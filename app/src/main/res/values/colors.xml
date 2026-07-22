@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#000000</color>
+    <color name="gray_8A8A8A">#8A8A8A</color>
+    <color name="blue_E6F2FF">#E6F2FF</color>
+    <color name="blue_007BFD">#007BFD</color>
+    <color name="blue_07">#007BFD</color>
+    <color name="black_0D0D0D">#0D0D0D</color>
+    <color name="gray_808080">#808080</color>
+    <color name="gray_B3B3B3">#B3B3B3</color>
+    <color name="red_FD593F">#FD593F</color>
+    <color name="gray_CCCCCC">#CCCCCC</color>
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+    <color name="green_00C062">#00C062</color>
+    <color name="gray_4D4D4D">#4d4d4d</color>
+    <color name="gray_E0E0E0">#E4E4E4</color>
+    <color name="gray_E6E6E6">#E6E6E6</color>
+    <color name="black_171717">#171717</color>
+    <color name="gray_666666">#666666</color>
+    <color name="blue_37AEFE">#37AEFE</color>
+    <color name="blue_0570FC">#0570FC</color>
+    <color name="orange_FFB700">#FFB700</color>
+    <color name="orange_FF6B27">#FF6B27</color>
+    <color name="blue_C8E6FF">#C8E6FF</color>
+    <color name="blue_F0F8FF">#F0F8FF</color>
+
+    <!-- Shared UI colors -->
+    <color name="colors_F5F5F5">#F5F5F5</color>
+    <color name="colors_FF4444">#FF4444</color>
+    <color name="colors_333333">#333333</color>
+
+    <!-- Figma Dark Theme -->
+    <color name="colors_FB2C36">#FFFB2C36</color>
+    <color name="colors_8A181E">#FF8A181E</color>
+    <color name="colors_D11E25">#FFD11E25</color>
+    <color name="colors_4254A6">#FF4254A6</color>
+    <color name="colors_060E30">#FF060E30</color>
+    <color name="colors_A66842">#FFA66842</color>
+    <color name="colors_301A06">#FF301A06</color>
+    <color name="colors_1A1A1A">#1A1A1A</color>
+    <color name="colors_2A2A2A">#2A2A2A</color>
+    <color name="colors_191919">#191919</color>
+    <color name="colors_FD9EA3">#FD9EA3</color>
+    <color name="colors_E5242D">#E5242D</color>
+    <color name="colors_80000000">#80000000</color>
+    <color name="colors_3D3D3D">#3D3D3D</color>
+
+    <!-- New Figma Theme -->
+    <color name="colors_005DFD">#FF005DFD</color>
+    <color name="colors_F8FAFF">#F8FAFF</color>
+    <color name="colors_151515">#151515</color>
+    <color name="colors_E6E6E6">#E6E6E6</color>
+    <color name="colors_B3B3B3">#B3B3B3</color>
+    <color name="colors_F2F6FF">#F2F6FF</color>
+    <color name="colors_B0CDFE">#B0CDFE</color>
+    <color name="colors_8AB3FE">#8AB3FE</color>
+    <color name="colors_010205">#010205</color>
+    <color name="colors_214AFF">#214AFF</color>
+    <color name="colors_2B95FF">#2B95FF</color>
+    <color name="colors_E6EFFF">#E6EFFF</color>
+    <color name="colors_0D0D0D">#0D0D0D</color>
+    <color name="colors_00C950">#00C950</color>
+
+    <!-- Category Tag Colors (Figma 5178:8120) -->
+    <color name="colors_FF9000">#FF9000</color>
+    <color name="colors_ED3A3A">#ED3A3A</color>
+    <color name="colors_3A40ED">#3A40ED</color>
+    <color name="colors_7C3AED">#7C3AED</color>
+    <color name="colors_3A55ED">#3A55ED</color>
+    <color name="colors_C33AED">#C33AED</color>
+    <color name="colors_3A8EED">#3A8EED</color>
+    <color name="colors_3AD5ED">#3AD5ED</color>
+    <color name="colors_3AED8E">#3AED8E</color>
+    <color name="colors_EDBA3A">#EDBA3A</color>
+    <color name="colors_613AED">#613AED</color>
+    <color name="colors_EDDB3A">#EDDB3A</color>
+    <color name="colors_ED3A67">#ED3A67</color>
+    <color name="colors_3A88ED">#3A88ED</color>
+    <color name="colors_CE4C00">#CE4C00</color>
+    <color name="colors_00E476">#00E476</color>
+    <color name="colors_9500FF">#9500FF</color>
+    <color name="colors_ED3AAE">#ED3AAE</color>
+    <color name="colors_3A73ED">#3A73ED</color>
+    <color name="colors_11CC00">#11CC00</color>
+    <color name="colors_AB00CE">#AB00CE</color>
+    <color name="colors_3AC3ED">#3AC3ED</color>
+    <color name="colors_FF5BEF">#FF5BEF</color>
+    <color name="colors_E8383B">#E8383B</color>
+    <color name="colors_00FFFB">#00FFFB</color>
+    <color name="colors_8BEE00">#8BEE00</color>
+    <color name="colors_FF9D00">#FF9D00</color>
+    <color name="colors_CCCCCC">#CCCCCC</color>
+    <color name="colors_999999">#999999</color>
+    <color name="colors_FD4C3F">#FD4C3F</color>
+    <color name="colors_FF5959">#FF5959</color>
+    <color name="colors_FF3636">#FF3636</color>
+    <color name="colors_0F0F0F">#0F0F0F</color>
+
+    <!-- Private Browser Design Palette -->
+    <color name="colorPrimary">#007BFD</color>
+    <color name="colors_5B6FFB">#5B6FFB</color>
+    <color name="colors_7C5BFB">#7C5BFB</color>
+    <color name="colors_8B5CF6">#8B5CF6</color>
+    <color name="colors_F5F3FF">#F5F3FF</color>
+    <color name="colors_22C55E">#22C55E</color>
+    <color name="colors_FB923C">#FB923C</color>
+    <color name="colors_EF4444">#EF4444</color>
+    <color name="colors_FFFFFF">#FFFFFF</color>
+    <color name="colors_F7F8FA">#F7F8FA</color>
+    <color name="colors_F2F2F7">#F2F2F7</color>
+    <color name="colors_EEEEEE">#EEEEEE</color>
+    <color name="colors_E5E7EB">#E5E7EB</color>
+    <color name="colors_B8B8B8">#B8B8B8</color>
+    <color name="colors_4A4A4A">#4A4A4A</color>
+    <color name="colors_1F1F1F">#1F1F1F</color>
+    <color name="colors_000000">#000000</color>
+    <color name="colors_F59E0B">#F59E0B</color>
+    <color name="colors_D1D5DB">#D1D5DB</color>
+    <color name="colors_E0E7FF">#E0E7FF</color>
+    <color name="colors_DCFCE7">#DCFCE7</color>
+    <color name="colors_FFEDD5">#FFEDD5</color>
+    <color name="colors_9F7AFF">#9F7AFF</color>
+
+    <!-- Home Dark Theme (Figma 11006:1048) -->
+    <color name="colors_141414">#141414</color>
+    <color name="colors_252525">#252525</color>
+    <color name="colors_101010">#101010</color>
+
+    <!-- Browser Dark Theme (Figma 11011:1991) -->
+    <color name="colors_1C1C1D">#1C1C1D</color>
+    <color name="colors_4D4D4D">#4D4D4D</color>
+
+    <!-- Bookmark Dark Theme (Figma 11023:3005) -->
+    <color name="colors_D9D9D9">#D9D9D9</color>
+    <color name="colors_ECECEC">#ECECEC</color>
+    <color name="colors_646464">#646464</color>
+    <color name="colors_79747E">#79747E</color>
+    <color name="colors_11151E">#11151E</color>
+    <color name="colors_F7F2FA">#F7F2FA</color>
+    <color name="colors_1D1B20">#1D1B20</color>
+    <color name="colors_49454F">#49454F</color>
+    <color name="colors_9EA2AB">#9EA2AB</color>
+    <color name="colors_3369FD">#3369FD</color>
+
+    <!-- Downloads Screen -->
+    <color name="colors_2257EB">#2257EB</color>
+    <color name="colors_161920">#161920</color>
+    <color name="colors_171B23">#171B23</color>
+    <color name="colors_252A36">#252A36</color>
+    <color name="colors_A6A7B1">#A6A7B1</color>
+    <color name="colors_040509">#040509</color>
+    <color name="colors_27272A">#27272A</color>
+    <color name="colors_3C3D41">#3C3D41</color>
+    <color name="colors_F7343F">#F7343F</color>
+    <color name="colors_348FF7">#348FF7</color>
+    <color name="colors_2FBE49">#2FBE49</color>
+    <color name="colors_F2D232">#F2D232</color>
+
+    <!-- Tabs Screen -->
+    <color name="colors_333538">#333538</color>
+    <color name="colors_DC2222">#DC2222</color>
+    <color name="colors_33FFFFFF">#33FFFFFF</color>
+    <color name="colors_424447">#424447</color>
+    <color name="colors_212327">#212327</color>
+    <color name="colors_6F7073">#6F7073</color>
+    <color name="colors_5D5E61">#5D5E61</color>
+    <color name="colors_9B9C9E">#9B9C9E</color>
+    <color name="colors_161718">#161718</color>
+    <color name="colors_1F252E">#1F252E</color>
+
+    <!-- Browser More Popup -->
+    <color name="colors_EBF0FF">#EBF0FF</color>
+
+    <!-- Rate App Dark Theme -->
+    <color name="colors_C0D1FE">#C0D1FE</color>
+    <color name="colors_6C90FB">#6C90FB</color>
+
+    <!-- Folder Screen Dark Theme -->
+    <color name="colors_D34C3E">#D34C3E</color>
+    <color name="colors_D99335">#D99335</color>
+    <color name="colors_DFC141">#DFC141</color>
+    <color name="colors_5DB95C">#5DB95C</color>
+    <color name="colors_FF5A5A">#FF5A5A</color>
+    <color name="colors_EB1919">#EB1919</color>
+    <color name="colors_FF715A">#FF715A</color>
+    <color name="colors_EB3519">#EB3519</color>
+    <color name="colors_FFC466">#FFC466</color>
+    <color name="colors_FE9D00">#FE9D00</color>
+    <color name="colors_0CDB4E">#0CDB4E</color>
+    <color name="colors_00B740">#00B740</color>
+    <color name="colors_152C6A">#152C6A</color>
+    <color name="colors_3268FC">#3268FC</color>
+    <color name="colors_1D86F6">#1D86F6</color>
+    <color name="colors_1E86F6">#1E86F6</color>
+    <color name="colors_0D45ED">#0D45ED</color>
+
+    <!-- Media List Screen -->
+    <color name="colors_2E2E2E">#2E2E2E</color>
+
+    <!-- Rate Dialog (Light Theme) -->
+    <color name="colors_0C0C0C">#0C0C0C</color>
+    <color name="colors_7F7F7F">#7F7F7F</color>
+    <color name="colors_A8D2FF">#A8D2FF</color>
+    <color name="colors_6B8FFB">#6B8FFB</color>
+    <color name="colors_F4F4F4">#F4F4F4</color>
+    <color name="colors_C8C8C9">#C8C8C9</color>
+
+    <!-- Set Default Browser Screen (Dark Theme) -->
+    <color name="colors_4F46E5">#4F46E5</color>
+    <color name="colors_16A34A">#16A34A</color>
+    <color name="colors_EA580C">#EA580C</color>
+    <color name="colors_4D5856D6">#4D5856D6</color>
+    <color name="colors_1A5856D6">#1A5856D6</color>
+    <color name="colors_4D34C759">#4D34C759</color>
+    <color name="colors_1A34C759">#1A34C759</color>
+    <color name="colors_4DFF9500">#4DFF9500</color>
+    <color name="colors_1AFF9500">#1AFF9500</color>
+    <color name="colors_33000000">#33000000</color>
+</resources>

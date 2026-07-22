@@ -1,0 +1,77 @@
+package com.asianmobile.privatebrower
+
+import android.app.Activity
+import android.app.Application
+import android.os.Bundle
+import com.adjust.sdk.Adjust
+import com.adjust.sdk.AdjustConfig
+import com.adjust.sdk.LogLevel
+import com.asianmobile.privatebrower.ads.BuildConfig
+import dagger.hilt.android.HiltAndroidApp
+
+@HiltAndroidApp
+class BaseApplication : Application(),
+    Application.ActivityLifecycleCallbacks,
+    coil.ImageLoaderFactory {
+
+    override fun onCreate() {
+        super.onCreate()
+        registerActivityLifecycleCallbacks(this)
+        // Adjust initialization
+        initAdjust()
+    }
+
+    override fun newImageLoader(): coil.ImageLoader {
+        return coil.ImageLoader.Builder(this)
+            .okHttpClient {
+                okhttp3.OkHttpClient.Builder()
+                    .addInterceptor { chain ->
+                        val request = chain.request().newBuilder()
+                            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
+                            .build()
+                        chain.proceed(request)
+                    }
+                    .build()
+            }
+            .build()
+    }
+
+    private fun initAdjust() {
+        val appToken = getString(R.string.adjust_token)
+        val environment = if (BuildConfig.DEBUG) {
+            AdjustConfig.ENVIRONMENT_SANDBOX
+        } else {
+            AdjustConfig.ENVIRONMENT_PRODUCTION
+        }
+        val config = AdjustConfig(this, appToken, environment)
+        config.setLogLevel(if (BuildConfig.DEBUG) LogLevel.VERBOSE else LogLevel.ERROR)
+
+        config.enablePreinstallTracking()
+        Adjust.initSdk(config)
+    }
+
+    override fun onActivityCreated(activity: Activity, bundle: Bundle?) {
+    }
+
+    override fun onActivityStarted(activity: Activity) {
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        Adjust.onResume()
+    }
+
+    override fun onActivityStopped(activity: Activity) {
+    }
+
+    override fun onActivityPaused(activity: Activity) {
+        Adjust.onPause()
+    }
+
+    override fun onActivitySaveInstanceState(activity: Activity, bundle: Bundle) {
+    }
+
+    override fun onActivityDestroyed(activity: Activity) {
+    }
+}
+
+

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "259565980311",
+    "project_id": "privatebrower-7168d",
+    "storage_bucket": "privatebrower-7168d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:259565980311:android:5af813e037f17b2a7077d2",
+        "android_client_info": {
+          "package_name": "com.asianmobile.privatebrower"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVpsKMRpcpKbLkaRdxMop2vkHRspfM3l8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

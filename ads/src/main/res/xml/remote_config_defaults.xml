@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>app_password_mail</key>
+        <value>ookx ibja hcoa jojl</value>
+    </entry>
+    <entry>
+        <key>rc_premium_onboarding_first</key>
+        <value>false</value>
+    </entry>
+    <entry>
+        <key>rc_premium_splash_return</key>
+        <value>false</value>
+    </entry>
+    <entry>
+        <key>distance_time_show_same_ads</key>
+        <value>30</value>
+    </entry>
+
+    <entry>
+        <key>distance_time_show_other_ads</key>
+        <value>20</value>
+    </entry>
+
+    <entry>
+        <key>is_show_banner_ads</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_open_ads</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_inter_ads</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>show_inter_launcher</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>time_click_action</key>
+        <value>3</value>
+    </entry>
+    <entry>
+        <key>rule_show_inter</key>
+        <value>3</value>
+    </entry>
+    <entry>
+        <key>is_show_native</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>number_click_ads_to_limit</key>
+        <value>5</value>
+    </entry>
+
+    <!-- Native ads per screen -->
+    <entry>
+        <key>is_show_native_intro</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_intro_second</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_intro_full</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_exit_dialog</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_language</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>is_show_native_language_second</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_permission</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_home</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_downloads</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_bookmarks</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_history</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_setting</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_set_default</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>is_show_native_files_photos</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>is_show_native_files_videos</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>is_show_native_files_audio</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>is_show_native_files_documents</key>
+        <value>true</value>
+    </entry>
+</defaultsMap>

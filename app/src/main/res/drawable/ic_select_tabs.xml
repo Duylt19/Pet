@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="18dp"
+    android:height="18dp"
+    android:viewportWidth="20"
+    android:viewportHeight="20">
+    <!-- icon-park-outline:full-selection — Select tabs checkbox icon -->
+    <!-- Figma node: 11322:10767 (20x20) -->
+    <path
+        android:pathData="M14.167,2.083H3.334C3.002,2.083 2.684,2.215 2.45,2.449C2.215,2.684 2.084,3.002 2.084,3.333V14.167C2.084,14.498 2.215,14.816 2.45,15.05C2.684,15.285 3.002,15.417 3.334,15.417H14.167C14.498,15.417 14.816,15.285 15.051,15.05C15.285,14.816 15.417,14.498 15.417,14.167V3.333C15.417,3.002 15.285,2.684 15.051,2.449C14.816,2.215 14.498,2.083 14.167,2.083Z"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FFFFFF"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M18.334,5.417V17.5C18.334,17.721 18.246,17.933 18.09,18.089C17.933,18.246 17.721,18.333 17.5,18.333H5.418M5.417,8.536L7.917,10.838L12.084,6.55"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FFFFFF"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

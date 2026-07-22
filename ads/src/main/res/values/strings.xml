@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name" translatable="false">Ads</string>
+
+    <!-- Test ad unit IDs -->
+    <string name="id_private_browser_inter_test" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="id_private_browser_banner_test" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="id_private_browser_open_ads_test" translatable="false">ca-app-pub-3940256099942544/9257395921</string>
+    <string name="id_private_browser_rewarded_test" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
+    <string name="id_private_browser_native_test" translatable="false">/21775744923/example/native</string>
+
+    <string name="id_pub" translatable="false">ca-app-pub-7219501334514633~2007481116</string>
+    <string name="id_private_browser_inter" translatable="false">ca-app-pub-7219501334514633/6026617175</string>
+    <string name="id_private_browser_banner" translatable="false">ca-app-pub-7219501334514633/2087372169</string>
+    <string name="id_private_browser_open_ads" translatable="false">ca-app-pub-7219501334514633/4601975008</string>
+    <string name="id_private_browser_rewarded" translatable="false">ca-app-pub-7219501334514633/1145257362</string>
+
+    <string name="id_private_browser_inter_splash" translatable="false">ca-app-pub-7219501334514633/1823648286</string>
+
+    <!-- Private Browser native placements. Keep separate resource names even when an
+         AdMob unit is shared temporarily so each placement can be split without code changes. -->
+    <string name="id_private_browser_native_language" translatable="false">ca-app-pub-7219501334514633/8832175699</string>
+    <string name="id_private_browser_native_language_second" translatable="false">ca-app-pub-7219501334514633/8832175699</string>
+    <string name="id_private_browser_native_intro" translatable="false">ca-app-pub-7219501334514633/3128991098</string>
+    <string name="id_private_browser_native_permission" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
+    <string name="id_private_browser_native_home" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_private_browser_native_downloads" translatable="false">ca-app-pub-7219501334514633/4521963817</string>
+    <string name="id_private_browser_native_bookmarks" translatable="false">ca-app-pub-7219501334514633/1324954831</string>
+    <string name="id_private_browser_native_history" translatable="false">ca-app-pub-7219501334514633/1895800473</string>
+    <string name="id_private_browser_native_setting" translatable="false">ca-app-pub-7219501334514633/8269637135</string>
+    <string name="id_private_browser_native_set_default" translatable="false">ca-app-pub-7219501334514633/6956555469</string>
+    <string name="id_private_browser_native_exit_dialog" translatable="false">ca-app-pub-7219501334514633/1512657095</string>
+    <string name="id_private_browser_native_files_photos" translatable="false">ca-app-pub-7219501334514633/9199575425</string>
+    <string name="id_private_browser_native_files_videos" translatable="false">ca-app-pub-7219501334514633/5563582742</string>
+    <string name="id_private_browser_native_files_audio" translatable="false">ca-app-pub-7219501334514633/9662729990</string>
+    <string name="id_private_browser_native_files_documents" translatable="false">ca-app-pub-7219501334514633/3947248740</string>
+
+    <!-- Full intro native ads -->
+    <string name="id_private_browser_native_full_intro" translatable="false"></string>
+    <string name="id_private_browser_native_full_intro_2" translatable="false"></string>
+
+    <!-- Ad UI -->
+    <string name="welcome_back">Welcome back</string>
+    <string name="ad_attribution" translatable="false">Ad</string>
+
+    <string name="loading_ads_inter">Loading Ads…</string>
+</resources>

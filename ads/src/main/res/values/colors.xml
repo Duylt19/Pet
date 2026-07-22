@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFF</color>
+    <color name="gray_444444">#444444</color>
+    <color name="black">#000000</color>
+    <color name="black_141414">#141414</color>
+    <color name="blue_007bfd">#0061FD</color>
+    <color name="red_FB2C36">#FB2C36</color>
+
+    <!-- Ad surfaces dark theme (Figma 11208:2231) -->
+    <color name="colors_FFFFFF">#FFFFFF</color>
+    <color name="colors_161718">#161718</color>
+    <color name="colors_222222">#222222</color>
+    <color name="colors_2A2A2A">#2A2A2A</color>
+    <color name="colors_9B9C9E">#9B9C9E</color>
+    <color name="colors_1AFFFFFF">#1AFFFFFF</color>
+    <color name="colors_33FFFFFF">#33FFFFFF</color>
+    <color name="colors_0D1DFF">#0D1DFF</color>
+    <color name="colors_5FADFF">#5FADFF</color>
+</resources>

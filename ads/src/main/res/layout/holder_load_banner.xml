@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.facebook.shimmer.ShimmerFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:animateLayoutChanges="true"
+    android:background="@color/colors_222222"
+    android:elevation="@dimen/_20sdp"
+    app:shimmer_auto_start="true"
+    app:shimmer_base_color="@color/colors_1AFFFFFF"
+    app:shimmer_highlight_color="@color/colors_33FFFFFF">
+
+    <FrameLayout
+        android:id="@+id/bannerContainer"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="wrap_content" />
+
+    <ImageView
+        android:id="@+id/ivThumbBanner"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_50sdp"
+        android:background="@color/colors_222222"
+        android:contentDescription="@string/app_name"
+        android:scaleType="fitXY"
+        android:src="@drawable/thumb_banner_ad" />
+</com.facebook.shimmer.ShimmerFrameLayout>
