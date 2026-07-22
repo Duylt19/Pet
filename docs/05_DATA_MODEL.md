@@ -14,9 +14,15 @@
 
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.
 
-## Pet model dự kiến
+## Pet engine model
 
-Phase engine sẽ thêm model Kotlin thuần cho `PetState`, `PetAction`, `PetEvent`, frame timeline và screen bounds. Model không chứa Android bitmap/view/context. Asset metadata production được xác định ở phase pack installer sau khi demo engine ổn định.
+- `PetState`: position, velocity, size, usable bounds, action, direction và animation cursor immutable.
+- `PetEvent`: tick, tap, drag start/by/end, fling và bounds change.
+- `PetTransition`: state mới + effect (`ActionChanged`, `Tapped`).
+- `PetClip`/`PetFrame`: action timeline version-independent với frame duration và scripted velocity.
+- `PetBounds`: clamp top-left position theo kích thước pet, kể cả pet lớn hơn usable area.
+
+Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap/view/context. Asset-pack metadata production sẽ được map sang các model này ở phase catalog/installer.
 
 ## Không có database
 

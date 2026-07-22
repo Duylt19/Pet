@@ -41,6 +41,8 @@ app/src/main/java/com/asianmobile/privatebrower/
 │   └── usecase/
 ├── di/
 ├── navigation/
+├── pet/
+│   └── engine/                 # Pure Kotlin state machine/timeline/geometry
 ├── ui/
 │   ├── component/
 │   ├── splash/

@@ -35,6 +35,8 @@ com.asianmobile.privatebrower/
 │   └── usecase/                # Nghiệp vụ tái sử dụng/testable
 ├── di/                         # Hilt modules đang có dependency thật
 ├── navigation/                 # Routes, NavGraph, safe navigation
+├── pet/
+│   └── engine/                 # Kotlin thuần, không phụ thuộc Android framework
 ├── ui/
 │   ├── component/              # Shared stateless UI
 │   ├── splash/
@@ -74,7 +76,9 @@ ui/feature/
 
 ## Pet engine boundary
 
-- Pet engine là Kotlin thuần: immutable state + event → state/effect; không phụ thuộc `View`, `WindowManager` hoặc `Context`.
+- Pet engine là Kotlin thuần: immutable `PetState` + `PetEvent` → `PetTransition`/`PetEffect`; không phụ thuộc `View`, `WindowManager` hoặc `Context`.
+- `PetAnimationTimeline` tiêu thụ frame duration độc lập tick partition, cộng scripted velocity và chuyển non-loop clip sang action kế tiếp.
+- `PetEngine` xử lý tap/drag/fling/bounds, giới hạn delayed tick để tránh catch-up storm và dùng constant deceleration cho fling.
 - Android overlay adapter sở hữu `WindowManager.LayoutParams`, gesture input, render clock và foreground-service lifecycle.
 - Asset pack được parse/validate thành model nội bộ trước khi engine sử dụng; renderer không đọc JSON/storage mỗi frame.
 - MVP chỉ chạy một pet và không thêm Room. Preference nhỏ tiếp tục dùng DataStore.

@@ -10,6 +10,7 @@ Base hiện chỉ giữ các capability hỗ trợ sau:
 | Rating/feedback | Settings + feedback helpers | Active |
 | Premium/billing | `ui/premium`, billing infrastructure | Active |
 | Ads/remote config | module `:ads` | Active |
+| Pure pet engine | `pet/engine` | Active, JVM-tested; chưa nối Android overlay |
 
 Không có browser core, search/clear-browsing, broad storage access, tabs, bookmarks/history, download manager, file/media manager, database hoặc background service.
 

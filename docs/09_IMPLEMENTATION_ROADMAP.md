@@ -19,7 +19,7 @@ Roadmap này chuyển base hiện tại thành app pet animation chạy nổi tr
 
 Definition of done: Manifest không còn storage permission; source active không phụ thuộc browser/storage capability; compile và unit test pass.
 
-## Phase 1 — Pure Kotlin pet engine — In progress
+## Phase 1 — Pure Kotlin pet engine — Done
 
 - Model immutable cho pet pose, direction, action, position, velocity và screen bounds.
 - Reducer/state machine nhận event tick/tap/drag/fling/bounds-change và trả state/effect xác định.
