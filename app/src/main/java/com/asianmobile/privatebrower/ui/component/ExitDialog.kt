@@ -64,7 +64,7 @@ fun ExitDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
-                    painter = painterResource(R.drawable.ic_splash),
+                    painter = painterResource(R.drawable.ic_splash_pet),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._60sdp))

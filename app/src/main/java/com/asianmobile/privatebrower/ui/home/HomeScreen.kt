@@ -202,7 +202,9 @@ private fun HomeScreenContent(
                         } else {
                             R.color.colors_3369FD
                         }
-                    )
+                    ),
+                    contentColor = colorResource(R.color.white),
+                    disabledContentColor = colorResource(R.color.white)
                 )
             ) {
                 Text(

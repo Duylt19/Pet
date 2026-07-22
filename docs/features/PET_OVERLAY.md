@@ -32,7 +32,13 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Tap/drag/fling đều được chuyển thành `PetEvent`; position luôn clamp theo usable system-bar/cutout bounds.
 - Stop action, `onDestroy` và lỗi add window đều remove callback/window và reset runtime state.
 
+## Device verification
+
+- Google Pixel 3 XL (`crosshatch`), Android 12 / API 31: verified start/stop, foreground notification, render over launcher, drag/fling and permission revocation cleanup.
+- Overlay window remained 112dp and touch did not block the rest of the launcher.
+- No fatal exception was recorded during the full flow; service, window and notification were all removed after Stop/revocation.
+
 ## Chưa thuộc MVP hiện tại
 
 - Asset pack/catalog, persistence, multi-pet hoặc auto-start after boot.
-- OEM/device verification: compile + JVM tests đã pass, nhưng workspace hiện không có thiết bị `adb` để chạy manual overlay matrix.
+- Cần mở rộng verification matrix sang API 33+, nhiều OEM, rotation/cutout và process death trước release.

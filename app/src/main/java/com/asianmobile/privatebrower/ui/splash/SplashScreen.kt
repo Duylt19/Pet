@@ -226,7 +226,7 @@ private fun SplashLogo(
                 .background(shadowColor, logoShape),
         )
         Image(
-            painter = painterResource(R.drawable.ic_splash),
+            painter = painterResource(R.drawable.ic_splash_pet),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier

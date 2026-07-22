@@ -225,7 +225,9 @@ private fun PermissionItem(
             enabled = !granted,
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorResource(R.color.colors_3369FD),
-                disabledContainerColor = colorResource(R.color.colors_00C950)
+                contentColor = colorResource(R.color.white),
+                disabledContainerColor = colorResource(R.color.colors_00C950),
+                disabledContentColor = colorResource(R.color.white)
             )
         ) {
             Text(
@@ -248,7 +250,9 @@ private fun PermissionContinueActions(
         enabled = enabled,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
-            containerColor = colorResource(R.color.colors_3369FD)
+            containerColor = colorResource(R.color.colors_3369FD),
+            contentColor = colorResource(R.color.white),
+            disabledContentColor = colorResource(R.color.white)
         )
     ) {
         Text(text = stringResource(R.string.permission_continue))
