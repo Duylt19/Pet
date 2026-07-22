@@ -26,6 +26,26 @@ class PetGeometryTest {
     }
 
     @Test
+    fun `screen edge bounds allow one third pet overflow except at bottom`() {
+        val screen = PetBounds(left = 0f, top = 0f, right = 300f, bottom = 600f)
+
+        val expanded = screen.expandedForScreenEdges(PetSize(width = 90f, height = 120f))
+
+        assertEquals(PetBounds(left = -30f, top = -30f, right = 330f, bottom = 600f), expanded)
+        assertEquals(
+            PetVector(x = 240f, y = 480f),
+            expanded.clampTopLeft(PetVector(x = 1_000f, y = 1_000f), PetSize(90f, 120f))
+        )
+    }
+
+    @Test
+    fun `direction mirrors only when it differs from sprite native direction`() {
+        assertEquals(false, PetDirection.LEFT.requiresMirror(PetDirection.LEFT))
+        assertEquals(true, PetDirection.RIGHT.requiresMirror(PetDirection.LEFT))
+        assertEquals(false, PetDirection.RIGHT.requiresMirror(PetDirection.RIGHT))
+    }
+
+    @Test
     fun `velocity is limited without changing direction`() {
         val limited = PetVector(x = 300f, y = 400f).limitedTo(maxMagnitude = 100f)
 

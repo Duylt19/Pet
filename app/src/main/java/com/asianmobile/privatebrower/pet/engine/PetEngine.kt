@@ -198,21 +198,22 @@ class PetEngine(
             updatedState.size
         )
         val hitHorizontalEdge = constrainedPosition.x != requestedPosition.x
-        val direction = if (updatedState.action == PetAction.WALK && hitHorizontalEdge) {
-            updatedState.direction.opposite()
-        } else {
-            updatedState.direction
-        }
-        updatedState = updatedState.copy(
-            position = constrainedPosition,
-            velocity = PetVector.Zero,
-            direction = direction
-        )
         val collisionAction = collisionAction(
             action = updatedState.action,
             requested = requestedPosition,
             constrained = constrainedPosition,
             bounds = updatedState.bounds
+        )
+        val direction = directionAfterCollision(
+            action = updatedState.action,
+            direction = updatedState.direction,
+            hitHorizontalEdge = hitHorizontalEdge,
+            collisionAction = collisionAction
+        )
+        updatedState = updatedState.copy(
+            position = constrainedPosition,
+            velocity = PetVector.Zero,
+            direction = direction
         )
         if (collisionAction != null) {
             val collided = changeAction(updatedState, collisionAction)
@@ -275,6 +276,20 @@ class PetEngine(
     private fun PetDirection.opposite(): PetDirection = when (this) {
         PetDirection.LEFT -> PetDirection.RIGHT
         PetDirection.RIGHT -> PetDirection.LEFT
+    }
+
+    private fun directionAfterCollision(
+        action: PetAction,
+        direction: PetDirection,
+        hitHorizontalEdge: Boolean,
+        collisionAction: PetAction?
+    ): PetDirection = when {
+        action == PetAction.CLIMB_WALL && collisionAction == PetAction.CLIMB_CEILING -> {
+            direction.opposite()
+        }
+        action == PetAction.WALK && hitHorizontalEdge &&
+            collisionAction != PetAction.CLIMB_WALL -> direction.opposite()
+        else -> direction
     }
 
     private fun collisionAction(

@@ -91,7 +91,7 @@ class PetEngineTest {
     }
 
     @Test
-    fun `walking pet turns around when reaching a horizontal edge`() {
+    fun `walking pet keeps edge direction when entering wall climb`() {
         val engine = engine(maxTickMillis = 1_000)
         val walking = engine.initialState(
             bounds = bounds,
@@ -104,8 +104,26 @@ class PetEngineTest {
         val advanced = engine.reduce(walking, PetEvent.Tick(elapsedMillis = 200))
 
         assertEquals(80f, advanced.state.position.x, FLOAT_TOLERANCE)
-        assertEquals(PetDirection.LEFT, advanced.state.direction)
+        assertEquals(PetDirection.RIGHT, advanced.state.direction)
         assertEquals(PetAction.CLIMB_WALL, advanced.state.action)
+    }
+
+    @Test
+    fun `wall climber turns inward when reaching the ceiling`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val climbingRightWall = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(80f, 1f),
+            action = PetAction.CLIMB_WALL,
+            direction = PetDirection.RIGHT
+        )
+
+        val atCeiling = engine.reduce(climbingRightWall, PetEvent.Tick(elapsedMillis = 100))
+
+        assertEquals(PetVector(80f, 0f), atCeiling.state.position)
+        assertEquals(PetAction.CLIMB_CEILING, atCeiling.state.action)
+        assertEquals(PetDirection.LEFT, atCeiling.state.direction)
     }
 
     @Test

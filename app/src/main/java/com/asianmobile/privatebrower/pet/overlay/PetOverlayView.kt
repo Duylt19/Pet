@@ -16,6 +16,7 @@ import com.asianmobile.privatebrower.pet.engine.PetDirection
 import com.asianmobile.privatebrower.pet.engine.PetEvent
 import com.asianmobile.privatebrower.pet.engine.PetState
 import com.asianmobile.privatebrower.pet.engine.PetVector
+import com.asianmobile.privatebrower.pet.engine.requiresMirror
 import com.asianmobile.privatebrower.pet.pack.PetPackVisual
 import kotlin.math.hypot
 
@@ -63,10 +64,28 @@ internal class PetOverlayView(
         val viewHeight = height.toFloat()
         if (viewWidth <= 0f || viewHeight <= 0f) return
 
+        when (val currentVisual = visual) {
+            PetPackVisual.CodeNative -> drawCodeNative(canvas, viewWidth, viewHeight, state)
+            is PetPackVisual.Sprite -> drawSpriteVisual(
+                canvas = canvas,
+                width = viewWidth,
+                height = viewHeight,
+                state = state,
+                visual = currentVisual
+            )
+        }
+    }
+
+    private fun drawCodeNative(
+        canvas: Canvas,
+        viewWidth: Float,
+        viewHeight: Float,
+        state: PetState
+    ) {
         val saveCount = canvas.save()
         val frameBob = if (state.frameIndex % 2 == 0) 0f else viewHeight * 0.025f
         canvas.translate(0f, frameBob)
-        if (state.direction == PetDirection.LEFT) {
+        if (state.direction.requiresMirror(PetDirection.RIGHT)) {
             canvas.scale(-1f, 1f, viewWidth / 2f, viewHeight / 2f)
         }
         when (state.action) {
@@ -92,20 +111,24 @@ internal class PetOverlayView(
             PetAction.WALK -> Unit
         }
 
-        when (val currentVisual = visual) {
-            PetPackVisual.CodeNative -> {
-                drawTail(canvas, viewWidth, viewHeight, state.frameIndex)
-                drawBody(canvas, viewWidth, viewHeight)
-                drawHead(canvas, viewWidth, viewHeight, state)
-            }
-            is PetPackVisual.Sprite -> drawSprite(
-                canvas = canvas,
-                width = viewWidth,
-                height = viewHeight,
-                state = state,
-                visual = currentVisual
-            )
+        drawTail(canvas, viewWidth, viewHeight, state.frameIndex)
+        drawBody(canvas, viewWidth, viewHeight)
+        drawHead(canvas, viewWidth, viewHeight, state)
+        canvas.restoreToCount(saveCount)
+    }
+
+    private fun drawSpriteVisual(
+        canvas: Canvas,
+        width: Float,
+        height: Float,
+        state: PetState,
+        visual: PetPackVisual.Sprite
+    ) {
+        val saveCount = canvas.save()
+        if (state.direction.requiresMirror(PetDirection.LEFT)) {
+            canvas.scale(-1f, 1f, width / 2f, height / 2f)
         }
+        drawSprite(canvas, width, height, state, visual)
         canvas.restoreToCount(saveCount)
     }
 
@@ -331,7 +354,7 @@ internal class PetOverlayView(
         val drawWidth = visual.canvas.width * fitScale
         val drawHeight = visual.canvas.height * fitScale
         val anchorX = width * 0.5f
-        val anchorY = height * 0.96f
+        val anchorY = height
         val destination = RectF(
             anchorX - visual.anchor.x * drawWidth,
             anchorY - visual.anchor.y * drawHeight,

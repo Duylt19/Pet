@@ -54,4 +54,18 @@ data class PetBounds(
             y = position.y.coerceIn(top, maximumY)
         )
     }
+
+    fun expandedForScreenEdges(petSize: PetSize): PetBounds {
+        val overflow = petSize.width / EDGE_OVERFLOW_DIVISOR
+        return PetBounds(
+            left = left - overflow,
+            top = top - overflow,
+            right = right + overflow,
+            bottom = bottom
+        )
+    }
+
+    private companion object {
+        const val EDGE_OVERFLOW_DIVISOR = 3f
+    }
 }

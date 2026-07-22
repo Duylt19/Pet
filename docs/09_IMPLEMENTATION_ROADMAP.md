@@ -24,7 +24,7 @@ Definition of done: Manifest không còn storage permission; source active khôn
 - Model immutable cho pet pose, direction, action, position, velocity và screen bounds.
 - Reducer/state machine nhận event tick/tap/drag/fling/bounds-change và trả state/effect xác định.
 - Frame timeline hỗ trợ duration theo frame, loop/non-loop và action transition.
-- Constraint/clamp giữ pet trong usable bounds, kể cả đổi orientation/inset.
+- Constraint/clamp dùng playground cục bộ đã chuẩn hóa inset, cho phép edge overflow có chủ đích và vẫn an toàn khi đổi orientation/inset.
 - Unit test transition, frame timing, drag/fling và bounds; tuyệt đối không phụ thuộc Android UI.
 
 Definition of done: engine chạy deterministic trong JVM tests và không import `android.*`.
@@ -100,6 +100,8 @@ Definition of done: release candidate đạt performance budget, policy checklis
 Technical evidence and the feature-parity matrix are recorded in [`research/COMPETITOR_TECHNICAL_AUDIT.md`](research/COMPETITOR_TECHNICAL_AUDIT.md).
 
 The first parity slice is verified on Pixel 3 XL / API 31: falling reaches the bottom, then resumes horizontal/autonomous motion; the overlay position remains stable while the device is dozing and advances again after wake. Force-stop removes both foreground service and overlay window without a fatal error.
+
+Edge parity is also verified on that device: status/cutout coordinates are applied exactly once, navigation-bar inset no longer shortens the bottom playground, side/top windows can extend one third of the pet size outside the display, and legacy sprites mirror only when moving right.
 
 The owner-authorized upstream data snapshot is complete and kept outside Git under `private_data/`. Server migration must consume the generated SHA-256 manifest/inventory and normalize the 78 reported naming/content/frame-contract exceptions without mutating the pinned source snapshot.
 

@@ -77,8 +77,8 @@ internal class PetOverlayController(
     fun start() {
         if (instances.isNotEmpty()) return
 
-        val bounds = currentUsableBounds()
         val size = PetSize(petSizePixels.toFloat(), petSizePixels.toFloat())
+        val bounds = currentPlaygroundBounds(size)
         val positions = sessionLayout.resolvePositions(
             count = petCount,
             bounds = bounds,
@@ -148,7 +148,8 @@ internal class PetOverlayController(
     }
 
     fun onBoundsChanged() {
-        val bounds = currentUsableBounds()
+        val size = PetSize(petSizePixels.toFloat(), petSizePixels.toFloat())
+        val bounds = currentPlaygroundBounds(size)
         instances.toList().forEach { instance ->
             render(instance, instance.engine.reduce(instance.state, PetEvent.BoundsChanged(bounds)).state)
         }
@@ -178,11 +179,17 @@ internal class PetOverlayController(
         overlayWindowType(),
         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
             if (preferences.interactionEnabled) 0 else WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
         PixelFormat.TRANSLUCENT
     ).apply {
         gravity = Gravity.TOP or Gravity.START
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            setFitInsetsTypes(
+                WindowInsets.Type.statusBars() or WindowInsets.Type.displayCutout()
+            )
+        }
         x = state.position.x.roundToInt()
         y = state.position.y.roundToInt()
         title = "$OVERLAY_WINDOW_TITLE ${index + 1}"
@@ -202,19 +209,19 @@ internal class PetOverlayController(
         WindowManager.LayoutParams.TYPE_PHONE
     }
 
-    private fun currentUsableBounds(): PetBounds {
+    private fun currentPlaygroundBounds(size: PetSize): PetBounds {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val metrics = windowManager.currentWindowMetrics
             val windowBounds = metrics.bounds
             val insets = metrics.windowInsets.getInsetsIgnoringVisibility(
-                WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
+                WindowInsets.Type.statusBars() or WindowInsets.Type.displayCutout()
             )
             return PetBounds(
-                left = (windowBounds.left + insets.left).toFloat(),
-                top = (windowBounds.top + insets.top).toFloat(),
-                right = (windowBounds.right - insets.right).toFloat(),
-                bottom = (windowBounds.bottom - insets.bottom).toFloat()
-            )
+                left = 0f,
+                top = 0f,
+                right = (windowBounds.width() - insets.left - insets.right).toFloat(),
+                bottom = (windowBounds.height() - insets.top - insets.bottom).toFloat()
+            ).expandedForScreenEdges(size)
         }
 
         @Suppress("DEPRECATION")
@@ -224,10 +231,10 @@ internal class PetOverlayController(
         display.getRealSize(displaySize)
         return PetBounds(
             left = 0f,
-            top = appContext.systemBarSize("status_bar_height").toFloat(),
+            top = 0f,
             right = displaySize.x.toFloat(),
-            bottom = (displaySize.y - appContext.systemBarSize("navigation_bar_height")).toFloat()
-        )
+            bottom = (displaySize.y - appContext.systemBarSize("status_bar_height")).toFloat()
+        ).expandedForScreenEdges(size)
     }
 
     private fun Context.dpToPixels(dp: Int): Int =

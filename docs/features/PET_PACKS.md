@@ -36,6 +36,8 @@ Ví dụ đầy đủ: [`docs/examples/pet-pack-v1`](../examples/pet-pack-v1).
 
 Action names được schema v1 nhận: `idle`, `walk`, `fall`, `bounce`, `climb_wall`, `climb_ceiling`, `sit`, `wink`, `creep`, `trip`, `special`, `special_2`, `tapped`, `dragged`, `flung`. `idle` và `walk` vẫn là hai clip nền bắt buộc; các action mở rộng là optional để pack v1 cũ tiếp tục hợp lệ. Runtime chỉ đưa một hành vi tự động/boundary vào state machine khi manifest khai báo action đó. Mapper vẫn tạo visual/physics fallback nội bộ để mọi `PetAction` có clip an toàn.
 
+Các sprite Shimeji legacy trong owner catalog dùng hướng gốc sang trái. Overlay mirror ngang frame khi `PetDirection.RIGHT` và giữ nguyên khi đi trái. Frame action là hình hoàn chỉnh theo pose của action, vì vậy renderer không xoay hoặc scale thêm cho wall/ceiling climb; hướng đổi vào trong khi pet chuyển từ tường lên trần được quyết định trong pure engine.
+
 ## Installer pipeline
 
 ```text

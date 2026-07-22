@@ -5,6 +5,8 @@ enum class PetDirection {
     RIGHT
 }
 
+fun PetDirection.requiresMirror(nativeDirection: PetDirection): Boolean = this != nativeDirection
+
 data class PetState(
     val position: PetVector,
     val velocity: PetVector,
