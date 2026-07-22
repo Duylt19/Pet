@@ -6,7 +6,7 @@ Roadmap này chuyển base hiện tại thành app pet animation chạy nổi tr
 
 - Giữ namespace/application ID legacy `com.asianmobile.privatebrower` cho đến khi owner yêu cầu đổi.
 - Giữ module `:ads`, chưa thêm placement mới.
-- MVP dùng asset pet demo do project sở hữu; không copy asset/code của app đối thủ.
+- MVP dùng asset pet demo do project sở hữu; snapshot pet được owner ủy quyền nằm ngoài Git và chưa được nối trực tiếp vào runtime; không copy code decompile.
 - Chưa dùng Room; persistence nhỏ dùng DataStore.
 - Runtime tối đa 3 pet theo device budget, không auto-start sau boot.
 
@@ -80,7 +80,7 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Extend autonomous behavior through explicit pack actions and boundary transitions without assuming the competitor's numbered-frame format.
 - Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
 - Treat tap popup, double-tap, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
-- Use only owned/licensed pack metadata and assets. The 991-entry competitor catalog and its remote ZIPs are analysis evidence only.
+- Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs and must enter the product only through a provenance-preserving server import.
 
 - Map entitlement free/premium lên catalog/slot/animation; billing failure không phá pet đang chạy.
 - Chỉ thêm ads placement khi có screen code/policy được owner duyệt; không đặt ad trong overlay.
@@ -92,7 +92,7 @@ Definition of done: release candidate đạt performance budget, policy checklis
 
 ## Guardrails
 
-- Không copy source/asset/branding của app đối thủ. Chỉ dùng kết quả reverse engineering để hiểu pattern kỹ thuật tương thích.
+- Không copy source decompile, credential, ad configuration hoặc branding. Dữ liệu pet chỉ đi qua snapshot được owner ủy quyền, checksum và quy trình import có provenance.
 - Không dùng periodic WorkManager cho animation hoặc service keep-alive.
 - Không mở full-screen overlay nếu pet chỉ cần một vùng nhỏ; window phải khớp hit target để không chặn app bên dưới.
 - Không thêm Room/network/boot receiver trước khi requirement của phase tương ứng thật sự cần.
@@ -100,3 +100,5 @@ Definition of done: release candidate đạt performance budget, policy checklis
 Technical evidence and the feature-parity matrix are recorded in [`research/COMPETITOR_TECHNICAL_AUDIT.md`](research/COMPETITOR_TECHNICAL_AUDIT.md).
 
 The first parity slice is verified on Pixel 3 XL / API 31: falling reaches the bottom, then resumes horizontal/autonomous motion; the overlay position remains stable while the device is dozing and advances again after wake. Force-stop removes both foreground service and overlay window without a fatal error.
+
+The owner-authorized upstream data snapshot is complete and kept outside Git under `private_data/`. Server migration must consume the generated SHA-256 manifest/inventory and normalize the 77 reported naming/frame-contract exceptions without mutating the pinned source snapshot.

@@ -38,7 +38,11 @@
 - [Competitor technical audit](research/COMPETITOR_TECHNICAL_AUDIT.md)
 - [Research index](research/README.md)
 
-Research records evidence and clean-room decisions; it is not a runtime specification and contains no competitor assets or source.
+Research records evidence and clean-room decisions; it is not a runtime specification and contains no decompiled source or binary assets in Git. The separately authorized owner data snapshot is intentionally ignored from source control.
+
+## Owner data tools
+
+- [Clone and audit an authorized pet data snapshot](tools/PET_DATA_SNAPSHOT.md)
 
 ## Quy tắc duy trì
 

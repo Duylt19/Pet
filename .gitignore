@@ -27,3 +27,7 @@ build/
 *.zip
 *.tar.gz
 *.rar
+
+# Owner-controlled data snapshots are intentionally kept outside source control.
+/private_data/
+__pycache__/

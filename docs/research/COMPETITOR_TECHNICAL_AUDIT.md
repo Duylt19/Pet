@@ -16,7 +16,9 @@ JADX reported 95 decompilation errors across 15,801 APK classes. Core product cl
 
 ## Ownership boundary
 
-The supplied app contains a catalog dominated by third-party anime, game and internet characters. Cute Pet must not copy its names, artwork, sprites, branding, translated copy, ad configuration, product IDs, credentials or backend identity. The reusable output of this audit is limited to behavior contracts, file-format observations and platform architecture.
+The supplied app contains a catalog dominated by anime, game and internet characters. At the start of this audit, its redistribution scope had not been established, so no binary assets were imported into the Android app or committed to source control. On 2026-07-22, the project owner represented that the demo app and its complete pet dataset are owner-controlled and fully authorized for this project. Based on that authorization, the upstream data repository was captured separately under ignored `private_data/` storage with a pinned commit and SHA-256 inventory.
+
+This authorization applies to the requested data snapshot. Decompiled implementation code, branding, translated copy, ad configuration, product IDs, credentials and backend identity remain excluded from Cute Pet. The reusable implementation output of this audit remains limited to behavior contracts, file-format observations and platform architecture.
 
 ## Executive architecture
 
@@ -272,7 +274,7 @@ The app combines subscriptions/one-time billing, rewarded unlocks, app-open, int
 |---|---|---|
 | High | ZIP extraction permits path traversal and has no resource budgets | Keep Cute Pet's validated atomic installer |
 | High | Foreground service and boot receiver are exported | Keep internal components `exported=false` |
-| High | Third-party character catalog/assets have unclear redistribution rights | Do not import; require owned/licensed packs |
+| High | Character catalog/assets require explicit redistribution authority | Owner authorization recorded for the 2026-07-22 snapshot; keep provenance and licensing metadata with server imports |
 | Medium | `allowBackup=true` and cleartext traffic enabled globally | Do not inherit; minimize backup/network surface |
 | Medium | Sticky service/boot behavior can surprise users and faces modern Android restrictions | Explicit start now; boot only as disclosed opt-in |
 | Medium | Download booleans can diverge from filesystem | Repository validates disk state as source of truth |
@@ -298,7 +300,7 @@ Credential-bearing configuration, ad unit values and service-specific identifier
 | Double-tap action | Missing | Add as pack interaction metadata in a future schema |
 | Multiple different selected pack types | Missing | Add repository/session model before swarm mode |
 | Nine slots / large swarm | Intentionally absent | Preserve device performance budget; do not clone limits blindly |
-| Remote catalog/download | Missing by design | Build only against an owned backend and licensed data |
+| Remote catalog/download | Missing by design | Build only against the owner-controlled backend and authorized snapshot |
 | Boot restart | Deferred | Explicit opt-in plus Android policy review only |
 | Ads/billing entitlement | Phase 6 | Use Cute Pet policy/config, never competitor IDs |
 | Hungry/take-care | Not implemented | Low-value/non-core until product requirement exists |
