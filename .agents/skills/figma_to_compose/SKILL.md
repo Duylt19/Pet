@@ -253,7 +253,7 @@ Icon(modifier = Modifier.size(22.dp))
 - Render số bằng `Text()` composable overlay lên icon:
 ```kotlin
 Box(contentAlignment = Alignment.Center) {
-    Icon(painter = painterResource(R.drawable.ic_browser_tabs), ...)
+    Icon(painter = painterResource(R.drawable.ic_feature_counter), ...)
     Text(
         text = tabCount.toString(),
         modifier = Modifier.offset(x = (-1).sdp, y = 2.sdp) // Adjust to match Figma

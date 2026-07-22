@@ -1,16 +1,15 @@
-# Implementation Progress — Private Browser
+# Implementation Progress — Cute Pet Base
 
-| Milestone | Tên Milestone | Trạng thái | Ngày hoàn thành | Commit Hash |
-|---|---|---|---|---|
-| M1 | Foundation Refactor | Done | 2026-06-08 | 9eb1ce7 |
-| M2 | Home Bottom Nav 4 Tabs | Done | 2026-06-08 | 2835cff |
-| M3 | Home Browser tab | Done | 2026-06-08 | 6ac65aa |
-| M4 | BrowserWebView Screen | Done | 2026-06-08 | 4587215 |
-| M5 | Tabs tab | Done | 2026-06-08 | 43beb9e |
-| M6 | Bookmarks/History Screen | Done | 2026-06-08 | 063ac9e |
-| M7 | File Manager + Progress UI | Done | 2026-06-08 | c2524cd |
-| M8 | Download Manager Engine | Done | 2026-06-08 | 8c1a192 |
-| M9 | Settings | Done | 2026-06-08 | f5086f7 |
-| M10 | Set Default Browser Flow | Done | 2026-06-08 | c095ef2 |
-| M11 | Ads Full Integration + Premium | Done | 2026-06-08 | 74d596e |
-| M12 | Polish + Edge Cases + Pre-release | Done | 2026-06-08 | 8c179d2 |
+| Hạng mục | Trạng thái | Ghi chú |
+|---|---|---|
+| Làm sạch feature Private Browser | Done | Browser/download/media/Room/service đã xóa |
+| Base onboarding | Done | Splash, Language, Intro, Permission |
+| Home placeholder | Done | Chỉ giữ Settings và Premium |
+| Settings/Premium infrastructure | Done | Giữ để tái sử dụng và cập nhật sau |
+| Chuẩn hóa tài liệu cho AI agent | Done | Docs phản ánh source và base contract |
+| Product feature Cute Pet | Pending | Chờ yêu cầu/design mới |
+| Đổi namespace/application ID | Deferred | Vẫn là `com.asianmobile.privatebrower` theo yêu cầu owner |
+
+## Nguyên tắc cập nhật
+
+Khi hoàn thành một milestone sản phẩm mới, cập nhật file này và `docs/09_IMPLEMENTATION_ROADMAP.md` trong cùng commit. Không phục hồi milestone hoặc trạng thái của Private Browser như feature hiện tại.
