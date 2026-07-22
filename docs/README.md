@@ -33,6 +33,13 @@
 - [Pet settings and session policy](features/PET_SETTINGS.md)
 - [Current screens](screens/README.md)
 
+## Research
+
+- [Competitor technical audit](research/COMPETITOR_TECHNICAL_AUDIT.md)
+- [Research index](research/README.md)
+
+Research records evidence and clean-room decisions; it is not a runtime specification and contains no competitor assets or source.
+
 ## Quy tắc duy trì
 
 - Code và docs phải thay đổi trong cùng commit khi architecture/flow thay đổi.

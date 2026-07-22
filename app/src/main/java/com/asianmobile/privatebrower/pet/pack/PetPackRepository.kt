@@ -85,15 +85,35 @@ class FilePetPackRepository @Inject constructor(
     }
 
     private fun builtInPetPack(): PetPack {
-        fun frame(duration: Long, velocityX: Float = 0f) = PetPackFrame(
+        fun frame(duration: Long, velocityX: Float = 0f, velocityY: Float = 0f) = PetPackFrame(
             file = "built-in",
             rect = PetPackFrameRect(0, 0, 128, 128),
             durationMillis = duration,
-            velocity = PetVector(x = velocityX)
+            velocity = PetVector(x = velocityX, y = velocityY)
         )
         val clips = listOf(
             PetPackClip(PetAction.IDLE, true, null, List(4) { frame(180) }),
             PetPackClip(PetAction.WALK, true, null, List(4) { frame(120, 42f) }),
+            PetPackClip(PetAction.FALL, true, null, listOf(frame(120, velocityY = 220f))),
+            PetPackClip(PetAction.BOUNCE, false, PetAction.WALK, List(2) { frame(110) }),
+            PetPackClip(
+                PetAction.CLIMB_WALL,
+                true,
+                null,
+                List(4) { frame(120, velocityY = -36f) }
+            ),
+            PetPackClip(
+                PetAction.CLIMB_CEILING,
+                true,
+                null,
+                List(4) { frame(120, velocityX = 36f) }
+            ),
+            PetPackClip(PetAction.SIT, false, PetAction.WALK, listOf(frame(2_400))),
+            PetPackClip(PetAction.WINK, false, PetAction.WALK, List(2) { frame(260) }),
+            PetPackClip(PetAction.CREEP, true, null, List(4) { frame(180, 16f) }),
+            PetPackClip(PetAction.TRIP, false, PetAction.WALK, List(4) { frame(140) }),
+            PetPackClip(PetAction.SPECIAL, false, PetAction.WALK, List(4) { frame(220) }),
+            PetPackClip(PetAction.SPECIAL_2, false, PetAction.WALK, List(8) { frame(160) }),
             PetPackClip(PetAction.TAPPED, false, PetAction.IDLE, List(3) { frame(100) }),
             PetPackClip(PetAction.DRAGGED, true, null, listOf(frame(200))),
             PetPackClip(PetAction.FLUNG, true, null, List(2) { frame(100) })

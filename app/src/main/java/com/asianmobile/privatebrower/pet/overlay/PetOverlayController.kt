@@ -53,7 +53,8 @@ internal class PetOverlayController(
     )
     private val engineConfig = PetEngineConfig(
         clips = pack.manifest.toEngineClips(preferences.speedPercent / 100f),
-        tapAction = pack.manifest.interaction.tapAction
+        tapAction = pack.manifest.interaction.tapAction,
+        supportedActions = pack.manifest.clips.keys
     )
     private val instances = mutableListOf<PetInstance>()
     private var isRendering = false
@@ -93,7 +94,11 @@ internal class PetOverlayController(
                     bounds = bounds,
                     size = size,
                     position = position,
-                    action = PetAction.WALK
+                    action = if (PetAction.FALL in pack.manifest.clips) {
+                        PetAction.FALL
+                    } else {
+                        PetAction.WALK
+                    }
                 )
                 lateinit var instance: PetInstance
                 val view = PetOverlayView(appContext, visual) { event -> dispatch(instance, event) }
@@ -126,6 +131,20 @@ internal class PetOverlayController(
         removeAllViews()
         lastTickNanos = 0L
         return positions
+    }
+
+    fun pauseRendering() {
+        if (!isRendering) return
+        isRendering = false
+        choreographer.removeFrameCallback(frameCallback)
+        lastTickNanos = 0L
+    }
+
+    fun resumeRendering() {
+        if (isRendering || instances.isEmpty()) return
+        lastTickNanos = 0L
+        isRendering = true
+        choreographer.postFrameCallback(frameCallback)
     }
 
     fun onBoundsChanged() {

@@ -5,6 +5,16 @@ import kotlin.math.min
 enum class PetAction {
     IDLE,
     WALK,
+    FALL,
+    BOUNCE,
+    CLIMB_WALL,
+    CLIMB_CEILING,
+    SIT,
+    WINK,
+    CREEP,
+    TRIP,
+    SPECIAL,
+    SPECIAL_2,
     TAPPED,
     DRAGGED,
     FLUNG
@@ -163,6 +173,45 @@ object DemoPetAnimation {
             loops = true
         ),
         PetClip(
+            action = PetAction.FALL,
+            frames = listOf(
+                PetFrame(index = 0, durationMillis = 120, velocity = PetVector(y = 220f))
+            ),
+            loops = true
+        ),
+        PetClip(
+            action = PetAction.BOUNCE,
+            frames = List(2) { index -> PetFrame(index = index, durationMillis = 110) },
+            loops = false,
+            nextAction = PetAction.WALK
+        ),
+        PetClip(
+            action = PetAction.CLIMB_WALL,
+            frames = List(4) { index ->
+                PetFrame(index = index, durationMillis = 120, velocity = PetVector(y = -36f))
+            },
+            loops = true
+        ),
+        PetClip(
+            action = PetAction.CLIMB_CEILING,
+            frames = List(4) { index ->
+                PetFrame(index = index, durationMillis = 120, velocity = PetVector(x = 36f))
+            },
+            loops = true
+        ),
+        oneShot(PetAction.SIT, frameCount = 1, frameDurationMillis = 2_400),
+        oneShot(PetAction.WINK, frameCount = 2, frameDurationMillis = 260),
+        PetClip(
+            action = PetAction.CREEP,
+            frames = List(4) { index ->
+                PetFrame(index = index, durationMillis = 180, velocity = PetVector(x = 16f))
+            },
+            loops = true
+        ),
+        oneShot(PetAction.TRIP, frameCount = 4, frameDurationMillis = 140),
+        oneShot(PetAction.SPECIAL, frameCount = 4, frameDurationMillis = 220),
+        oneShot(PetAction.SPECIAL_2, frameCount = 8, frameDurationMillis = 160),
+        PetClip(
             action = PetAction.TAPPED,
             frames = List(3) { index -> PetFrame(index = index, durationMillis = 100) },
             loops = false,
@@ -179,4 +228,17 @@ object DemoPetAnimation {
             loops = true
         )
     ).associateBy(PetClip::action)
+
+    private fun oneShot(
+        action: PetAction,
+        frameCount: Int,
+        frameDurationMillis: Long
+    ) = PetClip(
+        action = action,
+        frames = List(frameCount) { index ->
+            PetFrame(index = index, durationMillis = frameDurationMillis)
+        },
+        loops = false,
+        nextAction = PetAction.WALK
+    )
 }

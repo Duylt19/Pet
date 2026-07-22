@@ -78,6 +78,16 @@ internal class PetOverlayView(
             )
             PetAction.DRAGGED -> canvas.rotate(-7f, viewWidth / 2f, viewHeight / 2f)
             PetAction.FLUNG -> canvas.rotate(12f, viewWidth / 2f, viewHeight / 2f)
+            PetAction.FALL -> canvas.rotate(6f, viewWidth / 2f, viewHeight / 2f)
+            PetAction.BOUNCE,
+            PetAction.TRIP -> canvas.scale(1.04f, 0.92f, viewWidth / 2f, viewHeight * 0.75f)
+            PetAction.CLIMB_WALL -> canvas.rotate(-4f, viewWidth / 2f, viewHeight / 2f)
+            PetAction.CLIMB_CEILING -> canvas.rotate(180f, viewWidth / 2f, viewHeight / 2f)
+            PetAction.SIT -> canvas.translate(0f, viewHeight * 0.04f)
+            PetAction.WINK,
+            PetAction.CREEP,
+            PetAction.SPECIAL,
+            PetAction.SPECIAL_2,
             PetAction.IDLE,
             PetAction.WALK -> Unit
         }
@@ -250,6 +260,7 @@ internal class PetOverlayView(
         )
 
         val eyesClosed = state.action == PetAction.TAPPED ||
+            state.action == PetAction.WINK ||
             (state.action == PetAction.IDLE && state.frameIndex == 3)
         if (eyesClosed) {
             inkPaint.strokeWidth = width * 0.025f
@@ -300,7 +311,15 @@ internal class PetOverlayView(
         state: PetState,
         visual: PetPackVisual.Sprite
     ) {
+        val fallbackAction = when (state.action) {
+            PetAction.WALK,
+            PetAction.CREEP,
+            PetAction.CLIMB_WALL,
+            PetAction.CLIMB_CEILING -> PetAction.WALK
+            else -> PetAction.IDLE
+        }
         val clipFrames = visual.frames[state.action]
+            ?: visual.frames[fallbackAction]
             ?: visual.frames[PetAction.IDLE]
             ?: return
         if (clipFrames.isEmpty()) return

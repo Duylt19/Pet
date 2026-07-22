@@ -67,7 +67,7 @@ class PetEngineTest {
 
         assertEquals(PetVector(60f, 10f), settled.state.position)
         assertEquals(PetVector.Zero, settled.state.velocity)
-        assertEquals(PetAction.IDLE, settled.state.action)
+        assertEquals(PetAction.FALL, settled.state.action)
     }
 
     @Test
@@ -105,6 +105,97 @@ class PetEngineTest {
 
         assertEquals(80f, advanced.state.position.x, FLOAT_TOLERANCE)
         assertEquals(PetDirection.LEFT, advanced.state.direction)
+        assertEquals(PetAction.CLIMB_WALL, advanced.state.action)
+    }
+
+    @Test
+    fun `falling pet bounces after reaching the bottom edge`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val falling = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(20f, 75f),
+            action = PetAction.FALL
+        )
+
+        val landed = engine.reduce(falling, PetEvent.Tick(elapsedMillis = 100))
+
+        assertEquals(PetVector(20f, 80f), landed.state.position)
+        assertEquals(PetAction.BOUNCE, landed.state.action)
+        assertTrue(
+            landed.effects.contains(PetEffect.ActionChanged(PetAction.FALL, PetAction.BOUNCE))
+        )
+    }
+
+    @Test
+    fun `walking cycles through supported autonomous actions deterministically`() {
+        val engine = PetEngine(
+            PetEngineConfig(
+                maxTickMillis = 3_000,
+                autonomousIntervalMillis = 100,
+                autonomousActions = listOf(PetAction.SIT, PetAction.WINK)
+            )
+        )
+        var state = engine.initialState(
+            bounds = PetBounds(0f, 0f, 1_000f, 1_000f),
+            size = size,
+            action = PetAction.WALK
+        )
+
+        state = engine.reduce(state, PetEvent.Tick(100)).state
+        assertEquals(PetAction.SIT, state.action)
+
+        state = engine.reduce(state, PetEvent.Tick(2_400)).state
+        assertEquals(PetAction.WALK, state.action)
+
+        state = engine.reduce(state, PetEvent.Tick(100)).state
+        assertEquals(PetAction.WINK, state.action)
+    }
+
+    @Test
+    fun `idle resumes walking after autonomous interval`() {
+        val engine = PetEngine(PetEngineConfig(autonomousIntervalMillis = 500))
+        val idle = engine.initialState(bounds, size, action = PetAction.IDLE)
+
+        val waiting = engine.reduce(idle, PetEvent.Tick(250)).state
+        val walking = engine.reduce(waiting, PetEvent.Tick(250))
+
+        assertEquals(PetAction.IDLE, waiting.action)
+        assertEquals(PetAction.WALK, walking.state.action)
+        assertTrue(
+            walking.effects.contains(PetEffect.ActionChanged(PetAction.IDLE, PetAction.WALK))
+        )
+    }
+
+    @Test
+    fun `legacy pack without extended actions keeps safe walk and idle behavior`() {
+        val legacyActions = setOf(
+            PetAction.IDLE,
+            PetAction.WALK,
+            PetAction.TAPPED,
+            PetAction.DRAGGED,
+            PetAction.FLUNG
+        )
+        val engine = PetEngine(
+            PetEngineConfig(
+                supportedActions = legacyActions,
+                autonomousIntervalMillis = 100
+            )
+        )
+        val walking = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(75f, 10f),
+            action = PetAction.WALK
+        )
+
+        val atEdge = engine.reduce(walking, PetEvent.Tick(200)).state
+        val dragged = engine.reduce(atEdge, PetEvent.DragStart).state
+        val released = engine.reduce(dragged, PetEvent.DragEnd).state
+
+        assertEquals(PetAction.WALK, atEdge.action)
+        assertEquals(PetDirection.LEFT, atEdge.direction)
+        assertEquals(PetAction.IDLE, released.action)
     }
 
     @Test

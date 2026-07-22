@@ -5,15 +5,19 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.content.res.Configuration
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import com.asianmobile.privatebrower.MainActivity
 import com.asianmobile.privatebrower.R
 import com.asianmobile.privatebrower.data.repository.PetSettingsRepository
@@ -29,10 +33,20 @@ class PetOverlayService : Service() {
     @Inject lateinit var petSettingsRepository: PetSettingsRepository
 
     private var overlayController: PetOverlayController? = null
+    private var isScreenReceiverRegistered = false
+    private val screenStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                Intent.ACTION_SCREEN_OFF -> overlayController?.pauseRendering()
+                Intent.ACTION_SCREEN_ON -> overlayController?.resumeRendering()
+            }
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+        registerScreenStateReceiver()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -58,7 +72,12 @@ class PetOverlayService : Service() {
                     visual = visual,
                     preferences = preferences,
                     performanceBudget = petSettingsRepository.performanceBudget
-                ).also { it.start() }
+                ).also { controller ->
+                    controller.start()
+                    if (!getSystemService(PowerManager::class.java).isInteractive) {
+                        controller.pauseRendering()
+                    }
+                }
                 PetOverlayRuntime.updateRunning(true, preferences.petCount)
             } catch (error: RuntimeException) {
                 Log.e(TAG, "Unable to start pet overlay", error)
@@ -76,6 +95,7 @@ class PetOverlayService : Service() {
     }
 
     override fun onDestroy() {
+        unregisterScreenStateReceiver()
         overlayController?.stop()?.let(petSettingsRepository::updateLastPositions)
         overlayController = null
         PetOverlayRuntime.updateRunning(false)
@@ -142,6 +162,26 @@ class PetOverlayService : Service() {
             setShowBadge(false)
         }
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+    }
+
+    private fun registerScreenStateReceiver() {
+        if (isScreenReceiverRegistered) return
+        ContextCompat.registerReceiver(
+            this,
+            screenStateReceiver,
+            IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_SCREEN_ON)
+            },
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        isScreenReceiverRegistered = true
+    }
+
+    private fun unregisterScreenStateReceiver() {
+        if (!isScreenReceiverRegistered) return
+        unregisterReceiver(screenStateReceiver)
+        isScreenReceiverRegistered = false
     }
 
     companion object {

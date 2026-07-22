@@ -74,6 +74,14 @@ Verified trên Pixel 3 XL / API 31 với 3 instance `Sunny Cat`: một foregroun
 
 ## Phase 6 — Monetization, performance and release policy
 
+Before release hardening, complete the clean-room parity items confirmed by the local competitor audit:
+
+- [Done] Pause the render clock while the display is off and resume without a large catch-up tick.
+- [Done] Extend autonomous behavior through explicit pack actions and boundary transitions without assuming the competitor's numbered-frame format.
+- Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
+- Treat tap popup, double-tap, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
+- Use only owned/licensed pack metadata and assets. The 991-entry competitor catalog and its remote ZIPs are analysis evidence only.
+
 - Map entitlement free/premium lên catalog/slot/animation; billing failure không phá pet đang chạy.
 - Chỉ thêm ads placement khi có screen code/policy được owner duyệt; không đặt ad trong overlay.
 - Profile CPU, memory, bitmap cache, jank, battery trên nhiều API/device/orientation.
@@ -88,3 +96,7 @@ Definition of done: release candidate đạt performance budget, policy checklis
 - Không dùng periodic WorkManager cho animation hoặc service keep-alive.
 - Không mở full-screen overlay nếu pet chỉ cần một vùng nhỏ; window phải khớp hit target để không chặn app bên dưới.
 - Không thêm Room/network/boot receiver trước khi requirement của phase tương ứng thật sự cần.
+
+Technical evidence and the feature-parity matrix are recorded in [`research/COMPETITOR_TECHNICAL_AUDIT.md`](research/COMPETITOR_TECHNICAL_AUDIT.md).
+
+The first parity slice is verified on Pixel 3 XL / API 31: falling reaches the bottom, then resumes horizontal/autonomous motion; the overlay position remains stable while the device is dozing and advances again after wake. Force-stop removes both foreground service and overlay window without a fatal error.

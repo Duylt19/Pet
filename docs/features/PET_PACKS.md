@@ -34,6 +34,8 @@ Ví dụ đầy đủ: [`docs/examples/pet-pack-v1`](../examples/pet-pack-v1).
 
 `idle` phải loop và `walk` phải tồn tại. Renderer map metadata sang pure `PetClip` một lần khi service start; action gesture không có clip riêng fallback về frame idle an toàn.
 
+Action names được schema v1 nhận: `idle`, `walk`, `fall`, `bounce`, `climb_wall`, `climb_ceiling`, `sit`, `wink`, `creep`, `trip`, `special`, `special_2`, `tapped`, `dragged`, `flung`. `idle` và `walk` vẫn là hai clip nền bắt buộc; các action mở rộng là optional để pack v1 cũ tiếp tục hợp lệ. Runtime chỉ đưa một hành vi tự động/boundary vào state machine khi manifest khai báo action đó. Mapper vẫn tạo visual/physics fallback nội bộ để mọi `PetAction` có clip an toàn.
+
 ## Installer pipeline
 
 ```text

@@ -13,6 +13,9 @@
 | Product Home/permission flow | Done | Special access + notification permission + Start/Stop policy |
 | Pixel 3 XL device verification | Done | API 31 start/stop, notification, launcher overlay, drag/fling, revoke cleanup |
 | Pet catalog + validated pack v1 | Done | Secure ZIP import, repository/cache, detail/select, sprite overlay verified on API 31 |
+| Competitor technical audit | Done | Catalog/pack/engine/overlay/lifecycle/business/security evidence documented without importing proprietary data |
+| Extended pet behavior graph | Done | Fall, bounce, wall/ceiling climb, passive actions and legacy pack fallback verified by JVM tests/API 31 |
+| Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
 | Đổi namespace/application ID | Deferred | Vẫn là `com.asianmobile.privatebrower` theo yêu cầu owner |
 
 ## Nguyên tắc cập nhật

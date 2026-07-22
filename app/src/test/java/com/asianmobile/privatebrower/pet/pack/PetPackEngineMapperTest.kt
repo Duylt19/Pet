@@ -26,6 +26,16 @@ class PetPackEngineMapperTest {
         assertEquals(80L, fast.durationMillis)
     }
 
+    @Test
+    fun `legacy manifest receives safe runtime fall and climb fallback clips`() {
+        val clips = manifest().toEngineClips()
+
+        assertEquals(PetVector(0f, 220f), clips.getValue(PetAction.FALL).frames.first().velocity)
+        assertEquals(PetVector(0f, -36f), clips.getValue(PetAction.CLIMB_WALL).frames.first().velocity)
+        assertEquals(PetVector(36f, 0f), clips.getValue(PetAction.CLIMB_CEILING).frames.first().velocity)
+        assertEquals(PetAction.WALK, clips.getValue(PetAction.SIT).nextAction)
+    }
+
     private fun manifest(): PetPackManifest {
         fun clip(action: PetAction) = PetPackClip(
             action = action,

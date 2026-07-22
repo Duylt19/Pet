@@ -8,7 +8,17 @@ data class PetEngineConfig(
     val maxTickMillis: Long = 250,
     val maxFlingSpeed: Float = 2_500f,
     val flingDeceleration: Float = 3_500f,
-    val flingStopSpeed: Float = 24f
+    val flingStopSpeed: Float = 24f,
+    val supportedActions: Set<PetAction> = clips.keys,
+    val autonomousIntervalMillis: Long = 4_000,
+    val autonomousActions: List<PetAction> = listOf(
+        PetAction.SIT,
+        PetAction.WINK,
+        PetAction.TRIP,
+        PetAction.SPECIAL,
+        PetAction.SPECIAL_2,
+        PetAction.CREEP
+    )
 ) {
     init {
         require(clips.keys.containsAll(PetAction.entries)) {
@@ -21,6 +31,12 @@ data class PetEngineConfig(
         require(flingStopSpeed >= 0f) { "flingStopSpeed must not be negative" }
         require(flingStopSpeed < maxFlingSpeed) {
             "flingStopSpeed must be lower than maxFlingSpeed"
+        }
+        require(autonomousIntervalMillis > 0) {
+            "autonomousIntervalMillis must be positive"
+        }
+        require(supportedActions.all(clips::containsKey)) {
+            "supported actions must reference configured clips"
         }
     }
 }
@@ -57,7 +73,7 @@ class PetEngine(
 
         is PetEvent.DragBy -> onDragBy(state, event.delta)
         PetEvent.DragEnd -> if (state.action == PetAction.DRAGGED) {
-            changeAction(state, PetAction.IDLE)
+            changeAction(state, preferredAction(PetAction.FALL, PetAction.IDLE))
         } else {
             PetTransition(state)
         }
@@ -152,10 +168,24 @@ class PetEngine(
                 velocity = constrainedVelocity
             )
 
+            val collisionAction = collisionAction(
+                action = PetAction.FLUNG,
+                requested = requestedPosition,
+                constrained = constrainedPosition,
+                bounds = updatedState.bounds
+            )
+            if (collisionAction != null) {
+                val collided = changeAction(
+                    state = updatedState.copy(velocity = PetVector.Zero),
+                    action = collisionAction
+                )
+                return collided.copy(effects = effects + collided.effects)
+            }
+
             if (constrainedVelocity.magnitude <= config.flingStopSpeed) {
                 val stopped = changeAction(
                     state = updatedState.copy(velocity = PetVector.Zero),
-                    action = PetAction.IDLE
+                    action = preferredAction(PetAction.FALL, PetAction.IDLE)
                 )
                 return stopped.copy(effects = effects + stopped.effects)
             }
@@ -167,10 +197,8 @@ class PetEngine(
             requestedPosition,
             updatedState.size
         )
-        val direction = if (
-            updatedState.action == PetAction.WALK &&
-            constrainedPosition.x != requestedPosition.x
-        ) {
+        val hitHorizontalEdge = constrainedPosition.x != requestedPosition.x
+        val direction = if (updatedState.action == PetAction.WALK && hitHorizontalEdge) {
             updatedState.direction.opposite()
         } else {
             updatedState.direction
@@ -180,7 +208,22 @@ class PetEngine(
             velocity = PetVector.Zero,
             direction = direction
         )
-        return PetTransition(updatedState, effects)
+        val collisionAction = collisionAction(
+            action = updatedState.action,
+            requested = requestedPosition,
+            constrained = constrainedPosition,
+            bounds = updatedState.bounds
+        )
+        if (collisionAction != null) {
+            val collided = changeAction(updatedState, collisionAction)
+            return collided.copy(effects = effects + collided.effects)
+        }
+        return applyAutonomousBehavior(
+            state = updatedState,
+            elapsedMillis = elapsedMillis,
+            effects = effects,
+            previousAction = state.action
+        )
     }
 
     private fun advanceFling(
@@ -209,7 +252,12 @@ class PetEngine(
         return PetTransition(
             state = state.copy(
                 action = action,
-                animationCursor = PetAnimationCursor()
+                animationCursor = PetAnimationCursor(),
+                autonomousElapsedMillis = if (action == PetAction.WALK) {
+                    state.autonomousElapsedMillis
+                } else {
+                    0
+                }
             ),
             effects = if (state.action == action) {
                 emptyList()
@@ -228,6 +276,91 @@ class PetEngine(
         PetDirection.LEFT -> PetDirection.RIGHT
         PetDirection.RIGHT -> PetDirection.LEFT
     }
+
+    private fun collisionAction(
+        action: PetAction,
+        requested: PetVector,
+        constrained: PetVector,
+        bounds: PetBounds
+    ): PetAction? {
+        val hitLeft = requested.x < constrained.x
+        val hitRight = requested.x > constrained.x
+        val hitTop = requested.y < constrained.y
+        val hitBottom = requested.y > constrained.y
+        return when (action) {
+            PetAction.FALL -> if (hitBottom) preferredAction(PetAction.BOUNCE, PetAction.WALK) else null
+            PetAction.WALK,
+            PetAction.CREEP -> if (hitLeft || hitRight) {
+                preferredActionOrNull(PetAction.CLIMB_WALL)
+            } else {
+                null
+            }
+            PetAction.CLIMB_WALL -> if (hitTop || constrained.y <= bounds.top) {
+                preferredAction(PetAction.CLIMB_CEILING, PetAction.FALL, PetAction.WALK)
+            } else {
+                null
+            }
+            PetAction.CLIMB_CEILING -> if (hitLeft || hitRight) {
+                preferredAction(PetAction.FALL, PetAction.WALK)
+            } else {
+                null
+            }
+            PetAction.FLUNG -> when {
+                hitBottom -> preferredAction(PetAction.BOUNCE, PetAction.WALK)
+                hitTop -> preferredAction(PetAction.CLIMB_CEILING, PetAction.FALL, PetAction.WALK)
+                hitLeft || hitRight -> preferredAction(PetAction.CLIMB_WALL, PetAction.FALL, PetAction.WALK)
+                else -> null
+            }
+            else -> null
+        }
+    }
+
+    private fun applyAutonomousBehavior(
+        state: PetState,
+        elapsedMillis: Long,
+        effects: List<PetEffect>,
+        previousAction: PetAction
+    ): PetTransition {
+        if (state.action == PetAction.IDLE && previousAction == PetAction.IDLE) {
+            val total = state.autonomousElapsedMillis + elapsedMillis
+            if (total >= config.autonomousIntervalMillis && PetAction.WALK in config.supportedActions) {
+                val changed = changeAction(
+                    state.copy(autonomousElapsedMillis = 0),
+                    PetAction.WALK
+                )
+                return changed.copy(effects = effects + changed.effects)
+            }
+            return PetTransition(state.copy(autonomousElapsedMillis = total), effects)
+        }
+        if (state.action != PetAction.WALK || previousAction != PetAction.WALK) {
+            return PetTransition(state.copy(autonomousElapsedMillis = 0), effects)
+        }
+        val eligible = config.autonomousActions.filter { action ->
+            action in config.supportedActions && action != PetAction.WALK
+        }
+        if (eligible.isEmpty()) {
+            return PetTransition(state.copy(autonomousElapsedMillis = 0), effects)
+        }
+        val total = state.autonomousElapsedMillis + elapsedMillis
+        if (total < config.autonomousIntervalMillis) {
+            return PetTransition(state.copy(autonomousElapsedMillis = total), effects)
+        }
+        val next = eligible[state.autonomousStep.mod(eligible.size)]
+        val changed = changeAction(
+            state.copy(
+                autonomousElapsedMillis = 0,
+                autonomousStep = state.autonomousStep + 1
+            ),
+            next
+        )
+        return changed.copy(effects = effects + changed.effects)
+    }
+
+    private fun preferredActionOrNull(vararg actions: PetAction): PetAction? =
+        actions.firstOrNull { it in config.supportedActions }
+
+    private fun preferredAction(vararg actions: PetAction): PetAction =
+        preferredActionOrNull(*actions) ?: PetAction.IDLE
 
     private data class FlingAdvance(
         val velocity: PetVector,

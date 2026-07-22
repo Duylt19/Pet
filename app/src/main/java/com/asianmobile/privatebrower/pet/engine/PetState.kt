@@ -12,7 +12,9 @@ data class PetState(
     val bounds: PetBounds,
     val action: PetAction,
     val direction: PetDirection,
-    val animationCursor: PetAnimationCursor
+    val animationCursor: PetAnimationCursor,
+    val autonomousElapsedMillis: Long = 0,
+    val autonomousStep: Int = 0
 ) {
     val frameIndex: Int
         get() = animationCursor.frameIndex

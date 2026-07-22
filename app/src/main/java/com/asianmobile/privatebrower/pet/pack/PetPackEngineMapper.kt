@@ -3,29 +3,56 @@ package com.asianmobile.privatebrower.pet.pack
 import com.asianmobile.privatebrower.pet.engine.PetAction
 import com.asianmobile.privatebrower.pet.engine.PetClip
 import com.asianmobile.privatebrower.pet.engine.PetFrame
+import com.asianmobile.privatebrower.pet.engine.PetVector
 
 fun PetPackManifest.toEngineClips(speedMultiplier: Float = 1f): Map<PetAction, PetClip> {
     val safeMultiplier = speedMultiplier.coerceIn(MIN_SPEED_MULTIPLIER, MAX_SPEED_MULTIPLIER)
     val idleFrames = clips.getValue(PetAction.IDLE).frames
+    val walkFrames = clips.getValue(PetAction.WALK).frames
     return PetAction.entries.associateWith { action ->
         val source = clips[action]
         if (source != null) {
             source.toEngineClip(safeMultiplier)
         } else {
-            PetClip(
-                action = action,
-                frames = idleFrames.mapIndexed { index, frame ->
-                    PetFrame(
-                        index,
-                        (frame.durationMillis / safeMultiplier).toLong().coerceAtLeast(MIN_FRAME_MILLIS),
-                        frame.velocity * safeMultiplier
-                    )
-                },
-                loops = action != PetAction.TAPPED,
-                nextAction = if (action == PetAction.TAPPED) PetAction.IDLE else null
-            )
+            fallbackClip(action, idleFrames, walkFrames, safeMultiplier)
         }
     }
+}
+
+private fun fallbackClip(
+    action: PetAction,
+    idleFrames: List<PetPackFrame>,
+    walkFrames: List<PetPackFrame>,
+    speedMultiplier: Float
+): PetClip {
+    val sourceFrames = when (action) {
+        PetAction.WALK,
+        PetAction.CREEP,
+        PetAction.CLIMB_WALL,
+        PetAction.CLIMB_CEILING -> walkFrames
+        else -> idleFrames
+    }
+    val frames = sourceFrames.mapIndexed { index, frame ->
+        val fallbackVelocity = when (action) {
+            PetAction.FALL -> PetVector(y = FALL_VELOCITY)
+            PetAction.CLIMB_WALL -> PetVector(y = -CLIMB_VELOCITY)
+            PetAction.CLIMB_CEILING -> PetVector(x = CLIMB_VELOCITY)
+            PetAction.CREEP -> PetVector(x = CREEP_VELOCITY)
+            else -> frame.velocity
+        }
+        PetFrame(
+            index,
+            (frame.durationMillis / speedMultiplier).toLong().coerceAtLeast(MIN_FRAME_MILLIS),
+            fallbackVelocity * speedMultiplier
+        )
+    }
+    val isOneShot = action in ONE_SHOT_FALLBACK_ACTIONS
+    return PetClip(
+        action = action,
+        frames = frames,
+        loops = !isOneShot,
+        nextAction = if (isOneShot) PetAction.WALK else null
+    )
 }
 
 private fun PetPackClip.toEngineClip(speedMultiplier: Float): PetClip = PetClip(
@@ -45,3 +72,15 @@ private fun PetPackClip.toEngineClip(speedMultiplier: Float): PetClip = PetClip(
 private const val MIN_SPEED_MULTIPLIER = 0.5f
 private const val MAX_SPEED_MULTIPLIER = 1.5f
 private const val MIN_FRAME_MILLIS = 16L
+private const val FALL_VELOCITY = 220f
+private const val CLIMB_VELOCITY = 36f
+private const val CREEP_VELOCITY = 16f
+private val ONE_SHOT_FALLBACK_ACTIONS = setOf(
+    PetAction.BOUNCE,
+    PetAction.SIT,
+    PetAction.WINK,
+    PetAction.TRIP,
+    PetAction.SPECIAL,
+    PetAction.SPECIAL_2,
+    PetAction.TAPPED
+)
