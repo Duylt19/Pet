@@ -35,12 +35,12 @@ data class FeedbackOption(
 ) {
     companion object {
         fun defaultOptions() = listOf(
-            FeedbackOption("🛡️", R.string.rate_feedback_private_mode),
-            FeedbackOption("🔒", R.string.rate_feedback_vault_access),
-            FeedbackOption("🌐", R.string.rate_feedback_websites_wont_load),
-            FeedbackOption("🐢", R.string.rate_feedback_slow_browser),
-            FeedbackOption("⬇️", R.string.rate_feedback_downloads_failed),
-            FeedbackOption("📁", R.string.rate_feedback_files_missing),
+            FeedbackOption("👀", R.string.rate_feedback_pet_not_showing),
+            FeedbackOption("👆", R.string.rate_feedback_pet_interaction),
+            FeedbackOption("🎨", R.string.rate_feedback_pet_appearance),
+            FeedbackOption("🐢", R.string.rate_feedback_performance),
+            FeedbackOption("🔔", R.string.rate_feedback_notification),
+            FeedbackOption("⚙️", R.string.rate_feedback_settings),
             FeedbackOption("💥", R.string.rate_feedback_crashed),
             FeedbackOption("✏️", R.string.rate_feedback_others)
         )

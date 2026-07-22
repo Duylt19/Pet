@@ -17,8 +17,6 @@
     <string name="this_action_can_contain_ads">Thao tác này có thể chứa quảng cáo</string>
     <string name="setting_up_your_app_experience_please_wait_a_moment">Đang thiết lập trải nghiệm ứng dụng của bạn, vui lòng chờ trong giây lát...</string>
     <string name="grant_permission_later">Cấp quyền sau</string>
-    <string name="permission_title">Quyền</string>
-    <string name="permission_subtitle">Cho phép các quyền cần thiết để có đầy đủ chức năng.\nDữ liệu của bạn vẫn ở chế độ riêng tư.</string>
     <string name="permission_storage_title">Lưu trữ</string>
     <string name="permission_continue">TIẾP TỤC</string>
     <string name="permission_status_allowed">Đã cấp quyền</string>
@@ -42,23 +40,12 @@
     <string name="rate_no_internet">Không có kết nối internet. Vui lòng thử lại.</string>
     <string name="rate_feedback_send_failed">Không thể gửi phản hồi. Vui lòng thử lại sau.</string>
     <string name="rate_feedback_hint">Nhập phản hồi của bạn tại đây</string>
-    <string name="rate_feedback_private_mode">Chế độ riêng tư không hoạt động</string>
-    <string name="rate_feedback_vault_access">Không thể truy cập kho bảo mật</string>
-    <string name="rate_feedback_websites_wont_load">Trang web không tải được</string>
-    <string name="rate_feedback_slow_browser">Trình duyệt chậm hoặc không phản hồi</string>
-    <string name="rate_feedback_downloads_failed">Tải xuống không thành công hoặc bị thiếu</string>
-    <string name="rate_feedback_files_missing">Tệp hoặc ảnh bị thiếu</string>
     <string name="rate_feedback_crashed">Ứng dụng bị lỗi hoặc bị treo</string>
     <string name="rate_feedback_others">Khác</string>
-    <string name="premium_subtitle">Mở khóa tất cả tính năng</string>
     <string name="premium_all_features">Tất cả tính năng Premium</string>
     <string name="premium_free">Miễn phí</string>
     <string name="premium_pro">Pro</string>
-    <string name="premium_private_browsing">Duyệt web riêng tư</string>
-    <string name="premium_unlimited_downloads">Tải xuống không giới hạn</string>
     <string name="premium_remove_ads">Xóa quảng cáo</string>
-    <string name="premium_faster_downloads">Tải xuống nhanh hơn</string>
-    <string name="premium_secure_file_vault">Kho tệp bảo mật</string>
     <string name="premium_weekly">Hàng tuần</string>
     <string name="premium_monthly">Hàng tháng</string>
     <string name="premium_desc_in_week">%s/ tuần</string>
@@ -69,15 +56,6 @@
     <string name="please_check_your_internet_connection_and_try_again">Vui lòng kiểm tra kết nối internet và thử lại.</string>
     <string name="search_placeholder">Tìm kiếm hoặc nhập URL</string>
     <!-- Intro / Onboarding -->
-    <string name="intro_title_1">Khám phá trải nghiệm tốt hơn với\nTrình duyệt riêng tư.</string>
-    <string name="intro_title_highlight_1">Trình duyệt riêng tư.</string>
-    <string name="intro_message_1">Nhanh, đơn giản và được thiết kế\ncho nhu cầu duyệt web hằng ngày.</string>
-    <string name="intro_title_2">Lưu nhiều hơn với\nDấu trang thông minh.</string>
-    <string name="intro_title_highlight_2">Dấu trang thông minh.</string>
-    <string name="intro_message_2">Sắp xếp gọn gàng các trang web yêu thích\nđể truy cập dễ dàng.</string>
-    <string name="intro_title_3">Lưu video trong khi\nbạn duyệt web.</string>
-    <string name="intro_title_highlight_3">Lưu video</string>
-    <string name="intro_message_3">Tải xuống và lưu video yêu thích\nđể xem lại bất cứ lúc nào.</string>
     <string name="start">Bắt đầu</string>
     <string name="share_app">Chia sẻ ứng dụng</string>
     <string name="rate_app">Đánh giá ứng dụng</string>
@@ -296,10 +274,7 @@
     <string name="clear_history_cache_shared_note">Bộ nhớ đệm WebView được ứng dụng chia sẻ và sẽ bị xóa đối với cả tab Bình thường và Riêng tư.</string>
     <string name="clear_history_profile_limited_toast">Xóa dữ liệu duyệt web với cách ly hồ sơ hạn chế</string>
     <!-- Share / Feedback -->
-    <string name="share_app_subject">Dùng thử trình duyệt riêng tư</string>
-    <string name="share_app_message">Hãy xem Trình duyệt riêng tư - Duyệt web trên thiết bị di động an toàn &amp; bảo mật.\n\nTải xuống: %1$s</string>
     <string name="share_app_chooser_title">Chia sẻ qua</string>
-    <string name="feedback_subject_template">Phản hồi về Trình duyệt riêng tư v%1$s (API Android %2$d, %3$s %4$s)</string>
     <string name="feedback_body_template">\n\n---\nThông tin thiết bị tự động điền. Vui lòng mô tả vấn đề hoặc phản hồi của bạn ở trên.</string>
     <string name="feedback_chooser_title">Gửi phản hồi qua</string>
     <string name="feedback_no_email_app">Chưa cài đặt ứng dụng email</string>

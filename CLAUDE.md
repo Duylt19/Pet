@@ -18,13 +18,13 @@ Nếu tài liệu và source khác nhau, source hiện tại là bằng chứng 
 - Single-Activity, Compose, MVVM, Hilt, Flow.
 - Splash, Language, Intro, Permission, Home, Settings, Premium.
 - Home placeholder có hai nút Settings/Premium.
-- DataStore onboarding/language/permission/search engine.
+- DataStore onboarding/language.
 - Ads module, billing, analytics, remote config và localization.
-- Search engine picker, clear browsing data tối giản và feedback/rating trong Settings để làm mẫu tích hợp.
+- Settings giữ language, share, rating, feedback và version; Permission là shell trung tính chờ overlay phase.
 
 ## Không còn tồn tại
 
-Không giả định hoặc tham chiếu như source hiện hành tới BrowserEngine, TabManager, WebView browser screen, bookmarks/history database, download service, media/file tabs, Room schema hoặc foreground service cũ.
+Không giả định hoặc tham chiếu như source hiện hành tới BrowserEngine, TabManager, WebView browser screen, search engine, clear browsing data, broad storage access, bookmarks/history database, download service, media/file tabs, Room schema hoặc foreground service cũ.
 
 Muốn thêm lại một capability tương tự phải xem đó là feature mới: thiết kế contract, dependency, permission, manifest, test và docs từ đầu.
 

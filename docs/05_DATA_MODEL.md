@@ -11,17 +11,12 @@
 | `is_permission_completed` | Boolean | Hoàn thành/skip permission step |
 | `key_language` | String | Language code |
 | `country_language` | String | Region code |
-| `selected_search_engine` | String | Search engine trong Settings |
-| `runtime_permission_request_count_<permission>` | Int | Số lần request từng runtime permission |
 
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.
 
-## Model/repository hiện tại
+## Pet model dự kiến
 
-- `SearchEngine`: danh sách lựa chọn search engine còn được Settings sử dụng.
-- `SearchEngineRepository`: contract quan sát/lưu lựa chọn.
-- `SearchEngineRepositoryImpl`: implementation dựa trên DataStore.
-- `ClearBrowsingDataUseCase`: clear CookieManager/WebStorage/WebView cache-history mẫu; không phụ thuộc browser engine hoặc Room.
+Phase engine sẽ thêm model Kotlin thuần cho `PetState`, `PetAction`, `PetEvent`, frame timeline và screen bounds. Model không chứa Android bitmap/view/context. Asset metadata production được xác định ở phase pack installer sau khi demo engine ổn định.
 
 ## Không có database
 

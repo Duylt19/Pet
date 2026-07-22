@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -27,7 +26,6 @@ class DataStoreManager @Inject constructor(
         val IS_PERMISSION_COMPLETED = booleanPreferencesKey("is_permission_completed")
         val COUNTRY_LANGUAGE = stringPreferencesKey("country_language")
         val KEY_LANGUAGE = stringPreferencesKey("key_language")
-        val SELECTED_SEARCH_ENGINE = stringPreferencesKey("selected_search_engine")
     }
 
     val isIntroCompleted: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -40,10 +38,6 @@ class DataStoreManager @Inject constructor(
 
     val isPermissionCompleted: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[IS_PERMISSION_COMPLETED] ?: false
-    }
-
-    val selectedSearchEngine: Flow<String> = context.dataStore.data.map { preferences ->
-        preferences[SELECTED_SEARCH_ENGINE] ?: "google"
     }
 
     suspend fun saveIntroCompleted(completed: Boolean) {
@@ -77,31 +71,4 @@ class DataStoreManager @Inject constructor(
         }
     }
 
-    fun runtimePermissionRequestCounts(
-        permissions: Collection<String>
-    ): Flow<Map<String, Int>> = context.dataStore.data.map { preferences ->
-        permissions.associateWith { permission ->
-            preferences[runtimePermissionRequestCountKey(permission)] ?: 0
-        }
-    }
-
-    suspend fun markRuntimePermissionsRequested(permissions: Collection<String>) {
-        if (permissions.isEmpty()) return
-        context.dataStore.edit { preferences ->
-            permissions.forEach { permission ->
-                val key = runtimePermissionRequestCountKey(permission)
-                preferences[key] = (preferences[key] ?: 0) + 1
-            }
-        }
-    }
-
-    suspend fun saveSelectedSearchEngine(engine: String) {
-        context.dataStore.edit { preferences ->
-            preferences[SELECTED_SEARCH_ENGINE] = engine
-        }
-    }
-
-    private fun runtimePermissionRequestCountKey(permission: String) = intPreferencesKey(
-        "runtime_permission_request_count_${permission.substringAfterLast('.').lowercase()}"
-    )
 }

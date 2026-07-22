@@ -17,8 +17,6 @@
     <string name="this_action_can_contain_ads">Wannan aiki na iya ƙunsar talla</string>
     <string name="setting_up_your_app_experience_please_wait_a_moment">Ana saita ƙwarewar manhajarka, don Allah jira kaɗan...</string>
     <string name="grant_permission_later">Ba da izini daga baya</string>
-    <string name="permission_title">Izini</string>
-    <string name="permission_subtitle">Bada izinin zama dole don cikakken aiki.\nBayanan ku yana sirri.</string>
     <string name="permission_storage_title">Adanawa</string>
     <string name="permission_continue">CIGABA</string>
     <string name="permission_status_allowed">An ba da izini</string>
@@ -42,23 +40,12 @@
     <string name="rate_no_internet">Babu haɗin intanet. Da fatan za a sake gwadawa.</string>
     <string name="rate_feedback_send_failed">An kasa aika martani. Da fatan za a sake gwadawa daga baya.</string>
     <string name="rate_feedback_hint">Rubuta ra’ayinku a nan</string>
-    <string name="rate_feedback_private_mode">Yanayin keɓaɓɓen ba ya aiki</string>
-    <string name="rate_feedback_vault_access">An kasa shiga ma\'ajiyar sirri</string>
-    <string name="rate_feedback_websites_wont_load">Shafukan yanar gizo ba za su yi lodi ba</string>
-    <string name="rate_feedback_slow_browser">Burauza yana jinkiri ko baya amsawa</string>
-    <string name="rate_feedback_downloads_failed">Zazzagewar ta kasa ko bata</string>
-    <string name="rate_feedback_files_missing">Fayiloli ko hotuna sun ɓace</string>
     <string name="rate_feedback_crashed">Manhajar ta karye ko ta tsaya cak</string>
     <string name="rate_feedback_others">Sauran</string>
-    <string name="premium_subtitle">Buɗe duk fasaloli</string>
     <string name="premium_all_features">Duk fasalolin Premium</string>
     <string name="premium_free">Kyauta</string>
     <string name="premium_pro">Pro</string>
-    <string name="premium_private_browsing">Binciken sirri</string>
-    <string name="premium_unlimited_downloads">Zazzagewa mara iyaka</string>
     <string name="premium_remove_ads">Cire talla</string>
-    <string name="premium_faster_downloads">Saurin saukewa</string>
-    <string name="premium_secure_file_vault">Amintacciyar ma\'ajiyar fayil</string>
     <string name="premium_weekly">Mako-mako</string>
     <string name="premium_monthly">Wata-wata</string>
     <string name="premium_desc_in_week">%s/ mako</string>
@@ -69,15 +56,6 @@
     <string name="please_check_your_internet_connection_and_try_again">Da fatan za a duba haɗin intanet ɗinku kuma a sake gwadawa.</string>
     <string name="search_placeholder">Bincika ko rubuta URL</string>
     <!-- Intro / Onboarding -->
-    <string name="intro_title_1">Gano ingantaccen\nmai bincike na sirri.</string>
-    <string name="intro_title_highlight_1">mai bincike na sirri.</string>
-    <string name="intro_message_1">Mai sauri, mai sauƙi, kuma an tsara shi\ndon binciken yau da kullum.</string>
-    <string name="intro_title_2">Ajiye ƙari da\nalamomi masu wayo.</string>
-    <string name="intro_title_highlight_2">alamomi masu wayo.</string>
-    <string name="intro_message_2">Tsara shafukan da kuka fi so\nkuma ku shiga su cikin sauƙi.</string>
-    <string name="intro_title_3">Ajiye bidiyo yayin\nyin bincike.</string>
-    <string name="intro_title_highlight_3">Ajiye bidiyo</string>
-    <string name="intro_message_3">Zazzage kuma adana bidiyon da kuka fi so\ndon samun su cikin sauƙi.</string>
     <string name="start">Fara</string>
     <string name="share_app">Raba manhaja</string>
     <string name="rate_app">Ba manhaja ƙima</string>
@@ -296,10 +274,7 @@
     <string name="clear_history_cache_shared_note">WebView cache yana raba ta ƙa\'idar kuma za a share shi don shafuka na al\'ada da na Masu zaman kansu.</string>
     <string name="clear_history_profile_limited_toast">An share bayanan bincike tare da keɓewar bayanin martaba mai iyaka</string>
     <!-- Share / Feedback -->
-    <string name="share_app_subject">Gwada Browser Mai zaman kansa</string>
-    <string name="share_app_message">Duba Mai Binciken Mai zaman kansa - Safe &amp; Amintaccen binciken wayar hannu.\n\nSaukewa: %1$s</string>
     <string name="share_app_chooser_title">Raba ta hanyar</string>
-    <string name="feedback_subject_template">Ra\'ayin mai zaman kansa v%1$s (Android API %2$d, %3$s %4$s)</string>
     <string name="feedback_body_template">\n\n---\nCika bayanan na\'urar ta atomatik. Da fatan za a bayyana batunku ko ra\'ayin ku a sama.</string>
     <string name="feedback_chooser_title">Aika martani ta hanyar</string>
     <string name="feedback_no_email_app">Ba a shigar da app na imel ba</string>

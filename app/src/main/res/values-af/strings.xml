@@ -17,8 +17,6 @@
     <string name="this_action_can_contain_ads">Hierdie aksie kan advertensies bevat</string>
     <string name="setting_up_your_app_experience_please_wait_a_moment">Stel jou toepassingservaring op, wag asseblief \'n oomblik...</string>
     <string name="grant_permission_later">Gee toestemming later</string>
-    <string name="permission_title">Toestemming</string>
-    <string name="permission_subtitle">Laat die nodige toestemmings toe vir volle funksionaliteit.\nJou data bly privaat.</string>
     <string name="permission_storage_title">Berging</string>
     <string name="permission_continue">VERDER</string>
     <string name="permission_status_allowed">Toestemming verleen</string>
@@ -42,23 +40,12 @@
     <string name="rate_no_internet">Geen internetverbinding nie. Probeer asseblief weer.</string>
     <string name="rate_feedback_send_failed">Kon nie terugvoer stuur nie. Probeer asseblief later weer.</string>
     <string name="rate_feedback_hint">Skryf jou terugvoer hier</string>
-    <string name="rate_feedback_private_mode">Privaatmodus werk nie</string>
-    <string name="rate_feedback_vault_access">Kan nie toegang tot die kluis kry nie</string>
-    <string name="rate_feedback_websites_wont_load">Webwerwe sal nie laai nie</string>
-    <string name="rate_feedback_slow_browser">Blaaier is stadig of reageer nie</string>
-    <string name="rate_feedback_downloads_failed">Aflaaie het misluk of ontbreek</string>
-    <string name="rate_feedback_files_missing">Lêers of foto\'s ontbreek</string>
     <string name="rate_feedback_crashed">Toepassing het omgeval of gevries</string>
     <string name="rate_feedback_others">Ander</string>
-    <string name="premium_subtitle">Ontsluit alle funksies</string>
     <string name="premium_all_features">Alle Premium-funksies</string>
     <string name="premium_free">Gratis</string>
     <string name="premium_pro">Pro</string>
-    <string name="premium_private_browsing">Privaat blaai</string>
-    <string name="premium_unlimited_downloads">Onbeperkte aflaaie</string>
     <string name="premium_remove_ads">Verwyder advertensies</string>
-    <string name="premium_faster_downloads">Vinniger aflaaie</string>
-    <string name="premium_secure_file_vault">Veilige lêerkluis</string>
     <string name="premium_weekly">Weekliks</string>
     <string name="premium_monthly">Maandeliks</string>
     <string name="premium_desc_in_week">%s/ week</string>
@@ -69,15 +56,6 @@
     <string name="please_check_your_internet_connection_and_try_again">Kontroleer asseblief jou internetverbinding en probeer weer.</string>
     <string name="search_placeholder">Soek of tik \'n URL</string>
     <!-- Intro / Onboarding -->
-    <string name="intro_title_1">Ontdek \'n beter\nprivaat blaaier.</string>
-    <string name="intro_title_highlight_1">privaat blaaier.</string>
-    <string name="intro_message_1">Vinnig, eenvoudig en ontwerp\nvir alledaagse blaai.</string>
-    <string name="intro_title_2">Stoor meer met\nslim boekmerke.</string>
-    <string name="intro_title_highlight_2">slim boekmerke.</string>
-    <string name="intro_message_2">Hou jou gunsteling webwerwe netjies\nen maklik bereikbaar.</string>
-    <string name="intro_title_3">Stoor video\'s terwyl\njy blaai.</string>
-    <string name="intro_title_highlight_3">Stoor video\'s</string>
-    <string name="intro_message_3">Laai jou gunsteling video\'s af en hou dit\nbinne maklike bereik.</string>
     <string name="start">Begin</string>
     <string name="share_app">Deel toepassing</string>
     <string name="rate_app">Gradeer toepassing</string>
@@ -296,10 +274,7 @@
     <string name="clear_history_cache_shared_note">WebView-kas word deur die toepassing gedeel en sal vir beide Normale en Privaat-oortjies skoongemaak word.</string>
     <string name="clear_history_profile_limited_toast">Blaaidata is uitgevee met beperkte profielisolasie</string>
     <!-- Share / Feedback -->
-    <string name="share_app_subject">Probeer privaatblaaier</string>
-    <string name="share_app_message">Kyk na Privaatblaaier — Veilige en veilige blaai deur mobiele toestelle.\n\nAflaai: %1$s</string>
     <string name="share_app_chooser_title">Deel via</string>
-    <string name="feedback_subject_template">Privaat blaaierterugvoer v%1$s (Android API %2$d, %3$s %4$s)</string>
     <string name="feedback_body_template">\n\n---\nToestelinligting outomaties ingevul. Beskryf asseblief jou probleem of terugvoer hierbo.</string>
     <string name="feedback_chooser_title">Stuur terugvoer via</string>
     <string name="feedback_no_email_app">Geen e-postoepassing geïnstalleer nie</string>

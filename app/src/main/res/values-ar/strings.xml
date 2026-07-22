@@ -17,8 +17,6 @@
     <string name="this_action_can_contain_ads">قد يحتوي هذا الإجراء على إعلانات</string>
     <string name="setting_up_your_app_experience_please_wait_a_moment">جارٍ إعداد تجربة التطبيق، يرجى الانتظار لحظة...</string>
     <string name="grant_permission_later">منح الإذن لاحقًا</string>
-    <string name="permission_title">إذن</string>
-    <string name="permission_subtitle">السماح بالأذونات اللازمة للحصول على الوظائف الكاملة.\nتظل بياناتك خاصة.</string>
     <string name="permission_storage_title">التخزين</string>
     <string name="permission_continue">متابعة</string>
     <string name="permission_status_allowed">تم منح الإذن</string>
@@ -42,23 +40,12 @@
     <string name="rate_no_internet">لا يوجد اتصال بالإنترنت. يرجى المحاولة مرة أخرى.</string>
     <string name="rate_feedback_send_failed">تعذر إرسال التعليقات. يرجى المحاولة مرة أخرى في وقت لاحق.</string>
     <string name="rate_feedback_hint">اكتب ملاحظاتك هنا</string>
-    <string name="rate_feedback_private_mode">الوضع الخاص لا يعمل</string>
-    <string name="rate_feedback_vault_access">تعذر الوصول إلى الخزنة</string>
-    <string name="rate_feedback_websites_wont_load">لن يتم تحميل مواقع الويب</string>
-    <string name="rate_feedback_slow_browser">المتصفح بطيء أو لا يستجيب</string>
-    <string name="rate_feedback_downloads_failed">فشلت التنزيلات أو فقدت</string>
-    <string name="rate_feedback_files_missing">الملفات أو الصور مفقودة</string>
     <string name="rate_feedback_crashed">تعطل التطبيق أو تجمد</string>
     <string name="rate_feedback_others">أخرى</string>
-    <string name="premium_subtitle">افتح جميع الميزات</string>
     <string name="premium_all_features">جميع ميزات Premium</string>
     <string name="premium_free">مجاني</string>
     <string name="premium_pro">Pro</string>
-    <string name="premium_private_browsing">التصفح الخاص</string>
-    <string name="premium_unlimited_downloads">تنزيلات غير محدودة</string>
     <string name="premium_remove_ads">إزالة الإعلانات</string>
-    <string name="premium_faster_downloads">تنزيلات أسرع</string>
-    <string name="premium_secure_file_vault">خزنة ملفات آمنة</string>
     <string name="premium_weekly">أسبوعي</string>
     <string name="premium_monthly">شهري</string>
     <string name="premium_desc_in_week">%s/ الأسبوع</string>
@@ -69,15 +56,6 @@
     <string name="please_check_your_internet_connection_and_try_again">يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.</string>
     <string name="search_placeholder">ابحث عن عنوان URL أو اكتبه</string>
     <!-- Intro / Onboarding -->
-    <string name="intro_title_1">اكتشف تجربة أفضل مع\nمتصفح خاص.</string>
-    <string name="intro_title_highlight_1">متصفح خاص.</string>
-    <string name="intro_message_1">سريع وبسيط ومصمم\nللتصفح اليومي.</string>
-    <string name="intro_title_2">وفّر المزيد مع\nالإشارات المرجعية الذكية.</string>
-    <string name="intro_title_highlight_2">الإشارات المرجعية الذكية.</string>
-    <string name="intro_message_2">نظّم مواقعك المفضلة\nوسهّل الوصول إليها.</string>
-    <string name="intro_title_3">احفظ مقاطع الفيديو أثناء\nالتصفح.</string>
-    <string name="intro_title_highlight_3">احفظ مقاطع الفيديو</string>
-    <string name="intro_message_3">نزّل مقاطع الفيديو المفضلة لديك واحتفظ بها\nفي متناول يدك.</string>
     <string name="start">ابدأ</string>
     <string name="share_app">مشاركة التطبيق</string>
     <string name="rate_app">تقييم التطبيق</string>
@@ -296,10 +274,7 @@
     <string name="clear_history_cache_shared_note">تتم مشاركة ذاكرة التخزين المؤقت لـ WebView بواسطة التطبيق وسيتم مسحها لكل من علامتي التبويب العادية والخاصة.</string>
     <string name="clear_history_profile_limited_toast">تم مسح بيانات التصفح مع عزل محدود للملف الشخصي</string>
     <!-- Share / Feedback -->
-    <string name="share_app_subject">جرب المتصفح الخاص</string>
-    <string name="share_app_message">تحقق من المتصفح الخاص - التصفح الآمن والآمن عبر الهاتف المحمول.\n\nالتنزيل: %1$s</string>
     <string name="share_app_chooser_title">شارك عبر</string>
-    <string name="feedback_subject_template">تعليقات المتصفح الخاص v%1$s (Android API %2$d, %3$s %4$s)</string>
     <string name="feedback_body_template">\n\n---\nمعلومات الجهاز مملوءة تلقائيًا. يرجى وصف مشكلتك أو تعليقاتك أعلاه.</string>
     <string name="feedback_chooser_title">إرسال الملاحظات عبر</string>
     <string name="feedback_no_email_app">لم يتم تثبيت تطبيق البريد الإلكتروني</string>

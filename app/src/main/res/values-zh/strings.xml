@@ -17,8 +17,6 @@
     <string name="this_action_can_contain_ads">此操作可能包含广告</string>
     <string name="setting_up_your_app_experience_please_wait_a_moment">正在设置您的应用体验，请稍候...</string>
     <string name="grant_permission_later">稍后授予权限</string>
-    <string name="permission_title">许可</string>
-    <string name="permission_subtitle">授予完整功能所需的权限。\n您的数据保持私密。</string>
     <string name="permission_storage_title">存储</string>
     <string name="permission_continue">继续</string>
     <string name="permission_status_allowed">已授予权限</string>
@@ -42,23 +40,12 @@
     <string name="rate_no_internet">没有互联网连接。请重试。</string>
     <string name="rate_feedback_send_failed">无法发送反馈。请稍后重试。</string>
     <string name="rate_feedback_hint">在此填写您的反馈</string>
-    <string name="rate_feedback_private_mode">私人模式无法使用</string>
-    <string name="rate_feedback_vault_access">无法访问文件保险箱</string>
-    <string name="rate_feedback_websites_wont_load">网站无法加载</string>
-    <string name="rate_feedback_slow_browser">浏览器速度缓慢或无响应</string>
-    <string name="rate_feedback_downloads_failed">下载失败或丢失</string>
-    <string name="rate_feedback_files_missing">文件或照片丢失</string>
     <string name="rate_feedback_crashed">应用崩溃或卡住</string>
     <string name="rate_feedback_others">其他</string>
-    <string name="premium_subtitle">解锁所有功能</string>
     <string name="premium_all_features">所有 Premium 功能</string>
     <string name="premium_free">免费</string>
     <string name="premium_pro">Pro</string>
-    <string name="premium_private_browsing">私人浏览</string>
-    <string name="premium_unlimited_downloads">无限下载</string>
     <string name="premium_remove_ads">移除广告</string>
-    <string name="premium_faster_downloads">下载速度更快</string>
-    <string name="premium_secure_file_vault">安全文件库</string>
     <string name="premium_weekly">每周</string>
     <string name="premium_monthly">每月</string>
     <string name="premium_desc_in_week">%s/ 周</string>
@@ -69,15 +56,6 @@
     <string name="please_check_your_internet_connection_and_try_again">请检查您的互联网连接并重试。</string>
     <string name="search_placeholder">搜索或输入 URL</string>
     <!-- Intro / Onboarding -->
-    <string name="intro_title_1">探索更出色的\n隐私浏览器。</string>
-    <string name="intro_title_highlight_1">隐私浏览器。</string>
-    <string name="intro_message_1">快速、简洁，专为\n日常浏览而设计。</string>
-    <string name="intro_title_2">使用智能书签\n收藏更多内容。</string>
-    <string name="intro_title_highlight_2">智能书签</string>
-    <string name="intro_message_2">整理您喜爱的网站\n以便轻松访问。</string>
-    <string name="intro_title_3">浏览网页时\n保存视频。</string>
-    <string name="intro_title_highlight_3">保存视频</string>
-    <string name="intro_message_3">下载并保存喜爱的视频\n随时轻松查看。</string>
     <string name="start">开始</string>
     <string name="share_app">分享应用</string>
     <string name="rate_app">评价应用</string>
@@ -296,10 +274,7 @@
     <string name="clear_history_cache_shared_note">WebView 缓存由应用程序共享，并且将为“普通”和“私有”选项卡清除。</string>
     <string name="clear_history_profile_limited_toast">通过有限的配置文件隔离清除浏览数据</string>
     <!-- Share / Feedback -->
-    <string name="share_app_subject">尝试私人浏览器</string>
-    <string name="share_app_message">查看私人浏览器 - 安全可靠的移动浏览。\n\n下载：%1$s</string>
     <string name="share_app_chooser_title">分享通过</string>
-    <string name="feedback_subject_template">专用浏览器反馈 v%1$s（Android API %2$d、%3$s %4$s）</string>
     <string name="feedback_body_template">\n\n---\n自动填充设备信息。请在上面描述您的问题或反馈。</string>
     <string name="feedback_chooser_title">通过发送反馈</string>
     <string name="feedback_no_email_app">未安装电子邮件应用程序</string>

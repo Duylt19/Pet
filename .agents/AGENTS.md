@@ -6,7 +6,8 @@
 - App name hiện tại là `Cute Pet`.
 - Package/application ID legacy `com.asianmobile.privatebrower` được giữ cho đến khi owner yêu cầu đổi.
 - Flow hiện tại: Splash → Language → Intro → Permission → Home; Home chỉ có Settings và Premium.
-- Không tham chiếu các class/module browser, download, media, Room hoặc service cũ vì chúng đã bị xóa.
+- Không tham chiếu các class/module browser, search/clear-browsing, broad storage, download, media, Room hoặc service cũ vì chúng đã bị xóa.
+- Permission hiện chỉ là shell trung tính; overlay special access và foreground service là feature mới, phải triển khai có test/docs.
 
 ## Cách làm việc
 

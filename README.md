@@ -1,6 +1,6 @@
 # Cute Pet — Android Base Project
 
-Cute Pet hiện là một base project Android đã được làm sạch để phát triển sản phẩm mới. Base giữ lại flow onboarding, hệ thống quảng cáo, billing, localization, settings và các quy ước kiến trúc đã được kiểm chứng từ project trước.
+Cute Pet là base Android đang được chuyển thành ứng dụng pet animation chạy nổi trên màn hình. Base giữ flow onboarding, quảng cáo, billing, localization, settings và các quy ước kiến trúc hiện có.
 
 > Trạng thái nguồn chuẩn: tài liệu phải khớp với code hiện tại. Không xem lịch sử Private Browser là chức năng còn tồn tại.
 
@@ -11,7 +11,8 @@ Cute Pet hiện là một base project Android đã được làm sạch để p
 - Root Gradle project name tạm giữ: `PrivateBrowser`.
 - Flow: Splash → Language → Intro → Permission → Home.
 - Home là placeholder với đúng hai lối vào: Settings và Premium.
-- Các module browser, tab, bookmark/history, download, media, Room và foreground service đã bị xóa.
+- Permission hiện là product-neutral shell; overlay special access sẽ được triển khai trong phase riêng.
+- Browser, search engine, clear browsing data, storage permission, download, media, Room và service cũ đã bị xóa.
 
 ## Kiến trúc bắt buộc
 
@@ -48,7 +49,6 @@ app/src/main/java/com/asianmobile/privatebrower/
 │   ├── permission/
 │   ├── home/
 │   ├── premium/
-│   ├── searchengine/
 │   ├── main/
 │   └── theme/
 └── utils/

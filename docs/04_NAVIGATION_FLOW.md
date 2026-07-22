@@ -8,7 +8,7 @@
 | `language` | Language onboarding | First-run |
 | `language_settings` | Language settings | Mở từ Settings |
 | `intro` | Intro pager | First-run |
-| `permission` | Permission | First-run, có Continue/Skip |
+| `permission` | Permission | Product-neutral shell có Continue/Skip; chưa request special access |
 | `home` | Home | Placeholder 2 action |
 | `settings` | Settings | Mở từ Home |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
@@ -47,3 +47,4 @@ Home ──Premium──> Premium(in-app)
 - Full-screen ad transition dùng `navigateWithAd` theo policy.
 - String argument phải encode; enum argument phải parse an toàn với fallback.
 - Không phục hồi route Private Browser cũ nếu chưa có feature spec mới.
+- Overlay permission được mở qua `Settings.ACTION_MANAGE_OVERLAY_PERMISSION`; đây là special access, không phải runtime permission dialog.

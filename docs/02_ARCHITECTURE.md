@@ -43,7 +43,6 @@ com.asianmobile.privatebrower/
 │   ├── permission/
 │   ├── home/                   # Home + settings
 │   ├── premium/
-│   ├── searchengine/
 │   ├── main/
 │   └── theme/
 └── utils/                      # Platform/helper cross-feature nhỏ
@@ -72,6 +71,13 @@ ui/feature/
 - Use case không bắt buộc cho CRUD một dòng; dùng khi logic phối hợp nhiều nguồn, có policy hoặc cần reuse/test riêng.
 - DataStore cho key-value nhỏ; Room chỉ thêm lại khi có requirement về dữ liệu quan hệ/offline.
 - Service/WorkManager chỉ dùng khi công việc phải sống ngoài lifecycle UI.
+
+## Pet engine boundary
+
+- Pet engine là Kotlin thuần: immutable state + event → state/effect; không phụ thuộc `View`, `WindowManager` hoặc `Context`.
+- Android overlay adapter sở hữu `WindowManager.LayoutParams`, gesture input, render clock và foreground-service lifecycle.
+- Asset pack được parse/validate thành model nội bộ trước khi engine sử dụng; renderer không đọc JSON/storage mỗi frame.
+- MVP chỉ chạy một pet và không thêm Room. Preference nhỏ tiếp tục dùng DataStore.
 
 ## DI
 

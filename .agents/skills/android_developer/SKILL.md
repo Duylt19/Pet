@@ -14,7 +14,8 @@ Agent làm việc trong repository này PHẢI tuân thủ các contract dưới
 - Không tự đổi package, namespace, root project name hoặc provider authority nếu owner chưa yêu cầu.
 - Flow hiện tại: Splash → Language → Intro → Permission → Home.
 - Home chỉ là placeholder với hai action: Settings và Premium.
-- Browser, tab manager, bookmark/history, download, media/file manager, Room và foreground service cũ đã bị xóa.
+- Browser, search/clear-browsing, broad storage access, tab manager, bookmark/history, download, media/file manager, Room và foreground service cũ đã bị xóa.
+- Permission hiện là product-neutral shell; chưa request overlay special access.
 - Không viết code/docs dựa trên giả định các module đã xóa vẫn tồn tại.
 
 ## 1. Giao tiếp và làm rõ yêu cầu
@@ -177,7 +178,7 @@ size → shadow → clip → background → border → clickable → padding
 
 ## 8. Permission và platform policy
 
-- Màn Permission hiện được giữ làm base và còn mang policy storage của project trước; phải đánh giá lại theo chức năng Cute Pet trước khi release.
+- Màn Permission hiện là shell trung tính và không request storage. Overlay phải dùng special-access flow riêng khi feature được nối vào UI.
 - Không thêm permission vì “có thể cần sau”. Chỉ khai báo/request khi feature hiện tại cần và có UX giải thích.
 - Runtime permission phải xét API level, denial/rationale/permanent denial và đường dẫn App Settings.
 - Special access không được request như runtime permission.

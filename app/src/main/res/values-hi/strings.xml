@@ -17,8 +17,6 @@
     <string name="this_action_can_contain_ads">इस क्रिया में विज्ञापन हो सकते हैं</string>
     <string name="setting_up_your_app_experience_please_wait_a_moment">आपके ऐप अनुभव को सेट किया जा रहा है, कृपया एक क्षण प्रतीक्षा करें...</string>
     <string name="grant_permission_later">अनुमति बाद में दें</string>
-    <string name="permission_title">अनुमति</string>
-    <string name="permission_subtitle">पूर्ण कार्यक्षमता के लिए आवश्यक अनुमतियाँ दें।\nआपका डेटा निजी रहता है.</string>
     <string name="permission_storage_title">भंडारण</string>
     <string name="permission_continue">जारी रखें</string>
     <string name="permission_status_allowed">अनुमति दी गई</string>
@@ -42,23 +40,12 @@
     <string name="rate_no_internet">इंटरनेट कनेक्शन नहीं है। कृपया पुनः प्रयास करें।</string>
     <string name="rate_feedback_send_failed">फ़ीडबैक नहीं भेजा जा सका. कृपया बाद में पुन: प्रयास करें।</string>
     <string name="rate_feedback_hint">अपनी प्रतिक्रिया यहां लिखें</string>
-    <string name="rate_feedback_private_mode">प्राइवेट मोड काम नहीं कर रहा है</string>
-    <string name="rate_feedback_vault_access">वॉल्ट तक पहुंचने में असमर्थ</string>
-    <string name="rate_feedback_websites_wont_load">वेबसाइटें लोड नहीं होंगी</string>
-    <string name="rate_feedback_slow_browser">ब्राउज़र धीमा या अनुत्तरदायी है</string>
-    <string name="rate_feedback_downloads_failed">डाउनलोड विफल या अनुपलब्ध</string>
-    <string name="rate_feedback_files_missing">फ़ाइलें या फ़ोटो गुम हैं</string>
     <string name="rate_feedback_crashed">ऐप क्रैश या फ्रीज़ हो गया</string>
     <string name="rate_feedback_others">अन्य</string>
-    <string name="premium_subtitle">सभी सुविधाएं अनलॉक करें</string>
     <string name="premium_all_features">सभी Premium सुविधाएं</string>
     <string name="premium_free">मुफ़्त</string>
     <string name="premium_pro">Pro</string>
-    <string name="premium_private_browsing">निजी ब्राउज़िंग</string>
-    <string name="premium_unlimited_downloads">असीमित डाउनलोड</string>
     <string name="premium_remove_ads">विज्ञापन हटाएं</string>
-    <string name="premium_faster_downloads">तेज़ डाउनलोड</string>
-    <string name="premium_secure_file_vault">सुरक्षित फ़ाइल वॉल्ट</string>
     <string name="premium_weekly">साप्ताहिक</string>
     <string name="premium_monthly">मासिक</string>
     <string name="premium_desc_in_week">%s/ सप्ताह</string>
@@ -69,15 +56,6 @@
     <string name="please_check_your_internet_connection_and_try_again">कृपया अपना इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें।</string>
     <string name="search_placeholder">URL खोजें या टाइप करें</string>
     <!-- Intro / Onboarding -->
-    <string name="intro_title_1">एक बेहतर निजी ब्राउज़र\nखोजें।</string>
-    <string name="intro_title_highlight_1">निजी ब्राउज़र</string>
-    <string name="intro_message_1">तेज़, सरल और रोज़मर्रा की\nब्राउज़िंग के लिए बनाया गया।</string>
-    <string name="intro_title_2">स्मार्ट बुकमार्क के साथ\nज़्यादा सहेजें।</string>
-    <string name="intro_title_highlight_2">स्मार्ट बुकमार्क</string>
-    <string name="intro_message_2">अपनी पसंदीदा वेबसाइटें व्यवस्थित रखें\nऔर उन तक आसानी से पहुँचें।</string>
-    <string name="intro_title_3">ब्राउज़ करते समय\nवीडियो सहेजें।</string>
-    <string name="intro_title_highlight_3">वीडियो सहेजें</string>
-    <string name="intro_message_3">अपने पसंदीदा वीडियो डाउनलोड करके\nआसानी से सहेज कर रखें।</string>
     <string name="start">शुरू करें</string>
     <string name="share_app">ऐप साझा करें</string>
     <string name="rate_app">ऐप रेट करें</string>
@@ -296,10 +274,7 @@
     <string name="clear_history_cache_shared_note">वेबव्यू कैश ऐप द्वारा साझा किया जाता है और इसे सामान्य और निजी दोनों टैब के लिए साफ़ कर दिया जाएगा।</string>
     <string name="clear_history_profile_limited_toast">सीमित प्रोफ़ाइल अलगाव के साथ ब्राउज़िंग डेटा साफ़ किया गया</string>
     <!-- Share / Feedback -->
-    <string name="share_app_subject">निजी ब्राउज़र आज़माएँ</string>
-    <string name="share_app_message">निजी ब्राउज़र देखें - सुरक्षित और सुरक्षित मोबाइल ब्राउज़िंग।\n\nडाउनलोड: %1$s</string>
     <string name="share_app_chooser_title">के माध्यम से साझा करें</string>
-    <string name="feedback_subject_template">निजी ब्राउज़र फीडबैक v%1$s (एंड्रॉइड एपीआई %2$d, %3$s %4$s)</string>
     <string name="feedback_body_template">\n\n---\nडिवाइस की जानकारी स्वतः भरी गई. कृपया ऊपर अपनी समस्या या प्रतिक्रिया का वर्णन करें।</string>
     <string name="feedback_chooser_title">के माध्यम से प्रतिक्रिया भेजें</string>
     <string name="feedback_no_email_app">कोई ईमेल ऐप इंस्टॉल नहीं है</string>

@@ -10,7 +10,7 @@
 | UI | Jetpack Compose Material 3 |
 | Architecture | Single-Activity + MVVM + Hilt + Flow |
 
-Cute Pet chưa có domain feature chính thức. Không suy luận sản phẩm từ tên app và không tự thêm pet care, game, browser hoặc media feature nếu chưa có requirement/design.
+Cute Pet có domain chính thức: một pet animation có thể hiển thị và tương tác trên các ứng dụng khác bằng Android overlay. MVP bắt đầu với một pet và asset demo do project sở hữu.
 
 ## Mục tiêu của base
 
@@ -24,9 +24,9 @@ Cute Pet chưa có domain feature chính thức. Không suy luận sản phẩm 
 - Splash và startup orchestration.
 - Language onboarding + language settings.
 - Intro/onboarding pages.
-- Permission step để cập nhật theo nhu cầu sản phẩm mới.
+- Permission shell trung tính; overlay special-access UX được thêm ở phase service.
 - Home placeholder với Settings/Premium.
-- Settings, search engine picker, clear browsing data mẫu và feedback/rating.
+- Settings tối giản: language, share, rate, feedback và version.
 - Premium/billing, ads, analytics, remote config, theme và reusable components.
 
 ## Những gì đã bị xóa
@@ -37,10 +37,11 @@ Cute Pet chưa có domain feature chính thức. Không suy luận sản phẩm 
 - Download manager, video sniffing/remuxing và foreground service.
 - File/media tabs và viewer.
 - Room database/schema, network modules và dependencies chỉ phục vụ feature cũ.
+- Search engine preference, clear browsing data và broad storage permission.
 
 ## Quyết định deferred
 
 - Package/application ID và root Gradle project name chưa đổi.
-- UI/branding resource cũ ngoài `app_name` có thể được thay bằng design Cute Pet sau.
-- Permission policy phải được đánh giá lại khi domain feature được chốt.
-- Search engine/clear browsing helper có thể bị thay hoặc xóa khi Settings mới được thiết kế.
+- UI final, icon và pet asset production chờ design/asset chính thức.
+- Overlay permission, foreground-service notification và policy disclosure phải được triển khai/test trước release.
+- Không tự khởi động pet sau boot trong MVP; chỉ bổ sung khi user chủ động bật trong Settings.

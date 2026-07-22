@@ -1,38 +1,86 @@
-# 09 — Product Development Roadmap
+# 09 — Cute Pet Implementation Roadmap
 
-Đây là roadmap phương pháp, không tự giả định feature Cute Pet.
+Roadmap này chuyển base hiện tại thành app pet animation chạy nổi trên màn hình. Mỗi phase là một commit độc lập, phải compile/test/docs pass trước khi chuyển phase.
 
-## Phase 0 — Product definition
+## Quyết định đã chốt
 
-- Chốt user problem, primary flows và Figma source.
-- Chốt application ID mới, branding, icon và store metadata.
-- Rà permission/SDK/privacy policy phù hợp sản phẩm mới.
+- Giữ namespace/application ID legacy `com.asianmobile.privatebrower` cho đến khi owner yêu cầu đổi.
+- Giữ module `:ads`, chưa thêm placement mới.
+- MVP dùng asset pet demo do project sở hữu; không copy asset/code của app đối thủ.
+- Chưa dùng Room; persistence nhỏ dùng DataStore.
+- MVP một pet, không auto-start sau boot.
 
-## Phase 1 — Base adaptation
+## Phase 0 — Product foundation cleanup — Done
 
-- Update package/root project name khi owner yêu cầu.
-- Update theme, app icon, splash/intro copy và localization.
-- Thiết kế Home final thay placeholder.
-- Quyết định giữ/xóa search engine, clear browsing data và feedback actions legacy.
+- Xóa search engine, clear browsing data, default-browser helper và broad storage permission legacy.
+- Thu gọn Permission thành product-neutral shell; Settings chỉ giữ language/share/rate/feedback/version.
+- Đổi active splash/intro/premium/share/feedback copy sang Cute Pet.
+- Locale chưa có bản dịch Cute Pet fallback về English thay vì hiện branding browser cũ.
 
-## Phase 2 — Feature vertical slices
+Definition of done: Manifest không còn storage permission; source active không phụ thuộc browser/storage capability; compile và unit test pass.
 
-Mỗi feature đi theo một vertical slice hoàn chỉnh:
+## Phase 1 — Pure Kotlin pet engine — In progress
 
-1. Requirement + acceptance criteria.
-2. Screen/ViewModel/UiState.
-3. Model/repository/use case/data source.
-4. Hilt/navigation/resources/analytics.
-5. Loading/empty/error/accessibility.
-6. Unit/UI tests.
-7. Docs + compile/test + commit.
+- Model immutable cho pet pose, direction, action, position, velocity và screen bounds.
+- Reducer/state machine nhận event tick/tap/drag/fling/bounds-change và trả state/effect xác định.
+- Frame timeline hỗ trợ duration theo frame, loop/non-loop và action transition.
+- Constraint/clamp giữ pet trong usable bounds, kể cả đổi orientation/inset.
+- Unit test transition, frame timing, drag/fling và bounds; tuyệt đối không phụ thuộc Android UI.
 
-## Phase 3 — Release hardening
+Definition of done: engine chạy deterministic trong JVM tests và không import `android.*`.
 
-- Permission và privacy audit.
-- Ads/billing behavior audit.
-- Process death/offline/error testing.
-- Accessibility/localization/device-size testing.
-- Release compile/ProGuard verification và store configuration.
+## Phase 2 — One-pet overlay foreground service
 
-Không copy feature cũ trở lại chỉ để tiết kiệm thời gian; chỉ tái sử dụng pattern kiến trúc và code thực sự phù hợp requirement mới.
+- Khai báo `SYSTEM_ALERT_WINDOW`, foreground-service permission/type phù hợp và service `exported=false`.
+- Tạo notification channel + ongoing notification có Stop action; service gọi `startForeground` đúng thời hạn.
+- Mỗi pet là một `TYPE_APPLICATION_OVERLAY` window trong MVP; window trong suốt và chỉ chiếm pet bounds.
+- Render clock duy nhất khoảng 30 FPS; decode/cache asset ngoài frame loop; không tạo thread/window theo frame.
+- Gesture adapter chuyển tap/drag/fling thành engine events, update position bằng `WindowManager.updateViewLayout`.
+- Dừng sạch renderer, window và notification khi user stop hoặc service destroy.
+
+Definition of done: một pet hiển thị ổn định trên app khác, drag/tap/fling được, không rò window/service sau stop.
+
+## Phase 3 — Product Home and overlay permission flow
+
+- Thay Home placeholder bằng trạng thái pet selected/running/stopped và CTA Start/Stop.
+- Kiểm tra `Settings.canDrawOverlays`; mở `ACTION_MANAGE_OVERLAY_PERMISSION` theo package URI và refresh ở `ON_RESUME`.
+- Giải thích rõ lý do overlay + foreground notification; Start chỉ được phép sau khi special access được cấp.
+- Handle revoked permission, process restart và service start failure bằng UiState rõ ràng.
+- Chưa tự auto-start sau boot.
+
+Definition of done: first-run → permission → start pet → stop pet là một vertical slice hoàn chỉnh, có analytics và test policy/state.
+
+## Phase 4 — Pet catalog and validated asset packs
+
+- Định nghĩa schema versioned cho pack manifest, action clips, frame rect/duration, anchor và interaction metadata.
+- Installer copy pack vào app-private storage theo staging → validate → atomic promote; chống path traversal/zip bomb/file type sai.
+- Repository expose built-in/demo pack và installed packs; cache metadata/bitmap theo budget.
+- Catalog/pet detail/preview UI; lỗi pack không làm crash overlay đang chạy.
+
+Definition of done: cài và chọn được pack hợp lệ, reject pack lỗi an toàn, renderer không parse disk data mỗi frame.
+
+## Phase 5 — Multiple pets and persistence
+
+- Mở rộng service session từ một pet lên danh sách instance, nhưng vẫn dùng một render clock/thread.
+- Persist selected pack, size, speed, sound, last safe position và user setting bằng DataStore.
+- Settings cho behavior/interaction và giới hạn số pet theo performance budget.
+- Boot auto-start chỉ thêm dưới dạng opt-in rõ ràng sau khi policy/product quyết định; nếu có phải xử lý Android version restrictions.
+
+Definition of done: multi-pet không nhân thread tuyến tính, restore an toàn, setting có unit test và degradation policy.
+
+## Phase 6 — Monetization, performance and release policy
+
+- Map entitlement free/premium lên catalog/slot/animation; billing failure không phá pet đang chạy.
+- Chỉ thêm ads placement khi có screen code/policy được owner duyệt; không đặt ad trong overlay.
+- Profile CPU, memory, bitmap cache, jank, battery trên nhiều API/device/orientation.
+- Audit Play policy cho overlay/foreground-service disclosure, notification, privacy, data safety và asset licensing.
+- Accessibility/localization/process-death/revoked-permission/release-ProGuard test matrix.
+
+Definition of done: release candidate đạt performance budget, policy checklist, localized UX và test matrix đã ghi nhận.
+
+## Guardrails
+
+- Không copy source/asset/branding của app đối thủ. Chỉ dùng kết quả reverse engineering để hiểu pattern kỹ thuật tương thích.
+- Không dùng periodic WorkManager cho animation hoặc service keep-alive.
+- Không mở full-screen overlay nếu pet chỉ cần một vùng nhỏ; window phải khớp hit target để không chặn app bên dưới.
+- Không thêm Room/network/boot receiver trước khi requirement của phase tương ứng thật sự cần.

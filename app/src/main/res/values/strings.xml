@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name" translatable="false">Cute Pet</string>
-    <string name="splash_title" translatable="false">Private Browser: Safe &amp; Play</string>
-    <string name="home_header_title" translatable="false">Private Browser</string>
+    <string name="splash_title" translatable="false">Cute Pet: Your Screen Companion</string>
+    <string name="home_header_title" translatable="false">Cute Pet</string>
     <string name="adjust_token" translatable="false">9m8kbvwtwh6o</string>
     <string name="facebook_app_id" translatable="false">993681063116351</string>
     <string name="facebook_token" translatable="false">84b3bdf78933f7ab12dae551e57d915c</string>
@@ -35,8 +35,8 @@
     <string name="this_action_can_contain_ads">This action can contain ads</string>
     <string name="setting_up_your_app_experience_please_wait_a_moment">Setting up your app experience, please wait a moment...</string>
     <string name="grant_permission_later">Grant permission later</string>
-    <string name="permission_title">Permission</string>
-    <string name="permission_subtitle">Allow necessary permissions for full functionality.\nYour data stays private.</string>
+    <string name="permission_title">Cute Pet permissions</string>
+    <string name="permission_subtitle">Screen pet permission setup is coming in the next implementation phase.</string>
     <string name="permission_storage_title">Storage</string>
     <string name="permission_continue">CONTINUE</string>
     <string name="permission_status_allowed">Permission is allowed</string>
@@ -61,23 +61,23 @@
     <string name="rate_no_internet">No internet connection. Please try again.</string>
     <string name="rate_feedback_send_failed">Couldn\'t send feedback. Please try again later.</string>
     <string name="rate_feedback_hint">Star your feedback here</string>
-    <string name="rate_feedback_private_mode">Private mode isn\'t working</string>
-    <string name="rate_feedback_vault_access">Unable to access Vault</string>
-    <string name="rate_feedback_websites_wont_load">Websites won\'t load</string>
-    <string name="rate_feedback_slow_browser">Browser is slow or unresponsive</string>
-    <string name="rate_feedback_downloads_failed">Downloads failed or missing</string>
-    <string name="rate_feedback_files_missing">Files or photos are missing</string>
+    <string name="rate_feedback_pet_not_showing">Pet does not appear on screen</string>
+    <string name="rate_feedback_pet_interaction">Pet interaction is not working</string>
+    <string name="rate_feedback_pet_appearance">Pet size or appearance looks wrong</string>
+    <string name="rate_feedback_performance">Animation is slow or unresponsive</string>
+    <string name="rate_feedback_notification">Pet notification has a problem</string>
+    <string name="rate_feedback_settings">Pet settings are not applied</string>
     <string name="rate_feedback_crashed">App crashed or froze</string>
     <string name="rate_feedback_others">Others</string>
-    <string name="premium_subtitle">Unlock all Features</string>
+    <string name="premium_subtitle">Unlock the complete Cute Pet experience</string>
     <string name="premium_all_features">All Premium features</string>
     <string name="premium_free">Free</string>
     <string name="premium_pro">Pro</string>
-    <string name="premium_private_browsing">Private browsing</string>
-    <string name="premium_unlimited_downloads">Unlimited downloads</string>
+    <string name="premium_private_browsing">Cute screen pets</string>
+    <string name="premium_unlimited_downloads">More pets on screen</string>
     <string name="premium_remove_ads">Remove ADS</string>
-    <string name="premium_faster_downloads">Faster downloads</string>
-    <string name="premium_secure_file_vault">Secure file vault</string>
+    <string name="premium_faster_downloads">Special pet animations</string>
+    <string name="premium_secure_file_vault">Exclusive pet collection</string>
     <string name="premium_weekly">Weekly</string>
     <string name="premium_monthly">Monthly</string>
     <string name="premium_desc_in_week">%s/ Week</string>
@@ -91,15 +91,15 @@
     <string name="search_placeholder">Search or type a URL</string>
 
     <!-- Intro / Onboarding -->
-    <string name="intro_title_1">Discover a Better\nPrivate Browser.</string>
-    <string name="intro_title_highlight_1">Private Browser.</string>
-    <string name="intro_message_1">Fast, simple, and designed for\neveryday browsing.</string>
-    <string name="intro_title_2">Save More with\nSmart Bookmarks.</string>
-    <string name="intro_title_highlight_2">Smart Bookmarks.</string>
-    <string name="intro_message_2">Keep your favourite websites organized\nand easy to access.</string>
-    <string name="intro_title_3">Save Videos While\nYou Browse.</string>
-    <string name="intro_title_highlight_3">Save Videos</string>
-    <string name="intro_message_3">Download and keep your favorite videos\nwithin easy reach.</string>
+    <string name="intro_title_1">Meet Your Cute\nScreen Companion.</string>
+    <string name="intro_title_highlight_1">Screen Companion.</string>
+    <string name="intro_message_1">Bring a playful animated pet\nto every screen.</string>
+    <string name="intro_title_2">Play Anywhere\nOn Your Screen.</string>
+    <string name="intro_title_highlight_2">On Your Screen.</string>
+    <string name="intro_message_2">Drag, tap, and watch your pet\nexplore the screen edges.</string>
+    <string name="intro_title_3">Make It\nUniquely Yours.</string>
+    <string name="intro_title_highlight_3">Uniquely Yours.</string>
+    <string name="intro_message_3">Choose your companion and tune\nits size, speed, and behavior.</string>
     <string name="start">Start</string>
 
     <string name="share_app">Share app</string>
@@ -314,6 +314,7 @@
     <string name="settings_section_general">General</string>
     <string name="settings_set_default_title">Set As Default Browser</string>
     <string name="settings_language_title">Language</string>
+    <string name="settings_version_format">Version %1$s</string>
 
     <!-- Clear History Dialog -->
     <string name="clear_history_done_toast">Browsing data cleared</string>
@@ -332,11 +333,11 @@
     <string name="clear_history_profile_limited_toast">Browsing data cleared with limited profile isolation</string>
 
     <!-- Share / Feedback -->
-    <string name="share_app_subject">Try Private Browser</string>
-    <string name="share_app_message"><![CDATA[Check out Private Browser — Safe & Secure mobile browsing.\n\nDownload: %1$s]]></string>
+    <string name="share_app_subject">Try Cute Pet</string>
+    <string name="share_app_message"><![CDATA[Bring a cute animated pet to your screen with Cute Pet.\n\nDownload: %1$s]]></string>
     <string name="share_app_chooser_title">Share via</string>
     <string name="feedback_email_address" translatable="false">feedback@asianmobile.ltd</string>
-    <string name="feedback_subject_template">Private Browser feedback v%1$s (Android API %2$d, %3$s %4$s)</string>
+    <string name="feedback_subject_template">Cute Pet feedback v%1$s (Android API %2$d, %3$s %4$s)</string>
     <string name="feedback_body_template">\n\n---\nDevice info auto-filled. Please describe your issue or feedback above.</string>
     <string name="feedback_chooser_title">Send feedback via</string>
     <string name="feedback_no_email_app">No email app installed</string>

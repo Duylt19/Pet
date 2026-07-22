@@ -17,8 +17,6 @@
     <string name="this_action_can_contain_ads">Esta ação pode conter anúncios</string>
     <string name="setting_up_your_app_experience_please_wait_a_moment">Configurando sua experiência no aplicativo, aguarde um momento...</string>
     <string name="grant_permission_later">Conceder permissão mais tarde</string>
-    <string name="permission_title">Permissão</string>
-    <string name="permission_subtitle">Permita as permissões necessárias para funcionalidade completa.\nSeus dados permanecem privados.</string>
     <string name="permission_storage_title">Armazenamento</string>
     <string name="permission_continue">CONTINUAR</string>
     <string name="permission_status_allowed">Permissão concedida</string>
@@ -42,23 +40,12 @@
     <string name="rate_no_internet">Sem conexão com a internet. Tente novamente.</string>
     <string name="rate_feedback_send_failed">Não foi possível enviar feedback. Por favor, tente novamente mais tarde.</string>
     <string name="rate_feedback_hint">Escreva seu feedback aqui</string>
-    <string name="rate_feedback_private_mode">O modo privado não está funcionando</string>
-    <string name="rate_feedback_vault_access">Não foi possível acessar o cofre</string>
-    <string name="rate_feedback_websites_wont_load">Os sites não carregam</string>
-    <string name="rate_feedback_slow_browser">O navegador está lento ou não responde</string>
-    <string name="rate_feedback_downloads_failed">Os downloads falharam ou foram perdidos</string>
-    <string name="rate_feedback_files_missing">Arquivos ou fotos estão faltando</string>
     <string name="rate_feedback_crashed">O aplicativo travou ou congelou</string>
     <string name="rate_feedback_others">Outros</string>
-    <string name="premium_subtitle">Desbloqueie todos os recursos</string>
     <string name="premium_all_features">Todos os recursos Premium</string>
     <string name="premium_free">Grátis</string>
     <string name="premium_pro">Pro</string>
-    <string name="premium_private_browsing">Navegação privada</string>
-    <string name="premium_unlimited_downloads">Downloads ilimitados</string>
     <string name="premium_remove_ads">Remover anúncios</string>
-    <string name="premium_faster_downloads">Downloads mais rápidos</string>
-    <string name="premium_secure_file_vault">Cofre de arquivos seguro</string>
     <string name="premium_weekly">Semanal</string>
     <string name="premium_monthly">Mensal</string>
     <string name="premium_desc_in_week">%s/ semana</string>
@@ -69,15 +56,6 @@
     <string name="please_check_your_internet_connection_and_try_again">Verifique sua conexão com a internet e tente novamente.</string>
     <string name="search_placeholder">Pesquise ou digite um URL</string>
     <!-- Intro / Onboarding -->
-    <string name="intro_title_1">Descubra uma experiência melhor com\num navegador privado.</string>
-    <string name="intro_title_highlight_1">um navegador privado.</string>
-    <string name="intro_message_1">Rápido, simples e feito\npara navegar todos os dias.</string>
-    <string name="intro_title_2">Salve mais com\nmarcadores inteligentes.</string>
-    <string name="intro_title_highlight_2">marcadores inteligentes.</string>
-    <string name="intro_message_2">Mantenha seus sites favoritos organizados\ne acesse-os facilmente.</string>
-    <string name="intro_title_3">Salve vídeos enquanto\nnavega.</string>
-    <string name="intro_title_highlight_3">Salve vídeos</string>
-    <string name="intro_message_3">Baixe e mantenha seus vídeos favoritos\nsempre ao seu alcance.</string>
     <string name="start">Iniciar</string>
     <string name="share_app">Compartilhar aplicativo</string>
     <string name="rate_app">Avaliar aplicativo</string>
@@ -296,10 +274,7 @@
     <string name="clear_history_cache_shared_note">O cache do WebView é compartilhado pelo aplicativo e será limpo nas guias Normal e Privado.</string>
     <string name="clear_history_profile_limited_toast">Dados de navegação limpos com isolamento de perfil limitado</string>
     <!-- Share / Feedback -->
-    <string name="share_app_subject">Experimente o navegador privado</string>
-    <string name="share_app_message">Confira Navegador Privado – Navegação móvel segura e protegida.\n\nBaixar: %1$s</string>
     <string name="share_app_chooser_title">Compartilhar via</string>
-    <string name="feedback_subject_template">Feedback do navegador privado v%1$s (API Android %2$d, %3$s %4$s)</string>
     <string name="feedback_body_template">\n\n---\nInformações do dispositivo preenchidas automaticamente. Descreva seu problema ou feedback acima.</string>
     <string name="feedback_chooser_title">Envie comentários por meio de</string>
     <string name="feedback_no_email_app">Nenhum aplicativo de e-mail instalado</string>

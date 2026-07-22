@@ -17,8 +17,6 @@
     <string name="this_action_can_contain_ads">Cette action peut contenir des annonces</string>
     <string name="setting_up_your_app_experience_please_wait_a_moment">Configuration de votre expérience dans l’application, veuillez patienter un instant...</string>
     <string name="grant_permission_later">Accorder la permission plus tard</string>
-    <string name="permission_title">Autorisation</string>
-    <string name="permission_subtitle">Autorisez les autorisations nécessaires pour bénéficier de toutes les fonctionnalités.\nVos données restent privées.</string>
     <string name="permission_storage_title">Stockage</string>
     <string name="permission_continue">CONTINUER</string>
     <string name="permission_status_allowed">Autorisation accordée</string>
@@ -42,23 +40,12 @@
     <string name="rate_no_internet">Aucune connexion Internet. Veuillez réessayer.</string>
     <string name="rate_feedback_send_failed">Impossible d\'envoyer des commentaires. Veuillez réessayer plus tard.</string>
     <string name="rate_feedback_hint">Écrivez vos commentaires ici</string>
-    <string name="rate_feedback_private_mode">Le mode privé ne fonctionne pas</string>
-    <string name="rate_feedback_vault_access">Impossible d\'accéder au coffre-fort</string>
-    <string name="rate_feedback_websites_wont_load">Les sites Web ne se chargent pas</string>
-    <string name="rate_feedback_slow_browser">Le navigateur est lent ou ne répond pas</string>
-    <string name="rate_feedback_downloads_failed">Les téléchargements ont échoué ou sont manquants</string>
-    <string name="rate_feedback_files_missing">Des fichiers ou des photos sont manquants</string>
     <string name="rate_feedback_crashed">L’application s’est arrêtée ou a gelé</string>
     <string name="rate_feedback_others">Autres</string>
-    <string name="premium_subtitle">Débloquez toutes les fonctionnalités</string>
     <string name="premium_all_features">Toutes les fonctionnalités Premium</string>
     <string name="premium_free">Gratuit</string>
     <string name="premium_pro">Pro</string>
-    <string name="premium_private_browsing">Navigation privée</string>
-    <string name="premium_unlimited_downloads">Téléchargements illimités</string>
     <string name="premium_remove_ads">Supprimer les publicités</string>
-    <string name="premium_faster_downloads">Téléchargements plus rapides</string>
-    <string name="premium_secure_file_vault">Coffre-fort de fichiers sécurisé</string>
     <string name="premium_weekly">Hebdomadaire</string>
     <string name="premium_monthly">Mensuel</string>
     <string name="premium_desc_in_week">%s/ semaine</string>
@@ -69,15 +56,6 @@
     <string name="please_check_your_internet_connection_and_try_again">Veuillez vérifier votre connexion Internet et réessayer.</string>
     <string name="search_placeholder">Rechercher ou saisir une URL</string>
     <!-- Intro / Onboarding -->
-    <string name="intro_title_1">Découvrez une meilleure expérience avec\nle navigateur privé.</string>
-    <string name="intro_title_highlight_1">le navigateur privé.</string>
-    <string name="intro_message_1">Rapide, simple et conçu\npour la navigation quotidienne.</string>
-    <string name="intro_title_2">Enregistrez davantage avec\ndes favoris intelligents.</string>
-    <string name="intro_title_highlight_2">des favoris intelligents.</string>
-    <string name="intro_message_2">Organisez vos sites préférés\net accédez-y facilement.</string>
-    <string name="intro_title_3">Enregistrez des vidéos pendant\nvotre navigation.</string>
-    <string name="intro_title_highlight_3">Enregistrez des vidéos</string>
-    <string name="intro_message_3">Téléchargez et gardez vos vidéos préférées\nà portée de main.</string>
     <string name="start">Démarrer</string>
     <string name="share_app">Partager l’application</string>
     <string name="rate_app">Évaluer l’application</string>
@@ -296,10 +274,7 @@
     <string name="clear_history_cache_shared_note">Le cache WebView est partagé par l\'application et sera effacé pour les onglets Normal et Privé.</string>
     <string name="clear_history_profile_limited_toast">Données de navigation effacées avec une isolation de profil limitée</string>
     <!-- Share / Feedback -->
-    <string name="share_app_subject">Essayez le navigateur privé</string>
-    <string name="share_app_message">Découvrez Navigateur privé - Navigation mobile sûre et sécurisée.\n\nTélécharger : %1$s</string>
     <string name="share_app_chooser_title">Partager via</string>
-    <string name="feedback_subject_template">Commentaires du navigateur privé v%1$s (API Android %2$d, %3$s %4$s)</string>
     <string name="feedback_body_template">\n\n---\nInformations sur l\'appareil remplies automatiquement. Veuillez décrire votre problème ou vos commentaires ci-dessus.</string>
     <string name="feedback_chooser_title">Envoyez vos commentaires via</string>
     <string name="feedback_no_email_app">Aucune application de messagerie installée</string>
