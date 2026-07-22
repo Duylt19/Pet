@@ -75,9 +75,8 @@ fun HomeScreen(
         (selectedTab == 1 && isTabsSearchActive) ||
             (selectedTab == 3 && isBookmarksHistorySearchActive)
 
-    // Listen for targetTab from navigation (BrowserScreen, or the download notification).
-    // Collect the state flow so it also reacts to values set AFTER first composition (e.g.
-    // tapping the notification while Home is already the current screen).
+    // React to a tab requested by navigation, including notification taps received while Home
+    // is already visible.
     LaunchedEffect(savedStateHandle) {
         savedStateHandle?.getStateFlow<Int?>("targetTab", null)?.collect { targetTab ->
             if (targetTab != null) {

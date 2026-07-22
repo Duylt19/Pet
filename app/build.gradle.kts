@@ -118,15 +118,8 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     testImplementation(libs.junit)
 
-    implementation(libs.gson)
-
     // Lottie
     implementation(libs.lottie.compose)
-
-    // Media3 ExoPlayer
-    implementation(libs.media3.exoplayer)
-    implementation(libs.media3.ui)
-    implementation(libs.media3.hls)
 
     // Networking used by browser downloads
     implementation(libs.okhttp.logging)
