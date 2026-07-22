@@ -37,7 +37,8 @@ com.asianmobile.privatebrower/
 ├── navigation/                 # Routes, NavGraph, safe navigation
 ├── pet/
 │   ├── engine/                 # Kotlin thuần, không phụ thuộc Android framework
-│   └── overlay/                # Android service/window/input/render adapter
+│   ├── overlay/                # Android service/window/input/render adapter
+│   └── pack/                   # Schema/parser/validator/installer/repository/cache
 ├── ui/
 │   ├── component/              # Shared stateless UI
 │   ├── splash/
@@ -45,6 +46,7 @@ com.asianmobile.privatebrower/
 │   ├── intro/
 │   ├── permission/
 │   ├── home/                   # Home + settings
+│   ├── catalog/                # Pack catalog/detail/import/select
 │   ├── premium/
 │   ├── main/
 │   └── theme/
@@ -84,6 +86,8 @@ ui/feature/
 - `PetOverlayService` là `specialUse` foreground service `exported=false`; `PetOverlayController` sở hữu đúng một window và một Choreographer loop khoảng 30 FPS.
 - `PetOverlayView` chỉ vẽ/touch; mọi state transition vẫn đi qua `PetEngine`.
 - Asset pack được parse/validate thành model nội bộ trước khi engine sử dụng; renderer không đọc JSON/storage mỗi frame.
+- Pack installer chỉ promote version hợp lệ từ random staging directory; repository luôn giữ built-in fallback.
+- Bitmap cache decode asset trước khi render loop bắt đầu và có memory budget 4–24 MiB.
 - MVP chỉ chạy một pet và không thêm Room. Preference nhỏ tiếp tục dùng DataStore.
 
 ## DI

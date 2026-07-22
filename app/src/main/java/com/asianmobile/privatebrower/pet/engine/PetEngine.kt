@@ -4,6 +4,7 @@ import kotlin.math.max
 
 data class PetEngineConfig(
     val clips: Map<PetAction, PetClip> = DemoPetAnimation.clips(),
+    val tapAction: PetAction = PetAction.TAPPED,
     val maxTickMillis: Long = 250,
     val maxFlingSpeed: Float = 2_500f,
     val flingDeceleration: Float = 3_500f,
@@ -13,6 +14,7 @@ data class PetEngineConfig(
         require(clips.keys.containsAll(PetAction.entries)) {
             "engine configuration must provide a clip for every pet action"
         }
+        require(tapAction in clips) { "tapAction must reference a configured clip" }
         require(maxTickMillis > 0) { "maxTickMillis must be positive" }
         require(maxFlingSpeed > 0f) { "maxFlingSpeed must be positive" }
         require(flingDeceleration > 0f) { "flingDeceleration must be positive" }
@@ -73,7 +75,7 @@ class PetEngine(
         if (state.action == PetAction.DRAGGED) return PetTransition(state)
         val transition = changeAction(
             state = state.copy(velocity = PetVector.Zero),
-            action = PetAction.TAPPED,
+            action = config.tapAction,
             restartAnimation = true
         )
         return transition.copy(effects = transition.effects + PetEffect.Tapped)

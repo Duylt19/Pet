@@ -27,6 +27,17 @@ class PetEngineTest {
     }
 
     @Test
+    fun `tap uses pack configured interaction action`() {
+        val engine = PetEngine(PetEngineConfig(tapAction = PetAction.WALK))
+        val initial = engine.initialState(bounds, size)
+
+        val tapped = engine.reduce(initial, PetEvent.Tap)
+
+        assertEquals(PetAction.WALK, tapped.state.action)
+        assertTrue(tapped.effects.contains(PetEffect.Tapped))
+    }
+
+    @Test
     fun `drag only moves during dragged action and remains inside usable bounds`() {
         val engine = engine()
         val initial = engine.initialState(bounds, size, position = PetVector(50f, 50f))

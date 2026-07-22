@@ -16,8 +16,16 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.asianmobile.privatebrower.MainActivity
 import com.asianmobile.privatebrower.R
+import com.asianmobile.privatebrower.pet.pack.PetBitmapCache
+import com.asianmobile.privatebrower.pet.pack.PetPackRepository
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class PetOverlayService : Service() {
+    @Inject lateinit var petPackRepository: PetPackRepository
+    @Inject lateinit var petBitmapCache: PetBitmapCache
+
     private var overlayController: PetOverlayController? = null
 
     override fun onCreate() {
@@ -39,7 +47,13 @@ class PetOverlayService : Service() {
 
         if (overlayController == null) {
             try {
-                overlayController = PetOverlayController(this).also { it.start() }
+                val pack = petPackRepository.selectedPack.value
+                val visual = petBitmapCache.prepare(pack)
+                overlayController = PetOverlayController(
+                    context = this,
+                    pack = pack,
+                    visual = visual
+                ).also { it.start() }
                 PetOverlayRuntime.updateRunning(true)
             } catch (error: RuntimeException) {
                 Log.e(TAG, "Unable to start pet overlay", error)

@@ -29,6 +29,7 @@
 ## Runtime specs
 
 - [Current features](features/README.md)
+- [Pet pack v1 contract](features/PET_PACKS.md)
 - [Current screens](screens/README.md)
 
 ## Quy tắc duy trì

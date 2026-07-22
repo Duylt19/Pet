@@ -112,6 +112,7 @@ dependencies {
     // Debug Tooling
     debugImplementation(libs.compose.ui.tooling)
     testImplementation(libs.junit)
+    testImplementation(libs.json)
 
     // Lottie
     implementation(libs.lottie.compose)

@@ -28,6 +28,14 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 
 `PetOverlayRuntime.isRunning` là process-local `StateFlow<Boolean>`, không phải persisted preference. Service dùng `START_NOT_STICKY` và không có boot receiver nên trạng thái running không được restore sau process death/reboot ở MVP. `HomeUiState` kết hợp runtime state với overlay/notification permission snapshot.
 
+## Pet pack model
+
+- `PetPackManifest` là schema v1 versioned gồm identity, canvas, anchor, interaction và action clips/frame metadata.
+- `PetPackRepository.packs/selectedPack` là process-local `StateFlow`; built-in Orange Cat luôn là fallback.
+- Installed source chỉ trỏ tới app-private directory sau khi secure installer validate và atomic promote.
+- Selection chưa persist ở Phase 4; DataStore selection/settings thuộc Phase 5.
+- Android bitmap/`File` không đi vào pure engine state. Manifest được map sang `PetClip`; renderer giữ `PetPackVisual` đã preload.
+
 ## Không có database
 
 Base hiện không có Room, entity, DAO hay schema. Khi feature mới cần database:

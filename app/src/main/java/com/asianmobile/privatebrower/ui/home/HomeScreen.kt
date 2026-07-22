@@ -54,6 +54,7 @@ import com.intuit.ssp.R as SspR
 
 @Composable
 fun HomeScreen(
+    onNavigateToCatalog: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToPremium: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
@@ -112,6 +113,7 @@ fun HomeScreen(
         uiState = uiState,
         onPetButtonClicked = viewModel::onPetButtonClicked,
         onDismissMessage = viewModel::clearMessage,
+        onNavigateToCatalog = onNavigateToCatalog,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToPremium = onNavigateToPremium
     )
@@ -122,6 +124,7 @@ private fun HomeScreenContent(
     uiState: HomeUiState,
     onPetButtonClicked: () -> Unit,
     onDismissMessage: () -> Unit,
+    onNavigateToCatalog: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToPremium: () -> Unit
 ) {
@@ -170,6 +173,13 @@ private fun HomeScreenContent(
                 modifier = Modifier.size(dimensionResource(SdpR.dimen._96sdp))
             )
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+            Text(
+                text = uiState.selectedPetName,
+                color = colorResource(R.color.white),
+                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontSize = dimensionResource(SspR.dimen._13ssp).value.sp
+            )
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
             Text(
                 text = stringResource(
                     if (uiState.isPetRunning) {
@@ -238,6 +248,14 @@ private fun HomeScreenContent(
         }
 
         Spacer(Modifier.weight(1f))
+        OutlinedButton(
+            onClick = onNavigateToCatalog,
+            enabled = uiState.actionsEnabled,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = stringResource(R.string.pet_catalog_open))
+        }
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
         Row(modifier = Modifier.fillMaxWidth()) {
             OutlinedButton(
                 onClick = onNavigateToSettings,
@@ -295,6 +313,7 @@ private fun HomeScreenPreview() {
         uiState = HomeUiState(overlayGranted = true),
         onPetButtonClicked = {},
         onDismissMessage = {},
+        onNavigateToCatalog = {},
         onNavigateToSettings = {},
         onNavigateToPremium = {}
     )

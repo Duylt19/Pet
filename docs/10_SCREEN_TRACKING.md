@@ -12,6 +12,8 @@
 | Intro page 3 | `intro_page_3` |
 | Permission | `permission` |
 | Home | `home` |
+| Pet catalog | `pet_catalog` |
+| Pet detail | `pet_detail` |
 | Settings | `settings` |
 | Premium | `premium` |
 

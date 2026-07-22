@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.asianmobile.privatebrower.pet.overlay.PetOverlay
 import com.asianmobile.privatebrower.pet.overlay.PetOverlayRuntime
 import com.asianmobile.privatebrower.pet.overlay.PetOverlayStartResult
+import com.asianmobile.privatebrower.pet.pack.PetPackRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -24,7 +25,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context,
+    private val petPackRepository: PetPackRepository
 ) : ViewModel() {
     private val notificationPermissionRequired =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
@@ -44,6 +46,11 @@ class HomeViewModel @Inject constructor(
                         isStartingPet = if (isRunning) false else it.isStartingPet
                     )
                 }
+            }
+        }
+        viewModelScope.launch {
+            petPackRepository.selectedPack.collect { selected ->
+                _uiState.update { it.copy(selectedPetName = selected.manifest.name) }
             }
         }
     }
@@ -130,7 +137,8 @@ class HomeViewModel @Inject constructor(
         overlayGranted = PetOverlay.canDraw(context),
         notificationGranted = isNotificationGranted(),
         notificationPermissionRequired = notificationPermissionRequired,
-        isPetRunning = PetOverlayRuntime.isRunning.value
+        isPetRunning = PetOverlayRuntime.isRunning.value,
+        selectedPetName = petPackRepository.selectedPack.value.manifest.name
     )
 
     private fun isNotificationGranted(): Boolean =

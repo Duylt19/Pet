@@ -9,7 +9,9 @@
 | `language_settings` | Language settings | Mở từ Settings |
 | `intro` | Intro pager | First-run |
 | `permission` | Permission | Request overlay/notification, có Continue/Skip |
-| `home` | Home | Start/Stop demo pet + Settings/Premium |
+| `home` | Home | Selected pet + Start/Stop + Catalog/Settings/Premium |
+| `pet_catalog` | Pet Catalog | Built-in/installed packs + secure file import |
+| `pet_detail/{packKey}` | Pet Detail | Preview metadata và select pack |
 | `settings` | Settings | Mở từ Home |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
@@ -27,6 +29,7 @@ Permission ──continue/skip──> Home
 Home ──Start(no overlay)──> System Overlay Settings ──back──> Home
 Home ──Start(API 33+, notification missing)──> Notification permission ──result──> Start pet
 Home ──Start/Stop──> Pet overlay foreground service
+Home ──Choose a pet──> Catalog ──Pack──> Detail ──Select──> selected pack
 Home ──Settings──> Settings ──Language──> Language Settings
 Home ──Premium──> Premium(in-app)
 ```
@@ -35,6 +38,7 @@ Home ──Premium──> Premium(in-app)
 
 - Splash, Language, Intro và Permission được remove khỏi stack sau khi hoàn tất bước tương ứng.
 - Settings và Premium in-app pop về Home.
+- Pet Detail pop về Catalog; Catalog pop về Home. `packKey` luôn URI-encode trước navigation.
 - Premium onboarding close/success đi tiếp Permission.
 - Premium splash-return close/success đi Home.
 - Language settings restart activity với `skip_splash=true` sau confirm.

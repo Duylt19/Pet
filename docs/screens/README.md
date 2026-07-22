@@ -7,7 +7,9 @@
 | `language_settings` | `ui/language/LanguageScreen` | Chọn language từ Settings rồi restart app shell |
 | `intro` | `ui/intro/IntroScreen` | Pager ba trang, có native ads theo config |
 | `permission` | `ui/permission/PermissionScreen` | Overlay special access + notification permission, có Continue/Skip |
-| `home` | `ui/home/HomeScreen` | Permission status, Start/Stop demo pet, Settings/Premium |
+| `home` | `ui/home/HomeScreen` | Selected pet, permission status, Start/Stop, Catalog/Settings/Premium |
+| `pet_catalog` | `ui/catalog/PetCatalogScreen` | List validated packs, file picker import, install status |
+| `pet_detail/{packKey}` | `ui/catalog/PetDetailScreen` | Pack preview/metadata và select action |
 | `settings` | `ui/home/settings/SettingsScreen` | Language/share/rate/feedback/version |
 | `premium/{startByIndex}` | `ui/premium/PremiumScreen` | Subscription UI, close behavior theo entry source |
 

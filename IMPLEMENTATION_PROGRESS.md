@@ -12,6 +12,7 @@
 | Overlay foreground service | Done | specialUse FGS, một small-window pet, notification Stop, 30 FPS |
 | Product Home/permission flow | Done | Special access + notification permission + Start/Stop policy |
 | Pixel 3 XL device verification | Done | API 31 start/stop, notification, launcher overlay, drag/fling, revoke cleanup |
+| Pet catalog + validated pack v1 | Done | Secure ZIP import, repository/cache, detail/select, sprite overlay verified on API 31 |
 | Đổi namespace/application ID | Deferred | Vẫn là `com.asianmobile.privatebrower` theo yêu cầu owner |
 
 ## Nguyên tắc cập nhật

@@ -11,21 +11,35 @@ import android.view.WindowManager
 import com.asianmobile.privatebrower.pet.engine.PetAction
 import com.asianmobile.privatebrower.pet.engine.PetBounds
 import com.asianmobile.privatebrower.pet.engine.PetEngine
+import com.asianmobile.privatebrower.pet.engine.PetEngineConfig
 import com.asianmobile.privatebrower.pet.engine.PetEvent
 import com.asianmobile.privatebrower.pet.engine.PetSize
 import com.asianmobile.privatebrower.pet.engine.PetState
 import com.asianmobile.privatebrower.pet.engine.PetVector
+import com.asianmobile.privatebrower.pet.pack.PetPack
+import com.asianmobile.privatebrower.pet.pack.PetPackVisual
+import com.asianmobile.privatebrower.pet.pack.toEngineClips
 import kotlin.math.roundToInt
 
 internal class PetOverlayController(
     context: Context,
+    private val pack: PetPack,
+    private val visual: PetPackVisual,
     private val windowManager: WindowManager =
         context.getSystemService(WindowManager::class.java),
     private val choreographer: Choreographer = Choreographer.getInstance(),
-    private val engine: PetEngine = PetEngine()
+    private val engine: PetEngine = PetEngine(
+        PetEngineConfig(
+            clips = pack.manifest.toEngineClips(),
+            tapAction = pack.manifest.interaction.tapAction
+        )
+    )
 ) {
     private val appContext = context.applicationContext
-    private val petSizePixels = appContext.dpToPixels(PET_SIZE_DP)
+    private val petSizePixels = appContext.dpToPixels(
+        (PET_SIZE_DP * pack.manifest.canvas.defaultScale).roundToInt()
+            .coerceIn(MIN_PET_SIZE_DP, MAX_PET_SIZE_DP)
+    )
     private var overlayView: PetOverlayView? = null
     private var layoutParams: WindowManager.LayoutParams? = null
     private var state: PetState? = null
@@ -61,7 +75,7 @@ internal class PetOverlayController(
             position = initialPosition,
             action = PetAction.WALK
         )
-        val view = PetOverlayView(appContext, ::dispatch).apply {
+        val view = PetOverlayView(appContext, visual, ::dispatch).apply {
             render(initialState)
         }
         val params = createLayoutParams(initialState)
@@ -168,6 +182,8 @@ internal class PetOverlayController(
 
     private companion object {
         const val PET_SIZE_DP = 112
+        const val MIN_PET_SIZE_DP = 64
+        const val MAX_PET_SIZE_DP = 196
         const val START_MARGIN_DP = 20
         const val OVERLAY_WINDOW_TITLE = "Cute Pet overlay"
         const val NANOS_PER_MILLISECOND = 1_000_000L

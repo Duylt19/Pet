@@ -11,7 +11,8 @@ Cute Pet là base Android đang được chuyển thành ứng dụng pet animat
 - Root Gradle project name tạm giữ: `PrivateBrowser`.
 - Flow: Splash → Language → Intro → Permission → Home.
 - Permission giải thích/request overlay special access và notification permission; user vẫn có thể Skip.
-- Home điều khiển Start/Stop demo pet, đồng thời giữ lối vào Settings và Premium.
+- Home điều khiển Start/Stop selected pet, đồng thời mở Catalog, Settings và Premium.
+- Catalog hỗ trợ built-in pet, preview/select và import pack `.zip` qua schema v1 được validate an toàn.
 - Browser, search engine, clear browsing data, storage permission, download, media, Room và service cũ đã bị xóa.
 
 ## Kiến trúc bắt buộc
@@ -43,7 +44,8 @@ app/src/main/java/com/asianmobile/privatebrower/
 ├── navigation/
 ├── pet/
 │   ├── engine/                 # Pure Kotlin state machine/timeline/geometry
-│   └── overlay/                # FGS, WindowManager adapter, Canvas pet view
+│   ├── overlay/                # FGS, WindowManager adapter, Canvas/sprite pet view
+│   └── pack/                   # Pack schema, secure installer, repository/cache
 ├── ui/
 │   ├── component/
 │   ├── splash/
@@ -51,6 +53,7 @@ app/src/main/java/com/asianmobile/privatebrower/
 │   ├── intro/
 │   ├── permission/
 │   ├── home/
+│   ├── catalog/
 │   ├── premium/
 │   ├── main/
 │   └── theme/

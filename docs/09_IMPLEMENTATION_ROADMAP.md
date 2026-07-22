@@ -50,7 +50,7 @@ Definition of done: một pet hiển thị ổn định trên app khác, drag/ta
 
 Definition of done: first-run → permission → start pet → stop pet là một vertical slice hoàn chỉnh, có analytics và test policy/state.
 
-## Phase 4 — Pet catalog and validated asset packs
+## Phase 4 — Pet catalog and validated asset packs — Done
 
 - Định nghĩa schema versioned cho pack manifest, action clips, frame rect/duration, anchor và interaction metadata.
 - Installer copy pack vào app-private storage theo staging → validate → atomic promote; chống path traversal/zip bomb/file type sai.
@@ -58,6 +58,8 @@ Definition of done: first-run → permission → start pet → stop pet là mộ
 - Catalog/pet detail/preview UI; lỗi pack không làm crash overlay đang chạy.
 
 Definition of done: cài và chọn được pack hợp lệ, reject pack lỗi an toàn, renderer không parse disk data mỗi frame.
+
+Verified trên Pixel 3 XL / API 31 với `Sunny Cat` sample pack: system picker → secure install → catalog/detail/select → sprite overlay → drag/fling → clean stop. Parser/validator/archive guardrails có JVM tests; bitmap được preload qua bounded `LruCache` trước frame loop.
 
 ## Phase 5 — Multiple pets and persistence
 

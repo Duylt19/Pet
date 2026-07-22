@@ -361,6 +361,24 @@
     <string name="home_pet_action_starting">Starting…</string>
     <string name="home_pet_action_stop">Stop pet</string>
     <string name="home_pet_start_failed">The pet could not start. Check display access and try again.</string>
+    <string name="pet_catalog_open">Choose a pet</string>
+    <string name="pet_catalog_title">Pet catalog</string>
+    <string name="pet_catalog_subtitle">Choose a validated companion or import a .zip pack.</string>
+    <string name="pet_catalog_import">Import</string>
+    <string name="pet_catalog_selected">Selected</string>
+    <string name="pet_catalog_view_details">View details</string>
+    <string name="pet_catalog_unknown_author">Unknown creator</string>
+    <string name="pet_catalog_install_success">%1$s is ready</string>
+    <string name="pet_catalog_select_success">%1$s selected</string>
+    <string name="pet_catalog_install_rejected">Pack rejected: %1$s</string>
+    <string name="pet_detail_unavailable">This pet pack is unavailable.</string>
+    <string name="pet_detail_by_author">By %1$s</string>
+    <string name="pet_detail_version">Version</string>
+    <string name="pet_detail_actions">Actions</string>
+    <string name="pet_detail_source">Source</string>
+    <string name="pet_detail_builtin">Built-in</string>
+    <string name="pet_detail_installed">Installed</string>
+    <string name="pet_detail_select">Use this pet</string>
 
     <!-- Pet overlay foreground service -->
     <string name="pet_overlay_notification_channel_name">Screen pet</string>

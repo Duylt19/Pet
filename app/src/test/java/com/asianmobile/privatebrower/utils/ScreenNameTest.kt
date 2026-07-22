@@ -28,6 +28,8 @@ class ScreenNameTest {
             "intro_page_3",
             "permission",
             "home",
+            "pet_catalog",
+            "pet_detail",
             "premium",
             "settings"
         )

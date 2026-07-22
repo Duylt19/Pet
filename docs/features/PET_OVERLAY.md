@@ -40,5 +40,5 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 
 ## Chưa thuộc MVP hiện tại
 
-- Asset pack/catalog, persistence, multi-pet hoặc auto-start after boot.
+- Selection persistence, multi-pet hoặc auto-start after boot.
 - Cần mở rộng verification matrix sang API 33+, nhiều OEM, rotation/cutout và process death trước release.

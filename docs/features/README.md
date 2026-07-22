@@ -12,7 +12,8 @@ Base hiện chỉ giữ các capability hỗ trợ sau:
 | Ads/remote config | module `:ads` | Active |
 | Pure pet engine | `pet/engine` | Active, JVM-tested |
 | One-pet overlay | `pet/overlay` | Active, được điều khiển từ Home |
+| Validated pet packs | `pet/pack`, `ui/catalog` | Active, schema v1 + secure import + preview/select |
 
 Không có browser core, search/clear-browsing, broad storage access, tabs, bookmarks/history, download manager, file/media manager hoặc database. Background component duy nhất là `PetOverlayService` do user chủ động start, `START_NOT_STICKY` và không có boot receiver.
 
-Chi tiết platform contract: [PET_OVERLAY.md](PET_OVERLAY.md). Không tái sử dụng spec Private Browser cũ.
+Chi tiết: [PET_OVERLAY.md](PET_OVERLAY.md), [PET_PACKS.md](PET_PACKS.md). Không tái sử dụng spec Private Browser cũ.

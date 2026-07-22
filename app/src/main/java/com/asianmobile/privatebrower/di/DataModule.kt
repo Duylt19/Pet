@@ -2,6 +2,11 @@ package com.asianmobile.privatebrower.di
 
 import android.content.Context
 import com.asianmobile.privatebrower.data.local.DataStoreManager
+import com.asianmobile.privatebrower.pet.pack.FilePetPackRepository
+import com.asianmobile.privatebrower.pet.pack.PetPackArchiveExtractor
+import com.asianmobile.privatebrower.pet.pack.PetPackManifestParser
+import com.asianmobile.privatebrower.pet.pack.PetPackRepository
+import com.asianmobile.privatebrower.pet.pack.PetPackValidator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,4 +23,22 @@ object DataModule {
     fun provideDataStoreManager(
         @ApplicationContext context: Context
     ): DataStoreManager = DataStoreManager(context)
+
+    @Provides
+    @Singleton
+    fun providePetPackManifestParser(): PetPackManifestParser = PetPackManifestParser()
+
+    @Provides
+    @Singleton
+    fun providePetPackValidator(): PetPackValidator = PetPackValidator()
+
+    @Provides
+    @Singleton
+    fun providePetPackArchiveExtractor(): PetPackArchiveExtractor = PetPackArchiveExtractor()
+
+    @Provides
+    @Singleton
+    fun providePetPackRepository(
+        repository: FilePetPackRepository
+    ): PetPackRepository = repository
 }

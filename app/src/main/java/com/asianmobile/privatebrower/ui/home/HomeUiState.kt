@@ -6,6 +6,7 @@ data class HomeUiState(
     val notificationPermissionRequired: Boolean = false,
     val isPetRunning: Boolean = false,
     val isStartingPet: Boolean = false,
+    val selectedPetName: String = "Orange Cat",
     val message: HomeMessage? = null
 ) {
     val actionsEnabled: Boolean

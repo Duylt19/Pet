@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.RectF
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.View
@@ -15,10 +16,12 @@ import com.asianmobile.privatebrower.pet.engine.PetDirection
 import com.asianmobile.privatebrower.pet.engine.PetEvent
 import com.asianmobile.privatebrower.pet.engine.PetState
 import com.asianmobile.privatebrower.pet.engine.PetVector
+import com.asianmobile.privatebrower.pet.pack.PetPackVisual
 import kotlin.math.hypot
 
 internal class PetOverlayView(
     context: Context,
+    private val visual: PetPackVisual,
     private val onEvent: (PetEvent) -> Unit
 ) : View(context) {
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
@@ -79,9 +82,20 @@ internal class PetOverlayView(
             PetAction.WALK -> Unit
         }
 
-        drawTail(canvas, viewWidth, viewHeight, state.frameIndex)
-        drawBody(canvas, viewWidth, viewHeight)
-        drawHead(canvas, viewWidth, viewHeight, state)
+        when (val currentVisual = visual) {
+            PetPackVisual.CodeNative -> {
+                drawTail(canvas, viewWidth, viewHeight, state.frameIndex)
+                drawBody(canvas, viewWidth, viewHeight)
+                drawHead(canvas, viewWidth, viewHeight, state)
+            }
+            is PetPackVisual.Sprite -> drawSprite(
+                canvas = canvas,
+                width = viewWidth,
+                height = viewHeight,
+                state = state,
+                visual = currentVisual
+            )
+        }
         canvas.restoreToCount(saveCount)
     }
 
@@ -277,6 +291,35 @@ internal class PetOverlayView(
             )
         }
         canvas.drawPath(path, tailPaint)
+    }
+
+    private fun drawSprite(
+        canvas: Canvas,
+        width: Float,
+        height: Float,
+        state: PetState,
+        visual: PetPackVisual.Sprite
+    ) {
+        val clipFrames = visual.frames[state.action]
+            ?: visual.frames[PetAction.IDLE]
+            ?: return
+        if (clipFrames.isEmpty()) return
+        val frame = clipFrames[state.frameIndex.coerceIn(0, clipFrames.lastIndex)]
+        val fitScale = minOf(
+            width / visual.canvas.width,
+            height / visual.canvas.height
+        )
+        val drawWidth = visual.canvas.width * fitScale
+        val drawHeight = visual.canvas.height * fitScale
+        val anchorX = width * 0.5f
+        val anchorY = height * 0.96f
+        val destination = RectF(
+            anchorX - visual.anchor.x * drawWidth,
+            anchorY - visual.anchor.y * drawHeight,
+            anchorX + (1f - visual.anchor.x) * drawWidth,
+            anchorY + (1f - visual.anchor.y) * drawHeight
+        )
+        canvas.drawBitmap(frame.bitmap, frame.source, destination, null)
     }
 
     private fun addRawMovement(event: MotionEvent) {

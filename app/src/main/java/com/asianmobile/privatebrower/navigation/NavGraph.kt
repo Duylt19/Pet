@@ -2,6 +2,7 @@ package com.asianmobile.privatebrower.navigation
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -15,6 +16,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.asianmobile.privatebrower.ads.utils.SafeRemoteConfig
 import com.asianmobile.privatebrower.ui.home.HomeScreen
+import com.asianmobile.privatebrower.ui.catalog.PetCatalogScreen
+import com.asianmobile.privatebrower.ui.catalog.PetDetailScreen
 import com.asianmobile.privatebrower.ui.home.settings.SettingsScreen
 import com.asianmobile.privatebrower.ui.intro.IntroScreen
 import com.asianmobile.privatebrower.ui.language.LanguageScreen
@@ -31,6 +34,8 @@ object Routes {
     const val INTRO = "intro"
     const val PERMISSION = "permission"
     const val HOME = "home"
+    const val PET_CATALOG = "pet_catalog"
+    const val PET_DETAIL = "pet_detail"
     const val SETTINGS = "settings"
     const val PREMIUM = "premium"
 }
@@ -161,12 +166,37 @@ fun AppNavGraph(
 
             composable(Routes.HOME) {
                 HomeScreen(
+                    onNavigateToCatalog = {
+                        navController.safeNavigate(Routes.PET_CATALOG, ignoreDebounce = true)
+                    },
                     onNavigateToSettings = {
                         navigateFromHome(Routes.SETTINGS)
                     },
                     onNavigateToPremium = {
                         navigateFromHome(Routes.PREMIUM)
                     }
+                )
+            }
+
+            composable(Routes.PET_CATALOG) {
+                PetCatalogScreen(
+                    onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                    onOpenPack = { packKey ->
+                        navController.safeNavigate(
+                            "${Routes.PET_DETAIL}/${Uri.encode(packKey)}",
+                            ignoreDebounce = true
+                        )
+                    }
+                )
+            }
+
+            composable(
+                route = "${Routes.PET_DETAIL}/{packKey}",
+                arguments = listOf(navArgument("packKey") { type = NavType.StringType })
+            ) { backStackEntry ->
+                PetDetailScreen(
+                    packKey = backStackEntry.arguments?.getString("packKey").orEmpty(),
+                    onBack = { navController.safePopBackStack(ignoreDebounce = true) }
                 )
             }
 

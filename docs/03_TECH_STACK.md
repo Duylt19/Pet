@@ -20,6 +20,7 @@
 | Feedback | Android Mail/Activation | Rate feedback email |
 | Screen overlay | `WindowManager`, custom Canvas `View`, Choreographer | One-pet transparent overlay + 30 FPS clock |
 | Long-running pet | Android foreground service `specialUse` | User-visible lifetime + ongoing notification |
+| Pet packs | Platform ZIP/JSON/Bitmap APIs, JVM `org.json` test artifact | Secure import, validation, sprite preload/cache |
 
 ## Không còn trong app module
 
