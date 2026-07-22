@@ -11,6 +11,13 @@
 | `is_permission_completed` | Boolean | Hoàn thành/skip permission step |
 | `key_language` | String | Language code |
 | `country_language` | String | Region code |
+| `pet_selected_pack_key` | String | Pack được áp dụng ở lần Start tiếp theo |
+| `pet_count` | Int | Số instance, clamp theo device budget |
+| `pet_size_percent` | Int | 75–150%, bước 25% |
+| `pet_speed_percent` | Int | 50–150%, bước 25% |
+| `pet_sound_enabled` | Boolean | Opt-in âm thanh khi schema pack hỗ trợ |
+| `pet_interaction_enabled` | Boolean | Cho phép tap/drag/fling |
+| `pet_last_positions` | String | Tối đa 3 cặp tọa độ chuẩn hóa 0–1 |
 
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.
 
@@ -26,14 +33,14 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 
 ## Overlay runtime state
 
-`PetOverlayRuntime.isRunning` là process-local `StateFlow<Boolean>`, không phải persisted preference. Service dùng `START_NOT_STICKY` và không có boot receiver nên trạng thái running không được restore sau process death/reboot ở MVP. `HomeUiState` kết hợp runtime state với overlay/notification permission snapshot.
+`PetOverlayRuntime.isRunning` và `activePetCount` là process-local `StateFlow`, không phải persisted preference. Service dùng `START_NOT_STICKY` và không có boot receiver nên trạng thái running không được restore sau process death/reboot. `HomeUiState` kết hợp runtime state, persisted settings và permission snapshot.
 
 ## Pet pack model
 
 - `PetPackManifest` là schema v1 versioned gồm identity, canvas, anchor, interaction và action clips/frame metadata.
-- `PetPackRepository.packs/selectedPack` là process-local `StateFlow`; built-in Orange Cat luôn là fallback.
+- `PetPackRepository.packs/selectedPack` là `StateFlow`; key selection được DataStore restore, built-in Orange Cat luôn là fallback khi key không còn hợp lệ.
 - Installed source chỉ trỏ tới app-private directory sau khi secure installer validate và atomic promote.
-- Selection chưa persist ở Phase 4; DataStore selection/settings thuộc Phase 5.
+- Pack đang chạy vẫn là snapshot. Selection/settings mới chỉ áp dụng ở lần Start tiếp theo để không mutate renderer giữa session.
 - Android bitmap/`File` không đi vào pure engine state. Manifest được map sang `PetClip`; renderer giữ `PetPackVisual` đã preload.
 
 ## Không có database

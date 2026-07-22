@@ -38,7 +38,8 @@ com.asianmobile.privatebrower/
 ├── pet/
 │   ├── engine/                 # Kotlin thuần, không phụ thuộc Android framework
 │   ├── overlay/                # Android service/window/input/render adapter
-│   └── pack/                   # Schema/parser/validator/installer/repository/cache
+│   ├── pack/                   # Schema/parser/validator/installer/repository/cache
+│   └── settings/               # Pure policy cho budget/vị trí/session settings
 ├── ui/
 │   ├── component/              # Shared stateless UI
 │   ├── splash/
@@ -83,12 +84,12 @@ ui/feature/
 - `PetAnimationTimeline` tiêu thụ frame duration độc lập tick partition, cộng scripted velocity và chuyển non-loop clip sang action kế tiếp.
 - `PetEngine` xử lý tap/drag/fling/bounds, giới hạn delayed tick để tránh catch-up storm và dùng constant deceleration cho fling.
 - Android overlay adapter sở hữu `WindowManager.LayoutParams`, gesture input, render clock và foreground-service lifecycle.
-- `PetOverlayService` là `specialUse` foreground service `exported=false`; `PetOverlayController` sở hữu đúng một window và một Choreographer loop khoảng 30 FPS.
+- `PetOverlayService` là `specialUse` foreground service `exported=false`; `PetOverlayController` sở hữu một window/state machine cho mỗi instance nhưng chỉ một `Choreographer` loop dùng chung.
 - `PetOverlayView` chỉ vẽ/touch; mọi state transition vẫn đi qua `PetEngine`.
 - Asset pack được parse/validate thành model nội bộ trước khi engine sử dụng; renderer không đọc JSON/storage mỗi frame.
 - Pack installer chỉ promote version hợp lệ từ random staging directory; repository luôn giữ built-in fallback.
 - Bitmap cache decode asset trước khi render loop bắt đầu và có memory budget 4–24 MiB.
-- MVP chỉ chạy một pet và không thêm Room. Preference nhỏ tiếp tục dùng DataStore.
+- Session hỗ trợ 1–3 pet trên thiết bị thường, 1–2 pet trên low-RAM device; 3 pet hạ shared clock xuống 24 FPS. Không thêm Room; selection/behavior/last position dùng DataStore.
 
 ## DI
 

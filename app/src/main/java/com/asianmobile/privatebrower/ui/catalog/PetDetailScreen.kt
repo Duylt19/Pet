@@ -120,25 +120,27 @@ fun PetDetailScreen(
                     }
                 )
             }
-        }
-        Button(
-            onClick = { viewModel.select(pack.key) },
-            enabled = uiState.selectedKey != pack.key,
-            modifier = Modifier.fillMaxWidth().padding(24.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(R.color.colors_3369FD),
-                contentColor = colorResource(R.color.white),
-                disabledContainerColor = colorResource(R.color.colors_00C950),
-                disabledContentColor = colorResource(R.color.white)
-            )
-        ) {
-            Text(
-                if (uiState.selectedKey == pack.key) {
-                    stringResource(R.string.pet_catalog_selected)
-                } else {
-                    stringResource(R.string.pet_detail_select)
-                }
-            )
+            Spacer(Modifier.height(24.dp))
+            Button(
+                onClick = { viewModel.select(pack.key) },
+                enabled = uiState.selectedKey != pack.key,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.colors_3369FD),
+                    contentColor = colorResource(R.color.white),
+                    disabledContainerColor = colorResource(R.color.colors_00C950),
+                    disabledContentColor = colorResource(R.color.white)
+                )
+            ) {
+                Text(
+                    if (uiState.selectedKey == pack.key) {
+                        stringResource(R.string.pet_catalog_selected)
+                    } else {
+                        stringResource(R.string.pet_detail_select)
+                    }
+                )
+            }
+            Spacer(Modifier.height(24.dp))
         }
     }
 }

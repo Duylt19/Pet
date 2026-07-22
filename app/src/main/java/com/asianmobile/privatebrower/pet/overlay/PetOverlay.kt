@@ -42,8 +42,11 @@ object PetOverlay {
 object PetOverlayRuntime {
     private val _isRunning = MutableStateFlow(false)
     val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
+    private val _activePetCount = MutableStateFlow(0)
+    val activePetCount: StateFlow<Int> = _activePetCount.asStateFlow()
 
-    internal fun updateRunning(running: Boolean) {
+    internal fun updateRunning(running: Boolean, petCount: Int = 0) {
         _isRunning.value = running
+        _activePetCount.value = if (running) petCount.coerceAtLeast(1) else 0
     }
 }

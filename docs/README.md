@@ -30,6 +30,7 @@
 
 - [Current features](features/README.md)
 - [Pet pack v1 contract](features/PET_PACKS.md)
+- [Pet settings and session policy](features/PET_SETTINGS.md)
 - [Current screens](screens/README.md)
 
 ## Quy tắc duy trì

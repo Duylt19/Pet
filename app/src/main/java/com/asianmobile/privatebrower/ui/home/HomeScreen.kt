@@ -7,6 +7,8 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -134,7 +137,8 @@ private fun HomeScreenContent(
             .background(colorResource(R.color.colors_161718))
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(horizontal = dimensionResource(SdpR.dimen._24sdp)),
+            .padding(horizontal = dimensionResource(SdpR.dimen._24sdp))
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._24sdp)))
@@ -178,6 +182,17 @@ private fun HomeScreenContent(
                 color = colorResource(R.color.white),
                 fontFamily = FontFamily(Font(R.font.inter_semibold)),
                 fontSize = dimensionResource(SspR.dimen._13ssp).value.sp
+            )
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._3sdp)))
+            Text(
+                text = pluralStringResource(
+                    R.plurals.home_pet_configured_count,
+                    uiState.petCount,
+                    uiState.petCount
+                ),
+                color = colorResource(R.color.colors_9B9C9E),
+                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
             )
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
             Text(
@@ -247,7 +262,7 @@ private fun HomeScreenContent(
             }
         }
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._18sdp)))
         OutlinedButton(
             onClick = onNavigateToCatalog,
             enabled = uiState.actionsEnabled,

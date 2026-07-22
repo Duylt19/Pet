@@ -10,7 +10,7 @@
 | UI | Jetpack Compose Material 3 |
 | Architecture | Single-Activity + MVVM + Hilt + Flow |
 
-Cute Pet có domain chính thức: một pet animation có thể hiển thị và tương tác trên các ứng dụng khác bằng Android overlay. MVP bắt đầu với một pet và asset demo do project sở hữu.
+Cute Pet có domain chính thức: một hoặc nhiều pet animation có thể hiển thị và tương tác trên các ứng dụng khác bằng Android overlay. Runtime hỗ trợ tối đa 3 pet theo performance budget của thiết bị và chỉ dùng asset do project/user sở hữu.
 
 ## Mục tiêu của base
 

@@ -8,7 +8,7 @@ Roadmap này chuyển base hiện tại thành app pet animation chạy nổi tr
 - Giữ module `:ads`, chưa thêm placement mới.
 - MVP dùng asset pet demo do project sở hữu; không copy asset/code của app đối thủ.
 - Chưa dùng Room; persistence nhỏ dùng DataStore.
-- MVP một pet, không auto-start sau boot.
+- Runtime tối đa 3 pet theo device budget, không auto-start sau boot.
 
 ## Phase 0 — Product foundation cleanup — Done
 
@@ -61,7 +61,7 @@ Definition of done: cài và chọn được pack hợp lệ, reject pack lỗi 
 
 Verified trên Pixel 3 XL / API 31 với `Sunny Cat` sample pack: system picker → secure install → catalog/detail/select → sprite overlay → drag/fling → clean stop. Parser/validator/archive guardrails có JVM tests; bitmap được preload qua bounded `LruCache` trước frame loop.
 
-## Phase 5 — Multiple pets and persistence
+## Phase 5 — Multiple pets and persistence — Done
 
 - Mở rộng service session từ một pet lên danh sách instance, nhưng vẫn dùng một render clock/thread.
 - Persist selected pack, size, speed, sound, last safe position và user setting bằng DataStore.
@@ -69,6 +69,8 @@ Verified trên Pixel 3 XL / API 31 với `Sunny Cat` sample pack: system picker 
 - Boot auto-start chỉ thêm dưới dạng opt-in rõ ràng sau khi policy/product quyết định; nếu có phải xử lý Android version restrictions.
 
 Definition of done: multi-pet không nhân thread tuyến tính, restore an toàn, setting có unit test và degradation policy.
+
+Verified trên Pixel 3 XL / API 31 với 3 instance `Sunny Cat`: một foreground service + ba bounded overlay window, shared bitmap/clock, drag/stop/restart khôi phục vị trí chuẩn hóa, pack/count giữ qua process restart và cleanup không để lại service/window. Thiết bị thường giới hạn 3 pet/30 FPS (24 FPS khi chạy 3); low-RAM giới hạn 2 pet/24 FPS. Sound preference đã persist nhưng schema pack v1 chưa nhận audio. Boot auto-start vẫn chưa được thêm.
 
 ## Phase 6 — Monetization, performance and release policy
 

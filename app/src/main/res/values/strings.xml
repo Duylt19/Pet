@@ -126,6 +126,18 @@
     <string name="settings_rate_us_title">Rate us</string>
     <string name="settings_set_default_subtitle">Use Private Browser to open links by default</string>
     <string name="settings_section_other_short">Other</string>
+    <string name="settings_section_screen_pets">Screen pets</string>
+    <string name="settings_pet_count_title">Number of pets</string>
+    <string name="settings_pet_count_subtitle">Up to %1$d on this device</string>
+    <string name="settings_pet_size_title">Pet size</string>
+    <string name="settings_pet_speed_title">Animation speed</string>
+    <string name="settings_pet_sound_title">Pet sounds</string>
+    <string name="settings_pet_sound_subtitle">Used when the selected pack includes sound</string>
+    <string name="settings_pet_interaction_title">Touch interaction</string>
+    <string name="settings_pet_interaction_subtitle">Allow tap, drag, and fling gestures</string>
+    <string name="settings_pet_apply_on_restart">Changes apply the next time pets start</string>
+    <string name="settings_decrease_value">Decrease %1$s</string>
+    <string name="settings_increase_value">Increase %1$s</string>
     <string name="premium_subscription_title">Upgrade to Premium</string>
     <string name="files_videos_label">Videos</string>
     <string name="common_ok_label">OK</string>
@@ -353,6 +365,10 @@
     <string name="home_pet_subtitle">Start the demo pet, then drag, tap, or fling it while using other apps.</string>
     <string name="home_pet_status_running">Pet is running</string>
     <string name="home_pet_status_stopped">Pet is resting</string>
+    <plurals name="home_pet_configured_count">
+        <item quantity="one">%d pet configured</item>
+        <item quantity="other">%d pets configured</item>
+    </plurals>
     <string name="home_pet_overlay_ready">Display access is ready</string>
     <string name="home_pet_overlay_required">Display access is required before starting</string>
     <string name="home_pet_notification_will_request">Notification permission will be requested when you start.</string>

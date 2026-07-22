@@ -57,11 +57,11 @@ Các guardrail hiện tại:
 
 ## Repository và cache
 
-- `PetPackRepository` expose `StateFlow` danh sách pack và selected pack process-local.
+- `PetPackRepository` expose `StateFlow` danh sách pack; selected key được DataStore persist và restore.
 - Built-in Orange Cat luôn là fallback nếu installed pack không còn hợp lệ.
 - `PetBitmapCache` dùng `LruCache`, budget bằng 1/16 app memory class và clamp 4–24 MiB.
 - Bitmap được decode/preload trước frame loop; `PetOverlayView.onDraw` chỉ lấy frame đã chuẩn bị và vẽ source rect.
-- Persist selection thuộc Phase 5; Phase 4 cố ý reset về built-in sau process restart.
+- Key không còn hợp lệ tự fallback/persist về built-in. Pack đang chạy là snapshot và chỉ đổi ở lần Start kế tiếp.
 
 ## Asset ownership
 

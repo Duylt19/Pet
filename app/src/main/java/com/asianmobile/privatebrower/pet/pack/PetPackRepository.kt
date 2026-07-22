@@ -1,15 +1,22 @@
 package com.asianmobile.privatebrower.pet.pack
 
 import android.content.Context
+import com.asianmobile.privatebrower.data.repository.PetSettingsRepository
 import com.asianmobile.privatebrower.pet.engine.PetAction
 import com.asianmobile.privatebrower.pet.engine.PetVector
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 interface PetPackRepository {
     val packs: StateFlow<List<PetPack>>
@@ -21,9 +28,11 @@ interface PetPackRepository {
 
 @Singleton
 class FilePetPackRepository @Inject constructor(
-    @param:ApplicationContext context: Context,
-    private val diskLoader: PetPackDiskLoader
+    @ApplicationContext context: Context,
+    private val diskLoader: PetPackDiskLoader,
+    private val settingsRepository: PetSettingsRepository
 ) : PetPackRepository {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val storageRoot = PetPackInstaller.packStorageRoot(context)
     private val builtIn = builtInPetPack()
     private val _packs = MutableStateFlow(listOf(builtIn))
@@ -33,6 +42,12 @@ class FilePetPackRepository @Inject constructor(
 
     init {
         refresh()
+        scope.launch {
+            settingsRepository.preferences
+                .map { it.selectedPackKey }
+                .distinctUntilChanged()
+                .collect(::selectFromPreferences)
+        }
     }
 
     override fun find(key: String): PetPack? = _packs.value.firstOrNull { it.key == key }
@@ -40,6 +55,7 @@ class FilePetPackRepository @Inject constructor(
     override fun select(key: String): Boolean {
         val pack = find(key) ?: return false
         _selectedPack.value = pack
+        settingsRepository.updateSelectedPack(pack.key)
         return true
     }
 
@@ -53,8 +69,19 @@ class FilePetPackRepository @Inject constructor(
             .sortedWith(compareBy({ it.manifest.name.lowercase() }, { -it.manifest.version }))
         val updated = listOf(builtIn) + installed
         _packs.value = updated
-        val requestedKey = preferredKey ?: _selectedPack.value.key
-        _selectedPack.value = updated.firstOrNull { it.key == requestedKey } ?: builtIn
+        val requestedKey = preferredKey
+            ?: settingsRepository.preferences.value.selectedPackKey
+            .takeIf { it != builtIn.key }
+            ?: _selectedPack.value.key
+        val selected = updated.firstOrNull { it.key == requestedKey } ?: builtIn
+        _selectedPack.value = selected
+        if (preferredKey != null || selected.key != requestedKey) {
+            settingsRepository.updateSelectedPack(selected.key)
+        }
+    }
+
+    private fun selectFromPreferences(key: String) {
+        find(key)?.let { _selectedPack.value = it }
     }
 
     private fun builtInPetPack(): PetPack {

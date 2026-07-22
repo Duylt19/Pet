@@ -16,6 +16,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.asianmobile.privatebrower.MainActivity
 import com.asianmobile.privatebrower.R
+import com.asianmobile.privatebrower.data.repository.PetSettingsRepository
 import com.asianmobile.privatebrower.pet.pack.PetBitmapCache
 import com.asianmobile.privatebrower.pet.pack.PetPackRepository
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,6 +26,7 @@ import javax.inject.Inject
 class PetOverlayService : Service() {
     @Inject lateinit var petPackRepository: PetPackRepository
     @Inject lateinit var petBitmapCache: PetBitmapCache
+    @Inject lateinit var petSettingsRepository: PetSettingsRepository
 
     private var overlayController: PetOverlayController? = null
 
@@ -47,14 +49,17 @@ class PetOverlayService : Service() {
 
         if (overlayController == null) {
             try {
+                val preferences = petSettingsRepository.preferences.value
                 val pack = petPackRepository.selectedPack.value
                 val visual = petBitmapCache.prepare(pack)
                 overlayController = PetOverlayController(
                     context = this,
                     pack = pack,
-                    visual = visual
+                    visual = visual,
+                    preferences = preferences,
+                    performanceBudget = petSettingsRepository.performanceBudget
                 ).also { it.start() }
-                PetOverlayRuntime.updateRunning(true)
+                PetOverlayRuntime.updateRunning(true, preferences.petCount)
             } catch (error: RuntimeException) {
                 Log.e(TAG, "Unable to start pet overlay", error)
                 overlayController?.stop()
@@ -71,7 +76,7 @@ class PetOverlayService : Service() {
     }
 
     override fun onDestroy() {
-        overlayController?.stop()
+        overlayController?.stop()?.let(petSettingsRepository::updateLastPositions)
         overlayController = null
         PetOverlayRuntime.updateRunning(false)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
