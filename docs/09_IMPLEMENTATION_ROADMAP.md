@@ -29,7 +29,7 @@ Definition of done: Manifest không còn storage permission; source active khôn
 
 Definition of done: engine chạy deterministic trong JVM tests và không import `android.*`.
 
-## Phase 2 — One-pet overlay foreground service
+## Phase 2 — One-pet overlay foreground service — Done
 
 - Khai báo `SYSTEM_ALERT_WINDOW`, foreground-service permission/type phù hợp và service `exported=false`.
 - Tạo notification channel + ongoing notification có Stop action; service gọi `startForeground` đúng thời hạn.

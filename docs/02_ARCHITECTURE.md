@@ -36,7 +36,8 @@ com.asianmobile.privatebrower/
 ├── di/                         # Hilt modules đang có dependency thật
 ├── navigation/                 # Routes, NavGraph, safe navigation
 ├── pet/
-│   └── engine/                 # Kotlin thuần, không phụ thuộc Android framework
+│   ├── engine/                 # Kotlin thuần, không phụ thuộc Android framework
+│   └── overlay/                # Android service/window/input/render adapter
 ├── ui/
 │   ├── component/              # Shared stateless UI
 │   ├── splash/
@@ -80,6 +81,8 @@ ui/feature/
 - `PetAnimationTimeline` tiêu thụ frame duration độc lập tick partition, cộng scripted velocity và chuyển non-loop clip sang action kế tiếp.
 - `PetEngine` xử lý tap/drag/fling/bounds, giới hạn delayed tick để tránh catch-up storm và dùng constant deceleration cho fling.
 - Android overlay adapter sở hữu `WindowManager.LayoutParams`, gesture input, render clock và foreground-service lifecycle.
+- `PetOverlayService` là `specialUse` foreground service `exported=false`; `PetOverlayController` sở hữu đúng một window và một Choreographer loop khoảng 30 FPS.
+- `PetOverlayView` chỉ vẽ/touch; mọi state transition vẫn đi qua `PetEngine`.
 - Asset pack được parse/validate thành model nội bộ trước khi engine sử dụng; renderer không đọc JSON/storage mỗi frame.
 - MVP chỉ chạy một pet và không thêm Room. Preference nhỏ tiếp tục dùng DataStore.
 

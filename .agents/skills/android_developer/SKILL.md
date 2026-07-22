@@ -16,6 +16,7 @@ Agent làm việc trong repository này PHẢI tuân thủ các contract dưới
 - Home chỉ là placeholder với hai action: Settings và Premium.
 - Browser, search/clear-browsing, broad storage access, tab manager, bookmark/history, download, media/file manager, Room và foreground service cũ đã bị xóa.
 - Permission hiện là product-neutral shell; chưa request overlay special access.
+- Pet overlay mới nằm trong `pet/overlay`: one-pet `specialUse` foreground service, small `TYPE_APPLICATION_OVERLAY` window và notification bắt buộc.
 - Không viết code/docs dựa trên giả định các module đã xóa vẫn tồn tại.
 
 ## 1. Giao tiếp và làm rõ yêu cầu

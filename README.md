@@ -42,7 +42,8 @@ app/src/main/java/com/asianmobile/privatebrower/
 ├── di/
 ├── navigation/
 ├── pet/
-│   └── engine/                 # Pure Kotlin state machine/timeline/geometry
+│   ├── engine/                 # Pure Kotlin state machine/timeline/geometry
+│   └── overlay/                # FGS, WindowManager adapter, Canvas pet view
 ├── ui/
 │   ├── component/
 │   ├── splash/

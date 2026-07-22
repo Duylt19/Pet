@@ -12,6 +12,12 @@
     <color name="gray_CCCCCC">#CCCCCC</color>
     <color name="white">#FFFFFF</color>
     <color name="transparent">#00000000</color>
+    <color name="pet_demo_fur">#FFB86B</color>
+    <color name="pet_demo_fur_dark">#D97B3D</color>
+    <color name="pet_demo_muzzle">#FFE1BD</color>
+    <color name="pet_demo_ear">#F77C8C</color>
+    <color name="pet_demo_ink">#392A2A</color>
+    <color name="pet_demo_shadow">#33000000</color>
     <color name="green_00C062">#00C062</color>
     <color name="gray_4D4D4D">#4d4d4d</color>
     <color name="gray_E0E0E0">#E4E4E4</color>

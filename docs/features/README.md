@@ -10,8 +10,9 @@ Base hiện chỉ giữ các capability hỗ trợ sau:
 | Rating/feedback | Settings + feedback helpers | Active |
 | Premium/billing | `ui/premium`, billing infrastructure | Active |
 | Ads/remote config | module `:ads` | Active |
-| Pure pet engine | `pet/engine` | Active, JVM-tested; chưa nối Android overlay |
+| Pure pet engine | `pet/engine` | Active, JVM-tested |
+| One-pet overlay | `pet/overlay` | Active platform layer; chưa có Home/Permission entry |
 
-Không có browser core, search/clear-browsing, broad storage access, tabs, bookmarks/history, download manager, file/media manager, database hoặc background service.
+Không có browser core, search/clear-browsing, broad storage access, tabs, bookmarks/history, download manager, file/media manager hoặc database. Background component duy nhất là `PetOverlayService` do user chủ động start, `START_NOT_STICKY` và không có boot receiver.
 
-Khi domain feature Cute Pet được chốt, tạo spec mới theo tên feature thực tế và cập nhật index này. Không tái sử dụng spec Private Browser cũ.
+Chi tiết platform contract: [PET_OVERLAY.md](PET_OVERLAY.md). Không tái sử dụng spec Private Browser cũ.

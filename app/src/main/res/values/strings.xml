@@ -342,6 +342,14 @@
     <string name="feedback_chooser_title">Send feedback via</string>
     <string name="feedback_no_email_app">No email app installed</string>
 
+    <!-- Pet overlay foreground service -->
+    <string name="pet_overlay_notification_channel_name">Screen pet</string>
+    <string name="pet_overlay_notification_channel_description">Keeps your animated pet visible on top of other apps</string>
+    <string name="pet_overlay_notification_title">Cute Pet is on your screen</string>
+    <string name="pet_overlay_notification_text">Tap to open Cute Pet or stop the pet from this notification.</string>
+    <string name="pet_overlay_notification_stop">Stop pet</string>
+    <string name="pet_overlay_content_description">Animated screen pet</string>
+
     <!-- Privacy Policy -->
     <string name="privacy_policy_title">Privacy Policy</string>
     <string name="privacy_policy_default_url" translatable="false">https://sites.google.com/view/aseanlabstudio/home</string>

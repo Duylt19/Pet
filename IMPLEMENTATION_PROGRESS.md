@@ -9,7 +9,7 @@
 | Chuẩn hóa tài liệu cho AI agent | Done | Docs phản ánh source và base contract |
 | Product foundation cleanup | Done | Branding/copy active đã chuyển sang Cute Pet; giữ package legacy |
 | Pure Kotlin pet engine | Done | Deterministic state machine, frame timeline, drag/fling và bounds |
-| Overlay foreground service | Pending | Một pet, notification bắt buộc, drag/tap/fling |
+| Overlay foreground service | Done | specialUse FGS, một small-window pet, notification Stop, 30 FPS |
 | Product Home/permission flow | Pending | Cần design final; không dùng storage permission |
 | Đổi namespace/application ID | Deferred | Vẫn là `com.asianmobile.privatebrower` theo yêu cầu owner |
 
