@@ -80,7 +80,7 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Extend autonomous behavior through explicit pack actions and boundary transitions without assuming the competitor's numbered-frame format.
 - Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
 - Treat tap popup, double-tap, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
-- Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs and must enter the product only through a provenance-preserving server import.
+- Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs. Local device sync is enabled for validation, while production distribution must use a provenance-preserving server import.
 
 - Map entitlement free/premium lên catalog/slot/animation; billing failure không phá pet đang chạy.
 - Chỉ thêm ads placement khi có screen code/policy được owner duyệt; không đặt ad trong overlay.
@@ -101,4 +101,6 @@ Technical evidence and the feature-parity matrix are recorded in [`research/COMP
 
 The first parity slice is verified on Pixel 3 XL / API 31: falling reaches the bottom, then resumes horizontal/autonomous motion; the overlay position remains stable while the device is dozing and advances again after wake. Force-stop removes both foreground service and overlay window without a fatal error.
 
-The owner-authorized upstream data snapshot is complete and kept outside Git under `private_data/`. Server migration must consume the generated SHA-256 manifest/inventory and normalize the 77 reported naming/frame-contract exceptions without mutating the pinned source snapshot.
+The owner-authorized upstream data snapshot is complete and kept outside Git under `private_data/`. Server migration must consume the generated SHA-256 manifest/inventory and normalize the 78 reported naming/content/frame-contract exceptions without mutating the pinned source snapshot.
+
+The local catalog vertical slice is verified with all 1,026 metadata/archive/thumbnail records on Pixel 3 XL / API 31: category/search filtering, on-demand Set, DataStore selection and sprite overlay all work. `OwnerPetCatalogRepository` remains the replacement boundary for the production server source.

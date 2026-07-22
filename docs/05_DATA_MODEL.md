@@ -43,6 +43,14 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 - Pack đang chạy vẫn là snapshot. Selection/settings mới chỉ áp dụng ở lần Start tiếp theo để không mutate renderer giữa session.
 - Android bitmap/`File` không đi vào pure engine state. Manifest được map sang `PetClip`; renderer giữ `PetPackVisual` đã preload.
 
+## Owner catalog model
+
+- `OwnerPetCatalogEntry`: owner ID, name, category, author, optional local thumbnail path và archive availability.
+- `OwnerPetCatalogSnapshot`: immutable loading/content/error state cùng app-specific local root.
+- `OwnerPetCatalogRepository`: boundary dùng chung cho local test source hiện tại và network/cache source tương lai.
+- Raw ZIP chỉ được normalize khi user bấm `Set`; installed key ổn định là `owner.shimeji.<id>@1` và tiếp tục persist qua `pet_selected_pack_key`.
+- Catalog 1,026 item không dùng Room trong local test: metadata parse một lần vào memory, filter 1,026 record bằng pure policy; binary vẫn nằm ngoài APK/Git.
+
 ## Không có database
 
 Base hiện không có Room, entity, DAO hay schema. Khi feature mới cần database:

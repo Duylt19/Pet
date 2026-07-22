@@ -3,6 +3,8 @@ package com.asianmobile.privatebrower.ui.catalog
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.asianmobile.privatebrower.data.model.OwnerPetCatalogEntry
+import com.asianmobile.privatebrower.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.privatebrower.pet.pack.PetPackInstallResult
 import com.asianmobile.privatebrower.pet.pack.PetPackInstaller
 import com.asianmobile.privatebrower.pet.pack.PetPackRepository
@@ -18,23 +20,46 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class PetCatalogViewModel @Inject constructor(
     private val repository: PetPackRepository,
-    private val installer: PetPackInstaller
+    private val installer: PetPackInstaller,
+    private val ownerCatalogRepository: OwnerPetCatalogRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(
         PetCatalogUiState(
             packs = repository.packs.value,
-            selectedKey = repository.selectedPack.value.key
+            selectedKey = repository.selectedPack.value.key,
+            localRootPath = ownerCatalogRepository.snapshot.value.localRootPath
         )
     )
     val uiState: StateFlow<PetCatalogUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            combine(repository.packs, repository.selectedPack) { packs, selected ->
-                packs to selected.key
-            }.collect { (packs, selectedKey) ->
-                _uiState.update { it.copy(packs = packs, selectedKey = selectedKey) }
-            }
+            combine(
+                ownerCatalogRepository.snapshot,
+                repository.packs,
+                repository.selectedPack
+            ) { catalog, packs, selected -> Triple(catalog, packs, selected) }
+                .collect { (catalog, packs, selected) ->
+                    _uiState.update { current ->
+                        current.copy(
+                            packs = packs,
+                            selectedKey = selected.key,
+                            pets = catalog.entries,
+                            visiblePets = PetCatalogFilter.apply(
+                                catalog.entries,
+                                current.searchQuery,
+                                current.selectedCategory
+                            ),
+                            categories = PetCatalogFilter.categories(catalog.entries),
+                            selectedOwnerPetId = OwnerPetCatalogEntry.petIdFromPackId(
+                                selected.manifest.id
+                            ),
+                            localRootPath = catalog.localRootPath,
+                            isLoading = catalog.isLoading,
+                            catalogError = catalog.error
+                        )
+                    }
+                }
         }
     }
 
@@ -72,6 +97,70 @@ class PetCatalogViewModel @Inject constructor(
         if (repository.select(key)) {
             val name = repository.find(key)?.manifest?.name ?: return
             _uiState.update { it.copy(message = PetCatalogMessage.Selected(name)) }
+        }
+    }
+
+    fun setOwnerPet(petId: Int) {
+        if (_uiState.value.preparingPetId != null) return
+        val name = _uiState.value.pets.firstOrNull { it.id == petId }?.name ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(preparingPetId = petId, message = null) }
+            when (val result = ownerCatalogRepository.preparePack(petId)) {
+                is PetPackInstallResult.Installed -> {
+                    repository.refresh(preferredKey = result.pack.key)
+                    _uiState.update {
+                        it.copy(
+                            preparingPetId = null,
+                            message = PetCatalogMessage.Selected(name)
+                        )
+                    }
+                }
+                is PetPackInstallResult.Rejected -> _uiState.update {
+                    it.copy(
+                        preparingPetId = null,
+                        message = PetCatalogMessage.Rejected(result.reason)
+                    )
+                }
+                is PetPackInstallResult.Failed -> _uiState.update {
+                    it.copy(
+                        preparingPetId = null,
+                        message = PetCatalogMessage.Failed(result.reason)
+                    )
+                }
+            }
+        }
+    }
+
+    fun updateSearchQuery(query: String) {
+        _uiState.update { current ->
+            current.copy(
+                searchQuery = query,
+                visiblePets = PetCatalogFilter.apply(
+                    current.pets,
+                    query,
+                    current.selectedCategory
+                )
+            )
+        }
+    }
+
+    fun selectCategory(category: String?) {
+        _uiState.update { current ->
+            current.copy(
+                selectedCategory = category,
+                visiblePets = PetCatalogFilter.apply(
+                    current.pets,
+                    current.searchQuery,
+                    category
+                )
+            )
+        }
+    }
+
+    fun refreshCatalog() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, catalogError = null) }
+            ownerCatalogRepository.refresh()
         }
     }
 

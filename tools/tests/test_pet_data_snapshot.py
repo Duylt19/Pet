@@ -38,6 +38,7 @@ class PetDataSnapshotTest(unittest.TestCase):
             self.assertEqual([], result.extra_frame_numbers)
             self.assertEqual([], result.duplicate_frame_numbers)
             self.assertEqual([], result.noncanonical_frame_names)
+            self.assertEqual([], result.non_png_frame_names)
             self.assertGreater(result.uncompressed_bytes, 0)
             self.assertEqual([], result.errors)
             self.assertEqual(64, len(result.digest.sha256))
@@ -65,6 +66,17 @@ class PetDataSnapshotTest(unittest.TestCase):
 
             self.assertEqual([4], result.duplicate_frame_numbers)
             self.assertEqual(["shime4b.png"], result.noncanonical_frame_names)
+            self.assertEqual([], result.errors)
+
+    def test_zip_audit_reports_non_png_frame_content_for_normalization(self):
+        with tempfile.TemporaryDirectory() as directory:
+            archive_path = Path(directory) / "10.zip"
+            with zipfile.ZipFile(archive_path, "w") as archive:
+                archive.writestr("shime1.png", b"GIF89a" + b"legacy")
+
+            result = audit_zip(archive_path)
+
+            self.assertEqual(["shime1.png"], result.non_png_frame_names)
             self.assertEqual([], result.errors)
 
 

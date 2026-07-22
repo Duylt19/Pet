@@ -47,8 +47,8 @@ The owner-authorized snapshot captured on 2026-07-22 is stored at `private_data/
 - 1,026 catalog ZIPs and 1,026 thumbnails are present.
 - 18 custom pets reference 180 assets; all 180 are present.
 - The checkout contains 2,237 data files and 657,271,009 bytes excluding `.git`.
-- All 1,026 catalog packs pass CRC/signature/SHA-256 transport integrity checks; 949 are immediately runtime-ready.
-- 77 packs require a server-side normalization rule while preserving the source snapshot: 46 use upper-case `.PNG`, pack ID `691` uses names such as `shime1 (1).png`, seven packs include alternative duplicate filenames (one overlaps the upper-case group), and 24 packs contain missing or extended numbered frames.
+- All 1,026 catalog packs pass CRC/SHA-256 transport integrity checks and every thumbnail has a valid PNG signature; 948 packs are immediately runtime-ready.
+- 78 packs require a server-side normalization rule while preserving the source snapshot: 46 use upper-case `.PNG`, pack ID `691` uses names such as `shime1 (1).png`, seven packs include alternative duplicate filenames (one overlaps the upper-case group), 24 packs contain missing or extended numbered frames, and pack ID `136` has two GIF frames mislabeled as PNG.
 - Exact filenames and frame gaps are recorded in the JSON report and CSV inventory.
 
 Generated handoff files are beside the snapshot under `private_data/`:
@@ -56,3 +56,13 @@ Generated handoff files are beside the snapshot under `private_data/`:
 - `anime-shimeji-audit.json`
 - `anime-shimeji-inventory.csv`
 - `anime-shimeji-files.sha256`
+
+## Local Android test sync
+
+After installing a debug build, sync the complete snapshot into app-specific device storage:
+
+```bash
+python3 tools/sync_pet_catalog_to_device.py
+```
+
+The app reads this directory without a storage permission, displays the full catalog/categories, and converts only the selected raw ZIP into the validated pack-v1 runtime format. See [`../features/OWNER_PET_CATALOG.md`](../features/OWNER_PET_CATALOG.md).

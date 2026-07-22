@@ -13,8 +13,9 @@ Base hiện chỉ giữ các capability hỗ trợ sau:
 | Pure pet engine | `pet/engine` | Active, JVM-tested |
 | Multi-pet overlay | `pet/overlay` | Active, 1–3 window với một shared clock/service |
 | Validated pet packs | `pet/pack`, `ui/catalog` | Active, schema v1 + secure import + preview/select |
+| Owner pet catalog | `OwnerPetCatalogRepository`, `ui/catalog` | Active local test source, 1,026 pets + search/category/on-demand Set |
 | Pet settings persistence | `PetSettingsRepository`, DataStore | Active, selection/count/size/speed/interaction/position |
 
 Không có browser core, search/clear-browsing, broad storage access, tabs, bookmarks/history, download manager, file/media manager hoặc database. Background component duy nhất là `PetOverlayService` do user chủ động start, `START_NOT_STICKY` và không có boot receiver.
 
-Chi tiết: [PET_OVERLAY.md](PET_OVERLAY.md), [PET_PACKS.md](PET_PACKS.md), [PET_SETTINGS.md](PET_SETTINGS.md). Không tái sử dụng spec Private Browser cũ.
+Chi tiết: [PET_OVERLAY.md](PET_OVERLAY.md), [PET_PACKS.md](PET_PACKS.md), [PET_SETTINGS.md](PET_SETTINGS.md), [OWNER_PET_CATALOG.md](OWNER_PET_CATALOG.md). Không tái sử dụng spec Private Browser cũ.

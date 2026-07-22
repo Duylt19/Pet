@@ -67,7 +67,7 @@ Các guardrail hiện tại:
 
 ## Asset ownership
 
-`Sunny Cat` sample sprite được tạo riêng cho project bằng built-in image generation và chroma-key removal. Không có source, asset hoặc branding của app đối thủ trong pack mẫu.
+`Sunny Cat` sample sprite được tạo riêng cho project bằng built-in image generation và chroma-key removal. Owner đã xác nhận snapshot Anime Shimeji được kiểm soát/ủy quyền đầy đủ; binary snapshot nằm ngoài Git và được chuyển đổi on-demand theo [`OWNER_PET_CATALOG.md`](OWNER_PET_CATALOG.md). Decompiled source, credential, ad configuration và branding vẫn không được nhập vào runtime.
 
 ## Device verification
 

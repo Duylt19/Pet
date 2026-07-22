@@ -8,7 +8,7 @@
 | `intro` | `ui/intro/IntroScreen` | Pager ba trang, có native ads theo config |
 | `permission` | `ui/permission/PermissionScreen` | Overlay special access + notification permission, có Continue/Skip |
 | `home` | `ui/home/HomeScreen` | Selected pet/count, permission status, Start/Stop, Catalog/Settings/Premium; scroll thích ứng |
-| `pet_catalog` | `ui/catalog/PetCatalogScreen` | List validated packs, file picker import, install status |
+| `pet_catalog` | `ui/catalog/PetCatalogScreen` | Local owner catalog, search, 268 categories, thumbnail, availability và on-demand Set |
 | `pet_detail/{packKey}` | `ui/catalog/PetDetailScreen` | Pack preview/metadata và select action |
 | `settings` | `ui/home/settings/SettingsScreen` | Pet count/size/speed/sound/interaction + language/share/rate/feedback/version |
 | `premium/{startByIndex}` | `ui/premium/PremiumScreen` | Subscription UI, close behavior theo entry source |

@@ -42,6 +42,7 @@ class PackAudit:
     extra_frame_numbers: list[int]
     duplicate_frame_numbers: list[int]
     noncanonical_frame_names: list[str]
+    non_png_frame_names: list[str]
     uncompressed_bytes: int
     errors: list[str]
 
@@ -56,6 +57,7 @@ class ZipAudit:
     extra_frame_numbers: list[int]
     duplicate_frame_numbers: list[int]
     noncanonical_frame_names: list[str]
+    non_png_frame_names: list[str]
     uncompressed_bytes: int
     errors: list[str]
 
@@ -89,6 +91,7 @@ def audit_zip(path: Path) -> ZipAudit:
     errors: list[str] = []
     frames: list[int] = []
     noncanonical_frame_names: list[str] = []
+    non_png_frame_names: list[str] = []
     uncompressed_bytes = 0
     digest = sha256_file(path)
     try:
@@ -106,6 +109,9 @@ def audit_zip(path: Path) -> ZipAudit:
                     frames.append(frame_number)
                     if info.filename != f"shime{frame_number}.png":
                         noncanonical_frame_names.append(info.filename)
+                    with archive.open(info) as frame_stream:
+                        if frame_stream.read(len(PNG_SIGNATURE)) != PNG_SIGNATURE:
+                            non_png_frame_names.append(info.filename)
             corrupt = archive.testzip()
             if corrupt is not None:
                 errors.append(f"crc_error:{corrupt}")
@@ -126,6 +132,7 @@ def audit_zip(path: Path) -> ZipAudit:
         extra_frame_numbers=extra_frames,
         duplicate_frame_numbers=duplicate_frames,
         noncanonical_frame_names=noncanonical_frame_names,
+        non_png_frame_names=non_png_frame_names,
         uncompressed_bytes=uncompressed_bytes,
         errors=errors,
     )
@@ -219,6 +226,7 @@ def audit_snapshot(
         extra_frame_numbers: list[int] = []
         duplicate_frame_numbers: list[int] = []
         noncanonical_frame_names: list[str] = []
+        non_png_frame_names: list[str] = []
         uncompressed_bytes = 0
         if zip_path.is_file():
             zip_audit = audit_zip(zip_path)
@@ -230,6 +238,7 @@ def audit_snapshot(
             extra_frame_numbers = zip_audit.extra_frame_numbers
             duplicate_frame_numbers = zip_audit.duplicate_frame_numbers
             noncanonical_frame_names = zip_audit.noncanonical_frame_names
+            non_png_frame_names = zip_audit.non_png_frame_names
             uncompressed_bytes = zip_audit.uncompressed_bytes
             errors.extend(zip_audit.errors)
         else:
@@ -252,6 +261,7 @@ def audit_snapshot(
                 extra_frame_numbers=extra_frame_numbers,
                 duplicate_frame_numbers=duplicate_frame_numbers,
                 noncanonical_frame_names=noncanonical_frame_names,
+                non_png_frame_names=non_png_frame_names,
                 uncompressed_bytes=uncompressed_bytes,
                 errors=errors,
             )
@@ -307,8 +317,10 @@ def audit_snapshot(
         or audit.extra_frame_numbers
         or audit.duplicate_frame_numbers
         or audit.noncanonical_frame_names
+        or audit.non_png_frame_names
     ]
     noncanonical_name_packs = [audit for audit in audits if audit.noncanonical_frame_names]
+    non_png_frame_packs = [audit for audit in audits if audit.non_png_frame_names]
     report = {
         "schemaVersion": 1,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
@@ -343,6 +355,7 @@ def audit_snapshot(
             "runtimeReadyCatalogPacks": len(audits) - len(runtime_normalization_packs),
             "runtimeNormalizationPacks": len(runtime_normalization_packs),
             "noncanonicalNamePacks": len(noncanonical_name_packs),
+            "nonPngFramePacks": len(non_png_frame_packs),
             "customPets": len(custom_catalog),
             "expectedCustomAssets": len(expected_custom_paths),
             "presentCustomAssets": len(custom_digests),
@@ -389,6 +402,7 @@ def audit_snapshot(
                 "extra_frame_numbers",
                 "duplicate_frame_numbers",
                 "noncanonical_frame_names",
+                "non_png_frame_names",
                 "uncompressed_bytes",
                 "errors",
             ],
@@ -419,6 +433,7 @@ def audit_snapshot(
                     "noncanonical_frame_names": "|".join(
                         audit.noncanonical_frame_names
                     ),
+                    "non_png_frame_names": "|".join(audit.non_png_frame_names),
                     "uncompressed_bytes": audit.uncompressed_bytes,
                     "errors": "|".join(audit.errors),
                 }

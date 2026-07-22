@@ -10,7 +10,7 @@
 | `intro` | Intro pager | First-run |
 | `permission` | Permission | Request overlay/notification, có Continue/Skip |
 | `home` | Home | Selected pet + Start/Stop + Catalog/Settings/Premium |
-| `pet_catalog` | Pet Catalog | Built-in/installed packs + secure file import |
+| `pet_catalog` | Pet Catalog | 1,026 owner pets từ local test source, search/category, Set + secure file import |
 | `pet_detail/{packKey}` | Pet Detail | Preview metadata và select pack |
 | `settings` | Settings | Mở từ Home |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
@@ -29,7 +29,8 @@ Permission ──continue/skip──> Home
 Home ──Start(no overlay)──> System Overlay Settings ──back──> Home
 Home ──Start(API 33+, notification missing)──> Notification permission ──result──> Start pet
 Home ──Start/Stop──> Pet overlay foreground service
-Home ──Choose a pet──> Catalog ──Pack──> Detail ──Select──> selected pack
+Home ──Choose a pet──> Catalog ──search/category──> Set local owner pet
+Catalog ──already prepared pack──> Detail
 Home ──Settings──> Settings ──Language──> Language Settings
 Home ──Premium──> Premium(in-app)
 ```

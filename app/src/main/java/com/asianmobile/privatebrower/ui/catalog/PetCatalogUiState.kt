@@ -1,12 +1,29 @@
 package com.asianmobile.privatebrower.ui.catalog
 
+import com.asianmobile.privatebrower.data.model.OwnerPetCatalogEntry
+import com.asianmobile.privatebrower.data.model.OwnerPetCatalogError
 import com.asianmobile.privatebrower.pet.pack.PetPack
 
 data class PetCatalogUiState(
     val packs: List<PetPack> = emptyList(),
     val selectedKey: String = "",
+    val pets: List<OwnerPetCatalogEntry> = emptyList(),
+    val visiblePets: List<OwnerPetCatalogEntry> = emptyList(),
+    val categories: List<PetCatalogCategory> = emptyList(),
+    val selectedCategory: String? = null,
+    val searchQuery: String = "",
+    val selectedOwnerPetId: Int? = null,
+    val preparingPetId: Int? = null,
+    val localRootPath: String = "",
+    val isLoading: Boolean = true,
+    val catalogError: OwnerPetCatalogError? = null,
     val isInstalling: Boolean = false,
     val message: PetCatalogMessage? = null
+)
+
+data class PetCatalogCategory(
+    val name: String?,
+    val count: Int
 )
 
 sealed interface PetCatalogMessage {

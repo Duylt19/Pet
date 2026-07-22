@@ -379,9 +379,11 @@
     <string name="home_pet_start_failed">The pet could not start. Check display access and try again.</string>
     <string name="pet_catalog_open">Choose a pet</string>
     <string name="pet_catalog_title">Pet catalog</string>
-    <string name="pet_catalog_subtitle">Choose a validated companion or import a .zip pack.</string>
+    <string name="pet_catalog_subtitle">Browse the local owner catalog, filter by category, then set a pet for the next start.</string>
     <string name="pet_catalog_import">Import</string>
     <string name="pet_catalog_selected">Selected</string>
+    <string name="pet_catalog_set">Set</string>
+    <string name="pet_catalog_not_synced">Missing</string>
     <string name="pet_catalog_view_details">View details</string>
     <string name="pet_catalog_unknown_author">Unknown creator</string>
     <string name="pet_catalog_install_success">%1$s is ready</string>
@@ -395,6 +397,20 @@
     <string name="pet_detail_builtin">Built-in</string>
     <string name="pet_detail_installed">Installed</string>
     <string name="pet_detail_select">Use this pet</string>
+    <string name="pet_catalog_search_hint">Search pets, categories, or creators</string>
+    <string name="pet_catalog_clear_search">Clear pet search</string>
+    <string name="pet_catalog_all_category">All (%1$d)</string>
+    <string name="pet_catalog_category_with_count">%1$s (%2$d)</string>
+    <plurals name="pet_catalog_result_count">
+        <item quantity="one">%d pet</item>
+        <item quantity="other">%d pets</item>
+    </plurals>
+    <string name="pet_catalog_no_results">No pets match this filter.</string>
+    <string name="pet_catalog_local_missing">Local catalog data was not found. Sync the owner snapshot to:\n%1$s</string>
+    <string name="pet_catalog_local_invalid">The local pet catalog is invalid. Sync the snapshot again.</string>
+    <string name="pet_catalog_storage_unavailable">Local catalog storage is unavailable on this device.</string>
+    <string name="pet_catalog_retry">Retry</string>
+    <string name="pet_catalog_prepare_failed">This local pet could not be prepared. Check its archive and try again.</string>
 
     <!-- Pet overlay foreground service -->
     <string name="pet_overlay_notification_channel_name">Screen pet</string>

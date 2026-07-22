@@ -2,8 +2,11 @@ package com.asianmobile.privatebrower.di
 
 import android.content.Context
 import com.asianmobile.privatebrower.data.local.DataStoreManager
+import com.asianmobile.privatebrower.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.privatebrower.data.repository.PetSettingsRepository
 import com.asianmobile.privatebrower.data.repository.impl.DataStorePetSettingsRepository
+import com.asianmobile.privatebrower.data.repository.impl.LocalOwnerPetCatalogRepository
+import com.asianmobile.privatebrower.data.repository.impl.OwnerPetCatalogParser
 import com.asianmobile.privatebrower.pet.pack.FilePetPackRepository
 import com.asianmobile.privatebrower.pet.pack.PetPackArchiveExtractor
 import com.asianmobile.privatebrower.pet.pack.PetPackManifestParser
@@ -40,6 +43,10 @@ object DataModule {
 
     @Provides
     @Singleton
+    fun provideOwnerPetCatalogParser(): OwnerPetCatalogParser = OwnerPetCatalogParser()
+
+    @Provides
+    @Singleton
     fun providePetPackRepository(
         repository: FilePetPackRepository
     ): PetPackRepository = repository
@@ -49,4 +56,10 @@ object DataModule {
     fun providePetSettingsRepository(
         repository: DataStorePetSettingsRepository
     ): PetSettingsRepository = repository
+
+    @Provides
+    @Singleton
+    fun provideOwnerPetCatalogRepository(
+        repository: LocalOwnerPetCatalogRepository
+    ): OwnerPetCatalogRepository = repository
 }
