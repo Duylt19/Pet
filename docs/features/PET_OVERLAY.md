@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Phase platform đã hoàn tất nhưng chưa có entry từ Home/Permission. `PetOverlay.start(context)` chỉ start khi `Settings.canDrawOverlays(context)` trả `true`; product UX cấp quyền và Start/Stop được nối ở Phase 3.
+Platform và product vertical slice đã hoàn tất. `PetOverlay.start(context)` chỉ start khi `Settings.canDrawOverlays(context)` trả `true`; Permission giải thích/request access và Home điều khiển Start/Stop.
 
 ## Thành phần
 
@@ -18,7 +18,7 @@ Phase platform đã hoàn tất nhưng chưa có entry từ Home/Permission. `Pe
 
 - `SYSTEM_ALERT_WINDOW`: tạo `TYPE_APPLICATION_OVERLAY`; user phải cấp qua system settings.
 - `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_SPECIAL_USE`: service target SDK 36 khai báo `specialUse` và property giải thích use case.
-- `POST_NOTIFICATIONS`: Phase 3 phải request theo UX phù hợp trên API 33+; foreground service vẫn luôn tạo notification/channel.
+- `POST_NOTIFICATIONS`: Permission/Home request trên API 33+; denial không block FGS start, foreground service vẫn luôn tạo notification/channel.
 - Service `exported=false`, trả `START_NOT_STICKY`, không có boot receiver và không tự restart.
 - Play Console phải khai báo/review foreground-service type trước release.
 
@@ -32,8 +32,7 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Tap/drag/fling đều được chuyển thành `PetEvent`; position luôn clamp theo usable system-bar/cutout bounds.
 - Stop action, `onDestroy` và lỗi add window đều remove callback/window và reset runtime state.
 
-## Chưa thuộc phase này
+## Chưa thuộc MVP hiện tại
 
-- Overlay permission/notification permission UI.
-- Home Start/Stop state và error messaging.
 - Asset pack/catalog, persistence, multi-pet hoặc auto-start after boot.
+- OEM/device verification: compile + JVM tests đã pass, nhưng workspace hiện không có thiết bị `adb` để chạy manual overlay matrix.

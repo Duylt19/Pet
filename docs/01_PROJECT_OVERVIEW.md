@@ -24,8 +24,8 @@ Cute Pet có domain chính thức: một pet animation có thể hiển thị v�
 - Splash và startup orchestration.
 - Language onboarding + language settings.
 - Intro/onboarding pages.
-- Permission shell trung tính; overlay special-access UX được thêm ở phase service.
-- Home placeholder với Settings/Premium.
+- Permission UX cho overlay special access và notification permission, có Skip.
+- Home điều khiển Start/Stop demo pet và mở Settings/Premium.
 - Settings tối giản: language, share, rate, feedback và version.
 - Premium/billing, ads, analytics, remote config, theme và reusable components.
 
@@ -42,6 +42,6 @@ Cute Pet có domain chính thức: một pet animation có thể hiển thị v�
 ## Quyết định deferred
 
 - Package/application ID và root Gradle project name chưa đổi.
-- UI final, icon và pet asset production chờ design/asset chính thức.
+- UI visual final, icon và pet asset production chờ design/asset chính thức; vertical slice chức năng đã hoạt động.
 - Overlay permission, foreground-service notification và policy disclosure phải được triển khai/test trước release.
 - Không tự khởi động pet sau boot trong MVP; chỉ bổ sung khi user chủ động bật trong Settings.

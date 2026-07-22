@@ -6,8 +6,8 @@
 | `language` | `ui/language/LanguageScreen` | Chọn language trong onboarding |
 | `language_settings` | `ui/language/LanguageScreen` | Chọn language từ Settings rồi restart app shell |
 | `intro` | `ui/intro/IntroScreen` | Pager ba trang, có native ads theo config |
-| `permission` | `ui/permission/PermissionScreen` | Product-neutral shell có Continue/Skip; không request storage |
-| `home` | `ui/home/HomeScreen` | Placeholder: chỉ hai nút Settings/Premium |
+| `permission` | `ui/permission/PermissionScreen` | Overlay special access + notification permission, có Continue/Skip |
+| `home` | `ui/home/HomeScreen` | Permission status, Start/Stop demo pet, Settings/Premium |
 | `settings` | `ui/home/settings/SettingsScreen` | Language/share/rate/feedback/version |
 | `premium/{startByIndex}` | `ui/premium/PremiumScreen` | Subscription UI, close behavior theo entry source |
 

@@ -1,6 +1,6 @@
 # 06 — UI Design System Contract
 
-Base giữ infrastructure/theme và component pattern; UI Home hiện là placeholder, không phải final Cute Pet design.
+Base giữ infrastructure/theme và component pattern. Home/Permission hiện là functional MVP cho pet overlay, chưa phải visual design final từ Figma.
 
 ## Resource rules
 

@@ -24,6 +24,10 @@ Language được mirror sang SharedPreferences `language_cache` để có thể
 
 Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap/view/context. Asset-pack metadata production sẽ được map sang các model này ở phase catalog/installer.
 
+## Overlay runtime state
+
+`PetOverlayRuntime.isRunning` là process-local `StateFlow<Boolean>`, không phải persisted preference. Service dùng `START_NOT_STICKY` và không có boot receiver nên trạng thái running không được restore sau process death/reboot ở MVP. `HomeUiState` kết hợp runtime state với overlay/notification permission snapshot.
+
 ## Không có database
 
 Base hiện không có Room, entity, DAO hay schema. Khi feature mới cần database:

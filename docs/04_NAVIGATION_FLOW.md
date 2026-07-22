@@ -8,8 +8,8 @@
 | `language` | Language onboarding | First-run |
 | `language_settings` | Language settings | Mở từ Settings |
 | `intro` | Intro pager | First-run |
-| `permission` | Permission | Product-neutral shell có Continue/Skip; chưa request special access |
-| `home` | Home | Placeholder 2 action |
+| `permission` | Permission | Request overlay/notification, có Continue/Skip |
+| `home` | Home | Start/Stop demo pet + Settings/Premium |
 | `settings` | Settings | Mở từ Home |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
@@ -24,6 +24,9 @@ Intro ──finish──> Premium(onboarding, optional) ──close──> Permi
 Intro ──finish──> Permission
 Permission ──continue/skip──> Home
 
+Home ──Start(no overlay)──> System Overlay Settings ──back──> Home
+Home ──Start(API 33+, notification missing)──> Notification permission ──result──> Start pet
+Home ──Start/Stop──> Pet overlay foreground service
 Home ──Settings──> Settings ──Language──> Language Settings
 Home ──Premium──> Premium(in-app)
 ```
@@ -48,3 +51,5 @@ Home ──Premium──> Premium(in-app)
 - String argument phải encode; enum argument phải parse an toàn với fallback.
 - Không phục hồi route Private Browser cũ nếu chưa có feature spec mới.
 - Overlay permission được mở qua `Settings.ACTION_MANAGE_OVERLAY_PERMISSION`; đây là special access, không phải runtime permission dialog.
+- Notification permission chỉ request trên API 33+; denial không ngăn FGS chạy nhưng notification có thể chỉ hiện trong system task manager.
+- Home refresh permission ở `ON_RESUME`; nếu overlay bị thu hồi khi service đang chạy, app stop service.

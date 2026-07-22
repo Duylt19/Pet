@@ -1,10 +1,13 @@
 package com.asianmobile.privatebrower.ui.permission
 
+import android.Manifest
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,16 +17,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -34,10 +41,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.privatebrower.R
 import com.asianmobile.privatebrower.ads.config.SCREEN_PERMISSION
 import com.asianmobile.privatebrower.ads.ui.compose.NativeAdInternal
+import com.asianmobile.privatebrower.ads.ui.interstitial.InterstitialUtil
+import com.asianmobile.privatebrower.pet.overlay.PetOverlay
 import com.asianmobile.privatebrower.ui.component.TransparentStatusBarEffect
 import com.asianmobile.privatebrower.utils.ScreenName
 import com.asianmobile.privatebrower.utils.TrackScreenView
@@ -51,8 +63,42 @@ fun PermissionScreen(
     viewModel: PermissionViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val overlaySettingsLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        viewModel.refreshPermissions()
+    }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        viewModel.refreshPermissions()
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshPermissions()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     PermissionScreenContent(
         uiState = uiState,
+        onRequestOverlay = {
+            InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
+            runCatching {
+                overlaySettingsLauncher.launch(PetOverlay.permissionIntent(context))
+            }.onFailure {
+                overlaySettingsLauncher.launch(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
+            }
+        },
+        onRequestNotifications = {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        },
         onContinue = onContinue,
         onSkip = onSkip
     )
@@ -61,6 +107,8 @@ fun PermissionScreen(
 @Composable
 private fun PermissionScreenContent(
     uiState: PermissionUiState,
+    onRequestOverlay: () -> Unit,
+    onRequestNotifications: () -> Unit,
     onContinue: () -> Unit,
     onSkip: () -> Unit
 ) {
@@ -78,29 +126,27 @@ private fun PermissionScreenContent(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = dimensionResource(SdpR.dimen._18sdp)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.weight(1f))
-            Image(
-                painter = painterResource(R.drawable.img_permission_dark),
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._18sdp)))
+            Icon(
+                painter = painterResource(R.drawable.ic_notification_pet),
                 contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(
-                    width = dimensionResource(SdpR.dimen._143sdp),
-                    height = dimensionResource(SdpR.dimen._98sdp)
-                )
+                tint = colorResource(R.color.pet_demo_fur),
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._72sdp))
             )
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
             Text(
                 text = stringResource(R.string.permission_title),
                 color = colorResource(R.color.white),
                 fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
-                lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp,
+                fontSize = dimensionResource(SspR.dimen._18ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._24ssp).value.sp,
                 textAlign = TextAlign.Center
             )
-            Spacer(Modifier.height(dimensionResource(SdpR.dimen._3sdp)))
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
             Text(
                 text = stringResource(R.string.permission_subtitle),
                 color = colorResource(R.color.colors_9B9C9E),
@@ -109,7 +155,23 @@ private fun PermissionScreenContent(
                 lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
                 textAlign = TextAlign.Center
             )
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._18sdp)))
+            PermissionItem(
+                title = stringResource(R.string.permission_overlay_title),
+                subtitle = stringResource(R.string.permission_overlay_subtitle),
+                granted = uiState.overlayGranted,
+                onRequest = onRequestOverlay
+            )
+            if (uiState.notificationPermissionRequired) {
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
+                PermissionItem(
+                    title = stringResource(R.string.permission_notification_title),
+                    subtitle = stringResource(R.string.permission_notification_subtitle),
+                    granted = uiState.notificationGranted,
+                    onRequest = onRequestNotifications
+                )
+            }
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._18sdp)))
             PermissionContinueActions(
                 enabled = uiState.actionsEnabled,
                 onContinue = onContinue,
@@ -126,52 +188,81 @@ private fun PermissionScreenContent(
 }
 
 @Composable
+private fun PermissionItem(
+    title: String,
+    subtitle: String,
+    granted: Boolean,
+    onRequest: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = colorResource(R.color.colors_212327),
+                shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
+            )
+            .padding(dimensionResource(SdpR.dimen._12sdp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                color = colorResource(R.color.white),
+                fontFamily = FontFamily(Font(R.font.inter_medium)),
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
+            )
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._3sdp)))
+            Text(
+                text = subtitle,
+                color = colorResource(R.color.colors_9B9C9E),
+                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._11ssp).value.sp
+            )
+        }
+        Button(
+            onClick = onRequest,
+            enabled = !granted,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(R.color.colors_3369FD),
+                disabledContainerColor = colorResource(R.color.colors_00C950)
+            )
+        ) {
+            Text(
+                text = stringResource(
+                    if (granted) R.string.permission_allowed else R.string.permission_allow
+                )
+            )
+        }
+    }
+}
+
+@Composable
 private fun PermissionContinueActions(
     enabled: Boolean,
     onContinue: () -> Unit,
     onSkip: () -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(
-            modifier = Modifier
-                .height(dimensionResource(SdpR.dimen._24sdp))
-                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._3sdp)))
-                .clickable(enabled = enabled, onClick = onContinue)
-                .padding(horizontal = dimensionResource(SdpR.dimen._6sdp)),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.permission_continue),
-                color = colorResource(R.color.colors_3369FD),
-                fontFamily = FontFamily(Font(R.font.inter_medium)),
-                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-                lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp
-            )
-            Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
-            Box(
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_arrow_continue),
-                    contentDescription = null,
-                    tint = colorResource(R.color.colors_3369FD),
-                    modifier = Modifier.size(
-                        width = dimensionResource(SdpR.dimen._12sdp),
-                        height = dimensionResource(SdpR.dimen._11sdp)
-                    )
-                )
-            }
-        }
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._2sdp)))
-        Text(
-            text = stringResource(R.string.grant_permission_later),
-            color = colorResource(R.color.colors_9B9C9E),
-            fontFamily = FontFamily(Font(R.font.inter_regular)),
-            fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
-            lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp,
-            modifier = Modifier.clickable(enabled = enabled, onClick = onSkip)
+    Button(
+        onClick = onContinue,
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = colorResource(R.color.colors_3369FD)
         )
+    ) {
+        Text(text = stringResource(R.string.permission_continue))
+    }
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
+    Button(
+        onClick = onSkip,
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = colorResource(R.color.colors_9B9C9E)
+        )
+    ) {
+        Text(text = stringResource(R.string.grant_permission_later))
     }
 }
 
@@ -184,7 +275,9 @@ private fun PermissionContinueActions(
 @Composable
 private fun PermissionScreenPreview() {
     PermissionScreenContent(
-        uiState = PermissionUiState(),
+        uiState = PermissionUiState(notificationPermissionRequired = true),
+        onRequestOverlay = {},
+        onRequestNotifications = {},
         onContinue = {},
         onSkip = {}
     )

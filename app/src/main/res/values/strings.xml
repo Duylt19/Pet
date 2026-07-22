@@ -34,11 +34,17 @@
     <string name="confirm">Confirm</string>
     <string name="this_action_can_contain_ads">This action can contain ads</string>
     <string name="setting_up_your_app_experience_please_wait_a_moment">Setting up your app experience, please wait a moment...</string>
-    <string name="grant_permission_later">Grant permission later</string>
-    <string name="permission_title">Cute Pet permissions</string>
-    <string name="permission_subtitle">Screen pet permission setup is coming in the next implementation phase.</string>
+    <string name="grant_permission_later">Skip for now</string>
+    <string name="permission_title">Let your pet roam anywhere</string>
+    <string name="permission_subtitle">Cute Pet needs display access to stay visible above other apps. Notifications keep you in control while it is running.</string>
     <string name="permission_storage_title">Storage</string>
     <string name="permission_continue">CONTINUE</string>
+    <string name="permission_overlay_title">Display over other apps</string>
+    <string name="permission_overlay_subtitle">Required to show and move your pet outside Cute Pet.</string>
+    <string name="permission_notification_title">Pet running notification</string>
+    <string name="permission_notification_subtitle">Recommended so you can always see and stop the running pet.</string>
+    <string name="permission_allow">Allow</string>
+    <string name="permission_allowed">Allowed</string>
     <string name="permission_status_allowed">Permission is allowed</string>
     <string name="permission_status_not_allowed">Permission is not allowed</string>
     <string name="permission_required">Permission Required</string>
@@ -341,6 +347,20 @@
     <string name="feedback_body_template">\n\n---\nDevice info auto-filled. Please describe your issue or feedback above.</string>
     <string name="feedback_chooser_title">Send feedback via</string>
     <string name="feedback_no_email_app">No email app installed</string>
+
+    <!-- Cute Pet Home -->
+    <string name="home_pet_title">Your screen companion</string>
+    <string name="home_pet_subtitle">Start the demo pet, then drag, tap, or fling it while using other apps.</string>
+    <string name="home_pet_status_running">Pet is running</string>
+    <string name="home_pet_status_stopped">Pet is resting</string>
+    <string name="home_pet_overlay_ready">Display access is ready</string>
+    <string name="home_pet_overlay_required">Display access is required before starting</string>
+    <string name="home_pet_notification_will_request">Notification permission will be requested when you start.</string>
+    <string name="home_pet_action_allow_overlay">Allow display access</string>
+    <string name="home_pet_action_start">Start pet</string>
+    <string name="home_pet_action_starting">Starting…</string>
+    <string name="home_pet_action_stop">Stop pet</string>
+    <string name="home_pet_start_failed">The pet could not start. Check display access and try again.</string>
 
     <!-- Pet overlay foreground service -->
     <string name="pet_overlay_notification_channel_name">Screen pet</string>

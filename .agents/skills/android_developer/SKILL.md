@@ -13,9 +13,9 @@ Agent làm việc trong repository này PHẢI tuân thủ các contract dưới
 - Namespace/application ID tạm thời: `com.asianmobile.privatebrower`.
 - Không tự đổi package, namespace, root project name hoặc provider authority nếu owner chưa yêu cầu.
 - Flow hiện tại: Splash → Language → Intro → Permission → Home.
-- Home chỉ là placeholder với hai action: Settings và Premium.
+- Home điều khiển Start/Stop demo pet và có hai action Settings/Premium.
 - Browser, search/clear-browsing, broad storage access, tab manager, bookmark/history, download, media/file manager, Room và foreground service cũ đã bị xóa.
-- Permission hiện là product-neutral shell; chưa request overlay special access.
+- Permission xử lý overlay special access + notification permission và cho phép Skip.
 - Pet overlay mới nằm trong `pet/overlay`: one-pet `specialUse` foreground service, small `TYPE_APPLICATION_OVERLAY` window và notification bắt buộc.
 - Không viết code/docs dựa trên giả định các module đã xóa vẫn tồn tại.
 
@@ -179,7 +179,7 @@ size → shadow → clip → background → border → clickable → padding
 
 ## 8. Permission và platform policy
 
-- Màn Permission hiện là shell trung tính và không request storage. Overlay phải dùng special-access flow riêng khi feature được nối vào UI.
+- Màn Permission không request storage; overlay dùng `ACTION_MANAGE_OVERLAY_PERMISSION`, còn notification dùng runtime permission trên API 33+.
 - Không thêm permission vì “có thể cần sau”. Chỉ khai báo/request khi feature hiện tại cần và có UX giải thích.
 - Runtime permission phải xét API level, denial/rationale/permanent denial và đường dẫn App Settings.
 - Special access không được request như runtime permission.

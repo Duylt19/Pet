@@ -40,7 +40,7 @@ Definition of done: engine chạy deterministic trong JVM tests và không impor
 
 Definition of done: một pet hiển thị ổn định trên app khác, drag/tap/fling được, không rò window/service sau stop.
 
-## Phase 3 — Product Home and overlay permission flow
+## Phase 3 — Product Home and overlay permission flow — Done
 
 - Thay Home placeholder bằng trạng thái pet selected/running/stopped và CTA Start/Stop.
 - Kiểm tra `Settings.canDrawOverlays`; mở `ACTION_MANAGE_OVERLAY_PERMISSION` theo package URI và refresh ở `ON_RESUME`.
