@@ -1,8 +1,10 @@
 package com.asianmobile.privatebrower.data.usecase
 
-import com.asianmobile.privatebrower.data.browser.BrowserEngine
-import com.asianmobile.privatebrower.data.browser.TabManager
-import com.asianmobile.privatebrower.data.repository.HistoryRepository
+import android.content.Context
+import android.webkit.CookieManager
+import android.webkit.WebStorage
+import android.webkit.WebView
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -73,63 +75,33 @@ data class ClearBrowsingDataResult(
 )
 
 class ClearBrowsingDataUseCase @Inject constructor(
-    private val historyRepository: HistoryRepository,
-    private val tabManager: TabManager,
-    private val browserEngine: BrowserEngine
+    @param:ApplicationContext private val context: Context
 ) {
     val supportsProfileIsolation: Boolean
-        get() = tabManager.supportsProfileIsolation()
+        get() = false
 
     suspend operator fun invoke(options: ClearBrowsingDataOptions): ClearBrowsingDataResult {
-        val includesNormal = options.scope != BrowsingDataScope.PRIVATE
-        val includesPrivate = options.scope != BrowsingDataScope.NORMAL
-        val profileIsolationSupported = supportsProfileIsolation
-        val limitedIsolation = options.hasLimitedProfileIsolation(profileIsolationSupported)
-
         withContext(Dispatchers.Main.immediate) {
-            when (options.openTabReloadScope(profileIsolationSupported)) {
-                OpenTabReloadScope.NONE -> Unit
-                OpenTabReloadScope.NORMAL -> {
-                    tabManager.invalidateOpenTabsForReload(isIncognito = false)
+            if (options.clearCookies) {
+                CookieManager.getInstance().apply {
+                    removeAllCookies(null)
+                    flush()
                 }
-                OpenTabReloadScope.PRIVATE -> {
-                    tabManager.invalidateOpenTabsForReload(isIncognito = true)
-                }
-                OpenTabReloadScope.ALL -> tabManager.invalidateOpenTabsForReload()
             }
-            if (options.clearHistory && includesNormal) {
-                tabManager.clearNavigationHistory(
-                    isIncognito = if (options.scope == BrowsingDataScope.ALL) null else false
-                )
-            }
-            if (options.clearCache) tabManager.clearWebViewCache()
-        }
-
-        if (options.clearHistory && includesNormal) {
-            withContext(Dispatchers.IO) { historyRepository.deleteAll() }
-        }
-
-        if (options.clearCookies) {
-            if (profileIsolationSupported) {
-                if (includesNormal) browserEngine.clearProfileBrowsingData(isIncognito = false)
-                if (includesPrivate) browserEngine.clearProfileBrowsingData(isIncognito = true)
-            } else {
-                // Older providers share one store. Clear it once and keep both tab groups alive.
-                browserEngine.clearProfileBrowsingData(isIncognito = false)
-            }
-        }
-
-        if (options.clearOpenTabs) {
-            withContext(Dispatchers.Main.immediate) {
-                if (options.shouldCloseOpenTabs(isIncognito = false)) {
-                    tabManager.closeAllInMode(isIncognito = false)
-                }
-                if (options.shouldCloseOpenTabs(isIncognito = true)) {
-                    tabManager.closeAllInMode(isIncognito = true)
+            if (options.clearCache || options.clearHistory) {
+                WebStorage.getInstance().deleteAllData()
+                WebView(context).apply {
+                    clearCache(true)
+                    clearHistory()
+                    destroy()
                 }
             }
         }
 
-        return ClearBrowsingDataResult(profileIsolationLimited = limitedIsolation)
+        return ClearBrowsingDataResult(
+            profileIsolationLimited = options.hasLimitedProfileIsolation(
+                supportsProfileIsolation = false
+            )
+        )
     }
 }

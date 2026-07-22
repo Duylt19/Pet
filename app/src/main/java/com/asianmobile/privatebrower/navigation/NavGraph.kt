@@ -6,13 +6,11 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.asianmobile.privatebrower.ads.utils.SafeRemoteConfig
@@ -35,16 +33,6 @@ object Routes {
     const val HOME = "home"
     const val SETTINGS = "settings"
     const val PREMIUM = "premium"
-
-    // Legacy action keys emitted by the current Home UI. They intentionally have no
-    // destination in the base navigation graph and can be replaced when Home is redesigned.
-    const val BROWSER_WEBVIEW = "browser_webview"
-    const val TAB_SELECTION = "tab_selection"
-    const val BOOKMARKS_HISTORY = "bookmarks_history"
-    const val MEDIA_PHOTOS = "media_photos"
-    const val MEDIA_VIDEOS = "media_videos"
-    const val MEDIA_AUDIO = "media_audio"
-    const val MEDIA_DOCUMENTS = "media_documents"
 }
 
 @Composable
@@ -52,7 +40,6 @@ fun AppNavGraph(
     startDestination: String,
     nextScreenAfterSplash: String,
     viewModel: MainViewModel,
-    onExitApp: () -> Unit,
     onDestinationChanged: (String?) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -78,31 +65,6 @@ fun AppNavGraph(
     LaunchedEffect(navController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             onDestinationChanged(destination.route)
-        }
-    }
-
-    val activity = context as? com.asianmobile.privatebrower.MainActivity
-    val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = currentBackStackEntry?.destination?.route
-    val pendingHomeTab = activity?.pendingHomeTab
-
-    LaunchedEffect(pendingHomeTab, currentRoute) {
-        val startupRoutes = setOf(
-            Routes.SPLASH,
-            Routes.LANGUAGE,
-            Routes.INTRO,
-            Routes.PERMISSION
-        )
-        if (
-            pendingHomeTab != null &&
-            currentRoute != null &&
-            currentRoute != Routes.HOME &&
-            currentRoute !in startupRoutes &&
-            !currentRoute.startsWith(Routes.PREMIUM)
-        ) {
-            navController.safeNavigate(Routes.HOME, ignoreDebounce = true) {
-                popUpTo(Routes.HOME) { inclusive = false }
-            }
         }
     }
 
@@ -197,18 +159,14 @@ fun AppNavGraph(
                 )
             }
 
-            composable(Routes.HOME) { backStackEntry ->
-                val homeTab = activity?.pendingHomeTab
-                LaunchedEffect(homeTab) {
-                    if (homeTab != null) {
-                        backStackEntry.savedStateHandle["targetTab"] = homeTab
-                        activity.clearPendingHomeTab()
-                    }
-                }
+            composable(Routes.HOME) {
                 HomeScreen(
-                    nextScreen = ::navigateFromHome,
-                    savedStateHandle = backStackEntry.savedStateHandle,
-                    onExitApp = onExitApp
+                    onNavigateToSettings = {
+                        navigateFromHome(Routes.SETTINGS)
+                    },
+                    onNavigateToPremium = {
+                        navigateFromHome(Routes.PREMIUM)
+                    }
                 )
             }
 

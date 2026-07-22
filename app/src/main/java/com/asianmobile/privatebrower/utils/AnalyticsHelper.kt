@@ -24,38 +24,9 @@ enum class ScreenName(val value: String) {
     INTRO_PAGE_2("intro_page_2"),
     INTRO_PAGE_3("intro_page_3"),
     PERMISSION("permission"),
-    SET_DEFAULT_BROWSER("set_default_browser"),
+    HOME("home"),
     PREMIUM("premium"),
-    SETTINGS("settings"),
-    PRIVACY_POLICY("privacy_policy"),
-
-    HOME_BROWSER("home_browser"),
-    TABS_NORMAL("tabs_normal"),
-    TABS_PRIVATE("tabs_private"),
-    TABS_SEARCH_NORMAL("tabs_search_normal"),
-    TABS_SEARCH_PRIVATE("tabs_search_private"),
-    TAB_SELECTION_NORMAL("tab_selection_normal"),
-    TAB_SELECTION_PRIVATE("tab_selection_private"),
-    DOWNLOADS_ALL("downloads_all"),
-    DOWNLOADS_ACTIVE("downloads_active"),
-    DOWNLOADS_COMPLETED("downloads_completed"),
-    BOOKMARKS("bookmarks"),
-    BOOKMARKS_SEARCH("bookmarks_search"),
-    HISTORY("history"),
-    HISTORY_SEARCH("history_search"),
-    FILES_HOME("files_home"),
-
-    BROWSER_NORMAL("browser_normal"),
-    BROWSER_PRIVATE("browser_private"),
-    FILES_IMAGES("files_images"),
-    FILES_VIDEO("files_video"),
-    FILES_AUDIO("files_audio"),
-    FILES_DOCUMENTS("files_documents"),
-    VIEWER_IMAGE("viewer_image"),
-    VIEWER_VIDEO("viewer_video"),
-    VIEWER_AUDIO("viewer_audio"),
-    VIEWER_FILE("viewer_file"),
-    HOW_TO_DOWNLOAD("how_to_download")
+    SETTINGS("settings")
 }
 
 object AnalyticsHelper {

@@ -10,10 +10,6 @@ plugins {
     alias(libs.plugins.crashlytics)
 }
 
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
-}
-
 android {
     namespace = "com.asianmobile.privatebrower"
     compileSdk = 36
@@ -109,7 +105,6 @@ dependencies {
 
     // SDP & SSP
     implementation(libs.coil.compose)
-    implementation(libs.coil.video)
 
     // Ads Module
     implementation(project(":ads"))
@@ -121,14 +116,6 @@ dependencies {
     // Lottie
     implementation(libs.lottie.compose)
 
-    // Networking used by browser downloads
-    implementation(libs.okhttp.logging)
-
-    // Room Database
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
-
     // Rate feedback email
     implementation(libs.android.mail)
     implementation(libs.android.activation)
@@ -136,9 +123,7 @@ dependencies {
     // Billing
     implementation(libs.billing)
 
-    // WebKit
-    implementation(libs.androidx.webkit)
-
-    // Core library desugaring — required for java.time.* on API < 26
+    // Required transitively by the ads module.
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
 }

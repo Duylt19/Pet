@@ -1,11 +1,7 @@
 package com.asianmobile.privatebrower
 
-import android.Manifest
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +10,6 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +20,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -36,51 +30,25 @@ import com.asianmobile.privatebrower.ads.data.SharedPreferencesUtils
 import com.asianmobile.privatebrower.ads.ui.interstitial.InterstitialLauncherUtil
 import com.asianmobile.privatebrower.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.privatebrower.ads.utils.AdOverlayState
-import com.asianmobile.privatebrower.data.local.DataStoreManager
 import com.asianmobile.privatebrower.navigation.AppNavGraph
 import com.asianmobile.privatebrower.navigation.Routes
 import com.asianmobile.privatebrower.ui.component.ExitDialog
 import com.asianmobile.privatebrower.ui.main.MainViewModel
 import com.asianmobile.privatebrower.ui.theme.BaseAppTheme
 import com.asianmobile.privatebrower.utils.LanguageUtil
-import com.asianmobile.privatebrower.utils.permission.DownloadNotificationPermissionPolicy
-import com.asianmobile.privatebrower.utils.permission.DownloadNotificationPermissionRequests
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    companion object {
-        const val HOME_TAB_DOWNLOADS = 2
-    }
-
-    @Inject
-    lateinit var dataStoreManager: DataStoreManager
-
     private val mainViewModel: MainViewModel by viewModels()
-    private val notificationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { }
     private var currentRoute: String = ""
     private var showExitDialog by mutableStateOf(false)
     private var isExitingApp = false
-    var pendingHomeTab by mutableStateOf<Int?>(null)
-        private set
-
-    fun clearPendingHomeTab() {
-        pendingHomeTab = null
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        handleNotificationIntent(intent)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        handleNotificationIntent(intent)
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
@@ -110,7 +78,6 @@ class MainActivity : ComponentActivity() {
                             startDestination = startDestination,
                             nextScreenAfterSplash = nextScreen,
                             viewModel = mainViewModel,
-                            onExitApp = ::exitApp,
                             onDestinationChanged = { route ->
                                 currentRoute = route.orEmpty()
                             }
@@ -128,7 +95,6 @@ class MainActivity : ComponentActivity() {
         }
 
         setupAdOverlay()
-        observeDownloadNotificationPermissionRequests()
         onBackPressedDispatcher.addCallback(this) {
             if (currentRoute == Routes.HOME) {
                 showExitDialog = true
@@ -140,12 +106,6 @@ class MainActivity : ComponentActivity() {
         }
         hideSystemNavigationBar()
         setupImmersiveReHide()
-    }
-
-    private fun handleNotificationIntent(intent: Intent) {
-        if (intent.getBooleanExtra("navigate_to_downloads", false)) {
-            pendingHomeTab = HOME_TAB_DOWNLOADS
-        }
     }
 
     @Suppress("DEPRECATION")
@@ -173,40 +133,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    private fun observeDownloadNotificationPermissionRequests() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                DownloadNotificationPermissionRequests.requests.collect {
-                    requestDownloadNotificationPermissionIfNeeded()
-                }
-            }
-        }
-    }
-
-    private suspend fun requestDownloadNotificationPermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
-
-        val permission = Manifest.permission.POST_NOTIFICATIONS
-        val isGranted = ContextCompat.checkSelfPermission(this, permission) ==
-            PackageManager.PERMISSION_GRANTED
-        if (isGranted) return
-
-        val requestCount = dataStoreManager.runtimePermissionRequestCount(permission)
-        if (
-            !DownloadNotificationPermissionPolicy.shouldRequest(
-                sdkInt = Build.VERSION.SDK_INT,
-                isGranted = isGranted,
-                requestCount = requestCount
-            )
-        ) {
-            return
-        }
-
-        dataStoreManager.markRuntimePermissionsRequested(listOf(permission))
-        InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
-        notificationPermissionLauncher.launch(permission)
     }
 
     private fun exitApp() {

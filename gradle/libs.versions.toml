@@ -56,9 +56,6 @@ unity-ads = "4.16.5"
 vungle = "7.6.1.0"
 crashlytics-plugin = "3.0.6"
 desugar-jdk-libs = "2.1.5"
-okhttp = "4.12.0"
-room = "2.7.1"
-webkit = "1.16.0"
 
 
 billingclient = "8.0.0"
@@ -74,7 +71,6 @@ applovin-sdk = { module = "com.applovin:applovin-sdk", version.ref = "applovin-s
 blurry = { module = "jp.wasabeef:blurry", version.ref = "blurry" }
 cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil-compose" }
-coil-video = { module = "io.coil-kt:coil-video", version.ref = "coil-compose" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
@@ -130,14 +126,6 @@ ssp-android = { module = "com.intuit.ssp:ssp-android", version.ref = "ssp-androi
 
 #libs
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie-compose" }
-# Networking
-okhttp-logging = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
-
-# Room Database
-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
-
 android-activation = { module = "com.sun.mail:android-activation", version.ref = "android-mail" }
 android-mail = { module = "com.sun.mail:android-mail", version.ref = "android-mail" }
 unity = { module = "com.google.ads.mediation:unity", version.ref = "unity" }
@@ -146,7 +134,6 @@ vungle = { module = "com.google.ads.mediation:vungle", version.ref = "vungle" }
 
 billing = { module = "com.android.billingclient:billing", version.ref = "billingclient" }
 desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar-jdk-libs" }
-androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
 
 
 [plugins]
