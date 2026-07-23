@@ -25,7 +25,9 @@ The tool verifies that the device contains the same archive/thumbnail counts as 
 - Search matches pet name, category, or creator without case sensitivity.
 - The category rail contains `All` followed by categories sorted by pet count and name.
 - `Set` is disabled when a corresponding local archive is missing.
-- Selecting an already prepared pet updates the targeted slot in DataStore immediately; changes apply to the next overlay Start.
+- Selecting an already prepared pet updates the targeted slot in DataStore immediately;
+  nếu đây là Add flow thì slot chỉ được activate sau Set/Import thành công. Back khỏi
+  Catalog không tăng số pet. Changes apply to the next overlay Start.
 - Tapping an installed catalog card can open its existing pack detail screen.
 
 ## On-demand legacy conversion

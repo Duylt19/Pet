@@ -70,7 +70,7 @@ Verified trên Pixel 3 XL / API 31 với `Sunny Cat` sample pack: system picker 
 
 Definition of done: multi-pet không nhân thread tuyến tính, restore an toàn, setting có unit test và degradation policy.
 
-Verified trên Pixel 3 XL / API 31 với 3 instance `Sunny Cat`: một foreground service + ba bounded overlay window, shared bitmap/clock, drag/stop/restart khôi phục vị trí chuẩn hóa, pack/count giữ qua process restart và cleanup không để lại service/window. Thiết bị thường giới hạn 3 pet/30 FPS (24 FPS khi chạy 3); low-RAM giới hạn 2 pet/24 FPS. Sound preference đã persist nhưng schema pack v1 chưa nhận audio. Boot auto-start vẫn chưa được thêm.
+Verified trên Pixel 3 XL / API 31 với 3 instance `Sunny Cat`: một foreground service + ba bounded overlay window, shared bitmap/clock, drag/stop/restart khôi phục vị trí chuẩn hóa, pack/count giữ qua process restart và cleanup không để lại service/window. Settings hiện đã refactor thành `PetSlotPreferences`: character/size/speed/touch/speech/messages/position độc lập, Add commit sau selection và Remove shift an toàn. Thiết bị thường giới hạn 3 pet/30 FPS (24 FPS khi chạy 3); low-RAM giới hạn 2 pet/24 FPS. Sound vẫn hidden/reserved vì schema pack v1 chưa nhận audio. Boot auto-start vẫn chưa được thêm.
 
 ## Phase 6 — Monetization, performance and release policy
 

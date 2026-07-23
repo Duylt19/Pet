@@ -35,6 +35,7 @@
 | Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |
 | Different pet per slot + Settings refactor | Done | 1–3 slot selections, per-pack overlay instances, slot-aware Catalog/Detail, grouped Settings and reset-position guard |
+| Per-pet customization + Settings redesign | Done | Pet-first roster, commit-on-selection Add flow, independent size/speed/touch/speech/messages/position per slot, remove/shift migration và app-only Settings section |
 | Đổi namespace/application ID | Deferred | Vẫn là `com.asianmobile.privatebrower` theo yêu cầu owner |
 
 ## Nguyên tắc cập nhật

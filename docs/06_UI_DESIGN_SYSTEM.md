@@ -2,7 +2,16 @@
 
 Base giữ infrastructure/theme và component pattern. Home/Permission hiện là functional MVP cho pet overlay, chưa phải visual design final từ Figma.
 
-Settings hiện dùng bốn section ổn định: My pets, Appearance & movement, Interaction & speech và App & support. Mỗi active slot là một row độc lập mở Catalog với typed slot index; option session chung không lặp theo từng pet.
+Settings dùng cấu trúc pet-first:
+
+- `settings`: roster active pet, Add pet và App & support;
+- `pet_customization/{slotIndex}`: identity/change character, Appearance & movement,
+  Interaction & speech, reset position và remove của đúng pet;
+- không hiển thị Sound khi pack schema v1 chưa có audio;
+- Add mở Catalog ở slot trống nhưng chỉ commit `petCount` sau Set/Import thành công.
+
+Mỗi card phải cho user thấy nhanh character, size, speed và trạng thái tương tác; option
+pet không được lặp ở app-wide Settings hoặc ghi vào global state.
 
 ## Resource rules
 

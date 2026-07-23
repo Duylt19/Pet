@@ -12,7 +12,8 @@
 | `home` | Home | Selected pet + Start/Stop + Catalog/Settings/Premium |
 | `pet_catalog/{slotIndex}` | Pet Catalog | Chọn character cho slot typed 0–2; 1,026 owner pets, search/category, Set + secure file import |
 | `pet_detail/{slotIndex}/{packKey}` | Pet Detail | Preview metadata và select pack cho đúng slot |
-| `settings` | Settings | Mở từ Home |
+| `settings` | Settings | Pet roster + app/support hub |
+| `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
 ## Flow
@@ -30,7 +31,9 @@ Home ──Start(no overlay)──> System Overlay Settings ──back──> Ho
 Home ──Start(API 33+, notification missing)──> Notification permission ──result──> Start pet
 Home ──Start/Stop──> Pet overlay foreground service
 Home ──Choose a pet──> Catalog(slot 0) ──search/category──> Set local owner pet
-Settings ──Pet 1/2/3──> Catalog(slot) ──Set──> cập nhật đúng slot
+Settings ──Pet card──> Customize Pet(slot) ──Change character──> Catalog(slot)
+Settings ──Add pet──> Catalog(slot trống) ──Set/Import──> kích hoạt slot
+Customize Pet ──Remove──> Settings (shift slot sau, giữ profile riêng)
 Catalog ──already prepared pack──> Detail
 Home ──Settings──> Settings ──Language──> Language Settings
 Home ──Premium──> Premium(in-app)
@@ -40,7 +43,9 @@ Home ──Premium──> Premium(in-app)
 
 - Splash, Language, Intro và Permission được remove khỏi stack sau khi hoàn tất bước tương ứng.
 - Settings và Premium in-app pop về Home.
-- Pet Detail pop về Catalog; Catalog pop về màn đã mở nó. `slotIndex` là typed Int và `packKey` luôn URI-encode trước navigation.
+- Customize Pet pop về Settings. Pet Detail pop về Catalog; Catalog pop về màn đã mở
+  nó. Add chỉ tăng `petCount` sau Set/Import thành công; Back khỏi Catalog không tạo pet.
+  `slotIndex` là typed Int và `packKey` luôn URI-encode trước navigation.
 - Premium onboarding close/success đi tiếp Permission.
 - Premium splash-return close/success đi Home.
 - Language settings restart activity với `skip_splash=true` sau confirm.

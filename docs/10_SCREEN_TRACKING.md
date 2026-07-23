@@ -14,6 +14,7 @@
 | Home | `home` |
 | Pet catalog | `pet_catalog` |
 | Pet detail | `pet_detail` |
+| Customize Pet | `pet_customization` |
 | Settings | `settings` |
 | Premium | `premium` |
 

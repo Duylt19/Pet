@@ -20,7 +20,9 @@ Nếu tài liệu và source khác nhau, source hiện tại là bằng chứng 
 - Home có Start/Stop session 1–3 pet khác nhau cùng các lối Catalog/Settings/Premium.
 - DataStore onboarding/language.
 - Ads module, billing, analytics, remote config và localization.
-- Settings giữ language, share, rating, feedback và version; Permission xử lý overlay special access + notification runtime permission.
+- Settings là hub pet/app; `pet_customization/{slotIndex}` sở hữu option riêng của từng
+  pet, còn hub giữ language, share, rating, feedback và version. Permission xử lý overlay
+  special access + notification runtime permission.
 
 ## Không còn tồn tại
 

@@ -10,7 +10,8 @@
 | `home` | `ui/home/HomeScreen` | Selected pet/count, permission status, Start/Stop, Catalog/Settings/Premium; scroll thích ứng |
 | `pet_catalog/{slotIndex}` | `ui/catalog/PetCatalogScreen` | Local owner catalog, search, 268 categories, thumbnail, availability và on-demand Set cho đúng slot |
 | `pet_detail/{slotIndex}/{packKey}` | `ui/catalog/PetDetailScreen` | Pack preview/metadata và select action cho đúng slot |
-| `settings` | `ui/home/settings/SettingsScreen` | My pets theo slot; appearance/movement; interaction/speech; app/support |
+| `settings` | `ui/home/settings/SettingsScreen` | Pet roster, commit-on-selection Add flow và app/support |
+| `pet_customization/{slotIndex}` | `ui/home/settings/PetCustomizationScreen` | Hồ sơ độc lập: character, size, speed, touch, speech, custom messages, position và remove |
 | `premium/{startByIndex}` | `ui/premium/PremiumScreen` | Subscription UI, close behavior theo entry source |
 
 ## Screen implementation contract

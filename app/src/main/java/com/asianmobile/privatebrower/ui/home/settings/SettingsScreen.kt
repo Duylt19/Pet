@@ -3,9 +3,13 @@ package com.asianmobile.privatebrower.ui.home.settings
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,17 +43,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.asianmobile.privatebrower.R
 import com.asianmobile.privatebrower.ads.config.SCREEN_SETTING
 import com.asianmobile.privatebrower.ads.ui.compose.NativeAdInternal
@@ -67,30 +69,20 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     onBack: () -> Unit = {},
     onNavigateToLanguage: () -> Unit = {},
-    onNavigateToCatalog: (Int) -> Unit = {}
+    onNavigateToPetCustomization: (Int) -> Unit = {},
+    onAddPet: (Int) -> Unit = {}
 ) {
     TrackScreenView(ScreenName.SETTINGS)
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     var rateAppState by remember { mutableStateOf(RateAppUiState()) }
-    var isMessageEditorVisible by remember { mutableStateOf(false) }
     RateAppFlow(
         context = context,
         state = rateAppState,
         onStateChange = { rateAppState = it },
         onSendFeedback = viewModel::sendRateFeedback
     )
-    if (isMessageEditorVisible) {
-        PetMessageEditorDialog(
-            initialMessages = state.customMessages,
-            onSave = { messages ->
-                viewModel.setCustomMessages(messages)
-                isMessageEditorVisible = false
-            },
-            onDismiss = { isMessageEditorVisible = false }
-        )
-    }
 
     Column(
         modifier = Modifier
@@ -111,120 +103,71 @@ fun SettingsScreen(
                 .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
         ) {
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-            SettingsSection(title = stringResource(R.string.settings_section_my_pets)) {
-                PetValueSettingsRow(
-                    iconRes = R.drawable.ic_notification_pet,
-                    title = stringResource(R.string.settings_pet_count_title),
-                    subtitle = stringResource(R.string.settings_pet_count_subtitle, state.maxPets),
-                    value = state.petCount.toString(),
-                    canDecrease = state.petCount > 1,
-                    canIncrease = state.petCount < state.maxPets,
-                    onDecrease = viewModel::decreasePetCount,
-                    onIncrease = viewModel::increasePetCount
+            Text(
+                text = stringResource(R.string.settings_pet_hub_description),
+                color = colorResource(R.color.colors_9B9C9E),
+                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
+                modifier = Modifier.padding(
+                    start = dimensionResource(SdpR.dimen._4sdp),
+                    end = dimensionResource(SdpR.dimen._4sdp),
+                    bottom = dimensionResource(SdpR.dimen._14sdp)
                 )
-                state.petSlots.forEach { slot ->
-                    SettingsDivider()
-                    SettingsRow(
-                        iconRes = R.drawable.ic_notification_pet,
-                        title = stringResource(
-                            R.string.settings_pet_slot_title,
-                            slot.slotIndex + 1
-                        ),
-                        subtitle = slot.name,
-                        trailing = SettingsTrailing.TextTrailing(
-                            stringResource(R.string.settings_pet_change)
-                        ),
-                        onClick = { onNavigateToCatalog(slot.slotIndex) }
-                    )
-                }
-            }
-            Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-            SettingsSection(title = stringResource(R.string.settings_section_appearance_motion)) {
-                PetValueSettingsRow(
-                    iconRes = R.drawable.ic_pet_size,
-                    title = stringResource(R.string.settings_pet_size_title),
-                    value = "${state.sizePercent}%",
-                    canDecrease = state.sizePercent > 75,
-                    canIncrease = state.sizePercent < 150,
-                    onDecrease = viewModel::decreaseSize,
-                    onIncrease = viewModel::increaseSize
-                )
-                SettingsDivider()
-                PetValueSettingsRow(
-                    iconRes = R.drawable.ic_pet_speed,
-                    title = stringResource(R.string.settings_pet_speed_title),
-                    value = "${state.speedPercent}%",
-                    canDecrease = state.speedPercent > 50,
-                    canIncrease = state.speedPercent < 150,
-                    onDecrease = viewModel::decreaseSpeed,
-                    onIncrease = viewModel::increaseSpeed
-                )
-                SettingsDivider()
-                SettingsRow(
-                    iconRes = R.drawable.ic_refresh,
-                    title = stringResource(R.string.settings_pet_reset_positions_title),
-                    subtitle = stringResource(R.string.settings_pet_reset_positions_subtitle),
-                    onClick = viewModel::resetPetPositions
-                )
-            }
-            Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-            SettingsSection(title = stringResource(R.string.settings_section_interaction_speech)) {
-                SettingsRow(
-                    iconRes = R.drawable.ic_media_volume,
-                    title = stringResource(R.string.settings_pet_sound_title),
-                    subtitle = stringResource(R.string.settings_pet_sound_subtitle),
-                    trailing = SettingsTrailing.SwitchTrailing(
-                        checked = state.soundEnabled,
-                        onCheckedChange = viewModel::setSoundEnabled
-                    ),
-                    onClick = { viewModel.setSoundEnabled(!state.soundEnabled) }
-                )
-                SettingsDivider()
-                SettingsRow(
-                    iconRes = R.drawable.ic_chat_bubble,
-                    title = stringResource(R.string.settings_pet_messages_title),
-                    subtitle = stringResource(R.string.settings_pet_messages_subtitle),
-                    trailing = SettingsTrailing.SwitchTrailing(
-                        checked = state.messagesEnabled,
-                        onCheckedChange = viewModel::setMessagesEnabled
-                    ),
-                    onClick = { viewModel.setMessagesEnabled(!state.messagesEnabled) }
-                )
-                SettingsDivider()
-                SettingsRow(
-                    iconRes = R.drawable.ic_document_text,
-                    title = stringResource(R.string.settings_pet_custom_messages_title),
-                    subtitle = if (state.customMessages.isEmpty()) {
-                        stringResource(R.string.settings_pet_custom_messages_builtin)
-                    } else {
-                        pluralStringResource(
-                            R.plurals.settings_pet_custom_messages_count,
-                            state.customMessages.size,
-                            state.customMessages.size
-                        )
-                    },
-                    trailing = SettingsTrailing.TextTrailing(
-                        state.customMessages.size.toString()
-                    ),
-                    onClick = { isMessageEditorVisible = true }
-                )
-                SettingsDivider()
-                SettingsRow(
-                    iconRes = R.drawable.ic_settings_outline,
-                    title = stringResource(R.string.settings_pet_interaction_title),
-                    subtitle = stringResource(R.string.settings_pet_interaction_subtitle),
-                    trailing = SettingsTrailing.SwitchTrailing(
-                        checked = state.interactionEnabled,
-                        onCheckedChange = viewModel::setInteractionEnabled
-                    ),
-                    onClick = { viewModel.setInteractionEnabled(!state.interactionEnabled) }
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_section_my_pets),
+                    color = colorResource(R.color.colors_C0D1FE),
+                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
                 )
                 Text(
-                    text = stringResource(R.string.settings_pet_apply_on_restart),
+                    text = stringResource(
+                        R.string.settings_pet_count_compact,
+                        state.petCount,
+                        state.maxPets
+                    ),
                     color = colorResource(R.color.colors_9B9C9E),
                     fontFamily = FontFamily(Font(R.font.inter_regular)),
-                    fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
+                    fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
                 )
+            }
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._7sdp)))
+            state.petSlots.forEach { slot ->
+                PetProfileCard(
+                    slot = slot,
+                    onClick = { onNavigateToPetCustomization(slot.slotIndex) }
+                )
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
+            }
+            if (state.canAddPet) {
+                OutlinedButton(
+                    onClick = { viewModel.nextPetSlotForAdd()?.let(onAddPet) },
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = colorResource(R.color.colors_C0D1FE)
+                    ),
+                    shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_plus),
+                        contentDescription = null,
+                        tint = colorResource(R.color.colors_C0D1FE),
+                        modifier = Modifier.size(dimensionResource(SdpR.dimen._16sdp))
+                    )
+                    Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
+                    Text(
+                        text = stringResource(R.string.settings_add_pet),
+                        color = colorResource(R.color.colors_C0D1FE),
+                        fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                        fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
+                    )
+                }
             }
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
             SettingsSection(title = stringResource(R.string.settings_section_app_support)) {
@@ -279,75 +222,95 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun PetValueSettingsRow(
-    iconRes: Int,
-    title: String,
-    value: String,
-    canDecrease: Boolean,
-    canIncrease: Boolean,
-    onDecrease: () -> Unit,
-    onIncrease: () -> Unit,
-    subtitle: String? = null
-) {
-    val decreaseDescription = stringResource(R.string.settings_decrease_value, title)
-    val increaseDescription = stringResource(R.string.settings_increase_value, title)
-    SettingsRow(
-        iconRes = iconRes,
-        title = title,
-        subtitle = subtitle,
-        trailing = SettingsTrailing.Custom {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.background(
-                    colorResource(R.color.colors_333538),
-                    RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
-                )
-            ) {
-                StepperButton(
-                    symbol = "−",
-                    enabled = canDecrease,
-                    contentDescription = decreaseDescription,
-                    onClick = onDecrease
-                )
-                Text(
-                    text = value,
-                    color = colorResource(R.color.white),
-                    fontFamily = FontFamily(Font(R.font.inter_medium)),
-                    fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    modifier = Modifier.width(dimensionResource(SdpR.dimen._30sdp))
-                )
-                StepperButton(
-                    symbol = "+",
-                    enabled = canIncrease,
-                    contentDescription = increaseDescription,
-                    onClick = onIncrease
-                )
-            }
-        },
-        onClick = {}
-    )
-}
-
-@Composable
-private fun StepperButton(
-    symbol: String,
-    enabled: Boolean,
-    contentDescription: String,
+private fun PetProfileCard(
+    slot: SettingsPetSlotUiState,
     onClick: () -> Unit
 ) {
-    Text(
-        text = symbol,
-        color = colorResource(if (enabled) R.color.colors_C0D1FE else R.color.colors_9B9C9E),
-        fontFamily = FontFamily(Font(R.font.inter_semibold)),
-        fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
-        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+    Row(
         modifier = Modifier
-            .size(dimensionResource(SdpR.dimen._24sdp))
-            .semantics { this.contentDescription = contentDescription }
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .padding(top = dimensionResource(SdpR.dimen._2sdp))
-    )
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
+            .background(colorResource(R.color.colors_212327))
+            .border(
+                width = 1.dp,
+                color = colorResource(R.color.colors_333538),
+                shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
+            )
+            .clickable(onClick = onClick)
+            .padding(dimensionResource(SdpR.dimen._11sdp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(dimensionResource(SdpR.dimen._42sdp))
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
+                .background(
+                    colorResource(
+                        when (slot.slotIndex % 3) {
+                            0 -> R.color.pet_demo_fur
+                            1 -> R.color.colors_6C90FB
+                            else -> R.color.colors_E5242D
+                        }
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (slot.previewImagePath != null) {
+                AsyncImage(
+                    model = slot.previewImagePath,
+                    contentDescription = slot.name,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(dimensionResource(SdpR.dimen._3sdp))
+                )
+            } else {
+                Text(
+                    text = (slot.slotIndex + 1).toString(),
+                    color = colorResource(R.color.white),
+                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontSize = dimensionResource(SspR.dimen._13ssp).value.sp
+                )
+            }
+        }
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._10sdp)))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = slot.name,
+                color = colorResource(R.color.white),
+                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
+            )
+            Text(
+                text = stringResource(
+                    R.string.settings_pet_profile_summary,
+                    slot.sizePercent,
+                    slot.speedPercent
+                ),
+                color = colorResource(R.color.colors_9B9C9E),
+                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
+            )
+            Text(
+                text = stringResource(
+                    if (slot.messagesEnabled && slot.interactionEnabled) {
+                        R.string.settings_pet_profile_fully_interactive
+                    } else {
+                        R.string.settings_pet_profile_limited
+                    }
+                ),
+                color = colorResource(R.color.colors_C0D1FE),
+                fontFamily = FontFamily(Font(R.font.inter_medium)),
+                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
+            )
+        }
+        Icon(
+            painter = painterResource(R.drawable.ic_setting_chevron_right_v2),
+            contentDescription = stringResource(R.string.settings_customize_pet, slot.name),
+            tint = Color.Unspecified,
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
+        )
+    }
 }
 
 @Composable

@@ -3,6 +3,7 @@ package com.asianmobile.privatebrower.pet.settings
 import com.asianmobile.privatebrower.data.model.PetPositionFraction
 import com.asianmobile.privatebrower.data.model.DEFAULT_SELECTED_PACK_KEY
 import com.asianmobile.privatebrower.data.model.MAX_PET_SLOTS
+import org.json.JSONArray
 
 class PetSettingsPolicy {
     fun sanitizePetCount(value: Int, maxPets: Int): Int =
@@ -89,24 +90,60 @@ class PetSelectionCodec {
 }
 
 class PetPositionCodec {
-    fun encode(positions: List<PetPositionFraction>): String = positions
-        .take(MAX_POSITIONS)
+    fun encode(positions: List<PetPositionFraction?>): String = positions
+        .materialize(MAX_POSITIONS, null)
         .joinToString(separator = ";") { position ->
-            "${position.x.coerceIn(0f, 1f)},${position.y.coerceIn(0f, 1f)}"
+            position?.let {
+                "${it.x.coerceIn(0f, 1f)},${it.y.coerceIn(0f, 1f)}"
+            }.orEmpty()
         }
 
-    fun decode(encoded: String): List<PetPositionFraction> = encoded
-        .split(';')
-        .take(MAX_POSITIONS)
-        .mapNotNull { item ->
+    fun decode(encoded: String): List<PetPositionFraction?> = encoded
+        .split(';', limit = MAX_POSITIONS)
+        .map { item ->
             val values = item.split(',')
-            if (values.size != 2) return@mapNotNull null
-            val x = values[0].toFloatOrNull()?.takeIf(Float::isFinite) ?: return@mapNotNull null
-            val y = values[1].toFloatOrNull()?.takeIf(Float::isFinite) ?: return@mapNotNull null
+            if (values.size != 2) return@map null
+            val x = values[0].toFloatOrNull()?.takeIf(Float::isFinite) ?: return@map null
+            val y = values[1].toFloatOrNull()?.takeIf(Float::isFinite) ?: return@map null
             PetPositionFraction(x.coerceIn(0f, 1f), y.coerceIn(0f, 1f))
         }
+        .materialize(MAX_POSITIONS, null)
 
     private companion object {
         const val MAX_POSITIONS = 3
     }
 }
+
+class PetSlotValueCodec {
+    fun encodeInts(values: List<Int>): String = JSONArray(values.take(MAX_PET_SLOTS)).toString()
+
+    fun decodeInts(encoded: String, fallback: Int): List<Int> =
+        decodeArray(encoded) { array, index -> array.optInt(index, fallback) }
+            .materialize(MAX_PET_SLOTS, fallback)
+
+    fun encodeBooleans(values: List<Boolean>): String =
+        JSONArray(values.take(MAX_PET_SLOTS)).toString()
+
+    fun decodeBooleans(encoded: String, fallback: Boolean): List<Boolean> =
+        decodeArray(encoded) { array, index ->
+            if (array.isNull(index)) fallback else array.optBoolean(index, fallback)
+        }.materialize(MAX_PET_SLOTS, fallback)
+
+    fun encodeStrings(values: List<String>): String =
+        JSONArray(values.take(MAX_PET_SLOTS)).toString()
+
+    fun decodeStrings(encoded: String): List<String> =
+        decodeArray(encoded) { array, index -> array.optString(index, "") }
+            .materialize(MAX_PET_SLOTS, "")
+
+    private fun <T> decodeArray(
+        encoded: String,
+        read: (JSONArray, Int) -> T
+    ): List<T> = runCatching {
+        val array = JSONArray(encoded)
+        List(minOf(array.length(), MAX_PET_SLOTS)) { index -> read(array, index) }
+    }.getOrDefault(emptyList())
+}
+
+private fun <T> List<T>.materialize(size: Int, fallback: T): List<T> =
+    List(size) { index -> getOrNull(index) ?: fallback }

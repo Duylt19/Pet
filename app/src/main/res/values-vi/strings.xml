@@ -589,4 +589,24 @@
     <string name="media_viewer_playback_error">Không thể phát phương tiện này.</string>
     <string name="media_viewer_action_failed">Không thể hoàn tất hành động này.</string>
     <string name="media_viewer_remove_device_description">Tệp này sẽ bị xóa vĩnh viễn khỏi thiết bị của bạn.</string>
+    <string name="settings_pet_hub_description">Mỗi pet có nhân vật, kích thước, tốc độ, thao tác chạm và lời thoại riêng. Chạm vào pet để tùy chỉnh.</string>
+    <string name="settings_pet_count_compact">Đang bật %1$d/%2$d</string>
+    <string name="settings_add_pet">Thêm pet khác</string>
+    <string name="settings_pet_profile_summary">Kích thước %1$d%% • Tốc độ %2$d%%</string>
+    <string name="settings_pet_profile_fully_interactive">Đã bật chạm và lời thoại</string>
+    <string name="settings_pet_profile_limited">Một số tương tác đang tắt</string>
+    <string name="settings_customize_pet">Tùy chỉnh %1$s</string>
+    <string name="pet_customization_title">Tùy chỉnh Pet %1$d</string>
+    <string name="pet_customization_by_author">bởi %1$s</string>
+    <string name="pet_customization_change_character">Đổi nhân vật</string>
+    <string name="pet_customization_size_hint">Chỉ thay đổi pet này</string>
+    <string name="pet_customization_speed_hint">Mức năng lượng di chuyển của pet này</string>
+    <string name="pet_customization_reset_position">Đặt lại vị trí pet này</string>
+    <string name="pet_customization_reset_position_hint">Dùng vị trí bắt đầu mặc định ở lần chạy sau</string>
+    <string name="pet_customization_messages_hint">Cho phép pet này trò chuyện và phản ứng</string>
+    <string name="pet_customization_apply_note">Thay đổi nhân vật và hành vi áp dụng ở lần chạy pet tiếp theo. Các pet khác không bị ảnh hưởng.</string>
+    <string name="pet_customization_remove">Xóa pet này</string>
+    <string name="pet_customization_remove_title">Xóa pet?</string>
+    <string name="pet_customization_remove_message">%1$s sẽ bị xóa khỏi nhóm đang hoạt động. Các pet khác vẫn giữ cài đặt riêng.</string>
+    <string name="pet_customization_remove_confirm">Xóa</string>
 </resources>

@@ -14,22 +14,28 @@
 | `pet_selected_pack_keys` | String | Ba pack key độc lập theo slot, newline-delimited |
 | `pet_selected_pack_key` | String | Legacy/mirror slot 1 để migrate dữ liệu cũ |
 | `pet_count` | Int | Số instance, clamp theo device budget |
-| `pet_size_percent` | Int | 75–150%, bước 25% |
-| `pet_speed_percent` | Int | 50–150%, bước 25% |
+| `pet_slot_size_percents` | JSON String | Ba mức size độc lập 75–150%, bước 25% |
+| `pet_slot_speed_percents` | JSON String | Ba mức speed độc lập 50–150%, bước 25% |
+| `pet_size_percent`, `pet_speed_percent` | Int | Legacy global fallback cho migration |
 | `pet_sound_enabled` | Boolean | Opt-in âm thanh khi schema pack hỗ trợ |
-| `pet_messages_enabled` | Boolean | Cho phép reaction/chat/dialogue bubble |
-| `pet_custom_messages` | String | Danh sách lời thoại tùy chỉnh, mỗi record một dòng |
-| `pet_interaction_enabled` | Boolean | Cho phép tap/drag/fling |
-| `pet_last_positions` | String | Tối đa 3 cặp tọa độ chuẩn hóa 0–1 |
-| `pet_position_reset_revision` | Int | Guard để Reset position không bị session cũ ghi đè khi Stop |
+| `pet_slot_messages_enabled` | JSON String | Toggle speech độc lập theo slot |
+| `pet_slot_custom_messages` | JSON String | Ba message catalog encoded độc lập |
+| `pet_slot_interaction_enabled` | JSON String | Toggle tap/drag/fling độc lập theo slot |
+| `pet_messages_enabled`, `pet_custom_messages`, `pet_interaction_enabled` | mixed | Legacy global fallback cho migration |
+| `pet_last_positions` | String | Đúng 3 record nullable, tọa độ chuẩn hóa 0–1 theo slot |
+| `pet_position_reset_revisions` | JSON String | Ba reset revision độc lập |
+| `pet_position_reset_revision` | Int | Legacy global fallback cho migration |
 
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.
 
-`pet_custom_messages` là dữ liệu nhỏ có giới hạn nên vẫn dùng Preferences DataStore:
-tối đa 30 câu, 80 Unicode code point/câu. `PetMessageListPolicy` chuẩn hóa khoảng
-trắng, bỏ câu rỗng/trùng, cắt theo code point để không làm vỡ emoji và dùng chuỗi rỗng
-để biểu diễn fallback về catalog có sẵn. Khi danh sách có dữ liệu, nó thay catalog mặc
-định cho mọi tone ở session pet kế tiếp.
+`PetPreferences.petSlots` luôn materialize thành ba `PetSlotPreferences`. Mỗi record sở hữu
+`packKey`, size, speed, messages, custom messages và interaction; `petCount` chỉ quyết
+định bao nhiêu record đang active. Dữ liệu global cũ được duplicate làm fallback cho ba
+slot khi key mới chưa tồn tại, sau đó lần chỉnh đầu tiên persist ba record độc lập.
+
+Custom messages vẫn là dữ liệu nhỏ: tối đa 30 câu, 80 Unicode code point/câu.
+`PetMessageListPolicy` chuẩn hóa khoảng trắng, bỏ câu rỗng/trùng và cắt theo code point.
+Mỗi slot lưu catalog riêng; danh sách rỗng của slot đó dùng catalog có sẵn.
 
 ## Pet engine model
 

@@ -12,15 +12,16 @@ interface PetSettingsRepository {
     fun updateSelectedPack(slotIndex: Int, key: String)
     fun updateSelectedPacks(keys: List<String>)
     fun updatePetCount(count: Int)
-    fun updateSizePercent(percent: Int)
-    fun updateSpeedPercent(percent: Int)
+    fun removePet(slotIndex: Int)
+    fun updateSizePercent(slotIndex: Int, percent: Int)
+    fun updateSpeedPercent(slotIndex: Int, percent: Int)
     fun updateSoundEnabled(enabled: Boolean)
-    fun updateMessagesEnabled(enabled: Boolean)
-    fun updateCustomMessages(messages: List<String>)
-    fun updateInteractionEnabled(enabled: Boolean)
+    fun updateMessagesEnabled(slotIndex: Int, enabled: Boolean)
+    fun updateCustomMessages(slotIndex: Int, messages: List<String>)
+    fun updateInteractionEnabled(slotIndex: Int, enabled: Boolean)
     fun updateLastPositions(
         positions: List<PetPositionFraction>,
-        sessionResetRevision: Int
+        sessionResetRevisions: List<Int>
     )
-    fun resetLastPositions()
+    fun resetLastPosition(slotIndex: Int)
 }

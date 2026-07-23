@@ -4,16 +4,18 @@ data class SettingsUiState(
     val versionName: String = "",
     val petCount: Int = 1,
     val maxPets: Int = 1,
-    val sizePercent: Int = 100,
-    val speedPercent: Int = 100,
-    val soundEnabled: Boolean = false,
-    val messagesEnabled: Boolean = true,
-    val customMessages: List<String> = emptyList(),
-    val interactionEnabled: Boolean = true,
     val petSlots: List<SettingsPetSlotUiState> = emptyList()
-)
+) {
+    val canAddPet: Boolean
+        get() = petCount < maxPets
+}
 
 data class SettingsPetSlotUiState(
     val slotIndex: Int,
-    val name: String
+    val name: String,
+    val previewImagePath: String?,
+    val sizePercent: Int,
+    val speedPercent: Int,
+    val messagesEnabled: Boolean,
+    val interactionEnabled: Boolean
 )

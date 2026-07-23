@@ -35,7 +35,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   engine. Hai pet cùng TALK có hai window/lifecycle độc lập.
 - 1–3 instance dùng chung đúng một `Choreographer.FrameCallback` trên main thread; 30 FPS mặc định, 24 FPS cho 3 pet hoặc low-RAM budget.
 - Frame loop chỉ reduce engine + invalidate/update layout; không decode bitmap, parse file hoặc tạo thread.
-- Mỗi slot resolve pack/visual/engine config riêng; slot trùng pack dùng chung bitmap cache đã preload. Tất cả instance vẫn dùng chung một clock/service.
+- Mỗi slot resolve pack/visual/engine config riêng, gồm size, speed, touch flag và speech
+  catalog/toggle; slot trùng pack dùng chung bitmap cache đã preload. Tất cả instance vẫn
+  dùng chung một clock/service.
 - Tap/drag/fling đều được chuyển thành `PetEvent`. Hệ tọa độ overlay chỉ fit status bar/display cutout một lần, không trừ navigation bar ở đáy; vì vậy đáy pet chạm đáy màn hình vật lý thay vì dừng phía trên thanh điều hướng.
 - Playground cho phép cửa sổ pet tràn `1/3` chiều rộng qua mép trái/phải và `1/3` chiều rộng qua mép trên, còn mép dưới không tràn. `FLAG_LAYOUT_NO_LIMITS` là bắt buộc để WindowManager không clamp lại cửa sổ nhỏ; hit target vẫn chỉ bằng đúng kích thước pet.
 - Sprite pack dùng quy ước frame gốc quay sang trái. Renderer mirror ngang khi engine đi
@@ -78,7 +80,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   Beat locomotion/pose thường vẫn repeat; combo chỉ chuyển sau target duration hoặc
   collision tương ứng.
 - Fall dùng gravity/terminal velocity thay cho tốc độ dọc cố định. Thả kéo nhẹ phát `DragEnd → Fall`; chỉ thao tác vượt system minimum-fling velocity mới vào physics fling.
-- Stop chuẩn hóa vị trí 0–1 vào DataStore; Start sau process/orientation change restore và clamp theo usable bounds mới. Reset position dùng revision guard để session đã chạy không ghi đè yêu cầu reset khi Stop.
+- Stop chuẩn hóa vị trí 0–1 vào DataStore; Start sau process/orientation change restore và
+  clamp theo usable bounds mới. Reset position/revision theo slot nên session đã chạy chỉ
+  merge lại pet chưa bị reset hoặc reorder.
 - Default multi-pet layout giãn ngang 1,05 pet-width; vị trí restore trùng sâu được sửa
   sau khi cả hai pet đã đáp và cùng ở pose nghỉ.
 - Stop action, `onDestroy` và lỗi add window đều remove callback/toàn bộ window và reset runtime state.

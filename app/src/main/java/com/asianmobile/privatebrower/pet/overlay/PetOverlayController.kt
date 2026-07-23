@@ -12,6 +12,7 @@ import android.view.WindowManager
 import com.asianmobile.privatebrower.data.model.PetPerformanceBudget
 import com.asianmobile.privatebrower.data.model.PetPositionFraction
 import com.asianmobile.privatebrower.data.model.PetPreferences
+import com.asianmobile.privatebrower.data.model.PetSlotPreferences
 import com.asianmobile.privatebrower.pet.engine.PetAction
 import com.asianmobile.privatebrower.pet.engine.PetBounds
 import com.asianmobile.privatebrower.pet.engine.PetCrowdResolver
@@ -72,16 +73,14 @@ internal class PetOverlayController(
         }
     )
     private val crowdResolver = PetCrowdResolver()
-    private val speechDirector = if (preferences.messagesEnabled) {
-        PetSpeechDirector(
-            catalog = appContext.petSpeechCatalog(preferences.customMessages),
-            seed = selectedAssets.fold(1) { hash, asset ->
-                31 * hash + asset.pack.manifest.id.hashCode()
-            }
+    private val speechDirectors = selectedAssets.mapIndexedNotNull { index, asset ->
+        val slot = preferences.slot(index)
+        if (!slot.messagesEnabled) return@mapIndexedNotNull null
+        index to PetSpeechDirector(
+            catalog = appContext.petSpeechCatalog(slot.customMessages),
+            seed = 31 * asset.pack.manifest.id.hashCode() + index
         )
-    } else {
-        null
-    }
+    }.toMap()
     private val instances = mutableListOf<PetInstance>()
     private val speechWindows = mutableMapOf<Int, SpeechWindow>()
     private var isRendering = false
@@ -112,12 +111,13 @@ internal class PetOverlayController(
     fun start() {
         if (instances.isNotEmpty()) return
         socialDirector.reset()
-        speechDirector?.reset()
+        speechDirectors.values.forEach(PetSpeechDirector::reset)
 
         try {
             selectedAssets.forEachIndexed { index, asset ->
                 val pack = asset.pack
-                val petSizePixels = petSizePixels(pack)
+                val slotPreferences = preferences.slot(index)
+                val petSizePixels = petSizePixels(pack, slotPreferences)
                 val size = PetSize(petSizePixels.toFloat(), petSizePixels.toFloat())
                 val bounds = currentPlaygroundBounds(size)
                 val position = sessionLayout.resolvePosition(
@@ -128,7 +128,7 @@ internal class PetOverlayController(
                     marginPixels = appContext.dpToPixels(START_MARGIN_DP).toFloat()
                 )
                 val engineConfig = PetEngineConfig(
-                    clips = pack.manifest.toEngineClips(preferences.speedPercent / 100f),
+                    clips = pack.manifest.toEngineClips(slotPreferences.speedPercent / 100f),
                     tapAction = pack.manifest.interaction.tapAction,
                     supportedActions = pack.manifest.toEngineSupportedActions()
                 )
@@ -153,7 +153,7 @@ internal class PetOverlayController(
                     dispatch(instance, event)
                 }
                     .apply { render(initialState) }
-                val params = createLayoutParams(initialState, index)
+                val params = createLayoutParams(initialState, index, slotPreferences)
                 instance = PetInstance(index, engine, view, params, initialState)
                 windowManager.addView(view, params)
                 instances += instance
@@ -180,7 +180,7 @@ internal class PetOverlayController(
         choreographer.removeFrameCallback(frameCallback)
         removeAllViews()
         socialDirector.reset()
-        speechDirector?.reset()
+        speechDirectors.values.forEach(PetSpeechDirector::reset)
         lastTickNanos = 0L
         return positions
     }
@@ -212,7 +212,7 @@ internal class PetOverlayController(
         val previousState = instance.state
         val transition = instance.engine.reduce(previousState, event)
         render(instance, transition.state)
-        speechDirector
+        speechDirectors[instance.id]
             ?.onTransition(instance.id, previousState, transition)
             ?.forEach(::applySpeechDirective)
     }
@@ -351,7 +351,11 @@ internal class PetOverlayController(
         speechWindows.keys.toList().forEach(::hideSpeech)
     }
 
-    private fun createLayoutParams(state: PetState, index: Int) = WindowManager.LayoutParams(
+    private fun createLayoutParams(
+        state: PetState,
+        index: Int,
+        slotPreferences: PetSlotPreferences
+    ) = WindowManager.LayoutParams(
         state.size.width.roundToInt(),
         state.size.height.roundToInt(),
         overlayWindowType(),
@@ -359,7 +363,11 @@ internal class PetOverlayController(
             WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
-            if (preferences.interactionEnabled) 0 else WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            if (slotPreferences.interactionEnabled) {
+                0
+            } else {
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            },
         PixelFormat.TRANSLUCENT
     ).apply {
         gravity = Gravity.TOP or Gravity.START
@@ -450,8 +458,11 @@ internal class PetOverlayController(
     private fun Context.dpToPixels(dp: Int): Int =
         (dp * resources.displayMetrics.density).roundToInt()
 
-    private fun petSizePixels(pack: PetPack): Int = appContext.dpToPixels(
-        (PET_SIZE_DP * pack.manifest.canvas.defaultScale * preferences.sizePercent / 100f)
+    private fun petSizePixels(
+        pack: PetPack,
+        slotPreferences: PetSlotPreferences
+    ): Int = appContext.dpToPixels(
+        (PET_SIZE_DP * pack.manifest.canvas.defaultScale * slotPreferences.sizePercent / 100f)
             .roundToInt()
             .coerceIn(MIN_PET_SIZE_DP, MAX_PET_SIZE_DP)
     )

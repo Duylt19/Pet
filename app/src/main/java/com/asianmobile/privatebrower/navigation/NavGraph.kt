@@ -18,6 +18,7 @@ import com.asianmobile.privatebrower.ads.utils.SafeRemoteConfig
 import com.asianmobile.privatebrower.ui.home.HomeScreen
 import com.asianmobile.privatebrower.ui.catalog.PetCatalogScreen
 import com.asianmobile.privatebrower.ui.catalog.PetDetailScreen
+import com.asianmobile.privatebrower.ui.home.settings.PetCustomizationScreen
 import com.asianmobile.privatebrower.ui.home.settings.SettingsScreen
 import com.asianmobile.privatebrower.ui.intro.IntroScreen
 import com.asianmobile.privatebrower.ui.language.LanguageScreen
@@ -36,12 +37,14 @@ object Routes {
     const val HOME = "home"
     const val PET_CATALOG = "pet_catalog"
     const val PET_DETAIL = "pet_detail"
+    const val PET_CUSTOMIZATION = "pet_customization"
     const val SETTINGS = "settings"
     const val PREMIUM = "premium"
 
     fun petCatalog(slotIndex: Int): String = "$PET_CATALOG/$slotIndex"
     fun petDetail(slotIndex: Int, packKey: String): String =
         "$PET_DETAIL/$slotIndex/${Uri.encode(packKey)}"
+    fun petCustomization(slotIndex: Int): String = "$PET_CUSTOMIZATION/$slotIndex"
 }
 
 @Composable
@@ -224,11 +227,37 @@ fun AppNavGraph(
                     onNavigateToLanguage = {
                         navigateFromHome(Routes.LANGUAGE_SETTINGS)
                     },
-                    onNavigateToCatalog = { slotIndex ->
+                    onNavigateToPetCustomization = { slotIndex ->
+                        navController.safeNavigate(
+                            Routes.petCustomization(slotIndex),
+                            ignoreDebounce = true
+                        )
+                    },
+                    onAddPet = { slotIndex ->
                         navController.safeNavigate(
                             Routes.petCatalog(slotIndex),
                             ignoreDebounce = true
                         )
+                    }
+                )
+            }
+
+            composable(
+                route = "${Routes.PET_CUSTOMIZATION}/{slotIndex}",
+                arguments = listOf(navArgument("slotIndex") { type = NavType.IntType })
+            ) {
+                PetCustomizationScreen(
+                    onBack = {
+                        navController.safePopBackStack(ignoreDebounce = true)
+                    },
+                    onChangeCharacter = { slotIndex ->
+                        navController.safeNavigate(
+                            Routes.petCatalog(slotIndex),
+                            ignoreDebounce = true
+                        )
+                    },
+                    onPetRemoved = {
+                        navController.safePopBackStack(ignoreDebounce = true)
                     }
                 )
             }

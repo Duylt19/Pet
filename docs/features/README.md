@@ -15,7 +15,7 @@ Base hiện chỉ giữ các capability hỗ trợ sau:
 | Validated pet packs | `pet/pack`, `ui/catalog` | Active, schema v1 + secure import + preview/select |
 | Owner pet catalog | `OwnerPetCatalogRepository`, `ui/catalog` | Active local test source, 1,026 pets + search/category/on-demand Set |
 | Pet speech and dialogue | `pet/speech`, transient speech overlay | Active, localized/custom reactions + lifecycle độc lập theo pet |
-| Pet settings persistence | `PetSettingsRepository`, DataStore | Active, selection theo slot/count/size/speed/message list/interaction/position/reset guard |
+| Pet settings persistence | `PetSettingsRepository`, DataStore | Active, `PetSlotPreferences` độc lập cho selection/size/speed/message list/interaction và position/reset guard theo slot |
 
 Không có browser core, search/clear-browsing, broad storage access, tabs, bookmarks/history, download manager, file/media manager hoặc database. Background component duy nhất là `PetOverlayService` do user chủ động start, `START_NOT_STICKY` và không có boot receiver.
 

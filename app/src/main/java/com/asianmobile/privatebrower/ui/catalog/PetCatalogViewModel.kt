@@ -5,7 +5,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.privatebrower.data.model.MAX_PET_SLOTS
+import com.asianmobile.privatebrower.data.model.OwnerPetCatalogSnapshot
 import com.asianmobile.privatebrower.data.repository.OwnerPetCatalogRepository
+import com.asianmobile.privatebrower.data.repository.PetSettingsRepository
+import com.asianmobile.privatebrower.pet.pack.PetPack
 import com.asianmobile.privatebrower.pet.pack.PetPackInstallResult
 import com.asianmobile.privatebrower.pet.pack.PetPackInstaller
 import com.asianmobile.privatebrower.pet.pack.PetPackRepository
@@ -23,14 +26,21 @@ class PetCatalogViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val repository: PetPackRepository,
     private val installer: PetPackInstaller,
-    private val ownerCatalogRepository: OwnerPetCatalogRepository
+    private val ownerCatalogRepository: OwnerPetCatalogRepository,
+    private val petSettingsRepository: PetSettingsRepository
 ) : ViewModel() {
     private val targetSlotIndex = (savedStateHandle.get<Int>("slotIndex") ?: 0)
         .coerceIn(0, MAX_PET_SLOTS - 1)
     private val _uiState = MutableStateFlow(
         PetCatalogUiState(
             packs = repository.packs.value,
-            selectedKey = repository.selectedPackForSlot(targetSlotIndex).key,
+            selectedKey = if (
+                targetSlotIndex < petSettingsRepository.preferences.value.petCount
+            ) {
+                repository.selectedPackForSlot(targetSlotIndex).key
+            } else {
+                ""
+            },
             targetSlotIndex = targetSlotIndex,
             localRootPath = ownerCatalogRepository.snapshot.value.localRootPath
         )
@@ -42,27 +52,38 @@ class PetCatalogViewModel @Inject constructor(
             combine(
                 ownerCatalogRepository.snapshot,
                 repository.packs,
-                repository.selectedPacks
-            ) { catalog, packs, selected -> Triple(catalog, packs, selected) }
-                .collect { (catalog, packs, selected) ->
-                    _uiState.update { current ->
-                        current.copy(
-                            packs = packs,
-                            selectedKey = selected.getOrNull(targetSlotIndex)?.key
-                                ?: selected.firstOrNull()?.key.orEmpty(),
-                            pets = catalog.entries,
-                            visiblePets = PetCatalogFilter.apply(
-                                catalog.entries,
-                                current.searchQuery,
-                                current.selectedCategory
-                            ),
-                            categories = PetCatalogFilter.categories(catalog.entries),
-                            localRootPath = catalog.localRootPath,
-                            isLoading = catalog.isLoading,
-                            catalogError = catalog.error
-                        )
-                    }
+                repository.selectedPacks,
+                petSettingsRepository.preferences
+            ) { catalog, packs, selected, preferences ->
+                CatalogSources(
+                    catalog = catalog,
+                    packs = packs,
+                    selected = selected,
+                    activePetCount = preferences.petCount
+                )
+            }.collect { sources ->
+                _uiState.update { current ->
+                    current.copy(
+                        packs = sources.packs,
+                        selectedKey = if (targetSlotIndex < sources.activePetCount) {
+                            sources.selected.getOrNull(targetSlotIndex)?.key
+                                ?: sources.selected.firstOrNull()?.key.orEmpty()
+                        } else {
+                            ""
+                        },
+                        pets = sources.catalog.entries,
+                        visiblePets = PetCatalogFilter.apply(
+                            sources.catalog.entries,
+                            current.searchQuery,
+                            current.selectedCategory
+                        ),
+                        categories = PetCatalogFilter.categories(sources.catalog.entries),
+                        localRootPath = sources.catalog.localRootPath,
+                        isLoading = sources.catalog.isLoading,
+                        catalogError = sources.catalog.error
+                    )
                 }
+            }
         }
     }
 
@@ -76,6 +97,7 @@ class PetCatalogViewModel @Inject constructor(
                         preferredKey = result.pack.key,
                         preferredSlotIndex = targetSlotIndex
                     )
+                    activateTargetSlot()
                     _uiState.update {
                         it.copy(
                             isInstalling = false,
@@ -101,6 +123,7 @@ class PetCatalogViewModel @Inject constructor(
 
     fun select(key: String) {
         if (repository.select(key, targetSlotIndex)) {
+            activateTargetSlot()
             val name = repository.find(key)?.manifest?.name ?: return
             _uiState.update { it.copy(message = PetCatalogMessage.Selected(name)) }
         }
@@ -117,6 +140,7 @@ class PetCatalogViewModel @Inject constructor(
                         preferredKey = result.pack.key,
                         preferredSlotIndex = targetSlotIndex
                     )
+                    activateTargetSlot()
                     _uiState.update {
                         it.copy(
                             preparingPetId = null,
@@ -176,4 +200,18 @@ class PetCatalogViewModel @Inject constructor(
     fun clearMessage() {
         _uiState.update { it.copy(message = null) }
     }
+
+    private fun activateTargetSlot() {
+        val currentCount = petSettingsRepository.preferences.value.petCount
+        if (targetSlotIndex == currentCount) {
+            petSettingsRepository.updatePetCount(targetSlotIndex + 1)
+        }
+    }
+
+    private data class CatalogSources(
+        val catalog: OwnerPetCatalogSnapshot,
+        val packs: List<PetPack>,
+        val selected: List<PetPack>,
+        val activePetCount: Int
+    )
 }

@@ -10,7 +10,7 @@ class PetSessionLayout {
         count: Int,
         bounds: PetBounds,
         size: PetSize,
-        saved: List<PetPositionFraction>,
+        saved: List<PetPositionFraction?>,
         marginPixels: Float
     ): List<PetVector> = List(count.coerceAtLeast(0)) { index ->
         resolvePosition(index, bounds, size, saved, marginPixels)
@@ -20,7 +20,7 @@ class PetSessionLayout {
         index: Int,
         bounds: PetBounds,
         size: PetSize,
-        saved: List<PetPositionFraction>,
+        saved: List<PetPositionFraction?>,
         marginPixels: Float
     ): PetVector =
         saved.getOrNull(index)?.let { restore(it, bounds, size) }

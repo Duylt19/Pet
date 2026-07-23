@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.asianmobile.privatebrower.BuildConfig
 import com.asianmobile.privatebrower.R
 import com.asianmobile.privatebrower.data.repository.PetSettingsRepository
-import com.asianmobile.privatebrower.pet.settings.PetSettingsPolicy
 import com.asianmobile.privatebrower.pet.pack.PetPackRepository
 import com.asianmobile.privatebrower.utils.FeedbackLauncher
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,18 +44,18 @@ class SettingsViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         petCount = preferences.petCount,
-                        sizePercent = preferences.sizePercent,
-                        speedPercent = preferences.speedPercent,
-                        soundEnabled = preferences.soundEnabled,
-                        messagesEnabled = preferences.messagesEnabled,
-                        customMessages = preferences.customMessages,
-                        interactionEnabled = preferences.interactionEnabled,
                         petSlots = List(preferences.petCount) { slotIndex ->
                             val pack = selectedPacks.getOrNull(slotIndex)
                                 ?: selectedPacks.first()
+                            val slot = preferences.slot(slotIndex)
                             SettingsPetSlotUiState(
                                 slotIndex = slotIndex,
-                                name = pack.manifest.name
+                                name = pack.manifest.name,
+                                previewImagePath = pack.previewImagePath(),
+                                sizePercent = slot.sizePercent,
+                                speedPercent = slot.speedPercent,
+                                messagesEnabled = slot.messagesEnabled,
+                                interactionEnabled = slot.interactionEnabled
                             )
                         }
                     )
@@ -65,38 +64,11 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun decreasePetCount() = petSettingsRepository.updatePetCount(_uiState.value.petCount - 1)
-
-    fun increasePetCount() = petSettingsRepository.updatePetCount(_uiState.value.petCount + 1)
-
-    fun decreaseSize() = petSettingsRepository.updateSizePercent(
-        _uiState.value.sizePercent - PetSettingsPolicy.SIZE_STEP_PERCENT
-    )
-
-    fun increaseSize() = petSettingsRepository.updateSizePercent(
-        _uiState.value.sizePercent + PetSettingsPolicy.SIZE_STEP_PERCENT
-    )
-
-    fun decreaseSpeed() = petSettingsRepository.updateSpeedPercent(
-        _uiState.value.speedPercent - PetSettingsPolicy.SPEED_STEP_PERCENT
-    )
-
-    fun increaseSpeed() = petSettingsRepository.updateSpeedPercent(
-        _uiState.value.speedPercent + PetSettingsPolicy.SPEED_STEP_PERCENT
-    )
-
-    fun setSoundEnabled(enabled: Boolean) = petSettingsRepository.updateSoundEnabled(enabled)
-
-    fun setMessagesEnabled(enabled: Boolean) =
-        petSettingsRepository.updateMessagesEnabled(enabled)
-
-    fun setCustomMessages(messages: List<String>) =
-        petSettingsRepository.updateCustomMessages(messages)
-
-    fun setInteractionEnabled(enabled: Boolean) =
-        petSettingsRepository.updateInteractionEnabled(enabled)
-
-    fun resetPetPositions() = petSettingsRepository.resetLastPositions()
+    fun nextPetSlotForAdd(): Int? {
+        val state = _uiState.value
+        if (!state.canAddPet) return null
+        return state.petCount
+    }
 
     fun onFeedbackClicked(context: Context) {
         FeedbackLauncher.launch(context)

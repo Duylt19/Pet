@@ -53,7 +53,11 @@ class PetPositionCodecTest {
         )
 
         assertEquals(
-            listOf(PetPositionFraction(0f, 0.25f), PetPositionFraction(0.75f, 1f)),
+            listOf(
+                PetPositionFraction(0f, 0.25f),
+                PetPositionFraction(0.75f, 1f),
+                null
+            ),
             decoded
         )
     }
@@ -61,9 +65,20 @@ class PetPositionCodecTest {
     @Test
     fun `malformed positions are ignored`() {
         assertEquals(
-            listOf(PetPositionFraction(0.5f, 0.5f)),
+            listOf(null, PetPositionFraction(0.5f, 0.5f), null),
             codec.decode("broken;0.5,0.5;NaN,1")
         )
+    }
+
+    @Test
+    fun `empty position slot survives round trip`() {
+        val positions = listOf(
+            PetPositionFraction(0.2f, 0.3f),
+            null,
+            PetPositionFraction(0.8f, 0.9f)
+        )
+
+        assertEquals(positions, codec.decode(codec.encode(positions)))
     }
 }
 
@@ -92,6 +107,40 @@ class PetSelectionCodecTest {
         assertEquals(
             listOf("pack.new@1", "pack.old@1", "pack.old@1"),
             codec.replace(migrated, slotIndex = 0, key = "pack.new@1")
+        )
+    }
+}
+
+class PetSlotValueCodecTest {
+    private val codec = PetSlotValueCodec()
+
+    @Test
+    fun `slot values preserve independent order`() {
+        assertEquals(
+            listOf(75, 100, 150),
+            codec.decodeInts(codec.encodeInts(listOf(75, 100, 150)), fallback = 100)
+        )
+        assertEquals(
+            listOf(true, false, true),
+            codec.decodeBooleans(
+                codec.encodeBooleans(listOf(true, false, true)),
+                fallback = true
+            )
+        )
+        assertEquals(
+            listOf("hello\nthere", "", "third"),
+            codec.decodeStrings(
+                codec.encodeStrings(listOf("hello\nthere", "", "third"))
+            )
+        )
+    }
+
+    @Test
+    fun `missing and corrupt slot values use defaults`() {
+        assertEquals(listOf(100, 100, 100), codec.decodeInts("broken", fallback = 100))
+        assertEquals(
+            listOf(false, false, false),
+            codec.decodeBooleans("[]", fallback = false)
         )
     }
 }

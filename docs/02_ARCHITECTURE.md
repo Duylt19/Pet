@@ -94,7 +94,7 @@ ui/feature/
 - Asset pack được parse/validate thành model nội bộ trước khi engine sử dụng; renderer không đọc JSON/storage mỗi frame.
 - Pack installer chỉ promote version hợp lệ từ random staging directory; repository luôn giữ built-in fallback.
 - Bitmap cache decode asset trước khi render loop bắt đầu và có memory budget 4–24 MiB.
-- Session hỗ trợ 1–3 pet khác nhau trên thiết bị thường, 1–2 pet trên low-RAM device; 3 pet hạ shared clock xuống 24 FPS. Không thêm Room; selection theo slot/behavior/last position dùng DataStore.
+- Session hỗ trợ 1–3 pet khác nhau trên thiết bị thường, 1–2 pet trên low-RAM device; 3 pet hạ shared clock xuống 24 FPS. Không thêm Room; `PetSlotPreferences` giữ selection/size/speed/touch/speech theo slot, còn last position/reset revision cũng được persist theo đúng slot trong DataStore.
 
 ## DI
 

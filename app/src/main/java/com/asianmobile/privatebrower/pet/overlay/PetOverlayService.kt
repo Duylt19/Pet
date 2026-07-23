@@ -33,7 +33,7 @@ class PetOverlayService : Service() {
     @Inject lateinit var petSettingsRepository: PetSettingsRepository
 
     private var overlayController: PetOverlayController? = null
-    private var sessionPositionResetRevision: Int? = null
+    private var sessionPositionResetRevisions: List<Int>? = null
     private var isScreenReceiverRegistered = false
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -65,7 +65,7 @@ class PetOverlayService : Service() {
         if (overlayController == null) {
             try {
                 val preferences = petSettingsRepository.preferences.value
-                sessionPositionResetRevision = preferences.positionResetRevision
+                sessionPositionResetRevisions = preferences.positionResetRevisions
                 val packs = List(preferences.petCount) { slotIndex ->
                     petPackRepository.selectedPackForSlot(slotIndex)
                 }
@@ -106,16 +106,16 @@ class PetOverlayService : Service() {
 
     override fun onDestroy() {
         unregisterScreenStateReceiver()
-        val resetRevision = sessionPositionResetRevision
-        if (resetRevision != null) {
+        val resetRevisions = sessionPositionResetRevisions
+        if (resetRevisions != null) {
             overlayController?.stop()?.let { positions ->
-                petSettingsRepository.updateLastPositions(positions, resetRevision)
+                petSettingsRepository.updateLastPositions(positions, resetRevisions)
             }
         } else {
             overlayController?.stop()
         }
         overlayController = null
-        sessionPositionResetRevision = null
+        sessionPositionResetRevisions = null
         PetOverlayRuntime.updateRunning(false)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         super.onDestroy()

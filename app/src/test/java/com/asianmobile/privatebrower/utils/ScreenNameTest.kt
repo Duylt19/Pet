@@ -30,6 +30,7 @@ class ScreenNameTest {
             "home",
             "pet_catalog",
             "pet_detail",
+            "pet_customization",
             "premium",
             "settings"
         )
