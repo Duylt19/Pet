@@ -114,6 +114,9 @@ Before release hardening, complete the clean-room parity items confirmed by the 
   reactions use partial influence, expressive/skill frames use only 25% influence; owner
   Special clips play once then hold the last pose, with landing/recovery and alternating
   social duet choreography locked by JVM tests.
+- [Done] Rebalance standing/rest V3.16: render owner IDLE with the standing walk frame at
+  zero velocity, reserve long SIT for four meaningful autonomous stories and five social
+  rest/recovery roles, and replace incidental sitting with idle/look/walk transitions.
 - Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
 - Treat tap popup, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
 - Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs. Local device sync is enabled for validation, while production distribution must use a provenance-preserving server import.

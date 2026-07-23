@@ -105,7 +105,7 @@ class PetEngineTest {
             it.action == PetAction.SPECIAL_2
         }
 
-        assertEquals(PetAction.SIT, started.state.action)
+        assertEquals(PetAction.LOOK_UP, started.state.action)
         assertEquals(PetAction.SPECIAL, firstSpecial.action)
         assertEquals(PetAction.IDLE, recovery.action)
         assertEquals(PetAction.SPECIAL_2, secondSpecial.action)
@@ -565,7 +565,7 @@ class PetEngineTest {
 
         assertEquals(PetAction.BOUNCE, landed.state.action)
         assertEquals(PetComboId.SKY_DIVER, landed.state.activeComboId)
-        assertEquals(PetAction.SIT, landed.state.pendingComboBeats.first().action)
+        assertEquals(PetAction.IDLE, landed.state.pendingComboBeats.first().action)
     }
 
     @Test
@@ -589,10 +589,10 @@ class PetEngineTest {
 
         val selected = engine.reduce(walking, PetEvent.Tick(100))
 
-        assertEquals(PetAction.SIT, selected.state.action)
+        assertEquals(PetAction.LOOK_UP, selected.state.action)
         assertEquals(PetComboId.TINY_PERFORMANCE, selected.state.activeComboId)
         assertTrue(
-            selected.effects.contains(PetEffect.ActionChanged(PetAction.WALK, PetAction.SIT))
+            selected.effects.contains(PetEffect.ActionChanged(PetAction.WALK, PetAction.LOOK_UP))
         )
     }
 
@@ -784,8 +784,8 @@ class PetEngineTest {
         )
         val waiting = engine.reduce(started.state, PetEvent.Tick(1_000)).state
         val wink = advanceUntil(engine, waiting) { it.action == PetAction.WINK }
-        val sitting = advanceUntil(engine, wink) { it.action == PetAction.SIT }
-        var state = sitting
+        val standing = advanceUntil(engine, wink) { it.action == PetAction.IDLE }
+        var state = standing
         var completed: PetTransition? = null
         repeat(300) {
             val transition = engine.reduce(state, PetEvent.Tick(100))
@@ -803,7 +803,7 @@ class PetEngineTest {
         assertEquals(PetAction.TALK, started.state.action)
         assertEquals(PetAction.TALK, waiting.action)
         assertEquals(PetAction.WINK, wink.action)
-        assertEquals(PetAction.SIT, sitting.action)
+        assertEquals(PetAction.IDLE, standing.action)
         assertEquals(null, completed?.state?.activeComboId)
         assertTrue(completed != null)
     }
@@ -825,7 +825,7 @@ class PetEngineTest {
         val afterOneSitClip = engine.reduce(started.state, PetEvent.Tick(2_400)).state
 
         assertEquals(PetAction.SIT, started.state.action)
-        assertTrue(started.state.comboBeatTargetMillis >= 10_000L)
+        assertTrue(started.state.comboBeatTargetMillis >= 8_000L)
         assertEquals(PetAction.SIT, afterOneSitClip.action)
         assertEquals(PetComboId.SOCIAL_REST_A, afterOneSitClip.activeComboId)
         assertEquals(2_400L, afterOneSitClip.comboBeatElapsedMillis)

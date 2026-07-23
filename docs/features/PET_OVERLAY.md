@@ -42,6 +42,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   sang phải và chỉ thêm squash/stretch/lean nhẹ quanh bottom anchor cho locomotion/va
   chạm; Special dùng nguyên sprite, không scale luân phiên gây flicker. Pose climb
   wall/ceiling không bị xoay sai hướng.
+- Owner pack tách visual đứng/ngồi ở runtime: `IDLE` dùng frame đứng đầu tiên của `WALK`
+  nhưng engine giữ zero velocity, còn frame 11 chỉ xuất hiện khi action thật sự là `SIT`.
+  Pack ngoài prefix `owner.shimeji.` giữ nguyên visual IDLE do manifest khai báo.
 - Speech chỉ tồn tại trong `TALK` đứng yên một frame 34 hoặc `TALK_WALK` di chuyển bằng
   34/35/34/36. Box chữ nhật góc vuông dùng contract `WalkWithIE`, bám đáy ở
   `anchorY - 0,5 × petHeight`, nằm trước hướng nhìn, mirror theo direction và follow
@@ -107,6 +110,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Semantic cadence V3.15 đã cài đè và smoke-test với ba `Satoru Gojo` ở speed 150%:
   selection/count được giữ, service tạo đúng ba overlay 238×238 px, autonomous
   movement/speech tiếp tục qua launcher và log không có fatal, bad-token hoặc OOM.
+- Standing/rest V3.16 đã verified tiếp trên cùng thiết bị: owner pet ở bottom hiển thị
+  pose đứng khi window giữ nguyên X, không còn dùng frame 11 ngồi cho mọi IDLE. Ba overlay
+  tiếp tục chạy sau cài đè và không có fatal/window error.
 
 ## Chưa thuộc runtime hiện tại
 

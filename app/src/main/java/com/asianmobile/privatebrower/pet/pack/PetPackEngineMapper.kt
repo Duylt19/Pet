@@ -38,6 +38,14 @@ internal fun PetPackManifest.toEngineSupportedActions(): Set<PetAction> = buildS
     }
 }
 
+internal fun <T> Map<PetAction, List<T>>.normalizedRuntimeVisualFrames(
+    packId: String
+): Map<PetAction, List<T>> {
+    if (!packId.startsWith(OWNER_SHIMEJI_PACK_PREFIX)) return this
+    val standingFrame = get(PetAction.WALK)?.firstOrNull() ?: return this
+    return this + (PetAction.IDLE to listOf(standingFrame))
+}
+
 private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip? {
     val normalized = when (action) {
         PetAction.TALK -> clips[PetAction.TALK]?.let { clip ->

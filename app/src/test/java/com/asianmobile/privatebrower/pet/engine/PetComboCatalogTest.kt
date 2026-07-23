@@ -153,6 +153,49 @@ class PetComboCatalogTest {
     }
 
     @Test
+    fun `autonomous sitting is reserved for stories where rest has meaning`() {
+        val sittingCombos = PetBehaviorProfile().autonomousComboRules
+            .mapNotNull { rule -> PetComboCatalog.definition(rule.comboId) }
+            .filter { definition -> PetAction.SIT in definition.actions }
+        val sittingBeats = sittingCombos.flatMap(PetComboDefinition::beats)
+            .filter { beat -> beat.action == PetAction.SIT }
+
+        assertEquals(
+            setOf(
+                PetComboId.COZY_BREAK,
+                PetComboId.CLUMSY_RECOVERY,
+                PetComboId.DAYDREAM,
+                PetComboId.MAGIC_RITUAL
+            ),
+            sittingCombos.map(PetComboDefinition::id).toSet()
+        )
+        assertTrue(
+            sittingBeats.all { beat ->
+                beat.durationMillis?.first?.let { it >= 5_000L } == true
+            }
+        )
+    }
+
+    @Test
+    fun `social sitting is limited to rest copycat and trip recovery`() {
+        val socialSittingCombos = PetComboId.entries
+            .filter { comboId -> comboId.name.startsWith("SOCIAL_") }
+            .mapNotNull(PetComboCatalog::definition)
+            .filter { definition -> PetAction.SIT in definition.actions }
+
+        assertEquals(
+            setOf(
+                PetComboId.SOCIAL_CHASE_FOLLOWER,
+                PetComboId.SOCIAL_REST_A,
+                PetComboId.SOCIAL_REST_B,
+                PetComboId.SOCIAL_COPYCAT_A,
+                PetComboId.SOCIAL_COPYCAT_B
+            ),
+            socialSittingCombos.map(PetComboDefinition::id).toSet()
+        )
+    }
+
+    @Test
     fun `catalog marks spatial and aerial stories with their actual habitat`() {
         assertEquals(
             PetComboHabitat.WALL,

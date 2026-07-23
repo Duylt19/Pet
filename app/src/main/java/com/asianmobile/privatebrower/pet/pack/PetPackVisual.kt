@@ -61,7 +61,7 @@ class PetBitmapCache @Inject constructor(
                         )
                     )
                 }
-            }
+            }.normalizedRuntimeVisualFrames(pack.manifest.id)
             PetPackVisual.Sprite(
                 frames = frames,
                 canvas = pack.manifest.canvas,

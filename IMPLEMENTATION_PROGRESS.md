@@ -29,6 +29,7 @@
 | Stationary/moving speech V3.13 | Done | TALK holds frame 34; TALK_WALK uses 34/35/34/36 at walking speed, legacy packs normalize without reinstall and bubble lifecycle covers both |
 | Independent multi-pet interaction V3.14 | Done | Autonomous movers pass through, social invitations are probabilistic/interruptible, each TALK pet owns a box and off-ground speech is rejected |
 | Semantic action cadence V3.15 | Done | Movement/physics/expression use separate speed influence; owner skills play once then hold the final pose, combo recovery and duet timing are choreography-safe |
+| Standing/rest balance V3.16 | Done | Owner IDLE renders a zero-velocity standing pose; autonomous SIT reduced from 14/17 to 4/17 stories and social SIT from 11 to 5 roles |
 | Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
 | Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |

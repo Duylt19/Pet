@@ -104,6 +104,21 @@ class PetPackEngineMapperTest {
     }
 
     @Test
+    fun `owner shimeji idle renders a standing frame without moving`() {
+        val frames = mapOf(
+            PetAction.IDLE to listOf("sit", "wink"),
+            PetAction.WALK to listOf("stand", "step")
+        )
+
+        val owner = frames.normalizedRuntimeVisualFrames("owner.shimeji.4")
+        val external = frames.normalizedRuntimeVisualFrames("sample.external")
+
+        assertEquals(listOf("stand"), owner.getValue(PetAction.IDLE))
+        assertEquals(listOf("stand", "step"), owner.getValue(PetAction.WALK))
+        assertEquals(listOf("sit", "wink"), external.getValue(PetAction.IDLE))
+    }
+
+    @Test
     fun `legacy manifest receives safe runtime fall and climb fallback clips`() {
         val clips = manifest().toEngineClips()
 

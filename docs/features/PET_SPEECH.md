@@ -45,7 +45,7 @@ UI riêng:
   đã cài. `PetPackEngineMapper` normalize clip này lúc Start thành `TALK` một frame 34,
   zero velocity và `TALK_WALK` bốn frame với velocity 24 px/s; user không cần cài lại pet.
 - Combo `CHATTER` chạy
-  `IDLE 1,5–2,5 s → TALK 9–11 s → WINK → SIT 3–5 s`.
+  `IDLE 1,5–2,5 s → TALK 9–11 s → WINK → IDLE 3–5 s`.
 - Speech choreography không còn là effect phát ngay khi combo bắt đầu. Mỗi combo được
   phép nói có đúng một speech beat 9–11 giây tại điểm ngắt tự nhiên: sau quan sát, sau
   landing/recovery hoặc sau màn skill.
@@ -71,10 +71,10 @@ xác định vocabulary/tone sau khi frame TALK đã xuất hiện:
 | Combo có TALK | Tone | Vị trí nhịp nói |
 |---|---|---|
 | `USER_AFFECTION` | Affection | sau tap và recovery, trước wink |
-| `USER_SHOWCASE` | Celebration | sau cả hai Special và final sit |
+| `USER_SHOWCASE` | Celebration | sau cả hai Special và final idle recovery |
 | `CHATTER`, `CURIOUS_SCOUT`, `COZY_BREAK`, `CLUMSY_RECOVERY`, `DAYDREAM` | Chatter | ở điểm nghỉ/ngắm/hồi phục |
 | `SOCIAL_HELLO` | Social hello | pet A nói ngay bằng frame TALK |
-| `SOCIAL_HELLO_REPLY` | Social reply | pet B ngồi chờ 9–11 s rồi mới TALK |
+| `SOCIAL_HELLO_REPLY` | Social reply | pet B đứng yên chờ 9–11 s rồi mới TALK |
 | `SOCIAL_SHOW_OFF`, `SOCIAL_ADMIRE` | Celebration | sau performance/observation |
 | Wall/ceiling, wall-to-wall, aerial và skill/dance combo | Skill | sau landing/final recovery |
 | `TINY_PERFORMANCE`, `CHEERFUL_ENCORE` | Celebration | sau hoạt cảnh chính |
@@ -141,7 +141,7 @@ Mỗi pet đang nói dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn t
   sàn. Guard cuối trong `changeAction` từ chối `TALK` off-ground, clear combo và trả pet về
   `FALL`/ground fallback.
 - Combo catalog không cho speech đi ngay sau climb/dangle/jump/fall/flung; wall, ceiling và
-  aerial story phải landing/recovery trước. `DAYDREAM` cũng có SIT recovery giữa DANGLE và
+  aerial story phải landing/recovery trước. `DAYDREAM` dùng IDLE recovery giữa DANGLE và
   TALK.
 
 Catalog có sẵn hiện có 48 câu trong Android resources: tám câu cho mỗi tone, với English
