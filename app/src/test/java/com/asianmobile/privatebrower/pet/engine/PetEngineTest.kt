@@ -190,13 +190,15 @@ class PetEngineTest {
     }
 
     @Test
-    fun `walking selects a supported weighted behavior after its scheduled delay`() {
+    fun `walking selects a supported combo after its scheduled delay`() {
         val engine = PetEngine(
             PetEngineConfig(
                 maxTickMillis = 3_000,
                 behaviorProfile = behaviorProfile(
                     groundDelayMillis = 100L..100L,
-                    autonomousRules = listOf(PetBehaviorRule(PetAction.SIT, 1))
+                    autonomousComboRules = listOf(
+                        PetComboRule(PetComboId.TINY_PERFORMANCE, 1)
+                    )
                 )
             )
         )
@@ -209,6 +211,7 @@ class PetEngineTest {
         val selected = engine.reduce(walking, PetEvent.Tick(100))
 
         assertEquals(PetAction.SIT, selected.state.action)
+        assertEquals(PetComboId.TINY_PERFORMANCE, selected.state.activeComboId)
         assertTrue(
             selected.effects.contains(PetEffect.ActionChanged(PetAction.WALK, PetAction.SIT))
         )
@@ -220,7 +223,9 @@ class PetEngineTest {
             behaviorSeed = 42,
             behaviorProfile = behaviorProfile(
                 groundDelayMillis = 100L..10_000L,
-                autonomousRules = listOf(PetBehaviorRule(PetAction.SIT, 1))
+                autonomousComboRules = listOf(
+                    PetComboRule(PetComboId.TINY_PERFORMANCE, 1)
+                )
             )
         )
         val firstEngine = PetEngine(config)
@@ -236,17 +241,17 @@ class PetEngineTest {
     }
 
     @Test
-    fun `recent behavior memory prevents immediate action repetition`() {
+    fun `recent combo memory prevents immediate story repetition`() {
         val engine = PetEngine(
             PetEngineConfig(
                 maxTickMillis = 3_000,
                 behaviorSeed = 9,
                 behaviorProfile = behaviorProfile(
                     groundDelayMillis = 100L..100L,
-                    recentActionMemory = 1,
-                    autonomousRules = listOf(
-                        PetBehaviorRule(PetAction.SIT, 1),
-                        PetBehaviorRule(PetAction.WINK, 1)
+                    recentComboMemory = 1,
+                    autonomousComboRules = listOf(
+                        PetComboRule(PetComboId.TINY_PERFORMANCE, 1),
+                        PetComboRule(PetComboId.DAYDREAM, 1)
                     )
                 )
             )
@@ -257,14 +262,84 @@ class PetEngineTest {
             action = PetAction.WALK
         )
         state = engine.reduce(state, PetEvent.Tick(100)).state
-        val firstAction = state.action
-        val firstDuration = if (firstAction == PetAction.SIT) 2_400L else 520L
-        state = engine.reduce(state, PetEvent.Tick(firstDuration)).state
+        val firstCombo = state.activeComboId
+        state = state.copy(
+            action = PetAction.WALK,
+            activeComboId = null,
+            pendingRoutineActions = emptyList(),
+            actionElapsedMillis = 0,
+            actionTargetMillis = 0
+        )
         state = engine.reduce(state, PetEvent.Tick(100)).state
 
-        assertTrue(firstAction == PetAction.SIT || firstAction == PetAction.WINK)
-        assertTrue(state.action == PetAction.SIT || state.action == PetAction.WINK)
-        assertTrue(firstAction != state.action)
+        assertTrue(
+            firstCombo == PetComboId.TINY_PERFORMANCE || firstCombo == PetComboId.DAYDREAM
+        )
+        assertTrue(
+            state.activeComboId == PetComboId.TINY_PERFORMANCE ||
+                state.activeComboId == PetComboId.DAYDREAM
+        )
+        assertTrue(firstCombo != state.activeComboId)
+    }
+
+    @Test
+    fun `combo advances looping actions before choosing another combo`() {
+        val engine = PetEngine(
+            PetEngineConfig(
+                maxTickMillis = 1_000,
+                behaviorProfile = behaviorProfile(
+                    runDurationMillis = 100L..100L,
+                    groundDelayMillis = 100L..100L
+                )
+            )
+        )
+        val initial = engine.initialState(
+            PetBounds(0f, 0f, 10_000f, 1_000f),
+            size,
+            action = PetAction.WALK
+        )
+
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.HAPPY_ZOOMIES)
+        )
+        val run = engine.reduce(started.state, PetEvent.Tick(520))
+        val idle = engine.reduce(run.state, PetEvent.Tick(100))
+
+        assertEquals(PetComboId.HAPPY_ZOOMIES, started.state.activeComboId)
+        assertEquals(PetAction.RUN, run.state.action)
+        assertEquals(PetAction.IDLE, idle.state.action)
+        assertEquals(PetComboId.HAPPY_ZOOMIES, idle.state.activeComboId)
+    }
+
+    @Test
+    fun `external social combo faces peer and completes as one sequence`() {
+        val engine = PetEngine(
+            PetEngineConfig(
+                maxTickMillis = 2_000,
+                behaviorProfile = behaviorProfile(idleDurationMillis = 100L..100L)
+            )
+        )
+        val initial = engine.initialState(bounds, size, direction = PetDirection.RIGHT)
+
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.SOCIAL_HELLO, PetDirection.LEFT)
+        )
+        val wink = engine.reduce(started.state, PetEvent.Tick(100))
+        val lookUp = engine.reduce(wink.state, PetEvent.Tick(520))
+        val finalWink = engine.reduce(lookUp.state, PetEvent.Tick(1_200))
+        val completed = engine.reduce(finalWink.state, PetEvent.Tick(520))
+
+        assertEquals(PetDirection.LEFT, started.state.direction)
+        assertEquals(PetAction.IDLE, started.state.action)
+        assertEquals(PetAction.WINK, wink.state.action)
+        assertEquals(PetAction.LOOK_UP, lookUp.state.action)
+        assertEquals(PetAction.WINK, finalWink.state.action)
+        assertEquals(null, completed.state.activeComboId)
+        assertTrue(
+            completed.effects.contains(PetEffect.ComboCompleted(PetComboId.SOCIAL_HELLO))
+        )
     }
 
     @Test
@@ -460,25 +535,27 @@ class PetEngineTest {
     private fun behaviorProfile(
         groundDelayMillis: LongRange = 100L..100L,
         idleDurationMillis: LongRange = 100L..100L,
+        runDurationMillis: LongRange = 100L..100L,
         creepDurationMillis: LongRange = 100L..100L,
         wallDurationMillis: LongRange = 100L..100L,
         ceilingDurationMillis: LongRange = 100L..100L,
         wallJumpChancePercent: Int = 70,
         wallDescendChancePercent: Int = 0,
-        recentActionMemory: Int = 2,
-        autonomousRules: List<PetBehaviorRule> = emptyList()
+        recentComboMemory: Int = 2,
+        autonomousComboRules: List<PetComboRule> = listOf(
+            PetComboRule(PetComboId.CURIOUS_SCOUT, 1)
+        )
     ) = PetBehaviorProfile(
         groundDelayMillis = groundDelayMillis,
         idleDurationMillis = idleDurationMillis,
+        runDurationMillis = runDurationMillis,
         creepDurationMillis = creepDurationMillis,
         wallDurationMillis = wallDurationMillis,
         ceilingDurationMillis = ceilingDurationMillis,
-        continueWalkWeight = if (autonomousRules.isEmpty()) 1 else 0,
-        turnAroundWeight = 0,
         wallJumpChancePercent = wallJumpChancePercent,
         wallDescendChancePercent = wallDescendChancePercent,
-        recentActionMemory = recentActionMemory,
-        autonomousRules = autonomousRules
+        recentComboMemory = recentComboMemory,
+        autonomousComboRules = autonomousComboRules
     )
 
     private companion object {

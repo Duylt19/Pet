@@ -17,6 +17,9 @@ import com.asianmobile.privatebrower.pet.engine.PetEngine
 import com.asianmobile.privatebrower.pet.engine.PetEngineConfig
 import com.asianmobile.privatebrower.pet.engine.PetEvent
 import com.asianmobile.privatebrower.pet.engine.PetSize
+import com.asianmobile.privatebrower.pet.engine.PetSocialDirective
+import com.asianmobile.privatebrower.pet.engine.PetSocialDirector
+import com.asianmobile.privatebrower.pet.engine.PetSocialSnapshot
 import com.asianmobile.privatebrower.pet.engine.PetState
 import com.asianmobile.privatebrower.pet.pack.PetPack
 import com.asianmobile.privatebrower.pet.pack.PetPackVisual
@@ -56,6 +59,9 @@ internal class PetOverlayController(
         tapAction = pack.manifest.interaction.tapAction,
         supportedActions = pack.manifest.clips.keys
     )
+    private val socialDirector = PetSocialDirector(
+        sceneOffset = pack.manifest.id.hashCode()
+    )
     private val instances = mutableListOf<PetInstance>()
     private var isRendering = false
     private var lastTickNanos = 0L
@@ -67,7 +73,14 @@ internal class PetOverlayController(
             val elapsedNanos = frameTimeNanos - lastTickNanos
             if (elapsedNanos >= targetFrameNanos) {
                 lastTickNanos = frameTimeNanos
-                val event = PetEvent.Tick(elapsedNanos / NANOS_PER_MILLISECOND)
+                val elapsedMillis = elapsedNanos / NANOS_PER_MILLISECOND
+                socialDirector.update(
+                    pets = instances.map { instance ->
+                        PetSocialSnapshot(instance.id, instance.state)
+                    },
+                    elapsedMillis = elapsedMillis
+                ).forEach(::dispatchSocialDirective)
+                val event = PetEvent.Tick(elapsedMillis)
                 instances.toList().forEach { dispatch(it, event) }
             }
             choreographer.postFrameCallback(this)
@@ -76,6 +89,7 @@ internal class PetOverlayController(
 
     fun start() {
         if (instances.isNotEmpty()) return
+        socialDirector.reset()
 
         val size = PetSize(petSizePixels.toFloat(), petSizePixels.toFloat())
         val bounds = currentPlaygroundBounds(size)
@@ -109,7 +123,7 @@ internal class PetOverlayController(
                 val view = PetOverlayView(appContext, visual) { event -> dispatch(instance, event) }
                     .apply { render(initialState) }
                 val params = createLayoutParams(initialState, index)
-                instance = PetInstance(engine, view, params, initialState)
+                instance = PetInstance(index, engine, view, params, initialState)
                 windowManager.addView(view, params)
                 instances += instance
             }
@@ -134,6 +148,7 @@ internal class PetOverlayController(
         isRendering = false
         choreographer.removeFrameCallback(frameCallback)
         removeAllViews()
+        socialDirector.reset()
         lastTickNanos = 0L
         return positions
     }
@@ -163,6 +178,18 @@ internal class PetOverlayController(
     private fun dispatch(instance: PetInstance, event: PetEvent) {
         if (instance !in instances) return
         render(instance, instance.engine.reduce(instance.state, event).state)
+    }
+
+    private fun dispatchSocialDirective(directive: PetSocialDirective) {
+        val instance = instances.firstOrNull { it.id == directive.petId } ?: return
+        val event = when (directive) {
+            is PetSocialDirective.Face -> PetEvent.Face(directive.direction)
+            is PetSocialDirective.StartCombo -> PetEvent.StartCombo(
+                comboId = directive.comboId,
+                direction = directive.direction
+            )
+        }
+        dispatch(instance, event)
     }
 
     private fun render(instance: PetInstance, updatedState: PetState) {
@@ -252,6 +279,7 @@ internal class PetOverlayController(
     }
 
     private data class PetInstance(
+        val id: Int,
         val engine: PetEngine,
         val view: PetOverlayView,
         val params: WindowManager.LayoutParams,

@@ -18,7 +18,8 @@ data class PetState(
     val actionElapsedMillis: Long = 0,
     val actionTargetMillis: Long = 0,
     val behaviorSequence: Long = 0,
-    val recentAutonomousActions: List<PetAction> = emptyList(),
+    val activeComboId: PetComboId? = null,
+    val recentComboIds: List<PetComboId> = emptyList(),
     val pendingRoutineActions: List<PetAction> = emptyList()
 ) {
     val frameIndex: Int
@@ -34,6 +35,11 @@ sealed interface PetEvent {
     data object DragEnd : PetEvent
     data class Fling(val velocity: PetVector) : PetEvent
     data class BoundsChanged(val bounds: PetBounds) : PetEvent
+    data class Face(val direction: PetDirection) : PetEvent
+    data class StartCombo(
+        val comboId: PetComboId,
+        val direction: PetDirection? = null
+    ) : PetEvent
 }
 
 sealed interface PetEffect {
@@ -44,6 +50,8 @@ sealed interface PetEffect {
 
     data object Tapped : PetEffect
     data object ShowcaseStarted : PetEffect
+    data class ComboStarted(val comboId: PetComboId) : PetEffect
+    data class ComboCompleted(val comboId: PetComboId) : PetEffect
 }
 
 data class PetTransition(

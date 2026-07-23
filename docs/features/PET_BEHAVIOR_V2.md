@@ -63,3 +63,6 @@ https://github.com/CluelessCatBurger/wl_shimeji
   dùng.
 - Tương tác với cửa sổ kiểu desktop Shimeji-ee không phù hợp Android overlay hiện tại;
   runtime chỉ dùng các condition floor/wall/ceiling mà hệ điều hành cung cấp ổn định.
+
+Behavior combo và tương tác giữa nhiều pet được mở rộng ở
+[`PET_BEHAVIOR_V3_COMBOS.md`](PET_BEHAVIOR_V3_COMBOS.md).

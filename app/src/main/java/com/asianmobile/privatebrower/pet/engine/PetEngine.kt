@@ -67,6 +67,7 @@ class PetEngine(
         PetEvent.DragStart -> changeAction(
             state = state.copy(
                 velocity = PetVector.Zero,
+                activeComboId = null,
                 pendingRoutineActions = emptyList()
             ),
             action = PetAction.DRAGGED,
@@ -87,6 +88,8 @@ class PetEngine(
                 position = event.bounds.clampTopLeft(state.position, state.size)
             )
         )
+        is PetEvent.Face -> PetTransition(state.copy(direction = event.direction))
+        is PetEvent.StartCombo -> onStartCombo(state, event)
     }
 
     private fun onTap(state: PetState): PetTransition {
@@ -96,6 +99,7 @@ class PetEngine(
         val transition = startRoutine(
             state = state.copy(velocity = PetVector.Zero),
             actions = listOfNotNull(config.tapAction, followUp),
+            comboId = PetComboId.USER_AFFECTION,
             restartFirstAnimation = true
         )
         return transition.copy(effects = transition.effects + PetEffect.Tapped)
@@ -114,9 +118,28 @@ class PetEngine(
         val transition = startRoutine(
             state = state.copy(velocity = PetVector.Zero),
             actions = actions,
+            comboId = PetComboId.USER_SHOWCASE,
             restartFirstAnimation = true
         )
         return transition.copy(effects = transition.effects + PetEffect.ShowcaseStarted)
+    }
+
+    private fun onStartCombo(
+        state: PetState,
+        event: PetEvent.StartCombo
+    ): PetTransition {
+        if (state.action in USER_CONTROLLED_ACTIONS) return PetTransition(state)
+        val definition = PetComboCatalog.supportedDefinition(
+            id = event.comboId,
+            supportedActions = config.supportedActions
+        ) ?: return PetTransition(state)
+        val directedState = event.direction?.let { state.copy(direction = it) } ?: state
+        return startRoutine(
+            state = directedState.copy(velocity = PetVector.Zero),
+            actions = definition.actions,
+            comboId = definition.id,
+            restartFirstAnimation = true
+        )
     }
 
     private fun onDragBy(state: PetState, delta: PetVector): PetTransition {
@@ -140,6 +163,7 @@ class PetEngine(
             return changeAction(
                 state = state.copy(
                     velocity = PetVector.Zero,
+                    activeComboId = null,
                     pendingRoutineActions = emptyList()
                 ),
                 action = preferredAction(PetAction.FALL, PetAction.IDLE)
@@ -154,6 +178,7 @@ class PetEngine(
             state = state.copy(
                 velocity = velocity,
                 direction = direction,
+                activeComboId = null,
                 pendingRoutineActions = emptyList()
             ),
             action = PetAction.FLUNG,
@@ -180,12 +205,14 @@ class PetEngine(
             null
         }
         val resolvedAction = queuedAction ?: animation.action
-        val effects = if (queuedAction != null) {
-            mutableListOf<PetEffect>(PetEffect.ActionChanged(state.action, queuedAction))
-        } else {
-            animation.actionTransitions.map { (from, to) ->
-                PetEffect.ActionChanged(from, to)
-            }.toMutableList()
+        val effects = mutableListOf<PetEffect>().apply {
+            if (queuedAction != null) {
+                add(PetEffect.ActionChanged(state.action, queuedAction))
+            } else {
+                addAll(animation.actionTransitions.map { (from, to) ->
+                    PetEffect.ActionChanged(from, to)
+                })
+            }
         }
         var updatedState = state.copy(
             action = resolvedAction,
@@ -206,6 +233,13 @@ class PetEngine(
                 state.pendingRoutineActions.drop(1)
             }
         )
+        if (actionChangedByTimeline && queuedAction == null) {
+            val completedCombo = updatedState.activeComboId
+            if (completedCombo != null) {
+                updatedState = updatedState.copy(activeComboId = null)
+                effects += PetEffect.ComboCompleted(completedCombo)
+            }
+        }
 
         if (updatedState.action == PetAction.FLUNG) {
             val fling = advanceFling(updatedState.velocity, elapsedMillis)
@@ -231,7 +265,7 @@ class PetEngine(
             )
             if (collisionAction != null) {
                 val collided = changeAction(
-                    state = updatedState.copy(velocity = PetVector.Zero),
+                    state = updatedState.cancelRoutine().copy(velocity = PetVector.Zero),
                     action = collisionAction
                 )
                 return collided.copy(effects = effects + collided.effects)
@@ -239,7 +273,7 @@ class PetEngine(
 
             if (constrainedVelocity.magnitude <= config.flingStopSpeed) {
                 val stopped = changeAction(
-                    state = updatedState.copy(velocity = PetVector.Zero),
+                    state = updatedState.cancelRoutine().copy(velocity = PetVector.Zero),
                     action = preferredAction(PetAction.FALL, PetAction.IDLE)
                 )
                 return stopped.copy(effects = effects + stopped.effects)
@@ -275,7 +309,7 @@ class PetEngine(
             direction = direction
         )
         if (collisionAction != null) {
-            val collided = changeAction(updatedState, collisionAction)
+            val collided = changeAction(updatedState.cancelRoutine(), collisionAction)
             return collided.copy(effects = effects + collided.effects)
         }
         return applyLivingBehavior(
@@ -313,7 +347,7 @@ class PetEngine(
         if (collisionAction == null) return PetTransition(falling, effects)
 
         val collided = changeAction(
-            state = falling.copy(velocity = PetVector.Zero),
+            state = falling.cancelRoutine().copy(velocity = PetVector.Zero),
             action = collisionAction
         )
         return collided.copy(effects = effects + collided.effects)
@@ -360,18 +394,25 @@ class PetEngine(
     private fun startRoutine(
         state: PetState,
         actions: List<PetAction>,
+        comboId: PetComboId,
         restartFirstAnimation: Boolean = false
     ): PetTransition {
         val supported = actions.filter { it in config.supportedActions }
         val first = supported.firstOrNull() ?: preferredAction(PetAction.WALK, PetAction.IDLE)
-        return changeAction(
+        val recentCombos = (listOf(comboId) + state.recentComboIds)
+            .distinct()
+            .take(config.behaviorProfile.recentComboMemory)
+        val changed = changeAction(
             state = state.copy(
+                activeComboId = comboId,
+                recentComboIds = recentCombos,
                 pendingRoutineActions = supported.drop(1),
                 behaviorSequence = state.behaviorSequence + 1
             ),
             action = first,
             restartAnimation = restartFirstAnimation
         )
+        return changed.copy(effects = changed.effects + PetEffect.ComboStarted(comboId))
     }
 
     private fun PetVector.withDirection(direction: PetDirection): PetVector = when (direction) {
@@ -502,44 +543,53 @@ class PetEngine(
             return PetTransition(scheduled, effects)
         }
 
-        val supportedRules = config.behaviorProfile.autonomousRules.filter { rule ->
-            rule.action in config.supportedActions && rule.action != PetAction.WALK
+        if (scheduled.pendingRoutineActions.isNotEmpty()) {
+            return advanceRoutineOrFallback(
+                state = scheduled,
+                fallbackAction = preferredAction(PetAction.WALK, PetAction.IDLE),
+                effects = effects
+            )
         }
-        val freshRules = supportedRules.filterNot { it.action in scheduled.recentAutonomousActions }
+
+        if (scheduled.activeComboId != null) {
+            return completeCombo(
+                state = scheduled.resetActionTimer(),
+                effects = effects
+            )
+        }
+
+        val supportedRules = config.behaviorProfile.autonomousComboRules.mapNotNull { rule ->
+            PetComboCatalog.supportedDefinition(rule.comboId, config.supportedActions)
+                ?.let { definition -> rule to definition }
+        }
+        val freshRules = supportedRules.filterNot { (rule, _) ->
+            rule.comboId in scheduled.recentComboIds
+        }
         val eligibleRules = freshRules.ifEmpty { supportedRules }
-        val totalWeight = config.behaviorProfile.continueWalkWeight +
-            config.behaviorProfile.turnAroundWeight + eligibleRules.sumOf(PetBehaviorRule::weight)
+        val totalWeight = eligibleRules.sumOf { (rule, _) -> rule.weight }
         if (totalWeight <= 0) {
             return PetTransition(scheduled.resetActionTimer(), effects)
         }
 
         val draw = draw(scheduled, 0 until totalWeight, GROUND_CHOICE_SALT)
         var cursor = draw.value
-        if (cursor < config.behaviorProfile.continueWalkWeight) {
-            return PetTransition(draw.state.resetActionTimer(), effects)
-        }
-        cursor -= config.behaviorProfile.continueWalkWeight
-        if (cursor < config.behaviorProfile.turnAroundWeight) {
-            return PetTransition(
-                draw.state.copy(direction = draw.state.direction.opposite()).resetActionTimer(),
-                effects
-            )
-        }
-        cursor -= config.behaviorProfile.turnAroundWeight
-        val selected = eligibleRules.first { rule ->
+        val (_, selected) = eligibleRules.first { (rule, _) ->
             if (cursor < rule.weight) {
                 true
             } else {
                 cursor -= rule.weight
                 false
             }
-        }.action
-        val recent = (listOf(selected) + draw.state.recentAutonomousActions)
-            .distinct()
-            .take(config.behaviorProfile.recentActionMemory)
+        }
+        val directedState = if (selected.turnAtStart) {
+            draw.state.copy(direction = draw.state.direction.opposite())
+        } else {
+            draw.state
+        }
         val changed = startRoutine(
-            state = draw.state.copy(recentAutonomousActions = recent),
-            actions = autonomousRoutine(selected)
+            state = directedState,
+            actions = selected.actions,
+            comboId = selected.id
         )
         return changed.copy(effects = effects + changed.effects)
     }
@@ -572,7 +622,7 @@ class PetEngine(
         } else {
             chance.state
         }
-        val changed = changeAction(exiting, nextAction)
+        val changed = changeAction(exiting.cancelRoutine(), nextAction)
         return changed.copy(effects = effects + changed.effects)
     }
 
@@ -589,8 +639,42 @@ class PetEngine(
         ) {
             return PetTransition(scheduled, effects)
         }
-        val changed = changeAction(scheduled, nextAction)
-        return changed.copy(effects = effects + changed.effects)
+        return advanceRoutineOrFallback(
+            state = scheduled,
+            fallbackAction = nextAction,
+            effects = effects
+        )
+    }
+
+    private fun advanceRoutineOrFallback(
+        state: PetState,
+        fallbackAction: PetAction,
+        effects: List<PetEffect>
+    ): PetTransition {
+        val queuedAction = state.pendingRoutineActions.firstOrNull()
+        if (queuedAction != null) {
+            val changed = changeAction(
+                state = state.copy(pendingRoutineActions = state.pendingRoutineActions.drop(1)),
+                action = queuedAction,
+                restartAnimation = true
+            )
+            return changed.copy(effects = effects + changed.effects)
+        }
+
+        val completed = completeCombo(state, effects)
+        val changed = changeAction(completed.state, fallbackAction)
+        return changed.copy(effects = completed.effects + changed.effects)
+    }
+
+    private fun completeCombo(
+        state: PetState,
+        effects: List<PetEffect>
+    ): PetTransition {
+        val comboId = state.activeComboId ?: return PetTransition(state, effects)
+        return PetTransition(
+            state = state.copy(activeComboId = null, pendingRoutineActions = emptyList()),
+            effects = effects + PetEffect.ComboCompleted(comboId)
+        )
     }
 
     private fun ensureActionTarget(
@@ -630,36 +714,16 @@ class PetEngine(
         actionTargetMillis = 0
     )
 
+    private fun PetState.cancelRoutine(): PetState = copy(
+        activeComboId = null,
+        pendingRoutineActions = emptyList()
+    )
+
     private fun preferredActionOrNull(vararg actions: PetAction): PetAction? =
         actions.firstOrNull { it in config.supportedActions }
 
     private fun preferredAction(vararg actions: PetAction): PetAction =
         preferredActionOrNull(*actions) ?: PetAction.IDLE
-
-    private fun autonomousRoutine(action: PetAction): List<PetAction> = when (action) {
-        PetAction.SIT -> listOfNotNull(
-            PetAction.SIT,
-            preferredActionOrNull(PetAction.WINK, PetAction.LOOK_UP)
-        )
-        PetAction.DANGLE -> listOfNotNull(
-            PetAction.DANGLE,
-            preferredActionOrNull(PetAction.LOOK_UP, PetAction.WINK)
-        )
-        PetAction.TRIP -> listOfNotNull(
-            PetAction.TRIP,
-            preferredActionOrNull(PetAction.SIT, PetAction.IDLE)
-        )
-        PetAction.SPECIAL -> listOfNotNull(
-            PetAction.SPECIAL,
-            preferredActionOrNull(PetAction.SPECIAL_2),
-            preferredActionOrNull(PetAction.WINK)
-        ).distinct()
-        PetAction.SPECIAL_2 -> listOfNotNull(
-            PetAction.SPECIAL_2,
-            preferredActionOrNull(PetAction.WINK)
-        )
-        else -> listOf(action)
-    }
 
     private data class FlingAdvance(
         val velocity: PetVector,
@@ -685,5 +749,10 @@ class PetEngine(
         const val CLIMB_DOWN_DURATION_SALT = 0x403L
         const val CEILING_DURATION_SALT = 0x501L
         val GROUND_MOVEMENT_ACTIONS = setOf(PetAction.WALK, PetAction.RUN, PetAction.CREEP)
+        val USER_CONTROLLED_ACTIONS = setOf(
+            PetAction.DRAGGED,
+            PetAction.FLUNG,
+            PetAction.FALL
+        )
     }
 }

@@ -1,14 +1,5 @@
 package com.asianmobile.privatebrower.pet.engine
 
-data class PetBehaviorRule(
-    val action: PetAction,
-    val weight: Int
-) {
-    init {
-        require(weight > 0) { "behavior weight must be positive" }
-    }
-}
-
 data class PetBehaviorProfile(
     val groundDelayMillis: LongRange = 1_800L..6_500L,
     val idleDurationMillis: LongRange = 900L..2_800L,
@@ -16,22 +7,22 @@ data class PetBehaviorProfile(
     val creepDurationMillis: LongRange = 1_200L..3_500L,
     val wallDurationMillis: LongRange = 1_600L..6_500L,
     val ceilingDurationMillis: LongRange = 1_200L..5_000L,
-    val continueWalkWeight: Int = 25,
-    val turnAroundWeight: Int = 15,
     val wallJumpChancePercent: Int = 55,
     val wallDescendChancePercent: Int = 30,
-    val recentActionMemory: Int = 2,
-    val autonomousRules: List<PetBehaviorRule> = listOf(
-        PetBehaviorRule(PetAction.IDLE, 24),
-        PetBehaviorRule(PetAction.RUN, 13),
-        PetBehaviorRule(PetAction.SIT, 16),
-        PetBehaviorRule(PetAction.WINK, 14),
-        PetBehaviorRule(PetAction.LOOK_UP, 12),
-        PetBehaviorRule(PetAction.DANGLE, 8),
-        PetBehaviorRule(PetAction.CREEP, 10),
-        PetBehaviorRule(PetAction.TRIP, 7),
-        PetBehaviorRule(PetAction.SPECIAL, 5),
-        PetBehaviorRule(PetAction.SPECIAL_2, 4)
+    val recentComboMemory: Int = 3,
+    val autonomousComboRules: List<PetComboRule> = listOf(
+        PetComboRule(PetComboId.CURIOUS_SCOUT, 15),
+        PetComboRule(PetComboId.COZY_BREAK, 13),
+        PetComboRule(PetComboId.HAPPY_ZOOMIES, 11),
+        PetComboRule(PetComboId.SHY_SNEAK, 10),
+        PetComboRule(PetComboId.CLUMSY_RECOVERY, 8),
+        PetComboRule(PetComboId.TINY_PERFORMANCE, 7),
+        PetComboRule(PetComboId.DAYDREAM, 9),
+        PetComboRule(PetComboId.BUSY_PATROL, 12),
+        PetComboRule(PetComboId.PEEK_AND_DASH, 10),
+        PetComboRule(PetComboId.SLOW_MORNING, 12),
+        PetComboRule(PetComboId.BRAVE_EXPLORER, 9),
+        PetComboRule(PetComboId.CHEERFUL_ENCORE, 6)
     )
 ) {
     init {
@@ -41,11 +32,7 @@ data class PetBehaviorProfile(
         require(creepDurationMillis.isValid()) { "creep duration range must be positive" }
         require(wallDurationMillis.isValid()) { "wall duration range must be positive" }
         require(ceilingDurationMillis.isValid()) { "ceiling duration range must be positive" }
-        require(continueWalkWeight >= 0) { "continue walk weight must not be negative" }
-        require(turnAroundWeight >= 0) { "turn around weight must not be negative" }
-        require(continueWalkWeight + turnAroundWeight > 0 || autonomousRules.isNotEmpty()) {
-            "behavior profile must contain a possible decision"
-        }
+        require(autonomousComboRules.isNotEmpty()) { "behavior profile must contain a combo" }
         require(wallJumpChancePercent in 0..100) {
             "wall jump chance must be a percentage"
         }
@@ -55,7 +42,7 @@ data class PetBehaviorProfile(
         require(wallJumpChancePercent + wallDescendChancePercent <= 100) {
             "wall exit chances must not exceed 100 percent"
         }
-        require(recentActionMemory >= 0) { "recent action memory must not be negative" }
+        require(recentComboMemory >= 0) { "recent combo memory must not be negative" }
     }
 }
 
