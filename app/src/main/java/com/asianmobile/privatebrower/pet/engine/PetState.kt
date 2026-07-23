@@ -18,7 +18,8 @@ data class PetState(
     val actionElapsedMillis: Long = 0,
     val actionTargetMillis: Long = 0,
     val behaviorSequence: Long = 0,
-    val recentAutonomousActions: List<PetAction> = emptyList()
+    val recentAutonomousActions: List<PetAction> = emptyList(),
+    val pendingRoutineActions: List<PetAction> = emptyList()
 ) {
     val frameIndex: Int
         get() = animationCursor.frameIndex
@@ -27,6 +28,7 @@ data class PetState(
 sealed interface PetEvent {
     data class Tick(val elapsedMillis: Long) : PetEvent
     data object Tap : PetEvent
+    data object Showcase : PetEvent
     data object DragStart : PetEvent
     data class DragBy(val delta: PetVector) : PetEvent
     data object DragEnd : PetEvent
@@ -41,6 +43,7 @@ sealed interface PetEffect {
     ) : PetEffect
 
     data object Tapped : PetEffect
+    data object ShowcaseStarted : PetEffect
 }
 
 data class PetTransition(

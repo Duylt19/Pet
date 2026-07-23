@@ -180,6 +180,23 @@ class LegacyShimejiPackInstaller @Inject constructor(
                 frames = numbers.map { frame(it, duration, velocityX, velocityY) }
             )
         }
+        fun partialSpecialClip(
+            action: PetAction,
+            numbers: List<Int>,
+            specialFrameRange: IntRange
+        ): PetPackClip? {
+            val availableNumbers = LegacyShimejiFrameContract.availableSpecialSequence(
+                sequence = numbers,
+                specialFrameRange = specialFrameRange,
+                availableFrames = assets.keys
+            ) ?: return null
+            return PetPackClip(
+                action = action,
+                loops = false,
+                nextAction = PetAction.WALK,
+                frames = availableNumbers.map { frame(it, duration = 180L) }
+            )
+        }
 
         val clips = buildList {
             add(checkNotNull(clip(
@@ -196,6 +213,14 @@ class LegacyShimejiPackInstaller @Inject constructor(
                 velocityX = 42f,
                 allowFallback = true
             )))
+            add(checkNotNull(clip(
+                PetAction.RUN,
+                listOf(1, 2, 1, 3),
+                loops = true,
+                duration = 80L,
+                velocityX = 82f,
+                allowFallback = true
+            )))
             val fall = clip(PetAction.FALL, listOf(4), loops = true)
             fall?.let(::add)
             clip(PetAction.BOUNCE, listOf(18, 19), false, PetAction.WALK)?.let(::add)
@@ -205,6 +230,13 @@ class LegacyShimejiPackInstaller @Inject constructor(
                 loops = true,
                 duration = 80L,
                 velocityY = -36f
+            )?.let(::add)
+            clip(
+                PetAction.CLIMB_DOWN,
+                LegacyShimejiFrameContract.wallClimb,
+                loops = true,
+                duration = 80L,
+                velocityY = 36f
             )?.let(::add)
             clip(
                 PetAction.CLIMB_CEILING,
@@ -250,19 +282,15 @@ class LegacyShimejiPackInstaller @Inject constructor(
                     velocityY = -80f
                 )?.let(::add)
             }
-            clip(
+            partialSpecialClip(
                 PetAction.SPECIAL,
                 LegacyShimejiFrameContract.special,
-                false,
-                PetAction.WALK,
-                duration = 180L
+                LegacyShimejiFrameContract.specialFrameRange
             )?.let(::add)
-            clip(
+            partialSpecialClip(
                 PetAction.SPECIAL_2,
                 LegacyShimejiFrameContract.special2,
-                false,
-                PetAction.WALK,
-                duration = 180L
+                LegacyShimejiFrameContract.special2FrameRange
             )?.let(::add)
             clip(PetAction.TAPPED, listOf(15, 17), false, PetAction.IDLE, duration = 180L)
                 ?.let(::add)
@@ -371,11 +399,21 @@ internal object LegacyShimejiFrameContract {
     val creep = listOf(20, 20, 21, 21, 21)
     val trip = listOf(19, 18, 20, 20)
     val ceilingClimb = listOf(25, 25, 23, 24, 24, 24, 23, 25)
-    val special = listOf(1, 38, 39, 40)
+    val special = listOf(1, 38, 39, 40, 41)
     val special2 = listOf(42, 43, 44, 45, 46, 45, 44, 43)
+    val specialFrameRange = 38..41
+    val special2FrameRange = 42..46
 
     fun isAvailable(sequence: List<Int>, availableFrames: Set<Int>): Boolean =
         sequence.all(availableFrames::contains)
+
+    fun availableSpecialSequence(
+        sequence: List<Int>,
+        specialFrameRange: IntRange,
+        availableFrames: Set<Int>
+    ): List<Int>? = sequence
+        .filter(availableFrames::contains)
+        .takeIf { available -> available.any { it in specialFrameRange } }
 }
 
 object LegacyShimejiFrameSelector {

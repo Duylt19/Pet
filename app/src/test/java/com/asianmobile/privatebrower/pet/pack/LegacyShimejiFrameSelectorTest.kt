@@ -38,6 +38,10 @@ class LegacyShimejiFrameSelectorTest {
             listOf(42, 43, 44, 45, 46, 45, 44, 43),
             LegacyShimejiFrameContract.special2
         )
+        assertEquals(
+            listOf(1, 38, 39, 40, 41),
+            LegacyShimejiFrameContract.special
+        )
     }
 
     @Test
@@ -56,5 +60,22 @@ class LegacyShimejiFrameSelectorTest {
                 setOf(12, 14)
             )
         )
+    }
+
+    @Test
+    fun `partial special keeps real transformation frames instead of disabling the action`() {
+        val leviSequence = LegacyShimejiFrameContract.availableSpecialSequence(
+            sequence = LegacyShimejiFrameContract.special,
+            specialFrameRange = LegacyShimejiFrameContract.specialFrameRange,
+            availableFrames = setOf(1, 40)
+        )
+        val noSpecialSequence = LegacyShimejiFrameContract.availableSpecialSequence(
+            sequence = LegacyShimejiFrameContract.special,
+            specialFrameRange = LegacyShimejiFrameContract.specialFrameRange,
+            availableFrames = setOf(1)
+        )
+
+        assertEquals(listOf(1, 40), leviSequence)
+        assertEquals(null, noSpecialSequence)
     }
 }

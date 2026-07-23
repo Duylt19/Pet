@@ -23,7 +23,7 @@ Language được mirror sang SharedPreferences `language_cache` để có thể
 
 ## Pet engine model
 
-- `PetState`: position, velocity, size, usable bounds, action/direction, animation cursor, action timer, deterministic behavior sequence và recent-action memory immutable.
+- `PetState`: position, velocity, size, usable bounds, action/direction, animation cursor, action timer, deterministic behavior sequence, recent-action memory và pending routine immutable.
 - `PetEvent`: tick, tap, drag start/by/end, fling và bounds change.
 - `PetTransition`: state mới + effect (`ActionChanged`, `Tapped`).
 - `PetClip`/`PetFrame`: action timeline version-independent với frame duration và scripted velocity.
@@ -48,7 +48,7 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 - `OwnerPetCatalogEntry`: owner ID, name, category, author, optional local thumbnail path và archive availability.
 - `OwnerPetCatalogSnapshot`: immutable loading/content/error state cùng app-specific local root.
 - `OwnerPetCatalogRepository`: boundary dùng chung cho local test source hiện tại và network/cache source tương lai.
-- Raw ZIP chỉ được normalize khi user bấm `Set`; Living Behavior normalization hiện tạo immutable revision `owner.shimeji.<id>@2` và persist qua `pet_selected_pack_key`. Pack revision 1 đã cài vẫn đọc được để tương thích, còn thao tác `Set` mới chọn revision 2.
+- Raw ZIP chỉ được normalize khi user bấm `Set`; Living Behavior V2 normalization hiện tạo immutable revision `owner.shimeji.<id>@3` và persist qua `pet_selected_pack_key`. Các revision cũ đã cài vẫn đọc được để tương thích, còn thao tác `Set` mới chọn revision 3.
 - Catalog 1,026 item không dùng Room trong local test: metadata parse một lần vào memory, filter 1,026 record bằng pure policy; binary vẫn nằm ngoài APK/Git.
 
 ## Không có database

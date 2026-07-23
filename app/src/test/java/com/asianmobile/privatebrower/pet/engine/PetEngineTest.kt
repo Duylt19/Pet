@@ -9,7 +9,7 @@ class PetEngineTest {
     private val size = PetSize(width = 20f, height = 20f)
 
     @Test
-    fun `tap restarts tapped animation and returns to idle after clip completes`() {
+    fun `tap restarts tapped animation then follows with an affectionate reaction`() {
         val engine = engine(maxTickMillis = 1_000)
         val initial = engine.initialState(bounds, size, position = PetVector(10f, 10f))
 
@@ -18,12 +18,42 @@ class PetEngineTest {
 
         assertEquals(PetAction.TAPPED, tapped.state.action)
         assertTrue(tapped.effects.contains(PetEffect.Tapped))
-        assertEquals(PetAction.IDLE, completed.state.action)
+        assertEquals(PetAction.WINK, completed.state.action)
         assertTrue(
             completed.effects.contains(
-                PetEffect.ActionChanged(PetAction.TAPPED, PetAction.IDLE)
+                PetEffect.ActionChanged(PetAction.TAPPED, PetAction.WINK)
             )
         )
+    }
+
+    @Test
+    fun `showcase plays every supported special as one routine`() {
+        val engine = engine(maxTickMillis = 2_000)
+        val initial = engine.initialState(bounds, size)
+
+        val started = engine.reduce(initial, PetEvent.Showcase)
+        val secondSpecial = engine.reduce(started.state, PetEvent.Tick(880))
+        val wink = engine.reduce(secondSpecial.state, PetEvent.Tick(1_280))
+        val lookUp = engine.reduce(wink.state, PetEvent.Tick(520))
+
+        assertEquals(PetAction.SPECIAL, started.state.action)
+        assertEquals(PetAction.SPECIAL_2, secondSpecial.state.action)
+        assertEquals(PetAction.WINK, wink.state.action)
+        assertEquals(PetAction.LOOK_UP, lookUp.state.action)
+        assertTrue(started.effects.contains(PetEffect.ShowcaseStarted))
+    }
+
+    @Test
+    fun `run is a short faster ground action`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val largeBounds = PetBounds(0f, 0f, 10_000f, 10_000f)
+        val running = engine.initialState(largeBounds, size, action = PetAction.RUN)
+        val walking = engine.initialState(largeBounds, size, action = PetAction.WALK)
+
+        val advancedRun = engine.reduce(running, PetEvent.Tick(100)).state
+        val advancedWalk = engine.reduce(walking, PetEvent.Tick(100)).state
+
+        assertTrue(advancedRun.position.x > advancedWalk.position.x)
     }
 
     @Test
@@ -299,6 +329,29 @@ class PetEngineTest {
     }
 
     @Test
+    fun `wall climber can reverse into a controlled descent`() {
+        val engine = PetEngine(
+            PetEngineConfig(
+                behaviorProfile = behaviorProfile(
+                    wallDurationMillis = 100L..100L,
+                    wallJumpChancePercent = 0,
+                    wallDescendChancePercent = 100
+                )
+            )
+        )
+        val climbing = engine.initialState(
+            PetBounds(0f, 0f, 1_000f, 1_000f),
+            size,
+            position = PetVector(980f, 500f),
+            action = PetAction.CLIMB_WALL
+        )
+
+        val descending = engine.reduce(climbing, PetEvent.Tick(100))
+
+        assertEquals(PetAction.CLIMB_DOWN, descending.state.action)
+    }
+
+    @Test
     fun `ceiling climber drops after its behavior timeout`() {
         val engine = PetEngine(
             PetEngineConfig(
@@ -411,6 +464,7 @@ class PetEngineTest {
         wallDurationMillis: LongRange = 100L..100L,
         ceilingDurationMillis: LongRange = 100L..100L,
         wallJumpChancePercent: Int = 70,
+        wallDescendChancePercent: Int = 0,
         recentActionMemory: Int = 2,
         autonomousRules: List<PetBehaviorRule> = emptyList()
     ) = PetBehaviorProfile(
@@ -422,6 +476,7 @@ class PetEngineTest {
         continueWalkWeight = if (autonomousRules.isEmpty()) 1 else 0,
         turnAroundWeight = 0,
         wallJumpChancePercent = wallJumpChancePercent,
+        wallDescendChancePercent = wallDescendChancePercent,
         recentActionMemory = recentActionMemory,
         autonomousRules = autonomousRules
     )

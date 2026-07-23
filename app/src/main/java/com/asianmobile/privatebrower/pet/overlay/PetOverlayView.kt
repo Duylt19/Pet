@@ -29,12 +29,14 @@ internal class PetOverlayView(
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
     private val minimumFlingVelocity =
         ViewConfiguration.get(context).scaledMinimumFlingVelocity.toFloat()
+    private val doubleTapTimeoutMillis = ViewConfiguration.getDoubleTapTimeout().toLong()
     private var petState: PetState? = null
     private var downRawX = 0f
     private var downRawY = 0f
     private var lastRawX = 0f
     private var lastRawY = 0f
     private var isDragging = false
+    private var lastTapEventTimeMillis: Long? = null
     private var velocityTracker: VelocityTracker? = null
 
     private val furPaint = fillPaint(R.color.pet_demo_fur)
@@ -103,13 +105,15 @@ internal class PetOverlayView(
             PetAction.FALL -> canvas.rotate(6f, viewWidth / 2f, viewHeight / 2f)
             PetAction.BOUNCE,
             PetAction.TRIP -> canvas.scale(1.04f, 0.92f, viewWidth / 2f, viewHeight * 0.75f)
-            PetAction.CLIMB_WALL -> canvas.rotate(-4f, viewWidth / 2f, viewHeight / 2f)
+            PetAction.CLIMB_WALL,
+            PetAction.CLIMB_DOWN -> canvas.rotate(-4f, viewWidth / 2f, viewHeight / 2f)
             PetAction.CLIMB_CEILING -> canvas.rotate(180f, viewWidth / 2f, viewHeight / 2f)
             PetAction.SIT -> canvas.translate(0f, viewHeight * 0.04f)
             PetAction.LOOK_UP -> canvas.translate(0f, -viewHeight * 0.02f)
             PetAction.DANGLE -> canvas.translate(0f, viewHeight * 0.06f)
             PetAction.JUMP -> canvas.rotate(-8f, viewWidth / 2f, viewHeight / 2f)
             PetAction.WINK,
+            PetAction.RUN,
             PetAction.CREEP,
             PetAction.SPECIAL,
             PetAction.SPECIAL_2,
@@ -131,6 +135,7 @@ internal class PetOverlayView(
         visual: PetPackVisual.Sprite
     ) {
         val saveCount = canvas.save()
+        applySpriteMotion(canvas, width, height, state)
         if (state.direction.requiresMirror(PetDirection.LEFT)) {
             canvas.scale(-1f, 1f, width / 2f, height / 2f)
         }
@@ -155,6 +160,7 @@ internal class PetOverlayView(
                 val distanceFromDown = hypot(event.rawX - downRawX, event.rawY - downRawY)
                 if (!isDragging && distanceFromDown > touchSlop) {
                     isDragging = true
+                    lastTapEventTimeMillis = null
                     onEvent(PetEvent.DragStart)
                 }
                 if (isDragging) {
@@ -182,7 +188,16 @@ internal class PetOverlayView(
                     onEvent(PetGesturePolicy.releaseEvent(velocity, minimumFlingVelocity))
                 } else {
                     performClick()
-                    onEvent(PetEvent.Tap)
+                    val previousTap = lastTapEventTimeMillis
+                    val isDoubleTap = previousTap != null &&
+                        event.eventTime - previousTap in 0..doubleTapTimeoutMillis
+                    if (isDoubleTap) {
+                        lastTapEventTimeMillis = null
+                        onEvent(PetEvent.Showcase)
+                    } else {
+                        lastTapEventTimeMillis = event.eventTime
+                        onEvent(PetEvent.Tap)
+                    }
                 }
                 recycleVelocityTracker()
                 isDragging = false
@@ -339,8 +354,10 @@ internal class PetOverlayView(
     ) {
         val fallbackAction = when (state.action) {
             PetAction.WALK,
+            PetAction.RUN,
             PetAction.CREEP,
             PetAction.CLIMB_WALL,
+            PetAction.CLIMB_DOWN,
             PetAction.CLIMB_CEILING -> PetAction.WALK
             else -> PetAction.IDLE
         }
@@ -365,6 +382,41 @@ internal class PetOverlayView(
             anchorY + (1f - visual.anchor.y) * drawHeight
         )
         canvas.drawBitmap(frame.bitmap, frame.source, destination, null)
+    }
+
+    private fun applySpriteMotion(
+        canvas: Canvas,
+        width: Float,
+        height: Float,
+        state: PetState
+    ) {
+        val alternating = if (state.frameIndex % 2 == 0) -1f else 1f
+        when (state.action) {
+            PetAction.WALK -> canvas.scale(
+                1f + alternating * 0.012f,
+                1f - alternating * 0.012f,
+                width / 2f,
+                height
+            )
+            PetAction.RUN -> {
+                canvas.rotate(alternating * 2.5f, width / 2f, height)
+                canvas.scale(1.035f, 0.965f, width / 2f, height)
+            }
+            PetAction.JUMP -> canvas.rotate(-4f, width / 2f, height)
+            PetAction.FALL -> canvas.rotate(4f, width / 2f, height)
+            PetAction.BOUNCE,
+            PetAction.TRIP -> canvas.scale(1.05f, 0.93f, width / 2f, height)
+            PetAction.DRAGGED -> canvas.rotate(alternating * 4f, width / 2f, 0f)
+            PetAction.FLUNG -> canvas.rotate(alternating * 7f, width / 2f, height / 2f)
+            PetAction.SPECIAL,
+            PetAction.SPECIAL_2 -> canvas.scale(
+                1f + alternating * 0.018f,
+                1f + alternating * 0.018f,
+                width / 2f,
+                height
+            )
+            else -> Unit
+        }
     }
 
     private fun addRawMovement(event: MotionEvent) {

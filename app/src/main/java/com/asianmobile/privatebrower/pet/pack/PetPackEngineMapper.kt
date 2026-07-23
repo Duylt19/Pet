@@ -27,8 +27,10 @@ private fun fallbackClip(
 ): PetClip {
     val sourceFrames = when (action) {
         PetAction.WALK,
+        PetAction.RUN,
         PetAction.CREEP,
         PetAction.CLIMB_WALL,
+        PetAction.CLIMB_DOWN,
         PetAction.CLIMB_CEILING,
         PetAction.JUMP -> walkFrames
         else -> idleFrames
@@ -37,8 +39,10 @@ private fun fallbackClip(
         val fallbackVelocity = when (action) {
             PetAction.FALL -> PetVector(y = FALL_VELOCITY)
             PetAction.CLIMB_WALL -> PetVector(y = -CLIMB_VELOCITY)
+            PetAction.CLIMB_DOWN -> PetVector(y = CLIMB_VELOCITY)
             PetAction.CLIMB_CEILING -> PetVector(x = CLIMB_VELOCITY)
             PetAction.CREEP -> PetVector(x = CREEP_VELOCITY)
+            PetAction.RUN -> PetVector(x = RUN_VELOCITY)
             PetAction.JUMP -> PetVector(x = JUMP_HORIZONTAL_VELOCITY, y = JUMP_VERTICAL_VELOCITY)
             else -> frame.velocity
         }
@@ -77,6 +81,7 @@ private const val MIN_FRAME_MILLIS = 16L
 private const val FALL_VELOCITY = 220f
 private const val CLIMB_VELOCITY = 36f
 private const val CREEP_VELOCITY = 16f
+private const val RUN_VELOCITY = 82f
 private const val JUMP_HORIZONTAL_VELOCITY = 110f
 private const val JUMP_VERTICAL_VELOCITY = -80f
 private val ONE_SHOT_FALLBACK_ACTIONS = setOf(

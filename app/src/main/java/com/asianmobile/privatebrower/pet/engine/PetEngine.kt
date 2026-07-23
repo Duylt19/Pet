@@ -63,8 +63,12 @@ class PetEngine(
     fun reduce(state: PetState, event: PetEvent): PetTransition = when (event) {
         is PetEvent.Tick -> onTick(state, event.elapsedMillis)
         PetEvent.Tap -> onTap(state)
+        PetEvent.Showcase -> onShowcase(state)
         PetEvent.DragStart -> changeAction(
-            state = state.copy(velocity = PetVector.Zero),
+            state = state.copy(
+                velocity = PetVector.Zero,
+                pendingRoutineActions = emptyList()
+            ),
             action = PetAction.DRAGGED,
             restartAnimation = true
         )
@@ -87,12 +91,32 @@ class PetEngine(
 
     private fun onTap(state: PetState): PetTransition {
         if (state.action == PetAction.DRAGGED) return PetTransition(state)
-        val transition = changeAction(
+        val followUp = preferredActionOrNull(PetAction.WINK, PetAction.LOOK_UP)
+            ?.takeUnless { it == config.tapAction }
+        val transition = startRoutine(
             state = state.copy(velocity = PetVector.Zero),
-            action = config.tapAction,
-            restartAnimation = true
+            actions = listOfNotNull(config.tapAction, followUp),
+            restartFirstAnimation = true
         )
         return transition.copy(effects = transition.effects + PetEffect.Tapped)
+    }
+
+    private fun onShowcase(state: PetState): PetTransition {
+        if (state.action == PetAction.DRAGGED) return PetTransition(state)
+        val actions = listOf(
+            PetAction.SPECIAL,
+            PetAction.SPECIAL_2,
+            PetAction.WINK,
+            PetAction.LOOK_UP
+        ).filter { it in config.supportedActions }
+        if (actions.isEmpty()) return onTap(state)
+
+        val transition = startRoutine(
+            state = state.copy(velocity = PetVector.Zero),
+            actions = actions,
+            restartFirstAnimation = true
+        )
+        return transition.copy(effects = transition.effects + PetEffect.ShowcaseStarted)
     }
 
     private fun onDragBy(state: PetState, delta: PetVector): PetTransition {
@@ -114,7 +138,10 @@ class PetEngine(
         val velocity = requestedVelocity.limitedTo(config.maxFlingSpeed)
         if (velocity.magnitude <= config.flingStopSpeed) {
             return changeAction(
-                state = state.copy(velocity = PetVector.Zero),
+                state = state.copy(
+                    velocity = PetVector.Zero,
+                    pendingRoutineActions = emptyList()
+                ),
                 action = preferredAction(PetAction.FALL, PetAction.IDLE)
             )
         }
@@ -124,7 +151,11 @@ class PetEngine(
             else -> state.direction
         }
         return changeAction(
-            state = state.copy(velocity = velocity, direction = direction),
+            state = state.copy(
+                velocity = velocity,
+                direction = direction,
+                pendingRoutineActions = emptyList()
+            ),
             action = PetAction.FLUNG,
             restartAnimation = true
         )
@@ -142,19 +173,38 @@ class PetEngine(
             elapsedMillis = elapsedMillis
         )
         val scriptedDisplacement = animation.displacement.withDirection(state.direction)
-        val effects = animation.actionTransitions.map { (from, to) ->
-            PetEffect.ActionChanged(from, to)
-        }.toMutableList<PetEffect>()
         val actionChangedByTimeline = animation.action != state.action
+        val queuedAction = if (actionChangedByTimeline) {
+            state.pendingRoutineActions.firstOrNull()
+        } else {
+            null
+        }
+        val resolvedAction = queuedAction ?: animation.action
+        val effects = if (queuedAction != null) {
+            mutableListOf<PetEffect>(PetEffect.ActionChanged(state.action, queuedAction))
+        } else {
+            animation.actionTransitions.map { (from, to) ->
+                PetEffect.ActionChanged(from, to)
+            }.toMutableList()
+        }
         var updatedState = state.copy(
-            action = animation.action,
-            animationCursor = animation.cursor,
+            action = resolvedAction,
+            animationCursor = if (queuedAction == null) {
+                animation.cursor
+            } else {
+                PetAnimationCursor()
+            },
             actionElapsedMillis = if (actionChangedByTimeline) {
                 0
             } else {
                 state.actionElapsedMillis + elapsedMillis
             },
-            actionTargetMillis = if (actionChangedByTimeline) 0 else state.actionTargetMillis
+            actionTargetMillis = if (actionChangedByTimeline) 0 else state.actionTargetMillis,
+            pendingRoutineActions = if (queuedAction == null) {
+                state.pendingRoutineActions
+            } else {
+                state.pendingRoutineActions.drop(1)
+            }
         )
 
         if (updatedState.action == PetAction.FLUNG) {
@@ -307,6 +357,23 @@ class PetEngine(
         )
     }
 
+    private fun startRoutine(
+        state: PetState,
+        actions: List<PetAction>,
+        restartFirstAnimation: Boolean = false
+    ): PetTransition {
+        val supported = actions.filter { it in config.supportedActions }
+        val first = supported.firstOrNull() ?: preferredAction(PetAction.WALK, PetAction.IDLE)
+        return changeAction(
+            state = state.copy(
+                pendingRoutineActions = supported.drop(1),
+                behaviorSequence = state.behaviorSequence + 1
+            ),
+            action = first,
+            restartAnimation = restartFirstAnimation
+        )
+    }
+
     private fun PetVector.withDirection(direction: PetDirection): PetVector = when (direction) {
         PetDirection.LEFT -> copy(x = -x)
         PetDirection.RIGHT -> this
@@ -326,7 +393,7 @@ class PetEngine(
         action == PetAction.CLIMB_WALL && collisionAction == PetAction.CLIMB_CEILING -> {
             direction.opposite()
         }
-        action == PetAction.WALK && hitHorizontalEdge &&
+        action in GROUND_MOVEMENT_ACTIONS && hitHorizontalEdge &&
             collisionAction != PetAction.CLIMB_WALL -> direction.opposite()
         else -> direction
     }
@@ -344,6 +411,7 @@ class PetEngine(
         return when (action) {
             PetAction.FALL -> if (hitBottom) preferredAction(PetAction.BOUNCE, PetAction.WALK) else null
             PetAction.WALK,
+            PetAction.RUN,
             PetAction.CREEP -> if (hitLeft || hitRight) {
                 preferredActionOrNull(PetAction.CLIMB_WALL)
             } else {
@@ -354,8 +422,13 @@ class PetEngine(
             } else {
                 null
             }
+            PetAction.CLIMB_DOWN -> if (hitBottom || constrained.y >= bounds.bottom) {
+                preferredAction(PetAction.WALK, PetAction.IDLE)
+            } else {
+                null
+            }
             PetAction.CLIMB_CEILING -> if (hitLeft || hitRight) {
-                preferredAction(PetAction.FALL, PetAction.WALK)
+                preferredAction(PetAction.CLIMB_DOWN, PetAction.FALL, PetAction.WALK)
             } else {
                 null
             }
@@ -382,6 +455,13 @@ class PetEngine(
         )
 
         PetAction.WALK -> applyGroundBehavior(state, effects)
+        PetAction.RUN -> timedTransition(
+            state,
+            config.behaviorProfile.runDurationMillis,
+            preferredAction(PetAction.WALK, PetAction.IDLE),
+            effects,
+            RUN_DURATION_SALT
+        )
         PetAction.CREEP -> timedTransition(
             state,
             config.behaviorProfile.creepDurationMillis,
@@ -391,6 +471,13 @@ class PetEngine(
         )
 
         PetAction.CLIMB_WALL -> applyWallTimeout(state, effects)
+        PetAction.CLIMB_DOWN -> timedTransition(
+            state,
+            config.behaviorProfile.wallDurationMillis,
+            preferredAction(PetAction.FALL, PetAction.WALK),
+            effects,
+            CLIMB_DOWN_DURATION_SALT
+        )
         PetAction.CLIMB_CEILING -> timedTransition(
             state,
             config.behaviorProfile.ceilingDurationMillis,
@@ -450,9 +537,9 @@ class PetEngine(
         val recent = (listOf(selected) + draw.state.recentAutonomousActions)
             .distinct()
             .take(config.behaviorProfile.recentActionMemory)
-        val changed = changeAction(
-            draw.state.copy(recentAutonomousActions = recent),
-            selected
+        val changed = startRoutine(
+            state = draw.state.copy(recentAutonomousActions = recent),
+            actions = autonomousRoutine(selected)
         )
         return changed.copy(effects = effects + changed.effects)
     }
@@ -471,12 +558,14 @@ class PetEngine(
         }
         val chance = draw(scheduled, 0 until PERCENT_MAX, WALL_EXIT_SALT)
         val canJump = PetAction.JUMP in config.supportedActions
-        val nextAction = if (
-            canJump && chance.value < config.behaviorProfile.wallJumpChancePercent
-        ) {
-            PetAction.JUMP
-        } else {
-            preferredAction(PetAction.FALL, PetAction.WALK)
+        val jumpThreshold = config.behaviorProfile.wallJumpChancePercent
+        val descendThreshold = jumpThreshold + config.behaviorProfile.wallDescendChancePercent
+        val nextAction = when {
+            canJump && chance.value < jumpThreshold -> PetAction.JUMP
+            PetAction.CLIMB_DOWN in config.supportedActions && chance.value < descendThreshold -> {
+                PetAction.CLIMB_DOWN
+            }
+            else -> preferredAction(PetAction.FALL, PetAction.WALK)
         }
         val exiting = if (nextAction == PetAction.JUMP) {
             chance.state.copy(direction = chance.state.direction.opposite())
@@ -547,6 +636,31 @@ class PetEngine(
     private fun preferredAction(vararg actions: PetAction): PetAction =
         preferredActionOrNull(*actions) ?: PetAction.IDLE
 
+    private fun autonomousRoutine(action: PetAction): List<PetAction> = when (action) {
+        PetAction.SIT -> listOfNotNull(
+            PetAction.SIT,
+            preferredActionOrNull(PetAction.WINK, PetAction.LOOK_UP)
+        )
+        PetAction.DANGLE -> listOfNotNull(
+            PetAction.DANGLE,
+            preferredActionOrNull(PetAction.LOOK_UP, PetAction.WINK)
+        )
+        PetAction.TRIP -> listOfNotNull(
+            PetAction.TRIP,
+            preferredActionOrNull(PetAction.SIT, PetAction.IDLE)
+        )
+        PetAction.SPECIAL -> listOfNotNull(
+            PetAction.SPECIAL,
+            preferredActionOrNull(PetAction.SPECIAL_2),
+            preferredActionOrNull(PetAction.WINK)
+        ).distinct()
+        PetAction.SPECIAL_2 -> listOfNotNull(
+            PetAction.SPECIAL_2,
+            preferredActionOrNull(PetAction.WINK)
+        )
+        else -> listOf(action)
+    }
+
     private data class FlingAdvance(
         val velocity: PetVector,
         val displacement: PetVector
@@ -564,9 +678,12 @@ class PetEngine(
         const val GROUND_DELAY_SALT = 0x101L
         const val GROUND_CHOICE_SALT = 0x102L
         const val IDLE_DURATION_SALT = 0x201L
+        const val RUN_DURATION_SALT = 0x202L
         const val CREEP_DURATION_SALT = 0x301L
         const val WALL_DURATION_SALT = 0x401L
         const val WALL_EXIT_SALT = 0x402L
+        const val CLIMB_DOWN_DURATION_SALT = 0x403L
         const val CEILING_DURATION_SALT = 0x501L
+        val GROUND_MOVEMENT_ACTIONS = setOf(PetAction.WALK, PetAction.RUN, PetAction.CREEP)
     }
 }

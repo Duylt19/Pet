@@ -5,9 +5,11 @@ import kotlin.math.min
 enum class PetAction {
     IDLE,
     WALK,
+    RUN,
     FALL,
     BOUNCE,
     CLIMB_WALL,
+    CLIMB_DOWN,
     CLIMB_CEILING,
     SIT,
     WINK,
@@ -176,6 +178,17 @@ object DemoPetAnimation {
             loops = true
         ),
         PetClip(
+            action = PetAction.RUN,
+            frames = List(4) { index ->
+                PetFrame(
+                    index = index,
+                    durationMillis = 80,
+                    velocity = PetVector(x = 82f)
+                )
+            },
+            loops = true
+        ),
+        PetClip(
             action = PetAction.FALL,
             frames = listOf(
                 PetFrame(index = 0, durationMillis = 120, velocity = PetVector(y = 220f))
@@ -192,6 +205,13 @@ object DemoPetAnimation {
             action = PetAction.CLIMB_WALL,
             frames = List(4) { index ->
                 PetFrame(index = index, durationMillis = 120, velocity = PetVector(y = -36f))
+            },
+            loops = true
+        ),
+        PetClip(
+            action = PetAction.CLIMB_DOWN,
+            frames = List(4) { index ->
+                PetFrame(index = index, durationMillis = 120, velocity = PetVector(y = 36f))
             },
             loops = true
         ),

@@ -94,6 +94,7 @@ class FilePetPackRepository @Inject constructor(
         val clips = listOf(
             PetPackClip(PetAction.IDLE, true, null, List(4) { frame(180) }),
             PetPackClip(PetAction.WALK, true, null, List(4) { frame(120, 42f) }),
+            PetPackClip(PetAction.RUN, true, null, List(4) { frame(80, 82f) }),
             PetPackClip(PetAction.FALL, true, null, listOf(frame(120, velocityY = 220f))),
             PetPackClip(PetAction.BOUNCE, false, PetAction.WALK, List(2) { frame(110) }),
             PetPackClip(
@@ -101,6 +102,12 @@ class FilePetPackRepository @Inject constructor(
                 true,
                 null,
                 List(4) { frame(120, velocityY = -36f) }
+            ),
+            PetPackClip(
+                PetAction.CLIMB_DOWN,
+                true,
+                null,
+                List(4) { frame(120, velocityY = 36f) }
             ),
             PetPackClip(
                 PetAction.CLIMB_CEILING,

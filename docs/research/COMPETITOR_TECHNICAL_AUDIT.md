@@ -297,7 +297,7 @@ Credential-bearing configuration, ad unit values and service-specific identifier
 | Display-off render suspension | Missing | Implement cleanly |
 | Autonomous fall/bounce/climb/passive behaviors | Partial | Extend engine and pack schema compatibly |
 | Tap control popup | Missing | Add after owner-facing UX is defined |
-| Double-tap action | Missing | Add as pack interaction metadata in a future schema |
+| Double-tap action | Implemented | Use runtime showcase routine and skip unsupported pack actions |
 | Multiple different selected pack types | Missing | Add repository/session model before swarm mode |
 | Nine slots / large swarm | Intentionally absent | Preserve device performance budget; do not clone limits blindly |
 | Remote catalog/download | Missing by design | Build only against the owner-controlled backend and authorized snapshot |
