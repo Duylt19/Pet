@@ -81,6 +81,7 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Add Living Behavior scheduling: weighted seeded decisions, anti-repeat memory, variable action timing, wall jump/drop, ceiling drop, timed creep, gravity fall and velocity-aware drag release.
 - [Done] Add Living Behavior V2: run, controlled wall descent, sequence routines, partial-Special import and double-tap showcase.
 - [Done] Add Living Behavior V3: 25 ordered combo IDs, pack-aware degradation, combo anti-repeat and paired social scenes with approach/facing/chase coordination.
+- [Done] Pace Living Behavior V3.1 with once/sustained story beats, 5–12 second breathing room, long rest/performance durations and delayed social call-and-response.
 - Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
 - Treat tap popup, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
 - Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs. Local device sync is enabled for validation, while production distribution must use a provenance-preserving server import.

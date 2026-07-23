@@ -28,17 +28,36 @@ enum class PetComboId {
     SOCIAL_COPYCAT_B
 }
 
+data class PetComboBeat(
+    val action: PetAction,
+    val durationMillis: LongRange? = null
+) {
+    init {
+        require(durationMillis == null ||
+            (durationMillis.first > 0 && durationMillis.last >= durationMillis.first)
+        ) {
+            "combo beat duration must be positive"
+        }
+    }
+
+    val isSustained: Boolean
+        get() = durationMillis != null
+}
+
 data class PetComboDefinition(
     val id: PetComboId,
-    val actions: List<PetAction>,
+    val beats: List<PetComboBeat>,
     val turnAtStart: Boolean = false
 ) {
     init {
-        require(actions.isNotEmpty()) { "combo must contain at least one action" }
+        require(beats.isNotEmpty()) { "combo must contain at least one beat" }
     }
 
-    fun supportedActions(supported: Set<PetAction>): List<PetAction> =
-        actions.filter(supported::contains)
+    val actions: List<PetAction>
+        get() = beats.map(PetComboBeat::action)
+
+    fun supportedBeats(supported: Set<PetAction>): List<PetComboBeat> =
+        beats.filter { it.action in supported }
 }
 
 data class PetComboRule(
@@ -54,189 +73,172 @@ object PetComboCatalog {
     private val definitions = listOf(
         combo(
             PetComboId.CURIOUS_SCOUT,
-            PetAction.WALK,
-            PetAction.LOOK_UP,
-            PetAction.CREEP,
-            PetAction.WINK
+            sustain(PetAction.WALK, 4_000L..7_000L),
+            sustain(PetAction.IDLE, 2_000L..4_000L),
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L),
+            sustain(PetAction.CREEP, 4_000L..7_000L)
         ),
         combo(
             PetComboId.COZY_BREAK,
-            PetAction.IDLE,
-            PetAction.SIT,
-            PetAction.LOOK_UP,
-            PetAction.WINK
+            sustain(PetAction.IDLE, 3_000L..5_000L),
+            sustain(PetAction.SIT, 7_000L..12_000L),
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L),
+            sustain(PetAction.SIT, 4_000L..7_000L)
         ),
         combo(
             PetComboId.HAPPY_ZOOMIES,
-            PetAction.WINK,
-            PetAction.RUN,
-            PetAction.IDLE,
-            PetAction.RUN,
-            PetAction.WINK
+            sustain(PetAction.IDLE, 2_000L..3_500L),
+            once(PetAction.WINK),
+            sustain(PetAction.RUN, 3_500L..6_000L),
+            sustain(PetAction.IDLE, 3_000L..5_000L)
         ),
         combo(
             PetComboId.SHY_SNEAK,
-            PetAction.IDLE,
-            PetAction.CREEP,
-            PetAction.LOOK_UP,
-            PetAction.CREEP,
-            PetAction.WINK
+            sustain(PetAction.IDLE, 3_000L..5_000L),
+            sustain(PetAction.CREEP, 5_000L..8_000L),
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L),
+            sustain(PetAction.IDLE, 2_500L..4_500L)
         ),
         combo(
             PetComboId.CLUMSY_RECOVERY,
-            PetAction.RUN,
-            PetAction.TRIP,
-            PetAction.SIT,
-            PetAction.WINK
+            sustain(PetAction.RUN, 2_500L..4_000L),
+            once(PetAction.TRIP),
+            sustain(PetAction.SIT, 7_000L..11_000L),
+            once(PetAction.WINK)
         ),
         combo(
             PetComboId.TINY_PERFORMANCE,
-            PetAction.SIT,
-            PetAction.SPECIAL,
-            PetAction.SPECIAL_2,
-            PetAction.WINK,
-            PetAction.LOOK_UP
+            sustain(PetAction.SIT, 3_000L..5_000L),
+            sustain(PetAction.SPECIAL, 4_500L..7_000L),
+            sustain(PetAction.IDLE, 2_000L..3_500L),
+            sustain(PetAction.SPECIAL_2, 4_500L..7_000L),
+            sustain(PetAction.SIT, 4_000L..7_000L)
         ),
         combo(
             PetComboId.DAYDREAM,
-            PetAction.IDLE,
-            PetAction.LOOK_UP,
-            PetAction.DANGLE,
-            PetAction.LOOK_UP,
-            PetAction.WINK
+            sustain(PetAction.SIT, 6_000L..10_000L),
+            sustain(PetAction.LOOK_UP, 4_000L..7_000L),
+            sustain(PetAction.DANGLE, 4_000L..7_000L),
+            sustain(PetAction.SIT, 5_000L..9_000L)
         ),
         combo(
             PetComboId.BUSY_PATROL,
-            PetAction.WALK,
-            PetAction.RUN,
-            PetAction.WALK,
-            PetAction.LOOK_UP
+            sustain(PetAction.WALK, 6_000L..10_000L),
+            sustain(PetAction.IDLE, 2_000L..4_000L),
+            sustain(PetAction.RUN, 2_500L..4_500L),
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L)
         ),
         combo(
             PetComboId.PEEK_AND_DASH,
-            PetAction.CREEP,
-            PetAction.LOOK_UP,
-            PetAction.WINK,
-            PetAction.RUN
+            sustain(PetAction.CREEP, 5_000L..8_000L),
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L),
+            sustain(PetAction.IDLE, 1_500L..3_000L),
+            sustain(PetAction.RUN, 2_500L..4_500L)
         ),
         combo(
             PetComboId.SLOW_MORNING,
-            PetAction.IDLE,
-            PetAction.SIT,
-            PetAction.WINK,
-            PetAction.WALK
+            sustain(PetAction.IDLE, 5_000L..9_000L),
+            sustain(PetAction.SIT, 8_000L..14_000L),
+            sustain(PetAction.LOOK_UP, 3_000L..6_000L),
+            sustain(PetAction.WALK, 4_000L..7_000L)
         ),
-        PetComboDefinition(
-            id = PetComboId.BRAVE_EXPLORER,
-            actions = listOf(
-                PetAction.LOOK_UP,
-                PetAction.RUN,
-                PetAction.CREEP,
-                PetAction.RUN
-            ),
-            turnAtStart = true
+        turnedCombo(
+            PetComboId.BRAVE_EXPLORER,
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L),
+            sustain(PetAction.RUN, 3_000L..5_000L),
+            sustain(PetAction.IDLE, 2_000L..4_000L),
+            sustain(PetAction.CREEP, 4_000L..7_000L)
         ),
-        PetComboDefinition(
-            id = PetComboId.CHEERFUL_ENCORE,
-            actions = listOf(
-                PetAction.SPECIAL_2,
-                PetAction.WINK,
-                PetAction.SPECIAL,
-                PetAction.WINK
-            ),
-            turnAtStart = true
+        turnedCombo(
+            PetComboId.CHEERFUL_ENCORE,
+            sustain(PetAction.SPECIAL_2, 4_000L..6_500L),
+            sustain(PetAction.SIT, 3_000L..5_000L),
+            sustain(PetAction.SPECIAL, 4_000L..6_500L),
+            sustain(PetAction.IDLE, 3_000L..5_000L)
         ),
         combo(
             PetComboId.USER_AFFECTION,
-            PetAction.TAPPED,
-            PetAction.WINK,
-            PetAction.LOOK_UP
+            once(PetAction.TAPPED),
+            sustain(PetAction.IDLE, 1_500L..2_500L),
+            once(PetAction.WINK)
         ),
         combo(
             PetComboId.USER_SHOWCASE,
-            PetAction.SPECIAL,
-            PetAction.SPECIAL_2,
-            PetAction.WINK,
-            PetAction.LOOK_UP
+            sustain(PetAction.SIT, 2_500L..4_000L),
+            sustain(PetAction.SPECIAL, 4_500L..7_000L),
+            sustain(PetAction.IDLE, 2_000L..3_500L),
+            sustain(PetAction.SPECIAL_2, 4_500L..7_000L),
+            sustain(PetAction.SIT, 3_500L..6_000L)
         ),
         combo(
             PetComboId.SOCIAL_APPROACH,
-            PetAction.RUN,
-            PetAction.WALK,
-            PetAction.RUN
+            sustain(PetAction.RUN, 3_500L..5_500L),
+            sustain(PetAction.WALK, 2_500L..4_000L)
         ),
         combo(
             PetComboId.SOCIAL_HELLO,
-            PetAction.IDLE,
-            PetAction.WINK,
-            PetAction.LOOK_UP,
-            PetAction.WINK
+            sustain(PetAction.IDLE, 2_000L..3_500L),
+            once(PetAction.WINK),
+            sustain(PetAction.SIT, 5_000L..8_000L)
         ),
         combo(
             PetComboId.SOCIAL_HELLO_REPLY,
-            PetAction.LOOK_UP,
-            PetAction.WINK,
-            PetAction.SIT,
-            PetAction.WINK
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L),
+            sustain(PetAction.IDLE, 1_500L..3_000L),
+            once(PetAction.WINK),
+            sustain(PetAction.SIT, 4_000L..7_000L)
         ),
         combo(
             PetComboId.SOCIAL_CHASE_LEADER,
-            PetAction.WINK,
-            PetAction.RUN,
-            PetAction.WALK,
-            PetAction.RUN,
-            PetAction.LOOK_UP
+            once(PetAction.WINK),
+            sustain(PetAction.RUN, 5_000L..8_000L),
+            sustain(PetAction.IDLE, 3_000L..5_000L)
         ),
         combo(
             PetComboId.SOCIAL_CHASE_FOLLOWER,
-            PetAction.LOOK_UP,
-            PetAction.RUN,
-            PetAction.RUN,
-            PetAction.TRIP,
-            PetAction.SIT,
-            PetAction.WINK
+            sustain(PetAction.LOOK_UP, 2_000L..3_500L),
+            sustain(PetAction.RUN, 5_500L..8_500L),
+            once(PetAction.TRIP),
+            sustain(PetAction.SIT, 5_000L..8_000L)
         ),
         combo(
             PetComboId.SOCIAL_SHOW_OFF,
-            PetAction.SIT,
-            PetAction.SPECIAL,
-            PetAction.SPECIAL_2,
-            PetAction.WINK
+            sustain(PetAction.SIT, 2_500L..4_000L),
+            sustain(PetAction.SPECIAL, 5_000L..8_000L),
+            sustain(PetAction.IDLE, 2_000L..3_500L),
+            sustain(PetAction.SPECIAL_2, 5_000L..8_000L)
         ),
         combo(
             PetComboId.SOCIAL_ADMIRE,
-            PetAction.LOOK_UP,
-            PetAction.WINK,
-            PetAction.LOOK_UP,
-            PetAction.SIT
+            sustain(PetAction.LOOK_UP, 4_000L..7_000L),
+            sustain(PetAction.SIT, 7_000L..11_000L),
+            once(PetAction.WINK)
         ),
         combo(
             PetComboId.SOCIAL_REST_A,
-            PetAction.SIT,
-            PetAction.IDLE,
-            PetAction.LOOK_UP,
-            PetAction.WINK
+            sustain(PetAction.SIT, 10_000L..16_000L),
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L),
+            sustain(PetAction.SIT, 6_000L..10_000L)
         ),
         combo(
             PetComboId.SOCIAL_REST_B,
-            PetAction.LOOK_UP,
-            PetAction.SIT,
-            PetAction.IDLE,
-            PetAction.WINK
+            sustain(PetAction.IDLE, 2_000L..4_000L),
+            sustain(PetAction.SIT, 11_000L..17_000L),
+            once(PetAction.WINK),
+            sustain(PetAction.SIT, 5_000L..9_000L)
         ),
         combo(
             PetComboId.SOCIAL_COPYCAT_A,
-            PetAction.WINK,
-            PetAction.LOOK_UP,
-            PetAction.SIT,
-            PetAction.WINK
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L),
+            sustain(PetAction.SIT, 6_000L..9_000L),
+            once(PetAction.WINK)
         ),
         combo(
             PetComboId.SOCIAL_COPYCAT_B,
-            PetAction.LOOK_UP,
-            PetAction.WINK,
-            PetAction.SIT,
-            PetAction.WINK
+            sustain(PetAction.IDLE, 1_500L..2_500L),
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L),
+            sustain(PetAction.SIT, 6_000L..9_000L),
+            once(PetAction.WINK)
         )
     ).associateBy(PetComboDefinition::id)
 
@@ -247,16 +249,30 @@ object PetComboCatalog {
         supportedActions: Set<PetAction>
     ): PetComboDefinition? {
         val definition = definition(id) ?: return null
-        val actions = definition.supportedActions(supportedActions)
-        if (actions.size < MIN_COMBO_ACTIONS || actions.distinct().size < MIN_DISTINCT_ACTIONS) {
+        val beats = definition.supportedBeats(supportedActions)
+        if (beats.size < MIN_COMBO_BEATS || beats.map(PetComboBeat::action).distinct().size <
+            MIN_DISTINCT_ACTIONS
+        ) {
             return null
         }
-        return definition.copy(actions = actions)
+        return definition.copy(beats = beats)
     }
 
-    private fun combo(id: PetComboId, vararg actions: PetAction) =
-        PetComboDefinition(id = id, actions = actions.toList())
+    private fun combo(
+        id: PetComboId,
+        vararg beats: PetComboBeat
+    ) = PetComboDefinition(id = id, beats = beats.toList())
 
-    private const val MIN_COMBO_ACTIONS = 2
+    private fun turnedCombo(
+        id: PetComboId,
+        vararg beats: PetComboBeat
+    ) = PetComboDefinition(id = id, beats = beats.toList(), turnAtStart = true)
+
+    private fun once(action: PetAction) = PetComboBeat(action)
+
+    private fun sustain(action: PetAction, durationMillis: LongRange) =
+        PetComboBeat(action, durationMillis)
+
+    private const val MIN_COMBO_BEATS = 2
     private const val MIN_DISTINCT_ACTIONS = 2
 }

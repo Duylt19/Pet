@@ -23,6 +23,11 @@ của overlay; không tạo timer, thread hoặc Android window mới.
 - Từ steering `Arrive` và `Separation`, phiên social dùng khoảng cách tâm sprite, ngưỡng gặp
   theo kích thước pet, hướng tiếp cận động và timeout. Đây là implementation clean-room;
   project không copy source của các repository tham khảo.
+- Godot `AnimationTree` phân biệt transition `Immediate`, `Sync` và `At End`; V3.1 giữ
+  nguyên tắc chỉ sang beat mới ở cuối chu kỳ animation, trừ gesture/physics interrupt.
+- Unity Animator cho phép exit time lớn hơn một để thoát sau nhiều vòng lặp. `PetComboBeat`
+  dùng duration theo milliseconds cho cùng mục tiêu: giữ một pose hoặc performance qua
+  nhiều vòng clip trước khi transition.
 
 Nguồn:
 
@@ -32,40 +37,68 @@ Nguồn:
 - https://github.com/libgdx/gdx-ai/blob/master/gdx-ai/src/com/badlogic/gdx/ai/btree/BehaviorTree.java
 - https://github.com/libgdx/gdx-ai/blob/master/gdx-ai/src/com/badlogic/gdx/ai/steer/behaviors/Arrive.java
 - https://github.com/libgdx/gdx-ai/blob/master/gdx-ai/src/com/badlogic/gdx/ai/steer/behaviors/Separation.java
+- https://docs.godotengine.org/en/stable/tutorials/animation/animation_tree.html
+- https://docs.unity3d.com/2021.1/Documentation/ScriptReference/Animations.AnimatorStateTransition.html
+
+## V3.1 — từ action queue sang story beat
+
+Audit runtime trên owner pack cho thấy ở speed 150%:
+
+- `SIT` 1.600 ms chỉ còn khoảng 1.067 ms;
+- `WINK` 480 ms chỉ còn khoảng 320 ms;
+- `SPECIAL`/`SPECIAL_2` thường hoàn tất dưới hoặc xấp xỉ một giây tùy số frame có thật.
+
+V3 trước đây nối 4–6 action này trực tiếp nên đúng thứ tự nhưng sai nhịp: pet liên tục đổi
+pose và tạo cảm giác chớp. V3.1 thay mỗi action bằng `PetComboBeat` với hai policy:
+
+- **Once**: clip chỉ chạy một lần. Dùng cho blink/wink, trip, tap vì lặp những động tác này
+  trông giống lỗi animation.
+- **Sustained**: clip/pose được giữ hoặc lặp liền mạch đến một duration seeded. Dùng cho
+  sit, idle, look, walk/run/creep, dangle và special performance.
+
+Mỗi combo đi theo nhịp `anticipation → primary action → recovery`. Khoảng nghỉ tự chủ giữa
+hai combo là 5–12 giây; pet không phải lúc nào cũng “diễn”. Duration beat không bị rút ngắn
+bởi slider speed, nên tăng tốc di chuyển không làm cảm xúc chớp nhanh hơn.
 
 ## Combo catalog
 
-12 combo tự chủ:
+12 combo tự chủ đã được cân lại theo từng beat:
 
-1. `CURIOUS_SCOUT`: đi, quan sát, rón rén, nháy mắt.
-2. `COZY_BREAK`: nghỉ, ngồi, nhìn lên, nháy mắt.
-3. `HAPPY_ZOOMIES`: chào, chạy nhanh hai nhịp xen một nhịp nghỉ.
-4. `SHY_SNEAK`: đứng yên, rón rén, nhìn quanh rồi tiếp tục rón rén.
-5. `CLUMSY_RECOVERY`: chạy, vấp, ngồi dậy và trấn an.
-6. `TINY_PERFORMANCE`: ngồi mở màn, diễn hai special rồi kết bằng biểu cảm.
-7. `DAYDREAM`: nghỉ, nhìn lên, đung đưa, nhìn lại và nháy mắt.
-8. `BUSY_PATROL`: tuần tra qua nhịp đi–chạy–đi–quan sát.
-9. `PEEK_AND_DASH`: rón rén thăm dò rồi chạy đi.
-10. `SLOW_MORNING`: nghỉ, ngồi, chào và bắt đầu đi.
-11. `BRAVE_EXPLORER`: đổi hướng, quan sát rồi xen chạy/rón rén.
-12. `CHEERFUL_ENCORE`: đổi hướng và diễn lại special theo thứ tự khác.
+| Combo | Anticipation | Primary action | Recovery | Mục đích |
+|---|---|---|---|---|
+| `CURIOUS_SCOUT` | Walk 4–7s | Idle 2–4s → Look 3–5s | Creep 4–7s | Đi tuần rồi dừng thật sự để quan sát |
+| `COZY_BREAK` | Idle 3–5s | Sit 7–12s | Look 3–5s → Sit 4–7s | Một lần nghỉ dài, không phải ngồi rồi bật dậy |
+| `HAPPY_ZOOMIES` | Idle 2–3.5s → Wink once | Run 3.5–6s | Idle 3–5s | Lấy đà, chạy vui rồi thở |
+| `SHY_SNEAK` | Idle 3–5s | Creep 5–8s → Look 3–5s | Idle 2.5–4.5s | Rón rén có dừng nghe/ngó |
+| `CLUMSY_RECOVERY` | Run 2.5–4s | Trip once | Sit 7–11s → Wink once | Vấp một lần, hồi phục lâu rồi trấn an |
+| `TINY_PERFORMANCE` | Sit 3–5s | Special 4.5–7s → pause 2–3.5s → Special 2 4.5–7s | Sit 4–7s | Hai tiết mục có nghỉ giữa và pose kết |
+| `DAYDREAM` | Sit 6–10s | Look 4–7s → Dangle 4–7s | Sit 5–9s | Một đoạn mơ màng dài, ít transition |
+| `BUSY_PATROL` | Walk 6–10s | Idle 2–4s → Run 2.5–4.5s | Look 3–5s | Tuần tra có checkpoint thay vì đi liên tục |
+| `PEEK_AND_DASH` | Creep 5–8s | Look 3–5s → pause 1.5–3s | Run 2.5–4.5s | Thăm dò, xác nhận rồi mới chạy |
+| `SLOW_MORNING` | Idle 5–9s | Sit 8–14s → Look 3–6s | Walk 4–7s | Nhịp chậm nhất, ưu tiên nghỉ |
+| `BRAVE_EXPLORER` | Turn → Look 3–5s | Run 3–5s → pause 2–4s | Creep 4–7s | Đổi hướng có chủ ý, khám phá theo hai tốc độ |
+| `CHEERFUL_ENCORE` | Turn → Special 2 4–6.5s | Sit 3–5s → Special 4–6.5s | Idle 3–5s | Encore có pose tách hai tiết mục |
 
 Ngoài ra có combo riêng cho phản ứng tap/showcase và 5 scene social, mỗi scene có hai vai:
 
-- `GREETING`: một pet chào, pet kia nhìn và chào lại;
-- `PLAY_CHASE`: leader chọn phía còn nhiều không gian, follower chạy cùng hướng;
-- `SHOW_AND_REACT`: một pet biểu diễn special, pet còn lại quan sát/cổ vũ;
-- `REST_TOGETHER`: hai pet ngồi nghỉ lệch nhịp để tránh cảm giác clone;
-- `COPYCAT`: hai pet bắt chước cùng cử chỉ nhưng đảo thứ tự.
+- `GREETING`: một pet chờ 2–3,5s, wink một lần rồi ngồi 5–8s; pet kia nhìn 3–5s,
+  phản ứng trễ và ngồi 4–7s;
+- `PLAY_CHASE`: leader/follower chạy cùng hướng 5–8,5s rồi có recovery; follower có thể
+  trip đúng một lần và ngồi nghỉ;
+- `SHOW_AND_REACT`: performer giữ mỗi Special 5–8s, có pause; observer nhìn 4–7s và ngồi
+  cổ vũ 7–11s thay vì spam wink;
+- `REST_TOGETHER`: hai pet ngồi lệch nhịp tổng khoảng 19–30s;
+- `COPYCAT`: pet B trễ 1,5–2,5s rồi mới copy Look/Sit của pet A, tạo call-and-response.
 
 Tính cả approach, user reaction và hai vai social, catalog có 25 combo ID.
 
 ## Runtime contract
 
-- `PetState.activeComboId` xác định combo đang chạy; `pendingRoutineActions` giữ các bước
-  còn lại theo đúng thứ tự.
-- Action one-shot chuyển bước khi timeline kết thúc. Action loop như `IDLE`, `WALK`, `RUN`
-  và `CREEP` chuyển bước khi hết duration seeded của chính action đó.
+- `PetState.activeComboId` xác định combo đang chạy; `activeComboBeat` giữ beat hiện tại;
+  `pendingComboBeats` giữ các beat còn lại theo đúng thứ tự.
+- `comboBeatTargetMillis` được draw deterministic khi bắt đầu beat. One-shot chỉ chuyển ở
+  cuối clip; sustained one-shot tự restart liền mạch cho đến target; looping action chuyển
+  khi đạt target.
 - Chỉ khi queue rỗng và action cuối hoàn tất, engine phát `ComboCompleted`, clear combo rồi
   mới cho phép chọn combo tự chủ tiếp theo.
 - `recentComboIds` chống lặp ở cấp câu chuyện, mặc định nhớ ba combo gần nhất.
@@ -80,7 +113,7 @@ Phiên tương tác có hai pha:
 1. `APPROACHING`: chọn cặp pet ở sàn gần nhau nhất, hai pet chạy về phía tâm của nhau và
    cập nhật facing mỗi frame. Khi đạt khoảng cách 1,35 pet-width thì chuyển pha.
 2. `PERFORMING`: phát combo theo hai vai của scene, giữ facing phù hợp (đối mặt hoặc cùng
-   hướng khi đuổi bắt), chờ cả hai combo hoàn tất rồi cooldown trước scene tiếp theo.
+   hướng khi đuổi bắt), chờ cả hai combo hoàn tất rồi cooldown 10 giây trước scene tiếp theo.
 
 Các guardrail gồm: chỉ ghép pet đang rảnh trên cùng mặt sàn, không chiếm pet đang drag,
 fling, fall, jump hoặc climb; approach/performance đều có timeout; mất một instance sẽ hủy
@@ -89,7 +122,7 @@ session an toàn. Với một pet, director không phát directive social.
 ## Verification
 
 - JVM test kiểm tra catalog degrade theo pack, combo loop/one-shot chạy đúng thứ tự, combo
-  completion và anti-repeat.
+  completion, anti-repeat, long Sit hold và sustained Special không rơi qua action kế tiếp.
 - JVM test kiểm tra approach direction, paired greeting, closest-pair selection, bỏ qua pet
   đang climb và no-op khi chỉ có một pet.
 - Device smoke test cần chạy với 2–3 pet để quan sát đủ approach và ít nhất hai scene liên

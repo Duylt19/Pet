@@ -80,7 +80,8 @@ class PetAnimationTimeline(
     fun advance(
         action: PetAction,
         cursor: PetAnimationCursor,
-        elapsedMillis: Long
+        elapsedMillis: Long,
+        stopAtActionTransition: Boolean = false
     ): PetTimelineAdvance {
         require(elapsedMillis >= 0) { "elapsedMillis must not be negative" }
 
@@ -123,6 +124,9 @@ class PetAnimationTimeline(
                     transitions += currentAction to nextAction
                     currentAction = nextAction
                     currentCursor = PetAnimationCursor()
+                    if (stopAtActionTransition) {
+                        remainingMillis = 0
+                    }
                 }
             }
         }

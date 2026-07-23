@@ -9,37 +9,43 @@ class PetEngineTest {
     private val size = PetSize(width = 20f, height = 20f)
 
     @Test
-    fun `tap restarts tapped animation then follows with an affectionate reaction`() {
+    fun `tap reaction includes a calm recovery before its affectionate wink`() {
         val engine = engine(maxTickMillis = 1_000)
         val initial = engine.initialState(bounds, size, position = PetVector(10f, 10f))
 
         val tapped = engine.reduce(initial, PetEvent.Tap)
-        val completed = engine.reduce(tapped.state, PetEvent.Tick(elapsedMillis = 300))
+        val recovering = engine.reduce(tapped.state, PetEvent.Tick(elapsedMillis = 300))
+        val wink = advanceUntil(engine, recovering.state) { it.action == PetAction.WINK }
 
         assertEquals(PetAction.TAPPED, tapped.state.action)
         assertTrue(tapped.effects.contains(PetEffect.Tapped))
-        assertEquals(PetAction.WINK, completed.state.action)
+        assertEquals(PetAction.IDLE, recovering.state.action)
+        assertEquals(PetAction.WINK, wink.action)
         assertTrue(
-            completed.effects.contains(
-                PetEffect.ActionChanged(PetAction.TAPPED, PetAction.WINK)
+            recovering.effects.contains(
+                PetEffect.ActionChanged(PetAction.TAPPED, PetAction.IDLE)
             )
         )
     }
 
     @Test
-    fun `showcase plays every supported special as one routine`() {
-        val engine = engine(maxTickMillis = 2_000)
+    fun `showcase uses anticipation pauses and sustained special performances`() {
+        val engine = engine(maxTickMillis = 1_000)
         val initial = engine.initialState(bounds, size)
 
         val started = engine.reduce(initial, PetEvent.Showcase)
-        val secondSpecial = engine.reduce(started.state, PetEvent.Tick(880))
-        val wink = engine.reduce(secondSpecial.state, PetEvent.Tick(1_280))
-        val lookUp = engine.reduce(wink.state, PetEvent.Tick(520))
+        val firstSpecial = advanceUntil(engine, started.state) {
+            it.action == PetAction.SPECIAL
+        }
+        val recovery = advanceUntil(engine, firstSpecial) { it.action == PetAction.IDLE }
+        val secondSpecial = advanceUntil(engine, recovery) {
+            it.action == PetAction.SPECIAL_2
+        }
 
-        assertEquals(PetAction.SPECIAL, started.state.action)
-        assertEquals(PetAction.SPECIAL_2, secondSpecial.state.action)
-        assertEquals(PetAction.WINK, wink.state.action)
-        assertEquals(PetAction.LOOK_UP, lookUp.state.action)
+        assertEquals(PetAction.SIT, started.state.action)
+        assertEquals(PetAction.SPECIAL, firstSpecial.action)
+        assertEquals(PetAction.IDLE, recovery.action)
+        assertEquals(PetAction.SPECIAL_2, secondSpecial.action)
         assertTrue(started.effects.contains(PetEffect.ShowcaseStarted))
     }
 
@@ -266,7 +272,10 @@ class PetEngineTest {
         state = state.copy(
             action = PetAction.WALK,
             activeComboId = null,
-            pendingRoutineActions = emptyList(),
+            activeComboBeat = null,
+            comboBeatElapsedMillis = 0,
+            comboBeatTargetMillis = 0,
+            pendingComboBeats = emptyList(),
             actionElapsedMillis = 0,
             actionTargetMillis = 0
         )
@@ -283,7 +292,7 @@ class PetEngineTest {
     }
 
     @Test
-    fun `combo advances looping actions before choosing another combo`() {
+    fun `combo holds looping beats before advancing to the next story beat`() {
         val engine = PetEngine(
             PetEngineConfig(
                 maxTickMillis = 1_000,
@@ -303,13 +312,21 @@ class PetEngineTest {
             initial,
             PetEvent.StartCombo(PetComboId.HAPPY_ZOOMIES)
         )
-        val run = engine.reduce(started.state, PetEvent.Tick(520))
-        val idle = engine.reduce(run.state, PetEvent.Tick(100))
+        val stillAnticipating = engine.reduce(started.state, PetEvent.Tick(1_000)).state
+        val wink = advanceUntil(engine, stillAnticipating) { it.action == PetAction.WINK }
+        val run = advanceUntil(engine, wink) { it.action == PetAction.RUN }
+        var stillRunning = run
+        repeat(3) {
+            stillRunning = engine.reduce(stillRunning, PetEvent.Tick(1_000)).state
+        }
 
         assertEquals(PetComboId.HAPPY_ZOOMIES, started.state.activeComboId)
-        assertEquals(PetAction.RUN, run.state.action)
-        assertEquals(PetAction.IDLE, idle.state.action)
-        assertEquals(PetComboId.HAPPY_ZOOMIES, idle.state.activeComboId)
+        assertEquals(PetAction.IDLE, started.state.action)
+        assertEquals(PetAction.IDLE, stillAnticipating.action)
+        assertEquals(PetAction.WINK, wink.action)
+        assertEquals(PetAction.RUN, run.action)
+        assertEquals(PetAction.RUN, stillRunning.action)
+        assertEquals(PetComboId.HAPPY_ZOOMIES, stillRunning.activeComboId)
     }
 
     @Test
@@ -326,20 +343,62 @@ class PetEngineTest {
             initial,
             PetEvent.StartCombo(PetComboId.SOCIAL_HELLO, PetDirection.LEFT)
         )
-        val wink = engine.reduce(started.state, PetEvent.Tick(100))
-        val lookUp = engine.reduce(wink.state, PetEvent.Tick(520))
-        val finalWink = engine.reduce(lookUp.state, PetEvent.Tick(1_200))
-        val completed = engine.reduce(finalWink.state, PetEvent.Tick(520))
+        val waiting = engine.reduce(started.state, PetEvent.Tick(1_000)).state
+        val wink = advanceUntil(engine, waiting) { it.action == PetAction.WINK }
+        val sitting = advanceUntil(engine, wink) { it.action == PetAction.SIT }
+        var state = sitting
+        var completed: PetTransition? = null
+        repeat(300) {
+            val transition = engine.reduce(state, PetEvent.Tick(100))
+            state = transition.state
+            if (transition.effects.contains(
+                    PetEffect.ComboCompleted(PetComboId.SOCIAL_HELLO)
+                )
+            ) {
+                completed = transition
+                return@repeat
+            }
+        }
 
         assertEquals(PetDirection.LEFT, started.state.direction)
         assertEquals(PetAction.IDLE, started.state.action)
-        assertEquals(PetAction.WINK, wink.state.action)
-        assertEquals(PetAction.LOOK_UP, lookUp.state.action)
-        assertEquals(PetAction.WINK, finalWink.state.action)
-        assertEquals(null, completed.state.activeComboId)
-        assertTrue(
-            completed.effects.contains(PetEffect.ComboCompleted(PetComboId.SOCIAL_HELLO))
+        assertEquals(PetAction.IDLE, waiting.action)
+        assertEquals(PetAction.WINK, wink.action)
+        assertEquals(PetAction.SIT, sitting.action)
+        assertEquals(null, completed?.state?.activeComboId)
+        assertTrue(completed != null)
+    }
+
+    @Test
+    fun `long sitting beat repeats its pose instead of flashing into the next action`() {
+        val engine = engine(maxTickMillis = 2_500)
+        val initial = engine.initialState(bounds, size, action = PetAction.WALK)
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.SOCIAL_REST_A)
         )
+
+        val afterOneSitClip = engine.reduce(started.state, PetEvent.Tick(2_400)).state
+
+        assertEquals(PetAction.SIT, started.state.action)
+        assertTrue(started.state.comboBeatTargetMillis >= 10_000L)
+        assertEquals(PetAction.SIT, afterOneSitClip.action)
+        assertEquals(PetComboId.SOCIAL_REST_A, afterOneSitClip.activeComboId)
+        assertEquals(2_400L, afterOneSitClip.comboBeatElapsedMillis)
+    }
+
+    @Test
+    fun `special performance repeats seamlessly until its sustained beat is complete`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val initial = engine.initialState(bounds, size, action = PetAction.WALK)
+        val showcase = engine.reduce(initial, PetEvent.Showcase).state
+        val special = advanceUntil(engine, showcase) { it.action == PetAction.SPECIAL }
+
+        val afterOneSpecialClip = engine.reduce(special, PetEvent.Tick(880)).state
+
+        assertTrue(special.comboBeatTargetMillis >= 4_500L)
+        assertEquals(PetAction.SPECIAL, afterOneSpecialClip.action)
+        assertEquals(PetComboId.USER_SHOWCASE, afterOneSpecialClip.activeComboId)
     }
 
     @Test
@@ -558,7 +617,22 @@ class PetEngineTest {
         autonomousComboRules = autonomousComboRules
     )
 
+    private fun advanceUntil(
+        engine: PetEngine,
+        initial: PetState,
+        condition: (PetState) -> Boolean
+    ): PetState {
+        var state = initial
+        repeat(MAX_ADVANCE_TICKS) {
+            if (condition(state)) return state
+            state = engine.reduce(state, PetEvent.Tick(ADVANCE_STEP_MILLIS)).state
+        }
+        error("pet state did not reach the expected combo beat")
+    }
+
     private companion object {
         const val FLOAT_TOLERANCE = 0.001f
+        const val ADVANCE_STEP_MILLIS = 100L
+        const val MAX_ADVANCE_TICKS = 600
     }
 }

@@ -15,11 +15,10 @@ class PetComboCatalogTest {
 
         assertEquals(
             listOf(
+                PetAction.IDLE,
                 PetAction.WINK,
                 PetAction.RUN,
-                PetAction.IDLE,
-                PetAction.RUN,
-                PetAction.WINK
+                PetAction.IDLE
             ),
             combo?.actions
         )
@@ -51,5 +50,10 @@ class PetComboCatalogTest {
 
         assertTrue(resolved.size >= 20)
         assertTrue(resolved.all { it.actions.size >= 2 })
+        assertTrue(
+            resolved.flatMap(PetComboDefinition::beats)
+                .filter(PetComboBeat::isSustained)
+                .all { beat -> checkNotNull(beat.durationMillis).first >= 1_500L }
+        )
     }
 }

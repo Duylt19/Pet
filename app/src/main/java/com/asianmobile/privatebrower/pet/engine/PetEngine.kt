@@ -65,11 +65,7 @@ class PetEngine(
         PetEvent.Tap -> onTap(state)
         PetEvent.Showcase -> onShowcase(state)
         PetEvent.DragStart -> changeAction(
-            state = state.copy(
-                velocity = PetVector.Zero,
-                activeComboId = null,
-                pendingRoutineActions = emptyList()
-            ),
+            state = state.cancelRoutine().copy(velocity = PetVector.Zero),
             action = PetAction.DRAGGED,
             restartAnimation = true
         )
@@ -96,9 +92,22 @@ class PetEngine(
         if (state.action == PetAction.DRAGGED) return PetTransition(state)
         val followUp = preferredActionOrNull(PetAction.WINK, PetAction.LOOK_UP)
             ?.takeUnless { it == config.tapAction }
+        val tapBeat = PetComboBeat(
+            action = config.tapAction,
+            durationMillis = if (config.clips.getValue(config.tapAction).loops) {
+                TAP_LOOP_DURATION
+            } else {
+                null
+            }
+        )
         val transition = startRoutine(
             state = state.copy(velocity = PetVector.Zero),
-            actions = listOfNotNull(config.tapAction, followUp),
+            beats = listOfNotNull(
+                tapBeat,
+                PetComboBeat(PetAction.IDLE, TAP_RECOVERY_DURATION)
+                    .takeIf { PetAction.IDLE in config.supportedActions },
+                followUp?.let(::PetComboBeat)
+            ),
             comboId = PetComboId.USER_AFFECTION,
             restartFirstAnimation = true
         )
@@ -107,17 +116,14 @@ class PetEngine(
 
     private fun onShowcase(state: PetState): PetTransition {
         if (state.action == PetAction.DRAGGED) return PetTransition(state)
-        val actions = listOf(
-            PetAction.SPECIAL,
-            PetAction.SPECIAL_2,
-            PetAction.WINK,
-            PetAction.LOOK_UP
-        ).filter { it in config.supportedActions }
-        if (actions.isEmpty()) return onTap(state)
+        val definition = PetComboCatalog.supportedDefinition(
+            PetComboId.USER_SHOWCASE,
+            config.supportedActions
+        ) ?: return onTap(state)
 
         val transition = startRoutine(
             state = state.copy(velocity = PetVector.Zero),
-            actions = actions,
+            beats = definition.beats,
             comboId = PetComboId.USER_SHOWCASE,
             restartFirstAnimation = true
         )
@@ -136,7 +142,7 @@ class PetEngine(
         val directedState = event.direction?.let { state.copy(direction = it) } ?: state
         return startRoutine(
             state = directedState.copy(velocity = PetVector.Zero),
-            actions = definition.actions,
+            beats = definition.beats,
             comboId = definition.id,
             restartFirstAnimation = true
         )
@@ -161,11 +167,7 @@ class PetEngine(
         val velocity = requestedVelocity.limitedTo(config.maxFlingSpeed)
         if (velocity.magnitude <= config.flingStopSpeed) {
             return changeAction(
-                state = state.copy(
-                    velocity = PetVector.Zero,
-                    activeComboId = null,
-                    pendingRoutineActions = emptyList()
-                ),
+                state = state.cancelRoutine().copy(velocity = PetVector.Zero),
                 action = preferredAction(PetAction.FALL, PetAction.IDLE)
             )
         }
@@ -175,11 +177,9 @@ class PetEngine(
             else -> state.direction
         }
         return changeAction(
-            state = state.copy(
+            state = state.cancelRoutine().copy(
                 velocity = velocity,
-                direction = direction,
-                activeComboId = null,
-                pendingRoutineActions = emptyList()
+                direction = direction
             ),
             action = PetAction.FLUNG,
             restartAnimation = true
@@ -195,50 +195,73 @@ class PetEngine(
         val animation = timeline.advance(
             action = state.action,
             cursor = state.animationCursor,
-            elapsedMillis = elapsedMillis
+            elapsedMillis = elapsedMillis,
+            stopAtActionTransition = state.activeComboBeat != null
         )
         val scriptedDisplacement = animation.displacement.withDirection(state.direction)
         val actionChangedByTimeline = animation.action != state.action
-        val queuedAction = if (actionChangedByTimeline) {
-            state.pendingRoutineActions.firstOrNull()
+        val beatElapsedMillis = if (state.activeComboBeat == null) {
+            0
+        } else {
+            state.comboBeatElapsedMillis + elapsedMillis
+        }
+        val repeatSustainedBeat = actionChangedByTimeline &&
+            state.activeComboBeat?.isSustained == true &&
+            beatElapsedMillis < state.comboBeatTargetMillis
+        val nextBeat = if (actionChangedByTimeline && !repeatSustainedBeat) {
+            state.pendingComboBeats.firstOrNull()
         } else {
             null
         }
-        val resolvedAction = queuedAction ?: animation.action
-        val effects = mutableListOf<PetEffect>().apply {
-            if (queuedAction != null) {
-                add(PetEffect.ActionChanged(state.action, queuedAction))
-            } else {
-                addAll(animation.actionTransitions.map { (from, to) ->
-                    PetEffect.ActionChanged(from, to)
-                })
+        val effects = mutableListOf<PetEffect>()
+        var updatedState = when {
+            repeatSustainedBeat -> state.copy(
+                animationCursor = PetAnimationCursor(),
+                actionElapsedMillis = 0,
+                actionTargetMillis = 0,
+                comboBeatElapsedMillis = beatElapsedMillis
+            )
+
+            nextBeat != null -> {
+                val scheduled = scheduleComboBeat(
+                    state = state,
+                    beat = nextBeat,
+                    pendingBeats = state.pendingComboBeats.drop(1)
+                )
+                if (state.action != nextBeat.action) {
+                    effects += PetEffect.ActionChanged(state.action, nextBeat.action)
+                }
+                scheduled.copy(
+                    action = nextBeat.action,
+                    animationCursor = PetAnimationCursor(),
+                    actionElapsedMillis = 0,
+                    actionTargetMillis = 0
+                )
+            }
+
+            else -> state.copy(
+                action = animation.action,
+                animationCursor = animation.cursor,
+                actionElapsedMillis = if (actionChangedByTimeline) {
+                    0
+                } else {
+                    state.actionElapsedMillis + elapsedMillis
+                },
+                actionTargetMillis = if (actionChangedByTimeline) 0 else state.actionTargetMillis,
+                comboBeatElapsedMillis = beatElapsedMillis
+            )
+        }
+        if (!repeatSustainedBeat && nextBeat == null) {
+            effects += animation.actionTransitions.map { (from, to) ->
+                PetEffect.ActionChanged(from, to)
             }
         }
-        var updatedState = state.copy(
-            action = resolvedAction,
-            animationCursor = if (queuedAction == null) {
-                animation.cursor
-            } else {
-                PetAnimationCursor()
-            },
-            actionElapsedMillis = if (actionChangedByTimeline) {
-                0
-            } else {
-                state.actionElapsedMillis + elapsedMillis
-            },
-            actionTargetMillis = if (actionChangedByTimeline) 0 else state.actionTargetMillis,
-            pendingRoutineActions = if (queuedAction == null) {
-                state.pendingRoutineActions
-            } else {
-                state.pendingRoutineActions.drop(1)
-            }
-        )
-        if (actionChangedByTimeline && queuedAction == null) {
-            val completedCombo = updatedState.activeComboId
-            if (completedCombo != null) {
-                updatedState = updatedState.copy(activeComboId = null)
-                effects += PetEffect.ComboCompleted(completedCombo)
-            }
+        if (actionChangedByTimeline && !repeatSustainedBeat && nextBeat == null &&
+            updatedState.activeComboId != null
+        ) {
+            val completedCombo = checkNotNull(updatedState.activeComboId)
+            updatedState = updatedState.clearComboRuntime()
+            effects += PetEffect.ComboCompleted(completedCombo)
         }
 
         if (updatedState.action == PetAction.FLUNG) {
@@ -393,26 +416,52 @@ class PetEngine(
 
     private fun startRoutine(
         state: PetState,
-        actions: List<PetAction>,
+        beats: List<PetComboBeat>,
         comboId: PetComboId,
         restartFirstAnimation: Boolean = false
     ): PetTransition {
-        val supported = actions.filter { it in config.supportedActions }
-        val first = supported.firstOrNull() ?: preferredAction(PetAction.WALK, PetAction.IDLE)
+        val supported = beats.filter { it.action in config.supportedActions }
+        val first = supported.firstOrNull() ?: PetComboBeat(
+            preferredAction(PetAction.WALK, PetAction.IDLE),
+            config.behaviorProfile.groundDelayMillis
+        )
         val recentCombos = (listOf(comboId) + state.recentComboIds)
             .distinct()
             .take(config.behaviorProfile.recentComboMemory)
-        val changed = changeAction(
+        val scheduled = scheduleComboBeat(
             state = state.copy(
                 activeComboId = comboId,
                 recentComboIds = recentCombos,
-                pendingRoutineActions = supported.drop(1),
                 behaviorSequence = state.behaviorSequence + 1
             ),
-            action = first,
+            beat = first,
+            pendingBeats = supported.drop(1)
+        )
+        val changed = changeAction(
+            state = scheduled,
+            action = first.action,
             restartAnimation = restartFirstAnimation
         )
         return changed.copy(effects = changed.effects + PetEffect.ComboStarted(comboId))
+    }
+
+    private fun scheduleComboBeat(
+        state: PetState,
+        beat: PetComboBeat,
+        pendingBeats: List<PetComboBeat>
+    ): PetState {
+        val duration = beat.durationMillis
+        val scheduled = if (duration == null) {
+            RandomDraw(0L, state)
+        } else {
+            draw(state, duration, COMBO_BEAT_DURATION_SALT)
+        }
+        return scheduled.state.copy(
+            activeComboBeat = beat,
+            comboBeatElapsedMillis = 0,
+            comboBeatTargetMillis = scheduled.value,
+            pendingComboBeats = pendingBeats
+        )
     }
 
     private fun PetVector.withDirection(direction: PetDirection): PetVector = when (direction) {
@@ -486,48 +535,72 @@ class PetEngine(
     private fun applyLivingBehavior(
         state: PetState,
         effects: List<PetEffect>
-    ): PetTransition = when (state.action) {
-        PetAction.IDLE -> timedTransition(
-            state,
-            config.behaviorProfile.idleDurationMillis,
-            preferredAction(PetAction.WALK, PetAction.IDLE),
-            effects,
-            IDLE_DURATION_SALT
-        )
+    ): PetTransition {
+        val comboBeat = state.activeComboBeat
+        if (comboBeat != null && comboBeat.action == state.action &&
+            config.clips.getValue(state.action).loops
+        ) {
+            return applyLoopingComboBeat(state, effects)
+        }
+        return when (state.action) {
+            PetAction.IDLE -> timedTransition(
+                state,
+                config.behaviorProfile.idleDurationMillis,
+                preferredAction(PetAction.WALK, PetAction.IDLE),
+                effects,
+                IDLE_DURATION_SALT
+            )
 
-        PetAction.WALK -> applyGroundBehavior(state, effects)
-        PetAction.RUN -> timedTransition(
-            state,
-            config.behaviorProfile.runDurationMillis,
-            preferredAction(PetAction.WALK, PetAction.IDLE),
-            effects,
-            RUN_DURATION_SALT
-        )
-        PetAction.CREEP -> timedTransition(
-            state,
-            config.behaviorProfile.creepDurationMillis,
-            preferredAction(PetAction.WALK, PetAction.IDLE),
-            effects,
-            CREEP_DURATION_SALT
-        )
+            PetAction.WALK -> applyGroundBehavior(state, effects)
+            PetAction.RUN -> timedTransition(
+                state,
+                config.behaviorProfile.runDurationMillis,
+                preferredAction(PetAction.WALK, PetAction.IDLE),
+                effects,
+                RUN_DURATION_SALT
+            )
+            PetAction.CREEP -> timedTransition(
+                state,
+                config.behaviorProfile.creepDurationMillis,
+                preferredAction(PetAction.WALK, PetAction.IDLE),
+                effects,
+                CREEP_DURATION_SALT
+            )
 
-        PetAction.CLIMB_WALL -> applyWallTimeout(state, effects)
-        PetAction.CLIMB_DOWN -> timedTransition(
-            state,
-            config.behaviorProfile.wallDurationMillis,
-            preferredAction(PetAction.FALL, PetAction.WALK),
-            effects,
-            CLIMB_DOWN_DURATION_SALT
-        )
-        PetAction.CLIMB_CEILING -> timedTransition(
-            state,
-            config.behaviorProfile.ceilingDurationMillis,
-            preferredAction(PetAction.FALL, PetAction.WALK),
-            effects,
-            CEILING_DURATION_SALT
-        )
+            PetAction.CLIMB_WALL -> applyWallTimeout(state, effects)
+            PetAction.CLIMB_DOWN -> timedTransition(
+                state,
+                config.behaviorProfile.wallDurationMillis,
+                preferredAction(PetAction.FALL, PetAction.WALK),
+                effects,
+                CLIMB_DOWN_DURATION_SALT
+            )
+            PetAction.CLIMB_CEILING -> timedTransition(
+                state,
+                config.behaviorProfile.ceilingDurationMillis,
+                preferredAction(PetAction.FALL, PetAction.WALK),
+                effects,
+                CEILING_DURATION_SALT
+            )
 
-        else -> PetTransition(state, effects)
+            else -> PetTransition(state, effects)
+        }
+    }
+
+    private fun applyLoopingComboBeat(
+        state: PetState,
+        effects: List<PetEffect>
+    ): PetTransition {
+        if (state.comboBeatTargetMillis > 0 &&
+            state.comboBeatElapsedMillis < state.comboBeatTargetMillis
+        ) {
+            return PetTransition(state, effects)
+        }
+        return advanceComboBeatOrFallback(
+            state = state,
+            fallbackAction = preferredAction(PetAction.WALK, PetAction.IDLE),
+            effects = effects
+        )
     }
 
     private fun applyGroundBehavior(
@@ -541,21 +614,6 @@ class PetEngine(
         )
         if (scheduled.actionElapsedMillis < scheduled.actionTargetMillis) {
             return PetTransition(scheduled, effects)
-        }
-
-        if (scheduled.pendingRoutineActions.isNotEmpty()) {
-            return advanceRoutineOrFallback(
-                state = scheduled,
-                fallbackAction = preferredAction(PetAction.WALK, PetAction.IDLE),
-                effects = effects
-            )
-        }
-
-        if (scheduled.activeComboId != null) {
-            return completeCombo(
-                state = scheduled.resetActionTimer(),
-                effects = effects
-            )
         }
 
         val supportedRules = config.behaviorProfile.autonomousComboRules.mapNotNull { rule ->
@@ -588,7 +646,7 @@ class PetEngine(
         }
         val changed = startRoutine(
             state = directedState,
-            actions = selected.actions,
+            beats = selected.beats,
             comboId = selected.id
         )
         return changed.copy(effects = effects + changed.effects)
@@ -639,23 +697,28 @@ class PetEngine(
         ) {
             return PetTransition(scheduled, effects)
         }
-        return advanceRoutineOrFallback(
+        return advanceComboBeatOrFallback(
             state = scheduled,
             fallbackAction = nextAction,
             effects = effects
         )
     }
 
-    private fun advanceRoutineOrFallback(
+    private fun advanceComboBeatOrFallback(
         state: PetState,
         fallbackAction: PetAction,
         effects: List<PetEffect>
     ): PetTransition {
-        val queuedAction = state.pendingRoutineActions.firstOrNull()
-        if (queuedAction != null) {
+        val nextBeat = state.pendingComboBeats.firstOrNull()
+        if (nextBeat != null) {
+            val scheduled = scheduleComboBeat(
+                state = state,
+                beat = nextBeat,
+                pendingBeats = state.pendingComboBeats.drop(1)
+            )
             val changed = changeAction(
-                state = state.copy(pendingRoutineActions = state.pendingRoutineActions.drop(1)),
-                action = queuedAction,
+                state = scheduled,
+                action = nextBeat.action,
                 restartAnimation = true
             )
             return changed.copy(effects = effects + changed.effects)
@@ -672,7 +735,7 @@ class PetEngine(
     ): PetTransition {
         val comboId = state.activeComboId ?: return PetTransition(state, effects)
         return PetTransition(
-            state = state.copy(activeComboId = null, pendingRoutineActions = emptyList()),
+            state = state.clearComboRuntime(),
             effects = effects + PetEffect.ComboCompleted(comboId)
         )
     }
@@ -714,9 +777,14 @@ class PetEngine(
         actionTargetMillis = 0
     )
 
-    private fun PetState.cancelRoutine(): PetState = copy(
+    private fun PetState.cancelRoutine(): PetState = clearComboRuntime()
+
+    private fun PetState.clearComboRuntime(): PetState = copy(
         activeComboId = null,
-        pendingRoutineActions = emptyList()
+        activeComboBeat = null,
+        comboBeatElapsedMillis = 0,
+        comboBeatTargetMillis = 0,
+        pendingComboBeats = emptyList()
     )
 
     private fun preferredActionOrNull(vararg actions: PetAction): PetAction? =
@@ -748,6 +816,9 @@ class PetEngine(
         const val WALL_EXIT_SALT = 0x402L
         const val CLIMB_DOWN_DURATION_SALT = 0x403L
         const val CEILING_DURATION_SALT = 0x501L
+        const val COMBO_BEAT_DURATION_SALT = 0x601L
+        val TAP_LOOP_DURATION = 800L..1_200L
+        val TAP_RECOVERY_DURATION = 1_500L..2_500L
         val GROUND_MOVEMENT_ACTIONS = setOf(PetAction.WALK, PetAction.RUN, PetAction.CREEP)
         val USER_CONTROLLED_ACTIONS = setOf(
             PetAction.DRAGGED,

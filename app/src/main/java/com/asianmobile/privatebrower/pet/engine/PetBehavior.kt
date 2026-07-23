@@ -1,10 +1,10 @@
 package com.asianmobile.privatebrower.pet.engine
 
 data class PetBehaviorProfile(
-    val groundDelayMillis: LongRange = 1_800L..6_500L,
-    val idleDurationMillis: LongRange = 900L..2_800L,
-    val runDurationMillis: LongRange = 700L..2_200L,
-    val creepDurationMillis: LongRange = 1_200L..3_500L,
+    val groundDelayMillis: LongRange = 5_000L..12_000L,
+    val idleDurationMillis: LongRange = 3_000L..7_000L,
+    val runDurationMillis: LongRange = 1_800L..4_000L,
+    val creepDurationMillis: LongRange = 3_500L..7_500L,
     val wallDurationMillis: LongRange = 1_600L..6_500L,
     val ceilingDurationMillis: LongRange = 1_200L..5_000L,
     val wallJumpChancePercent: Int = 55,

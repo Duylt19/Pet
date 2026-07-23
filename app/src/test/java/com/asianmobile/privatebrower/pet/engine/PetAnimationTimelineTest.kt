@@ -54,6 +54,24 @@ class PetAnimationTimelineTest {
     }
 
     @Test
+    fun `managed combo transition does not leak leftover movement into fallback action`() {
+        val clips = DemoPetAnimation.clips()
+        val timeline = PetAnimationTimeline(clips)
+
+        val advance = timeline.advance(
+            action = PetAction.SPECIAL,
+            cursor = PetAnimationCursor(),
+            elapsedMillis = 1_000,
+            stopAtActionTransition = true
+        )
+
+        assertEquals(PetAction.WALK, advance.action)
+        assertEquals(PetAnimationCursor(), advance.cursor)
+        assertEquals(0f, advance.displacement.x, FLOAT_TOLERANCE)
+        assertEquals(listOf(PetAction.SPECIAL to PetAction.WALK), advance.actionTransitions)
+    }
+
+    @Test
     fun `partitioned timeline produces the same cursor and displacement`() {
         val timeline = PetAnimationTimeline(DemoPetAnimation.clips())
         val whole = timeline.advance(

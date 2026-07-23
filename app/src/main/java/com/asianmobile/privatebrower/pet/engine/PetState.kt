@@ -20,7 +20,10 @@ data class PetState(
     val behaviorSequence: Long = 0,
     val activeComboId: PetComboId? = null,
     val recentComboIds: List<PetComboId> = emptyList(),
-    val pendingRoutineActions: List<PetAction> = emptyList()
+    val activeComboBeat: PetComboBeat? = null,
+    val comboBeatElapsedMillis: Long = 0,
+    val comboBeatTargetMillis: Long = 0,
+    val pendingComboBeats: List<PetComboBeat> = emptyList()
 ) {
     val frameIndex: Int
         get() = animationCursor.frameIndex
