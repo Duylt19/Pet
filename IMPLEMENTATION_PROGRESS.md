@@ -28,6 +28,7 @@
 | Adaptive speech layout V3.12 | Done | Glyph-aware 80–260dp × 48–112dp box, balanced four-line wrapping, viewport clamp and explicit 80-code-point Settings limit |
 | Stationary/moving speech V3.13 | Done | TALK holds frame 34; TALK_WALK uses 34/35/34/36 at walking speed, legacy packs normalize without reinstall and bubble lifecycle covers both |
 | Independent multi-pet interaction V3.14 | Done | Autonomous movers pass through, social invitations are probabilistic/interruptible, each TALK pet owns a box and off-ground speech is rejected |
+| Semantic action cadence V3.15 | Done | Movement/physics/expression use separate speed influence; owner skills play once then hold the final pose, combo recovery and duet timing are choreography-safe |
 | Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
 | Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |

@@ -1,6 +1,7 @@
 package com.asianmobile.privatebrower.pet.engine
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -14,11 +15,13 @@ class PetEngineTest {
         val initial = engine.initialState(bounds, size, position = PetVector(10f, 80f))
 
         val tapped = engine.reduce(initial, PetEvent.Tap)
-        val recovering = engine.reduce(tapped.state, PetEvent.Tick(elapsedMillis = 300))
+        val stillReacting = engine.reduce(tapped.state, PetEvent.Tick(elapsedMillis = 800))
+        val recovering = engine.reduce(stillReacting.state, PetEvent.Tick(elapsedMillis = 100))
         val talking = advanceUntil(engine, recovering.state) { it.action == PetAction.TALK }
         val wink = advanceUntil(engine, talking) { it.action == PetAction.WINK }
 
         assertEquals(PetAction.TAPPED, tapped.state.action)
+        assertEquals(PetAction.TAPPED, stillReacting.state.action)
         assertTrue(tapped.effects.contains(PetEffect.Tapped))
         assertEquals(PetAction.IDLE, recovering.state.action)
         assertEquals(PetAction.TALK, talking.action)
@@ -829,8 +832,8 @@ class PetEngineTest {
     }
 
     @Test
-    fun `special performance repeats seamlessly until its sustained beat is complete`() {
-        val engine = engine(maxTickMillis = 1_000)
+    fun `special performance plays once then holds its final frame`() {
+        val engine = engine(maxTickMillis = 2_500)
         val initial = engine.initialState(
             bounds,
             size,
@@ -840,11 +843,50 @@ class PetEngineTest {
         val showcase = engine.reduce(initial, PetEvent.Showcase).state
         val special = advanceUntil(engine, showcase) { it.action == PetAction.SPECIAL }
 
-        val afterOneSpecialClip = engine.reduce(special, PetEvent.Tick(880)).state
+        val afterOneSpecialClip = engine.reduce(special, PetEvent.Tick(1_800)).state
+        val stillHolding = engine.reduce(
+            afterOneSpecialClip,
+            PetEvent.Tick(elapsedMillis = 1_000)
+        ).state
+        val recovered = advanceUntil(engine, stillHolding) {
+            it.action != PetAction.SPECIAL
+        }
+        val lastFrameIndex = DemoPetAnimation.clips()
+            .getValue(PetAction.SPECIAL)
+            .frames
+            .lastIndex
 
         assertTrue(special.comboBeatTargetMillis >= 4_500L)
         assertEquals(PetAction.SPECIAL, afterOneSpecialClip.action)
         assertEquals(PetComboId.USER_SHOWCASE, afterOneSpecialClip.activeComboId)
+        assertEquals(lastFrameIndex, afterOneSpecialClip.frameIndex)
+        assertTrue(afterOneSpecialClip.isHoldingComboBeatFrame)
+        assertEquals(lastFrameIndex, stillHolding.frameIndex)
+        assertTrue(stillHolding.isHoldingComboBeatFrame)
+        assertEquals(PetAction.IDLE, recovered.action)
+        assertFalse(recovered.isHoldingComboBeatFrame)
+    }
+
+    @Test
+    fun `ninja skill preserves landing and reaches its performance`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val wideBounds = PetBounds(left = 0f, top = 0f, right = 10_000f, bottom = 100f)
+        val initial = engine.initialState(
+            wideBounds,
+            size,
+            position = PetVector(10f, 80f),
+            action = PetAction.WALK
+        )
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.NINJA_SKILL)
+        ).state
+        val falling = advanceUntil(engine, started) { it.action == PetAction.FALL }
+        val bounced = advanceUntil(engine, falling) { it.action == PetAction.BOUNCE }
+        val special = advanceUntil(engine, bounced) { it.action == PetAction.SPECIAL }
+
+        assertEquals(PetComboId.NINJA_SKILL, bounced.activeComboId)
+        assertEquals(PetComboId.NINJA_SKILL, special.activeComboId)
     }
 
     @Test

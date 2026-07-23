@@ -36,7 +36,14 @@ Ví dụ đầy đủ: [`docs/examples/pet-pack-v1`](../examples/pet-pack-v1).
 
 Action names được schema v1 nhận: `idle`, `walk`, `run`, `fall`, `bounce`, `climb_wall`, `climb_down`, `climb_ceiling`, `sit`, `wink`, `look_up`, `dangle`, `creep`, `trip`, `jump`, `special`, `special_2`, `tapped`, `dragged`, `flung`. `idle` và `walk` vẫn là hai clip nền bắt buộc; các action mở rộng là optional để pack v1 cũ tiếp tục hợp lệ. Runtime chỉ đưa một hành vi tự động/boundary vào state machine khi manifest khai báo action đó. Mapper vẫn tạo visual/physics fallback nội bộ để mọi `PetAction` có clip an toàn, nhưng fallback không làm action thiếu asset xuất hiện trong weighted behavior pool.
 
-Các sprite Shimeji legacy trong owner catalog dùng hướng gốc sang trái. Overlay mirror ngang frame khi `PetDirection.RIGHT` và giữ nguyên khi đi trái. Motion polish chỉ biến đổi nhẹ quanh bottom anchor; wall/ceiling pose vẫn giữ orientation gốc, còn hướng đổi vào trong khi pet chuyển biên được quyết định trong pure engine.
+Các sprite Shimeji legacy trong owner catalog dùng hướng gốc sang trái. Overlay mirror ngang frame khi `PetDirection.RIGHT` và giữ nguyên khi đi trái. Motion polish chỉ biến đổi nhẹ quanh bottom anchor cho locomotion/physics; `SPECIAL`/`SPECIAL_2` không còn scale luân phiên vì chính sprite đã chứa chuyển động. Wall/ceiling pose vẫn giữ orientation gốc, còn hướng đổi vào trong khi pet chuyển biên được quyết định trong pure engine.
+
+Owner pack revision 4 vẫn immutable trên disk. Khi service Start, mapper áp dụng profile
+nhịp frame tương thích theo prefix `owner.shimeji.`: idle giữ frame đầu để không bước chân
+tại chỗ; wink/bounce/trip/jump/tapped có nhịp đọc được; Special dùng sequence một chiều
+với anticipation ngắn và final pose dài. `SPECIAL_2` loại các frame lặp ngược theo file ở
+runtime. Việc normalize này không rewrite archive/manifest và không yêu cầu user Set lại
+1.026 pet đã cài.
 
 ## Installer pipeline
 

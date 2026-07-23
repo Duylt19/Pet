@@ -9,7 +9,7 @@
 | Pack key | installed hoặc built-in key | fallback Orange Cat khi missing/invalid |
 | Count | 1–3; low-RAM 1–2 | một window/state machine mỗi pet |
 | Size | 75/100/125/150% | kết hợp `defaultScale`, clamp 64–196dp |
-| Speed | 50–150%, bước 25% | map duration/velocity một lần khi Start |
+| Speed | 50–150%, bước 25% | velocity và locomotion nhận toàn bộ mức speed; physics reaction nhận 50%, expression/skill chỉ nhận 25% ảnh hưởng lên nhịp frame |
 | Sound | on/off | reserved; pack v1 chưa hỗ trợ audio |
 | Pet messages | on/off | bật/tắt speech director và transient bubble window |
 | Custom messages | 0–30 câu, tối đa 80 code point/câu | mỗi câu một dòng; danh sách rỗng dùng catalog có sẵn |
@@ -22,6 +22,12 @@ Unicode code point/câu nên emoji không bị tính hai lần. Repository chu�
 trắng, bỏ câu rỗng/trùng và persist dạng newline-delimited string.
 Pet chọn ngẫu nhiên nhưng không lặp ngay câu vừa nói; thay đổi áp dụng ở lần Start tiếp
 theo theo cùng snapshot policy với các setting runtime khác.
+
+Speed là mức năng lượng di chuyển, không còn là hệ số tua đều cho mọi animation. `WALK`,
+`RUN`, `CREEP`, climb và `TALK_WALK` scale frame timing đầy đủ; bounce/trip/jump/dragged
+scale một nửa; idle, sit, wink, look, speech, Special và các pose cảm xúc chỉ scale một
+phần tư. Scripted velocity vẫn scale đầy đủ để pet thật sự đi nhanh/chậm theo setting,
+nhưng nét mặt và skill không chớp ở 150%.
 
 ## Performance/degradation
 

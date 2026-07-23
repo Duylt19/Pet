@@ -11,10 +11,20 @@ fun PetPackManifest.toEngineClips(speedMultiplier: Float = 1f): Map<PetAction, P
     val walkFrames = clips.getValue(PetAction.WALK).frames
     return PetAction.entries.associateWith { action ->
         val source = normalizedSourceClip(action)
+        val timingMultiplier = action.timingMultiplier(safeMultiplier)
         if (source != null) {
-            source.toEngineClip(safeMultiplier)
+            source.toEngineClip(
+                timingMultiplier = timingMultiplier,
+                motionMultiplier = safeMultiplier
+            )
         } else {
-            fallbackClip(action, idleFrames, walkFrames, safeMultiplier)
+            fallbackClip(
+                action = action,
+                idleFrames = idleFrames,
+                walkFrames = walkFrames,
+                timingMultiplier = timingMultiplier,
+                motionMultiplier = safeMultiplier
+            )
         }
     }
 }
@@ -28,8 +38,8 @@ internal fun PetPackManifest.toEngineSupportedActions(): Set<PetAction> = buildS
     }
 }
 
-private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip? =
-    when (action) {
+private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip? {
+    val normalized = when (action) {
         PetAction.TALK -> clips[PetAction.TALK]?.let { clip ->
             clip.copy(frames = clip.frames.take(1))
         }
@@ -52,12 +62,21 @@ private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip
 
         else -> clips[action]
     }
+    return normalized?.let { clip ->
+        if (id.startsWith(OWNER_SHIMEJI_PACK_PREFIX)) {
+            clip.normalizedOwnerShimejiTiming()
+        } else {
+            clip
+        }
+    }
+}
 
 private fun fallbackClip(
     action: PetAction,
     idleFrames: List<PetPackFrame>,
     walkFrames: List<PetPackFrame>,
-    speedMultiplier: Float
+    timingMultiplier: Float,
+    motionMultiplier: Float
 ): PetClip {
     val sourceFrames = when (action) {
         PetAction.WALK,
@@ -84,8 +103,8 @@ private fun fallbackClip(
         }
         PetFrame(
             index,
-            (frame.durationMillis / speedMultiplier).toLong().coerceAtLeast(MIN_FRAME_MILLIS),
-            fallbackVelocity * speedMultiplier
+            (frame.durationMillis / timingMultiplier).toLong().coerceAtLeast(MIN_FRAME_MILLIS),
+            fallbackVelocity * motionMultiplier
         )
     }
     val isOneShot = action in ONE_SHOT_FALLBACK_ACTIONS
@@ -97,23 +116,86 @@ private fun fallbackClip(
     )
 }
 
-private fun PetPackClip.toEngineClip(speedMultiplier: Float): PetClip = PetClip(
+private fun PetPackClip.toEngineClip(
+    timingMultiplier: Float,
+    motionMultiplier: Float
+): PetClip = PetClip(
     action = action,
     frames = frames.mapIndexed { index, frame ->
         PetFrame(
             index = index,
-            durationMillis = (frame.durationMillis / speedMultiplier).toLong()
+            durationMillis = (frame.durationMillis / timingMultiplier).toLong()
                 .coerceAtLeast(MIN_FRAME_MILLIS),
-            velocity = frame.velocity * speedMultiplier
+            velocity = frame.velocity * motionMultiplier
         )
     },
     loops = loops,
     nextAction = nextAction
 )
 
+private fun PetAction.timingMultiplier(speedMultiplier: Float): Float {
+    val influence = when (this) {
+        PetAction.WALK,
+        PetAction.RUN,
+        PetAction.CREEP,
+        PetAction.CLIMB_WALL,
+        PetAction.CLIMB_DOWN,
+        PetAction.CLIMB_CEILING,
+        PetAction.TALK_WALK -> FULL_SPEED_INFLUENCE
+
+        PetAction.BOUNCE,
+        PetAction.TRIP,
+        PetAction.JUMP,
+        PetAction.DRAGGED -> PHYSICS_SPEED_INFLUENCE
+
+        PetAction.IDLE,
+        PetAction.FALL,
+        PetAction.SIT,
+        PetAction.WINK,
+        PetAction.LOOK_UP,
+        PetAction.DANGLE,
+        PetAction.TALK,
+        PetAction.SPECIAL,
+        PetAction.SPECIAL_2,
+        PetAction.TAPPED,
+        PetAction.FLUNG -> EXPRESSIVE_SPEED_INFLUENCE
+    }
+    return 1f + (speedMultiplier - 1f) * influence
+}
+
+private fun PetPackClip.normalizedOwnerShimejiTiming(): PetPackClip {
+    val normalizedFrames = when (action) {
+        PetAction.IDLE -> frames.take(1).withDurations(OWNER_IDLE_DURATIONS)
+        PetAction.BOUNCE -> frames.withDurations(OWNER_BOUNCE_DURATIONS)
+        PetAction.WINK -> frames.withDurations(OWNER_WINK_DURATIONS)
+        PetAction.TRIP -> frames.withDurations(OWNER_TRIP_DURATIONS)
+        PetAction.JUMP -> frames.withDurations(OWNER_JUMP_DURATIONS)
+        PetAction.SPECIAL -> frames.withDurations(OWNER_SPECIAL_DURATIONS)
+        PetAction.SPECIAL_2 -> frames
+            .distinctBy(PetPackFrame::file)
+            .withDurations(OWNER_SPECIAL_2_DURATIONS)
+        PetAction.TAPPED -> frames.withDurations(OWNER_TAPPED_DURATIONS)
+        else -> frames
+    }
+    return copy(
+        frames = normalizedFrames,
+        loops = if (action == PetAction.IDLE) true else loops,
+        nextAction = if (action == PetAction.IDLE) null else nextAction
+    )
+}
+
+private fun List<PetPackFrame>.withDurations(durations: List<Long>): List<PetPackFrame> =
+    mapIndexed { index, frame ->
+        frame.copy(durationMillis = durations.getOrElse(index) { durations.last() })
+    }
+
 private const val MIN_SPEED_MULTIPLIER = 0.5f
 private const val MAX_SPEED_MULTIPLIER = 1.5f
 private const val MIN_FRAME_MILLIS = 16L
+private const val FULL_SPEED_INFLUENCE = 1f
+private const val PHYSICS_SPEED_INFLUENCE = 0.5f
+private const val EXPRESSIVE_SPEED_INFLUENCE = 0.25f
+private const val OWNER_SHIMEJI_PACK_PREFIX = "owner.shimeji."
 private const val FALL_VELOCITY = 220f
 private const val CLIMB_VELOCITY = 36f
 private const val CREEP_VELOCITY = 16f
@@ -121,6 +203,14 @@ private const val RUN_VELOCITY = 82f
 private const val JUMP_HORIZONTAL_VELOCITY = 110f
 private const val JUMP_VERTICAL_VELOCITY = -80f
 private const val TALK_WALK_VELOCITY = 24f
+private val OWNER_IDLE_DURATIONS = listOf(900L)
+private val OWNER_BOUNCE_DURATIONS = listOf(220L, 280L)
+private val OWNER_WINK_DURATIONS = listOf(350L, 550L)
+private val OWNER_TRIP_DURATIONS = listOf(180L, 220L, 180L, 240L)
+private val OWNER_JUMP_DURATIONS = listOf(300L)
+private val OWNER_SPECIAL_DURATIONS = listOf(320L, 380L, 420L, 500L, 800L)
+private val OWNER_SPECIAL_2_DURATIONS = listOf(320L, 360L, 420L, 520L, 800L)
+private val OWNER_TAPPED_DURATIONS = listOf(350L, 550L)
 private val ONE_SHOT_FALLBACK_ACTIONS = setOf(
     PetAction.BOUNCE,
     PetAction.SIT,

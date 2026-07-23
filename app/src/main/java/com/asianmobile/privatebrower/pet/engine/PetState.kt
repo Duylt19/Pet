@@ -26,6 +26,7 @@ data class PetState(
     val activeComboBeat: PetComboBeat? = null,
     val comboBeatElapsedMillis: Long = 0,
     val comboBeatTargetMillis: Long = 0,
+    val isHoldingComboBeatFrame: Boolean = false,
     val pendingComboBeats: List<PetComboBeat> = emptyList()
 ) {
     val frameIndex: Int

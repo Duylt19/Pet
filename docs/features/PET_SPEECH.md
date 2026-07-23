@@ -49,8 +49,9 @@ UI riêng:
 - Speech choreography không còn là effect phát ngay khi combo bắt đầu. Mỗi combo được
   phép nói có đúng một speech beat 9–11 giây tại điểm ngắt tự nhiên: sau quan sát, sau
   landing/recovery hoặc sau màn skill.
-- `CURIOUS_SCOUT` và `HAPPY_ZOOMIES` dùng `TALK_WALK` để pet tiếp tục tiến chậm khi nói;
-  tap, chatter, social, recovery và các câu sau skill dùng `TALK` đứng yên.
+- `CURIOUS_SCOUT` dùng `TALK_WALK` rồi có idle recovery trước khi creep để pet tiếp tục
+  tiến chậm khi nói mà không đổi pose gấp; tap, chatter, social, recovery và các câu sau
+  skill dùng `TALK` đứng yên. `HAPPY_ZOOMIES` là combo vận động im lặng.
 - Pack thiếu 34/35/36 không khai báo `TALK`; combo tự loại qua `requiredActions`, không
   dùng ảnh fallback giả làm pose nói. Beat TALK tùy chọn của combo khác cũng được lọc,
   vì vậy pack đó vẫn chạy choreography nhưng không hiện text sai frame.
@@ -76,7 +77,7 @@ xác định vocabulary/tone sau khi frame TALK đã xuất hiện:
 | `SOCIAL_HELLO_REPLY` | Social reply | pet B ngồi chờ 9–11 s rồi mới TALK |
 | `SOCIAL_SHOW_OFF`, `SOCIAL_ADMIRE` | Celebration | sau performance/observation |
 | Wall/ceiling, wall-to-wall, aerial và skill/dance combo | Skill | sau landing/final recovery |
-| `HAPPY_ZOOMIES`, `TINY_PERFORMANCE`, `CHEERFUL_ENCORE` | Celebration | sau hoạt cảnh chính |
+| `TINY_PERFORMANCE`, `CHEERFUL_ENCORE` | Celebration | sau hoạt cảnh chính |
 
 Pacing:
 
@@ -90,7 +91,8 @@ Pacing:
 - speech director không còn reading timer hoặc lệnh `advance(elapsedMillis)` riêng;
 - director nhớ câu cuối toàn scene và tránh lặp ngay khi còn lựa chọn khác.
 
-Các combo vận động thuần (`SHY_SNEAK`, patrol, chase, rest, copycat, duet...) không có
+Các combo vận động thuần (`HAPPY_ZOOMIES`, `SHY_SNEAK`, patrol, chase, rest, copycat,
+duet...) không có
 TALK và không phát message. Tần suất hội thoại do combo scheduler cùng beat dài kiểm soát,
 không dùng cooldown độc lập có thể làm pet giữ frame TALK nhưng không có text.
 

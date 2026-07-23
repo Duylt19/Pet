@@ -26,8 +26,8 @@ của overlay; không tạo timer, thread hoặc Android window mới.
 - Godot `AnimationTree` phân biệt transition `Immediate`, `Sync` và `At End`; V3.1 giữ
   nguyên tắc chỉ sang beat mới ở cuối chu kỳ animation, trừ gesture/physics interrupt.
 - Unity Animator cho phép exit time lớn hơn một để thoát sau nhiều vòng lặp. `PetComboBeat`
-  dùng duration theo milliseconds cho cùng mục tiêu: giữ một pose hoặc performance qua
-  nhiều vòng clip trước khi transition.
+  dùng duration theo milliseconds cho cùng mục tiêu: pose/locomotion có thể lặp, còn
+  performance skill chạy một lượt rồi giữ final pose trước khi transition.
 
 Nguồn:
 
@@ -54,43 +54,46 @@ pose và tạo cảm giác chớp. V3.1 thay mỗi action bằng `PetComboBeat` 
 - **Once**: clip chỉ chạy một lần. Dùng cho blink/wink, trip, tap vì lặp những động tác này
   trông giống lỗi animation.
 - **Sustained**: clip/pose được giữ hoặc lặp liền mạch đến một duration seeded. Dùng cho
-  sit, idle, look, walk/run/creep, dangle và special performance.
+  sit, idle, look, walk/run/creep và dangle. Từ V3.15, Special dùng playback riêng
+  `HOLD_LAST_FRAME` thay vì lặp cả clip.
 
 Mỗi combo đi theo nhịp `anticipation → primary action → recovery`. Khoảng nghỉ tự chủ giữa
 hai combo là 4–8 giây; pet không phải lúc nào cũng “diễn”. Duration beat không bị rút ngắn
-bởi slider speed, nên tăng tốc di chuyển không làm cảm xúc chớp nhanh hơn.
+bởi slider speed. V3.15 còn tách mức ảnh hưởng speed lên frame theo ngữ nghĩa, nên tăng tốc
+di chuyển không làm cảm xúc chớp nhanh hơn.
 
 ## Combo catalog
 
-Catalog giữ 20 solo story. 12 combo nền được cân lại theo từng beat:
+Catalog hiện có 25 solo/user story và 13 role/approach social. 12 combo nền được cân lại
+theo từng beat:
 
 | Combo | Anticipation | Primary action | Recovery | Mục đích |
 |---|---|---|---|---|
-| `CURIOUS_SCOUT` | Walk 4–7s | Idle 2–4s → Look 3–5s | Creep 4–7s | Đi tuần rồi dừng thật sự để quan sát |
-| `COZY_BREAK` | Idle 3–5s | Sit 7–12s | Look 3–5s → Sit 4–7s | Một lần nghỉ dài, không phải ngồi rồi bật dậy |
-| `HAPPY_ZOOMIES` | Idle 2–3.5s → Wink once | Run 3.5–6s | Idle 3–5s | Lấy đà, chạy vui rồi thở |
+| `CURIOUS_SCOUT` | Walk 4–7s | Idle 2–4s → Look 3–5s → Talk-walk 9–11s | Idle 1.5–2.5s → Creep 4–7s | Đi tuần, nói khi bước chậm rồi dừng trước khi rón rén |
+| `COZY_BREAK` | Idle 3–5s | Sit 7–12s → Talk 9–11s | Look 3–5s → Sit 4–7s | Một lần nghỉ dài, không phải ngồi rồi bật dậy |
+| `HAPPY_ZOOMIES` | Idle 2–3.5s → Wink once | Run 3.5–6s | Walk 3–5s → Idle 3–5s | Lấy đà, chạy vui, hạ tốc rồi thở |
 | `SHY_SNEAK` | Idle 3–5s | Creep 5–8s → Look 3–5s | Idle 2.5–4.5s | Rón rén có dừng nghe/ngó |
-| `CLUMSY_RECOVERY` | Run 2.5–4s | Trip once | Sit 7–11s → Wink once | Vấp một lần, hồi phục lâu rồi trấn an |
-| `TINY_PERFORMANCE` | Sit 3–5s | Special 4.5–7s → pause 2–3.5s → Special 2 4.5–7s | Sit 4–7s | Hai tiết mục có nghỉ giữa và pose kết |
+| `CLUMSY_RECOVERY` | Run 2.5–4s | Trip once | Sit 7–11s → Talk 9–11s → Wink once | Vấp một lần, hồi phục lâu rồi trấn an |
+| `TINY_PERFORMANCE` | Sit 3–5s | Special 4.5–7s → pause 2–3.5s → Special 2 4.5–7s | Talk 9–11s → Sit 4–7s | Hai tiết mục có nghỉ giữa và pose kết |
 | `DAYDREAM` | Sit 6–10s | Look 4–7s → Dangle 4–7s → Sit 2.5–4s | Talk → Sit 5–9s | Có pose ngồi hồi phục trước khi nói, không chuyển thẳng từ pose treo |
 | `BUSY_PATROL` | Walk 6–10s | Idle 2–4s → Run 2.5–4.5s | Look 3–5s | Tuần tra có checkpoint thay vì đi liên tục |
 | `PEEK_AND_DASH` | Creep 5–8s | Look 3–5s → pause 1.5–3s | Run 2.5–4.5s | Thăm dò, xác nhận rồi mới chạy |
 | `SLOW_MORNING` | Idle 5–9s | Sit 8–14s → Look 3–6s | Walk 4–7s | Nhịp chậm nhất, ưu tiên nghỉ |
 | `BRAVE_EXPLORER` | Turn → Look 3–5s | Run 3–5s → pause 2–4s | Creep 4–7s | Đổi hướng có chủ ý, khám phá theo hai tốc độ |
-| `CHEERFUL_ENCORE` | Turn → Special 2 4–6.5s | Sit 3–5s → Special 4–6.5s | Idle 3–5s | Encore có pose tách hai tiết mục |
+| `CHEERFUL_ENCORE` | Turn → Special 2 4–6.5s | Sit 3–5s → Special 4–6.5s | Sit 2.5–4s → Talk → Idle 3–5s | Encore có pose tách skill và recovery trước khi nói |
 
 V3.2 thêm 8 choreography dùng chính action/frame mà pack đã khai báo:
 
 | Combo | Choreography | Chi tiết tự nhiên |
 |---|---|---|
-| `WALL_PARKOUR` | Run tới mép → climb 10–16s → dangle 6–10s → jump vào trong → fall/bounce → sit | Leo nhanh 1,8× rồi giữ pose trên tường đủ lâu; jump đảo hướng tại beat |
-| `CEILING_EXPEDITION` | Run tới mép → climb tới trần → ceiling walk 12–20s → dangle 8–14s → jump/fall → bounce/look | Hai chặng tiếp cận hoàn tất bằng collision thật; pet sinh hoạt trên trần 20–34s |
-| `WALL_DIVE` | Run tới mép → climb 8–13s → wall jump → fall/bounce → Special | Leo nhanh 1,8×; nếu tường kết thúc sớm, jump thay cho chuyển sai sang ceiling |
-| `SKY_DIVER` | Anticipation → boosted jump → fall → bounce → sit/wink | Giữ đầy đủ landing recovery thay vì đổi thẳng sang idle |
-| `NINJA_SKILL` | Creep → sprint → boosted jump/fall → Special → sit | Có stealth, burst, skill và cooldown rõ ràng |
-| `BATTLE_DANCE` | Look → Special → pause → Special 2 → Dangle → sit | Hai skill có nhịp nghỉ nên không flash liên tục |
-| `MAGIC_RITUAL` | Sit → look → Special 2 → Dangle → Special → idle | Ritual dài 25–40s, có charge-up và release |
-| `ACROBATIC_FINALE` | Run → boosted jump/fall/bounce → Special → sit | Combo biểu diễn có take-off, landing và final pose |
+| `WALL_PARKOUR` | Run tới mép → climb 10–16s → dangle 6–10s → jump vào trong → fall/bounce → sit → talk | Leo nhanh 1,8× rồi giữ pose trên tường đủ lâu; chỉ nói sau landing |
+| `CEILING_EXPEDITION` | Run tới mép → climb tới trần → ceiling walk 12–20s → dangle 8–14s → jump/fall → bounce/look → talk | Hai chặng tiếp cận hoàn tất bằng collision thật; Look là recovery mặt đất trước khi nói |
+| `WALL_DIVE` | Run tới mép → climb 8–13s → wall jump → fall/bounce → Special → sit → talk | Landing, skill và recovery tách rõ; nếu tường kết thúc sớm, jump thay cho chuyển sai sang ceiling |
+| `SKY_DIVER` | Anticipation → boosted jump → fall → bounce → sit → talk → wink | Giữ đầy đủ landing và speech recovery thay vì đổi thẳng sang idle |
+| `NINJA_SKILL` | Creep → sprint → boosted jump/fall → bounce → Special → sit → talk | Chỉ phát skill sau khi đã landing, có stealth, burst và cooldown rõ ràng |
+| `BATTLE_DANCE` | Look → Special → pause → Special 2 → sit → talk | Hai skill có nhịp nghỉ; bỏ Dangle không đúng ngữ nghĩa mặt đất |
+| `MAGIC_RITUAL` | Sit → look → Special 2 → idle focus → Special → sit → talk | Ritual dài, hai skill bắt buộc và có charge-up/release/recovery |
+| `ACROBATIC_FINALE` | Run → boosted jump/fall/bounce → Special → sit → talk | Combo biểu diễn có take-off, landing và final recovery |
 
 `motionMultiplier` chỉ tăng displacement cho beat được biên đạo (run-to-wall 1,15×,
 climb-to-ceiling 2,4×, jump 2,2×), không tăng tốc animation pose hoặc toàn bộ pet.
@@ -105,22 +108,23 @@ Ngoài ra có combo riêng cho phản ứng tap/showcase và 6 scene social, m�
   cổ vũ 7–11s thay vì spam wink;
 - `REST_TOGETHER`: hai pet ngồi lệch nhịp tổng khoảng 19–30s;
 - `COPYCAT`: pet B trễ 1,5–2,5s rồi mới copy Look/Sit của pet A, tạo call-and-response.
-- `DUET_DANCE`: hai pet đối mặt và luân phiên `SPECIAL`/`SPECIAL_2`; vai B vào trễ để tạo
-  call-and-response thay vì hai sprite phát cùng một frame.
+- `DUET_DANCE`: hai pet đối mặt và luân phiên hai lượt `SPECIAL`/`SPECIAL_2`; các khoảng
+  Sit/Idle được tính để không có cửa sổ skill chồng nhau, tạo call-and-response thật.
 
-Tính cả approach, user reaction và hai vai social, catalog có 37 combo ID.
+Tính cả approach, user reaction và hai vai social, catalog có 38 combo ID.
 
 ## V3.3 — spatial balance
 
 Catalog vẫn giữ toàn bộ story để dùng cho trigger cụ thể, nhưng pool tự chủ mặc định hiện có
-16 combo:
+17 combo:
 
 - chỉ giữ 6 ground basic khác biệt nhất: `CURIOUS_SCOUT`, `COZY_BREAK`,
   `HAPPY_ZOOMIES`, `CLUMSY_RECOVERY`, `TINY_PERFORMANCE`, `DAYDREAM`;
 - loại 6 ground basic trùng nhịp khỏi random pool: `SHY_SNEAK`, `BUSY_PATROL`,
   `PEEK_AND_DASH`, `SLOW_MORNING`, `BRAVE_EXPLORER`, `CHEERFUL_ENCORE`;
-- giữ 5 climb (gồm hai hướng wall-to-wall), 3 aerial và 2 skill/dance story;
-- climb có tổng weight 54/144, tức 37,5% trước khi áp quota.
+- thêm `CHATTER`, giữ 5 climb (gồm hai hướng wall-to-wall), 3 aerial và 2 skill/dance
+  story;
+- climb có tổng weight 54/150, tức 36% trước khi áp quota.
 
 Mỗi definition có `PetComboHabitat`: `GROUND`, `AERIAL`, `WALL` hoặc `CEILING`.
 `nonClimbComboStreak` tồn tại xuyên qua vòng đời combo. Sau tối đa hai story không leo,
@@ -170,9 +174,9 @@ tại, còn upward rise không bị `initialFallSpeed` ghi đè.
 
 - `PetState.activeComboId` xác định combo đang chạy; `activeComboBeat` giữ beat hiện tại;
   `pendingComboBeats` giữ các beat còn lại theo đúng thứ tự.
-- `comboBeatTargetMillis` được draw deterministic khi bắt đầu beat. One-shot chỉ chuyển ở
-  cuối clip; sustained one-shot tự restart liền mạch cho đến target; looping action chuyển
-  khi đạt target.
+- `comboBeatTargetMillis` được draw deterministic khi bắt đầu beat. One-shot thường chỉ
+  chuyển ở cuối clip; sustained pose/locomotion repeat đến target. Beat
+  `HOLD_LAST_FRAME` chạy clip đúng một lượt, giữ frame cuối và chỉ chuyển khi target hết.
 - Beat `COLLISION` chạy cho tới khi chạm mục tiêu không gian. Timeout được tính từ khoảng
   cách còn lại, velocity thật của pack và motion multiplier, cộng grace 3 giây; pack có
   velocity lỗi sẽ thoát an toàn thay vì mắc kẹt.
@@ -230,8 +234,8 @@ Speech action được tách theo chuyển động thay vì dùng toàn bộ chu
 
 - `TALK` loop đúng một frame 34 và zero displacement, dùng cho tap, chatter, social,
   recovery và câu nói sau skill;
-- `TALK_WALK` loop `34 → 35 → 34 → 36` ở 24 px/s, dùng có chủ đích trong
-  `CURIOUS_SCOUT` và `HAPPY_ZOOMIES`;
+- `TALK_WALK` loop `34 → 35 → 34 → 36` ở 24 px/s, chỉ dùng có chủ đích trong
+  `CURIOUS_SCOUT`; `HAPPY_ZOOMIES` dùng run → walk → idle và không nói;
 - raw owner pack revision 4 không bị rewrite. Mapper nhận clip TALK bốn frame cũ, tạo hai
   runtime clip và expose `TALK_WALK` như supported action nên pet đã cài không cần Set lại;
 - speech director xem cả hai là cùng một lifecycle. Chuyển giữa hai speech pose không
@@ -268,6 +272,45 @@ Catalog còn khóa speech predecessor: các story leo/bay phải landing rồi q
 `BOUNCE`/`SIT`/`LOOK`/ground recovery trước khi nói; `DAYDREAM` thêm SIT giữa DANGLE và
 TALK.
 
+## V3.15 — semantic action cadence và skill playback
+
+Audit frame trực tiếp trên owner model Natsu cho thấy clip preview gốc dùng khoảng 400
+ms/frame và hai skill là các sequence pose có diễn tiến:
+
+- `SPECIAL`: frame `1 → 38 → 39 → 40 → 41`;
+- `SPECIAL_2`: frame `42 → 43 → 44 → 45 → 46`, trong khi raw revision 4 có thể chứa thêm
+  các file lặp ngược để phục vụ compatibility;
+- `IDLE` legacy chứa nhiều pha chân nên loop toàn clip làm pet như bước tại chỗ;
+- khi lấy slider 150% chia đều mọi duration, wink/skill/cảm xúc bị tua nhanh hơn trong khi
+  các beat combo vẫn kéo dài nhiều giây, dẫn tới lặp đầu-cuối và flicker.
+
+V3.15 giải quyết ở ba lớp:
+
+1. **Semantic speed policy**: locomotion nhận 100% ảnh hưởng speed; physics reaction nhận
+   50%; idle/emotion/speech/skill chỉ nhận 25%. Scripted velocity vẫn nhận 100% để khoảng
+   cách di chuyển đúng với setting.
+2. **Owner runtime profile**: mapper giữ một frame idle; gán cadence riêng cho
+   bounce/wink/trip/jump/tapped; Special dùng 320/380/420/500/800 ms và Special 2 dùng
+   320/360/420/520/800 ms trước speed policy. Frame trùng ngược của Special 2 được loại
+   theo file ở runtime, không mutate revision 4 trên disk và không yêu cầu reinstall.
+3. **Skill playback policy**: mọi beat `SPECIAL`/`SPECIAL_2` trong catalog dùng
+   `HOLD_LAST_FRAME`. Clip phát trọn một lần, giữ final pose cho hết target 4–9 giây rồi
+   mới vào recovery. Mỗi skill beat đồng thời là `requiredAction`, nên pack thiếu đúng
+   frame performance sẽ loại story đó thay vì chạy một combo bị khuyết. Renderer bỏ scale
+   luân phiên trên hai action này.
+
+Choreography cũng được audit lại theo surface và ý nghĩa frame: Ninja bắt buộc
+`FALL → BOUNCE → SPECIAL`; Battle Dance và Magic Ritual bỏ Dangle trên mặt đất; Wall Dive,
+Encore, social showcase và các skill story có Sit recovery trước TALK; Happy Zoomies im
+lặng và hạ nhịp bằng WALK/IDLE. Social Duet dùng timeline hai vai không overlap:
+
+- vai A: Sit → Special → Idle dài → Special 2 → Sit;
+- vai B: Idle dài → Special 2 → Sit dài → Special → Wink.
+
+`PetState.isHoldingComboBeatFrame` chỉ tồn tại trong engine thuần Kotlin. Khi đang hold,
+frame index và vị trí không restart; elapsed beat vẫn tăng và transition/effect tiếp theo
+chỉ phát một lần khi target kết thúc.
+
 ## Social state machine
 
 Phiên tương tác có hai pha:
@@ -289,10 +332,10 @@ director không phát directive social.
 ## Verification
 
 - JVM test kiểm tra catalog degrade/required-action theo pack, combo loop/one-shot chạy đúng
-  thứ tự, combo completion, anti-repeat, long Sit hold và sustained Special.
+  thứ tự, combo completion, anti-repeat, long Sit hold và Special play-once/hold-final.
 - JVM test khóa hướng mép gần nhất, run-to-wall, wall-to-ceiling, inward wall jump,
   distance/velocity timeout, fall-to-bounce và việc giữ nguyên combo qua collision.
-- JVM test khóa autonomous pool 16 story, climb weight tối thiểu 25%, quota sau hai
+- JVM test khóa autonomous pool 17 story, climb weight tối thiểu 25%, quota sau hai
   non-climb story, reset streak và fallback khi pack thiếu frame leo.
 - JVM test chạy toàn bộ wall-to-wall traversal theo cả hai hướng, xác nhận thời gian
   screen-relative, cạnh đích, facing, opposite-wall catch và combo lifecycle không bị hủy.
@@ -305,5 +348,15 @@ director không phát directive social.
   resting overlap và không can thiệp social/airborne pet.
 - JVM test khóa tap/social không ngắt wall climb, mọi speech predecessor đều là ground-safe,
   hai pet TALK nhận session riêng và mỗi Hide chỉ tác động đúng owner.
+- JVM test khóa semantic speed influence, owner frame sequence/duration normalization,
+  Ninja landing trước skill, toàn bộ Special beat dùng `HOLD_LAST_FRAME` và hai lượt duet
+  không overlap.
 - Device smoke test cần chạy với 2–3 pet để quan sát đủ approach và ít nhất hai scene liên
   tiếp; overlay vẫn phải có đúng một foreground service và một shared render clock.
+
+V3.15 đã smoke-test trên Pixel 3 XL / API 31 ở speed 150% với owner pack `Satoru Gojo`
+đang chọn sẵn: APK cài đè không mất selection/count, service tạo đúng ba window 238×238
+px và tiếp tục chạy trên launcher. Chuỗi capture 15 giây không ghi nhận
+`FATAL EXCEPTION`, `BadTokenException` hoặc `OutOfMemoryError`. Contract frame chính xác
+(cadence, one-way Special 2, hold-final và transition) được khóa bằng JVM test xác định
+thay vì suy đoán state từ screenshot của ba pet tự chủ.

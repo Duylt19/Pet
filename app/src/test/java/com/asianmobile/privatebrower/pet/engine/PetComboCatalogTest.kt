@@ -18,7 +18,7 @@ class PetComboCatalogTest {
                 PetAction.IDLE,
                 PetAction.WINK,
                 PetAction.RUN,
-                PetAction.TALK_WALK,
+                PetAction.WALK,
                 PetAction.IDLE
             ),
             combo?.actions
@@ -174,6 +174,65 @@ class PetComboCatalogTest {
             PetComboHabitat.WALL,
             PetComboCatalog.definition(PetComboId.WALL_TO_WALL_RISE)?.habitat
         )
+    }
+
+    @Test
+    fun `skill performances play once and hold their final frame`() {
+        val performanceActions = setOf(PetAction.SPECIAL, PetAction.SPECIAL_2)
+        val performanceBeats = PetComboId.entries.flatMap { comboId ->
+            val definition = PetComboCatalog.definition(comboId) ?: return@flatMap emptyList()
+            definition.beats
+                .filter { beat -> beat.action in performanceActions }
+                .map { beat -> definition to beat }
+        }
+
+        assertTrue(performanceBeats.isNotEmpty())
+        assertTrue(
+            performanceBeats.all { (definition, beat) ->
+                beat.playback == PetBeatPlayback.HOLD_LAST_FRAME &&
+                    beat.action in definition.requiredActions
+            }
+        )
+    }
+
+    @Test
+    fun `ninja skill lands before performing and requires every critical action`() {
+        val combo = PetComboCatalog.definition(PetComboId.NINJA_SKILL)
+        val fallIndex = combo?.actions?.indexOf(PetAction.FALL) ?: -1
+
+        assertTrue(fallIndex >= 0)
+        assertEquals(PetAction.BOUNCE, combo?.actions?.get(fallIndex + 1))
+        assertEquals(PetAction.SPECIAL, combo?.actions?.get(fallIndex + 2))
+        assertTrue(
+            combo?.requiredActions?.containsAll(
+                setOf(PetAction.BOUNCE, PetAction.SPECIAL)
+            ) == true
+        )
+    }
+
+    @Test
+    fun `social duet roles reserve non overlapping skill turns`() {
+        val first = PetComboCatalog.definition(PetComboId.SOCIAL_DUET_A)?.beats.orEmpty()
+        val second = PetComboCatalog.definition(PetComboId.SOCIAL_DUET_B)?.beats.orEmpty()
+        val firstEnd = first.first().durationMillis!!.last +
+            first[1].durationMillis!!.last
+        val secondStart = second.first().durationMillis!!.first
+        val secondEnd = second.first().durationMillis!!.last +
+            second[1].durationMillis!!.last
+        val firstSecondStart = first.first().durationMillis!!.first +
+            first[1].durationMillis!!.first +
+            first[2].durationMillis!!.first
+        val firstSecondEnd = first.first().durationMillis!!.last +
+            first[1].durationMillis!!.last +
+            first[2].durationMillis!!.last +
+            first[3].durationMillis!!.last
+        val secondSecondStart = second.first().durationMillis!!.first +
+            second[1].durationMillis!!.first +
+            second[2].durationMillis!!.first
+
+        assertTrue(firstEnd <= secondStart)
+        assertTrue(secondEnd <= firstSecondStart)
+        assertTrue(firstSecondEnd <= secondSecondStart)
     }
 
     @Test

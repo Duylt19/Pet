@@ -1,6 +1,7 @@
 package com.asianmobile.privatebrower.pet.pack
 
 import com.asianmobile.privatebrower.pet.engine.PetAction
+import com.asianmobile.privatebrower.pet.engine.PetFrame
 import com.asianmobile.privatebrower.pet.engine.PetVector
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -26,6 +27,80 @@ class PetPackEngineMapperTest {
 
         assertEquals(240L, slow.durationMillis)
         assertEquals(80L, fast.durationMillis)
+    }
+
+    @Test
+    fun `expressive timing resists global speed while motion still scales fully`() {
+        val base = manifest()
+        val wink = PetPackClip(
+            action = PetAction.WINK,
+            loops = false,
+            nextAction = PetAction.WALK,
+            frames = listOf(frame("wink.png", durationMillis = 120L))
+        )
+        val fast = base.copy(clips = base.clips + (PetAction.WINK to wink))
+            .toEngineClips(speedMultiplier = 1.5f)
+
+        assertEquals(106L, fast.getValue(PetAction.WINK).frames.single().durationMillis)
+        assertEquals(
+            PetVector(60f, 15f),
+            fast.getValue(PetAction.WINK).frames.single().velocity
+        )
+        assertEquals(80L, fast.getValue(PetAction.WALK).frames.single().durationMillis)
+    }
+
+    @Test
+    fun `owner shimeji clips use calm idle emotion and one way skill timing`() {
+        val base = manifest()
+        val owner = base.copy(
+            id = "owner.shimeji.4",
+            clips = base.clips + mapOf(
+                PetAction.IDLE to clip(
+                    PetAction.IDLE,
+                    listOf("idle.png", "emotion-a.png", "idle.png", "emotion-b.png"),
+                    loops = true
+                ),
+                PetAction.WINK to clip(
+                    PetAction.WINK,
+                    listOf("emotion-a.png", "emotion-b.png")
+                ),
+                PetAction.SPECIAL to clip(
+                    PetAction.SPECIAL,
+                    listOf("s1.png", "s2.png", "s3.png", "s4.png", "s5.png")
+                ),
+                PetAction.SPECIAL_2 to clip(
+                    PetAction.SPECIAL_2,
+                    listOf(
+                        "x1.png",
+                        "x2.png",
+                        "x3.png",
+                        "x4.png",
+                        "x5.png",
+                        "x4.png",
+                        "x3.png",
+                        "x2.png"
+                    )
+                )
+            )
+        )
+        val fast = owner.toEngineClips(speedMultiplier = 1.5f)
+
+        assertEquals(1, fast.getValue(PetAction.IDLE).frames.size)
+        assertEquals(800L, fast.getValue(PetAction.IDLE).frames.single().durationMillis)
+        assertEquals(
+            listOf(311L, 488L),
+            fast.getValue(PetAction.WINK).frames.map(PetFrame::durationMillis)
+        )
+        assertEquals(5, fast.getValue(PetAction.SPECIAL).frames.size)
+        assertEquals(
+            listOf(284L, 337L, 373L, 444L, 711L),
+            fast.getValue(PetAction.SPECIAL).frames.map(PetFrame::durationMillis)
+        )
+        assertEquals(5, fast.getValue(PetAction.SPECIAL_2).frames.size)
+        assertEquals(
+            listOf(284L, 320L, 373L, 462L, 711L),
+            fast.getValue(PetAction.SPECIAL_2).frames.map(PetFrame::durationMillis)
+        )
     }
 
     @Test
@@ -119,4 +194,25 @@ class PetPackEngineMapperTest {
             )
         )
     }
+
+    private fun clip(
+        action: PetAction,
+        files: List<String>,
+        loops: Boolean = false
+    ) = PetPackClip(
+        action = action,
+        loops = loops,
+        nextAction = if (loops) null else PetAction.WALK,
+        frames = files.map { file -> frame(file) }
+    )
+
+    private fun frame(
+        file: String,
+        durationMillis: Long = 180L
+    ) = PetPackFrame(
+        file = file,
+        rect = PetPackFrameRect(0, 0, 16, 16),
+        durationMillis = durationMillis,
+        velocity = PetVector(40f, 10f)
+    )
 }

@@ -61,7 +61,7 @@ class PetAnimationTimelineTest {
         val advance = timeline.advance(
             action = PetAction.SPECIAL,
             cursor = PetAnimationCursor(),
-            elapsedMillis = 1_000,
+            elapsedMillis = 1_800,
             stopAtActionTransition = true
         )
 

@@ -38,7 +38,10 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Mọi instance dùng chung visual đã preload; mỗi instance chỉ giữ engine state/view/layout params riêng.
 - Tap/drag/fling đều được chuyển thành `PetEvent`. Hệ tọa độ overlay chỉ fit status bar/display cutout một lần, không trừ navigation bar ở đáy; vì vậy đáy pet chạm đáy màn hình vật lý thay vì dừng phía trên thanh điều hướng.
 - Playground cho phép cửa sổ pet tràn `1/3` chiều rộng qua mép trái/phải và `1/3` chiều rộng qua mép trên, còn mép dưới không tràn. `FLAG_LAYOUT_NO_LIMITS` là bắt buộc để WindowManager không clamp lại cửa sổ nhỏ; hit target vẫn chỉ bằng đúng kích thước pet.
-- Sprite pack dùng quy ước frame gốc quay sang trái. Renderer mirror ngang khi engine đi sang phải và chỉ thêm squash/stretch/lean nhẹ quanh bottom anchor cho motion nhanh, va chạm và Special; pose climb wall/ceiling không bị xoay sai hướng.
+- Sprite pack dùng quy ước frame gốc quay sang trái. Renderer mirror ngang khi engine đi
+  sang phải và chỉ thêm squash/stretch/lean nhẹ quanh bottom anchor cho locomotion/va
+  chạm; Special dùng nguyên sprite, không scale luân phiên gây flicker. Pose climb
+  wall/ceiling không bị xoay sai hướng.
 - Speech chỉ tồn tại trong `TALK` đứng yên một frame 34 hoặc `TALK_WALK` di chuyển bằng
   34/35/34/36. Box chữ nhật góc vuông dùng contract `WalkWithIE`, bám đáy ở
   `anchorY - 0,5 × petHeight`, nằm trước hướng nhìn, mirror theo direction và follow
@@ -58,6 +61,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   Mọi transition vào `TALK` còn có guard cuối trong engine: nếu không đứng trên sàn thì
   combo bị hủy về physics `FALL`/ground fallback thay vì render frame nói trên tường.
 - State graph hỗ trợ `fall → bounce → walk`, run/creep có timeout, leo lên/leo xuống, cùng routine như `sit → wink`, `trip → sit` và `special → special-2 → wink`. Wall timeout chọn jump/descend/fall; pet tới mép trần có thể leo xuống thay vì luôn rơi. Pack v1 cũ chỉ tham gia action thật sự khai báo và vẫn fallback walk/idle an toàn.
+- Story beat biểu diễn dùng playback `HOLD_LAST_FRAME`: Special chạy đúng một lượt rồi giữ
+  final pose cho hết 4–9 giây của beat, thay vì lặp đầu-cuối liên tục. Beat locomotion/pose
+  thường vẫn repeat; combo chỉ chuyển sau target duration hoặc collision tương ứng.
 - Fall dùng gravity/terminal velocity thay cho tốc độ dọc cố định. Thả kéo nhẹ phát `DragEnd → Fall`; chỉ thao tác vượt system minimum-fling velocity mới vào physics fling.
 - Stop chuẩn hóa vị trí 0–1 vào DataStore; Start sau process/orientation change restore và clamp theo usable bounds mới.
 - Default multi-pet layout giãn ngang 1,05 pet-width; vị trí restore trùng sâu được sửa
@@ -98,6 +104,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   `Cute Pet speech 1` và `Cute Pet speech 2`, xác nhận controller giữ hai window theo
   owner ID. Không có fatal/window error; force-stop kết thúc với 0 overlay, 0 speech
   window và 0 service.
+- Semantic cadence V3.15 đã cài đè và smoke-test với ba `Satoru Gojo` ở speed 150%:
+  selection/count được giữ, service tạo đúng ba overlay 238×238 px, autonomous
+  movement/speech tiếp tục qua launcher và log không có fatal, bad-token hoặc OOM.
 
 ## Chưa thuộc runtime hiện tại
 

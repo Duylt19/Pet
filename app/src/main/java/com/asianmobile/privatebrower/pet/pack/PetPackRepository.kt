@@ -96,7 +96,7 @@ class FilePetPackRepository @Inject constructor(
             PetPackClip(PetAction.WALK, true, null, List(4) { frame(120, 42f) }),
             PetPackClip(PetAction.RUN, true, null, List(4) { frame(80, 82f) }),
             PetPackClip(PetAction.FALL, true, null, listOf(frame(120, velocityY = 220f))),
-            PetPackClip(PetAction.BOUNCE, false, PetAction.WALK, List(2) { frame(110) }),
+            PetPackClip(PetAction.BOUNCE, false, PetAction.WALK, List(2) { frame(220) }),
             PetPackClip(
                 PetAction.CLIMB_WALL,
                 true,
@@ -116,22 +116,22 @@ class FilePetPackRepository @Inject constructor(
                 List(4) { frame(120, velocityX = 36f) }
             ),
             PetPackClip(PetAction.SIT, false, PetAction.WALK, listOf(frame(2_400))),
-            PetPackClip(PetAction.WINK, false, PetAction.WALK, List(2) { frame(260) }),
+            PetPackClip(PetAction.WINK, false, PetAction.WALK, List(2) { frame(400) }),
             PetPackClip(PetAction.LOOK_UP, false, PetAction.WALK, listOf(frame(1_200))),
             PetPackClip(PetAction.DANGLE, false, PetAction.WALK, List(4) { frame(320) }),
             PetPackClip(PetAction.CREEP, true, null, List(4) { frame(180, 16f) }),
-            PetPackClip(PetAction.TRIP, false, PetAction.WALK, List(4) { frame(140) }),
+            PetPackClip(PetAction.TRIP, false, PetAction.WALK, List(4) { frame(200) }),
             PetPackClip(PetAction.TALK, true, null, listOf(frame(240))),
             PetPackClip(PetAction.TALK_WALK, true, null, List(4) { frame(240, 24f) }),
             PetPackClip(
                 PetAction.JUMP,
                 false,
                 PetAction.FALL,
-                listOf(frame(220, velocityX = 110f, velocityY = -80f))
+                listOf(frame(300, velocityX = 110f, velocityY = -80f))
             ),
-            PetPackClip(PetAction.SPECIAL, false, PetAction.WALK, List(4) { frame(220) }),
-            PetPackClip(PetAction.SPECIAL_2, false, PetAction.WALK, List(8) { frame(160) }),
-            PetPackClip(PetAction.TAPPED, false, PetAction.IDLE, List(3) { frame(100) }),
+            PetPackClip(PetAction.SPECIAL, false, PetAction.WALK, List(4) { frame(400) }),
+            PetPackClip(PetAction.SPECIAL_2, false, PetAction.WALK, List(8) { frame(300) }),
+            PetPackClip(PetAction.TAPPED, false, PetAction.IDLE, List(3) { frame(300) }),
             PetPackClip(PetAction.DRAGGED, true, null, listOf(frame(200))),
             PetPackClip(PetAction.FLUNG, true, null, List(2) { frame(100) })
         ).associateBy(PetPackClip::action)

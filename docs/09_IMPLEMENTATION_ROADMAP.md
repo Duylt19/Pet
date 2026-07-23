@@ -110,6 +110,10 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Redesign multi-pet interaction V3.14: autonomous movers pass through instead
   of blocking/turning each other, social invitations use chance/range/cooldown and release
   on interruption, speech windows are keyed by pet ID, and TALK is ground-surface gated.
+- [Done] Add semantic action cadence V3.15: movement keeps full speed control, physics
+  reactions use partial influence, expressive/skill frames use only 25% influence; owner
+  Special clips play once then hold the last pose, with landing/recovery and alternating
+  social duet choreography locked by JVM tests.
 - Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
 - Treat tap popup, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
 - Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs. Local device sync is enabled for validation, while production distribution must use a provenance-preserving server import.

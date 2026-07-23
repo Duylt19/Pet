@@ -412,12 +412,7 @@ internal class PetOverlayView(
             PetAction.DRAGGED -> canvas.rotate(alternating * 4f, width / 2f, 0f)
             PetAction.FLUNG -> canvas.rotate(alternating * 7f, width / 2f, height / 2f)
             PetAction.SPECIAL,
-            PetAction.SPECIAL_2 -> canvas.scale(
-                1f + alternating * 0.018f,
-                1f + alternating * 0.018f,
-                width / 2f,
-                height
-            )
+            PetAction.SPECIAL_2 -> Unit
             else -> Unit
         }
     }

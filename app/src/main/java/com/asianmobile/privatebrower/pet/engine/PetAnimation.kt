@@ -203,7 +203,7 @@ object DemoPetAnimation {
         ),
         PetClip(
             action = PetAction.BOUNCE,
-            frames = List(2) { index -> PetFrame(index = index, durationMillis = 110) },
+            frames = List(2) { index -> PetFrame(index = index, durationMillis = 220) },
             loops = false,
             nextAction = PetAction.WALK
         ),
@@ -229,7 +229,7 @@ object DemoPetAnimation {
             loops = true
         ),
         oneShot(PetAction.SIT, frameCount = 1, frameDurationMillis = 2_400),
-        oneShot(PetAction.WINK, frameCount = 2, frameDurationMillis = 260),
+        oneShot(PetAction.WINK, frameCount = 2, frameDurationMillis = 400),
         oneShot(PetAction.LOOK_UP, frameCount = 1, frameDurationMillis = 1_200),
         oneShot(PetAction.DANGLE, frameCount = 4, frameDurationMillis = 320),
         PetClip(
@@ -239,7 +239,7 @@ object DemoPetAnimation {
             },
             loops = true
         ),
-        oneShot(PetAction.TRIP, frameCount = 4, frameDurationMillis = 140),
+        oneShot(PetAction.TRIP, frameCount = 4, frameDurationMillis = 200),
         PetClip(
             action = PetAction.TALK,
             frames = listOf(PetFrame(index = 0, durationMillis = 240)),
@@ -261,18 +261,18 @@ object DemoPetAnimation {
             frames = listOf(
                 PetFrame(
                     index = 0,
-                    durationMillis = 220,
+                    durationMillis = 300,
                     velocity = PetVector(x = 110f, y = -80f)
                 )
             ),
             loops = false,
             nextAction = PetAction.FALL
         ),
-        oneShot(PetAction.SPECIAL, frameCount = 4, frameDurationMillis = 220),
-        oneShot(PetAction.SPECIAL_2, frameCount = 8, frameDurationMillis = 160),
+        oneShot(PetAction.SPECIAL, frameCount = 4, frameDurationMillis = 400),
+        oneShot(PetAction.SPECIAL_2, frameCount = 8, frameDurationMillis = 300),
         PetClip(
             action = PetAction.TAPPED,
-            frames = List(3) { index -> PetFrame(index = index, durationMillis = 100) },
+            frames = List(3) { index -> PetFrame(index = index, durationMillis = 300) },
             loops = false,
             nextAction = PetAction.IDLE
         ),

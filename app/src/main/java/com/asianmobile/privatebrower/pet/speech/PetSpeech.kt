@@ -171,10 +171,10 @@ internal object PetComboSpeechPolicy {
         PetComboId.MAGIC_RITUAL,
         PetComboId.ACROBATIC_FINALE -> cue(PetSpeechTone.SKILL)
 
-        PetComboId.HAPPY_ZOOMIES,
         PetComboId.TINY_PERFORMANCE,
         PetComboId.CHEERFUL_ENCORE -> cue(PetSpeechTone.CELEBRATION)
 
+        PetComboId.HAPPY_ZOOMIES,
         PetComboId.SHY_SNEAK,
         PetComboId.BUSY_PATROL,
         PetComboId.PEEK_AND_DASH,

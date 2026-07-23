@@ -200,6 +200,9 @@ class PetEngine(
         }
 
         val elapsedMillis = requestedElapsedMillis.coerceAtMost(config.maxTickMillis)
+        if (state.isHoldingComboBeatFrame) {
+            return advanceHeldComboBeat(state, elapsedMillis)
+        }
         val animation = timeline.advance(
             action = state.action,
             cursor = state.animationCursor,
@@ -221,16 +224,35 @@ class PetEngine(
         } else {
             state.comboBeatElapsedMillis + elapsedMillis
         }
+        val holdSustainedBeat = actionChangedByTimeline &&
+            state.activeComboBeat?.playback == PetBeatPlayback.HOLD_LAST_FRAME &&
+            beatElapsedMillis < state.comboBeatTargetMillis
         val repeatSustainedBeat = actionChangedByTimeline &&
+            !holdSustainedBeat &&
             state.activeComboBeat?.isSustained == true &&
             beatElapsedMillis < state.comboBeatTargetMillis
-        val nextBeat = if (actionChangedByTimeline && !repeatSustainedBeat) {
+        val nextBeat = if (actionChangedByTimeline && !repeatSustainedBeat && !holdSustainedBeat) {
             state.pendingComboBeats.firstOrNull()
         } else {
             null
         }
         val effects = mutableListOf<PetEffect>()
         var updatedState = when {
+            holdSustainedBeat -> {
+                val clip = config.clips.getValue(state.action)
+                val lastFrameIndex = clip.frames.lastIndex
+                val lastFrame = clip.frames[lastFrameIndex]
+                state.copy(
+                    animationCursor = PetAnimationCursor(
+                        frameIndex = lastFrameIndex,
+                        elapsedInFrameMillis = lastFrame.durationMillis - 1
+                    ),
+                    actionElapsedMillis = state.actionElapsedMillis + elapsedMillis,
+                    comboBeatElapsedMillis = beatElapsedMillis,
+                    isHoldingComboBeatFrame = true
+                )
+            }
+
             repeatSustainedBeat -> state.copy(
                 animationCursor = PetAnimationCursor(),
                 actionElapsedMillis = 0,
@@ -265,12 +287,13 @@ class PetEngine(
                 comboBeatElapsedMillis = beatElapsedMillis
             )
         }
-        if (!repeatSustainedBeat && nextBeat == null) {
+        if (!repeatSustainedBeat && !holdSustainedBeat && nextBeat == null) {
             effects += animation.actionTransitions.map { (from, to) ->
                 PetEffect.ActionChanged(from, to)
             }
         }
-        if (actionChangedByTimeline && !repeatSustainedBeat && nextBeat == null &&
+        if (actionChangedByTimeline && !repeatSustainedBeat && !holdSustainedBeat &&
+            nextBeat == null &&
             updatedState.activeComboId != null
         ) {
             val completedCombo = checkNotNull(updatedState.activeComboId)
@@ -452,7 +475,8 @@ class PetEngine(
                 action = resolvedAction,
                 animationCursor = PetAnimationCursor(),
                 actionElapsedMillis = 0,
-                actionTargetMillis = 0
+                actionTargetMillis = 0,
+                isHoldingComboBeatFrame = false
             ),
             effects = if (state.action == resolvedAction) {
                 emptyList()
@@ -538,7 +562,27 @@ class PetEngine(
             activeComboBeat = beat,
             comboBeatElapsedMillis = 0,
             comboBeatTargetMillis = scheduled.value,
+            isHoldingComboBeatFrame = false,
             pendingComboBeats = pendingBeats
+        )
+    }
+
+    private fun advanceHeldComboBeat(
+        state: PetState,
+        elapsedMillis: Long
+    ): PetTransition {
+        val elapsed = state.comboBeatElapsedMillis + elapsedMillis
+        val held = state.copy(
+            actionElapsedMillis = state.actionElapsedMillis + elapsedMillis,
+            comboBeatElapsedMillis = elapsed
+        )
+        if (elapsed < state.comboBeatTargetMillis) {
+            return PetTransition(held)
+        }
+        return advanceComboBeatOrFallback(
+            state = held,
+            fallbackAction = preferredAction(PetAction.WALK, PetAction.IDLE),
+            effects = emptyList()
         )
     }
 
@@ -994,6 +1038,7 @@ class PetEngine(
         activeComboBeat = null,
         comboBeatElapsedMillis = 0,
         comboBeatTargetMillis = 0,
+        isHoldingComboBeatFrame = false,
         pendingComboBeats = emptyList()
     )
 
