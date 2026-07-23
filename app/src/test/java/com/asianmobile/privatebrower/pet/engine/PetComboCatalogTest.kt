@@ -15,8 +15,8 @@ class PetComboCatalogTest {
 
         assertEquals(
             listOf(
-                PetAction.IDLE,
-                PetAction.WINK,
+                PetAction.LOOK_UP,
+                PetAction.EMOTE,
                 PetAction.RUN,
                 PetAction.WALK,
                 PetAction.IDLE
@@ -108,7 +108,8 @@ class PetComboCatalogTest {
             PetAction.CLIMB_WALL,
             PetAction.CLIMB_DOWN,
             PetAction.CLIMB_CEILING,
-            PetAction.DANGLE,
+            PetAction.HOLD_WALL,
+            PetAction.HOLD_CEILING,
             PetAction.JUMP,
             PetAction.FALL,
             PetAction.FLUNG,
@@ -177,7 +178,7 @@ class PetComboCatalogTest {
     }
 
     @Test
-    fun `social sitting is limited to rest copycat and trip recovery`() {
+    fun `social sitting is limited to shared rest and trip recovery`() {
         val socialSittingCombos = PetComboId.entries
             .filter { comboId -> comboId.name.startsWith("SOCIAL_") }
             .mapNotNull(PetComboCatalog::definition)
@@ -186,10 +187,7 @@ class PetComboCatalogTest {
         assertEquals(
             setOf(
                 PetComboId.SOCIAL_CHASE_FOLLOWER,
-                PetComboId.SOCIAL_REST_A,
-                PetComboId.SOCIAL_REST_B,
-                PetComboId.SOCIAL_COPYCAT_A,
-                PetComboId.SOCIAL_COPYCAT_B
+                PetComboId.SOCIAL_REST_A
             ),
             socialSittingCombos.map(PetComboDefinition::id).toSet()
         )
@@ -220,7 +218,7 @@ class PetComboCatalogTest {
     }
 
     @Test
-    fun `skill performances play once and hold their final frame`() {
+    fun `skill performances play their complete clip once without freezing the endpoint`() {
         val performanceActions = setOf(PetAction.SPECIAL, PetAction.SPECIAL_2)
         val performanceBeats = PetComboId.entries.flatMap { comboId ->
             val definition = PetComboCatalog.definition(comboId) ?: return@flatMap emptyList()
@@ -232,7 +230,8 @@ class PetComboCatalogTest {
         assertTrue(performanceBeats.isNotEmpty())
         assertTrue(
             performanceBeats.all { (definition, beat) ->
-                beat.playback == PetBeatPlayback.HOLD_LAST_FRAME &&
+                beat.playback == PetBeatPlayback.PLAY_ONCE &&
+                    beat.durationMillis == null &&
                     beat.action in definition.requiredActions
             }
         )
@@ -245,7 +244,8 @@ class PetComboCatalogTest {
 
         assertTrue(fallIndex >= 0)
         assertEquals(PetAction.BOUNCE, combo?.actions?.get(fallIndex + 1))
-        assertEquals(PetAction.SPECIAL, combo?.actions?.get(fallIndex + 2))
+        assertEquals(PetAction.LOOK_UP, combo?.actions?.get(fallIndex + 2))
+        assertEquals(PetAction.SPECIAL, combo?.actions?.get(fallIndex + 3))
         assertTrue(
             combo?.requiredActions?.containsAll(
                 setOf(PetAction.BOUNCE, PetAction.SPECIAL)
@@ -254,28 +254,67 @@ class PetComboCatalogTest {
     }
 
     @Test
-    fun `social duet roles reserve non overlapping skill turns`() {
-        val first = PetComboCatalog.definition(PetComboId.SOCIAL_DUET_A)?.beats.orEmpty()
-        val second = PetComboCatalog.definition(PetComboId.SOCIAL_DUET_B)?.beats.orEmpty()
-        val firstEnd = first.first().durationMillis!!.last +
-            first[1].durationMillis!!.last
-        val secondStart = second.first().durationMillis!!.first
-        val secondEnd = second.first().durationMillis!!.last +
-            second[1].durationMillis!!.last
-        val firstSecondStart = first.first().durationMillis!!.first +
-            first[1].durationMillis!!.first +
-            first[2].durationMillis!!.first
-        val firstSecondEnd = first.first().durationMillis!!.last +
-            first[1].durationMillis!!.last +
-            first[2].durationMillis!!.last +
-            first[3].durationMillis!!.last
-        val secondSecondStart = second.first().durationMillis!!.first +
-            second[1].durationMillis!!.first +
-            second[2].durationMillis!!.first
+    fun `social duet alternates one shot skills with deliberate recovery gaps`() {
+        val first = PetComboCatalog.definition(PetComboId.SOCIAL_DUET_A)
+        val second = PetComboCatalog.definition(PetComboId.SOCIAL_DUET_B)
 
-        assertTrue(firstEnd <= secondStart)
-        assertTrue(secondEnd <= firstSecondStart)
-        assertTrue(firstSecondEnd <= secondSecondStart)
+        assertEquals(
+            listOf(
+                PetAction.IDLE,
+                PetAction.SPECIAL,
+                PetAction.IDLE,
+                PetAction.SPECIAL_2,
+                PetAction.EMOTE,
+                PetAction.LOOK_UP
+            ),
+            first?.actions
+        )
+        assertEquals(
+            listOf(
+                PetAction.IDLE,
+                PetAction.SPECIAL_2,
+                PetAction.IDLE,
+                PetAction.SPECIAL,
+                PetAction.EMOTE
+            ),
+            second?.actions
+        )
+        assertTrue(checkNotNull(first).beats[2].durationMillis!!.first >= 5_000L)
+        assertTrue(checkNotNull(second).beats[2].durationMillis!!.first >= 5_000L)
+    }
+
+    @Test
+    fun `wall and ceiling stories hold the correct surface pose instead of floor play`() {
+        val spatial = listOf(
+            PetComboId.WALL_PARKOUR,
+            PetComboId.CEILING_EXPEDITION,
+            PetComboId.WALL_DIVE,
+            PetComboId.WALL_TO_WALL_LEAP,
+            PetComboId.WALL_TO_WALL_RISE
+        ).mapNotNull(PetComboCatalog::definition)
+
+        assertTrue(spatial.all { PetAction.DANGLE !in it.actions })
+        assertTrue(spatial.all { PetAction.HOLD_WALL in it.actions })
+        assertTrue(
+            PetAction.HOLD_CEILING in checkNotNull(
+                PetComboCatalog.definition(PetComboId.CEILING_EXPEDITION)
+            ).actions
+        )
+    }
+
+    @Test
+    fun `energy transition favors recovery and suppresses consecutive performances`() {
+        val calm = checkNotNull(PetComboCatalog.definition(PetComboId.COZY_BREAK))
+        val performance = checkNotNull(PetComboCatalog.definition(PetComboId.TINY_PERFORMANCE))
+        val chatter = checkNotNull(PetComboCatalog.definition(PetComboId.CHATTER))
+
+        assertTrue(
+            PetComboCatalog.transitionWeight(100, calm, PetComboId.BATTLE_DANCE) >
+                PetComboCatalog.transitionWeight(100, performance, PetComboId.BATTLE_DANCE)
+        )
+        assertTrue(
+            PetComboCatalog.transitionWeight(100, chatter, PetComboId.COZY_BREAK) < 100
+        )
     }
 
     @Test

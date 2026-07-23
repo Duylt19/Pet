@@ -157,19 +157,9 @@ internal object PetComboSpeechPolicy {
 
         PetComboId.CURIOUS_SCOUT,
         PetComboId.COZY_BREAK,
-        PetComboId.CLUMSY_RECOVERY,
-        PetComboId.DAYDREAM -> cue(PetSpeechTone.CHATTER)
+        PetComboId.CLUMSY_RECOVERY -> cue(PetSpeechTone.CHATTER)
 
-        PetComboId.WALL_PARKOUR,
-        PetComboId.CEILING_EXPEDITION,
-        PetComboId.WALL_DIVE,
-        PetComboId.WALL_TO_WALL_LEAP,
-        PetComboId.WALL_TO_WALL_RISE,
-        PetComboId.SKY_DIVER,
-        PetComboId.NINJA_SKILL,
-        PetComboId.BATTLE_DANCE,
-        PetComboId.MAGIC_RITUAL,
-        PetComboId.ACROBATIC_FINALE -> cue(PetSpeechTone.SKILL)
+        PetComboId.MAGIC_RITUAL -> cue(PetSpeechTone.SKILL)
 
         PetComboId.TINY_PERFORMANCE,
         PetComboId.CHEERFUL_ENCORE -> cue(PetSpeechTone.CELEBRATION)
@@ -180,6 +170,16 @@ internal object PetComboSpeechPolicy {
         PetComboId.PEEK_AND_DASH,
         PetComboId.SLOW_MORNING,
         PetComboId.BRAVE_EXPLORER,
+        PetComboId.DAYDREAM,
+        PetComboId.WALL_PARKOUR,
+        PetComboId.CEILING_EXPEDITION,
+        PetComboId.WALL_DIVE,
+        PetComboId.WALL_TO_WALL_LEAP,
+        PetComboId.WALL_TO_WALL_RISE,
+        PetComboId.SKY_DIVER,
+        PetComboId.NINJA_SKILL,
+        PetComboId.BATTLE_DANCE,
+        PetComboId.ACROBATIC_FINALE,
         PetComboId.SOCIAL_APPROACH,
         PetComboId.SOCIAL_CHASE_LEADER,
         PetComboId.SOCIAL_CHASE_FOLLOWER,

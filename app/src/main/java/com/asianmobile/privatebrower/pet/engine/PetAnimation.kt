@@ -13,11 +13,16 @@ enum class PetAction {
     CLIMB_CEILING,
     SIT,
     WINK,
+    EMOTE,
     LOOK_UP,
     DANGLE,
+    FLOOR_PLAY,
+    SPRAWL,
     CREEP,
     TRIP,
     JUMP,
+    HOLD_WALL,
+    HOLD_CEILING,
     TALK,
     TALK_WALK,
     SPECIAL,
@@ -230,8 +235,15 @@ object DemoPetAnimation {
         ),
         oneShot(PetAction.SIT, frameCount = 1, frameDurationMillis = 2_400),
         oneShot(PetAction.WINK, frameCount = 2, frameDurationMillis = 400),
+        oneShot(PetAction.EMOTE, frameCount = 2, frameDurationMillis = 500),
         oneShot(PetAction.LOOK_UP, frameCount = 1, frameDurationMillis = 1_200),
         oneShot(PetAction.DANGLE, frameCount = 4, frameDurationMillis = 320),
+        oneShot(PetAction.FLOOR_PLAY, frameCount = 4, frameDurationMillis = 420),
+        PetClip(
+            action = PetAction.SPRAWL,
+            frames = listOf(PetFrame(index = 0, durationMillis = 1_200)),
+            loops = true
+        ),
         PetClip(
             action = PetAction.CREEP,
             frames = List(4) { index ->
@@ -267,6 +279,16 @@ object DemoPetAnimation {
             ),
             loops = false,
             nextAction = PetAction.FALL
+        ),
+        PetClip(
+            action = PetAction.HOLD_WALL,
+            frames = listOf(PetFrame(index = 0, durationMillis = 900)),
+            loops = true
+        ),
+        PetClip(
+            action = PetAction.HOLD_CEILING,
+            frames = listOf(PetFrame(index = 0, durationMillis = 900)),
+            loops = true
         ),
         oneShot(PetAction.SPECIAL, frameCount = 4, frameDurationMillis = 400),
         oneShot(PetAction.SPECIAL_2, frameCount = 8, frameDurationMillis = 300),

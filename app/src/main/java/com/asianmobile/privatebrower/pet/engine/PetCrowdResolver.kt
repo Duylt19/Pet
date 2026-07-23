@@ -120,7 +120,11 @@ class PetCrowdResolver(
             PetAction.IDLE,
             PetAction.SIT,
             PetAction.WINK,
+            PetAction.EMOTE,
             PetAction.LOOK_UP,
+            PetAction.DANGLE,
+            PetAction.FLOOR_PLAY,
+            PetAction.SPRAWL,
             PetAction.TALK,
             PetAction.SPECIAL,
             PetAction.SPECIAL_2

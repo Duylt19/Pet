@@ -255,7 +255,7 @@ class PetSpeechDirectorTest {
             PetComboId.SOCIAL_HELLO to PetSpeechTone.SOCIAL_HELLO,
             PetComboId.SOCIAL_HELLO_REPLY to PetSpeechTone.SOCIAL_REPLY,
             PetComboId.CURIOUS_SCOUT to PetSpeechTone.CHATTER,
-            PetComboId.WALL_PARKOUR to PetSpeechTone.SKILL,
+            PetComboId.MAGIC_RITUAL to PetSpeechTone.SKILL,
             PetComboId.SOCIAL_SHOW_OFF to PetSpeechTone.CELEBRATION
         )
 

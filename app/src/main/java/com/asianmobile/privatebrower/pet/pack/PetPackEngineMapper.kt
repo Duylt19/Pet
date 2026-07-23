@@ -36,14 +36,36 @@ internal fun PetPackManifest.toEngineSupportedActions(): Set<PetAction> = buildS
     ) {
         add(PetAction.TALK_WALK)
     }
+    if (id.startsWith(OWNER_SHIMEJI_PACK_PREFIX)) {
+        if (PetAction.WINK in clips) add(PetAction.EMOTE)
+        if (PetAction.DANGLE in clips) add(PetAction.FLOOR_PLAY)
+        if (PetAction.CREEP in clips) add(PetAction.SPRAWL)
+        if (PetAction.CLIMB_WALL in clips) add(PetAction.HOLD_WALL)
+        if (PetAction.CLIMB_CEILING in clips) add(PetAction.HOLD_CEILING)
+    }
 }
 
 internal fun <T> Map<PetAction, List<T>>.normalizedRuntimeVisualFrames(
     packId: String
 ): Map<PetAction, List<T>> {
     if (!packId.startsWith(OWNER_SHIMEJI_PACK_PREFIX)) return this
-    val standingFrame = get(PetAction.WALK)?.firstOrNull() ?: return this
-    return this + (PetAction.IDLE to listOf(standingFrame))
+    return buildMap {
+        putAll(this@normalizedRuntimeVisualFrames)
+        get(PetAction.WALK)?.firstOrNull()?.let { frame ->
+            put(PetAction.IDLE, listOf(frame))
+        }
+        get(PetAction.WINK)?.let { put(PetAction.EMOTE, it) }
+        get(PetAction.DANGLE)?.let { put(PetAction.FLOOR_PLAY, it) }
+        get(PetAction.CREEP)?.lastOrNull()?.let { frame ->
+            put(PetAction.SPRAWL, listOf(frame))
+        }
+        get(PetAction.CLIMB_WALL)?.getOrNull(OWNER_HOLD_WALL_FRAME_INDEX)?.let { frame ->
+            put(PetAction.HOLD_WALL, listOf(frame))
+        }
+        get(PetAction.CLIMB_CEILING)
+            ?.getOrNull(OWNER_HOLD_CEILING_FRAME_INDEX)
+            ?.let { frame -> put(PetAction.HOLD_CEILING, listOf(frame)) }
+    }
 }
 
 private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip? {
@@ -68,6 +90,25 @@ private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip
                     )
                 }
 
+        PetAction.EMOTE -> clips[PetAction.WINK]?.derivedAction(PetAction.EMOTE)
+        PetAction.FLOOR_PLAY -> clips[PetAction.DANGLE]?.derivedAction(PetAction.FLOOR_PLAY)
+        PetAction.SPRAWL -> clips[PetAction.CREEP]
+            ?.frames
+            ?.lastOrNull()
+            ?.copy(velocity = PetVector.Zero)
+            ?.let { frame ->
+                PetPackClip(
+                    action = PetAction.SPRAWL,
+                    loops = true,
+                    nextAction = null,
+                    frames = listOf(frame)
+                )
+            }
+        PetAction.HOLD_WALL -> clips[PetAction.CLIMB_WALL]
+            ?.stationaryFrameAction(PetAction.HOLD_WALL, OWNER_HOLD_WALL_FRAME_INDEX)
+        PetAction.HOLD_CEILING -> clips[PetAction.CLIMB_CEILING]
+            ?.stationaryFrameAction(PetAction.HOLD_CEILING, OWNER_HOLD_CEILING_FRAME_INDEX)
+
         else -> clips[action]
     }
     return normalized?.let { clip ->
@@ -77,6 +118,20 @@ private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip
             clip
         }
     }
+}
+
+private fun PetPackClip.derivedAction(action: PetAction): PetPackClip = copy(action = action)
+
+private fun PetPackClip.stationaryFrameAction(
+    action: PetAction,
+    frameIndex: Int
+): PetPackClip? = frames.getOrNull(frameIndex)?.let { frame ->
+    PetPackClip(
+        action = action,
+        loops = true,
+        nextAction = null,
+        frames = listOf(frame.copy(velocity = PetVector.Zero))
+    )
 }
 
 private fun fallbackClip(
@@ -93,6 +148,8 @@ private fun fallbackClip(
         PetAction.CLIMB_WALL,
         PetAction.CLIMB_DOWN,
         PetAction.CLIMB_CEILING,
+        PetAction.HOLD_WALL,
+        PetAction.HOLD_CEILING,
         PetAction.JUMP,
         PetAction.TALK_WALK -> walkFrames
         else -> idleFrames
@@ -103,6 +160,11 @@ private fun fallbackClip(
             PetAction.CLIMB_WALL -> PetVector(y = -CLIMB_VELOCITY)
             PetAction.CLIMB_DOWN -> PetVector(y = CLIMB_VELOCITY)
             PetAction.CLIMB_CEILING -> PetVector(x = CLIMB_VELOCITY)
+            PetAction.HOLD_WALL,
+            PetAction.HOLD_CEILING,
+            PetAction.SPRAWL,
+            PetAction.FLOOR_PLAY,
+            PetAction.EMOTE -> PetVector.Zero
             PetAction.CREEP -> PetVector(x = CREEP_VELOCITY)
             PetAction.RUN -> PetVector(x = RUN_VELOCITY)
             PetAction.JUMP -> PetVector(x = JUMP_HORIZONTAL_VELOCITY, y = JUMP_VERTICAL_VELOCITY)
@@ -160,8 +222,13 @@ private fun PetAction.timingMultiplier(speedMultiplier: Float): Float {
         PetAction.FALL,
         PetAction.SIT,
         PetAction.WINK,
+        PetAction.EMOTE,
         PetAction.LOOK_UP,
         PetAction.DANGLE,
+        PetAction.FLOOR_PLAY,
+        PetAction.SPRAWL,
+        PetAction.HOLD_WALL,
+        PetAction.HOLD_CEILING,
         PetAction.TALK,
         PetAction.SPECIAL,
         PetAction.SPECIAL_2,
@@ -176,6 +243,11 @@ private fun PetPackClip.normalizedOwnerShimejiTiming(): PetPackClip {
         PetAction.IDLE -> frames.take(1).withDurations(OWNER_IDLE_DURATIONS)
         PetAction.BOUNCE -> frames.withDurations(OWNER_BOUNCE_DURATIONS)
         PetAction.WINK -> frames.withDurations(OWNER_WINK_DURATIONS)
+        PetAction.EMOTE -> frames.withDurations(OWNER_EMOTE_DURATIONS)
+        PetAction.FLOOR_PLAY -> frames.withDurations(OWNER_FLOOR_PLAY_DURATIONS)
+        PetAction.SPRAWL -> frames.withDurations(OWNER_SPRAWL_DURATIONS)
+        PetAction.HOLD_WALL,
+        PetAction.HOLD_CEILING -> frames.withDurations(OWNER_SURFACE_HOLD_DURATIONS)
         PetAction.TRIP -> frames.withDurations(OWNER_TRIP_DURATIONS)
         PetAction.JUMP -> frames.withDurations(OWNER_JUMP_DURATIONS)
         PetAction.SPECIAL -> frames.withDurations(OWNER_SPECIAL_DURATIONS)
@@ -211,13 +283,19 @@ private const val RUN_VELOCITY = 82f
 private const val JUMP_HORIZONTAL_VELOCITY = 110f
 private const val JUMP_VERTICAL_VELOCITY = -80f
 private const val TALK_WALK_VELOCITY = 24f
+private const val OWNER_HOLD_WALL_FRAME_INDEX = 3
+private const val OWNER_HOLD_CEILING_FRAME_INDEX = 2
 private val OWNER_IDLE_DURATIONS = listOf(900L)
 private val OWNER_BOUNCE_DURATIONS = listOf(220L, 280L)
 private val OWNER_WINK_DURATIONS = listOf(350L, 550L)
+private val OWNER_EMOTE_DURATIONS = listOf(420L, 680L)
+private val OWNER_FLOOR_PLAY_DURATIONS = listOf(420L, 900L, 420L, 900L)
+private val OWNER_SPRAWL_DURATIONS = listOf(1_200L)
+private val OWNER_SURFACE_HOLD_DURATIONS = listOf(900L)
 private val OWNER_TRIP_DURATIONS = listOf(180L, 220L, 180L, 240L)
 private val OWNER_JUMP_DURATIONS = listOf(300L)
-private val OWNER_SPECIAL_DURATIONS = listOf(320L, 380L, 420L, 500L, 800L)
-private val OWNER_SPECIAL_2_DURATIONS = listOf(320L, 360L, 420L, 520L, 800L)
+private val OWNER_SPECIAL_DURATIONS = listOf(420L, 480L, 560L, 680L, 860L)
+private val OWNER_SPECIAL_2_DURATIONS = listOf(420L, 480L, 560L, 680L, 860L)
 private val OWNER_TAPPED_DURATIONS = listOf(350L, 550L)
 private val ONE_SHOT_FALLBACK_ACTIONS = setOf(
     PetAction.BOUNCE,

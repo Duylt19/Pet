@@ -41,10 +41,16 @@ Các sprite Shimeji legacy trong owner catalog dùng hướng gốc sang trái. 
 Owner pack revision 4 vẫn immutable trên disk. Khi service Start, mapper áp dụng profile
 nhịp frame tương thích theo prefix `owner.shimeji.`: engine idle chỉ có một frame và zero
 velocity; renderer lấy frame đứng đầu tiên của clip WALK thay cho frame 11 đang ngồi trong
-raw IDLE. Wink/bounce/trip/jump/tapped có nhịp đọc được; Special dùng sequence một chiều
-với anticipation ngắn và final pose dài. `SPECIAL_2` loại các frame lặp ngược theo file ở
-runtime. Việc normalize này không rewrite archive/manifest và không yêu cầu user Set lại
-1.026 pet đã cài.
+raw IDLE. Runtime còn tạo các alias semantic chỉ cho owner pack: `EMOTE` từ clip `wink`
+frame 15/17, `FLOOR_PLAY` từ `dangle` frame 31/32, `SPRAWL` từ cuối clip `creep`,
+`HOLD_WALL` từ frame bám tường 13 và `HOLD_CEILING` từ frame bám trần 23. Nhờ vậy combo
+không còn dùng pose chơi chân trên sàn để giả bám tường/trần.
+
+Wink/bounce/trip/jump/tapped có nhịp đọc được; Special dùng sequence một chiều
+`420/480/560/680/860 ms` và playback `PLAY_ONCE`, sau đó chuyển sang beat recovery riêng
+thay vì giữ vô hạn endpoint không ổn định. `SPECIAL_2` loại các frame lặp ngược theo file
+ở runtime. Việc normalize này không rewrite archive/manifest và không yêu cầu user Set
+lại 1.026 pet đã cài.
 
 ## Installer pipeline
 

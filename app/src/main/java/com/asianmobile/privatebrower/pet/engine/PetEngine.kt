@@ -92,7 +92,11 @@ class PetEngine(
 
     private fun onTap(state: PetState): PetTransition {
         if (!state.isGroundedSurface()) return PetTransition(state)
-        val followUp = preferredActionOrNull(PetAction.WINK, PetAction.LOOK_UP)
+        val followUp = preferredActionOrNull(
+            PetAction.EMOTE,
+            PetAction.WINK,
+            PetAction.LOOK_UP
+        )
             ?.takeUnless { it == config.tapAction }
         val tapBeat = PetComboBeat(
             action = config.tapAction,
@@ -224,6 +228,11 @@ class PetEngine(
         } else {
             state.comboBeatElapsedMillis + elapsedMillis
         }
+        val playOnceCompleted = beat?.playback == PetBeatPlayback.PLAY_ONCE &&
+            beatElapsedMillis >= config.clips.getValue(state.action)
+                .frames
+                .sumOf(PetFrame::durationMillis)
+        val beatCompleted = actionChangedByTimeline || playOnceCompleted
         val holdSustainedBeat = actionChangedByTimeline &&
             state.activeComboBeat?.playback == PetBeatPlayback.HOLD_LAST_FRAME &&
             beatElapsedMillis < state.comboBeatTargetMillis
@@ -231,7 +240,7 @@ class PetEngine(
             !holdSustainedBeat &&
             state.activeComboBeat?.isSustained == true &&
             beatElapsedMillis < state.comboBeatTargetMillis
-        val nextBeat = if (actionChangedByTimeline && !repeatSustainedBeat && !holdSustainedBeat) {
+        val nextBeat = if (beatCompleted && !repeatSustainedBeat && !holdSustainedBeat) {
             state.pendingComboBeats.firstOrNull()
         } else {
             null
@@ -275,6 +284,17 @@ class PetEngine(
                 changed.state
             }
 
+            playOnceCompleted && !actionChangedByTimeline -> {
+                val clip = config.clips.getValue(state.action)
+                val changed = changeAction(
+                    state = state.copy(comboBeatElapsedMillis = beatElapsedMillis),
+                    action = clip.nextAction ?: PetAction.IDLE,
+                    restartAnimation = true
+                )
+                effects += changed.effects
+                changed.state
+            }
+
             else -> state.copy(
                 action = animation.action,
                 animationCursor = animation.cursor,
@@ -292,7 +312,7 @@ class PetEngine(
                 PetEffect.ActionChanged(from, to)
             }
         }
-        if (actionChangedByTimeline && !repeatSustainedBeat && !holdSustainedBeat &&
+        if (beatCompleted && !repeatSustainedBeat && !holdSustainedBeat &&
             nextBeat == null &&
             updatedState.activeComboId != null
         ) {
@@ -649,7 +669,13 @@ class PetEngine(
                 (action == PetAction.CLIMB_WALL || action == PetAction.CLIMB_CEILING) -> {
                 PetAction.JUMP
             }
-            nextAction == PetAction.DANGLE && action == PetAction.CLIMB_WALL -> PetAction.DANGLE
+            nextAction == PetAction.JUMP && action in GROUND_MOVEMENT_ACTIONS -> PetAction.JUMP
+            nextAction == PetAction.HOLD_WALL && action == PetAction.CLIMB_WALL -> {
+                PetAction.HOLD_WALL
+            }
+            nextAction == PetAction.HOLD_CEILING && action == PetAction.CLIMB_CEILING -> {
+                PetAction.HOLD_CEILING
+            }
             else -> defaultAction
         }
     }
@@ -829,6 +855,9 @@ class PetEngine(
         state: PetState,
         effects: List<PetEffect>
     ): PetTransition {
+        if (state.activeComboBeat?.playback == PetBeatPlayback.PLAY_ONCE) {
+            return PetTransition(state, effects)
+        }
         if (state.activeComboBeat?.completion == PetBeatCompletion.COLLISION) {
             if (state.comboBeatElapsedMillis < state.comboBeatTargetMillis) {
                 return PetTransition(state, effects)
@@ -882,18 +911,26 @@ class PetEngine(
             rule.comboId in scheduled.recentComboIds
         }
         val eligibleRules = freshRules.ifEmpty { habitatRules }
-        val totalWeight = eligibleRules.sumOf { (rule, _) -> rule.weight }
+        val previousComboId = scheduled.recentComboIds.firstOrNull()
+        val weightedRules = eligibleRules.map { (rule, definition) ->
+            Triple(
+                rule,
+                definition,
+                PetComboCatalog.transitionWeight(rule.weight, definition, previousComboId)
+            )
+        }
+        val totalWeight = weightedRules.sumOf { (_, _, weight) -> weight }
         if (totalWeight <= 0) {
             return PetTransition(scheduled.resetActionTimer(), effects)
         }
 
         val draw = draw(scheduled, 0 until totalWeight, GROUND_CHOICE_SALT)
         var cursor = draw.value
-        val (_, selected) = eligibleRules.first { (rule, _) ->
-            if (cursor < rule.weight) {
+        val (_, selected, _) = weightedRules.first { (_, _, weight) ->
+            if (cursor < weight) {
                 true
             } else {
-                cursor -= rule.weight
+                cursor -= weight
                 false
             }
         }

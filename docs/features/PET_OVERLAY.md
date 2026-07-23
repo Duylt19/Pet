@@ -45,6 +45,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Owner pack tách visual đứng/ngồi ở runtime: `IDLE` dùng frame đứng đầu tiên của `WALK`
   nhưng engine giữ zero velocity, còn frame 11 chỉ xuất hiện khi action thật sự là `SIT`.
   Pack ngoài prefix `owner.shimeji.` giữ nguyên visual IDLE do manifest khai báo.
+- Owner pack còn tách đúng ngữ nghĩa pose: `EMOTE` dùng frame 15/17, `FLOOR_PLAY` dùng
+  31/32 trên sàn, `SPRAWL` dùng pose nằm cuối creep, còn `HOLD_WALL`/`HOLD_CEILING` giữ
+  frame 13/23 đúng surface. Các alias này chỉ tồn tại ở runtime nên không đổi schema pack.
 - Speech chỉ tồn tại trong `TALK` đứng yên một frame 34 hoặc `TALK_WALK` di chuyển bằng
   34/35/34/36. Box chữ nhật góc vuông dùng contract `WalkWithIE`, bám đáy ở
   `anchorY - 0,5 × petHeight`, nằm trước hướng nhìn, mirror theo direction và follow
@@ -63,10 +66,17 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Tap, showcase và combo habitat `GROUND` bị từ chối khi pet đang leo, treo hoặc bay.
   Mọi transition vào `TALK` còn có guard cuối trong engine: nếu không đứng trên sàn thì
   combo bị hủy về physics `FALL`/ground fallback thay vì render frame nói trên tường.
-- State graph hỗ trợ `fall → bounce → walk`, run/creep có timeout, leo lên/leo xuống, cùng routine như `sit → wink`, `trip → sit` và `special → special-2 → wink`. Wall timeout chọn jump/descend/fall; pet tới mép trần có thể leo xuống thay vì luôn rơi. Pack v1 cũ chỉ tham gia action thật sự khai báo và vẫn fallback walk/idle an toàn.
-- Story beat biểu diễn dùng playback `HOLD_LAST_FRAME`: Special chạy đúng một lượt rồi giữ
-  final pose cho hết 4–9 giây của beat, thay vì lặp đầu-cuối liên tục. Beat locomotion/pose
-  thường vẫn repeat; combo chỉ chuyển sau target duration hoặc collision tương ứng.
+- State graph hỗ trợ `fall → bounce → walk`, run/creep có timeout, leo lên/leo xuống và
+  các routine có anticipation/action/recovery như `sit → floor-play → idle`,
+  `run → trip → sprawl` và `look → special → idle → emote`. Wall/ceiling collision có
+  thể vào pose hold đúng surface trước bước nhảy tiếp theo; pet tới mép trần có thể leo
+  xuống thay vì luôn rơi. Pack v1 cũ chỉ tham gia action thật sự khai báo và vẫn fallback
+  walk/idle an toàn.
+- Story beat biểu diễn dùng playback `PLAY_ONCE`: Special chạy trọn một lượt gần 3 giây,
+  rồi combo chuyển sang beat idle/look/emote recovery 3–6 giây. Không giữ frame cuối vì
+  frame 41/46 của nhiều model là motion blur, portal, clone hoặc sprite chỉ còn một phần.
+  Beat locomotion/pose thường vẫn repeat; combo chỉ chuyển sau target duration hoặc
+  collision tương ứng.
 - Fall dùng gravity/terminal velocity thay cho tốc độ dọc cố định. Thả kéo nhẹ phát `DragEnd → Fall`; chỉ thao tác vượt system minimum-fling velocity mới vào physics fling.
 - Stop chuẩn hóa vị trí 0–1 vào DataStore; Start sau process/orientation change restore và clamp theo usable bounds mới.
 - Default multi-pet layout giãn ngang 1,05 pet-width; vị trí restore trùng sâu được sửa
@@ -83,6 +93,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Edge contract verified trên cùng thiết bị với pet 392 px: parent overlay bắt đầu tại status bar `y=171`, mép trái đạt `x=-131`, mép phải đạt `x=1179` và mép trên đạt `y=-131`; cửa sổ được phép tràn ra ngoài display thay vì bị WindowManager clamp. Playground bottom là `2789`, tương ứng đáy vật lý `2960`, nên không còn bị navigation bar 168 px đẩy lên.
 - Overlay window remained 112dp and touch did not block the rest of the launcher.
 - No fatal exception was recorded during the full flow; service, window and notification were all removed after Stop/revocation.
+- Frame-semantic choreography V3.17 verified trên Pixel 3 XL với ba `Satoru Gojo`: các
+  capture theo mốc ghi nhận ground, wall-climb, skill và speech diễn ra độc lập; kết thúc
+  vẫn có đúng ba window 238×238 px, một foreground service và không fatal/ANR/window error.
 - Pet Speech V3.7 initial slice đã verified `Natsu` conversion revision 4 và lifecycle
   non-touchable window 220×84dp; trigger tap trực tiếp của revision này đã được thay thế
   bởi pose-gated choreography V3.10 bên dưới.

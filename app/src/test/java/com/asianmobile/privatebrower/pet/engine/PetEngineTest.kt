@@ -10,7 +10,7 @@ class PetEngineTest {
     private val size = PetSize(width = 20f, height = 20f)
 
     @Test
-    fun `tap reaction includes a calm recovery before its affectionate wink`() {
+    fun `tap reaction includes a calm recovery before its affectionate emote`() {
         val engine = engine(maxTickMillis = 1_000)
         val initial = engine.initialState(bounds, size, position = PetVector(10f, 80f))
 
@@ -18,14 +18,14 @@ class PetEngineTest {
         val stillReacting = engine.reduce(tapped.state, PetEvent.Tick(elapsedMillis = 800))
         val recovering = engine.reduce(stillReacting.state, PetEvent.Tick(elapsedMillis = 100))
         val talking = advanceUntil(engine, recovering.state) { it.action == PetAction.TALK }
-        val wink = advanceUntil(engine, talking) { it.action == PetAction.WINK }
+        val emote = advanceUntil(engine, talking) { it.action == PetAction.EMOTE }
 
         assertEquals(PetAction.TAPPED, tapped.state.action)
         assertEquals(PetAction.TAPPED, stillReacting.state.action)
         assertTrue(tapped.effects.contains(PetEffect.Tapped))
         assertEquals(PetAction.IDLE, recovering.state.action)
         assertEquals(PetAction.TALK, talking.action)
-        assertEquals(PetAction.WINK, wink.action)
+        assertEquals(PetAction.EMOTE, emote.action)
         assertTrue(
             recovering.effects.contains(
                 PetEffect.ActionChanged(PetAction.TAPPED, PetAction.IDLE)
@@ -302,7 +302,7 @@ class PetEngineTest {
         assertEquals(PetAction.RUN, started.state.action)
         assertEquals(PetAction.CLIMB_WALL, climbing.state.action)
         assertEquals(PetComboId.WALL_PARKOUR, climbing.state.activeComboId)
-        assertEquals(PetAction.DANGLE, climbing.state.pendingComboBeats.first().action)
+        assertEquals(PetAction.HOLD_WALL, climbing.state.pendingComboBeats.first().action)
     }
 
     @Test
@@ -320,20 +320,24 @@ class PetEngineTest {
         )
         val onWall = engine.reduce(started.state, PetEvent.Tick(200)).state
 
-        val onCeiling = engine.reduce(
+        val holdingCorner = engine.reduce(
             onWall.copy(position = PetVector(80f, 1f)),
             PetEvent.Tick(100)
-        )
+        ).state
+        val onCeiling = advanceUntil(engine, holdingCorner) {
+            it.action == PetAction.CLIMB_CEILING
+        }
 
-        assertEquals(PetAction.CLIMB_CEILING, onCeiling.state.action)
-        assertEquals(PetDirection.LEFT, onCeiling.state.direction)
-        assertEquals(PetComboId.CEILING_EXPEDITION, onCeiling.state.activeComboId)
-        assertEquals(PetAction.DANGLE, onCeiling.state.pendingComboBeats.first().action)
-        assertTrue(onCeiling.state.comboBeatTargetMillis >= 12_000L)
+        assertEquals(PetAction.HOLD_WALL, holdingCorner.action)
+        assertEquals(PetAction.CLIMB_CEILING, onCeiling.action)
+        assertEquals(PetDirection.LEFT, onCeiling.direction)
+        assertEquals(PetComboId.CEILING_EXPEDITION, onCeiling.activeComboId)
+        assertEquals(PetAction.HOLD_CEILING, onCeiling.pendingComboBeats.first().action)
+        assertTrue(onCeiling.comboBeatTargetMillis >= 10_000L)
     }
 
     @Test
-    fun `parkour holds a wall dangle before jumping back into the screen`() {
+    fun `parkour pauses on a wall grip before jumping back into the screen`() {
         val engine = engine(maxTickMillis = 1_000)
         val largeBounds = PetBounds(0f, 0f, 2_000f, 2_000f)
         val initial = engine.initialState(
@@ -348,11 +352,11 @@ class PetEngineTest {
         )
         val climbing = engine.reduce(started.state, PetEvent.Tick(200)).state
 
-        val dangling = advanceUntil(engine, climbing) { it.action == PetAction.DANGLE }
-        val jumped = advanceUntil(engine, dangling) { it.action == PetAction.JUMP }
+        val holding = advanceUntil(engine, climbing) { it.action == PetAction.HOLD_WALL }
+        val jumped = advanceUntil(engine, holding) { it.action == PetAction.JUMP }
 
-        assertEquals(1_980f, dangling.position.x, FLOAT_TOLERANCE)
-        assertTrue(dangling.comboBeatTargetMillis >= 6_000L)
+        assertEquals(1_980f, holding.position.x, FLOAT_TOLERANCE)
+        assertTrue(holding.comboBeatTargetMillis >= 1_500L)
         assertEquals(PetDirection.LEFT, jumped.direction)
         assertEquals(PetComboId.WALL_PARKOUR, jumped.activeComboId)
     }
@@ -420,14 +424,16 @@ class PetEngineTest {
         )
         val climbing = engine.reduce(started.state, PetEvent.Tick(200)).state
 
-        val jumped = engine.reduce(
+        val holding = engine.reduce(
             climbing.copy(position = PetVector(80f, 1f)),
             PetEvent.Tick(100)
-        )
+        ).state
+        val jumped = advanceUntil(engine, holding) { it.action == PetAction.JUMP }
 
-        assertEquals(PetAction.JUMP, jumped.state.action)
-        assertEquals(PetDirection.LEFT, jumped.state.direction)
-        assertEquals(PetComboId.WALL_DIVE, jumped.state.activeComboId)
+        assertEquals(PetAction.HOLD_WALL, holding.action)
+        assertEquals(PetAction.JUMP, jumped.action)
+        assertEquals(PetDirection.LEFT, jumped.direction)
+        assertEquals(PetComboId.WALL_DIVE, jumped.activeComboId)
     }
 
     @Test
@@ -447,7 +453,7 @@ class PetEngineTest {
         )
         val firstClimb = engine.reduce(started.state, PetEvent.Tick(200)).state
         val takeoffPose = advanceUntil(engine, firstClimb) {
-            it.action == PetAction.DANGLE
+            it.action == PetAction.HOLD_WALL
         }
         val takeoff = advanceUntil(engine, takeoffPose) { it.action == PetAction.JUMP }
         val crossing = advanceUntil(engine, takeoff) {
@@ -464,7 +470,7 @@ class PetEngineTest {
         assertEquals(0f, oppositeWall.position.x, FLOAT_TOLERANCE)
         assertEquals(PetDirection.LEFT, oppositeWall.direction)
         assertEquals(PetComboId.WALL_TO_WALL_LEAP, oppositeWall.activeComboId)
-        assertEquals(PetAction.DANGLE, oppositeWall.pendingComboBeats.first().action)
+        assertEquals(PetAction.HOLD_WALL, oppositeWall.pendingComboBeats.first().action)
     }
 
     @Test
@@ -484,7 +490,7 @@ class PetEngineTest {
         )
         val firstClimb = engine.reduce(started.state, PetEvent.Tick(200)).state
         val takeoffPose = advanceUntil(engine, firstClimb) {
-            it.action == PetAction.DANGLE
+            it.action == PetAction.HOLD_WALL
         }
         val takeoff = advanceUntil(engine, takeoffPose) { it.action == PetAction.JUMP }
         val crossing = advanceUntil(engine, takeoff) {
@@ -519,7 +525,7 @@ class PetEngineTest {
         )
         val firstClimb = engine.reduce(started.state, PetEvent.Tick(200)).state
         val takeoffPose = advanceUntil(engine, firstClimb) {
-            it.action == PetAction.DANGLE
+            it.action == PetAction.HOLD_WALL
         }
         val takeoff = advanceUntil(engine, takeoffPose) { it.action == PetAction.JUMP }
         val crossing = advanceUntil(engine, takeoff) {
@@ -539,7 +545,7 @@ class PetEngineTest {
         assertTrue(oppositeWall.position.y < crossing.position.y)
         assertEquals(PetDirection.LEFT, oppositeWall.direction)
         assertEquals(PetComboId.WALL_TO_WALL_RISE, oppositeWall.activeComboId)
-        assertEquals(PetAction.DANGLE, oppositeWall.pendingComboBeats.first().action)
+        assertEquals(PetAction.HOLD_WALL, oppositeWall.pendingComboBeats.first().action)
     }
 
     @Test
@@ -565,7 +571,7 @@ class PetEngineTest {
 
         assertEquals(PetAction.BOUNCE, landed.state.action)
         assertEquals(PetComboId.SKY_DIVER, landed.state.activeComboId)
-        assertEquals(PetAction.IDLE, landed.state.pendingComboBeats.first().action)
+        assertEquals(PetAction.SPRAWL, landed.state.pendingComboBeats.first().action)
     }
 
     @Test
@@ -747,17 +753,17 @@ class PetEngineTest {
             PetEvent.StartCombo(PetComboId.HAPPY_ZOOMIES)
         )
         val stillAnticipating = engine.reduce(started.state, PetEvent.Tick(1_000)).state
-        val wink = advanceUntil(engine, stillAnticipating) { it.action == PetAction.WINK }
-        val run = advanceUntil(engine, wink) { it.action == PetAction.RUN }
+        val emote = advanceUntil(engine, stillAnticipating) { it.action == PetAction.EMOTE }
+        val run = advanceUntil(engine, emote) { it.action == PetAction.RUN }
         var stillRunning = run
         repeat(3) {
             stillRunning = engine.reduce(stillRunning, PetEvent.Tick(1_000)).state
         }
 
         assertEquals(PetComboId.HAPPY_ZOOMIES, started.state.activeComboId)
-        assertEquals(PetAction.IDLE, started.state.action)
-        assertEquals(PetAction.IDLE, stillAnticipating.action)
-        assertEquals(PetAction.WINK, wink.action)
+        assertEquals(PetAction.LOOK_UP, started.state.action)
+        assertEquals(PetAction.LOOK_UP, stillAnticipating.action)
+        assertEquals(PetAction.EMOTE, emote.action)
         assertEquals(PetAction.RUN, run.action)
         assertEquals(PetAction.RUN, stillRunning.action)
         assertEquals(PetComboId.HAPPY_ZOOMIES, stillRunning.activeComboId)
@@ -783,8 +789,8 @@ class PetEngineTest {
             PetEvent.StartCombo(PetComboId.SOCIAL_HELLO, PetDirection.LEFT)
         )
         val waiting = engine.reduce(started.state, PetEvent.Tick(1_000)).state
-        val wink = advanceUntil(engine, waiting) { it.action == PetAction.WINK }
-        val standing = advanceUntil(engine, wink) { it.action == PetAction.IDLE }
+        val emote = advanceUntil(engine, waiting) { it.action == PetAction.EMOTE }
+        val standing = advanceUntil(engine, emote) { it.action == PetAction.IDLE }
         var state = standing
         var completed: PetTransition? = null
         repeat(300) {
@@ -802,7 +808,7 @@ class PetEngineTest {
         assertEquals(PetDirection.LEFT, started.state.direction)
         assertEquals(PetAction.TALK, started.state.action)
         assertEquals(PetAction.TALK, waiting.action)
-        assertEquals(PetAction.WINK, wink.action)
+        assertEquals(PetAction.EMOTE, emote.action)
         assertEquals(PetAction.IDLE, standing.action)
         assertEquals(null, completed?.state?.activeComboId)
         assertTrue(completed != null)
@@ -832,7 +838,7 @@ class PetEngineTest {
     }
 
     @Test
-    fun `special performance plays once then holds its final frame`() {
+    fun `special performance plays once then enters a recovery pose`() {
         val engine = engine(maxTickMillis = 2_500)
         val initial = engine.initialState(
             bounds,
@@ -843,28 +849,40 @@ class PetEngineTest {
         val showcase = engine.reduce(initial, PetEvent.Showcase).state
         val special = advanceUntil(engine, showcase) { it.action == PetAction.SPECIAL }
 
-        val afterOneSpecialClip = engine.reduce(special, PetEvent.Tick(1_800)).state
-        val stillHolding = engine.reduce(
-            afterOneSpecialClip,
-            PetEvent.Tick(elapsedMillis = 1_000)
-        ).state
-        val recovered = advanceUntil(engine, stillHolding) {
-            it.action != PetAction.SPECIAL
-        }
-        val lastFrameIndex = DemoPetAnimation.clips()
-            .getValue(PetAction.SPECIAL)
-            .frames
-            .lastIndex
+        val recovered = engine.reduce(special, PetEvent.Tick(1_600)).state
 
-        assertTrue(special.comboBeatTargetMillis >= 4_500L)
-        assertEquals(PetAction.SPECIAL, afterOneSpecialClip.action)
-        assertEquals(PetComboId.USER_SHOWCASE, afterOneSpecialClip.activeComboId)
-        assertEquals(lastFrameIndex, afterOneSpecialClip.frameIndex)
-        assertTrue(afterOneSpecialClip.isHoldingComboBeatFrame)
-        assertEquals(lastFrameIndex, stillHolding.frameIndex)
-        assertTrue(stillHolding.isHoldingComboBeatFrame)
+        assertEquals(0L, special.comboBeatTargetMillis)
+        assertEquals(PetBeatPlayback.PLAY_ONCE, special.activeComboBeat?.playback)
         assertEquals(PetAction.IDLE, recovered.action)
+        assertEquals(PetComboId.USER_SHOWCASE, recovered.activeComboId)
         assertFalse(recovered.isHoldingComboBeatFrame)
+    }
+
+    @Test
+    fun `play once performance cannot get stuck when an imported skill clip loops`() {
+        val loopingSpecial = DemoPetAnimation.clips().getValue(PetAction.SPECIAL).copy(
+            loops = true,
+            nextAction = null
+        )
+        val engine = PetEngine(
+            PetEngineConfig(
+                clips = DemoPetAnimation.clips() + (PetAction.SPECIAL to loopingSpecial),
+                maxTickMillis = 2_500
+            )
+        )
+        val initial = engine.initialState(
+            bounds,
+            size,
+            position = PetVector(0f, 80f),
+            action = PetAction.WALK
+        )
+        val showcase = engine.reduce(initial, PetEvent.Showcase).state
+        val special = advanceUntil(engine, showcase) { it.action == PetAction.SPECIAL }
+
+        val recovered = engine.reduce(special, PetEvent.Tick(1_600)).state
+
+        assertEquals(PetAction.IDLE, recovered.action)
+        assertEquals(PetComboId.USER_SHOWCASE, recovered.activeComboId)
     }
 
     @Test
@@ -1117,7 +1135,7 @@ class PetEngineTest {
             if (condition(state)) return state
             state = engine.reduce(state, PetEvent.Tick(ADVANCE_STEP_MILLIS)).state
         }
-        error("pet state did not reach the expected combo beat")
+        error("pet state did not reach the expected combo beat: $state")
     }
 
     private companion object {

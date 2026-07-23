@@ -64,6 +64,25 @@ class PetPackEngineMapperTest {
                     PetAction.WINK,
                     listOf("emotion-a.png", "emotion-b.png")
                 ),
+                PetAction.DANGLE to clip(
+                    PetAction.DANGLE,
+                    listOf("floor-a.png", "floor-b.png")
+                ),
+                PetAction.CREEP to clip(
+                    PetAction.CREEP,
+                    listOf("creep-a.png", "sprawl.png"),
+                    loops = true
+                ),
+                PetAction.CLIMB_WALL to clip(
+                    PetAction.CLIMB_WALL,
+                    listOf("wall-a.png", "wall-b.png", "wall-c.png", "wall-grip.png"),
+                    loops = true
+                ),
+                PetAction.CLIMB_CEILING to clip(
+                    PetAction.CLIMB_CEILING,
+                    listOf("ceiling-a.png", "ceiling-b.png", "ceiling-grip.png"),
+                    loops = true
+                ),
                 PetAction.SPECIAL to clip(
                     PetAction.SPECIAL,
                     listOf("s1.png", "s2.png", "s3.png", "s4.png", "s5.png")
@@ -93,13 +112,30 @@ class PetPackEngineMapperTest {
         )
         assertEquals(5, fast.getValue(PetAction.SPECIAL).frames.size)
         assertEquals(
-            listOf(284L, 337L, 373L, 444L, 711L),
+            listOf(373L, 426L, 497L, 604L, 764L),
             fast.getValue(PetAction.SPECIAL).frames.map(PetFrame::durationMillis)
         )
         assertEquals(5, fast.getValue(PetAction.SPECIAL_2).frames.size)
         assertEquals(
-            listOf(284L, 320L, 373L, 462L, 711L),
+            listOf(373L, 426L, 497L, 604L, 764L),
             fast.getValue(PetAction.SPECIAL_2).frames.map(PetFrame::durationMillis)
+        )
+        assertEquals(PetVector.Zero, fast.getValue(PetAction.SPRAWL).frames.single().velocity)
+        assertEquals(PetVector.Zero, fast.getValue(PetAction.HOLD_WALL).frames.single().velocity)
+        assertEquals(
+            PetVector.Zero,
+            fast.getValue(PetAction.HOLD_CEILING).frames.single().velocity
+        )
+        assertTrue(
+            owner.toEngineSupportedActions().containsAll(
+                setOf(
+                    PetAction.EMOTE,
+                    PetAction.FLOOR_PLAY,
+                    PetAction.SPRAWL,
+                    PetAction.HOLD_WALL,
+                    PetAction.HOLD_CEILING
+                )
+            )
         )
     }
 
@@ -107,7 +143,12 @@ class PetPackEngineMapperTest {
     fun `owner shimeji idle renders a standing frame without moving`() {
         val frames = mapOf(
             PetAction.IDLE to listOf("sit", "wink"),
-            PetAction.WALK to listOf("stand", "step")
+            PetAction.WALK to listOf("stand", "step"),
+            PetAction.WINK to listOf("emotion-a", "emotion-b"),
+            PetAction.DANGLE to listOf("floor-a", "floor-b"),
+            PetAction.CREEP to listOf("creep", "sprawl"),
+            PetAction.CLIMB_WALL to listOf("wall-a", "wall-b", "wall-c", "wall-grip"),
+            PetAction.CLIMB_CEILING to listOf("ceiling-a", "ceiling-b", "ceiling-grip")
         )
 
         val owner = frames.normalizedRuntimeVisualFrames("owner.shimeji.4")
@@ -115,7 +156,13 @@ class PetPackEngineMapperTest {
 
         assertEquals(listOf("stand"), owner.getValue(PetAction.IDLE))
         assertEquals(listOf("stand", "step"), owner.getValue(PetAction.WALK))
+        assertEquals(listOf("emotion-a", "emotion-b"), owner.getValue(PetAction.EMOTE))
+        assertEquals(listOf("floor-a", "floor-b"), owner.getValue(PetAction.FLOOR_PLAY))
+        assertEquals(listOf("sprawl"), owner.getValue(PetAction.SPRAWL))
+        assertEquals(listOf("wall-grip"), owner.getValue(PetAction.HOLD_WALL))
+        assertEquals(listOf("ceiling-grip"), owner.getValue(PetAction.HOLD_CEILING))
         assertEquals(listOf("sit", "wink"), external.getValue(PetAction.IDLE))
+        assertFalse(PetAction.EMOTE in external)
     }
 
     @Test

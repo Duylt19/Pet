@@ -45,13 +45,14 @@ UI riêng:
   đã cài. `PetPackEngineMapper` normalize clip này lúc Start thành `TALK` một frame 34,
   zero velocity và `TALK_WALK` bốn frame với velocity 24 px/s; user không cần cài lại pet.
 - Combo `CHATTER` chạy
-  `IDLE 1,5–2,5 s → TALK 9–11 s → WINK → IDLE 3–5 s`.
+  `IDLE 2–4 s → LOOK 2–4 s → TALK 9–11 s → EMOTE → IDLE 3–5 s`.
 - Speech choreography không còn là effect phát ngay khi combo bắt đầu. Mỗi combo được
   phép nói có đúng một speech beat 9–11 giây tại điểm ngắt tự nhiên: sau quan sát, sau
-  landing/recovery hoặc sau màn skill.
-- `CURIOUS_SCOUT` dùng `TALK_WALK` rồi có idle recovery trước khi creep để pet tiếp tục
-  tiến chậm khi nói mà không đổi pose gấp; tap, chatter, social, recovery và các câu sau
-  skill dùng `TALK` đứng yên. `HAPPY_ZOOMIES` là combo vận động im lặng.
+  recovery hoặc sau màn skill có chủ đích.
+- `CURIOUS_SCOUT` dùng `TALK_WALK`, rồi idle và emote để pet tiếp tục tiến chậm khi nói
+  mà không đổi pose gấp; tap, chatter, social, recovery và câu nói trong `MAGIC_TRICK`
+  dùng `TALK` đứng yên. Toàn bộ wall/ceiling/aerial/battle/dance vật lý là combo im lặng,
+  tránh vừa leo hoặc vừa bay vừa bật frame speech.
 - Pack thiếu 34/35/36 không khai báo `TALK`; combo tự loại qua `requiredActions`, không
   dùng ảnh fallback giả làm pose nói. Beat TALK tùy chọn của combo khác cũng được lọc,
   vì vậy pack đó vẫn chạy choreography nhưng không hiện text sai frame.
@@ -70,14 +71,15 @@ xác định vocabulary/tone sau khi frame TALK đã xuất hiện:
 
 | Combo có TALK | Tone | Vị trí nhịp nói |
 |---|---|---|
-| `USER_AFFECTION` | Affection | sau tap và recovery, trước wink |
+| `USER_AFFECTION` | Affection | sau tap và recovery, trước emote |
 | `USER_SHOWCASE` | Celebration | sau cả hai Special và final idle recovery |
-| `CHATTER`, `CURIOUS_SCOUT`, `COZY_BREAK`, `CLUMSY_RECOVERY`, `DAYDREAM` | Chatter | ở điểm nghỉ/ngắm/hồi phục |
+| `CHATTER`, `CURIOUS_SCOUT`, `COZY_BREAK`, `CLUMSY_RECOVERY` | Chatter | ở điểm nghỉ/ngắm/hồi phục |
 | `SOCIAL_HELLO` | Social hello | pet A nói ngay bằng frame TALK |
 | `SOCIAL_HELLO_REPLY` | Social reply | pet B đứng yên chờ 9–11 s rồi mới TALK |
 | `SOCIAL_SHOW_OFF`, `SOCIAL_ADMIRE` | Celebration | sau performance/observation |
-| Wall/ceiling, wall-to-wall, aerial và skill/dance combo | Skill | sau landing/final recovery |
+| `MAGIC_TRICK` | Skill | sau Special và idle recovery |
 | `TINY_PERFORMANCE`, `CHEERFUL_ENCORE` | Celebration | sau hoạt cảnh chính |
+| Wall/ceiling, wall-to-wall, aerial, battle và dance combo khác | — | im lặng |
 
 Pacing:
 
@@ -140,9 +142,9 @@ Mỗi pet đang nói dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn t
 - Tap/showcase/social ground combo bị bỏ qua khi action hoặc tọa độ cho thấy pet không ở
   sàn. Guard cuối trong `changeAction` từ chối `TALK` off-ground, clear combo và trả pet về
   `FALL`/ground fallback.
-- Combo catalog không cho speech đi ngay sau climb/dangle/jump/fall/flung; wall, ceiling và
-  aerial story phải landing/recovery trước. `DAYDREAM` dùng IDLE recovery giữa DANGLE và
-  TALK.
+- Combo catalog không cho speech đi ngay sau climb/jump/fall/flung; wall, ceiling và
+  aerial story luôn im lặng. `DAYDREAM` là story yên tĩnh
+  `SIT → LOOK → SPRAWL → EMOTE → IDLE`, không có TALK.
 
 Catalog có sẵn hiện có 48 câu trong Android resources: tám câu cho mỗi tone, với English
 base và Vietnamese. `Pet messages` trong Settings được persist bằng

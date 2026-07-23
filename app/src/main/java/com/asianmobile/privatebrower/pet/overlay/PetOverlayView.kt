@@ -106,13 +106,18 @@ internal class PetOverlayView(
             PetAction.BOUNCE,
             PetAction.TRIP -> canvas.scale(1.04f, 0.92f, viewWidth / 2f, viewHeight * 0.75f)
             PetAction.CLIMB_WALL,
-            PetAction.CLIMB_DOWN -> canvas.rotate(-4f, viewWidth / 2f, viewHeight / 2f)
-            PetAction.CLIMB_CEILING -> canvas.rotate(180f, viewWidth / 2f, viewHeight / 2f)
+            PetAction.CLIMB_DOWN,
+            PetAction.HOLD_WALL -> canvas.rotate(-4f, viewWidth / 2f, viewHeight / 2f)
+            PetAction.CLIMB_CEILING,
+            PetAction.HOLD_CEILING -> canvas.rotate(180f, viewWidth / 2f, viewHeight / 2f)
             PetAction.SIT -> canvas.translate(0f, viewHeight * 0.04f)
             PetAction.LOOK_UP -> canvas.translate(0f, -viewHeight * 0.02f)
-            PetAction.DANGLE -> canvas.translate(0f, viewHeight * 0.06f)
+            PetAction.DANGLE,
+            PetAction.FLOOR_PLAY,
+            PetAction.SPRAWL -> canvas.translate(0f, viewHeight * 0.06f)
             PetAction.JUMP -> canvas.rotate(-8f, viewWidth / 2f, viewHeight / 2f)
             PetAction.WINK,
+            PetAction.EMOTE,
             PetAction.RUN,
             PetAction.CREEP,
             PetAction.TALK,
@@ -360,7 +365,12 @@ internal class PetOverlayView(
             PetAction.CREEP,
             PetAction.CLIMB_WALL,
             PetAction.CLIMB_DOWN,
-            PetAction.CLIMB_CEILING -> PetAction.WALK
+            PetAction.CLIMB_CEILING,
+            PetAction.HOLD_WALL,
+            PetAction.HOLD_CEILING -> PetAction.WALK
+            PetAction.EMOTE -> PetAction.WINK
+            PetAction.FLOOR_PLAY -> PetAction.DANGLE
+            PetAction.SPRAWL -> PetAction.IDLE
             PetAction.TALK_WALK -> PetAction.TALK
             else -> PetAction.IDLE
         }
