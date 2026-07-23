@@ -31,10 +31,14 @@ class PetCrowdResolverTest {
     }
 
     @Test
-    fun `autonomous movers turn outward after crowd collision`() {
+    fun `autonomous movers including walking talk turn outward after crowd collision`() {
         val resolved = resolver.resolve(
             listOf(
-                grounded(x = 120f, action = PetAction.RUN, direction = PetDirection.RIGHT),
+                grounded(
+                    x = 120f,
+                    action = PetAction.TALK_WALK,
+                    direction = PetDirection.RIGHT
+                ),
                 grounded(x = 180f, action = PetAction.WALK, direction = PetDirection.LEFT)
             )
         )

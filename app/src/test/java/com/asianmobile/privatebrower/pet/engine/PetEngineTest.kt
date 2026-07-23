@@ -58,6 +58,37 @@ class PetEngineTest {
     }
 
     @Test
+    fun `stationary talk holds position while walking talk moves and turns at edge`() {
+        val engine = engine(maxTickMillis = 100)
+        val still = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(40f, 80f),
+            action = PetAction.TALK,
+            direction = PetDirection.RIGHT
+        )
+        val moving = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(70f, 80f),
+            action = PetAction.TALK_WALK,
+            direction = PetDirection.RIGHT
+        )
+
+        val stillAdvanced = engine.reduce(still, PetEvent.Tick(1_000)).state
+        var movingAdvanced = moving
+        repeat(10) {
+            movingAdvanced = engine.reduce(movingAdvanced, PetEvent.Tick(100)).state
+        }
+
+        assertEquals(still.position, stillAdvanced.position)
+        assertEquals(0, stillAdvanced.frameIndex)
+        assertTrue(movingAdvanced.position.x < bounds.right - size.width)
+        assertEquals(PetDirection.LEFT, movingAdvanced.direction)
+        assertEquals(PetAction.TALK_WALK, movingAdvanced.action)
+    }
+
+    @Test
     fun `showcase uses anticipation pauses and sustained special performances`() {
         val engine = engine(maxTickMillis = 1_000)
         val initial = engine.initialState(bounds, size)

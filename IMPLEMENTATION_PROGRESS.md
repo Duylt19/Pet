@@ -26,6 +26,7 @@
 | Pose-gated speech choreography V3.10 | Done | All messages require TALK, combo tone/priority is context-only, silent combos stay silent and carried box is rectangular without a tail |
 | Synchronized TALK lifecycle V3.11 | Done | Bubble and frame share TALK enter/exit transitions; independent reading timer removed so neither can finish before the other |
 | Adaptive speech layout V3.12 | Done | Glyph-aware 80–260dp × 48–112dp box, balanced four-line wrapping, viewport clamp and explicit 80-code-point Settings limit |
+| Stationary/moving speech V3.13 | Done | TALK holds frame 34; TALK_WALK uses 34/35/34/36 at walking speed, legacy packs normalize without reinstall and bubble lifecycle covers both |
 | Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
 | Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |

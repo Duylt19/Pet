@@ -92,6 +92,31 @@ class PetAnimationTimelineTest {
         assertEquals(whole.displacement.y, displacement.y, FLOAT_TOLERANCE)
     }
 
+    @Test
+    fun `stationary talk holds one frame while walking talk animates and moves`() {
+        val clips = DemoPetAnimation.clips()
+        val stillTalk = clips.getValue(PetAction.TALK)
+        val walkingTalk = clips.getValue(PetAction.TALK_WALK)
+        val timeline = PetAnimationTimeline(clips)
+
+        val stillAdvance = timeline.advance(
+            action = PetAction.TALK,
+            cursor = PetAnimationCursor(),
+            elapsedMillis = 1_000
+        )
+        val walkingAdvance = timeline.advance(
+            action = PetAction.TALK_WALK,
+            cursor = PetAnimationCursor(),
+            elapsedMillis = 1_000
+        )
+
+        assertEquals(1, stillTalk.frames.size)
+        assertEquals(4, walkingTalk.frames.size)
+        assertEquals(PetAnimationCursor(frameIndex = 0, elapsedInFrameMillis = 40), stillAdvance.cursor)
+        assertEquals(0f, stillAdvance.displacement.x, FLOAT_TOLERANCE)
+        assertEquals(24f, walkingAdvance.displacement.x, FLOAT_TOLERANCE)
+    }
+
     private companion object {
         const val FLOAT_TOLERANCE = 0.001f
     }

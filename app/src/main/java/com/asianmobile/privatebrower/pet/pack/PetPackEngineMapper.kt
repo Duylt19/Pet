@@ -10,7 +10,7 @@ fun PetPackManifest.toEngineClips(speedMultiplier: Float = 1f): Map<PetAction, P
     val idleFrames = clips.getValue(PetAction.IDLE).frames
     val walkFrames = clips.getValue(PetAction.WALK).frames
     return PetAction.entries.associateWith { action ->
-        val source = clips[action]
+        val source = normalizedSourceClip(action)
         if (source != null) {
             source.toEngineClip(safeMultiplier)
         } else {
@@ -18,6 +18,40 @@ fun PetPackManifest.toEngineClips(speedMultiplier: Float = 1f): Map<PetAction, P
         }
     }
 }
+
+internal fun PetPackManifest.toEngineSupportedActions(): Set<PetAction> = buildSet {
+    addAll(clips.keys)
+    if (PetAction.TALK_WALK !in clips &&
+        clips[PetAction.TALK]?.frames.orEmpty().size > 1
+    ) {
+        add(PetAction.TALK_WALK)
+    }
+}
+
+private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip? =
+    when (action) {
+        PetAction.TALK -> clips[PetAction.TALK]?.let { clip ->
+            clip.copy(frames = clip.frames.take(1))
+        }
+
+        PetAction.TALK_WALK -> clips[PetAction.TALK_WALK]
+            ?: clips[PetAction.TALK]
+                ?.takeIf { clip -> clip.frames.size > 1 }
+                ?.let { legacyTalk ->
+                    legacyTalk.copy(
+                        action = PetAction.TALK_WALK,
+                        frames = legacyTalk.frames.map { frame ->
+                            frame.copy(
+                                velocity = frame.velocity.takeUnless {
+                                    it == PetVector.Zero
+                                } ?: PetVector(x = TALK_WALK_VELOCITY)
+                            )
+                        }
+                    )
+                }
+
+        else -> clips[action]
+    }
 
 private fun fallbackClip(
     action: PetAction,
@@ -32,7 +66,8 @@ private fun fallbackClip(
         PetAction.CLIMB_WALL,
         PetAction.CLIMB_DOWN,
         PetAction.CLIMB_CEILING,
-        PetAction.JUMP -> walkFrames
+        PetAction.JUMP,
+        PetAction.TALK_WALK -> walkFrames
         else -> idleFrames
     }
     val frames = sourceFrames.mapIndexed { index, frame ->
@@ -44,6 +79,7 @@ private fun fallbackClip(
             PetAction.CREEP -> PetVector(x = CREEP_VELOCITY)
             PetAction.RUN -> PetVector(x = RUN_VELOCITY)
             PetAction.JUMP -> PetVector(x = JUMP_HORIZONTAL_VELOCITY, y = JUMP_VERTICAL_VELOCITY)
+            PetAction.TALK_WALK -> PetVector(x = TALK_WALK_VELOCITY)
             else -> frame.velocity
         }
         PetFrame(
@@ -84,6 +120,7 @@ private const val CREEP_VELOCITY = 16f
 private const val RUN_VELOCITY = 82f
 private const val JUMP_HORIZONTAL_VELOCITY = 110f
 private const val JUMP_VERTICAL_VELOCITY = -80f
+private const val TALK_WALK_VELOCITY = 24f
 private val ONE_SHOT_FALLBACK_ACTIONS = setOf(
     PetAction.BOUNCE,
     PetAction.SIT,

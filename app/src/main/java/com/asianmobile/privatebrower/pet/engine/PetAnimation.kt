@@ -19,6 +19,7 @@ enum class PetAction {
     TRIP,
     JUMP,
     TALK,
+    TALK_WALK,
     SPECIAL,
     SPECIAL_2,
     TAPPED,
@@ -241,7 +242,18 @@ object DemoPetAnimation {
         oneShot(PetAction.TRIP, frameCount = 4, frameDurationMillis = 140),
         PetClip(
             action = PetAction.TALK,
-            frames = List(4) { index -> PetFrame(index = index, durationMillis = 240) },
+            frames = listOf(PetFrame(index = 0, durationMillis = 240)),
+            loops = true
+        ),
+        PetClip(
+            action = PetAction.TALK_WALK,
+            frames = List(4) { index ->
+                PetFrame(
+                    index = index,
+                    durationMillis = 240,
+                    velocity = PetVector(x = 24f)
+                )
+            },
             loops = true
         ),
         PetClip(
@@ -289,3 +301,6 @@ object DemoPetAnimation {
         nextAction = PetAction.WALK
     )
 }
+
+internal val PetAction.isSpeechAction: Boolean
+    get() = this == PetAction.TALK || this == PetAction.TALK_WALK

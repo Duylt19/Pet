@@ -193,8 +193,8 @@ tại, còn upward rise không bị `initialFallSpeed` ghi đè.
 Speech không còn được phát từ `ComboStarted`, tap hoặc showcase effect. Catalog chia combo
 thành hai nhóm rõ ràng:
 
-- combo được phép nói có đúng một beat `TALK` 9–11 giây ở điểm nghỉ tự nhiên;
-- combo vận động/social thuần không có TALK và luôn im lặng.
+- combo được phép nói có đúng một speech beat 9–11 giây ở điểm nghỉ tự nhiên;
+- combo vận động/social thuần không có `TALK`/`TALK_WALK` và luôn im lặng.
 
 Tap chạy `TAPPED → IDLE recovery → TALK → WINK`; showcase nói sau final sit. Skill leo,
 bay và wall-to-wall chỉ nói sau khi đã landing/recovery, nên box không che lên frame đang
@@ -206,8 +206,8 @@ Khi solo pet bắt đầu TALK, engine quay pet vào tâm viewport dựa trên v
 cầm; các combo social được miễn policy này để hai pet luôn giữ facing với nhau.
 
 `PetComboSpeechPolicy` chỉ map combo đang active sang tone/priority khi engine đã chuyển
-vào TALK. Unit test khóa hai chiều: mọi combo trong speaking policy phải có đúng một TALK
-beat và mọi combo ngoài policy không được chứa TALK.
+vào speech action. Unit test khóa hai chiều: mọi combo trong speaking policy phải có đúng
+một `TALK` hoặc `TALK_WALK` beat và mọi combo ngoài policy không được chứa speech action.
 
 ## V3.11 — synchronized TALK lifecycle
 
@@ -223,6 +223,23 @@ nhất biến mất trong khi frame 34–36 của pet thứ nhất vẫn còn ch
 Frame loop cũng không còn gọi `speechDirector.advance(elapsedMillis)`. Unit test tích hợp
 chạy engine theo tick 100 ms và khóa một lần Show, 90–110 tick TALK, rồi đúng một lần Hide
 trên transition sang action kế tiếp.
+
+## V3.13 — stationary và moving speech pose
+
+Speech action được tách theo chuyển động thay vì dùng toàn bộ chuỗi bước chân cho mọi câu:
+
+- `TALK` loop đúng một frame 34 và zero displacement, dùng cho tap, chatter, social,
+  recovery và câu nói sau skill;
+- `TALK_WALK` loop `34 → 35 → 34 → 36` ở 24 px/s, dùng có chủ đích trong
+  `CURIOUS_SCOUT` và `HAPPY_ZOOMIES`;
+- raw owner pack revision 4 không bị rewrite. Mapper nhận clip TALK bốn frame cũ, tạo hai
+  runtime clip và expose `TALK_WALK` như supported action nên pet đã cài không cần Set lại;
+- speech director xem cả hai là cùng một lifecycle. Chuyển giữa hai speech pose không
+  flicker box, rời cả hai mới Hide; bubble follow pet bằng shared frame clock khi đi;
+- `TALK_WALK` quay lại ở mép màn hình và tham gia crowd spacing như ground movement.
+
+Unit test khóa frame count, velocity/displacement, legacy normalization, combo mapping và
+Show/Hide xuyên qua transition giữa hai speech action.
 
 ## Social state machine
 

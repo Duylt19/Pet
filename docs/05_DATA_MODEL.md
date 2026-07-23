@@ -59,7 +59,8 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 - Raw ZIP chỉ được normalize khi user bấm `Set`; normalization hiện tạo immutable
   revision `owner.shimeji.<id>@4`, thêm `TALK` từ frame 34–36 khi đủ dữ liệu và persist
   qua `pet_selected_pack_key`. Revision cũ đã cài vẫn đọc được; thao tác `Set` mới chọn
-  revision 4.
+  revision 4. Khi map vào engine, raw TALK bốn frame được tách tương thích thành TALK
+  đứng yên một frame và TALK_WALK bốn frame; manifest app-private không bị mutate.
 - Catalog 1,026 item không dùng Room trong local test: metadata parse một lần vào memory, filter 1,026 record bằng pure policy; binary vẫn nằm ngoài APK/Git.
 
 ## Không có database

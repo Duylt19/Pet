@@ -30,19 +30,20 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Window trong suốt có kích thước 64–196dp theo pack/setting, chỉ bắt touch trong hitbox pet; không dùng full-screen overlay.
 - Khi pet nói, controller tạo tối đa một window non-touchable thích ứng
   80–260dp × 48–112dp. Width lấy từ glyph/dòng thực tế và usable viewport; height tăng
-  tới bốn dòng, sau đó ellipsis. Window bị remove đúng khi action rời TALK, drag/fling,
-  Stop hoặc service destroy. Không có timer speech độc lập với engine.
+  tới bốn dòng, sau đó ellipsis. Window bị remove đúng khi action rời cả `TALK` và
+  `TALK_WALK`, drag/fling, Stop hoặc service destroy. Không có timer speech độc lập với
+  engine.
 - 1–3 instance dùng chung đúng một `Choreographer.FrameCallback` trên main thread; 30 FPS mặc định, 24 FPS cho 3 pet hoặc low-RAM budget.
 - Frame loop chỉ reduce engine + invalidate/update layout; không decode bitmap, parse file hoặc tạo thread.
 - Mọi instance dùng chung visual đã preload; mỗi instance chỉ giữ engine state/view/layout params riêng.
 - Tap/drag/fling đều được chuyển thành `PetEvent`. Hệ tọa độ overlay chỉ fit status bar/display cutout một lần, không trừ navigation bar ở đáy; vì vậy đáy pet chạm đáy màn hình vật lý thay vì dừng phía trên thanh điều hướng.
 - Playground cho phép cửa sổ pet tràn `1/3` chiều rộng qua mép trái/phải và `1/3` chiều rộng qua mép trên, còn mép dưới không tràn. `FLAG_LAYOUT_NO_LIMITS` là bắt buộc để WindowManager không clamp lại cửa sổ nhỏ; hit target vẫn chỉ bằng đúng kích thước pet.
 - Sprite pack dùng quy ước frame gốc quay sang trái. Renderer mirror ngang khi engine đi sang phải và chỉ thêm squash/stretch/lean nhẹ quanh bottom anchor cho motion nhanh, va chạm và Special; pose climb wall/ceiling không bị xoay sai hướng.
-- Speech chỉ tồn tại trong frame TALK 34–36: box chữ nhật góc vuông dùng contract
-  `WalkWithIE`, bám đáy ở `anchorY - 0,5 × petHeight`, nằm trước hướng nhìn và mirror
-  theo direction. Solo TALK quay vào tâm viewport để giữ box đọc được mà không phá anchor;
-  social TALK giữ facing với pet kia. Box không bo góc, không có tail tam giác và không
-  còn overhead fallback.
+- Speech chỉ tồn tại trong `TALK` đứng yên một frame 34 hoặc `TALK_WALK` di chuyển bằng
+  34/35/34/36. Box chữ nhật góc vuông dùng contract `WalkWithIE`, bám đáy ở
+  `anchorY - 0,5 × petHeight`, nằm trước hướng nhìn, mirror theo direction và follow
+  shared tick khi pet đi. Solo speech quay vào tâm viewport; social TALK giữ facing với
+  pet kia. Box không bo góc, không có tail tam giác và không còn overhead fallback.
 - Living Behavior dùng weighted scheduler với khoảng chờ biến thiên, continue/turn-around decisions, recent-action memory và deterministic seed riêng cho từng instance. Vì vậy nhiều pet không chạy đồng bộ nhưng mọi transition vẫn tái lập được trong JVM test.
 - Sau mỗi shared tick, crowd resolver tách các pet cùng mặt sàn với khoảng cách 5% canvas; pet tự chủ quay ra ngoài khi va nhau, social combo giữ facing do director quyết định, còn pet đang bay/leo/drag được phép đi qua mà không bị correction.
 - State graph hỗ trợ `fall → bounce → walk`, run/creep có timeout, leo lên/leo xuống, cùng routine như `sit → wink`, `trip → sit` và `special → special-2 → wink`. Wall timeout chọn jump/descend/fall; pet tới mép trần có thể leo xuống thay vì luôn rơi. Pack v1 cũ chỉ tham gia action thật sự khai báo và vẫn fallback walk/idle an toàn.
@@ -74,6 +75,10 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   (~98,6×48dp) thay vì fixed 770×294 px; chu kỳ speech tồn tại 10.052 ms (~10,05 giây)
   rồi remove ở cuối TALK. Settings hiển thị rõ counter 14/80 code point; sau smoke test
   đã Stop sạch và restore cấu hình ba pet.
+- Pet Speech V3.13 verified với owner pack revision 4 hiện có: moving speech đổi X khoảng
+  40 px/s ở speed 150%, còn tap speech giữ nguyên window qua năm mẫu 400 ms. Hai capture
+  cách nhau một giây trong stationary beat có SHA-256 giống hệt, xác nhận frame 34 không
+  còn bước chân. Session test đã được cleanup và restore ba pet/size 75%.
 
 ## Chưa thuộc runtime hiện tại
 

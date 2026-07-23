@@ -43,6 +43,8 @@ class LegacyShimejiFrameSelectorTest {
             LegacyShimejiFrameContract.special
         )
         assertEquals(listOf(34, 35, 34, 36), LegacyShimejiFrameContract.talk)
+        assertEquals(listOf(34), LegacyShimejiFrameContract.talkStill)
+        assertEquals(listOf(34, 35, 34, 36), LegacyShimejiFrameContract.talkWalk)
     }
 
     @Test

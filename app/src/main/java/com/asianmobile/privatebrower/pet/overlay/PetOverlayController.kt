@@ -26,6 +26,7 @@ import com.asianmobile.privatebrower.pet.engine.PetState
 import com.asianmobile.privatebrower.pet.pack.PetPack
 import com.asianmobile.privatebrower.pet.pack.PetPackVisual
 import com.asianmobile.privatebrower.pet.pack.toEngineClips
+import com.asianmobile.privatebrower.pet.pack.toEngineSupportedActions
 import com.asianmobile.privatebrower.pet.settings.PetSessionLayout
 import com.asianmobile.privatebrower.pet.settings.PetSettingsPolicy
 import com.asianmobile.privatebrower.pet.speech.PetSpeechDirective
@@ -63,7 +64,7 @@ internal class PetOverlayController(
     private val engineConfig = PetEngineConfig(
         clips = pack.manifest.toEngineClips(preferences.speedPercent / 100f),
         tapAction = pack.manifest.interaction.tapAction,
-        supportedActions = pack.manifest.clips.keys
+        supportedActions = pack.manifest.toEngineSupportedActions()
     )
     private val socialDirector = PetSocialDirector(
         sceneOffset = pack.manifest.id.hashCode()

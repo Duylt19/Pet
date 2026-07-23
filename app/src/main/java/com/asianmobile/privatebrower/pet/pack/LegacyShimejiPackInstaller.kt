@@ -405,6 +405,8 @@ internal object LegacyShimejiFrameContract {
     val creep = listOf(20, 20, 21, 21, 21)
     val trip = listOf(19, 18, 20, 20)
     val talk = listOf(34, 35, 34, 36)
+    val talkStill = talk.take(1)
+    val talkWalk = talk
     val ceilingClimb = listOf(25, 25, 23, 24, 24, 24, 23, 25)
     val special = listOf(1, 38, 39, 40, 41)
     val special2 = listOf(42, 43, 44, 45, 46, 45, 44, 43)

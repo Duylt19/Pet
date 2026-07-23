@@ -14,6 +14,7 @@ import com.asianmobile.privatebrower.pet.engine.PetSize
 import com.asianmobile.privatebrower.pet.engine.PetState
 import com.asianmobile.privatebrower.pet.engine.PetTransition
 import com.asianmobile.privatebrower.pet.engine.PetVector
+import com.asianmobile.privatebrower.pet.engine.isSpeechAction
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -96,6 +97,36 @@ class PetSpeechDirectorTest {
         )
 
         assertEquals(listOf(PetSpeechDirective.Hide(2)), directives)
+    }
+
+    @Test
+    fun `moving talk shares one bubble lifecycle with stationary talk`() {
+        val director = PetSpeechDirector(catalog)
+        val walking = state(PetAction.WALK)
+        val movingTalk = walking.copy(
+            action = PetAction.TALK_WALK,
+            activeComboId = PetComboId.CURIOUS_SCOUT
+        )
+        val stationaryTalk = movingTalk.copy(action = PetAction.TALK)
+
+        val shown = director.onTransition(2, walking, PetTransition(movingTalk))
+        val poseChanged = director.onTransition(
+            2,
+            movingTalk,
+            PetTransition(stationaryTalk)
+        )
+        val hidden = director.onTransition(
+            2,
+            stationaryTalk,
+            PetTransition(stationaryTalk.copy(action = PetAction.WINK))
+        )
+
+        assertEquals(
+            PetSpeechTone.CHATTER,
+            (shown.single() as PetSpeechDirective.Show).line.tone
+        )
+        assertTrue(poseChanged.isEmpty())
+        assertEquals(listOf(PetSpeechDirective.Hide(2)), hidden)
     }
 
     @Test
@@ -228,7 +259,12 @@ class PetSpeechDirectorTest {
         expected.forEach { (comboId, tone) ->
             val director = PetSpeechDirector(catalog)
             val idle = state(PetAction.IDLE)
-            val talking = idle.copy(action = PetAction.TALK, activeComboId = comboId)
+            val speechAction = PetComboCatalog.definition(comboId)
+                ?.beats
+                ?.single { it.action.isSpeechAction }
+                ?.action
+                ?: error("$comboId has no speech action")
+            val talking = idle.copy(action = speechAction, activeComboId = comboId)
 
             val directive = director.onTransition(1, idle, PetTransition(talking))
                 .single() as PetSpeechDirective.Show
@@ -254,18 +290,22 @@ class PetSpeechDirectorTest {
     }
 
     @Test
-    fun `catalog talk beats exactly match speaking policy and remain readable`() {
+    fun `catalog speech beats exactly match speaking policy and remain readable`() {
         PetComboId.entries.forEach { comboId ->
-            val talkBeats = PetComboCatalog.definition(comboId)
+            val speechBeats = PetComboCatalog.definition(comboId)
                 ?.beats
                 .orEmpty()
-                .filter { it.action == PetAction.TALK }
+                .filter { it.action.isSpeechAction }
 
             if (comboId in PetComboSpeechPolicy.speakingComboIds) {
-                assertEquals(comboId.name, 1, talkBeats.size)
-                assertEquals(comboId.name, 9_000L..11_000L, talkBeats.single().durationMillis)
+                assertEquals(comboId.name, 1, speechBeats.size)
+                assertEquals(
+                    comboId.name,
+                    9_000L..11_000L,
+                    speechBeats.single().durationMillis
+                )
             } else {
-                assertTrue(comboId.name, talkBeats.isEmpty())
+                assertTrue(comboId.name, speechBeats.isEmpty())
             }
         }
     }

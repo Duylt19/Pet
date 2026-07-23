@@ -18,7 +18,7 @@ class PetComboCatalogTest {
                 PetAction.IDLE,
                 PetAction.WINK,
                 PetAction.RUN,
-                PetAction.TALK,
+                PetAction.TALK_WALK,
                 PetAction.IDLE
             ),
             combo?.actions
@@ -85,6 +85,21 @@ class PetComboCatalogTest {
 
         assertEquals(9_000L..11_000L, talkBeat?.durationMillis)
         assertNull(withoutTalk)
+    }
+
+    @Test
+    fun `speech combos distinguish stationary and walking talk beats`() {
+        val chatterSpeech = PetComboCatalog.definition(PetComboId.CHATTER)
+            ?.beats
+            ?.single { it.action.isSpeechAction }
+        val scoutSpeech = PetComboCatalog.definition(PetComboId.CURIOUS_SCOUT)
+            ?.beats
+            ?.single { it.action.isSpeechAction }
+
+        assertEquals(PetAction.TALK, chatterSpeech?.action)
+        assertEquals(PetAction.TALK_WALK, scoutSpeech?.action)
+        assertEquals(PET_TALK_BEAT_DURATION_MILLIS, chatterSpeech?.durationMillis)
+        assertEquals(PET_TALK_BEAT_DURATION_MILLIS, scoutSpeech?.durationMillis)
     }
 
     @Test

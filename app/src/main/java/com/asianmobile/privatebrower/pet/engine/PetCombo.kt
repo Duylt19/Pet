@@ -138,7 +138,7 @@ object PetComboCatalog {
             sustain(PetAction.WALK, 4_000L..7_000L),
             sustain(PetAction.IDLE, 2_000L..4_000L),
             sustain(PetAction.LOOK_UP, 3_000L..5_000L),
-            speak(),
+            speakWhileWalking(),
             sustain(PetAction.CREEP, 4_000L..7_000L)
         ),
         combo(
@@ -154,7 +154,7 @@ object PetComboCatalog {
             sustain(PetAction.IDLE, 2_000L..3_500L),
             once(PetAction.WINK),
             sustain(PetAction.RUN, 3_500L..6_000L),
-            speak(),
+            speakWhileWalking(),
             sustain(PetAction.IDLE, 3_000L..5_000L)
         ),
         combo(
@@ -610,6 +610,11 @@ object PetComboCatalog {
 
     private fun speak() = sustain(
         action = PetAction.TALK,
+        durationMillis = PET_TALK_BEAT_DURATION_MILLIS
+    )
+
+    private fun speakWhileWalking() = sustain(
+        action = PetAction.TALK_WALK,
         durationMillis = PET_TALK_BEAT_DURATION_MILLIS
     )
 

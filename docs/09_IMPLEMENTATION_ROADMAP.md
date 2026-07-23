@@ -104,6 +104,9 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Add Pet Speech V3.12 adaptive layout: glyph-aware single-line width,
   balanced multi-line sizing, four-line/viewport bounds and an explicit 80-code-point
   custom-message limit.
+- [Done] Split Pet Speech V3.13 poses: stationary TALK holds frame 34, moving
+  TALK_WALK keeps the 34/35/34/36 gait, legacy packs normalize at runtime and both
+  actions share one bubble lifecycle.
 - Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
 - Treat tap popup, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
 - Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs. Local device sync is enabled for validation, while production distribution must use a provenance-preserving server import.

@@ -4,6 +4,7 @@ import com.asianmobile.privatebrower.pet.engine.PetAction
 import com.asianmobile.privatebrower.pet.engine.PetComboId
 import com.asianmobile.privatebrower.pet.engine.PetState
 import com.asianmobile.privatebrower.pet.engine.PetTransition
+import com.asianmobile.privatebrower.pet.engine.isSpeechAction
 import java.util.ArrayDeque
 import kotlin.random.Random
 
@@ -46,7 +47,8 @@ sealed interface PetSpeechDirective {
 
 /**
  * Serializes pose-gated speech across all overlay pets. A message may only start while its owner is
- * rendering [PetAction.TALK], so text can never float over an unrelated movement or skill frame.
+ * rendering a stationary or moving speech action, so text can never float over an unrelated
+ * movement or skill frame.
  */
 class PetSpeechDirector(
     private val catalog: PetSpeechCatalog,
@@ -69,14 +71,14 @@ class PetSpeechDirector(
             directives += cancel(petId)
             return directives
         }
-        if (previousState.action == PetAction.TALK &&
-            transition.state.action != PetAction.TALK
+        if (previousState.action.isSpeechAction &&
+            !transition.state.action.isSpeechAction
         ) {
             directives += cancel(petId)
         }
 
-        if (previousState.action != PetAction.TALK &&
-            transition.state.action == PetAction.TALK
+        if (!previousState.action.isSpeechAction &&
+            transition.state.action.isSpeechAction
         ) {
             PetComboSpeechPolicy.cueFor(transition.state.activeComboId)?.let { cue ->
                 directives += request(petId, cue.tone, cue.priority)
@@ -119,7 +121,7 @@ class PetSpeechDirector(
 
     private fun startNext(): List<PetSpeechDirective> {
         if (active != null) return emptyList()
-        pending.removeIf { queued -> actionByPet[queued.petId] != PetAction.TALK }
+        pending.removeIf { queued -> actionByPet[queued.petId]?.isSpeechAction != true }
         val next = pending
             .maxByOrNull(PendingSpeech::priority)
             ?: return emptyList()

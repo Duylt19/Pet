@@ -12,8 +12,9 @@ File được phân tích:
 - `shime36.png` SHA-256
   `85ce2396a6ddcc2ead0c1593c49fa8f2cc5b89cc649c89164a6933e47712bf4f`.
 
-Quan sát trực tiếp cho thấy 35/36 là pose đưa tay/giữ vật thể, không có glyph hay text
-được raster vào ảnh. `actions.xml` của Shimeji-EE xác nhận:
+Quan sát trực tiếp cho thấy cả ba frame đều là pose đưa tay/giữ vật thể, không có glyph
+hay text được raster vào ảnh. Tuy nhiên chân khác nhau rõ ràng: frame 34 đặt cả hai chân
+trên sàn, còn frame 35/36 là hai pha bước chân. `actions.xml` của Shimeji-EE xác nhận:
 
 - `FallWithIe` dùng riêng frame 36;
 - `WalkWithIe` dùng `34 → 35 → 34 → 36`, velocity ngang `-2`;
@@ -28,21 +29,28 @@ Nguồn đối chiếu chính:
 - https://github.com/gil/shimeji-ee
 
 Android không có desktop-window contract tương đương để một overlay app kéo cửa sổ app
-khác. Project chủ động chuyển sequence này thành pose `TALK/PRESENT`: giữ đúng nhịp
-`34 → 35 → 34 → 36`, còn nội dung chữ là lớp UI riêng. Đây là adaptation theo nền tảng,
-không khẳng định sai rằng PNG gốc chứa text.
+khác. Project chủ động chuyển dữ liệu này thành hai speech pose, còn nội dung chữ là lớp
+UI riêng:
+
+- `TALK`: đứng yên tuyệt đối bằng một frame 34;
+- `TALK_WALK`: nói khi đi chậm bằng nhịp `34 → 35 → 34 → 36`.
+
+Đây là adaptation theo nền tảng, không khẳng định sai rằng PNG gốc chứa text.
 
 ## Runtime contract
 
 ### Action và combo
 
-- Legacy converter revision 4 thêm clip loop `TALK`, 240 ms/frame, chỉ khi đủ frame
-  34/35/36.
+- Legacy manifest revision 4 vẫn giữ raw clip `TALK` 34/35/34/36 để tương thích dữ liệu
+  đã cài. `PetPackEngineMapper` normalize clip này lúc Start thành `TALK` một frame 34,
+  zero velocity và `TALK_WALK` bốn frame với velocity 24 px/s; user không cần cài lại pet.
 - Combo `CHATTER` chạy
   `IDLE 1,5–2,5 s → TALK 9–11 s → WINK → SIT 3–5 s`.
 - Speech choreography không còn là effect phát ngay khi combo bắt đầu. Mỗi combo được
-  phép nói có đúng một beat `TALK` 9–11 giây tại điểm ngắt tự nhiên: sau quan sát, sau
+  phép nói có đúng một speech beat 9–11 giây tại điểm ngắt tự nhiên: sau quan sát, sau
   landing/recovery hoặc sau màn skill.
+- `CURIOUS_SCOUT` và `HAPPY_ZOOMIES` dùng `TALK_WALK` để pet tiếp tục tiến chậm khi nói;
+  tap, chatter, social, recovery và các câu sau skill dùng `TALK` đứng yên.
 - Pack thiếu 34/35/36 không khai báo `TALK`; combo tự loại qua `requiredActions`, không
   dùng ảnh fallback giả làm pose nói. Beat TALK tùy chọn của combo khác cũng được lọc,
   vì vậy pack đó vẫn chạy choreography nhưng không hiện text sai frame.
@@ -54,7 +62,8 @@ không khẳng định sai rằng PNG gốc chứa text.
 `PetSpeechDirector` là Kotlin thuần và nhận `PetTransition`, không phụ thuộc
 `View`, `Context` hoặc `WindowManager`.
 
-Contract duy nhất để mở message là transition thật sự đi vào `PetAction.TALK`.
+Contract duy nhất để mở message là transition thật sự đi vào `PetAction.TALK` hoặc
+`PetAction.TALK_WALK`.
 `Tapped`, `ShowcaseStarted` và `ComboStarted` không còn trực tiếp phát text. Combo ID chỉ
 xác định vocabulary và priority sau khi frame TALK đã xuất hiện:
 
@@ -76,8 +85,8 @@ Pacing:
 - priority chỉ sắp thứ tự queue, không preempt pet đang TALK; vì vậy pet hiện tại luôn
   giữ box đến hết beat trước khi pet kế tiếp nhận lượt;
 - cùng pet/tone không được xếp trùng;
-- box và frame dùng cùng lifecycle: `Show` khi vào TALK, giữ suốt beat 9–11 giây và
-  `Hide` trên đúng transition rời TALK;
+- box và frame dùng cùng lifecycle: `Show` khi vào một speech action, giữ suốt beat
+  9–11 giây và `Hide` trên đúng transition rời cả `TALK`/`TALK_WALK`;
 - speech director không còn reading timer hoặc lệnh `advance(elapsedMillis)` riêng;
 - mọi item trong queue bị loại nếu pet đã rời TALK trước khi tới lượt;
 - director nhớ câu cuối toàn scene và tránh lặp ngay khi còn lựa chọn khác.
@@ -104,13 +113,14 @@ Speech dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn tại khi có c
 - box là hình chữ nhật góc vuông, không bo tròn và không có tail/tam giác phía dưới;
 - box nằm hoàn toàn phía trước pet: cạnh phải chạm anchor khi quay trái, cạnh trái chạm
   anchor khi quay phải; toàn placement được mirror;
-- trước TALK, pet solo ở nửa trái/phải tự quay vào tâm viewport để box có đủ chỗ và cạnh
-  vẫn chạm đúng hand/anchor thay vì bị horizontal clamp đẩy xuyên qua sprite; social TALK
-  giữ nguyên facing giữa hai pet;
-- câu TALK đang active hoặc queued bị hủy trên chính transition rời pose 34–36; không có
-  timeout độc lập nên box không thể tắt trước frame hoặc tồn tại trên action kế tiếp;
+- trước speech, pet solo ở nửa trái/phải tự quay vào tâm viewport để box có đủ chỗ và
+  cạnh vẫn chạm đúng hand/anchor thay vì bị horizontal clamp đẩy xuyên qua sprite;
+  `TALK_WALK` đi theo hướng này và tự quay lại nếu chạm mép; social TALK giữ nguyên facing;
+- câu đang active hoặc queued bị hủy trên chính transition rời cả hai speech action;
+  chuyển nội bộ `TALK ↔ TALK_WALK` không đóng/mở lại box;
 - mọi placement vẫn clamp trong usable viewport;
-- update vị trí bằng cùng shared frame clock, không tạo thread/coroutine/timer riêng;
+- update vị trí bằng cùng shared frame clock nên box follow liên tục khi `TALK_WALK`,
+  không tạo thread/coroutine/timer riêng;
 - text tối đa bốn dòng, căn giữa theo cả hai trục, tương phản cao và có
   `contentDescription`;
 - stop/service destroy remove bubble trước khi remove các pet window.
@@ -140,12 +150,12 @@ sàng, nên thêm `SpeechCatalogRepository` độc lập với pack binary:
 
 ## Verification matrix
 
-- JVM: sanitize/codec custom list, random không lặp ngay, lifecycle engine–speech giữ box
-  xuyên suốt 90–110 tick TALK, adaptive sizing cho short/single-line/explicit newline/
-  long/fallback/narrow viewport, placement trái/phải theo `IeOffset`, hủy active/queued
-  TALK khi pose kết thúc, speaking/silent combo mapping, social reply tuần tự và drag
-  đóng bubble.
-- Pack: contract sequence 34/35/34/36 và immutable owner conversion revision 4.
+- JVM: TALK đứng yên một frame/zero displacement, TALK_WALK bốn frame/24 px/s, legacy
+  runtime normalization, lifecycle engine–speech giữ box xuyên suốt 90–110 tick,
+  adaptive sizing cho short/single-line/explicit newline/long/fallback/narrow viewport,
+  placement trái/phải theo `IeOffset`, hủy active/queued speech khi pose kết thúc,
+  speaking/silent combo mapping, social reply tuần tự và drag đóng bubble.
+- Pack: raw contract sequence 34/35/34/36 và immutable owner conversion revision 4.
 - Android: rectangular TALK box theo pet và hướng mirror, không tail, clamp hai mép,
   1/2/3 pet turn-taking, rotation, screen-off/resume, Settings off và Stop không còn
   window.
@@ -178,3 +188,16 @@ Adaptive layout V3.12 được xác minh tiếp trên cùng thiết bị:
 - tap tạo một chu kỳ speech hiển thị 10.052 ms (~10,05 giây); window biến mất ở cuối
   TALK và pet tiếp tục action kế tiếp không còn giữ frame speech;
 - session test được Stop sạch và cấu hình ban đầu đã được restore về ba pet.
+
+Stationary/moving speech V3.13 được xác minh với chính owner pack revision 4 đã cài,
+không reinstall:
+
+- autonomous `TALK_WALK` giữ bubble trong lúc window pet đổi X từ 1196 sang 1236 px
+  trong khoảng một giây ở speed 150%;
+- tap vào pet tạo speech sau 2.311 ms; năm mẫu liên tiếp cách nhau 400 ms đều giữ nguyên
+  window `(701, 2274)`;
+- hai full-screen capture trong cùng stationary beat, cách nhau một giây, có cùng
+  SHA-256 `ecaaef5ccfc5b55dfe56b87a5f993ff1bfea85b1af69c96b7e29a20fb8462df7`,
+  xác nhận cả vị trí, frame chân và bubble không thay đổi;
+- sau smoke test đã restore ba pet/size 75%, force-stop dọn sạch service và mọi overlay
+  window.

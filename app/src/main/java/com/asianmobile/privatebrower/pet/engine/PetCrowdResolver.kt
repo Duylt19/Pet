@@ -138,7 +138,8 @@ class PetCrowdResolver(
         val GROUND_MOVEMENT_ACTIONS = setOf(
             PetAction.WALK,
             PetAction.RUN,
-            PetAction.CREEP
+            PetAction.CREEP,
+            PetAction.TALK_WALK
         )
         val SOCIAL_COMBO_IDS = setOf(
             PetComboId.SOCIAL_APPROACH,

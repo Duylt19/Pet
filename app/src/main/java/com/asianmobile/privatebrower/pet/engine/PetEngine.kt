@@ -429,8 +429,8 @@ class PetEngine(
         restartAnimation: Boolean = false
     ): PetTransition {
         if (state.action == action && !restartAnimation) return PetTransition(state)
-        val directedState = if (action == PetAction.TALK &&
-            state.action != PetAction.TALK &&
+        val directedState = if (action.isSpeechAction &&
+            !state.action.isSpeechAction &&
             state.activeComboId !in SOCIAL_SPEECH_COMBOS
         ) {
             state.faceViewportCenter()
@@ -1028,7 +1028,12 @@ class PetEngine(
         const val MAX_COLLISION_BEAT_TIMEOUT_MILLIS = 90_000L
         val TAP_LOOP_DURATION = 800L..1_200L
         val TAP_RECOVERY_DURATION = 1_500L..2_500L
-        val GROUND_MOVEMENT_ACTIONS = setOf(PetAction.WALK, PetAction.RUN, PetAction.CREEP)
+        val GROUND_MOVEMENT_ACTIONS = setOf(
+            PetAction.WALK,
+            PetAction.RUN,
+            PetAction.CREEP,
+            PetAction.TALK_WALK
+        )
         val USER_CONTROLLED_ACTIONS = setOf(
             PetAction.DRAGGED,
             PetAction.FLUNG,

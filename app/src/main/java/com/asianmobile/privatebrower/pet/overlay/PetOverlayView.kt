@@ -116,6 +116,7 @@ internal class PetOverlayView(
             PetAction.RUN,
             PetAction.CREEP,
             PetAction.TALK,
+            PetAction.TALK_WALK,
             PetAction.SPECIAL,
             PetAction.SPECIAL_2,
             PetAction.IDLE,
@@ -360,6 +361,7 @@ internal class PetOverlayView(
             PetAction.CLIMB_WALL,
             PetAction.CLIMB_DOWN,
             PetAction.CLIMB_CEILING -> PetAction.WALK
+            PetAction.TALK_WALK -> PetAction.TALK
             else -> PetAction.IDLE
         }
         val clipFrames = visual.frames[state.action]
