@@ -17,6 +17,7 @@ enum class PetComboId {
     CEILING_EXPEDITION,
     WALL_DIVE,
     WALL_TO_WALL_LEAP,
+    WALL_TO_WALL_RISE,
     SKY_DIVER,
     NINJA_SKILL,
     BATTLE_DANCE,
@@ -71,7 +72,8 @@ data class PetComboBeat(
     val directionChange: PetBeatDirectionChange = PetBeatDirectionChange.KEEP,
     val completion: PetBeatCompletion = PetBeatCompletion.CLIP_OR_DURATION,
     val motionMultiplier: Float = 1f,
-    val crossScreenDurationMillis: Long? = null
+    val crossScreenDurationMillis: Long? = null,
+    val crossScreenLaunchVelocityY: Float? = null
 ) {
     init {
         require(durationMillis == null ||
@@ -85,6 +87,15 @@ data class PetComboBeat(
         }
         require(crossScreenDurationMillis == null || completion == PetBeatCompletion.COLLISION) {
             "cross-screen beat must complete on collision"
+        }
+        require(
+            crossScreenLaunchVelocityY == null ||
+                (crossScreenLaunchVelocityY.isFinite() && crossScreenLaunchVelocityY < 0f)
+        ) {
+            "cross-screen launch velocity must be finite and negative"
+        }
+        require(crossScreenLaunchVelocityY == null || crossScreenDurationMillis != null) {
+            "cross-screen launch velocity requires cross-screen travel"
         }
     }
 
@@ -271,36 +282,10 @@ object PetComboCatalog {
             once(PetAction.BOUNCE),
             sustain(PetAction.SPECIAL, 3_500L..6_000L)
         ),
-        spatialCombo(
-            PetComboId.WALL_TO_WALL_LEAP,
-            requiredActions = setOf(
-                PetAction.RUN,
-                PetAction.CLIMB_WALL,
-                PetAction.DANGLE,
-                PetAction.JUMP,
-                PetAction.FALL,
-                PetAction.BOUNCE
-            ),
-            habitat = PetComboHabitat.WALL,
-            untilCollision(PetAction.RUN, motionMultiplier = 1.15f),
-            sustain(PetAction.CLIMB_WALL, 12_000L..18_000L, motionMultiplier = 1.8f),
-            sustain(PetAction.DANGLE, 3_000L..5_000L),
-            once(
-                PetAction.JUMP,
-                directionChange = PetBeatDirectionChange.REVERSE,
-                motionMultiplier = 2.5f
-            ),
-            crossScreenFall(durationMillis = 1_100L),
-            sustain(PetAction.CLIMB_WALL, 5_000L..8_000L, motionMultiplier = 1.8f),
-            sustain(PetAction.DANGLE, 6_000L..10_000L),
-            once(
-                PetAction.JUMP,
-                directionChange = PetBeatDirectionChange.REVERSE,
-                motionMultiplier = 2.2f
-            ),
-            sustain(PetAction.FALL, 12_000L..18_000L),
-            once(PetAction.BOUNCE),
-            sustain(PetAction.SIT, 4_000L..7_000L)
+        wallToWallCombo(PetComboId.WALL_TO_WALL_LEAP),
+        wallToWallCombo(
+            PetComboId.WALL_TO_WALL_RISE,
+            crossScreenLaunchVelocityY = WALL_TO_WALL_RISE_VELOCITY_Y
         ),
         aerialCombo(
             PetComboId.SKY_DIVER,
@@ -511,6 +496,44 @@ object PetComboCatalog {
         habitat = habitat
     )
 
+    private fun wallToWallCombo(
+        id: PetComboId,
+        crossScreenLaunchVelocityY: Float? = null
+    ) = spatialCombo(
+        id = id,
+        requiredActions = setOf(
+            PetAction.RUN,
+            PetAction.CLIMB_WALL,
+            PetAction.DANGLE,
+            PetAction.JUMP,
+            PetAction.FALL,
+            PetAction.BOUNCE
+        ),
+        habitat = PetComboHabitat.WALL,
+        untilCollision(PetAction.RUN, motionMultiplier = 1.15f),
+        sustain(PetAction.CLIMB_WALL, 12_000L..18_000L, motionMultiplier = 1.8f),
+        sustain(PetAction.DANGLE, 3_000L..5_000L),
+        once(
+            PetAction.JUMP,
+            directionChange = PetBeatDirectionChange.REVERSE,
+            motionMultiplier = 2.5f
+        ),
+        crossScreenFall(
+            durationMillis = WALL_TO_WALL_CROSS_DURATION_MILLIS,
+            launchVelocityY = crossScreenLaunchVelocityY
+        ),
+        sustain(PetAction.CLIMB_WALL, 5_000L..8_000L, motionMultiplier = 1.8f),
+        sustain(PetAction.DANGLE, 6_000L..10_000L),
+        once(
+            PetAction.JUMP,
+            directionChange = PetBeatDirectionChange.REVERSE,
+            motionMultiplier = 2.2f
+        ),
+        sustain(PetAction.FALL, 12_000L..18_000L),
+        once(PetAction.BOUNCE),
+        sustain(PetAction.SIT, 4_000L..7_000L)
+    )
+
     private fun requiredCombo(
         id: PetComboId,
         requiredActions: Set<PetAction>,
@@ -561,12 +584,18 @@ object PetComboCatalog {
         motionMultiplier = motionMultiplier
     )
 
-    private fun crossScreenFall(durationMillis: Long) = PetComboBeat(
+    private fun crossScreenFall(
+        durationMillis: Long,
+        launchVelocityY: Float? = null
+    ) = PetComboBeat(
         action = PetAction.FALL,
         completion = PetBeatCompletion.COLLISION,
-        crossScreenDurationMillis = durationMillis
+        crossScreenDurationMillis = durationMillis,
+        crossScreenLaunchVelocityY = launchVelocityY
     )
 
     private const val MIN_COMBO_BEATS = 2
     private const val MIN_DISTINCT_ACTIONS = 2
+    private const val WALL_TO_WALL_CROSS_DURATION_MILLIS = 1_100L
+    private const val WALL_TO_WALL_RISE_VELOCITY_Y = -700f
 }

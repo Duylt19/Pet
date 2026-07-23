@@ -68,7 +68,7 @@ class PetComboCatalogTest {
             PetComboCatalog.definition(rule.comboId)?.habitat?.isClimb == true
         }.sumOf(PetComboRule::weight)
 
-        assertEquals(15, rules.size)
+        assertEquals(16, rules.size)
         assertTrue(rules.none { it.comboId in retiredGroundBasics })
         assertTrue(climbWeight * 4 >= rules.sumOf(PetComboRule::weight))
     }
@@ -91,19 +91,30 @@ class PetComboCatalogTest {
             PetComboHabitat.WALL,
             PetComboCatalog.definition(PetComboId.WALL_TO_WALL_LEAP)?.habitat
         )
+        assertEquals(
+            PetComboHabitat.WALL,
+            PetComboCatalog.definition(PetComboId.WALL_TO_WALL_RISE)?.habitat
+        )
     }
 
     @Test
-    fun `wall to wall leap contains one collision driven screen crossing beat`() {
-        val crossingBeats = PetComboCatalog.definition(PetComboId.WALL_TO_WALL_LEAP)
+    fun `wall to wall variants distinguish falling and rising screen crossing beats`() {
+        val fallingCrossing = PetComboCatalog.definition(PetComboId.WALL_TO_WALL_LEAP)
+            ?.beats
+            .orEmpty()
+            .filter { beat -> beat.crossScreenDurationMillis != null }
+        val risingCrossing = PetComboCatalog.definition(PetComboId.WALL_TO_WALL_RISE)
             ?.beats
             .orEmpty()
             .filter { beat -> beat.crossScreenDurationMillis != null }
 
-        assertEquals(1, crossingBeats.size)
-        assertEquals(PetAction.FALL, crossingBeats.single().action)
-        assertEquals(PetBeatCompletion.COLLISION, crossingBeats.single().completion)
-        assertEquals(1_100L, crossingBeats.single().crossScreenDurationMillis)
+        assertEquals(1, fallingCrossing.size)
+        assertEquals(1, risingCrossing.size)
+        assertEquals(PetAction.FALL, fallingCrossing.single().action)
+        assertEquals(PetBeatCompletion.COLLISION, fallingCrossing.single().completion)
+        assertEquals(1_100L, fallingCrossing.single().crossScreenDurationMillis)
+        assertNull(fallingCrossing.single().crossScreenLaunchVelocityY)
+        assertEquals(-700f, risingCrossing.single().crossScreenLaunchVelocityY)
     }
 
     @Test
@@ -113,7 +124,7 @@ class PetComboCatalogTest {
             PetComboCatalog.supportedDefinition(id, PetAction.entries.toSet())
         }
 
-        assertTrue(resolved.size >= 36)
+        assertTrue(resolved.size >= 37)
         assertTrue(resolved.all { it.actions.size >= 2 })
         assertTrue(
             resolved.flatMap(PetComboDefinition::beats)

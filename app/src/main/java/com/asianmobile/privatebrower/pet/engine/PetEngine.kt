@@ -353,7 +353,11 @@ class PetEngine(
         effects: List<PetEffect>
     ): PetTransition {
         val seconds = elapsedMillis / MILLIS_PER_SECOND
-        val oldSpeed = state.velocity.y.coerceAtLeast(config.initialFallSpeed)
+        val oldSpeed = if (state.activeComboBeat?.crossScreenLaunchVelocityY != null) {
+            state.velocity.y
+        } else {
+            state.velocity.y.coerceAtLeast(config.initialFallSpeed)
+        }
         val newSpeed = (oldSpeed + config.fallGravity * seconds)
             .coerceAtMost(config.terminalFallSpeed)
         val fallDistance = (oldSpeed + newSpeed) * 0.5f * seconds
@@ -468,14 +472,17 @@ class PetEngine(
             PetBeatDirectionChange.KEEP -> state
             PetBeatDirectionChange.REVERSE -> state.copy(direction = state.direction.opposite())
         }
+        val launchedState = beat.crossScreenLaunchVelocityY?.let { velocityY ->
+            directedState.copy(velocity = PetVector(y = velocityY))
+        } ?: directedState
         val duration = beat.durationMillis
         val scheduled = when {
             beat.completion == PetBeatCompletion.COLLISION -> RandomDraw(
-                collisionBeatTimeoutMillis(directedState, beat),
-                directedState
+                collisionBeatTimeoutMillis(launchedState, beat),
+                launchedState
             )
-            duration == null -> RandomDraw(0L, directedState)
-            else -> draw(directedState, duration, COMBO_BEAT_DURATION_SALT)
+            duration == null -> RandomDraw(0L, launchedState)
+            else -> draw(launchedState, duration, COMBO_BEAT_DURATION_SALT)
         }
         return scheduled.state.copy(
             activeComboBeat = beat,
