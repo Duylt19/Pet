@@ -1,8 +1,10 @@
 package com.asianmobile.privatebrower.ui.catalog
 
 import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.asianmobile.privatebrower.data.model.MAX_PET_SLOTS
 import com.asianmobile.privatebrower.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.privatebrower.pet.pack.PetPackInstallResult
 import com.asianmobile.privatebrower.pet.pack.PetPackInstaller
@@ -18,14 +20,18 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class PetCatalogViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val repository: PetPackRepository,
     private val installer: PetPackInstaller,
     private val ownerCatalogRepository: OwnerPetCatalogRepository
 ) : ViewModel() {
+    private val targetSlotIndex = (savedStateHandle.get<Int>("slotIndex") ?: 0)
+        .coerceIn(0, MAX_PET_SLOTS - 1)
     private val _uiState = MutableStateFlow(
         PetCatalogUiState(
             packs = repository.packs.value,
-            selectedKey = repository.selectedPack.value.key,
+            selectedKey = repository.selectedPackForSlot(targetSlotIndex).key,
+            targetSlotIndex = targetSlotIndex,
             localRootPath = ownerCatalogRepository.snapshot.value.localRootPath
         )
     )
@@ -36,13 +42,14 @@ class PetCatalogViewModel @Inject constructor(
             combine(
                 ownerCatalogRepository.snapshot,
                 repository.packs,
-                repository.selectedPack
+                repository.selectedPacks
             ) { catalog, packs, selected -> Triple(catalog, packs, selected) }
                 .collect { (catalog, packs, selected) ->
                     _uiState.update { current ->
                         current.copy(
                             packs = packs,
-                            selectedKey = selected.key,
+                            selectedKey = selected.getOrNull(targetSlotIndex)?.key
+                                ?: selected.firstOrNull()?.key.orEmpty(),
                             pets = catalog.entries,
                             visiblePets = PetCatalogFilter.apply(
                                 catalog.entries,
@@ -65,7 +72,10 @@ class PetCatalogViewModel @Inject constructor(
             _uiState.update { it.copy(isInstalling = true, message = null) }
             when (val result = installer.install(uri)) {
                 is PetPackInstallResult.Installed -> {
-                    repository.refresh(preferredKey = result.pack.key)
+                    repository.refresh(
+                        preferredKey = result.pack.key,
+                        preferredSlotIndex = targetSlotIndex
+                    )
                     _uiState.update {
                         it.copy(
                             isInstalling = false,
@@ -90,7 +100,7 @@ class PetCatalogViewModel @Inject constructor(
     }
 
     fun select(key: String) {
-        if (repository.select(key)) {
+        if (repository.select(key, targetSlotIndex)) {
             val name = repository.find(key)?.manifest?.name ?: return
             _uiState.update { it.copy(message = PetCatalogMessage.Selected(name)) }
         }
@@ -103,7 +113,10 @@ class PetCatalogViewModel @Inject constructor(
             _uiState.update { it.copy(preparingPetId = petId, message = null) }
             when (val result = ownerCatalogRepository.preparePack(petId)) {
                 is PetPackInstallResult.Installed -> {
-                    repository.refresh(preferredKey = result.pack.key)
+                    repository.refresh(
+                        preferredKey = result.pack.key,
+                        preferredSlotIndex = targetSlotIndex
+                    )
                     _uiState.update {
                         it.copy(
                             preparingPetId = null,

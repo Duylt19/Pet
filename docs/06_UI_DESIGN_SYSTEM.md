@@ -2,6 +2,8 @@
 
 Base giữ infrastructure/theme và component pattern. Home/Permission hiện là functional MVP cho pet overlay, chưa phải visual design final từ Figma.
 
+Settings hiện dùng bốn section ổn định: My pets, Appearance & movement, Interaction & speech và App & support. Mỗi active slot là một row độc lập mở Catalog với typed slot index; option session chung không lặp theo từng pet.
+
 ## Resource rules
 
 - User-facing text: `strings.xml`, key `<feature>_<purpose>`.

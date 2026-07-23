@@ -33,6 +33,7 @@ class PetOverlayService : Service() {
     @Inject lateinit var petSettingsRepository: PetSettingsRepository
 
     private var overlayController: PetOverlayController? = null
+    private var sessionPositionResetRevision: Int? = null
     private var isScreenReceiverRegistered = false
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -64,12 +65,21 @@ class PetOverlayService : Service() {
         if (overlayController == null) {
             try {
                 val preferences = petSettingsRepository.preferences.value
-                val pack = petPackRepository.selectedPack.value
-                val visual = petBitmapCache.prepare(pack)
+                sessionPositionResetRevision = preferences.positionResetRevision
+                val packs = List(preferences.petCount) { slotIndex ->
+                    petPackRepository.selectedPackForSlot(slotIndex)
+                }
+                val visuals = packs.distinctBy { it.key }.associate { pack ->
+                    pack.key to petBitmapCache.prepare(pack)
+                }
                 overlayController = PetOverlayController(
                     context = this,
-                    pack = pack,
-                    visual = visual,
+                    assets = packs.map { pack ->
+                        PetOverlayAsset(
+                            pack = pack,
+                            visual = checkNotNull(visuals[pack.key])
+                        )
+                    },
                     preferences = preferences,
                     performanceBudget = petSettingsRepository.performanceBudget
                 ).also { controller ->
@@ -96,8 +106,16 @@ class PetOverlayService : Service() {
 
     override fun onDestroy() {
         unregisterScreenStateReceiver()
-        overlayController?.stop()?.let(petSettingsRepository::updateLastPositions)
+        val resetRevision = sessionPositionResetRevision
+        if (resetRevision != null) {
+            overlayController?.stop()?.let { positions ->
+                petSettingsRepository.updateLastPositions(positions, resetRevision)
+            }
+        } else {
+            overlayController?.stop()
+        }
         overlayController = null
+        sessionPositionResetRevision = null
         PetOverlayRuntime.updateRunning(false)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         super.onDestroy()

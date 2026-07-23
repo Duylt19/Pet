@@ -9,5 +9,11 @@ data class SettingsUiState(
     val soundEnabled: Boolean = false,
     val messagesEnabled: Boolean = true,
     val customMessages: List<String> = emptyList(),
-    val interactionEnabled: Boolean = true
+    val interactionEnabled: Boolean = true,
+    val petSlots: List<SettingsPetSlotUiState> = emptyList()
+)
+
+data class SettingsPetSlotUiState(
+    val slotIndex: Int,
+    val name: String
 )

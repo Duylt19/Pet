@@ -34,6 +34,7 @@
 | Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
 | Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |
+| Different pet per slot + Settings refactor | Done | 1–3 slot selections, per-pack overlay instances, slot-aware Catalog/Detail, grouped Settings and reset-position guard |
 | Đổi namespace/application ID | Deferred | Vẫn là `com.asianmobile.privatebrower` theo yêu cầu owner |
 
 ## Nguyên tắc cập nhật

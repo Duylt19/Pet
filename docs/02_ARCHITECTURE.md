@@ -86,7 +86,7 @@ ui/feature/
 - `PetAnimationTimeline` tiêu thụ frame duration độc lập tick partition, cộng scripted velocity và chuyển non-loop clip sang action kế tiếp.
 - `PetEngine` xử lý tap/drag/fling/bounds, giới hạn delayed tick để tránh catch-up storm và dùng constant deceleration cho fling.
 - Android overlay adapter sở hữu `WindowManager.LayoutParams`, gesture input, render clock và foreground-service lifecycle.
-- `PetOverlayService` là `specialUse` foreground service `exported=false`; `PetOverlayController` sở hữu một window/state machine cho mỗi instance nhưng chỉ một `Choreographer` loop dùng chung.
+- `PetOverlayService` là `specialUse` foreground service `exported=false`; `PetOverlayController` sở hữu một window/state machine/pack visual cho mỗi slot nhưng chỉ một `Choreographer` loop dùng chung.
 - `PetOverlayView` chỉ vẽ/touch; mọi state transition vẫn đi qua `PetEngine`.
 - `PetSpeechDirector` tiêu thụ effect/action transition bằng Kotlin thuần; Android adapter
   render tối đa một transient, non-touchable speech window cho mỗi pet và không tạo clock
@@ -94,7 +94,7 @@ ui/feature/
 - Asset pack được parse/validate thành model nội bộ trước khi engine sử dụng; renderer không đọc JSON/storage mỗi frame.
 - Pack installer chỉ promote version hợp lệ từ random staging directory; repository luôn giữ built-in fallback.
 - Bitmap cache decode asset trước khi render loop bắt đầu và có memory budget 4–24 MiB.
-- Session hỗ trợ 1–3 pet trên thiết bị thường, 1–2 pet trên low-RAM device; 3 pet hạ shared clock xuống 24 FPS. Không thêm Room; selection/behavior/last position dùng DataStore.
+- Session hỗ trợ 1–3 pet khác nhau trên thiết bị thường, 1–2 pet trên low-RAM device; 3 pet hạ shared clock xuống 24 FPS. Không thêm Room; selection theo slot/behavior/last position dùng DataStore.
 
 ## DI
 

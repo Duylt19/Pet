@@ -8,12 +8,14 @@ import com.asianmobile.privatebrower.BuildConfig
 import com.asianmobile.privatebrower.R
 import com.asianmobile.privatebrower.data.repository.PetSettingsRepository
 import com.asianmobile.privatebrower.pet.settings.PetSettingsPolicy
+import com.asianmobile.privatebrower.pet.pack.PetPackRepository
 import com.asianmobile.privatebrower.utils.FeedbackLauncher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -21,7 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val petSettingsRepository: PetSettingsRepository
+    private val petSettingsRepository: PetSettingsRepository,
+    private val petPackRepository: PetPackRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(
         SettingsUiState(
@@ -33,7 +36,12 @@ class SettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            petSettingsRepository.preferences.collect { preferences ->
+            combine(
+                petSettingsRepository.preferences,
+                petPackRepository.selectedPacks
+            ) { preferences, selectedPacks ->
+                preferences to selectedPacks
+            }.collect { (preferences, selectedPacks) ->
                 _uiState.update {
                     it.copy(
                         petCount = preferences.petCount,
@@ -42,7 +50,15 @@ class SettingsViewModel @Inject constructor(
                         soundEnabled = preferences.soundEnabled,
                         messagesEnabled = preferences.messagesEnabled,
                         customMessages = preferences.customMessages,
-                        interactionEnabled = preferences.interactionEnabled
+                        interactionEnabled = preferences.interactionEnabled,
+                        petSlots = List(preferences.petCount) { slotIndex ->
+                            val pack = selectedPacks.getOrNull(slotIndex)
+                                ?: selectedPacks.first()
+                            SettingsPetSlotUiState(
+                                slotIndex = slotIndex,
+                                name = pack.manifest.name
+                            )
+                        }
                     )
                 }
             }
@@ -79,6 +95,8 @@ class SettingsViewModel @Inject constructor(
 
     fun setInteractionEnabled(enabled: Boolean) =
         petSettingsRepository.updateInteractionEnabled(enabled)
+
+    fun resetPetPositions() = petSettingsRepository.resetLastPositions()
 
     fun onFeedbackClicked(context: Context) {
         FeedbackLauncher.launch(context)

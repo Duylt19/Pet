@@ -1,6 +1,7 @@
 package com.asianmobile.privatebrower.pet.settings
 
 import com.asianmobile.privatebrower.data.model.PetPositionFraction
+import com.asianmobile.privatebrower.data.model.MAX_PET_SLOTS
 
 class PetSettingsPolicy {
     fun sanitizePetCount(value: Int, maxPets: Int): Int =
@@ -19,6 +20,11 @@ class PetSettingsPolicy {
             budgetFramesPerSecond
         }
 
+    fun shouldPersistPositions(
+        sessionResetRevision: Int,
+        currentResetRevision: Int
+    ): Boolean = sessionResetRevision == currentResetRevision
+
     private fun nearestStep(value: Int, minimum: Int, maximum: Int, step: Int): Int {
         val clamped = value.coerceIn(minimum, maximum)
         val stepsFromMinimum = ((clamped - minimum) + step / 2) / step
@@ -34,6 +40,24 @@ class PetSettingsPolicy {
         const val MAX_SPEED_PERCENT = 150
         const val SPEED_STEP_PERCENT = 25
         const val THREE_PET_FRAMES_PER_SECOND = 24
+    }
+}
+
+class PetSelectionCodec {
+    fun encode(packKeys: List<String>): String = packKeys
+        .map(String::trim)
+        .filter(String::isNotEmpty)
+        .take(MAX_PET_SLOTS)
+        .joinToString(SEPARATOR)
+
+    fun decode(encoded: String): List<String> = encoded
+        .split(SEPARATOR)
+        .map(String::trim)
+        .filter(String::isNotEmpty)
+        .take(MAX_PET_SLOTS)
+
+    private companion object {
+        const val SEPARATOR = "\n"
     }
 }
 

@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -57,7 +58,7 @@ import com.intuit.ssp.R as SspR
 
 @Composable
 fun HomeScreen(
-    onNavigateToCatalog: () -> Unit,
+    onNavigateToCatalog: (Int) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToPremium: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
@@ -116,7 +117,7 @@ fun HomeScreen(
         uiState = uiState,
         onPetButtonClicked = viewModel::onPetButtonClicked,
         onDismissMessage = viewModel::clearMessage,
-        onNavigateToCatalog = onNavigateToCatalog,
+        onNavigateToCatalog = { onNavigateToCatalog(0) },
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToPremium = onNavigateToPremium
     )
@@ -178,10 +179,17 @@ private fun HomeScreenContent(
             )
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
             Text(
-                text = uiState.selectedPetName,
+                text = if (uiState.selectedPetNames.isEmpty()) {
+                    stringResource(R.string.home_pet_default_name)
+                } else {
+                    uiState.selectedPetNames.joinToString(separator = " • ")
+                },
                 color = colorResource(R.color.white),
                 fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                fontSize = dimensionResource(SspR.dimen._13ssp).value.sp
+                fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._3sdp)))
             Text(

@@ -7,11 +7,13 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.asianmobile.privatebrower.R
+import com.asianmobile.privatebrower.data.repository.PetSettingsRepository
 import com.asianmobile.privatebrower.pet.overlay.PetOverlay
 import com.asianmobile.privatebrower.pet.overlay.PetOverlayRuntime
 import com.asianmobile.privatebrower.pet.overlay.PetOverlayStartResult
+import com.asianmobile.privatebrower.pet.pack.PetPack
 import com.asianmobile.privatebrower.pet.pack.PetPackRepository
-import com.asianmobile.privatebrower.data.repository.PetSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -51,13 +53,25 @@ class HomeViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            petPackRepository.selectedPack.collect { selected ->
-                _uiState.update { it.copy(selectedPetName = selected.manifest.name) }
+            petPackRepository.selectedPacks.collect { selected ->
+                _uiState.update { current ->
+                    current.copy(
+                        selectedPetNames = selectedNames(selected, current.petCount)
+                    )
+                }
             }
         }
         viewModelScope.launch {
             petSettingsRepository.preferences.collect { preferences ->
-                _uiState.update { it.copy(petCount = preferences.petCount) }
+                _uiState.update {
+                    it.copy(
+                        petCount = preferences.petCount,
+                        selectedPetNames = selectedNames(
+                            petPackRepository.selectedPacks.value,
+                            preferences.petCount
+                        )
+                    )
+                }
             }
         }
     }
@@ -145,9 +159,21 @@ class HomeViewModel @Inject constructor(
         notificationGranted = isNotificationGranted(),
         notificationPermissionRequired = notificationPermissionRequired,
         isPetRunning = PetOverlayRuntime.isRunning.value,
-        selectedPetName = petPackRepository.selectedPack.value.manifest.name,
+        selectedPetNames = selectedNames(
+            petPackRepository.selectedPacks.value,
+            petSettingsRepository.preferences.value.petCount
+        ),
         petCount = petSettingsRepository.preferences.value.petCount
     )
+
+    private fun selectedNames(
+        selected: List<PetPack>,
+        count: Int
+    ): List<String> = List(count) { slotIndex ->
+        selected.getOrNull(slotIndex)?.manifest?.name
+            ?: selected.firstOrNull()?.manifest?.name
+            ?: context.getString(R.string.home_pet_default_name)
+    }
 
     private fun isNotificationGranted(): Boolean =
         !notificationPermissionRequired ||

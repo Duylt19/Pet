@@ -121,7 +121,10 @@ private fun PetCatalogContent(
             onImport = onImport
         )
         Text(
-            text = stringResource(R.string.pet_catalog_subtitle),
+            text = stringResource(
+                R.string.pet_catalog_target_slot,
+                uiState.targetSlotIndex + 1
+            ),
             color = colorResource(R.color.colors_9B9C9E),
             fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
             modifier = Modifier.padding(

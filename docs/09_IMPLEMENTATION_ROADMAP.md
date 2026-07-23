@@ -121,7 +121,7 @@ Before release hardening, complete the clean-room parity items confirmed by the 
   Shimeji actions, derive emote/floor-play/sprawl/wall-hold/ceiling-hold poses, play skills
   once with explicit recovery, use energy-aware combo transitions, and keep physical
   wall/aerial stories silent.
-- Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
+- [Done] Add multi-pack session selection before considering swarm mode: 1–3 typed slots can select different packs while the current device performance budget remains authoritative.
 - Treat tap popup, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
 - Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs. Local device sync is enabled for validation, while production distribution must use a provenance-preserving server import.
 

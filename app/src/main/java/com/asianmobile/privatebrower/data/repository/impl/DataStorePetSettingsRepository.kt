@@ -13,11 +13,13 @@ import com.asianmobile.privatebrower.data.model.DEFAULT_PET_COUNT
 import com.asianmobile.privatebrower.data.model.DEFAULT_SELECTED_PACK_KEY
 import com.asianmobile.privatebrower.data.model.DEFAULT_SIZE_PERCENT
 import com.asianmobile.privatebrower.data.model.DEFAULT_SPEED_PERCENT
+import com.asianmobile.privatebrower.data.model.MAX_PET_SLOTS
 import com.asianmobile.privatebrower.data.model.PetPerformanceBudget
 import com.asianmobile.privatebrower.data.model.PetPositionFraction
 import com.asianmobile.privatebrower.data.model.PetPreferences
 import com.asianmobile.privatebrower.data.repository.PetSettingsRepository
 import com.asianmobile.privatebrower.pet.settings.PetPositionCodec
+import com.asianmobile.privatebrower.pet.settings.PetSelectionCodec
 import com.asianmobile.privatebrower.pet.settings.PetSettingsPolicy
 import com.asianmobile.privatebrower.pet.speech.PetMessageListPolicy
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -41,6 +43,7 @@ class DataStorePetSettingsRepository @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val policy = PetSettingsPolicy()
     private val positionCodec = PetPositionCodec()
+    private val selectionCodec = PetSelectionCodec()
     private val messageListPolicy = PetMessageListPolicy()
     private val activityManager = context.getSystemService(ActivityManager::class.java)
 
@@ -61,8 +64,23 @@ class DataStorePetSettingsRepository @Inject constructor(
             initialValue = PetPreferences()
         )
 
-    override fun updateSelectedPack(key: String) = edit { preferences ->
-        preferences[SELECTED_PACK_KEY] = key
+    override fun updateSelectedPack(slotIndex: Int, key: String) {
+        if (slotIndex !in 0 until MAX_PET_SLOTS || key.isBlank()) return
+        edit { preferences ->
+            val current = decodeSelectedPackKeys(preferences).toMutableList()
+            while (current.size <= slotIndex) {
+                current += current.firstOrNull() ?: DEFAULT_SELECTED_PACK_KEY
+            }
+            current[slotIndex] = key
+            writeSelectedPackKeys(preferences, current)
+        }
+    }
+
+    override fun updateSelectedPacks(keys: List<String>) = edit { preferences ->
+        writeSelectedPackKeys(
+            preferences,
+            keys.ifEmpty { listOf(DEFAULT_SELECTED_PACK_KEY) }
+        )
     }
 
     override fun updatePetCount(count: Int) = edit { preferences ->
@@ -93,12 +111,24 @@ class DataStorePetSettingsRepository @Inject constructor(
         preferences[INTERACTION_ENABLED] = enabled
     }
 
-    override fun updateLastPositions(positions: List<PetPositionFraction>) = edit { preferences ->
-        preferences[LAST_POSITIONS] = positionCodec.encode(positions)
+    override fun updateLastPositions(
+        positions: List<PetPositionFraction>,
+        sessionResetRevision: Int
+    ) = edit { preferences ->
+        val currentRevision = preferences[POSITION_RESET_REVISION] ?: 0
+        if (policy.shouldPersistPositions(sessionResetRevision, currentRevision)) {
+            preferences[LAST_POSITIONS] = positionCodec.encode(positions)
+        }
+    }
+
+    override fun resetLastPositions() = edit { preferences ->
+        preferences[LAST_POSITIONS] = ""
+        preferences[POSITION_RESET_REVISION] =
+            (preferences[POSITION_RESET_REVISION] ?: 0) + 1
     }
 
     private fun decode(preferences: Preferences): PetPreferences = PetPreferences(
-        selectedPackKey = preferences[SELECTED_PACK_KEY] ?: DEFAULT_SELECTED_PACK_KEY,
+        selectedPackKeys = decodeSelectedPackKeys(preferences),
         petCount = policy.sanitizePetCount(
             preferences[PET_COUNT] ?: DEFAULT_PET_COUNT,
             performanceBudget.maxPets
@@ -113,8 +143,25 @@ class DataStorePetSettingsRepository @Inject constructor(
         messagesEnabled = preferences[MESSAGES_ENABLED] ?: true,
         customMessages = messageListPolicy.decode(preferences[CUSTOM_MESSAGES].orEmpty()),
         interactionEnabled = preferences[INTERACTION_ENABLED] ?: true,
-        lastPositions = positionCodec.decode(preferences[LAST_POSITIONS].orEmpty())
+        lastPositions = positionCodec.decode(preferences[LAST_POSITIONS].orEmpty()),
+        positionResetRevision = preferences[POSITION_RESET_REVISION] ?: 0
     )
+
+    private fun decodeSelectedPackKeys(preferences: Preferences): List<String> =
+        selectionCodec.decode(preferences[SELECTED_PACK_KEYS].orEmpty())
+            .ifEmpty {
+                listOf(preferences[SELECTED_PACK_KEY] ?: DEFAULT_SELECTED_PACK_KEY)
+            }
+
+    private fun writeSelectedPackKeys(
+        preferences: androidx.datastore.preferences.core.MutablePreferences,
+        keys: List<String>
+    ) {
+        val sanitized = selectionCodec.decode(selectionCodec.encode(keys))
+            .ifEmpty { listOf(DEFAULT_SELECTED_PACK_KEY) }
+        preferences[SELECTED_PACK_KEYS] = selectionCodec.encode(sanitized)
+        preferences[SELECTED_PACK_KEY] = sanitized.first()
+    }
 
     private fun edit(block: suspend (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
         scope.launch { context.dataStore.edit(block) }
@@ -122,6 +169,7 @@ class DataStorePetSettingsRepository @Inject constructor(
 
     private companion object {
         val SELECTED_PACK_KEY = stringPreferencesKey("pet_selected_pack_key")
+        val SELECTED_PACK_KEYS = stringPreferencesKey("pet_selected_pack_keys")
         val PET_COUNT = intPreferencesKey("pet_count")
         val SIZE_PERCENT = intPreferencesKey("pet_size_percent")
         val SPEED_PERCENT = intPreferencesKey("pet_speed_percent")
@@ -130,5 +178,6 @@ class DataStorePetSettingsRepository @Inject constructor(
         val CUSTOM_MESSAGES = stringPreferencesKey("pet_custom_messages")
         val INTERACTION_ENABLED = booleanPreferencesKey("pet_interaction_enabled")
         val LAST_POSITIONS = stringPreferencesKey("pet_last_positions")
+        val POSITION_RESET_REVISION = intPreferencesKey("pet_position_reset_revision")
     }
 }

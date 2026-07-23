@@ -25,8 +25,8 @@ Cute Pet có domain chính thức: một hoặc nhiều pet animation có thể 
 - Language onboarding + language settings.
 - Intro/onboarding pages.
 - Permission UX cho overlay special access và notification permission, có Skip.
-- Home điều khiển Start/Stop demo pet và mở Settings/Premium.
-- Settings tối giản: language, share, rate, feedback và version.
+- Home điều khiển Start/Stop session 1–3 pet khác nhau và mở Catalog/Settings/Premium.
+- Settings quản lý từng slot pet, count/size/speed/position, interaction/speech cùng language/share/rate/feedback/version.
 - Premium/billing, ads, analytics, remote config, theme và reusable components.
 
 ## Những gì đã bị xóa

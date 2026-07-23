@@ -66,7 +66,8 @@ import com.intuit.ssp.R as SspR
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     onBack: () -> Unit = {},
-    onNavigateToLanguage: () -> Unit = {}
+    onNavigateToLanguage: () -> Unit = {},
+    onNavigateToCatalog: (Int) -> Unit = {}
 ) {
     TrackScreenView(ScreenName.SETTINGS)
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -110,7 +111,7 @@ fun SettingsScreen(
                 .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
         ) {
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-            SettingsSection(title = stringResource(R.string.settings_section_screen_pets)) {
+            SettingsSection(title = stringResource(R.string.settings_section_my_pets)) {
                 PetValueSettingsRow(
                     iconRes = R.drawable.ic_notification_pet,
                     title = stringResource(R.string.settings_pet_count_title),
@@ -121,7 +122,24 @@ fun SettingsScreen(
                     onDecrease = viewModel::decreasePetCount,
                     onIncrease = viewModel::increasePetCount
                 )
-                SettingsDivider()
+                state.petSlots.forEach { slot ->
+                    SettingsDivider()
+                    SettingsRow(
+                        iconRes = R.drawable.ic_notification_pet,
+                        title = stringResource(
+                            R.string.settings_pet_slot_title,
+                            slot.slotIndex + 1
+                        ),
+                        subtitle = slot.name,
+                        trailing = SettingsTrailing.TextTrailing(
+                            stringResource(R.string.settings_pet_change)
+                        ),
+                        onClick = { onNavigateToCatalog(slot.slotIndex) }
+                    )
+                }
+            }
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+            SettingsSection(title = stringResource(R.string.settings_section_appearance_motion)) {
                 PetValueSettingsRow(
                     iconRes = R.drawable.ic_pet_size,
                     title = stringResource(R.string.settings_pet_size_title),
@@ -142,6 +160,15 @@ fun SettingsScreen(
                     onIncrease = viewModel::increaseSpeed
                 )
                 SettingsDivider()
+                SettingsRow(
+                    iconRes = R.drawable.ic_refresh,
+                    title = stringResource(R.string.settings_pet_reset_positions_title),
+                    subtitle = stringResource(R.string.settings_pet_reset_positions_subtitle),
+                    onClick = viewModel::resetPetPositions
+                )
+            }
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+            SettingsSection(title = stringResource(R.string.settings_section_interaction_speech)) {
                 SettingsRow(
                     iconRes = R.drawable.ic_media_volume,
                     title = stringResource(R.string.settings_pet_sound_title),
@@ -200,7 +227,7 @@ fun SettingsScreen(
                 )
             }
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-            SettingsSection(title = stringResource(R.string.settings_section_other_short)) {
+            SettingsSection(title = stringResource(R.string.settings_section_app_support)) {
                 LanguageSettingsRow(
                     context = context,
                     onClick = onNavigateToLanguage

@@ -7,6 +7,7 @@ import com.asianmobile.privatebrower.pet.pack.PetPack
 data class PetCatalogUiState(
     val packs: List<PetPack> = emptyList(),
     val selectedKey: String = "",
+    val targetSlotIndex: Int = 0,
     val pets: List<OwnerPetCatalogEntry> = emptyList(),
     val visiblePets: List<OwnerPetCatalogEntry> = emptyList(),
     val categories: List<PetCatalogCategory> = emptyList(),

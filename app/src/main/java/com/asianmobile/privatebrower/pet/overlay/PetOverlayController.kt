@@ -35,10 +35,14 @@ import com.asianmobile.privatebrower.pet.speech.PetSpeechLine
 import com.asianmobile.privatebrower.pet.speech.PetSpeechPlacementPolicy
 import kotlin.math.roundToInt
 
+internal data class PetOverlayAsset(
+    val pack: PetPack,
+    val visual: PetPackVisual
+)
+
 internal class PetOverlayController(
     context: Context,
-    private val pack: PetPack,
-    private val visual: PetPackVisual,
+    assets: List<PetOverlayAsset>,
     private val preferences: PetPreferences,
     performanceBudget: PetPerformanceBudget,
     private val windowManager: WindowManager =
@@ -52,28 +56,28 @@ internal class PetOverlayController(
         preferences.petCount,
         performanceBudget.maxPets
     )
+    private val availableAssets = assets.also {
+        require(it.isNotEmpty()) { "At least one pet asset is required" }
+    }
+    private val selectedAssets = List(petCount) { index ->
+        availableAssets.getOrNull(index) ?: availableAssets.first()
+    }
     private val targetFrameNanos = NANOS_PER_SECOND / settingsPolicy.targetFramesPerSecond(
         petCount,
         performanceBudget.targetFramesPerSecond
     )
-    private val petSizePixels = appContext.dpToPixels(
-        (PET_SIZE_DP * pack.manifest.canvas.defaultScale * preferences.sizePercent / 100f)
-            .roundToInt()
-            .coerceIn(MIN_PET_SIZE_DP, MAX_PET_SIZE_DP)
-    )
-    private val engineConfig = PetEngineConfig(
-        clips = pack.manifest.toEngineClips(preferences.speedPercent / 100f),
-        tapAction = pack.manifest.interaction.tapAction,
-        supportedActions = pack.manifest.toEngineSupportedActions()
-    )
     private val socialDirector = PetSocialDirector(
-        sceneOffset = pack.manifest.id.hashCode()
+        sceneOffset = selectedAssets.fold(1) { hash, asset ->
+            31 * hash + asset.pack.manifest.id.hashCode()
+        }
     )
     private val crowdResolver = PetCrowdResolver()
     private val speechDirector = if (preferences.messagesEnabled) {
         PetSpeechDirector(
             catalog = appContext.petSpeechCatalog(preferences.customMessages),
-            seed = pack.manifest.id.hashCode()
+            seed = selectedAssets.fold(1) { hash, asset ->
+                31 * hash + asset.pack.manifest.id.hashCode()
+            }
         )
     } else {
         null
@@ -110,18 +114,24 @@ internal class PetOverlayController(
         socialDirector.reset()
         speechDirector?.reset()
 
-        val size = PetSize(petSizePixels.toFloat(), petSizePixels.toFloat())
-        val bounds = currentPlaygroundBounds(size)
-        val positions = sessionLayout.resolvePositions(
-            count = petCount,
-            bounds = bounds,
-            size = size,
-            saved = preferences.lastPositions,
-            marginPixels = appContext.dpToPixels(START_MARGIN_DP).toFloat()
-        )
-
         try {
-            positions.forEachIndexed { index, position ->
+            selectedAssets.forEachIndexed { index, asset ->
+                val pack = asset.pack
+                val petSizePixels = petSizePixels(pack)
+                val size = PetSize(petSizePixels.toFloat(), petSizePixels.toFloat())
+                val bounds = currentPlaygroundBounds(size)
+                val position = sessionLayout.resolvePosition(
+                    index = index,
+                    bounds = bounds,
+                    size = size,
+                    saved = preferences.lastPositions,
+                    marginPixels = appContext.dpToPixels(START_MARGIN_DP).toFloat()
+                )
+                val engineConfig = PetEngineConfig(
+                    clips = pack.manifest.toEngineClips(preferences.speedPercent / 100f),
+                    tapAction = pack.manifest.interaction.tapAction,
+                    supportedActions = pack.manifest.toEngineSupportedActions()
+                )
                 val engine = PetEngine(
                     engineConfig.copy(
                         behaviorSeed = pack.manifest.id.hashCode().toLong() xor
@@ -139,7 +149,9 @@ internal class PetOverlayController(
                     }
                 )
                 lateinit var instance: PetInstance
-                val view = PetOverlayView(appContext, visual) { event -> dispatch(instance, event) }
+                val view = PetOverlayView(appContext, asset.visual) { event ->
+                    dispatch(instance, event)
+                }
                     .apply { render(initialState) }
                 val params = createLayoutParams(initialState, index)
                 instance = PetInstance(index, engine, view, params, initialState)
@@ -188,9 +200,8 @@ internal class PetOverlayController(
     }
 
     fun onBoundsChanged() {
-        val size = PetSize(petSizePixels.toFloat(), petSizePixels.toFloat())
-        val bounds = currentPlaygroundBounds(size)
         instances.toList().forEach { instance ->
+            val bounds = currentPlaygroundBounds(instance.state.size)
             render(instance, instance.engine.reduce(instance.state, PetEvent.BoundsChanged(bounds)).state)
         }
         speechWindows.values.toList().forEach(::updateSpeechPosition)
@@ -341,8 +352,8 @@ internal class PetOverlayController(
     }
 
     private fun createLayoutParams(state: PetState, index: Int) = WindowManager.LayoutParams(
-        petSizePixels,
-        petSizePixels,
+        state.size.width.roundToInt(),
+        state.size.height.roundToInt(),
         overlayWindowType(),
         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
@@ -438,6 +449,12 @@ internal class PetOverlayController(
 
     private fun Context.dpToPixels(dp: Int): Int =
         (dp * resources.displayMetrics.density).roundToInt()
+
+    private fun petSizePixels(pack: PetPack): Int = appContext.dpToPixels(
+        (PET_SIZE_DP * pack.manifest.canvas.defaultScale * preferences.sizePercent / 100f)
+            .roundToInt()
+            .coerceIn(MIN_PET_SIZE_DP, MAX_PET_SIZE_DP)
+    )
 
     @Suppress("DiscouragedApi")
     private fun Context.systemBarSize(resourceName: String): Int {

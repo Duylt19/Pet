@@ -11,7 +11,8 @@
 | `is_permission_completed` | Boolean | Hoàn thành/skip permission step |
 | `key_language` | String | Language code |
 | `country_language` | String | Region code |
-| `pet_selected_pack_key` | String | Pack được áp dụng ở lần Start tiếp theo |
+| `pet_selected_pack_keys` | String | Danh sách pack theo slot, tối đa 3 record newline-delimited |
+| `pet_selected_pack_key` | String | Legacy/mirror slot 1 để migrate dữ liệu cũ |
 | `pet_count` | Int | Số instance, clamp theo device budget |
 | `pet_size_percent` | Int | 75–150%, bước 25% |
 | `pet_speed_percent` | Int | 50–150%, bước 25% |
@@ -20,6 +21,7 @@
 | `pet_custom_messages` | String | Danh sách lời thoại tùy chỉnh, mỗi record một dòng |
 | `pet_interaction_enabled` | Boolean | Cho phép tap/drag/fling |
 | `pet_last_positions` | String | Tối đa 3 cặp tọa độ chuẩn hóa 0–1 |
+| `pet_position_reset_revision` | Int | Guard để Reset position không bị session cũ ghi đè khi Stop |
 
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.
 
@@ -46,9 +48,9 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 ## Pet pack model
 
 - `PetPackManifest` là schema v1 versioned gồm identity, canvas, anchor, interaction và action clips/frame metadata.
-- `PetPackRepository.packs/selectedPack` là `StateFlow`; key selection được DataStore restore, built-in Orange Cat luôn là fallback khi key không còn hợp lệ.
+- `PetPackRepository.packs/selectedPacks` là `StateFlow`; selection được resolve theo slot, slot chưa cấu hình fallback về slot 1 và built-in Orange Cat luôn là fallback khi key không còn hợp lệ.
 - Installed source chỉ trỏ tới app-private directory sau khi secure installer validate và atomic promote.
-- Pack đang chạy vẫn là snapshot. Selection/settings mới chỉ áp dụng ở lần Start tiếp theo để không mutate renderer giữa session.
+- Pack đang chạy vẫn là snapshot theo từng slot. Selection/settings mới chỉ áp dụng ở lần Start tiếp theo để không mutate renderer giữa session.
 - Android bitmap/`File` không đi vào pure engine state. Manifest được map sang `PetClip`; renderer giữ `PetPackVisual` đã preload.
 
 ## Owner catalog model
@@ -58,8 +60,8 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 - `OwnerPetCatalogRepository`: boundary dùng chung cho local test source hiện tại và network/cache source tương lai.
 - Raw ZIP chỉ được normalize khi user bấm `Set`; normalization hiện tạo immutable
   revision `owner.shimeji.<id>@4`, thêm `TALK` từ frame 34–36 khi đủ dữ liệu và persist
-  qua `pet_selected_pack_key`. Revision cũ đã cài vẫn đọc được; thao tác `Set` mới chọn
-  revision 4. Khi map vào engine, raw TALK bốn frame được tách tương thích thành TALK
+  qua selection của slot đích trong `pet_selected_pack_keys`. Revision cũ đã cài vẫn đọc
+  được; thao tác `Set` mới chọn revision 4. Khi map vào engine, raw TALK bốn frame được tách tương thích thành TALK
   đứng yên một frame và TALK_WALK bốn frame; manifest app-private không bị mutate.
 - Catalog 1,026 item không dùng Room trong local test: metadata parse một lần vào memory, filter 1,026 record bằng pure policy; binary vẫn nằm ngoài APK/Git.
 

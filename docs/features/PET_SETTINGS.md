@@ -6,7 +6,7 @@
 
 | Setting | Giá trị hợp lệ | Runtime |
 |---|---|---|
-| Pack key | installed hoặc built-in key | fallback Orange Cat khi missing/invalid |
+| Pack keys | tối đa 3 installed/built-in key theo slot | slot chưa cấu hình dùng slot 1; missing/invalid fallback Orange Cat |
 | Count | 1–3; low-RAM 1–2 | một window/state machine mỗi pet |
 | Size | 75/100/125/150% | kết hợp `defaultScale`, clamp 64–196dp |
 | Speed | 50–150%, bước 25% | velocity và locomotion nhận toàn bộ mức speed; physics reaction nhận 50%, expression/skill chỉ nhận 25% ảnh hưởng lên nhịp frame |
@@ -15,6 +15,14 @@
 | Custom messages | 0–30 câu, tối đa 80 code point/câu | mỗi câu một dòng; danh sách rỗng dùng catalog có sẵn |
 | Interaction | on/off | off thêm `FLAG_NOT_TOUCHABLE` |
 | Position | x/y chuẩn hóa 0–1 | lưu khi Stop, restore/clamp theo bounds mới |
+
+Legacy `pet_selected_pack_key` được dùng làm slot 1 khi `pet_selected_pack_keys` chưa tồn
+tại và tiếp tục được mirror để migration tương thích. Giảm count không xóa selection của
+slot ẩn; tăng lại count sẽ restore character đã chọn trước đó.
+
+Reset position xóa toàn bộ tọa độ và tăng `pet_position_reset_revision`. Session chụp
+revision lúc Start; thao tác Stop chỉ persist vị trí khi revision chưa đổi, nên Reset từ
+Settings trong lúc overlay đang chạy không bị session cũ ghi đè.
 
 Editor lời thoại nằm trong Settings, hỗ trợ lưu, hủy và reset về câu có sẵn. Counter
 hiển thị cả số câu và độ dài câu dài nhất; nút Save bị khóa khi vượt 30 câu hoặc 80
@@ -33,7 +41,7 @@ nhưng nét mặt và skill không chớp ở 150%.
 
 - Thiết bị thường: tối đa 3 pet, shared clock 30 FPS cho 1–2 pet và 24 FPS cho 3 pet.
 - Low-RAM device: tối đa 2 pet và shared clock 24 FPS.
-- Bitmap visual/cache dùng chung giữa instance; không decode, parse DataStore hoặc tạo coroutine/thread trong frame loop.
+- Bitmap visual/cache được chia sẻ theo pack key; mỗi slot có engine/visual riêng nhưng không decode, parse DataStore hoặc tạo coroutine/thread trong frame loop.
 - UI không cho vượt budget; repository vẫn sanitize dữ liệu cũ/corrupt trước khi service dùng.
 
 Không có boot receiver hoặc auto-start. Runtime state không persist; sau process death/reboot user phải chủ động Start lại.

@@ -17,7 +17,7 @@ Nếu tài liệu và source khác nhau, source hiện tại là bằng chứng 
 
 - Single-Activity, Compose, MVVM, Hilt, Flow.
 - Splash, Language, Intro, Permission, Home, Settings, Premium.
-- Home có Start/Stop one-pet overlay cùng hai lối Settings/Premium.
+- Home có Start/Stop session 1–3 pet khác nhau cùng các lối Catalog/Settings/Premium.
 - DataStore onboarding/language.
 - Ads module, billing, analytics, remote config và localization.
 - Settings giữ language, share, rating, feedback và version; Permission xử lý overlay special access + notification runtime permission.

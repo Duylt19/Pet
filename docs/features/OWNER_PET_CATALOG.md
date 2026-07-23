@@ -25,7 +25,7 @@ The tool verifies that the device contains the same archive/thumbnail counts as 
 - Search matches pet name, category, or creator without case sensitivity.
 - The category rail contains `All` followed by categories sorted by pet count and name.
 - `Set` is disabled when a corresponding local archive is missing.
-- Selecting an already prepared pet updates DataStore immediately; changes apply to the next overlay Start.
+- Selecting an already prepared pet updates the targeted slot in DataStore immediately; changes apply to the next overlay Start.
 - Tapping an installed catalog card can open its existing pack detail screen.
 
 ## On-demand legacy conversion
@@ -50,4 +50,4 @@ Conversion is staged and atomically promoted. Revision 3 preserves the canonical
 4. pass the cached archive through the same validated converter/installer;
 5. preserve owner provenance and server version metadata.
 
-No Catalog composable, selection state, DataStore key, or overlay runtime contract needs to change.
+Catalog keeps the same repository boundary when moving to a server; slot-targeted selection remains app-local state and does not change the server contract.

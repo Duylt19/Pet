@@ -38,6 +38,10 @@ object Routes {
     const val PET_DETAIL = "pet_detail"
     const val SETTINGS = "settings"
     const val PREMIUM = "premium"
+
+    fun petCatalog(slotIndex: Int): String = "$PET_CATALOG/$slotIndex"
+    fun petDetail(slotIndex: Int, packKey: String): String =
+        "$PET_DETAIL/$slotIndex/${Uri.encode(packKey)}"
 }
 
 @Composable
@@ -166,8 +170,11 @@ fun AppNavGraph(
 
             composable(Routes.HOME) {
                 HomeScreen(
-                    onNavigateToCatalog = {
-                        navController.safeNavigate(Routes.PET_CATALOG, ignoreDebounce = true)
+                    onNavigateToCatalog = { slotIndex ->
+                        navController.safeNavigate(
+                            Routes.petCatalog(slotIndex),
+                            ignoreDebounce = true
+                        )
                     },
                     onNavigateToSettings = {
                         navigateFromHome(Routes.SETTINGS)
@@ -178,12 +185,16 @@ fun AppNavGraph(
                 )
             }
 
-            composable(Routes.PET_CATALOG) {
+            composable(
+                route = "${Routes.PET_CATALOG}/{slotIndex}",
+                arguments = listOf(navArgument("slotIndex") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val slotIndex = backStackEntry.arguments?.getInt("slotIndex") ?: 0
                 PetCatalogScreen(
                     onBack = { navController.safePopBackStack(ignoreDebounce = true) },
                     onOpenPack = { packKey ->
                         navController.safeNavigate(
-                            "${Routes.PET_DETAIL}/${Uri.encode(packKey)}",
+                            Routes.petDetail(slotIndex, packKey),
                             ignoreDebounce = true
                         )
                     }
@@ -191,8 +202,11 @@ fun AppNavGraph(
             }
 
             composable(
-                route = "${Routes.PET_DETAIL}/{packKey}",
-                arguments = listOf(navArgument("packKey") { type = NavType.StringType })
+                route = "${Routes.PET_DETAIL}/{slotIndex}/{packKey}",
+                arguments = listOf(
+                    navArgument("slotIndex") { type = NavType.IntType },
+                    navArgument("packKey") { type = NavType.StringType }
+                )
             ) { backStackEntry ->
                 PetDetailScreen(
                     packKey = backStackEntry.arguments?.getString("packKey").orEmpty(),
@@ -209,6 +223,12 @@ fun AppNavGraph(
                     },
                     onNavigateToLanguage = {
                         navigateFromHome(Routes.LANGUAGE_SETTINGS)
+                    },
+                    onNavigateToCatalog = { slotIndex ->
+                        navController.safeNavigate(
+                            Routes.petCatalog(slotIndex),
+                            ignoreDebounce = true
+                        )
                     }
                 )
             }

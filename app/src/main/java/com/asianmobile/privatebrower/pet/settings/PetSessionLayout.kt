@@ -13,9 +13,18 @@ class PetSessionLayout {
         saved: List<PetPositionFraction>,
         marginPixels: Float
     ): List<PetVector> = List(count.coerceAtLeast(0)) { index ->
+        resolvePosition(index, bounds, size, saved, marginPixels)
+    }
+
+    fun resolvePosition(
+        index: Int,
+        bounds: PetBounds,
+        size: PetSize,
+        saved: List<PetPositionFraction>,
+        marginPixels: Float
+    ): PetVector =
         saved.getOrNull(index)?.let { restore(it, bounds, size) }
             ?: defaultPosition(index, bounds, size, marginPixels)
-    }
 
     fun normalize(position: PetVector, bounds: PetBounds, size: PetSize): PetPositionFraction {
         val availableWidth = (bounds.right - bounds.left - size.width).coerceAtLeast(1f)

@@ -136,7 +136,10 @@ fun PetDetailScreen(
                     if (uiState.selectedKey == pack.key) {
                         stringResource(R.string.pet_catalog_selected)
                     } else {
-                        stringResource(R.string.pet_detail_select)
+                        stringResource(
+                            R.string.pet_detail_select_for_slot,
+                            uiState.targetSlotIndex + 1
+                        )
                     }
                 )
             }

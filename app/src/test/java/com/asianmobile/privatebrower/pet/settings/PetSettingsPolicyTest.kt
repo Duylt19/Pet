@@ -30,6 +30,12 @@ class PetSettingsPolicyTest {
         assertEquals(24, policy.targetFramesPerSecond(3, 30))
         assertEquals(24, policy.targetFramesPerSecond(2, 24))
     }
+
+    @Test
+    fun `running session cannot overwrite positions after reset`() {
+        assertEquals(true, policy.shouldPersistPositions(4, 4))
+        assertEquals(false, policy.shouldPersistPositions(4, 5))
+    }
 }
 
 class PetPositionCodecTest {
@@ -57,6 +63,25 @@ class PetPositionCodecTest {
         assertEquals(
             listOf(PetPositionFraction(0.5f, 0.5f)),
             codec.decode("broken;0.5,0.5;NaN,1")
+        )
+    }
+}
+
+class PetSelectionCodecTest {
+    private val codec = PetSelectionCodec()
+
+    @Test
+    fun `pack selections preserve slot order and duplicates`() {
+        val selections = listOf("pack.cat@1", "pack.dog@2", "pack.cat@1")
+
+        assertEquals(selections, codec.decode(codec.encode(selections)))
+    }
+
+    @Test
+    fun `pack selections drop blanks and cap persisted slots`() {
+        assertEquals(
+            listOf("pack.one@1", "pack.two@1", "pack.three@1"),
+            codec.decode(" pack.one@1 \n\npack.two@1\npack.three@1\npack.four@1")
         )
     }
 }

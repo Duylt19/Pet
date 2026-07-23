@@ -1,6 +1,7 @@
 package com.asianmobile.privatebrower.pet.pack
 
 import android.content.Context
+import com.asianmobile.privatebrower.data.model.MAX_PET_SLOTS
 import com.asianmobile.privatebrower.data.repository.PetSettingsRepository
 import com.asianmobile.privatebrower.pet.engine.PetAction
 import com.asianmobile.privatebrower.pet.engine.PetVector
@@ -20,10 +21,11 @@ import kotlinx.coroutines.launch
 
 interface PetPackRepository {
     val packs: StateFlow<List<PetPack>>
-    val selectedPack: StateFlow<PetPack>
+    val selectedPacks: StateFlow<List<PetPack>>
     fun find(key: String): PetPack?
-    fun select(key: String): Boolean
-    fun refresh(preferredKey: String? = null)
+    fun selectedPackForSlot(slotIndex: Int): PetPack
+    fun select(key: String, slotIndex: Int = 0): Boolean
+    fun refresh(preferredKey: String? = null, preferredSlotIndex: Int = 0)
 }
 
 @Singleton
@@ -37,14 +39,14 @@ class FilePetPackRepository @Inject constructor(
     private val builtIn = builtInPetPack()
     private val _packs = MutableStateFlow(listOf(builtIn))
     override val packs: StateFlow<List<PetPack>> = _packs.asStateFlow()
-    private val _selectedPack = MutableStateFlow(builtIn)
-    override val selectedPack: StateFlow<PetPack> = _selectedPack.asStateFlow()
+    private val _selectedPacks = MutableStateFlow(listOf(builtIn))
+    override val selectedPacks: StateFlow<List<PetPack>> = _selectedPacks.asStateFlow()
 
     init {
         refresh()
         scope.launch {
             settingsRepository.preferences
-                .map { it.selectedPackKey }
+                .map { it.selectedPackKeys }
                 .distinctUntilChanged()
                 .collect(::selectFromPreferences)
         }
@@ -52,15 +54,24 @@ class FilePetPackRepository @Inject constructor(
 
     override fun find(key: String): PetPack? = _packs.value.firstOrNull { it.key == key }
 
-    override fun select(key: String): Boolean {
+    override fun selectedPackForSlot(slotIndex: Int): PetPack =
+        _selectedPacks.value.getOrNull(slotIndex) ?: _selectedPacks.value.firstOrNull() ?: builtIn
+
+    override fun select(key: String, slotIndex: Int): Boolean {
         val pack = find(key) ?: return false
-        _selectedPack.value = pack
-        settingsRepository.updateSelectedPack(pack.key)
+        if (slotIndex !in 0 until MAX_PET_SLOTS) return false
+        val selected = _selectedPacks.value.toMutableList()
+        while (selected.size <= slotIndex) {
+            selected += selected.firstOrNull() ?: builtIn
+        }
+        selected[slotIndex] = pack
+        _selectedPacks.value = selected
+        settingsRepository.updateSelectedPack(slotIndex, pack.key)
         return true
     }
 
     @Synchronized
-    override fun refresh(preferredKey: String?) {
+    override fun refresh(preferredKey: String?, preferredSlotIndex: Int) {
         val installedRoot = File(storageRoot, "installed")
         val installed = installedRoot.listFiles().orEmpty()
             .filter(File::isDirectory)
@@ -69,19 +80,34 @@ class FilePetPackRepository @Inject constructor(
             .sortedWith(compareBy({ it.manifest.name.lowercase() }, { -it.manifest.version }))
         val updated = listOf(builtIn) + installed
         _packs.value = updated
-        val requestedKey = preferredKey
-            ?: settingsRepository.preferences.value.selectedPackKey
-            .takeIf { it != builtIn.key }
-            ?: _selectedPack.value.key
-        val selected = updated.firstOrNull { it.key == requestedKey } ?: builtIn
-        _selectedPack.value = selected
-        if (preferredKey != null || selected.key != requestedKey) {
-            settingsRepository.updateSelectedPack(selected.key)
+        val requestedKeys = settingsRepository.preferences.value.selectedPackKeys
+            .ifEmpty { listOf(builtIn.key) }
+            .toMutableList()
+        if (preferredKey != null && preferredSlotIndex in 0 until MAX_PET_SLOTS) {
+            while (requestedKeys.size <= preferredSlotIndex) {
+                requestedKeys += requestedKeys.firstOrNull() ?: builtIn.key
+            }
+            requestedKeys[preferredSlotIndex] = preferredKey
+        }
+        val selected = requestedKeys.map { requestedKey ->
+            updated.firstOrNull { it.key == requestedKey } ?: builtIn
+        }
+        _selectedPacks.value = selected
+        val resolvedKeys = selected.map(PetPack::key)
+        if (preferredKey != null || resolvedKeys != requestedKeys) {
+            settingsRepository.updateSelectedPacks(resolvedKeys)
         }
     }
 
-    private fun selectFromPreferences(key: String) {
-        find(key)?.let { _selectedPack.value = it }
+    private fun selectFromPreferences(keys: List<String>) {
+        val selected = keys.ifEmpty { listOf(builtIn.key) }.map { key ->
+            find(key) ?: builtIn
+        }
+        _selectedPacks.value = selected
+        val resolvedKeys = selected.map(PetPack::key)
+        if (resolvedKeys != keys) {
+            settingsRepository.updateSelectedPacks(resolvedKeys)
+        }
     }
 
     private fun builtInPetPack(): PetPack {

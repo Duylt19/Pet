@@ -127,8 +127,14 @@
     <string name="settings_set_default_subtitle">Use Private Browser to open links by default</string>
     <string name="settings_section_other_short">Other</string>
     <string name="settings_section_screen_pets">Screen pets</string>
+    <string name="settings_section_my_pets">My pets</string>
+    <string name="settings_section_appearance_motion">Appearance &amp; movement</string>
+    <string name="settings_section_interaction_speech">Interaction &amp; speech</string>
+    <string name="settings_section_app_support">App &amp; support</string>
     <string name="settings_pet_count_title">Number of pets</string>
     <string name="settings_pet_count_subtitle">Up to %1$d on this device</string>
+    <string name="settings_pet_slot_title">Pet %1$d</string>
+    <string name="settings_pet_change">Change</string>
     <string name="settings_pet_size_title">Pet size</string>
     <string name="settings_pet_speed_title">Animation speed</string>
     <string name="settings_pet_sound_title">Pet sounds</string>
@@ -151,6 +157,8 @@
     <string name="settings_pet_message_editor_close">Close message editor</string>
     <string name="settings_pet_interaction_title">Touch interaction</string>
     <string name="settings_pet_interaction_subtitle">Allow tap, drag, and fling gestures</string>
+    <string name="settings_pet_reset_positions_title">Reset pet positions</string>
+    <string name="settings_pet_reset_positions_subtitle">Place pets at their default starting points next time</string>
     <string name="settings_pet_apply_on_restart">Changes apply the next time pets start</string>
     <string name="settings_decrease_value">Decrease %1$s</string>
     <string name="settings_increase_value">Increase %1$s</string>
@@ -378,7 +386,8 @@
 
     <!-- Cute Pet Home -->
     <string name="home_pet_title">Your screen companion</string>
-    <string name="home_pet_subtitle">Start the demo pet, then drag, tap, or fling it while using other apps.</string>
+    <string name="home_pet_default_name">Orange Cat</string>
+    <string name="home_pet_subtitle">Start your configured pets, then drag, tap, or fling them while using other apps.</string>
     <string name="home_pet_status_running">Pet is running</string>
     <string name="home_pet_status_stopped">Pet is resting</string>
     <plurals name="home_pet_configured_count">
@@ -395,6 +404,7 @@
     <string name="home_pet_start_failed">The pet could not start. Check display access and try again.</string>
     <string name="pet_catalog_open">Choose a pet</string>
     <string name="pet_catalog_title">Pet catalog</string>
+    <string name="pet_catalog_target_slot">Choose a character for Pet %1$d. The change applies the next time pets start.</string>
     <string name="pet_catalog_subtitle">Browse the local owner catalog, filter by category, then set a pet for the next start.</string>
     <string name="pet_catalog_import">Import</string>
     <string name="pet_catalog_selected">Selected</string>
@@ -413,6 +423,7 @@
     <string name="pet_detail_builtin">Built-in</string>
     <string name="pet_detail_installed">Installed</string>
     <string name="pet_detail_select">Use this pet</string>
+    <string name="pet_detail_select_for_slot">Use for Pet %1$d</string>
     <string name="pet_catalog_search_hint">Search pets, categories, or creators</string>
     <string name="pet_catalog_clear_search">Clear pet search</string>
     <string name="pet_catalog_all_category">All (%1$d)</string>

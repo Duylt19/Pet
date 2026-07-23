@@ -9,7 +9,8 @@ interface PetSettingsRepository {
     val preferences: StateFlow<PetPreferences>
     val performanceBudget: PetPerformanceBudget
 
-    fun updateSelectedPack(key: String)
+    fun updateSelectedPack(slotIndex: Int, key: String)
+    fun updateSelectedPacks(keys: List<String>)
     fun updatePetCount(count: Int)
     fun updateSizePercent(percent: Int)
     fun updateSpeedPercent(percent: Int)
@@ -17,5 +18,9 @@ interface PetSettingsRepository {
     fun updateMessagesEnabled(enabled: Boolean)
     fun updateCustomMessages(messages: List<String>)
     fun updateInteractionEnabled(enabled: Boolean)
-    fun updateLastPositions(positions: List<PetPositionFraction>)
+    fun updateLastPositions(
+        positions: List<PetPositionFraction>,
+        sessionResetRevision: Int
+    )
+    fun resetLastPositions()
 }
