@@ -508,7 +508,11 @@ object PetComboCatalog {
             PetAction.JUMP,
             PetAction.FALL,
             PetAction.BOUNCE
-        ),
+        ) + if (crossScreenLaunchVelocityY != null) {
+            setOf(PetAction.FLUNG)
+        } else {
+            emptySet()
+        },
         habitat = PetComboHabitat.WALL,
         untilCollision(PetAction.RUN, motionMultiplier = 1.15f),
         sustain(PetAction.CLIMB_WALL, 12_000L..18_000L, motionMultiplier = 1.8f),
@@ -518,7 +522,7 @@ object PetComboCatalog {
             directionChange = PetBeatDirectionChange.REVERSE,
             motionMultiplier = 2.5f
         ),
-        crossScreenFall(
+        crossScreenFlight(
             durationMillis = WALL_TO_WALL_CROSS_DURATION_MILLIS,
             launchVelocityY = crossScreenLaunchVelocityY
         ),
@@ -584,11 +588,11 @@ object PetComboCatalog {
         motionMultiplier = motionMultiplier
     )
 
-    private fun crossScreenFall(
+    private fun crossScreenFlight(
         durationMillis: Long,
         launchVelocityY: Float? = null
     ) = PetComboBeat(
-        action = PetAction.FALL,
+        action = if (launchVelocityY == null) PetAction.FALL else PetAction.FLUNG,
         completion = PetBeatCompletion.COLLISION,
         crossScreenDurationMillis = durationMillis,
         crossScreenLaunchVelocityY = launchVelocityY

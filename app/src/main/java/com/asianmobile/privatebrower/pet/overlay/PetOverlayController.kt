@@ -13,6 +13,7 @@ import com.asianmobile.privatebrower.data.model.PetPositionFraction
 import com.asianmobile.privatebrower.data.model.PetPreferences
 import com.asianmobile.privatebrower.pet.engine.PetAction
 import com.asianmobile.privatebrower.pet.engine.PetBounds
+import com.asianmobile.privatebrower.pet.engine.PetCrowdResolver
 import com.asianmobile.privatebrower.pet.engine.PetEngine
 import com.asianmobile.privatebrower.pet.engine.PetEngineConfig
 import com.asianmobile.privatebrower.pet.engine.PetEvent
@@ -62,6 +63,7 @@ internal class PetOverlayController(
     private val socialDirector = PetSocialDirector(
         sceneOffset = pack.manifest.id.hashCode()
     )
+    private val crowdResolver = PetCrowdResolver()
     private val instances = mutableListOf<PetInstance>()
     private var isRendering = false
     private var lastTickNanos = 0L
@@ -82,6 +84,7 @@ internal class PetOverlayController(
                 ).forEach(::dispatchSocialDirective)
                 val event = PetEvent.Tick(elapsedMillis)
                 instances.toList().forEach { dispatch(it, event) }
+                resolveCrowdSpacing()
             }
             choreographer.postFrameCallback(this)
         }
@@ -190,6 +193,15 @@ internal class PetOverlayController(
             )
         }
         dispatch(instance, event)
+    }
+
+    private fun resolveCrowdSpacing() {
+        val resolvedStates = crowdResolver.resolve(instances.map(PetInstance::state))
+        instances.zip(resolvedStates).forEach { (instance, resolvedState) ->
+            if (instance.state != resolvedState) {
+                render(instance, resolvedState)
+            }
+        }
     }
 
     private fun render(instance: PetInstance, updatedState: PetState) {

@@ -157,7 +157,10 @@ va chạm ngoài choreography vẫn dùng fallback physics hiện tại.
    đường thẳng;
 3. trong 1,1 giây băng ngang, pet đạt đỉnh cao hơn khoảng 272 px và bắt tường đối diện
    cao hơn điểm rời tường khoảng 225 px nếu không chạm trần;
-4. `WALL_TO_WALL_LEAP` cũ vẫn không có launch velocity nên tiếp tục là biến thể lao xuống.
+4. beat đi lên render action `FLUNG`, dùng đúng pose bay khi user ném pet; chuyển động vẫn
+   do metadata cross-screen điều khiển nên velocity trong clip không làm lệch điểm bắt tường;
+5. `WALL_TO_WALL_LEAP` cũ vẫn dùng `FALL` và không có launch velocity nên tiếp tục là
+   biến thể lao xuống.
 
 `crossScreenLaunchVelocityY` chỉ hợp lệ khi âm, hữu hạn và đi cùng một collision-driven
 `crossScreenDurationMillis`. Nhờ vậy các combo khác dùng `FALL` vẫn giữ physics rơi hiện
@@ -190,13 +193,19 @@ tại, còn upward rise không bị `initialFallSpeed` ghi đè.
 Phiên tương tác có hai pha:
 
 1. `APPROACHING`: chọn cặp pet ở sàn gần nhau nhất, hai pet chạy về phía tâm của nhau và
-   cập nhật facing mỗi frame. Khi đạt khoảng cách 1,35 pet-width thì chuyển pha.
+   chỉ cập nhật facing khi hướng mục tiêu thực sự đổi. Khi đạt khoảng cách 1,35 pet-width
+   thì chuyển pha; nếu cặp đã đủ gần, bỏ qua approach để không chạy xuyên nhau một frame.
 2. `PERFORMING`: phát combo theo hai vai của scene, giữ facing phù hợp (đối mặt hoặc cùng
-   hướng khi đuổi bắt), chờ cả hai combo hoàn tất rồi cooldown 20 giây trước scene tiếp theo.
+   hướng khi đuổi bắt). Facing có dead-zone 0,2 pet-width và không được phát lặp mỗi frame.
+   Khi một vai kết thúc, director giải phóng cả cặp khỏi social ownership ngay; combo của
+   vai còn lại vẫn tự hoàn tất nhưng không còn ép pet đã rảnh quay qua lại.
 
 Các guardrail gồm: chỉ ghép pet đang rảnh trên cùng mặt sàn, không chiếm pet đang drag,
 fling, fall, jump hoặc climb; approach/performance đều có timeout; mất một instance sẽ hủy
-session an toàn. Với một pet, director không phát directive social.
+session an toàn. `PetCrowdResolver` chạy sau tick chung, giữ khoảng cách sàn tối thiểu bằng
+1,05 pet-width, quay các pet tự chủ ra ngoài khi va nhau nhưng không phá facing của social
+combo; pet đang bay/leo/drag không bị correction. Với một pet, director không phát directive
+social.
 
 ## Verification
 
@@ -209,8 +218,10 @@ session an toàn. Với một pet, director không phát directive social.
 - JVM test chạy toàn bộ wall-to-wall traversal theo cả hai hướng, xác nhận thời gian
   screen-relative, cạnh đích, facing, opposite-wall catch và combo lifecycle không bị hủy.
 - JVM test xác nhận upward variant giữ vận tốc Y âm sau takeoff, giảm tọa độ Y trong lúc
-  bay và bắt tường đối diện ở vị trí cao hơn.
+  bay bằng action `FLUNG` và bắt tường đối diện ở vị trí cao hơn.
 - JVM test kiểm tra approach direction, greeting/duet roles, closest-pair selection, bỏ qua
-  pet đang climb và no-op khi chỉ có một pet.
+  pet đang climb, facing dead-zone, early role release và no-op khi chỉ có một pet.
+- JVM test khóa personal-space cho ba pet ở sàn, autonomous collision turn-away, giữ social
+  facing và không can thiệp pet đang bay.
 - Device smoke test cần chạy với 2–3 pet để quan sát đủ approach và ít nhất hai scene liên
   tiếp; overlay vẫn phải có đúng một foreground service và một shared render clock.

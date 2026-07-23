@@ -5,6 +5,7 @@ import com.asianmobile.privatebrower.pet.engine.PetBounds
 import com.asianmobile.privatebrower.pet.engine.PetSize
 import com.asianmobile.privatebrower.pet.engine.PetVector
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PetSessionLayoutTest {
@@ -40,6 +41,9 @@ class PetSessionLayoutTest {
         )
 
         assertEquals(3, positions.distinct().size)
+        positions.sortedBy(PetVector::x).zipWithNext().forEach { (left, right) ->
+            assertTrue(right.x >= left.x + size.width)
+        }
         positions.forEach { position ->
             assertEquals(position, bounds.clampTopLeft(position, size))
         }

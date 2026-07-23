@@ -437,7 +437,7 @@ class PetEngineTest {
         }
         val takeoff = advanceUntil(engine, takeoffPose) { it.action == PetAction.JUMP }
         val crossing = advanceUntil(engine, takeoff) {
-            it.action == PetAction.FALL &&
+            it.action == PetAction.FLUNG &&
                 it.activeComboBeat?.crossScreenLaunchVelocityY != null
         }
         val rising = engine.reduce(crossing, PetEvent.Tick(100)).state
@@ -446,6 +446,7 @@ class PetEngineTest {
         }
 
         assertEquals(PetDirection.LEFT, crossing.direction)
+        assertEquals(PetAction.FLUNG, crossing.action)
         assertTrue(rising.velocity.y < 0f)
         assertTrue(rising.position.y < crossing.position.y)
         assertEquals(0f, oppositeWall.position.x, FLOAT_TOLERANCE)

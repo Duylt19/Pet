@@ -58,7 +58,7 @@ class PetSessionLayout {
     }
 
     private companion object {
-        const val HORIZONTAL_SPACING_FACTOR = 0.72f
+        const val HORIZONTAL_SPACING_FACTOR = 1.05f
         const val VERTICAL_SPACING_FACTOR = 0.45f
     }
 }

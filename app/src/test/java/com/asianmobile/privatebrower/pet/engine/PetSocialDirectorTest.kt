@@ -43,7 +43,6 @@ class PetSocialDirectorTest {
             snapshot(4, x = 20f),
             snapshot(7, x = 42f)
         )
-        director.update(pets, elapsedMillis = 1)
 
         val performance = director.update(pets, elapsedMillis = 1)
 
@@ -72,7 +71,6 @@ class PetSocialDirectorTest {
             snapshot(4, x = 20f),
             snapshot(7, x = 42f)
         )
-        director.update(pets, elapsedMillis = 1)
 
         val performance = director.update(pets, elapsedMillis = 1)
 
@@ -117,6 +115,98 @@ class PetSocialDirectorTest {
         assertTrue(directives.isEmpty())
     }
 
+    @Test
+    fun `stable social roles are not forced to face again every frame`() {
+        val director = director()
+        val available = listOf(
+            snapshot(0, x = 20f),
+            snapshot(1, x = 42f)
+        )
+        director.update(available, elapsedMillis = 1)
+        val performing = listOf(
+            snapshot(
+                id = 0,
+                x = 20f,
+                action = PetAction.IDLE,
+                direction = PetDirection.RIGHT,
+                activeComboId = PetComboId.SOCIAL_HELLO
+            ),
+            snapshot(
+                id = 1,
+                x = 42f,
+                action = PetAction.LOOK_UP,
+                direction = PetDirection.LEFT,
+                activeComboId = PetComboId.SOCIAL_HELLO_REPLY
+            )
+        )
+
+        val directives = director.update(performing, elapsedMillis = 100)
+
+        assertTrue(directives.isEmpty())
+    }
+
+    @Test
+    fun `overlapping social pets keep their facing inside the dead zone`() {
+        val director = director()
+        val available = listOf(
+            snapshot(0, x = 40f),
+            snapshot(1, x = 40f)
+        )
+        director.update(available, elapsedMillis = 1)
+        val performing = listOf(
+            snapshot(
+                id = 0,
+                x = 40f,
+                action = PetAction.IDLE,
+                direction = PetDirection.LEFT,
+                activeComboId = PetComboId.SOCIAL_HELLO
+            ),
+            snapshot(
+                id = 1,
+                x = 40f,
+                action = PetAction.LOOK_UP,
+                direction = PetDirection.RIGHT,
+                activeComboId = PetComboId.SOCIAL_HELLO_REPLY
+            )
+        )
+
+        val directives = director.update(performing, elapsedMillis = 100)
+
+        assertTrue(directives.isEmpty())
+    }
+
+    @Test
+    fun `social session releases both pets when either role finishes`() {
+        val director = director()
+        val available = listOf(
+            snapshot(0, x = 20f),
+            snapshot(1, x = 42f)
+        )
+        director.update(available, elapsedMillis = 1)
+        val oneRoleFinished = listOf(
+            snapshot(
+                id = 0,
+                x = 20f,
+                action = PetAction.RUN,
+                direction = PetDirection.RIGHT,
+                activeComboId = PetComboId.CURIOUS_SCOUT
+            ),
+            snapshot(
+                id = 1,
+                x = 42f,
+                action = PetAction.SIT,
+                direction = PetDirection.LEFT,
+                activeComboId = PetComboId.SOCIAL_HELLO_REPLY
+            )
+        )
+
+        val ending = director.update(oneRoleFinished, elapsedMillis = 500)
+        val nextScene = director.update(available, elapsedMillis = 100)
+
+        assertTrue(ending.isEmpty())
+        assertTrue(nextScene.filterIsInstance<PetSocialDirective.StartCombo>().isNotEmpty())
+    }
+
     private fun director(sceneOffset: Int = 0) = PetSocialDirector(
         config = PetSocialConfig(
             initialDelayMillis = 0,
@@ -131,14 +221,17 @@ class PetSocialDirectorTest {
     private fun snapshot(
         id: Int,
         x: Float,
-        action: PetAction = PetAction.WALK
+        action: PetAction = PetAction.WALK,
+        direction: PetDirection = PetDirection.RIGHT,
+        activeComboId: PetComboId? = null
     ) = PetSocialSnapshot(
         id = id,
         state = engine.initialState(
             bounds = bounds,
             size = size,
             position = PetVector(x, bounds.bottom - size.height),
-            action = action
-        )
+            action = action,
+            direction = direction
+        ).copy(activeComboId = activeComboId)
     )
 }

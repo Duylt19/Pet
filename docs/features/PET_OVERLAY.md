@@ -34,9 +34,11 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Playground cho phép cửa sổ pet tràn `1/3` chiều rộng qua mép trái/phải và `1/3` chiều rộng qua mép trên, còn mép dưới không tràn. `FLAG_LAYOUT_NO_LIMITS` là bắt buộc để WindowManager không clamp lại cửa sổ nhỏ; hit target vẫn chỉ bằng đúng kích thước pet.
 - Sprite pack dùng quy ước frame gốc quay sang trái. Renderer mirror ngang khi engine đi sang phải và chỉ thêm squash/stretch/lean nhẹ quanh bottom anchor cho motion nhanh, va chạm và Special; pose climb wall/ceiling không bị xoay sai hướng.
 - Living Behavior dùng weighted scheduler với khoảng chờ biến thiên, continue/turn-around decisions, recent-action memory và deterministic seed riêng cho từng instance. Vì vậy nhiều pet không chạy đồng bộ nhưng mọi transition vẫn tái lập được trong JVM test.
+- Sau mỗi shared tick, crowd resolver tách các pet cùng mặt sàn với khoảng cách 5% canvas; pet tự chủ quay ra ngoài khi va nhau, social combo giữ facing do director quyết định, còn pet đang bay/leo/drag được phép đi qua mà không bị correction.
 - State graph hỗ trợ `fall → bounce → walk`, run/creep có timeout, leo lên/leo xuống, cùng routine như `sit → wink`, `trip → sit` và `special → special-2 → wink`. Wall timeout chọn jump/descend/fall; pet tới mép trần có thể leo xuống thay vì luôn rơi. Pack v1 cũ chỉ tham gia action thật sự khai báo và vẫn fallback walk/idle an toàn.
 - Fall dùng gravity/terminal velocity thay cho tốc độ dọc cố định. Thả kéo nhẹ phát `DragEnd → Fall`; chỉ thao tác vượt system minimum-fling velocity mới vào physics fling.
 - Stop chuẩn hóa vị trí 0–1 vào DataStore; Start sau process/orientation change restore và clamp theo usable bounds mới.
+- Default multi-pet layout giãn ngang 1,05 pet-width; vị trí restore trùng nhau được crowd resolver tách sau khi pet đáp xuống.
 - Stop action, `onDestroy` và lỗi add window đều remove callback/toàn bộ window và reset runtime state.
 - Dynamic `SCREEN_OFF`/`SCREEN_ON` receiver dừng và nối lại shared frame clock; resume reset mốc tick để không chạy bù toàn bộ thời gian màn hình tắt.
 

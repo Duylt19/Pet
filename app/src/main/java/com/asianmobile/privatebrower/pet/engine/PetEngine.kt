@@ -202,8 +202,13 @@ class PetEngine(
             stopAtActionTransition = state.activeComboBeat != null
         )
         val beat = state.activeComboBeat
-        val scriptedDisplacement = animation.displacement
-            .withDirection(state.direction) * (beat?.motionMultiplier ?: 1f) +
+        val clipDisplacement = if (beat?.crossScreenDurationMillis == null) {
+            animation.displacement.withDirection(state.direction) *
+                (beat?.motionMultiplier ?: 1f)
+        } else {
+            PetVector.Zero
+        }
+        val scriptedDisplacement = clipDisplacement +
             crossScreenDisplacement(state, beat, elapsedMillis)
         val actionChangedByTimeline = animation.action != state.action
         val beatElapsedMillis = if (state.activeComboBeat == null) {
@@ -270,6 +275,15 @@ class PetEngine(
             effects += PetEffect.ComboCompleted(completedCombo)
         }
 
+        if (updatedState.activeComboBeat?.crossScreenLaunchVelocityY != null) {
+            return advanceBallisticFlight(
+                updatedState,
+                scriptedDisplacement,
+                elapsedMillis,
+                effects
+            )
+        }
+
         if (updatedState.action == PetAction.FLUNG) {
             val fling = advanceFling(updatedState.velocity, elapsedMillis)
             val requestedPosition = updatedState.position + scriptedDisplacement + fling.displacement
@@ -311,7 +325,12 @@ class PetEngine(
         }
 
         if (updatedState.action == PetAction.FALL) {
-            return advanceFall(updatedState, scriptedDisplacement, elapsedMillis, effects)
+            return advanceBallisticFlight(
+                updatedState,
+                scriptedDisplacement,
+                elapsedMillis,
+                effects
+            )
         }
 
         val requestedPosition = updatedState.position + scriptedDisplacement
@@ -346,7 +365,7 @@ class PetEngine(
         )
     }
 
-    private fun advanceFall(
+    private fun advanceBallisticFlight(
         state: PetState,
         scriptedDisplacement: PetVector,
         elapsedMillis: Long,
@@ -366,7 +385,7 @@ class PetEngine(
             y = fallDistance
         )
         val constrainedPosition = state.bounds.clampTopLeft(requestedPosition, state.size)
-        val collisionAction = state.comboFallCollisionAction(
+        val collisionAction = state.comboFlightCollisionAction(
             defaultAction = collisionAction(
                 action = PetAction.FALL,
                 requested = requestedPosition,
@@ -560,13 +579,12 @@ class PetEngine(
         }
     }
 
-    private fun PetState.comboFallCollisionAction(
+    private fun PetState.comboFlightCollisionAction(
         defaultAction: PetAction?,
         requested: PetVector,
         constrained: PetVector
     ): PetAction? {
-        val crossingToWall = action == PetAction.FALL &&
-            activeComboBeat?.crossScreenDurationMillis != null &&
+        val crossingToWall = activeComboBeat?.crossScreenDurationMillis != null &&
             pendingComboBeats.firstOrNull()?.action == PetAction.CLIMB_WALL
         val hitHorizontalEdge = requested.x != constrained.x
         return if (crossingToWall && hitHorizontalEdge) {

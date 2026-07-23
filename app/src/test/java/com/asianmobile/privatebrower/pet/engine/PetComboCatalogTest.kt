@@ -54,6 +54,23 @@ class PetComboCatalogTest {
     }
 
     @Test
+    fun `upward wall crossing requires flung pose without removing downward crossing`() {
+        val withoutFlung = PetAction.entries.toSet() - PetAction.FLUNG
+
+        val downward = PetComboCatalog.supportedDefinition(
+            PetComboId.WALL_TO_WALL_LEAP,
+            withoutFlung
+        )
+        val upward = PetComboCatalog.supportedDefinition(
+            PetComboId.WALL_TO_WALL_RISE,
+            withoutFlung
+        )
+
+        assertTrue(downward != null)
+        assertNull(upward)
+    }
+
+    @Test
     fun `autonomous profile keeps only distinct ground basics and gives climb meaningful weight`() {
         val rules = PetBehaviorProfile().autonomousComboRules
         val retiredGroundBasics = setOf(
@@ -111,6 +128,7 @@ class PetComboCatalogTest {
         assertEquals(1, fallingCrossing.size)
         assertEquals(1, risingCrossing.size)
         assertEquals(PetAction.FALL, fallingCrossing.single().action)
+        assertEquals(PetAction.FLUNG, risingCrossing.single().action)
         assertEquals(PetBeatCompletion.COLLISION, fallingCrossing.single().completion)
         assertEquals(1_100L, fallingCrossing.single().crossScreenDurationMillis)
         assertNull(fallingCrossing.single().crossScreenLaunchVelocityY)

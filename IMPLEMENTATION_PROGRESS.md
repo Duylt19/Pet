@@ -18,7 +18,8 @@
 | Spatial skill choreography V3.2 | Done | 35 paced combos: wall/ceiling parkour, aerial/skill/dance stories, collision-driven transitions and social duet roles |
 | Spatial behavior balance V3.3 | Done | Reduced ground basics, two-story climb quota and longer wall/ceiling dwell |
 | Wall-to-wall traversal V3.4 | Done | Screen-relative leap, mirrored airborne travel, opposite-wall catch and continued climb choreography |
-| Upward wall-to-wall rise V3.5 | Done | Ballistic upward launch, higher opposite-wall catch and independent downward/upward combo weights |
+| Upward wall-to-wall rise V3.5 | Done | Ballistic upward launch with FLUNG pose, higher opposite-wall catch and independent downward/upward combo weights |
+| Multi-pet stability V3.6 | Done | Social ownership release, facing dead-zone, grounded personal space and autonomous collision turn-away |
 | Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
 | Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |

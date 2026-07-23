@@ -39,6 +39,7 @@ data class PetSocialConfig(
     val approachTimeoutMillis: Long = 12_000,
     val performanceTimeoutMillis: Long = 45_000,
     val meetDistanceInPetWidths: Float = 1.35f,
+    val facingDeadZoneInPetWidths: Float = 0.2f,
     val floorToleranceInPetHeights: Float = 0.45f,
     val verticalToleranceInPetHeights: Float = 0.75f
 ) {
@@ -49,6 +50,9 @@ data class PetSocialConfig(
         require(approachTimeoutMillis > 0) { "approach timeout must be positive" }
         require(performanceTimeoutMillis > 0) { "performance timeout must be positive" }
         require(meetDistanceInPetWidths > 0f) { "meet distance must be positive" }
+        require(facingDeadZoneInPetWidths >= 0f) {
+            "facing dead zone must not be negative"
+        }
         require(floorToleranceInPetHeights >= 0f) { "floor tolerance must not be negative" }
         require(verticalToleranceInPetHeights >= 0f) {
             "vertical tolerance must not be negative"
@@ -111,14 +115,20 @@ class PetSocialDirector(
         }
         val scene = PetSocialScene.entries[sceneCursor]
         sceneCursor = (sceneCursor + 1) % PetSocialScene.entries.size
+        val alreadyMeeting = horizontalCenterDistance(pair.first.state, pair.second.state) <=
+            meetDistance(pair.first.state, pair.second.state)
         val newSession = SocialSession(
             firstPetId = pair.first.id,
             secondPetId = pair.second.id,
             scene = scene,
-            phase = SocialPhase.APPROACHING
+            phase = if (alreadyMeeting) SocialPhase.PERFORMING else SocialPhase.APPROACHING
         )
         session = newSession
-        return approachDirectives(pair.first, pair.second, forceCombo = true)
+        return if (alreadyMeeting) {
+            performanceDirectives(scene, pair.first, pair.second)
+        } else {
+            approachDirectives(pair.first, pair.second, forceCombo = true)
+        }
     }
 
     private fun updateApproach(
@@ -128,8 +138,7 @@ class PetSocialDirector(
         elapsedMillis: Long
     ): List<PetSocialDirective> {
         val elapsed = current.elapsedMillis + elapsedMillis
-        val meetDistance = max(first.state.size.width, second.state.size.width) *
-            config.meetDistanceInPetWidths
+        val meetDistance = meetDistance(first.state, second.state)
         if (horizontalCenterDistance(first.state, second.state) <= meetDistance) {
             val performing = current.copy(
                 phase = SocialPhase.PERFORMING,
@@ -157,9 +166,10 @@ class PetSocialDirector(
     ): List<PetSocialDirective> {
         val elapsed = current.elapsedMillis + elapsedMillis
         val (firstCombo, secondCombo) = comboPair(current.scene)
-        val completed = elapsed >= MIN_PERFORMANCE_MILLIS &&
-            first.state.activeComboId != firstCombo &&
-            second.state.activeComboId != secondCombo
+        val completed = elapsed >= MIN_PERFORMANCE_MILLIS && (
+            first.state.activeComboId != firstCombo ||
+                second.state.activeComboId != secondCombo
+            )
         if (completed || elapsed >= config.performanceTimeoutMillis) {
             endSession(config.interactionCooldownMillis)
             return emptyList()
@@ -216,9 +226,11 @@ class PetSocialDirector(
         second: PetSocialSnapshot
     ): List<PetSocialDirective> {
         val (firstDirection, secondDirection) = performanceDirections(scene, first, second)
-        return listOf(
-            PetSocialDirective.Face(first.id, firstDirection),
+        return listOfNotNull(
+            PetSocialDirective.Face(first.id, firstDirection)
+                .takeIf { first.state.direction != firstDirection },
             PetSocialDirective.Face(second.id, secondDirection)
+                .takeIf { second.state.direction != secondDirection }
         )
     }
 
@@ -228,8 +240,8 @@ class PetSocialDirector(
         second: PetSocialSnapshot
     ): Pair<PetDirection, PetDirection> {
         if (scene != PetSocialScene.PLAY_CHASE) {
-            return directionToward(first.state, second.state) to
-                directionToward(second.state, first.state)
+            return stableDirectionToward(first.state, second.state) to
+                stableDirectionToward(second.state, first.state)
         }
         val averageCenter = (centerX(first.state) + centerX(second.state)) * 0.5f
         val screenCenter = (first.state.bounds.left + first.state.bounds.right) * 0.5f
@@ -289,6 +301,20 @@ class PetSocialDirector(
 
     private fun directionToward(from: PetState, to: PetState): PetDirection =
         if (centerX(to) < centerX(from)) PetDirection.LEFT else PetDirection.RIGHT
+
+    private fun stableDirectionToward(from: PetState, to: PetState): PetDirection {
+        val horizontalDelta = centerX(to) - centerX(from)
+        val deadZone = max(from.size.width, to.size.width) *
+            config.facingDeadZoneInPetWidths
+        return when {
+            horizontalDelta < -deadZone -> PetDirection.LEFT
+            horizontalDelta > deadZone -> PetDirection.RIGHT
+            else -> from.direction
+        }
+    }
+
+    private fun meetDistance(first: PetState, second: PetState): Float =
+        max(first.size.width, second.size.width) * config.meetDistanceInPetWidths
 
     private fun horizontalCenterDistance(first: PetState, second: PetState): Float =
         abs(centerX(first) - centerX(second))
