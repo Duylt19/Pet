@@ -6,7 +6,7 @@
 
 | Setting | Giá trị hợp lệ | Runtime |
 |---|---|---|
-| Pack keys | tối đa 3 installed/built-in key theo slot | slot chưa cấu hình dùng slot 1; missing/invalid fallback Orange Cat |
+| Pack keys | đúng 3 installed/built-in key theo slot | slot legacy còn thiếu được khởi tạo từ slot 1; missing/invalid fallback Orange Cat |
 | Count | 1–3; low-RAM 1–2 | một window/state machine mỗi pet |
 | Size | 75/100/125/150% | kết hợp `defaultScale`, clamp 64–196dp |
 | Speed | 50–150%, bước 25% | velocity và locomotion nhận toàn bộ mức speed; physics reaction nhận 50%, expression/skill chỉ nhận 25% ảnh hưởng lên nhịp frame |
@@ -16,9 +16,10 @@
 | Interaction | on/off | off thêm `FLAG_NOT_TOUCHABLE` |
 | Position | x/y chuẩn hóa 0–1 | lưu khi Stop, restore/clamp theo bounds mới |
 
-Legacy `pet_selected_pack_key` được dùng làm slot 1 khi `pet_selected_pack_keys` chưa tồn
-tại và tiếp tục được mirror để migration tương thích. Giảm count không xóa selection của
-slot ẩn; tăng lại count sẽ restore character đã chọn trước đó.
+Legacy `pet_selected_pack_key` được materialize thành ba slot cùng giá trị khi
+`pet_selected_pack_keys` chưa tồn tại hoặc chưa đủ record, sau đó mỗi slot được update
+độc lập. Key legacy tiếp tục mirror slot 1 để migration tương thích. Giảm count không xóa
+selection của slot ẩn; tăng lại count sẽ restore character đã chọn trước đó.
 
 Reset position xóa toàn bộ tọa độ và tăng `pet_position_reset_revision`. Session chụp
 revision lúc Start; thao tác Stop chỉ persist vị trí khi revision chưa đổi, nên Reset từ

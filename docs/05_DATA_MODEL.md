@@ -11,7 +11,7 @@
 | `is_permission_completed` | Boolean | Hoàn thành/skip permission step |
 | `key_language` | String | Language code |
 | `country_language` | String | Region code |
-| `pet_selected_pack_keys` | String | Danh sách pack theo slot, tối đa 3 record newline-delimited |
+| `pet_selected_pack_keys` | String | Ba pack key độc lập theo slot, newline-delimited |
 | `pet_selected_pack_key` | String | Legacy/mirror slot 1 để migrate dữ liệu cũ |
 | `pet_count` | Int | Số instance, clamp theo device budget |
 | `pet_size_percent` | Int | 75–150%, bước 25% |
@@ -48,7 +48,7 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 ## Pet pack model
 
 - `PetPackManifest` là schema v1 versioned gồm identity, canvas, anchor, interaction và action clips/frame metadata.
-- `PetPackRepository.packs/selectedPacks` là `StateFlow`; selection được resolve theo slot, slot chưa cấu hình fallback về slot 1 và built-in Orange Cat luôn là fallback khi key không còn hợp lệ.
+- `PetPackRepository.packs/selectedPacks` là `StateFlow`; selection thiếu slot được materialize một lần từ slot 1 thành ba giá trị độc lập, và built-in Orange Cat luôn là fallback khi key không còn hợp lệ.
 - Installed source chỉ trỏ tới app-private directory sau khi secure installer validate và atomic promote.
 - Pack đang chạy vẫn là snapshot theo từng slot. Selection/settings mới chỉ áp dụng ở lần Start tiếp theo để không mutate renderer giữa session.
 - Android bitmap/`File` không đi vào pure engine state. Manifest được map sang `PetClip`; renderer giữ `PetPackVisual` đã preload.

@@ -1,7 +1,7 @@
 package com.asianmobile.privatebrower.data.model
 
 data class PetPreferences(
-    val selectedPackKeys: List<String> = listOf(DEFAULT_SELECTED_PACK_KEY),
+    val selectedPackKeys: List<String> = List(MAX_PET_SLOTS) { DEFAULT_SELECTED_PACK_KEY },
     val petCount: Int = DEFAULT_PET_COUNT,
     val sizePercent: Int = DEFAULT_SIZE_PERCENT,
     val speedPercent: Int = DEFAULT_SPEED_PERCENT,

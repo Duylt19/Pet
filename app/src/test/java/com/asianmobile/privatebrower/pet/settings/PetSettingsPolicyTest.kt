@@ -84,4 +84,14 @@ class PetSelectionCodecTest {
             codec.decode(" pack.one@1 \n\npack.two@1\npack.three@1\npack.four@1")
         )
     }
+
+    @Test
+    fun `legacy selection is materialized before one slot changes`() {
+        val migrated = codec.materialize(listOf("pack.old@1"))
+
+        assertEquals(
+            listOf("pack.new@1", "pack.old@1", "pack.old@1"),
+            codec.replace(migrated, slotIndex = 0, key = "pack.new@1")
+        )
+    }
 }

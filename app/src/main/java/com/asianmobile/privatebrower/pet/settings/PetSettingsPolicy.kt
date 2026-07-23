@@ -1,6 +1,7 @@
 package com.asianmobile.privatebrower.pet.settings
 
 import com.asianmobile.privatebrower.data.model.PetPositionFraction
+import com.asianmobile.privatebrower.data.model.DEFAULT_SELECTED_PACK_KEY
 import com.asianmobile.privatebrower.data.model.MAX_PET_SLOTS
 
 class PetSettingsPolicy {
@@ -55,6 +56,32 @@ class PetSelectionCodec {
         .map(String::trim)
         .filter(String::isNotEmpty)
         .take(MAX_PET_SLOTS)
+
+    fun materialize(
+        packKeys: List<String>,
+        fallbackKey: String = DEFAULT_SELECTED_PACK_KEY
+    ): List<String> {
+        val sanitized = packKeys
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+            .take(MAX_PET_SLOTS)
+        val fallback = sanitized.firstOrNull() ?: fallbackKey
+        return List(MAX_PET_SLOTS) { slotIndex ->
+            sanitized.getOrNull(slotIndex) ?: fallback
+        }
+    }
+
+    fun replace(
+        packKeys: List<String>,
+        slotIndex: Int,
+        key: String
+    ): List<String> {
+        val materialized = materialize(packKeys).toMutableList()
+        if (slotIndex in materialized.indices && key.isNotBlank()) {
+            materialized[slotIndex] = key.trim()
+        }
+        return materialized
+    }
 
     private companion object {
         const val SEPARATOR = "\n"

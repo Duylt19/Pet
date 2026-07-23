@@ -67,12 +67,14 @@ class DataStorePetSettingsRepository @Inject constructor(
     override fun updateSelectedPack(slotIndex: Int, key: String) {
         if (slotIndex !in 0 until MAX_PET_SLOTS || key.isBlank()) return
         edit { preferences ->
-            val current = decodeSelectedPackKeys(preferences).toMutableList()
-            while (current.size <= slotIndex) {
-                current += current.firstOrNull() ?: DEFAULT_SELECTED_PACK_KEY
-            }
-            current[slotIndex] = key
-            writeSelectedPackKeys(preferences, current)
+            writeSelectedPackKeys(
+                preferences,
+                selectionCodec.replace(
+                    packKeys = decodeSelectedPackKeys(preferences),
+                    slotIndex = slotIndex,
+                    key = key
+                )
+            )
         }
     }
 
@@ -148,17 +150,18 @@ class DataStorePetSettingsRepository @Inject constructor(
     )
 
     private fun decodeSelectedPackKeys(preferences: Preferences): List<String> =
-        selectionCodec.decode(preferences[SELECTED_PACK_KEYS].orEmpty())
-            .ifEmpty {
-                listOf(preferences[SELECTED_PACK_KEY] ?: DEFAULT_SELECTED_PACK_KEY)
-            }
+        selectionCodec.materialize(
+            selectionCodec.decode(preferences[SELECTED_PACK_KEYS].orEmpty())
+                .ifEmpty {
+                    listOf(preferences[SELECTED_PACK_KEY] ?: DEFAULT_SELECTED_PACK_KEY)
+                }
+        )
 
     private fun writeSelectedPackKeys(
         preferences: androidx.datastore.preferences.core.MutablePreferences,
         keys: List<String>
     ) {
-        val sanitized = selectionCodec.decode(selectionCodec.encode(keys))
-            .ifEmpty { listOf(DEFAULT_SELECTED_PACK_KEY) }
+        val sanitized = selectionCodec.materialize(keys)
         preferences[SELECTED_PACK_KEYS] = selectionCodec.encode(sanitized)
         preferences[SELECTED_PACK_KEY] = sanitized.first()
     }

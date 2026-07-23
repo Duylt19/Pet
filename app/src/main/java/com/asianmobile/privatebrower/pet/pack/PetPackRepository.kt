@@ -39,7 +39,7 @@ class FilePetPackRepository @Inject constructor(
     private val builtIn = builtInPetPack()
     private val _packs = MutableStateFlow(listOf(builtIn))
     override val packs: StateFlow<List<PetPack>> = _packs.asStateFlow()
-    private val _selectedPacks = MutableStateFlow(listOf(builtIn))
+    private val _selectedPacks = MutableStateFlow(List(MAX_PET_SLOTS) { builtIn })
     override val selectedPacks: StateFlow<List<PetPack>> = _selectedPacks.asStateFlow()
 
     init {
