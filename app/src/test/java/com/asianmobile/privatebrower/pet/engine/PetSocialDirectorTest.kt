@@ -65,6 +65,35 @@ class PetSocialDirectorTest {
     }
 
     @Test
+    fun `nearby pets perform offset call and response dance roles`() {
+        val duetOffset = PetSocialScene.entries.indexOf(PetSocialScene.DUET_DANCE)
+        val director = director(sceneOffset = duetOffset)
+        val pets = listOf(
+            snapshot(4, x = 20f),
+            snapshot(7, x = 42f)
+        )
+        director.update(pets, elapsedMillis = 1)
+
+        val performance = director.update(pets, elapsedMillis = 1)
+
+        assertEquals(
+            listOf(
+                PetSocialDirective.StartCombo(
+                    4,
+                    PetComboId.SOCIAL_DUET_A,
+                    PetDirection.RIGHT
+                ),
+                PetSocialDirective.StartCombo(
+                    7,
+                    PetComboId.SOCIAL_DUET_B,
+                    PetDirection.LEFT
+                )
+            ),
+            performance
+        )
+    }
+
+    @Test
     fun `director chooses the closest grounded pair and ignores a climbing pet`() {
         val director = director()
         val pets = listOf(
@@ -88,7 +117,7 @@ class PetSocialDirectorTest {
         assertTrue(directives.isEmpty())
     }
 
-    private fun director() = PetSocialDirector(
+    private fun director(sceneOffset: Int = 0) = PetSocialDirector(
         config = PetSocialConfig(
             initialDelayMillis = 0,
             interactionCooldownMillis = 100,
@@ -96,7 +125,7 @@ class PetSocialDirectorTest {
             approachTimeoutMillis = 1_000,
             performanceTimeoutMillis = 1_000
         ),
-        sceneOffset = 0
+        sceneOffset = sceneOffset
     )
 
     private fun snapshot(

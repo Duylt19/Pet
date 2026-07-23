@@ -62,7 +62,7 @@ bởi slider speed, nên tăng tốc di chuyển không làm cảm xúc chớp n
 
 ## Combo catalog
 
-12 combo tự chủ đã được cân lại theo từng beat:
+Catalog hiện có 20 combo tự chủ. 12 combo nền được cân lại theo từng beat:
 
 | Combo | Anticipation | Primary action | Recovery | Mục đích |
 |---|---|---|---|---|
@@ -79,7 +79,23 @@ bởi slider speed, nên tăng tốc di chuyển không làm cảm xúc chớp n
 | `BRAVE_EXPLORER` | Turn → Look 3–5s | Run 3–5s → pause 2–4s | Creep 4–7s | Đổi hướng có chủ ý, khám phá theo hai tốc độ |
 | `CHEERFUL_ENCORE` | Turn → Special 2 4–6.5s | Sit 3–5s → Special 4–6.5s | Idle 3–5s | Encore có pose tách hai tiết mục |
 
-Ngoài ra có combo riêng cho phản ứng tap/showcase và 5 scene social, mỗi scene có hai vai:
+V3.2 thêm 8 choreography dùng chính action/frame mà pack đã khai báo:
+
+| Combo | Choreography | Chi tiết tự nhiên |
+|---|---|---|
+| `WALL_PARKOUR` | Run tới mép → climb 4–7s → jump vào trong → fall → bounce → sit | Hướng chạy chọn mép gần nhất; jump đảo hướng tại beat |
+| `CEILING_EXPEDITION` | Run tới mép → climb tới trần → ceiling walk 5–9s → jump/fall → bounce → look | Hai chặng đầu hoàn tất bằng collision thật, không dùng thời lượng màn hình cố định |
+| `WALL_DIVE` | Run tới mép → climb 5–8s → wall jump → fall/bounce → Special | Nếu tường kết thúc sớm, jump thay cho chuyển sai sang ceiling |
+| `SKY_DIVER` | Anticipation → boosted jump → fall → bounce → sit/wink | Giữ đầy đủ landing recovery thay vì đổi thẳng sang idle |
+| `NINJA_SKILL` | Creep → sprint → boosted jump/fall → Special → sit | Có stealth, burst, skill và cooldown rõ ràng |
+| `BATTLE_DANCE` | Look → Special → pause → Special 2 → Dangle → sit | Hai skill có nhịp nghỉ nên không flash liên tục |
+| `MAGIC_RITUAL` | Sit → look → Special 2 → Dangle → Special → idle | Ritual dài 25–40s, có charge-up và release |
+| `ACROBATIC_FINALE` | Run → boosted jump/fall/bounce → Special → sit | Combo biểu diễn có take-off, landing và final pose |
+
+`motionMultiplier` chỉ tăng displacement cho beat được biên đạo (run-to-wall 1,15×,
+climb-to-ceiling 2,4×, jump 2,2×), không tăng tốc animation pose hoặc toàn bộ pet.
+
+Ngoài ra có combo riêng cho phản ứng tap/showcase và 6 scene social, mỗi scene có hai vai:
 
 - `GREETING`: một pet chờ 2–3,5s, wink một lần rồi ngồi 5–8s; pet kia nhìn 3–5s,
   phản ứng trễ và ngồi 4–7s;
@@ -89,8 +105,10 @@ Ngoài ra có combo riêng cho phản ứng tap/showcase và 5 scene social, m�
   cổ vũ 7–11s thay vì spam wink;
 - `REST_TOGETHER`: hai pet ngồi lệch nhịp tổng khoảng 19–30s;
 - `COPYCAT`: pet B trễ 1,5–2,5s rồi mới copy Look/Sit của pet A, tạo call-and-response.
+- `DUET_DANCE`: hai pet đối mặt và luân phiên `SPECIAL`/`SPECIAL_2`; vai B vào trễ để tạo
+  call-and-response thay vì hai sprite phát cùng một frame.
 
-Tính cả approach, user reaction và hai vai social, catalog có 25 combo ID.
+Tính cả approach, user reaction và hai vai social, catalog có 35 combo ID.
 
 ## Runtime contract
 
@@ -99,12 +117,20 @@ Tính cả approach, user reaction và hai vai social, catalog có 25 combo ID.
 - `comboBeatTargetMillis` được draw deterministic khi bắt đầu beat. One-shot chỉ chuyển ở
   cuối clip; sustained one-shot tự restart liền mạch cho đến target; looping action chuyển
   khi đạt target.
+- Beat `COLLISION` chạy cho tới khi chạm mục tiêu không gian. Timeout được tính từ khoảng
+  cách còn lại, velocity thật của pack và motion multiplier, cộng grace 3 giây; pack có
+  velocity lỗi sẽ thoát an toàn thay vì mắc kẹt.
+- Collision khớp beat kế tiếp (`RUN → CLIMB_WALL`, `CLIMB_WALL → CLIMB_CEILING`,
+  `FALL → BOUNCE`) tiếp tục cùng combo. Wall/ceiling kết thúc trước một beat `JUMP` sẽ ưu
+  tiên jump. Collision không khớp vẫn hủy choreography để giữ physics an toàn.
 - Chỉ khi queue rỗng và action cuối hoàn tất, engine phát `ComboCompleted`, clear combo rồi
   mới cho phép chọn combo tự chủ tiếp theo.
 - `recentComboIds` chống lặp ở cấp câu chuyện, mặc định nhớ ba combo gần nhất.
-- Combo được lọc bằng `supportedActions` của pack. Combo không còn ít nhất hai action khác
-  nhau sẽ không đủ điều kiện; pack cũ tiếp tục đi/idle an toàn.
-- Drag, fling, fall và collision biên có quyền ngắt combo vì gesture/physics phải ưu tiên.
+- Combo được lọc bằng `supportedActions` của pack. Spatial/skill combo còn có
+  `requiredActions`; thiếu một primitive bắt buộc thì loại cả combo thay vì degrade thành
+  câu chuyện sai. Combo thường vẫn có thể degrade và pack cũ tiếp tục đi/idle an toàn.
+- Drag và fling có quyền ngắt combo vì gesture/physics phải ưu tiên. Fall/collision chỉ
+  tiếp tục khi khớp choreography như trên.
 
 ## Social state machine
 
@@ -121,9 +147,11 @@ session an toàn. Với một pet, director không phát directive social.
 
 ## Verification
 
-- JVM test kiểm tra catalog degrade theo pack, combo loop/one-shot chạy đúng thứ tự, combo
-  completion, anti-repeat, long Sit hold và sustained Special không rơi qua action kế tiếp.
-- JVM test kiểm tra approach direction, paired greeting, closest-pair selection, bỏ qua pet
-  đang climb và no-op khi chỉ có một pet.
+- JVM test kiểm tra catalog degrade/required-action theo pack, combo loop/one-shot chạy đúng
+  thứ tự, combo completion, anti-repeat, long Sit hold và sustained Special.
+- JVM test khóa hướng mép gần nhất, run-to-wall, wall-to-ceiling, inward wall jump,
+  distance/velocity timeout, fall-to-bounce và việc giữ nguyên combo qua collision.
+- JVM test kiểm tra approach direction, greeting/duet roles, closest-pair selection, bỏ qua
+  pet đang climb và no-op khi chỉ có một pet.
 - Device smoke test cần chạy với 2–3 pet để quan sát đủ approach và ít nhất hai scene liên
   tiếp; overlay vẫn phải có đúng một foreground service và một shared render clock.

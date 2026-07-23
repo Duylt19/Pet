@@ -22,7 +22,15 @@ data class PetBehaviorProfile(
         PetComboRule(PetComboId.PEEK_AND_DASH, 10),
         PetComboRule(PetComboId.SLOW_MORNING, 12),
         PetComboRule(PetComboId.BRAVE_EXPLORER, 9),
-        PetComboRule(PetComboId.CHEERFUL_ENCORE, 6)
+        PetComboRule(PetComboId.CHEERFUL_ENCORE, 6),
+        PetComboRule(PetComboId.WALL_PARKOUR, 5),
+        PetComboRule(PetComboId.CEILING_EXPEDITION, 4),
+        PetComboRule(PetComboId.WALL_DIVE, 5),
+        PetComboRule(PetComboId.SKY_DIVER, 6),
+        PetComboRule(PetComboId.NINJA_SKILL, 6),
+        PetComboRule(PetComboId.BATTLE_DANCE, 5),
+        PetComboRule(PetComboId.MAGIC_RITUAL, 4),
+        PetComboRule(PetComboId.ACROBATIC_FINALE, 5)
     )
 ) {
     init {

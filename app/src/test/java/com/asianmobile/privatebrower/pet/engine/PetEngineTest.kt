@@ -196,6 +196,155 @@ class PetEngineTest {
     }
 
     @Test
+    fun `parkour combo runs toward nearest wall and preserves its climb story on impact`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val initial = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(75f, 40f),
+            action = PetAction.WALK,
+            direction = PetDirection.LEFT
+        )
+
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.WALL_PARKOUR)
+        )
+        val climbing = engine.reduce(started.state, PetEvent.Tick(200))
+
+        assertEquals(PetDirection.RIGHT, started.state.direction)
+        assertEquals(PetAction.RUN, started.state.action)
+        assertEquals(PetAction.CLIMB_WALL, climbing.state.action)
+        assertEquals(PetComboId.WALL_PARKOUR, climbing.state.activeComboId)
+        assertEquals(PetAction.JUMP, climbing.state.pendingComboBeats.first().action)
+    }
+
+    @Test
+    fun `ceiling expedition continues from wall to ceiling without cancelling combo`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val initial = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(75f, 40f),
+            action = PetAction.WALK
+        )
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.CEILING_EXPEDITION)
+        )
+        val onWall = engine.reduce(started.state, PetEvent.Tick(200)).state
+
+        val onCeiling = engine.reduce(
+            onWall.copy(position = PetVector(80f, 1f)),
+            PetEvent.Tick(100)
+        )
+
+        assertEquals(PetAction.CLIMB_CEILING, onCeiling.state.action)
+        assertEquals(PetDirection.LEFT, onCeiling.state.direction)
+        assertEquals(PetComboId.CEILING_EXPEDITION, onCeiling.state.activeComboId)
+        assertEquals(PetAction.JUMP, onCeiling.state.pendingComboBeats.first().action)
+    }
+
+    @Test
+    fun `ceiling climb timeout is derived from screen distance and boosted pack velocity`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val tallBounds = PetBounds(0f, 0f, 100f, 2_500f)
+        val initial = engine.initialState(
+            bounds = tallBounds,
+            size = size,
+            position = PetVector(75f, 2_000f),
+            action = PetAction.WALK
+        )
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.CEILING_EXPEDITION)
+        )
+
+        val onWall = engine.reduce(started.state, PetEvent.Tick(200)).state
+
+        assertEquals(PetAction.CLIMB_WALL, onWall.action)
+        assertEquals(PetBeatCompletion.COLLISION, onWall.activeComboBeat?.completion)
+        assertTrue(onWall.comboBeatTargetMillis > 22_000L)
+        assertTrue(onWall.comboBeatTargetMillis < 30_000L)
+    }
+
+    @Test
+    fun `wall dive jumps inward after holding its climb beat`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val largeBounds = PetBounds(0f, 0f, 1_000f, 1_000f)
+        val initial = engine.initialState(
+            bounds = largeBounds,
+            size = size,
+            position = PetVector(975f, 600f),
+            action = PetAction.WALK,
+            direction = PetDirection.LEFT
+        )
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.WALL_DIVE)
+        )
+        val climbing = engine.reduce(started.state, PetEvent.Tick(200)).state
+
+        val jumped = advanceUntil(engine, climbing) { it.action == PetAction.JUMP }
+
+        assertEquals(PetAction.CLIMB_WALL, climbing.action)
+        assertEquals(PetDirection.RIGHT, climbing.direction)
+        assertEquals(PetDirection.LEFT, jumped.direction)
+        assertEquals(PetComboId.WALL_DIVE, jumped.activeComboId)
+    }
+
+    @Test
+    fun `wall dive jumps inward when the wall ends before its timed climb does`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val initial = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(75f, 40f),
+            action = PetAction.WALK
+        )
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.WALL_DIVE)
+        )
+        val climbing = engine.reduce(started.state, PetEvent.Tick(200)).state
+
+        val jumped = engine.reduce(
+            climbing.copy(position = PetVector(80f, 1f)),
+            PetEvent.Tick(100)
+        )
+
+        assertEquals(PetAction.JUMP, jumped.state.action)
+        assertEquals(PetDirection.LEFT, jumped.state.direction)
+        assertEquals(PetComboId.WALL_DIVE, jumped.state.activeComboId)
+    }
+
+    @Test
+    fun `sky diver keeps its landing bounce inside the combo`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val tallBounds = PetBounds(0f, 0f, 100f, 1_000f)
+        val initial = engine.initialState(
+            bounds = tallBounds,
+            size = size,
+            position = PetVector(20f, 100f),
+            action = PetAction.WALK
+        )
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.SKY_DIVER)
+        )
+        val falling = advanceUntil(engine, started.state) { it.action == PetAction.FALL }
+
+        val landed = engine.reduce(
+            falling.copy(position = PetVector(20f, 975f)),
+            PetEvent.Tick(100)
+        )
+
+        assertEquals(PetAction.BOUNCE, landed.state.action)
+        assertEquals(PetComboId.SKY_DIVER, landed.state.activeComboId)
+        assertEquals(PetAction.SIT, landed.state.pendingComboBeats.first().action)
+    }
+
+    @Test
     fun `walking selects a supported combo after its scheduled delay`() {
         val engine = PetEngine(
             PetEngineConfig(

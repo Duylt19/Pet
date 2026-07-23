@@ -13,6 +13,14 @@ enum class PetComboId {
     SLOW_MORNING,
     BRAVE_EXPLORER,
     CHEERFUL_ENCORE,
+    WALL_PARKOUR,
+    CEILING_EXPEDITION,
+    WALL_DIVE,
+    SKY_DIVER,
+    NINJA_SKILL,
+    BATTLE_DANCE,
+    MAGIC_RITUAL,
+    ACROBATIC_FINALE,
     USER_AFFECTION,
     USER_SHOWCASE,
     SOCIAL_APPROACH,
@@ -25,12 +33,33 @@ enum class PetComboId {
     SOCIAL_REST_A,
     SOCIAL_REST_B,
     SOCIAL_COPYCAT_A,
-    SOCIAL_COPYCAT_B
+    SOCIAL_COPYCAT_B,
+    SOCIAL_DUET_A,
+    SOCIAL_DUET_B
+}
+
+enum class PetComboStartDirection {
+    KEEP,
+    REVERSE,
+    NEAREST_WALL
+}
+
+enum class PetBeatDirectionChange {
+    KEEP,
+    REVERSE
+}
+
+enum class PetBeatCompletion {
+    CLIP_OR_DURATION,
+    COLLISION
 }
 
 data class PetComboBeat(
     val action: PetAction,
-    val durationMillis: LongRange? = null
+    val durationMillis: LongRange? = null,
+    val directionChange: PetBeatDirectionChange = PetBeatDirectionChange.KEEP,
+    val completion: PetBeatCompletion = PetBeatCompletion.CLIP_OR_DURATION,
+    val motionMultiplier: Float = 1f
 ) {
     init {
         require(durationMillis == null ||
@@ -38,16 +67,18 @@ data class PetComboBeat(
         ) {
             "combo beat duration must be positive"
         }
+        require(motionMultiplier > 0f) { "combo beat motion multiplier must be positive" }
     }
 
     val isSustained: Boolean
-        get() = durationMillis != null
+        get() = durationMillis != null || completion == PetBeatCompletion.COLLISION
 }
 
 data class PetComboDefinition(
     val id: PetComboId,
     val beats: List<PetComboBeat>,
-    val turnAtStart: Boolean = false
+    val startDirection: PetComboStartDirection = PetComboStartDirection.KEEP,
+    val requiredActions: Set<PetAction> = emptySet()
 ) {
     init {
         require(beats.isNotEmpty()) { "combo must contain at least one beat" }
@@ -142,19 +173,138 @@ object PetComboCatalog {
             sustain(PetAction.LOOK_UP, 3_000L..6_000L),
             sustain(PetAction.WALK, 4_000L..7_000L)
         ),
-        turnedCombo(
+        reversedCombo(
             PetComboId.BRAVE_EXPLORER,
             sustain(PetAction.LOOK_UP, 3_000L..5_000L),
             sustain(PetAction.RUN, 3_000L..5_000L),
             sustain(PetAction.IDLE, 2_000L..4_000L),
             sustain(PetAction.CREEP, 4_000L..7_000L)
         ),
-        turnedCombo(
+        reversedCombo(
             PetComboId.CHEERFUL_ENCORE,
             sustain(PetAction.SPECIAL_2, 4_000L..6_500L),
             sustain(PetAction.SIT, 3_000L..5_000L),
             sustain(PetAction.SPECIAL, 4_000L..6_500L),
             sustain(PetAction.IDLE, 3_000L..5_000L)
+        ),
+        spatialCombo(
+            PetComboId.WALL_PARKOUR,
+            requiredActions = setOf(
+                PetAction.RUN,
+                PetAction.CLIMB_WALL,
+                PetAction.JUMP,
+                PetAction.FALL,
+                PetAction.BOUNCE
+            ),
+            untilCollision(PetAction.RUN, motionMultiplier = 1.15f),
+            sustain(PetAction.CLIMB_WALL, 4_000L..7_000L),
+            once(
+                PetAction.JUMP,
+                directionChange = PetBeatDirectionChange.REVERSE,
+                motionMultiplier = 2.2f
+            ),
+            sustain(PetAction.FALL, 12_000L..18_000L),
+            once(PetAction.BOUNCE),
+            sustain(PetAction.SIT, 4_000L..7_000L)
+        ),
+        spatialCombo(
+            PetComboId.CEILING_EXPEDITION,
+            requiredActions = setOf(
+                PetAction.RUN,
+                PetAction.CLIMB_WALL,
+                PetAction.CLIMB_CEILING,
+                PetAction.JUMP,
+                PetAction.FALL,
+                PetAction.BOUNCE
+            ),
+            untilCollision(PetAction.RUN, motionMultiplier = 1.15f),
+            untilCollision(PetAction.CLIMB_WALL, motionMultiplier = 2.4f),
+            sustain(PetAction.CLIMB_CEILING, 5_000L..9_000L),
+            once(PetAction.JUMP, motionMultiplier = 2.2f),
+            sustain(PetAction.FALL, 15_000L..22_000L),
+            once(PetAction.BOUNCE),
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L)
+        ),
+        spatialCombo(
+            PetComboId.WALL_DIVE,
+            requiredActions = setOf(
+                PetAction.RUN,
+                PetAction.CLIMB_WALL,
+                PetAction.JUMP,
+                PetAction.FALL,
+                PetAction.BOUNCE
+            ),
+            untilCollision(PetAction.RUN, motionMultiplier = 1.15f),
+            sustain(PetAction.CLIMB_WALL, 5_000L..8_000L),
+            once(
+                PetAction.JUMP,
+                directionChange = PetBeatDirectionChange.REVERSE,
+                motionMultiplier = 2.2f
+            ),
+            sustain(PetAction.FALL, 12_000L..18_000L),
+            once(PetAction.BOUNCE),
+            sustain(PetAction.SPECIAL, 3_500L..6_000L)
+        ),
+        requiredCombo(
+            PetComboId.SKY_DIVER,
+            requiredActions = setOf(PetAction.JUMP, PetAction.FALL, PetAction.BOUNCE),
+            sustain(PetAction.IDLE, 2_000L..3_500L),
+            once(PetAction.JUMP, motionMultiplier = 2.2f),
+            sustain(PetAction.FALL, 10_000L..16_000L),
+            once(PetAction.BOUNCE),
+            sustain(PetAction.SIT, 4_000L..7_000L),
+            once(PetAction.WINK)
+        ),
+        requiredCombo(
+            PetComboId.NINJA_SKILL,
+            requiredActions = setOf(
+                PetAction.CREEP,
+                PetAction.RUN,
+                PetAction.JUMP,
+                PetAction.FALL
+            ),
+            sustain(PetAction.CREEP, 3_500L..6_000L),
+            sustain(PetAction.RUN, 2_500L..4_000L),
+            once(PetAction.JUMP, motionMultiplier = 2.2f),
+            sustain(PetAction.FALL, 10_000L..16_000L),
+            sustain(PetAction.SPECIAL, 4_000L..6_500L),
+            sustain(PetAction.SIT, 4_000L..7_000L)
+        ),
+        requiredCombo(
+            PetComboId.BATTLE_DANCE,
+            requiredActions = setOf(PetAction.SPECIAL, PetAction.SPECIAL_2),
+            sustain(PetAction.LOOK_UP, 2_500L..4_000L),
+            sustain(PetAction.SPECIAL, 4_000L..6_000L),
+            sustain(PetAction.IDLE, 1_500L..2_500L),
+            sustain(PetAction.SPECIAL_2, 4_000L..6_500L),
+            sustain(PetAction.DANGLE, 3_500L..5_500L),
+            sustain(PetAction.SIT, 4_000L..7_000L)
+        ),
+        requiredCombo(
+            PetComboId.MAGIC_RITUAL,
+            requiredActions = setOf(PetAction.SPECIAL_2),
+            sustain(PetAction.SIT, 5_000L..8_000L),
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L),
+            sustain(PetAction.SPECIAL_2, 6_000L..9_000L),
+            sustain(PetAction.DANGLE, 4_000L..6_000L),
+            sustain(PetAction.SPECIAL, 4_000L..7_000L),
+            sustain(PetAction.IDLE, 3_000L..5_000L)
+        ),
+        requiredCombo(
+            PetComboId.ACROBATIC_FINALE,
+            requiredActions = setOf(
+                PetAction.RUN,
+                PetAction.JUMP,
+                PetAction.FALL,
+                PetAction.BOUNCE,
+                PetAction.SPECIAL
+            ),
+            sustain(PetAction.RUN, 3_000L..5_000L),
+            once(PetAction.JUMP, motionMultiplier = 2.2f),
+            sustain(PetAction.FALL, 10_000L..16_000L),
+            once(PetAction.BOUNCE),
+            sustain(PetAction.SPECIAL, 5_000L..8_000L),
+            sustain(PetAction.SIT, 5_000L..8_000L)
         ),
         combo(
             PetComboId.USER_AFFECTION,
@@ -239,6 +389,24 @@ object PetComboCatalog {
             sustain(PetAction.LOOK_UP, 3_000L..5_000L),
             sustain(PetAction.SIT, 6_000L..9_000L),
             once(PetAction.WINK)
+        ),
+        requiredCombo(
+            PetComboId.SOCIAL_DUET_A,
+            requiredActions = setOf(PetAction.SPECIAL, PetAction.SPECIAL_2),
+            sustain(PetAction.SIT, 2_000L..3_500L),
+            sustain(PetAction.SPECIAL, 5_000L..8_000L),
+            sustain(PetAction.IDLE, 2_000L..3_000L),
+            sustain(PetAction.SPECIAL_2, 5_000L..8_000L),
+            sustain(PetAction.SIT, 4_000L..6_000L)
+        ),
+        requiredCombo(
+            PetComboId.SOCIAL_DUET_B,
+            requiredActions = setOf(PetAction.SPECIAL, PetAction.SPECIAL_2),
+            sustain(PetAction.IDLE, 1_500L..2_500L),
+            sustain(PetAction.SPECIAL_2, 5_000L..8_000L),
+            sustain(PetAction.SIT, 2_000L..3_500L),
+            sustain(PetAction.SPECIAL, 5_000L..8_000L),
+            once(PetAction.WINK)
         )
     ).associateBy(PetComboDefinition::id)
 
@@ -249,6 +417,7 @@ object PetComboCatalog {
         supportedActions: Set<PetAction>
     ): PetComboDefinition? {
         val definition = definition(id) ?: return null
+        if (!supportedActions.containsAll(definition.requiredActions)) return null
         val beats = definition.supportedBeats(supportedActions)
         if (beats.size < MIN_COMBO_BEATS || beats.map(PetComboBeat::action).distinct().size <
             MIN_DISTINCT_ACTIONS
@@ -263,15 +432,57 @@ object PetComboCatalog {
         vararg beats: PetComboBeat
     ) = PetComboDefinition(id = id, beats = beats.toList())
 
-    private fun turnedCombo(
+    private fun reversedCombo(
         id: PetComboId,
         vararg beats: PetComboBeat
-    ) = PetComboDefinition(id = id, beats = beats.toList(), turnAtStart = true)
+    ) = PetComboDefinition(
+        id = id,
+        beats = beats.toList(),
+        startDirection = PetComboStartDirection.REVERSE
+    )
 
-    private fun once(action: PetAction) = PetComboBeat(action)
+    private fun spatialCombo(
+        id: PetComboId,
+        requiredActions: Set<PetAction>,
+        vararg beats: PetComboBeat
+    ) = PetComboDefinition(
+        id = id,
+        beats = beats.toList(),
+        startDirection = PetComboStartDirection.NEAREST_WALL,
+        requiredActions = requiredActions
+    )
+
+    private fun requiredCombo(
+        id: PetComboId,
+        requiredActions: Set<PetAction>,
+        vararg beats: PetComboBeat
+    ) = PetComboDefinition(
+        id = id,
+        beats = beats.toList(),
+        requiredActions = requiredActions
+    )
+
+    private fun once(
+        action: PetAction,
+        directionChange: PetBeatDirectionChange = PetBeatDirectionChange.KEEP,
+        motionMultiplier: Float = 1f
+    ) = PetComboBeat(
+        action = action,
+        directionChange = directionChange,
+        motionMultiplier = motionMultiplier
+    )
 
     private fun sustain(action: PetAction, durationMillis: LongRange) =
         PetComboBeat(action, durationMillis)
+
+    private fun untilCollision(
+        action: PetAction,
+        motionMultiplier: Float = 1f
+    ) = PetComboBeat(
+        action = action,
+        completion = PetBeatCompletion.COLLISION,
+        motionMultiplier = motionMultiplier
+    )
 
     private const val MIN_COMBO_BEATS = 2
     private const val MIN_DISTINCT_ACTIONS = 2

@@ -8,7 +8,8 @@ enum class PetSocialScene {
     PLAY_CHASE,
     SHOW_AND_REACT,
     REST_TOGETHER,
-    COPYCAT
+    COPYCAT,
+    DUET_DANCE
 }
 
 data class PetSocialSnapshot(
@@ -251,6 +252,8 @@ class PetSocialDirector(
             PetComboId.SOCIAL_REST_A to PetComboId.SOCIAL_REST_B
         PetSocialScene.COPYCAT ->
             PetComboId.SOCIAL_COPYCAT_A to PetComboId.SOCIAL_COPYCAT_B
+        PetSocialScene.DUET_DANCE ->
+            PetComboId.SOCIAL_DUET_A to PetComboId.SOCIAL_DUET_B
     }
 
     private fun closestPair(

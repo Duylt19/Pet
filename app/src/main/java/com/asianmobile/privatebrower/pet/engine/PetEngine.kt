@@ -1,5 +1,7 @@
 package com.asianmobile.privatebrower.pet.engine
 
+import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.max
 
 data class PetEngineConfig(
@@ -139,7 +141,8 @@ class PetEngine(
             id = event.comboId,
             supportedActions = config.supportedActions
         ) ?: return PetTransition(state)
-        val directedState = event.direction?.let { state.copy(direction = it) } ?: state
+        val directedState = event.direction?.let { state.copy(direction = it) }
+            ?: state.withComboStartDirection(definition.startDirection)
         return startRoutine(
             state = directedState.copy(velocity = PetVector.Zero),
             beats = definition.beats,
@@ -198,7 +201,8 @@ class PetEngine(
             elapsedMillis = elapsedMillis,
             stopAtActionTransition = state.activeComboBeat != null
         )
-        val scriptedDisplacement = animation.displacement.withDirection(state.direction)
+        val scriptedDisplacement = animation.displacement
+            .withDirection(state.direction) * (state.activeComboBeat?.motionMultiplier ?: 1f)
         val actionChangedByTimeline = animation.action != state.action
         val beatElapsedMillis = if (state.activeComboBeat == null) {
             0
@@ -319,7 +323,7 @@ class PetEngine(
             requested = requestedPosition,
             constrained = constrainedPosition,
             bounds = updatedState.bounds
-        )
+        )?.let { defaultAction -> updatedState.comboCollisionAction(defaultAction) }
         val direction = directionAfterCollision(
             action = updatedState.action,
             direction = updatedState.direction,
@@ -332,8 +336,7 @@ class PetEngine(
             direction = direction
         )
         if (collisionAction != null) {
-            val collided = changeAction(updatedState.cancelRoutine(), collisionAction)
-            return collided.copy(effects = effects + collided.effects)
+            return transitionAfterCollision(updatedState, collisionAction, effects)
         }
         return applyLivingBehavior(
             state = updatedState,
@@ -369,11 +372,7 @@ class PetEngine(
         )
         if (collisionAction == null) return PetTransition(falling, effects)
 
-        val collided = changeAction(
-            state = falling.cancelRoutine().copy(velocity = PetVector.Zero),
-            action = collisionAction
-        )
-        return collided.copy(effects = effects + collided.effects)
+        return transitionAfterCollision(falling, collisionAction, effects)
     }
 
     private fun advanceFling(
@@ -450,11 +449,18 @@ class PetEngine(
         beat: PetComboBeat,
         pendingBeats: List<PetComboBeat>
     ): PetState {
+        val directedState = when (beat.directionChange) {
+            PetBeatDirectionChange.KEEP -> state
+            PetBeatDirectionChange.REVERSE -> state.copy(direction = state.direction.opposite())
+        }
         val duration = beat.durationMillis
-        val scheduled = if (duration == null) {
-            RandomDraw(0L, state)
-        } else {
-            draw(state, duration, COMBO_BEAT_DURATION_SALT)
+        val scheduled = when {
+            beat.completion == PetBeatCompletion.COLLISION -> RandomDraw(
+                collisionBeatTimeoutMillis(directedState, beat),
+                directedState
+            )
+            duration == null -> RandomDraw(0L, directedState)
+            else -> draw(directedState, duration, COMBO_BEAT_DURATION_SALT)
         }
         return scheduled.state.copy(
             activeComboBeat = beat,
@@ -472,6 +478,88 @@ class PetEngine(
     private fun PetDirection.opposite(): PetDirection = when (this) {
         PetDirection.LEFT -> PetDirection.RIGHT
         PetDirection.RIGHT -> PetDirection.LEFT
+    }
+
+    private fun PetState.withComboStartDirection(
+        startDirection: PetComboStartDirection
+    ): PetState = when (startDirection) {
+        PetComboStartDirection.KEEP -> this
+        PetComboStartDirection.REVERSE -> copy(direction = direction.opposite())
+        PetComboStartDirection.NEAREST_WALL -> {
+            val maximumX = (bounds.right - size.width).coerceAtLeast(bounds.left)
+            val distanceToLeft = position.x - bounds.left
+            val distanceToRight = maximumX - position.x
+            copy(
+                direction = if (distanceToLeft <= distanceToRight) {
+                    PetDirection.LEFT
+                } else {
+                    PetDirection.RIGHT
+                }
+            )
+        }
+    }
+
+    private fun transitionAfterCollision(
+        state: PetState,
+        collisionAction: PetAction,
+        effects: List<PetEffect>
+    ): PetTransition {
+        val nextBeat = state.pendingComboBeats.firstOrNull()
+        if (nextBeat?.action == collisionAction) {
+            val scheduled = scheduleComboBeat(
+                state = state.copy(velocity = PetVector.Zero),
+                beat = nextBeat,
+                pendingBeats = state.pendingComboBeats.drop(1)
+            )
+            val changed = changeAction(
+                state = scheduled,
+                action = collisionAction,
+                restartAnimation = true
+            )
+            return changed.copy(effects = effects + changed.effects)
+        }
+
+        val collided = changeAction(
+            state = state.cancelRoutine().copy(velocity = PetVector.Zero),
+            action = collisionAction
+        )
+        return collided.copy(effects = effects + collided.effects)
+    }
+
+    private fun PetState.comboCollisionAction(defaultAction: PetAction): PetAction {
+        val nextAction = pendingComboBeats.firstOrNull()?.action
+        return if (nextAction == PetAction.JUMP &&
+            (action == PetAction.CLIMB_WALL || action == PetAction.CLIMB_CEILING)
+        ) {
+            PetAction.JUMP
+        } else {
+            defaultAction
+        }
+    }
+
+    private fun collisionBeatTimeoutMillis(state: PetState, beat: PetComboBeat): Long {
+        val action = beat.action
+        val horizontal = action in GROUND_MOVEMENT_ACTIONS ||
+            action == PetAction.CLIMB_CEILING
+        val distance = if (horizontal) {
+            val maximumX = (state.bounds.right - state.size.width)
+                .coerceAtLeast(state.bounds.left)
+            when (state.direction) {
+                PetDirection.LEFT -> state.position.x - state.bounds.left
+                PetDirection.RIGHT -> maximumX - state.position.x
+            }
+        } else {
+            state.position.y - state.bounds.top
+        }.coerceAtLeast(0f)
+        val speed = config.clips.getValue(action).frames.maxOf { frame ->
+            abs(if (horizontal) frame.velocity.x else frame.velocity.y)
+        } * beat.motionMultiplier
+        if (speed <= 0f) return MIN_COLLISION_BEAT_TIMEOUT_MILLIS
+        val travelMillis = ceil(distance / speed * MILLIS_PER_SECOND).toLong()
+        return (travelMillis + COLLISION_BEAT_GRACE_MILLIS).coerceIn(
+            MIN_COLLISION_BEAT_TIMEOUT_MILLIS,
+            MAX_COLLISION_BEAT_TIMEOUT_MILLIS
+        )
     }
 
     private fun directionAfterCollision(
@@ -591,6 +679,16 @@ class PetEngine(
         state: PetState,
         effects: List<PetEffect>
     ): PetTransition {
+        if (state.activeComboBeat?.completion == PetBeatCompletion.COLLISION) {
+            if (state.comboBeatElapsedMillis < state.comboBeatTargetMillis) {
+                return PetTransition(state, effects)
+            }
+            val fallback = changeAction(
+                state = state.cancelRoutine(),
+                action = preferredAction(PetAction.WALK, PetAction.IDLE)
+            )
+            return fallback.copy(effects = effects + fallback.effects)
+        }
         if (state.comboBeatTargetMillis > 0 &&
             state.comboBeatElapsedMillis < state.comboBeatTargetMillis
         ) {
@@ -639,11 +737,7 @@ class PetEngine(
                 false
             }
         }
-        val directedState = if (selected.turnAtStart) {
-            draw.state.copy(direction = draw.state.direction.opposite())
-        } else {
-            draw.state
-        }
+        val directedState = draw.state.withComboStartDirection(selected.startDirection)
         val changed = startRoutine(
             state = directedState,
             beats = selected.beats,
@@ -817,6 +911,9 @@ class PetEngine(
         const val CLIMB_DOWN_DURATION_SALT = 0x403L
         const val CEILING_DURATION_SALT = 0x501L
         const val COMBO_BEAT_DURATION_SALT = 0x601L
+        const val COLLISION_BEAT_GRACE_MILLIS = 3_000L
+        const val MIN_COLLISION_BEAT_TIMEOUT_MILLIS = 5_000L
+        const val MAX_COLLISION_BEAT_TIMEOUT_MILLIS = 90_000L
         val TAP_LOOP_DURATION = 800L..1_200L
         val TAP_RECOVERY_DURATION = 1_500L..2_500L
         val GROUND_MOVEMENT_ACTIONS = setOf(PetAction.WALK, PetAction.RUN, PetAction.CREEP)

@@ -42,17 +42,29 @@ class PetComboCatalogTest {
     }
 
     @Test
+    fun `spatial combo is rejected instead of losing a required choreography action`() {
+        val missingWallClimb = PetAction.entries.toSet() - PetAction.CLIMB_WALL
+
+        val combo = PetComboCatalog.supportedDefinition(
+            PetComboId.WALL_PARKOUR,
+            missingWallClimb
+        )
+
+        assertNull(combo)
+    }
+
+    @Test
     fun `catalog exposes many solo and paired stories without adjacent empty steps`() {
         val ids = PetComboId.entries
         val resolved = ids.mapNotNull { id ->
             PetComboCatalog.supportedDefinition(id, PetAction.entries.toSet())
         }
 
-        assertTrue(resolved.size >= 20)
+        assertTrue(resolved.size >= 35)
         assertTrue(resolved.all { it.actions.size >= 2 })
         assertTrue(
             resolved.flatMap(PetComboDefinition::beats)
-                .filter(PetComboBeat::isSustained)
+                .filter { beat -> beat.durationMillis != null }
                 .all { beat -> checkNotNull(beat.durationMillis).first >= 1_500L }
         )
     }
