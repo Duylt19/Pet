@@ -58,7 +58,7 @@ class PetSpeechDirector(
     private val random = Random(seed)
     private val pending = ArrayDeque<PendingSpeech>()
     private val cooldownByPet = mutableMapOf<Int, Long>()
-    private val lastLineByTone = mutableMapOf<PetSpeechTone, String>()
+    private var lastLineText: String? = null
     private var active: ActiveSpeech? = null
 
     fun onTransition(
@@ -127,7 +127,7 @@ class PetSpeechDirector(
         active = null
         pending.clear()
         cooldownByPet.clear()
-        lastLineByTone.clear()
+        lastLineText = null
     }
 
     private fun onComboStarted(
@@ -147,12 +147,49 @@ class PetSpeechDirector(
             delayMillis = SOCIAL_REPLY_DELAY_MILLIS
         )
 
+        PetComboId.CURIOUS_SCOUT,
+        PetComboId.COZY_BREAK,
+        PetComboId.CLUMSY_RECOVERY,
+        PetComboId.DAYDREAM,
+        PetComboId.BUSY_PATROL,
+        PetComboId.PEEK_AND_DASH,
+        PetComboId.SLOW_MORNING,
+        PetComboId.BRAVE_EXPLORER,
+        PetComboId.SOCIAL_REST_A,
+        PetComboId.SOCIAL_REST_B,
+        PetComboId.SOCIAL_COPYCAT_A,
+        PetComboId.SOCIAL_COPYCAT_B -> request(
+            petId,
+            PetSpeechTone.CHATTER,
+            SpeechPriority.AMBIENT
+        )
+
         PetComboId.NINJA_SKILL,
         PetComboId.BATTLE_DANCE,
         PetComboId.MAGIC_RITUAL,
-        PetComboId.ACROBATIC_FINALE -> request(
+        PetComboId.ACROBATIC_FINALE,
+        PetComboId.WALL_PARKOUR,
+        PetComboId.CEILING_EXPEDITION,
+        PetComboId.WALL_DIVE,
+        PetComboId.WALL_TO_WALL_LEAP,
+        PetComboId.WALL_TO_WALL_RISE,
+        PetComboId.SKY_DIVER -> request(
             petId,
             PetSpeechTone.SKILL,
+            SpeechPriority.AMBIENT
+        )
+
+        PetComboId.HAPPY_ZOOMIES,
+        PetComboId.TINY_PERFORMANCE,
+        PetComboId.CHEERFUL_ENCORE,
+        PetComboId.SOCIAL_CHASE_LEADER,
+        PetComboId.SOCIAL_CHASE_FOLLOWER,
+        PetComboId.SOCIAL_SHOW_OFF,
+        PetComboId.SOCIAL_ADMIRE,
+        PetComboId.SOCIAL_DUET_A,
+        PetComboId.SOCIAL_DUET_B -> request(
+            petId,
+            PetSpeechTone.CELEBRATION,
             SpeechPriority.AMBIENT
         )
 
@@ -211,10 +248,9 @@ class PetSpeechDirector(
     private fun chooseLine(tone: PetSpeechTone): PetSpeechLine? {
         val lines = catalog.lines(tone)
         if (lines.isEmpty()) return null
-        val lastText = lastLineByTone[tone]
-        val candidates = lines.filterNot { it.text == lastText }.ifEmpty { lines }
+        val candidates = lines.filterNot { it.text == lastLineText }.ifEmpty { lines }
         return candidates[random.nextInt(candidates.size)].also { selected ->
-            lastLineByTone[tone] = selected.text
+            lastLineText = selected.text
         }
     }
 
@@ -256,12 +292,12 @@ class PetSpeechDirector(
 
     private companion object {
         val INTERRUPTING_ACTIONS = setOf(PetAction.DRAGGED, PetAction.FLUNG)
-        const val BASE_READING_MILLIS = 2_200L
-        const val MILLIS_PER_CHARACTER = 70L
-        const val MIN_READING_MILLIS = 2_800L
-        const val MAX_READING_MILLIS = 6_200L
-        const val SPEAKER_COOLDOWN_MILLIS = 14_000L
-        const val SOCIAL_REPLY_DELAY_MILLIS = 1_600L
+        const val BASE_READING_MILLIS = 3_400L
+        const val MILLIS_PER_CHARACTER = 90L
+        const val MIN_READING_MILLIS = 4_500L
+        const val MAX_READING_MILLIS = 8_500L
+        const val SPEAKER_COOLDOWN_MILLIS = 18_000L
+        const val SOCIAL_REPLY_DELAY_MILLIS = 2_000L
         const val MAX_PENDING_SPEECH = 4
     }
 }

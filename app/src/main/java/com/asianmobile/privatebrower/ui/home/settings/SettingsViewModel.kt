@@ -41,6 +41,7 @@ class SettingsViewModel @Inject constructor(
                         speedPercent = preferences.speedPercent,
                         soundEnabled = preferences.soundEnabled,
                         messagesEnabled = preferences.messagesEnabled,
+                        customMessages = preferences.customMessages,
                         interactionEnabled = preferences.interactionEnabled
                     )
                 }
@@ -72,6 +73,9 @@ class SettingsViewModel @Inject constructor(
 
     fun setMessagesEnabled(enabled: Boolean) =
         petSettingsRepository.updateMessagesEnabled(enabled)
+
+    fun setCustomMessages(messages: List<String>) =
+        petSettingsRepository.updateCustomMessages(messages)
 
     fun setInteractionEnabled(enabled: Boolean) =
         petSettingsRepository.updateInteractionEnabled(enabled)

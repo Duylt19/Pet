@@ -8,5 +8,6 @@ data class SettingsUiState(
     val speedPercent: Int = 100,
     val soundEnabled: Boolean = false,
     val messagesEnabled: Boolean = true,
+    val customMessages: List<String> = emptyList(),
     val interactionEnabled: Boolean = true
 )

@@ -39,7 +39,7 @@ không khẳng định sai rằng PNG gốc chứa text.
 - Legacy converter revision 4 thêm clip loop `TALK`, 240 ms/frame, chỉ khi đủ frame
   34/35/36.
 - Combo `CHATTER` chạy
-  `IDLE 1,5–2,5 s → TALK 4,5–7 s → WINK → SIT 3–5 s`.
+  `IDLE 1,5–2,5 s → TALK 6,5–10 s → WINK → SIT 3–5 s`.
 - Pack thiếu 34/35/36 không khai báo `TALK`; combo tự loại qua `requiredActions`, không
   dùng ảnh fallback giả làm pose nói.
 - Built-in cat có clip code-native tương đương để feature không phụ thuộc riêng owner
@@ -57,8 +57,10 @@ Trigger hiện tại:
 | Single tap | Affection | ưu tiên cao, có thể ngắt lời ambient |
 | Bắt đầu pose `TALK` | Chatter | chỉ phát một lần khi vào action |
 | `SOCIAL_HELLO` | Social hello | pet thứ nhất nói trước |
-| `SOCIAL_HELLO_REPLY` | Social reply | delay 1,6 s và chờ bubble trước kết thúc |
-| Ninja/dance/magic/acrobatic combo | Skill | câu ngắn theo màn biểu diễn |
+| `SOCIAL_HELLO_REPLY` | Social reply | delay 2 s và chờ bubble trước kết thúc |
+| Combo nghỉ/ngắm cảnh/khám phá | Chatter | hội thoại ambient có cooldown |
+| Combo leo tường/trần/bay/kỹ năng | Skill | câu theo màn biểu diễn |
+| Combo zoomies/performance/duet | Celebration | câu ăn mừng theo hoạt cảnh |
 | Double-tap showcase | Celebration | ưu tiên user |
 | Drag/fling | — | đóng bubble của pet ngay |
 
@@ -67,9 +69,9 @@ Pacing:
 - toàn scene chỉ có tối đa một bubble;
 - queue tối đa bốn câu, social được ưu tiên hơn ambient;
 - cùng pet/tone không được xếp trùng;
-- thời gian đọc = `2.200 ms + 70 ms × số code point`, clamp 2,8–6,2 giây;
-- sau khi nói, pet có cooldown 14 giây;
-- director nhớ câu cuối theo tone và tránh lặp ngay khi còn lựa chọn khác.
+- thời gian đọc = `3.400 ms + 90 ms × số code point`, clamp 4,5–8,5 giây;
+- sau khi nói, pet có cooldown 18 giây;
+- director nhớ câu cuối toàn scene và tránh lặp ngay khi còn lựa chọn khác.
 
 Các giới hạn này quan trọng hơn việc random thật nhiều câu: chúng tạo turn-taking và
 thời gian đọc, tránh cảm giác notification spam hoặc chữ chớp liên tục.
@@ -86,9 +88,15 @@ Speech dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn tại khi có c
 - text tối đa ba dòng, tương phản cao và có `contentDescription`;
 - stop/service destroy remove bubble trước khi remove các pet window.
 
-Text hiện nằm trong Android resources, có English base và Vietnamese. `Pet messages`
-trong Settings được persist bằng `pet_messages_enabled`, mặc định bật và áp dụng ở lần
-Start pet kế tiếp.
+Catalog có sẵn hiện có 48 câu trong Android resources: tám câu cho mỗi tone, với English
+base và Vietnamese. `Pet messages` trong Settings được persist bằng
+`pet_messages_enabled`, mặc định bật.
+
+`Custom message list` cho nhập mỗi câu một dòng, tối đa 30 câu và 120 Unicode code
+point/câu. DataStore lưu qua `pet_custom_messages`; parser chuẩn hóa khoảng trắng, bỏ
+câu rỗng/trùng và không cắt giữa surrogate pair/emoji. Khi list không rỗng, mọi trigger
+dùng list này và pet chọn ngẫu nhiên không lặp ngay; `Use built-in` xóa list để trở lại
+catalog 48 câu. Cả toggle và list mới áp dụng ở lần Start pet kế tiếp.
 
 ## Hướng mở rộng server
 
@@ -104,8 +112,9 @@ sàng, nên thêm `SpeechCatalogRepository` độc lập với pack binary:
 
 ## Verification matrix
 
-- JVM: tap show/hide theo reading time, TALK chỉ trigger một lần, social reply tuần tự,
-  drag đóng bubble.
+- JVM: sanitize/codec custom list, random không lặp ngay, tap show/hide theo reading
+  time, TALK chỉ trigger một lần, ambient combo mapping, social reply tuần tự và drag
+  đóng bubble.
 - Pack: contract sequence 34/35/34/36 và immutable owner conversion revision 4.
 - Android: bubble trên/dưới pet, clamp hai mép, 1/2/3 pet turn-taking, rotation,
   screen-off/resume, Settings off, Stop không còn window.

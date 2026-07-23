@@ -19,6 +19,7 @@ import com.asianmobile.privatebrower.data.model.PetPreferences
 import com.asianmobile.privatebrower.data.repository.PetSettingsRepository
 import com.asianmobile.privatebrower.pet.settings.PetPositionCodec
 import com.asianmobile.privatebrower.pet.settings.PetSettingsPolicy
+import com.asianmobile.privatebrower.pet.speech.PetMessageListPolicy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
 import javax.inject.Inject
@@ -40,6 +41,7 @@ class DataStorePetSettingsRepository @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val policy = PetSettingsPolicy()
     private val positionCodec = PetPositionCodec()
+    private val messageListPolicy = PetMessageListPolicy()
     private val activityManager = context.getSystemService(ActivityManager::class.java)
 
     override val performanceBudget = if (activityManager.isLowRamDevice) {
@@ -83,6 +85,10 @@ class DataStorePetSettingsRepository @Inject constructor(
         preferences[MESSAGES_ENABLED] = enabled
     }
 
+    override fun updateCustomMessages(messages: List<String>) = edit { preferences ->
+        preferences[CUSTOM_MESSAGES] = messageListPolicy.encode(messages)
+    }
+
     override fun updateInteractionEnabled(enabled: Boolean) = edit { preferences ->
         preferences[INTERACTION_ENABLED] = enabled
     }
@@ -105,6 +111,7 @@ class DataStorePetSettingsRepository @Inject constructor(
         ),
         soundEnabled = preferences[SOUND_ENABLED] ?: false,
         messagesEnabled = preferences[MESSAGES_ENABLED] ?: true,
+        customMessages = messageListPolicy.decode(preferences[CUSTOM_MESSAGES].orEmpty()),
         interactionEnabled = preferences[INTERACTION_ENABLED] ?: true,
         lastPositions = positionCodec.decode(preferences[LAST_POSITIONS].orEmpty())
     )
@@ -120,6 +127,7 @@ class DataStorePetSettingsRepository @Inject constructor(
         val SPEED_PERCENT = intPreferencesKey("pet_speed_percent")
         val SOUND_ENABLED = booleanPreferencesKey("pet_sound_enabled")
         val MESSAGES_ENABLED = booleanPreferencesKey("pet_messages_enabled")
+        val CUSTOM_MESSAGES = stringPreferencesKey("pet_custom_messages")
         val INTERACTION_ENABLED = booleanPreferencesKey("pet_interaction_enabled")
         val LAST_POSITIONS = stringPreferencesKey("pet_last_positions")
     }

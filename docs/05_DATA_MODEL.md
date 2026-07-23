@@ -17,10 +17,17 @@
 | `pet_speed_percent` | Int | 50–150%, bước 25% |
 | `pet_sound_enabled` | Boolean | Opt-in âm thanh khi schema pack hỗ trợ |
 | `pet_messages_enabled` | Boolean | Cho phép reaction/chat/dialogue bubble |
+| `pet_custom_messages` | String | Danh sách lời thoại tùy chỉnh, mỗi record một dòng |
 | `pet_interaction_enabled` | Boolean | Cho phép tap/drag/fling |
 | `pet_last_positions` | String | Tối đa 3 cặp tọa độ chuẩn hóa 0–1 |
 
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.
+
+`pet_custom_messages` là dữ liệu nhỏ có giới hạn nên vẫn dùng Preferences DataStore:
+tối đa 30 câu, 120 Unicode code point/câu. `PetMessageListPolicy` chuẩn hóa khoảng
+trắng, bỏ câu rỗng/trùng, cắt theo code point để không làm vỡ emoji và dùng chuỗi rỗng
+để biểu diễn fallback về catalog có sẵn. Khi danh sách có dữ liệu, nó thay catalog mặc
+định cho mọi tone ở session pet kế tiếp.
 
 ## Pet engine model
 

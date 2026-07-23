@@ -71,7 +71,7 @@ internal class PetOverlayController(
     private val crowdResolver = PetCrowdResolver()
     private val speechDirector = if (preferences.messagesEnabled) {
         PetSpeechDirector(
-            catalog = appContext.petSpeechCatalog(),
+            catalog = appContext.petSpeechCatalog(preferences.customMessages),
             seed = pack.manifest.id.hashCode()
         )
     } else {

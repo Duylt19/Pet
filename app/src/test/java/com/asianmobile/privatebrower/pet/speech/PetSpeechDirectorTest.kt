@@ -33,7 +33,9 @@ class PetSpeechDirectorTest {
         )
 
         assertEquals(1, shown.size)
-        assertEquals(PetSpeechTone.AFFECTION, (shown.single() as PetSpeechDirective.Show).line.tone)
+        val directive = shown.single() as PetSpeechDirective.Show
+        assertEquals(PetSpeechTone.AFFECTION, directive.line.tone)
+        assertTrue(directive.durationMillis >= 4_500L)
         assertTrue(director.advance(2_000).isEmpty())
         assertEquals(listOf(PetSpeechDirective.Hide(1)), director.advance(10_000))
     }
@@ -49,6 +51,55 @@ class PetSpeechDirectorTest {
 
         assertEquals(PetSpeechTone.CHATTER, (first.single() as PetSpeechDirective.Show).line.tone)
         assertTrue(repeated.isEmpty())
+    }
+
+    @Test
+    fun `ambient combos expose chatter skill and celebration speech`() {
+        val state = state(PetAction.IDLE)
+
+        val chatter = PetSpeechDirector(catalog).onTransition(
+            1,
+            state,
+            PetTransition(state, listOf(PetEffect.ComboStarted(PetComboId.DAYDREAM)))
+        )
+        val skill = PetSpeechDirector(catalog).onTransition(
+            2,
+            state,
+            PetTransition(state, listOf(PetEffect.ComboStarted(PetComboId.WALL_PARKOUR)))
+        )
+        val celebration = PetSpeechDirector(catalog).onTransition(
+            3,
+            state,
+            PetTransition(state, listOf(PetEffect.ComboStarted(PetComboId.SOCIAL_DUET_A)))
+        )
+
+        assertEquals(PetSpeechTone.CHATTER, (chatter.single() as PetSpeechDirective.Show).line.tone)
+        assertEquals(PetSpeechTone.SKILL, (skill.single() as PetSpeechDirective.Show).line.tone)
+        assertEquals(
+            PetSpeechTone.CELEBRATION,
+            (celebration.single() as PetSpeechDirective.Show).line.tone
+        )
+    }
+
+    @Test
+    fun `random selection avoids immediately repeating a custom chatter line`() {
+        val customCatalog = PetSpeechCatalog(
+            PetSpeechTone.entries.associateWith { tone ->
+                if (tone == PetSpeechTone.CHATTER) listOf("Custom one", "Custom two") else emptyList()
+            }
+        )
+        val director = PetSpeechDirector(customCatalog, seed = 2)
+        val walking = state(PetAction.WALK)
+        val talking = walking.copy(action = PetAction.TALK)
+
+        val first = director.onTransition(1, walking, PetTransition(talking))
+            .single() as PetSpeechDirective.Show
+        director.advance(20_000L)
+        val second = director.onTransition(2, walking, PetTransition(talking))
+            .single() as PetSpeechDirective.Show
+
+        assertTrue(first.line.text in setOf("Custom one", "Custom two"))
+        assertTrue(first.line.text != second.line.text)
     }
 
     @Test

@@ -15,6 +15,7 @@ interface PetSettingsRepository {
     fun updateSpeedPercent(percent: Int)
     fun updateSoundEnabled(enabled: Boolean)
     fun updateMessagesEnabled(enabled: Boolean)
+    fun updateCustomMessages(messages: List<String>)
     fun updateInteractionEnabled(enabled: Boolean)
     fun updateLastPositions(positions: List<PetPositionFraction>)
 }

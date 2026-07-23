@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -72,12 +73,23 @@ fun SettingsScreen(
     val context = LocalContext.current
 
     var rateAppState by remember { mutableStateOf(RateAppUiState()) }
+    var isMessageEditorVisible by remember { mutableStateOf(false) }
     RateAppFlow(
         context = context,
         state = rateAppState,
         onStateChange = { rateAppState = it },
         onSendFeedback = viewModel::sendRateFeedback
     )
+    if (isMessageEditorVisible) {
+        PetMessageEditorDialog(
+            initialMessages = state.customMessages,
+            onSave = { messages ->
+                viewModel.setCustomMessages(messages)
+                isMessageEditorVisible = false
+            },
+            onDismiss = { isMessageEditorVisible = false }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -150,6 +162,24 @@ fun SettingsScreen(
                         onCheckedChange = viewModel::setMessagesEnabled
                     ),
                     onClick = { viewModel.setMessagesEnabled(!state.messagesEnabled) }
+                )
+                SettingsDivider()
+                SettingsRow(
+                    iconRes = R.drawable.ic_document_text,
+                    title = stringResource(R.string.settings_pet_custom_messages_title),
+                    subtitle = if (state.customMessages.isEmpty()) {
+                        stringResource(R.string.settings_pet_custom_messages_builtin)
+                    } else {
+                        pluralStringResource(
+                            R.plurals.settings_pet_custom_messages_count,
+                            state.customMessages.size,
+                            state.customMessages.size
+                        )
+                    },
+                    trailing = SettingsTrailing.TextTrailing(
+                        state.customMessages.size.toString()
+                    ),
+                    onClick = { isMessageEditorVisible = true }
                 )
                 SettingsDivider()
                 SettingsRow(
