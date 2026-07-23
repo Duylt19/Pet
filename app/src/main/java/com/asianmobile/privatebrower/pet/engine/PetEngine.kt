@@ -201,8 +201,10 @@ class PetEngine(
             elapsedMillis = elapsedMillis,
             stopAtActionTransition = state.activeComboBeat != null
         )
+        val beat = state.activeComboBeat
         val scriptedDisplacement = animation.displacement
-            .withDirection(state.direction) * (state.activeComboBeat?.motionMultiplier ?: 1f)
+            .withDirection(state.direction) * (beat?.motionMultiplier ?: 1f) +
+            crossScreenDisplacement(state, beat, elapsedMillis)
         val actionChangedByTimeline = animation.action != state.action
         val beatElapsedMillis = if (state.activeComboBeat == null) {
             0
@@ -360,11 +362,15 @@ class PetEngine(
             y = fallDistance
         )
         val constrainedPosition = state.bounds.clampTopLeft(requestedPosition, state.size)
-        val collisionAction = collisionAction(
-            action = PetAction.FALL,
+        val collisionAction = state.comboFallCollisionAction(
+            defaultAction = collisionAction(
+                action = PetAction.FALL,
+                requested = requestedPosition,
+                constrained = constrainedPosition,
+                bounds = state.bounds
+            ),
             requested = requestedPosition,
-            constrained = constrainedPosition,
-            bounds = state.bounds
+            constrained = constrainedPosition
         )
         val falling = state.copy(
             position = constrainedPosition,
@@ -547,9 +553,39 @@ class PetEngine(
         }
     }
 
+    private fun PetState.comboFallCollisionAction(
+        defaultAction: PetAction?,
+        requested: PetVector,
+        constrained: PetVector
+    ): PetAction? {
+        val crossingToWall = action == PetAction.FALL &&
+            activeComboBeat?.crossScreenDurationMillis != null &&
+            pendingComboBeats.firstOrNull()?.action == PetAction.CLIMB_WALL
+        val hitHorizontalEdge = requested.x != constrained.x
+        return if (crossingToWall && hitHorizontalEdge) {
+            PetAction.CLIMB_WALL
+        } else {
+            defaultAction
+        }
+    }
+
+    private fun crossScreenDisplacement(
+        state: PetState,
+        beat: PetComboBeat?,
+        elapsedMillis: Long
+    ): PetVector {
+        val durationMillis = beat?.crossScreenDurationMillis ?: return PetVector.Zero
+        val travelWidth = (state.bounds.right - state.bounds.left - state.size.width)
+            .coerceAtLeast(0f)
+        val velocity = travelWidth / (durationMillis / MILLIS_PER_SECOND)
+        return PetVector(x = velocity * (elapsedMillis / MILLIS_PER_SECOND))
+            .withDirection(state.direction)
+    }
+
     private fun collisionBeatTimeoutMillis(state: PetState, beat: PetComboBeat): Long {
         val action = beat.action
-        val horizontal = action in GROUND_MOVEMENT_ACTIONS ||
+        val horizontal = beat.crossScreenDurationMillis != null ||
+            action in GROUND_MOVEMENT_ACTIONS ||
             action == PetAction.CLIMB_CEILING
         val distance = if (horizontal) {
             val maximumX = (state.bounds.right - state.size.width)
@@ -561,9 +597,13 @@ class PetEngine(
         } else {
             state.position.y - state.bounds.top
         }.coerceAtLeast(0f)
-        val speed = config.clips.getValue(action).frames.maxOf { frame ->
+        val speed = beat.crossScreenDurationMillis?.let { durationMillis ->
+            val travelWidth = (state.bounds.right - state.bounds.left - state.size.width)
+                .coerceAtLeast(0f)
+            travelWidth / (durationMillis / MILLIS_PER_SECOND)
+        } ?: (config.clips.getValue(action).frames.maxOf { frame ->
             abs(if (horizontal) frame.velocity.x else frame.velocity.y)
-        } * beat.motionMultiplier
+        } * beat.motionMultiplier)
         if (speed <= 0f) return MIN_COLLISION_BEAT_TIMEOUT_MILLIS
         val travelMillis = ceil(distance / speed * MILLIS_PER_SECOND).toLong()
         return (travelMillis + COLLISION_BEAT_GRACE_MILLIS).coerceIn(

@@ -68,7 +68,7 @@ class PetComboCatalogTest {
             PetComboCatalog.definition(rule.comboId)?.habitat?.isClimb == true
         }.sumOf(PetComboRule::weight)
 
-        assertEquals(14, rules.size)
+        assertEquals(15, rules.size)
         assertTrue(rules.none { it.comboId in retiredGroundBasics })
         assertTrue(climbWeight * 4 >= rules.sumOf(PetComboRule::weight))
     }
@@ -87,6 +87,23 @@ class PetComboCatalogTest {
             PetComboHabitat.AERIAL,
             PetComboCatalog.definition(PetComboId.NINJA_SKILL)?.habitat
         )
+        assertEquals(
+            PetComboHabitat.WALL,
+            PetComboCatalog.definition(PetComboId.WALL_TO_WALL_LEAP)?.habitat
+        )
+    }
+
+    @Test
+    fun `wall to wall leap contains one collision driven screen crossing beat`() {
+        val crossingBeats = PetComboCatalog.definition(PetComboId.WALL_TO_WALL_LEAP)
+            ?.beats
+            .orEmpty()
+            .filter { beat -> beat.crossScreenDurationMillis != null }
+
+        assertEquals(1, crossingBeats.size)
+        assertEquals(PetAction.FALL, crossingBeats.single().action)
+        assertEquals(PetBeatCompletion.COLLISION, crossingBeats.single().completion)
+        assertEquals(1_100L, crossingBeats.single().crossScreenDurationMillis)
     }
 
     @Test
@@ -96,7 +113,7 @@ class PetComboCatalogTest {
             PetComboCatalog.supportedDefinition(id, PetAction.entries.toSet())
         }
 
-        assertTrue(resolved.size >= 35)
+        assertTrue(resolved.size >= 36)
         assertTrue(resolved.all { it.actions.size >= 2 })
         assertTrue(
             resolved.flatMap(PetComboDefinition::beats)

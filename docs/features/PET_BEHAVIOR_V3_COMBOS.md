@@ -108,19 +108,19 @@ Ngoài ra có combo riêng cho phản ứng tap/showcase và 6 scene social, m�
 - `DUET_DANCE`: hai pet đối mặt và luân phiên `SPECIAL`/`SPECIAL_2`; vai B vào trễ để tạo
   call-and-response thay vì hai sprite phát cùng một frame.
 
-Tính cả approach, user reaction và hai vai social, catalog có 35 combo ID.
+Tính cả approach, user reaction và hai vai social, catalog có 36 combo ID.
 
 ## V3.3 — spatial balance
 
 Catalog vẫn giữ toàn bộ story để dùng cho trigger cụ thể, nhưng pool tự chủ mặc định giảm
-từ 20 xuống 14 combo:
+từ 20 xuống 15 combo:
 
 - chỉ giữ 6 ground basic khác biệt nhất: `CURIOUS_SCOUT`, `COZY_BREAK`,
   `HAPPY_ZOOMIES`, `CLUMSY_RECOVERY`, `TINY_PERFORMANCE`, `DAYDREAM`;
 - loại 6 ground basic trùng nhịp khỏi random pool: `SHY_SNEAK`, `BUSY_PATROL`,
   `PEEK_AND_DASH`, `SLOW_MORNING`, `BRAVE_EXPLORER`, `CHEERFUL_ENCORE`;
-- giữ 3 climb, 3 aerial và 2 skill/dance story;
-- climb có tổng weight 34/124, tức 27,4% trước khi áp quota.
+- giữ 4 climb, 3 aerial và 2 skill/dance story;
+- climb có tổng weight 48/138, tức 34,8% trước khi áp quota.
 
 Mỗi definition có `PetComboHabitat`: `GROUND`, `AERIAL`, `WALL` hoặc `CEILING`.
 `nonClimbComboStreak` tồn tại xuyên qua vòng đời combo. Sau tối đa hai story không leo,
@@ -130,6 +130,22 @@ climb, selector bỏ quota và fallback về các story tương thích thay vì 
 Multi-pet social bắt đầu sau 12 giây thay vì 6 giây để từng pet có cơ hội chọn autonomous
 story đầu tiên; cooldown social tăng từ 10 lên 20 giây để social scene ở mặt đất không chiếm
 phần lớn thời gian.
+
+## V3.4 — wall-to-wall leap
+
+`WALL_TO_WALL_LEAP` thêm một traversal story hoàn chỉnh:
+
+1. chạy tới tường gần nhất và leo cao 12–18 giây;
+2. giữ `DANGLE` 3–5 giây làm anticipation;
+3. `JUMP` đảo hướng vào màn hình;
+4. `FALL` di chuyển ngang hết usable width trong khoảng 1,1 giây;
+5. collision cạnh đối diện chuyển thẳng sang `CLIMB_WALL`, không hủy combo;
+6. leo tiếp 5–8 giây, treo 6–10 giây, nhảy vào trong rồi fall/bounce/sit.
+
+`crossScreenDurationMillis` là metadata của beat, không phải velocity pixel cố định. Engine
+tính vận tốc từ `bounds.width - pet.width`, vì vậy thời gian băng màn gần như đồng nhất trên
+điện thoại dọc, landscape và tablet. Beat chỉ bắt tường khi queue đang chờ `CLIMB_WALL`;
+va chạm ngoài choreography vẫn dùng fallback physics hiện tại.
 
 ## Runtime contract
 
@@ -172,8 +188,10 @@ session an toàn. Với một pet, director không phát directive social.
   thứ tự, combo completion, anti-repeat, long Sit hold và sustained Special.
 - JVM test khóa hướng mép gần nhất, run-to-wall, wall-to-ceiling, inward wall jump,
   distance/velocity timeout, fall-to-bounce và việc giữ nguyên combo qua collision.
-- JVM test khóa autonomous pool 14 story, climb weight tối thiểu 25%, quota sau hai
+- JVM test khóa autonomous pool 15 story, climb weight tối thiểu 25%, quota sau hai
   non-climb story, reset streak và fallback khi pack thiếu frame leo.
+- JVM test chạy toàn bộ wall-to-wall traversal theo cả hai hướng, xác nhận thời gian
+  screen-relative, cạnh đích, facing, opposite-wall catch và combo lifecycle không bị hủy.
 - JVM test kiểm tra approach direction, greeting/duet roles, closest-pair selection, bỏ qua
   pet đang climb và no-op khi chỉ có một pet.
 - Device smoke test cần chạy với 2–3 pet để quan sát đủ approach và ít nhất hai scene liên

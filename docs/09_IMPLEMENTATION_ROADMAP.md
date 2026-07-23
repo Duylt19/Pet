@@ -83,7 +83,8 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Add Living Behavior V3: 25 ordered combo IDs, pack-aware degradation, combo anti-repeat and paired social scenes with approach/facing/chase coordination.
 - [Done] Pace Living Behavior V3.1 with once/sustained story beats, 5–12 second breathing room, long rest/performance durations and delayed social call-and-response.
 - [Done] Add Living Behavior V3.2: 35 combo IDs with wall/ceiling parkour, boosted aerial/skill/dance choreography, collision-driven spatial beats, required-action guards and paired duet dance.
-- [Done] Rebalance Living Behavior V3.3: reduce the autonomous pool to 14 distinct stories, guarantee climb after two non-climb stories, extend wall/ceiling dwell and reduce ground-only social occupancy.
+- [Done] Rebalance Living Behavior V3.3: reduce the autonomous pool to distinct high-value stories, guarantee climb after two non-climb stories, extend wall/ceiling dwell and reduce ground-only social occupancy.
+- [Done] Add Living Behavior V3.4 wall-to-wall traversal with screen-relative airborne motion, opposite-wall catch, mirrored choreography and safe collision fallback.
 - Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
 - Treat tap popup, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
 - Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs. Local device sync is enabled for validation, while production distribution must use a provenance-preserving server import.

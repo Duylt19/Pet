@@ -345,6 +345,78 @@ class PetEngineTest {
     }
 
     @Test
+    fun `wall to wall leap crosses the screen and catches the opposite wall`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val tallBounds = PetBounds(0f, 0f, 1_000f, 3_000f)
+        val initial = engine.initialState(
+            bounds = tallBounds,
+            size = size,
+            position = PetVector(975f, 2_500f),
+            action = PetAction.WALK,
+            direction = PetDirection.LEFT
+        )
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.WALL_TO_WALL_LEAP)
+        )
+        val firstClimb = engine.reduce(started.state, PetEvent.Tick(200)).state
+        val takeoffPose = advanceUntil(engine, firstClimb) {
+            it.action == PetAction.DANGLE
+        }
+        val takeoff = advanceUntil(engine, takeoffPose) { it.action == PetAction.JUMP }
+        val crossing = advanceUntil(engine, takeoff) {
+            it.action == PetAction.FALL &&
+                it.activeComboBeat?.crossScreenDurationMillis != null
+        }
+
+        val oppositeWall = advanceUntil(engine, crossing) {
+            it.action == PetAction.CLIMB_WALL
+        }
+
+        assertEquals(PetDirection.LEFT, crossing.direction)
+        assertTrue(crossing.comboBeatTargetMillis in 4_000L..5_000L)
+        assertEquals(0f, oppositeWall.position.x, FLOAT_TOLERANCE)
+        assertEquals(PetDirection.LEFT, oppositeWall.direction)
+        assertEquals(PetComboId.WALL_TO_WALL_LEAP, oppositeWall.activeComboId)
+        assertEquals(PetAction.DANGLE, oppositeWall.pendingComboBeats.first().action)
+    }
+
+    @Test
+    fun `wall to wall leap mirrors the crossing from the left wall`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val tallBounds = PetBounds(0f, 0f, 1_000f, 3_000f)
+        val initial = engine.initialState(
+            bounds = tallBounds,
+            size = size,
+            position = PetVector(5f, 2_500f),
+            action = PetAction.WALK,
+            direction = PetDirection.RIGHT
+        )
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.WALL_TO_WALL_LEAP)
+        )
+        val firstClimb = engine.reduce(started.state, PetEvent.Tick(200)).state
+        val takeoffPose = advanceUntil(engine, firstClimb) {
+            it.action == PetAction.DANGLE
+        }
+        val takeoff = advanceUntil(engine, takeoffPose) { it.action == PetAction.JUMP }
+        val crossing = advanceUntil(engine, takeoff) {
+            it.action == PetAction.FALL &&
+                it.activeComboBeat?.crossScreenDurationMillis != null
+        }
+
+        val oppositeWall = advanceUntil(engine, crossing) {
+            it.action == PetAction.CLIMB_WALL
+        }
+
+        assertEquals(PetDirection.RIGHT, crossing.direction)
+        assertEquals(980f, oppositeWall.position.x, FLOAT_TOLERANCE)
+        assertEquals(PetDirection.RIGHT, oppositeWall.direction)
+        assertEquals(PetComboId.WALL_TO_WALL_LEAP, oppositeWall.activeComboId)
+    }
+
+    @Test
     fun `sky diver keeps its landing bounce inside the combo`() {
         val engine = engine(maxTickMillis = 1_000)
         val tallBounds = PetBounds(0f, 0f, 100f, 1_000f)

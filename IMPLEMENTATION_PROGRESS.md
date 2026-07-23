@@ -16,7 +16,8 @@
 | Competitor technical audit | Done | Catalog/pack/engine/overlay/lifecycle/business/security evidence documented without copying decompiled implementation code |
 | Living pet behavior graph | Done | Weighted seeded scheduling, anti-repeat memory, look-up/dangle/jump, timed wall/ceiling/creep exits, gravity fall and full legacy frame rhythm covered by JVM tests |
 | Spatial skill choreography V3.2 | Done | 35 paced combos: wall/ceiling parkour, aerial/skill/dance stories, collision-driven transitions and social duet roles |
-| Spatial behavior balance V3.3 | Done | 14-story autonomous pool, 27% base climb weight, two-story climb quota and longer wall/ceiling dwell |
+| Spatial behavior balance V3.3 | Done | Reduced ground basics, two-story climb quota and longer wall/ceiling dwell |
+| Wall-to-wall traversal V3.4 | Done | Screen-relative leap, mirrored airborne travel, opposite-wall catch and continued climb choreography |
 | Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
 | Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |
