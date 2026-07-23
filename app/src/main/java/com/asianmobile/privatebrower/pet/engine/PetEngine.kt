@@ -108,6 +108,8 @@ class PetEngine(
                 tapBeat,
                 PetComboBeat(PetAction.IDLE, TAP_RECOVERY_DURATION)
                     .takeIf { PetAction.IDLE in config.supportedActions },
+                PetComboBeat(PetAction.TALK, PET_TALK_BEAT_DURATION_MILLIS)
+                    .takeIf { PetAction.TALK in config.supportedActions },
                 followUp?.let(::PetComboBeat)
             ),
             comboId = PetComboId.USER_AFFECTION,
@@ -427,8 +429,16 @@ class PetEngine(
         restartAnimation: Boolean = false
     ): PetTransition {
         if (state.action == action && !restartAnimation) return PetTransition(state)
+        val directedState = if (action == PetAction.TALK &&
+            state.action != PetAction.TALK &&
+            state.activeComboId !in SOCIAL_SPEECH_COMBOS
+        ) {
+            state.faceViewportCenter()
+        } else {
+            state
+        }
         return PetTransition(
-            state = state.copy(
+            state = directedState.copy(
                 action = action,
                 animationCursor = PetAnimationCursor(),
                 actionElapsedMillis = 0,
@@ -440,6 +450,17 @@ class PetEngine(
                 listOf(PetEffect.ActionChanged(state.action, action))
             }
         )
+    }
+
+    private fun PetState.faceViewportCenter(): PetState {
+        val petCenterX = position.x + size.width / 2f
+        val viewportCenterX = (bounds.left + bounds.right) / 2f
+        val talkDirection = if (petCenterX <= viewportCenterX) {
+            PetDirection.RIGHT
+        } else {
+            PetDirection.LEFT
+        }
+        return copy(direction = talkDirection)
     }
 
     private fun startRoutine(
@@ -983,6 +1004,12 @@ class PetEngine(
     )
 
     private companion object {
+        val SOCIAL_SPEECH_COMBOS = setOf(
+            PetComboId.SOCIAL_HELLO,
+            PetComboId.SOCIAL_HELLO_REPLY,
+            PetComboId.SOCIAL_SHOW_OFF,
+            PetComboId.SOCIAL_ADMIRE
+        )
         const val MILLIS_PER_SECOND = 1_000f
         const val PERCENT_MAX = 100
         const val RANDOM_SEQUENCE_MULTIPLIER = 1_103_515_245L

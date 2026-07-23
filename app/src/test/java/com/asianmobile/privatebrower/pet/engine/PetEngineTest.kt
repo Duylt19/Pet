@@ -15,17 +15,46 @@ class PetEngineTest {
 
         val tapped = engine.reduce(initial, PetEvent.Tap)
         val recovering = engine.reduce(tapped.state, PetEvent.Tick(elapsedMillis = 300))
-        val wink = advanceUntil(engine, recovering.state) { it.action == PetAction.WINK }
+        val talking = advanceUntil(engine, recovering.state) { it.action == PetAction.TALK }
+        val wink = advanceUntil(engine, talking) { it.action == PetAction.WINK }
 
         assertEquals(PetAction.TAPPED, tapped.state.action)
         assertTrue(tapped.effects.contains(PetEffect.Tapped))
         assertEquals(PetAction.IDLE, recovering.state.action)
+        assertEquals(PetAction.TALK, talking.action)
         assertEquals(PetAction.WINK, wink.action)
         assertTrue(
             recovering.effects.contains(
                 PetEffect.ActionChanged(PetAction.TAPPED, PetAction.IDLE)
             )
         )
+    }
+
+    @Test
+    fun `solo talk faces into viewport so carried box remains aligned and readable`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val leftPet = engine.initialState(
+            bounds,
+            size,
+            position = PetVector(0f, 10f),
+            direction = PetDirection.LEFT
+        )
+        val rightPet = engine.initialState(
+            bounds,
+            size,
+            position = PetVector(80f, 10f),
+            direction = PetDirection.RIGHT
+        )
+
+        val leftTalking = advanceUntil(engine, engine.reduce(leftPet, PetEvent.Tap).state) {
+            it.action == PetAction.TALK
+        }
+        val rightTalking = advanceUntil(engine, engine.reduce(rightPet, PetEvent.Tap).state) {
+            it.action == PetAction.TALK
+        }
+
+        assertEquals(PetDirection.RIGHT, leftTalking.direction)
+        assertEquals(PetDirection.LEFT, rightTalking.direction)
     }
 
     @Test
@@ -708,8 +737,8 @@ class PetEngineTest {
         }
 
         assertEquals(PetDirection.LEFT, started.state.direction)
-        assertEquals(PetAction.IDLE, started.state.action)
-        assertEquals(PetAction.IDLE, waiting.action)
+        assertEquals(PetAction.TALK, started.state.action)
+        assertEquals(PetAction.TALK, waiting.action)
         assertEquals(PetAction.WINK, wink.action)
         assertEquals(PetAction.SIT, sitting.action)
         assertEquals(null, completed?.state?.activeComboId)

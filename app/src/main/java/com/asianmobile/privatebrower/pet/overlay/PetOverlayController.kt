@@ -28,7 +28,6 @@ import com.asianmobile.privatebrower.pet.pack.PetPackVisual
 import com.asianmobile.privatebrower.pet.pack.toEngineClips
 import com.asianmobile.privatebrower.pet.settings.PetSessionLayout
 import com.asianmobile.privatebrower.pet.settings.PetSettingsPolicy
-import com.asianmobile.privatebrower.pet.speech.PetSpeechAttachment
 import com.asianmobile.privatebrower.pet.speech.PetSpeechDirective
 import com.asianmobile.privatebrower.pet.speech.PetSpeechDirector
 import com.asianmobile.privatebrower.pet.speech.PetSpeechLine
@@ -255,8 +254,7 @@ internal class PetOverlayController(
         when (directive) {
             is PetSpeechDirective.Show -> showSpeech(
                 petId = directive.petId,
-                line = directive.line,
-                attachment = directive.attachment
+                line = directive.line
             )
 
             is PetSpeechDirective.Hide -> {
@@ -267,14 +265,12 @@ internal class PetOverlayController(
 
     private fun showSpeech(
         petId: Int,
-        line: PetSpeechLine,
-        attachment: PetSpeechAttachment
+        line: PetSpeechLine
     ) {
         val instance = instances.firstOrNull { it.id == petId } ?: return
         val existing = speechWindow
         if (existing?.petId == petId) {
             existing.line = line
-            existing.attachment = attachment
             updateSpeechPosition(existing, instance)
             return
         }
@@ -282,7 +278,7 @@ internal class PetOverlayController(
 
         val view = PetSpeechBubbleView(appContext)
         val params = createSpeechLayoutParams(petId)
-        val created = SpeechWindow(petId, view, params, line, attachment)
+        val created = SpeechWindow(petId, view, params, line)
         updateSpeechPosition(created, instance)
         try {
             windowManager.addView(view, params)
@@ -311,16 +307,11 @@ internal class PetOverlayController(
             bubbleWidth = window.params.width,
             bubbleHeight = window.params.height,
             margin = appContext.dpToPixels(SPEECH_MARGIN_DP),
-            direction = state.direction,
-            attachment = window.attachment
+            direction = state.direction
         )
         window.params.x = placement.x
         window.params.y = placement.y
-        window.view.render(
-            line = window.line,
-            tailAtTop = placement.tailAtTop,
-            tailCenterX = placement.tailCenterX
-        )
+        window.view.render(window.line)
         if (window.view.isAttachedToWindow) {
             windowManager.updateViewLayout(window.view, window.params)
         }
@@ -442,8 +433,7 @@ internal class PetOverlayController(
         val petId: Int,
         val view: PetSpeechBubbleView,
         val params: WindowManager.LayoutParams,
-        var line: PetSpeechLine,
-        var attachment: PetSpeechAttachment
+        var line: PetSpeechLine
     )
 
     private companion object {

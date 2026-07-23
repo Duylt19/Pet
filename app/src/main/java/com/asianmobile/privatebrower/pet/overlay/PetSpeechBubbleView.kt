@@ -3,7 +3,6 @@ package com.asianmobile.privatebrower.pet.overlay
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.RectF
 import android.text.Layout
 import android.text.StaticLayout
@@ -37,17 +36,9 @@ internal class PetSpeechBubbleView(context: Context) : View(context) {
         textAlign = Paint.Align.LEFT
     }
     private var line: PetSpeechLine? = null
-    private var tailAtTop = false
-    private var tailCenterX = 0f
 
-    fun render(
-        line: PetSpeechLine,
-        tailAtTop: Boolean,
-        tailCenterX: Float
-    ) {
+    fun render(line: PetSpeechLine) {
         this.line = line
-        this.tailAtTop = tailAtTop
-        this.tailCenterX = tailCenterX
         contentDescription = line.text
         invalidate()
     }
@@ -55,39 +46,18 @@ internal class PetSpeechBubbleView(context: Context) : View(context) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val currentLine = line ?: return
-        val tailHeight = TAIL_HEIGHT_DP * density
-        val horizontalInset = HORIZONTAL_INSET_DP * density
-        val bubbleTop = if (tailAtTop) tailHeight else 0f
-        val bubbleBottom = if (tailAtTop) height.toFloat() else height - tailHeight
-        val bubble = RectF(
-            horizontalInset,
-            bubbleTop,
-            width - horizontalInset,
-            bubbleBottom
+        val bubble = RectF(0f, 0f, width.toFloat(), height.toFloat())
+        canvas.drawRect(bubble, bubblePaint)
+        val borderInset = borderPaint.strokeWidth / 2f
+        canvas.drawRect(
+            RectF(
+                borderInset,
+                borderInset,
+                width - borderInset,
+                height - borderInset
+            ),
+            borderPaint
         )
-        val radius = CORNER_RADIUS_DP * density
-        canvas.drawRoundRect(bubble, radius, radius, bubblePaint)
-        canvas.drawRoundRect(bubble, radius, radius, borderPaint)
-
-        val clampedTailX = tailCenterX.coerceIn(
-            bubble.left + radius,
-            bubble.right - radius
-        )
-        val tailHalfWidth = TAIL_HALF_WIDTH_DP * density
-        val tail = Path().apply {
-            if (tailAtTop) {
-                moveTo(clampedTailX - tailHalfWidth, bubble.top + borderPaint.strokeWidth)
-                lineTo(clampedTailX, 0f)
-                lineTo(clampedTailX + tailHalfWidth, bubble.top + borderPaint.strokeWidth)
-            } else {
-                moveTo(clampedTailX - tailHalfWidth, bubble.bottom - borderPaint.strokeWidth)
-                lineTo(clampedTailX, height.toFloat())
-                lineTo(clampedTailX + tailHalfWidth, bubble.bottom - borderPaint.strokeWidth)
-            }
-            close()
-        }
-        canvas.drawPath(tail, bubblePaint)
-        canvas.drawPath(tail, borderPaint)
 
         val textInset = TEXT_INSET_DP * density
         val textWidth = (bubble.width() - textInset * 2).toInt().coerceAtLeast(1)
@@ -107,11 +77,7 @@ internal class PetSpeechBubbleView(context: Context) : View(context) {
     }
 
     private companion object {
-        const val HORIZONTAL_INSET_DP = 3f
         const val TEXT_INSET_DP = 10f
-        const val CORNER_RADIUS_DP = 14f
-        const val TAIL_HEIGHT_DP = 10f
-        const val TAIL_HALF_WIDTH_DP = 8f
         const val MAX_TEXT_LINES = 3
     }
 }

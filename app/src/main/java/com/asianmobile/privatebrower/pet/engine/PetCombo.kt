@@ -138,12 +138,14 @@ object PetComboCatalog {
             sustain(PetAction.WALK, 4_000L..7_000L),
             sustain(PetAction.IDLE, 2_000L..4_000L),
             sustain(PetAction.LOOK_UP, 3_000L..5_000L),
+            speak(),
             sustain(PetAction.CREEP, 4_000L..7_000L)
         ),
         combo(
             PetComboId.COZY_BREAK,
             sustain(PetAction.IDLE, 3_000L..5_000L),
             sustain(PetAction.SIT, 7_000L..12_000L),
+            speak(),
             sustain(PetAction.LOOK_UP, 3_000L..5_000L),
             sustain(PetAction.SIT, 4_000L..7_000L)
         ),
@@ -152,6 +154,7 @@ object PetComboCatalog {
             sustain(PetAction.IDLE, 2_000L..3_500L),
             once(PetAction.WINK),
             sustain(PetAction.RUN, 3_500L..6_000L),
+            speak(),
             sustain(PetAction.IDLE, 3_000L..5_000L)
         ),
         combo(
@@ -166,6 +169,7 @@ object PetComboCatalog {
             sustain(PetAction.RUN, 2_500L..4_000L),
             once(PetAction.TRIP),
             sustain(PetAction.SIT, 7_000L..11_000L),
+            speak(),
             once(PetAction.WINK)
         ),
         combo(
@@ -174,6 +178,7 @@ object PetComboCatalog {
             sustain(PetAction.SPECIAL, 4_500L..7_000L),
             sustain(PetAction.IDLE, 2_000L..3_500L),
             sustain(PetAction.SPECIAL_2, 4_500L..7_000L),
+            speak(),
             sustain(PetAction.SIT, 4_000L..7_000L)
         ),
         combo(
@@ -181,6 +186,7 @@ object PetComboCatalog {
             sustain(PetAction.SIT, 6_000L..10_000L),
             sustain(PetAction.LOOK_UP, 4_000L..7_000L),
             sustain(PetAction.DANGLE, 4_000L..7_000L),
+            speak(),
             sustain(PetAction.SIT, 5_000L..9_000L)
         ),
         combo(
@@ -216,13 +222,14 @@ object PetComboCatalog {
             sustain(PetAction.SPECIAL_2, 4_000L..6_500L),
             sustain(PetAction.SIT, 3_000L..5_000L),
             sustain(PetAction.SPECIAL, 4_000L..6_500L),
+            speak(),
             sustain(PetAction.IDLE, 3_000L..5_000L)
         ),
         requiredCombo(
             PetComboId.CHATTER,
             requiredActions = setOf(PetAction.TALK),
             sustain(PetAction.IDLE, 1_500L..2_500L),
-            sustain(PetAction.TALK, 9_000L..11_000L),
+            speak(),
             once(PetAction.WINK),
             sustain(PetAction.SIT, 3_000L..5_000L)
         ),
@@ -247,7 +254,8 @@ object PetComboCatalog {
             ),
             sustain(PetAction.FALL, 12_000L..18_000L),
             once(PetAction.BOUNCE),
-            sustain(PetAction.SIT, 4_000L..7_000L)
+            sustain(PetAction.SIT, 4_000L..7_000L),
+            speak()
         ),
         spatialCombo(
             PetComboId.CEILING_EXPEDITION,
@@ -268,7 +276,8 @@ object PetComboCatalog {
             once(PetAction.JUMP, motionMultiplier = 2.2f),
             sustain(PetAction.FALL, 15_000L..22_000L),
             once(PetAction.BOUNCE),
-            sustain(PetAction.LOOK_UP, 3_000L..5_000L)
+            sustain(PetAction.LOOK_UP, 3_000L..5_000L),
+            speak()
         ),
         spatialCombo(
             PetComboId.WALL_DIVE,
@@ -289,7 +298,8 @@ object PetComboCatalog {
             ),
             sustain(PetAction.FALL, 12_000L..18_000L),
             once(PetAction.BOUNCE),
-            sustain(PetAction.SPECIAL, 3_500L..6_000L)
+            sustain(PetAction.SPECIAL, 3_500L..6_000L),
+            speak()
         ),
         wallToWallCombo(PetComboId.WALL_TO_WALL_LEAP),
         wallToWallCombo(
@@ -304,6 +314,7 @@ object PetComboCatalog {
             sustain(PetAction.FALL, 10_000L..16_000L),
             once(PetAction.BOUNCE),
             sustain(PetAction.SIT, 4_000L..7_000L),
+            speak(),
             once(PetAction.WINK)
         ),
         aerialCombo(
@@ -319,7 +330,8 @@ object PetComboCatalog {
             once(PetAction.JUMP, motionMultiplier = 2.2f),
             sustain(PetAction.FALL, 10_000L..16_000L),
             sustain(PetAction.SPECIAL, 4_000L..6_500L),
-            sustain(PetAction.SIT, 4_000L..7_000L)
+            sustain(PetAction.SIT, 4_000L..7_000L),
+            speak()
         ),
         requiredCombo(
             PetComboId.BATTLE_DANCE,
@@ -329,7 +341,8 @@ object PetComboCatalog {
             sustain(PetAction.IDLE, 1_500L..2_500L),
             sustain(PetAction.SPECIAL_2, 4_000L..6_500L),
             sustain(PetAction.DANGLE, 3_500L..5_500L),
-            sustain(PetAction.SIT, 4_000L..7_000L)
+            sustain(PetAction.SIT, 4_000L..7_000L),
+            speak()
         ),
         requiredCombo(
             PetComboId.MAGIC_RITUAL,
@@ -339,7 +352,8 @@ object PetComboCatalog {
             sustain(PetAction.SPECIAL_2, 6_000L..9_000L),
             sustain(PetAction.DANGLE, 4_000L..6_000L),
             sustain(PetAction.SPECIAL, 4_000L..7_000L),
-            sustain(PetAction.IDLE, 3_000L..5_000L)
+            sustain(PetAction.IDLE, 3_000L..5_000L),
+            speak()
         ),
         aerialCombo(
             PetComboId.ACROBATIC_FINALE,
@@ -355,12 +369,14 @@ object PetComboCatalog {
             sustain(PetAction.FALL, 10_000L..16_000L),
             once(PetAction.BOUNCE),
             sustain(PetAction.SPECIAL, 5_000L..8_000L),
-            sustain(PetAction.SIT, 5_000L..8_000L)
+            sustain(PetAction.SIT, 5_000L..8_000L),
+            speak()
         ),
         combo(
             PetComboId.USER_AFFECTION,
             once(PetAction.TAPPED),
             sustain(PetAction.IDLE, 1_500L..2_500L),
+            speak(),
             once(PetAction.WINK)
         ),
         combo(
@@ -369,7 +385,8 @@ object PetComboCatalog {
             sustain(PetAction.SPECIAL, 4_500L..7_000L),
             sustain(PetAction.IDLE, 2_000L..3_500L),
             sustain(PetAction.SPECIAL_2, 4_500L..7_000L),
-            sustain(PetAction.SIT, 3_500L..6_000L)
+            sustain(PetAction.SIT, 3_500L..6_000L),
+            speak()
         ),
         combo(
             PetComboId.SOCIAL_APPROACH,
@@ -378,14 +395,14 @@ object PetComboCatalog {
         ),
         combo(
             PetComboId.SOCIAL_HELLO,
-            sustain(PetAction.IDLE, 2_000L..3_500L),
+            speak(),
             once(PetAction.WINK),
             sustain(PetAction.SIT, 5_000L..8_000L)
         ),
         combo(
             PetComboId.SOCIAL_HELLO_REPLY,
-            sustain(PetAction.LOOK_UP, 3_000L..5_000L),
-            sustain(PetAction.IDLE, 1_500L..3_000L),
+            sustain(PetAction.SIT, 9_000L..11_000L),
+            speak(),
             once(PetAction.WINK),
             sustain(PetAction.SIT, 4_000L..7_000L)
         ),
@@ -407,12 +424,14 @@ object PetComboCatalog {
             sustain(PetAction.SIT, 2_500L..4_000L),
             sustain(PetAction.SPECIAL, 5_000L..8_000L),
             sustain(PetAction.IDLE, 2_000L..3_500L),
-            sustain(PetAction.SPECIAL_2, 5_000L..8_000L)
+            sustain(PetAction.SPECIAL_2, 5_000L..8_000L),
+            speak()
         ),
         combo(
             PetComboId.SOCIAL_ADMIRE,
             sustain(PetAction.LOOK_UP, 4_000L..7_000L),
             sustain(PetAction.SIT, 7_000L..11_000L),
+            speak(),
             once(PetAction.WINK)
         ),
         combo(
@@ -544,7 +563,8 @@ object PetComboCatalog {
         ),
         sustain(PetAction.FALL, 12_000L..18_000L),
         once(PetAction.BOUNCE),
-        sustain(PetAction.SIT, 4_000L..7_000L)
+        sustain(PetAction.SIT, 4_000L..7_000L),
+        speak()
     )
 
     private fun requiredCombo(
@@ -588,6 +608,11 @@ object PetComboCatalog {
         motionMultiplier = motionMultiplier
     )
 
+    private fun speak() = sustain(
+        action = PetAction.TALK,
+        durationMillis = PET_TALK_BEAT_DURATION_MILLIS
+    )
+
     private fun untilCollision(
         action: PetAction,
         motionMultiplier: Float = 1f
@@ -612,3 +637,5 @@ object PetComboCatalog {
     private const val WALL_TO_WALL_CROSS_DURATION_MILLIS = 1_100L
     private const val WALL_TO_WALL_RISE_VELOCITY_Y = -700f
 }
+
+internal val PET_TALK_BEAT_DURATION_MILLIS = 9_000L..11_000L

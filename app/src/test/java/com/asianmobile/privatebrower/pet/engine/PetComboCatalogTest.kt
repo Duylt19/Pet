@@ -18,6 +18,7 @@ class PetComboCatalogTest {
                 PetAction.IDLE,
                 PetAction.WINK,
                 PetAction.RUN,
+                PetAction.TALK,
                 PetAction.IDLE
             ),
             combo?.actions

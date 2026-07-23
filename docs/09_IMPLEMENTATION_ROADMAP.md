@@ -96,6 +96,9 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Fix Pet Speech V3.9 TALK attachment: reproduce the original frame 34–36
   `IeOffsetX=0/IeOffsetY=-64` carried-window geometry, mirror the box with pet direction,
   keep it synchronized with pet movement and discard active/queued text when TALK ends.
+- [Done] Redesign Pet Speech V3.10 choreography: gate every message behind the actual
+  TALK frame, add one deliberate 9–11 second speech beat only to speaking combos, keep
+  physical combos silent and render a sharp rectangular carried box without a tail.
 - Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
 - Treat tap popup, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
 - Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs. Local device sync is enabled for validation, while production distribution must use a provenance-preserving server import.

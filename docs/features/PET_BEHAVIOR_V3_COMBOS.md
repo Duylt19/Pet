@@ -188,6 +188,27 @@ tại, còn upward rise không bị `initialFallSpeed` ghi đè.
 - Drag và fling có quyền ngắt combo vì gesture/physics phải ưu tiên. Fall/collision chỉ
   tiếp tục khi khớp choreography như trên.
 
+## V3.10 — pose-gated speech choreography
+
+Speech không còn được phát từ `ComboStarted`, tap hoặc showcase effect. Catalog chia combo
+thành hai nhóm rõ ràng:
+
+- combo được phép nói có đúng một beat `TALK` 9–11 giây ở điểm nghỉ tự nhiên;
+- combo vận động/social thuần không có TALK và luôn im lặng.
+
+Tap chạy `TAPPED → IDLE recovery → TALK → WINK`; showcase nói sau final sit. Skill leo,
+bay và wall-to-wall chỉ nói sau khi đã landing/recovery, nên box không che lên frame đang
+chạy, rơi hoặc leo. Greeting dùng TALK ngay cho vai A, còn vai B ngồi chờ 9–11 giây trước
+TALK để tạo call-and-response bằng choreography thật thay vì timer speech độc lập.
+
+Khi solo pet bắt đầu TALK, engine quay pet vào tâm viewport dựa trên vị trí hiện tại. Nhờ
+đó box nằm ở vùng màn hình còn trống và cạnh box tiếp tục chạm đúng anchor của frame tay
+cầm; các combo social được miễn policy này để hai pet luôn giữ facing với nhau.
+
+`PetComboSpeechPolicy` chỉ map combo đang active sang tone/priority khi engine đã chuyển
+vào TALK. Unit test khóa hai chiều: mọi combo trong speaking policy phải có đúng một TALK
+beat và mọi combo ngoài policy không được chứa TALK.
+
 ## Social state machine
 
 Phiên tương tác có hai pha:

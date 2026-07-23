@@ -3,6 +3,7 @@ package com.asianmobile.privatebrower.pet.speech
 import com.asianmobile.privatebrower.pet.engine.PetAction
 import com.asianmobile.privatebrower.pet.engine.PetAnimationCursor
 import com.asianmobile.privatebrower.pet.engine.PetBounds
+import com.asianmobile.privatebrower.pet.engine.PetComboCatalog
 import com.asianmobile.privatebrower.pet.engine.PetComboId
 import com.asianmobile.privatebrower.pet.engine.PetDirection
 import com.asianmobile.privatebrower.pet.engine.PetEffect
@@ -20,29 +21,51 @@ class PetSpeechDirectorTest {
     )
 
     @Test
-    fun `tap starts an immediate readable reaction and later hides it`() {
+    fun `tap effect does not show text until affection combo enters talk pose`() {
         val director = PetSpeechDirector(catalog, seed = 3)
-        val state = state(PetAction.WALK)
-        val shown = director.onTransition(
-            petId = 1,
-            previousState = state,
-            transition = PetTransition(
-                state.copy(action = PetAction.TAPPED),
-                listOf(PetEffect.Tapped)
-            )
+        val walking = state(PetAction.WALK)
+        val tapped = walking.copy(
+            action = PetAction.TAPPED,
+            activeComboId = PetComboId.USER_AFFECTION
         )
 
-        assertEquals(1, shown.size)
+        assertTrue(
+            director.onTransition(
+                petId = 1,
+                previousState = walking,
+                transition = PetTransition(tapped, listOf(PetEffect.Tapped))
+            ).isEmpty()
+        )
+        val shown = director.onTransition(
+            petId = 1,
+            previousState = tapped,
+            transition = PetTransition(tapped.copy(action = PetAction.TALK))
+        )
+
         val directive = shown.single() as PetSpeechDirective.Show
         assertEquals(PetSpeechTone.AFFECTION, directive.line.tone)
-        assertEquals(PetSpeechAttachment.OVERHEAD, directive.attachment)
         assertTrue(directive.durationMillis >= 4_500L)
-        assertTrue(director.advance(2_000).isEmpty())
-        assertEquals(listOf(PetSpeechDirective.Hide(1)), director.advance(10_000))
     }
 
     @Test
-    fun `talk pose triggers chatter only once while the action remains active`() {
+    fun `combo started effect cannot show text over a non talk frame`() {
+        val director = PetSpeechDirector(catalog)
+        val idle = state(PetAction.IDLE)
+
+        val directives = director.onTransition(
+            petId = 1,
+            previousState = idle,
+            transition = PetTransition(
+                state = idle.copy(activeComboId = PetComboId.WALL_PARKOUR),
+                effects = listOf(PetEffect.ComboStarted(PetComboId.WALL_PARKOUR))
+            )
+        )
+
+        assertTrue(directives.isEmpty())
+    }
+
+    @Test
+    fun `direct talk pose uses chatter and triggers only once while active`() {
         val director = PetSpeechDirector(catalog)
         val walking = state(PetAction.WALK)
         val talking = walking.copy(action = PetAction.TALK)
@@ -50,14 +73,15 @@ class PetSpeechDirectorTest {
         val first = director.onTransition(2, walking, PetTransition(talking))
         val repeated = director.onTransition(2, talking, PetTransition(talking))
 
-        val directive = first.single() as PetSpeechDirective.Show
-        assertEquals(PetSpeechTone.CHATTER, directive.line.tone)
-        assertEquals(PetSpeechAttachment.TALK_WINDOW, directive.attachment)
+        assertEquals(
+            PetSpeechTone.CHATTER,
+            (first.single() as PetSpeechDirective.Show).line.tone
+        )
         assertTrue(repeated.isEmpty())
     }
 
     @Test
-    fun `talk window speech closes when pet leaves the carrying pose`() {
+    fun `speech closes as soon as pet leaves talk pose`() {
         val director = PetSpeechDirector(catalog)
         val walking = state(PetAction.WALK)
         val talking = walking.copy(action = PetAction.TALK)
@@ -73,53 +97,87 @@ class PetSpeechDirectorTest {
     }
 
     @Test
-    fun `queued talk window speech is discarded after carrying pose ends`() {
+    fun `queued speech is discarded if its owner leaves talk before its turn`() {
         val director = PetSpeechDirector(catalog)
         val idle = state(PetAction.IDLE)
-        director.onTransition(
-            1,
-            idle,
-            PetTransition(idle, listOf(PetEffect.ComboStarted(PetComboId.SOCIAL_HELLO)))
+        val greeting = idle.copy(
+            action = PetAction.TALK,
+            activeComboId = PetComboId.SOCIAL_HELLO
         )
-        val talking = idle.copy(action = PetAction.TALK)
-        assertTrue(director.onTransition(2, idle, PetTransition(talking)).isEmpty())
-
-        val leftTalk = director.onTransition(
-            2,
-            talking,
-            PetTransition(talking.copy(action = PetAction.WINK))
+        val reply = idle.copy(
+            action = PetAction.TALK,
+            activeComboId = PetComboId.SOCIAL_HELLO_REPLY
         )
 
-        assertTrue(leftTalk.isEmpty())
+        director.onTransition(1, idle, PetTransition(greeting))
+        assertTrue(director.onTransition(2, idle, PetTransition(reply)).isEmpty())
+        assertTrue(
+            director.onTransition(
+                2,
+                reply,
+                PetTransition(reply.copy(action = PetAction.WINK))
+            ).isEmpty()
+        )
+
         assertEquals(listOf(PetSpeechDirective.Hide(1)), director.advance(10_000L))
     }
 
     @Test
-    fun `ambient combos expose chatter skill and celebration speech`() {
-        val state = state(PetAction.IDLE)
-
-        val chatter = PetSpeechDirector(catalog).onTransition(
-            1,
-            state,
-            PetTransition(state, listOf(PetEffect.ComboStarted(PetComboId.DAYDREAM)))
-        )
-        val skill = PetSpeechDirector(catalog).onTransition(
-            2,
-            state,
-            PetTransition(state, listOf(PetEffect.ComboStarted(PetComboId.WALL_PARKOUR)))
-        )
-        val celebration = PetSpeechDirector(catalog).onTransition(
-            3,
-            state,
-            PetTransition(state, listOf(PetEffect.ComboStarted(PetComboId.SOCIAL_DUET_A)))
+    fun `every speaking combo resolves its intended tone only on talk pose`() {
+        val expected = mapOf(
+            PetComboId.USER_AFFECTION to PetSpeechTone.AFFECTION,
+            PetComboId.USER_SHOWCASE to PetSpeechTone.CELEBRATION,
+            PetComboId.SOCIAL_HELLO to PetSpeechTone.SOCIAL_HELLO,
+            PetComboId.SOCIAL_HELLO_REPLY to PetSpeechTone.SOCIAL_REPLY,
+            PetComboId.CURIOUS_SCOUT to PetSpeechTone.CHATTER,
+            PetComboId.WALL_PARKOUR to PetSpeechTone.SKILL,
+            PetComboId.HAPPY_ZOOMIES to PetSpeechTone.CELEBRATION,
+            PetComboId.SOCIAL_SHOW_OFF to PetSpeechTone.CELEBRATION
         )
 
-        assertEquals(PetSpeechTone.CHATTER, (chatter.single() as PetSpeechDirective.Show).line.tone)
-        assertEquals(PetSpeechTone.SKILL, (skill.single() as PetSpeechDirective.Show).line.tone)
-        assertEquals(
-            PetSpeechTone.CELEBRATION,
-            (celebration.single() as PetSpeechDirective.Show).line.tone
-        )
+        expected.forEach { (comboId, tone) ->
+            val director = PetSpeechDirector(catalog)
+            val idle = state(PetAction.IDLE)
+            val talking = idle.copy(action = PetAction.TALK, activeComboId = comboId)
+
+            val directive = director.onTransition(1, idle, PetTransition(talking))
+                .single() as PetSpeechDirective.Show
+
+            assertEquals(comboId.name, tone, directive.line.tone)
+        }
+    }
+
+    @Test
+    fun `physical only combos stay silent even if talk is forced`() {
+        val silentCombos = PetComboId.entries.toSet() - PetComboSpeechPolicy.speakingComboIds
+        val idle = state(PetAction.IDLE)
+
+        silentCombos.forEach { comboId ->
+            val talking = idle.copy(action = PetAction.TALK, activeComboId = comboId)
+            assertTrue(
+                comboId.name,
+                PetSpeechDirector(catalog)
+                    .onTransition(1, idle, PetTransition(talking))
+                    .isEmpty()
+            )
+        }
+    }
+
+    @Test
+    fun `catalog talk beats exactly match speaking policy and remain readable`() {
+        PetComboId.entries.forEach { comboId ->
+            val talkBeats = PetComboCatalog.definition(comboId)
+                ?.beats
+                .orEmpty()
+                .filter { it.action == PetAction.TALK }
+
+            if (comboId in PetComboSpeechPolicy.speakingComboIds) {
+                assertEquals(comboId.name, 1, talkBeats.size)
+                assertEquals(comboId.name, 9_000L..11_000L, talkBeats.single().durationMillis)
+            } else {
+                assertTrue(comboId.name, talkBeats.isEmpty())
+            }
+        }
     }
 
     @Test
@@ -146,39 +204,46 @@ class PetSpeechDirectorTest {
     @Test
     fun `social reply waits until greeting bubble finishes`() {
         val director = PetSpeechDirector(catalog)
-        val state = state(PetAction.IDLE)
-        val greeting = director.onTransition(
-            1,
-            state,
-            PetTransition(state, listOf(PetEffect.ComboStarted(PetComboId.SOCIAL_HELLO)))
+        val idle = state(PetAction.IDLE)
+        val greetingState = idle.copy(
+            action = PetAction.TALK,
+            activeComboId = PetComboId.SOCIAL_HELLO
         )
-        val reply = director.onTransition(
-            2,
-            state,
-            PetTransition(state, listOf(PetEffect.ComboStarted(PetComboId.SOCIAL_HELLO_REPLY)))
+        val replyState = idle.copy(
+            action = PetAction.TALK,
+            activeComboId = PetComboId.SOCIAL_HELLO_REPLY
         )
 
-        assertEquals(PetSpeechTone.SOCIAL_HELLO, (greeting.single() as PetSpeechDirective.Show).line.tone)
+        val greeting = director.onTransition(1, idle, PetTransition(greetingState))
+        val reply = director.onTransition(2, idle, PetTransition(replyState))
+
+        assertEquals(
+            PetSpeechTone.SOCIAL_HELLO,
+            (greeting.single() as PetSpeechDirective.Show).line.tone
+        )
         assertTrue(reply.isEmpty())
         val switched = director.advance(10_000)
         assertEquals(PetSpeechDirective.Hide(1), switched.first())
-        assertEquals(PetSpeechTone.SOCIAL_REPLY, (switched.last() as PetSpeechDirective.Show).line.tone)
+        assertEquals(
+            PetSpeechTone.SOCIAL_REPLY,
+            (switched.last() as PetSpeechDirective.Show).line.tone
+        )
     }
 
     @Test
     fun `dragging a speaking pet removes its bubble and queued lines`() {
         val director = PetSpeechDirector(catalog)
         val idle = state(PetAction.IDLE)
-        director.onTransition(
-            4,
-            idle,
-            PetTransition(idle.copy(action = PetAction.TAPPED), listOf(PetEffect.Tapped))
+        val talking = idle.copy(
+            action = PetAction.TALK,
+            activeComboId = PetComboId.USER_AFFECTION
         )
+        director.onTransition(4, idle, PetTransition(talking))
 
         val directives = director.onTransition(
             4,
-            idle,
-            PetTransition(idle.copy(action = PetAction.DRAGGED))
+            talking,
+            PetTransition(talking.copy(action = PetAction.DRAGGED))
         )
 
         assertEquals(listOf(PetSpeechDirective.Hide(4)), directives)

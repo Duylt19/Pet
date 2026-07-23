@@ -40,41 +40,47 @@ không khẳng định sai rằng PNG gốc chứa text.
   34/35/36.
 - Combo `CHATTER` chạy
   `IDLE 1,5–2,5 s → TALK 9–11 s → WINK → SIT 3–5 s`.
+- Speech choreography không còn là effect phát ngay khi combo bắt đầu. Mỗi combo được
+  phép nói có đúng một beat `TALK` 9–11 giây tại điểm ngắt tự nhiên: sau quan sát, sau
+  landing/recovery hoặc sau màn skill.
 - Pack thiếu 34/35/36 không khai báo `TALK`; combo tự loại qua `requiredActions`, không
-  dùng ảnh fallback giả làm pose nói.
+  dùng ảnh fallback giả làm pose nói. Beat TALK tùy chọn của combo khác cũng được lọc,
+  vì vậy pack đó vẫn chạy choreography nhưng không hiện text sai frame.
 - Built-in cat có clip code-native tương đương để feature không phụ thuộc riêng owner
   pack.
 
 ### Speech director
 
-`PetSpeechDirector` là Kotlin thuần và nhận `PetTransition/PetEffect`, không phụ thuộc
+`PetSpeechDirector` là Kotlin thuần và nhận `PetTransition`, không phụ thuộc
 `View`, `Context` hoặc `WindowManager`.
 
-Trigger hiện tại:
+Contract duy nhất để mở message là transition thật sự đi vào `PetAction.TALK`.
+`Tapped`, `ShowcaseStarted` và `ComboStarted` không còn trực tiếp phát text. Combo ID chỉ
+xác định vocabulary và priority sau khi frame TALK đã xuất hiện:
 
-| Trigger | Tone | Quy tắc |
+| Combo có TALK | Tone | Vị trí nhịp nói |
 |---|---|---|
-| Single tap | Affection | ưu tiên cao, có thể ngắt lời ambient |
-| Bắt đầu pose `TALK` | Chatter | chỉ phát một lần khi vào action |
-| `SOCIAL_HELLO` | Social hello | pet thứ nhất nói trước |
-| `SOCIAL_HELLO_REPLY` | Social reply | delay 2 s và chờ bubble trước kết thúc |
-| Combo nghỉ/ngắm cảnh/khám phá | Chatter | hội thoại ambient có cooldown |
-| Combo leo tường/trần/bay/kỹ năng | Skill | câu theo màn biểu diễn |
-| Combo zoomies/performance/duet | Celebration | câu ăn mừng theo hoạt cảnh |
-| Double-tap showcase | Celebration | ưu tiên user |
-| Drag/fling | — | đóng bubble của pet ngay |
+| `USER_AFFECTION` | Affection | sau tap và recovery, trước wink |
+| `USER_SHOWCASE` | Celebration | sau cả hai Special và final sit |
+| `CHATTER`, `CURIOUS_SCOUT`, `COZY_BREAK`, `CLUMSY_RECOVERY`, `DAYDREAM` | Chatter | ở điểm nghỉ/ngắm/hồi phục |
+| `SOCIAL_HELLO` | Social hello | pet A nói ngay bằng frame TALK |
+| `SOCIAL_HELLO_REPLY` | Social reply | pet B ngồi chờ 9–11 s rồi mới TALK |
+| `SOCIAL_SHOW_OFF`, `SOCIAL_ADMIRE` | Celebration | sau performance/observation |
+| Wall/ceiling, wall-to-wall, aerial và skill/dance combo | Skill | sau landing/final recovery |
+| `HAPPY_ZOOMIES`, `TINY_PERFORMANCE`, `CHEERFUL_ENCORE` | Celebration | sau hoạt cảnh chính |
 
 Pacing:
 
 - toàn scene chỉ có tối đa một bubble;
-- queue tối đa bốn câu, social được ưu tiên hơn ambient;
+- queue tối đa bốn câu, user và social được ưu tiên hơn ambient;
 - cùng pet/tone không được xếp trùng;
 - thời gian đọc = `3.400 ms + 90 ms × số code point`, clamp 4,5–8,5 giây;
-- sau khi nói, pet có cooldown 18 giây;
+- mọi item trong queue bị loại nếu pet đã rời TALK trước khi tới lượt;
 - director nhớ câu cuối toàn scene và tránh lặp ngay khi còn lựa chọn khác.
 
-Các giới hạn này quan trọng hơn việc random thật nhiều câu: chúng tạo turn-taking và
-thời gian đọc, tránh cảm giác notification spam hoặc chữ chớp liên tục.
+Các combo vận động thuần (`SHY_SNEAK`, patrol, chase, rest, copycat, duet...) không có
+TALK và không phát message. Tần suất hội thoại do combo scheduler cùng beat dài kiểm soát,
+không dùng cooldown độc lập có thể làm pet giữ frame TALK nhưng không có text.
 
 ## Bubble overlay
 
@@ -82,14 +88,16 @@ Speech dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn tại khi có c
 
 - fixed 220×84 dp, transparent, `FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE`;
 - không tạo full-screen window và không chặn app bên dưới;
-- reaction thông thường bám tâm pet; khi pet sát trần thì chuyển xuống dưới;
-- riêng TALK dùng attachment gốc của `WalkWithIE`: canvas 128 có `ImageAnchorY=128`,
+- mọi message dùng attachment gốc của `WalkWithIE`: canvas 128 có `ImageAnchor=64,128`,
   `IeOffsetX=0`, `IeOffsetY=-64`, nên đáy box nằm ở nửa chiều cao pet;
-- box TALK nằm hoàn toàn phía trước pet: cạnh phải chạm anchor khi quay trái, cạnh trái
-  chạm anchor khi quay phải; tail nối đúng điểm giữ box và toàn placement được mirror;
-- attachment là một phần của speech directive, không suy đoán từ bubble view;
+- box là hình chữ nhật góc vuông, không bo tròn và không có tail/tam giác phía dưới;
+- box nằm hoàn toàn phía trước pet: cạnh phải chạm anchor khi quay trái, cạnh trái chạm
+  anchor khi quay phải; toàn placement được mirror;
+- trước TALK, pet solo ở nửa trái/phải tự quay vào tâm viewport để box có đủ chỗ và cạnh
+  vẫn chạm đúng hand/anchor thay vì bị horizontal clamp đẩy xuyên qua sprite; social TALK
+  giữ nguyên facing giữa hai pet;
 - câu TALK đang active hoặc queued bị hủy nếu pet rời pose 34–36; beat TALK 9–11 giây
-  luôn dài hơn reading-time tối đa 8,5 giây nên box không nhảy về overhead cuối câu;
+  luôn dài hơn reading-time tối đa 8,5 giây nên box không thể tồn tại trên action kế tiếp;
 - mọi placement vẫn clamp trong usable viewport;
 - update vị trí bằng cùng shared frame clock, không tạo thread/coroutine/timer riêng;
 - text tối đa ba dòng, tương phản cao và có `contentDescription`;
@@ -120,12 +128,12 @@ sàng, nên thêm `SpeechCatalogRepository` độc lập với pack binary:
 ## Verification matrix
 
 - JVM: sanitize/codec custom list, random không lặp ngay, tap show/hide theo reading
-  time, TALK attachment trái/phải theo `IeOffset`, hủy active/queued TALK khi pose kết
-  thúc, ambient combo mapping, social reply tuần tự và drag đóng bubble.
+  time, TALK placement trái/phải theo `IeOffset`, hủy active/queued TALK khi pose kết
+  thúc, speaking/silent combo mapping, social reply tuần tự và drag đóng bubble.
 - Pack: contract sequence 34/35/34/36 và immutable owner conversion revision 4.
-- Android: carried TALK box theo pet và hướng mirror, reaction bubble trên/dưới pet,
-  clamp hai mép, 1/2/3 pet turn-taking, rotation, screen-off/resume, Settings off và
-  Stop không còn window.
+- Android: rectangular TALK box theo pet và hướng mirror, không tail, clamp hai mép,
+  1/2/3 pet turn-taking, rotation, screen-off/resume, Settings off và Stop không còn
+  window.
 
 ## Device verification
 
@@ -134,7 +142,13 @@ Pixel 3 XL / Android 12 / API 31:
 - owner pack `Natsu` từ `4.zip` được convert thành `owner.shimeji.4@4`;
 - manifest app-private chứa đúng clip loop
   `shime34 → shime35 → shime34 → shime36`, 240 ms/frame;
-- tap tạo một `Cute Pet speech` window 770×294 px, tương ứng 220×84 dp ở density
-  thiết bị, có `NOT_TOUCHABLE` và bám phía trên pet;
-- bubble tự remove sau reading time;
+- `Cute Pet speech` window có kích thước 770×294 px, tương ứng 220×84 dp ở density
+  thiết bị, có `NOT_TOUCHABLE`;
+- tap không tạo window trong `TAPPED/IDLE`; window chỉ xuất hiện khi Natsu chuyển sang
+  đúng pose TALK 34–36 với tay đưa ra;
+- screenshot xác nhận box có bốn góc vuông, không tail/tam giác và bám phía trước vùng
+  tay theo hướng pet;
+- edge-case bên trái xác nhận pet tự mirror vào trong: owner window `[-98, 196]` có
+  anchor X `49`, speech window bắt đầu đúng X `49` thay vì bị clamp xuyên qua sprite;
+- bubble tự remove khi reading time/TALK pose kết thúc;
 - Stop còn 0 pet/speech window, 0 `PetOverlayService` và logcat không có lỗi feature.

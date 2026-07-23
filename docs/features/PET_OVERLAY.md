@@ -36,9 +36,11 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Tap/drag/fling đều được chuyển thành `PetEvent`. Hệ tọa độ overlay chỉ fit status bar/display cutout một lần, không trừ navigation bar ở đáy; vì vậy đáy pet chạm đáy màn hình vật lý thay vì dừng phía trên thanh điều hướng.
 - Playground cho phép cửa sổ pet tràn `1/3` chiều rộng qua mép trái/phải và `1/3` chiều rộng qua mép trên, còn mép dưới không tràn. `FLAG_LAYOUT_NO_LIMITS` là bắt buộc để WindowManager không clamp lại cửa sổ nhỏ; hit target vẫn chỉ bằng đúng kích thước pet.
 - Sprite pack dùng quy ước frame gốc quay sang trái. Renderer mirror ngang khi engine đi sang phải và chỉ thêm squash/stretch/lean nhẹ quanh bottom anchor cho motion nhanh, va chạm và Special; pose climb wall/ceiling không bị xoay sai hướng.
-- Speech TALK không neo theo tâm pet: box dùng contract `WalkWithIE` của frame 34–36,
-  bám đáy ở `anchorY - 0,5 × petHeight`, nằm trước hướng nhìn và mirror theo direction.
-  Reaction không dùng TALK tiếp tục dùng overhead placement.
+- Speech chỉ tồn tại trong frame TALK 34–36: box chữ nhật góc vuông dùng contract
+  `WalkWithIE`, bám đáy ở `anchorY - 0,5 × petHeight`, nằm trước hướng nhìn và mirror
+  theo direction. Solo TALK quay vào tâm viewport để giữ box đọc được mà không phá anchor;
+  social TALK giữ facing với pet kia. Box không bo góc, không có tail tam giác và không
+  còn overhead fallback.
 - Living Behavior dùng weighted scheduler với khoảng chờ biến thiên, continue/turn-around decisions, recent-action memory và deterministic seed riêng cho từng instance. Vì vậy nhiều pet không chạy đồng bộ nhưng mọi transition vẫn tái lập được trong JVM test.
 - Sau mỗi shared tick, crowd resolver tách các pet cùng mặt sàn với khoảng cách 5% canvas; pet tự chủ quay ra ngoài khi va nhau, social combo giữ facing do director quyết định, còn pet đang bay/leo/drag được phép đi qua mà không bị correction.
 - State graph hỗ trợ `fall → bounce → walk`, run/creep có timeout, leo lên/leo xuống, cùng routine như `sit → wink`, `trip → sit` và `special → special-2 → wink`. Wall timeout chọn jump/descend/fall; pet tới mép trần có thể leo xuống thay vì luôn rơi. Pack v1 cũ chỉ tham gia action thật sự khai báo và vẫn fallback walk/idle an toàn.
@@ -57,9 +59,15 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Edge contract verified trên cùng thiết bị với pet 392 px: parent overlay bắt đầu tại status bar `y=171`, mép trái đạt `x=-131`, mép phải đạt `x=1179` và mép trên đạt `y=-131`; cửa sổ được phép tràn ra ngoài display thay vì bị WindowManager clamp. Playground bottom là `2789`, tương ứng đáy vật lý `2960`, nên không còn bị navigation bar 168 px đẩy lên.
 - Overlay window remained 112dp and touch did not block the rest of the launcher.
 - No fatal exception was recorded during the full flow; service, window and notification were all removed after Stop/revocation.
-- Pet Speech V3.7 verified với `Natsu` conversion revision 4: tap tạo đúng một
-  non-touchable bubble 220×84dp, bubble tự hết hạn; Stop remove cả ba pet window,
-  speech window và service.
+- Pet Speech V3.7 initial slice đã verified `Natsu` conversion revision 4 và lifecycle
+  non-touchable window 220×84dp; trigger tap trực tiếp của revision này đã được thay thế
+  bởi pose-gated choreography V3.10 bên dưới.
+- Pet Speech V3.10 verified trên cùng thiết bị: tap không mở text trong TAPPED/IDLE,
+  window chỉ xuất hiện cùng frame TALK có tay đưa ra; box 220×84dp là hình chữ nhật
+  không tail. Ở mép trái, pet window `[-98, 196]` có anchor X `49` và speech window bắt
+  đầu đúng X `49`, xác nhận inward-facing giữ attachment chính xác. Box tự remove khi
+  TALK kết thúc. Clean Stop còn 0 overlay/speech window, 0 service và không có
+  fatal/window leak trong logcat.
 
 ## Chưa thuộc runtime hiện tại
 
