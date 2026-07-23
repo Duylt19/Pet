@@ -209,6 +209,21 @@ cầm; các combo social được miễn policy này để hai pet luôn giữ f
 vào TALK. Unit test khóa hai chiều: mọi combo trong speaking policy phải có đúng một TALK
 beat và mọi combo ngoài policy không được chứa TALK.
 
+## V3.11 — synchronized TALK lifecycle
+
+Bubble không còn có reading-time 4,5–8,5 giây chạy song song với combo. Speech director
+chỉ phát `Show` khi engine đi vào TALK và chỉ phát `Hide` trên transition rời TALK,
+drag/fling hoặc cleanup. Vì vậy beat TALK 9–11 giây và box luôn bắt đầu/kết thúc cùng
+nhau, không có khoảng pet tiếp tục giữ frame 34–36 sau khi text đã tắt.
+
+User/social priority chỉ thay đổi thứ tự queue và không được preempt bubble đang active.
+Điều này đóng case nhiều pet trong đó pet thứ hai vào TALK có thể làm box của pet thứ
+nhất biến mất trong khi frame 34–36 của pet thứ nhất vẫn còn chạy.
+
+Frame loop cũng không còn gọi `speechDirector.advance(elapsedMillis)`. Unit test tích hợp
+chạy engine theo tick 100 ms và khóa một lần Show, 90–110 tick TALK, rồi đúng một lần Hide
+trên transition sang action kế tiếp.
+
 ## Social state machine
 
 Phiên tương tác có hai pha:

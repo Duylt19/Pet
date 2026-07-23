@@ -7,11 +7,18 @@ import android.graphics.RectF
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.text.TextUtils
 import android.util.TypedValue
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.asianmobile.privatebrower.R
+import com.asianmobile.privatebrower.pet.speech.PetSpeechBoxConstraints
+import com.asianmobile.privatebrower.pet.speech.PetSpeechBoxSize
+import com.asianmobile.privatebrower.pet.speech.PetSpeechBoxSizingPolicy
 import com.asianmobile.privatebrower.pet.speech.PetSpeechLine
+import com.asianmobile.privatebrower.pet.speech.PetSpeechTextMetrics
+import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 internal class PetSpeechBubbleView(context: Context) : View(context) {
     private val density = resources.displayMetrics.density
@@ -37,6 +44,35 @@ internal class PetSpeechBubbleView(context: Context) : View(context) {
     }
     private var line: PetSpeechLine? = null
 
+    fun measureBox(
+        text: String,
+        maximumWidthPixels: Int
+    ): PetSpeechBoxSize {
+        val defaultMinimumWidth = dp(MINIMUM_WIDTH_DP)
+        val safeMaximumWidth = maximumWidthPixels
+            .coerceAtLeast(1)
+            .coerceAtMost(dp(MAXIMUM_WIDTH_DP))
+        val horizontalPadding = dp(HORIZONTAL_TEXT_INSET_DP)
+            .coerceAtMost((safeMaximumWidth - 1) / 2)
+        val minimumWidth = defaultMinimumWidth
+            .coerceAtLeast(horizontalPadding * 2 + 1)
+            .coerceAtMost(safeMaximumWidth)
+        return PetSpeechBoxSizingPolicy.resolve(
+            constraints = PetSpeechBoxConstraints(
+                minimumWidth = minimumWidth,
+                maximumWidth = safeMaximumWidth,
+                widthStep = dp(WIDTH_STEP_DP),
+                minimumHeight = dp(MINIMUM_HEIGHT_DP),
+                maximumHeight = dp(MAXIMUM_HEIGHT_DP),
+                horizontalPadding = horizontalPadding,
+                verticalPadding = dp(VERTICAL_TEXT_INSET_DP),
+                maximumLines = MAX_TEXT_LINES,
+                minimumAspectRatio = MINIMUM_ASPECT_RATIO
+            ),
+            measureText = { contentWidth -> measureText(text, contentWidth) }
+        )
+    }
+
     fun render(line: PetSpeechLine) {
         this.line = line
         contentDescription = line.text
@@ -59,25 +95,70 @@ internal class PetSpeechBubbleView(context: Context) : View(context) {
             borderPaint
         )
 
-        val textInset = TEXT_INSET_DP * density
-        val textWidth = (bubble.width() - textInset * 2).toInt().coerceAtLeast(1)
-        val textLayout = StaticLayout.Builder
-            .obtain(currentLine.text, 0, currentLine.text.length, textPaint, textWidth)
-            .setAlignment(Layout.Alignment.ALIGN_CENTER)
-            .setIncludePad(false)
-            .setMaxLines(MAX_TEXT_LINES)
-            .build()
-        val availableTextHeight = bubble.height() - textInset * 2
-        val textY = bubble.top + textInset +
+        val horizontalInset = dp(HORIZONTAL_TEXT_INSET_DP)
+            .coerceAtMost((width - 1) / 2)
+            .toFloat()
+        val verticalInset = dp(VERTICAL_TEXT_INSET_DP).toFloat()
+        val textWidth = (bubble.width() - horizontalInset * 2).toInt().coerceAtLeast(1)
+        val textLayout = buildTextLayout(
+            text = currentLine.text,
+            contentWidth = textWidth,
+            maximumLines = MAX_TEXT_LINES
+        )
+        val availableTextHeight = bubble.height() - verticalInset * 2
+        val textY = bubble.top + verticalInset +
             ((availableTextHeight - textLayout.height) / 2f).coerceAtLeast(0f)
         canvas.save()
-        canvas.translate(bubble.left + textInset, textY)
+        canvas.translate(bubble.left + horizontalInset, textY)
         textLayout.draw(canvas)
         canvas.restore()
     }
 
+    private fun measureText(
+        text: String,
+        contentWidth: Int
+    ): PetSpeechTextMetrics {
+        val layout = buildTextLayout(text, contentWidth)
+        val usedWidth = (0 until layout.lineCount)
+            .maxOfOrNull { lineIndex -> ceil(layout.getLineWidth(lineIndex)).toInt() }
+            ?: 0
+        return PetSpeechTextMetrics(
+            usedWidth = usedWidth.coerceAtMost(contentWidth),
+            height = layout.height.coerceAtLeast(1),
+            lineCount = layout.lineCount.coerceAtLeast(1)
+        )
+    }
+
+    private fun buildTextLayout(
+        text: String,
+        contentWidth: Int,
+        maximumLines: Int? = null
+    ): StaticLayout {
+        val builder = StaticLayout.Builder
+            .obtain(text, 0, text.length, textPaint, contentWidth.coerceAtLeast(1))
+            .setAlignment(Layout.Alignment.ALIGN_CENTER)
+            .setIncludePad(false)
+            .setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY)
+        if (maximumLines != null) {
+            builder
+                .setEllipsize(TextUtils.TruncateAt.END)
+                .setEllipsizedWidth(contentWidth)
+                .setMaxLines(maximumLines)
+        }
+        return builder.build()
+    }
+
+    private fun dp(value: Float): Int = (value * density).roundToInt().coerceAtLeast(1)
+
     private companion object {
-        const val TEXT_INSET_DP = 10f
-        const val MAX_TEXT_LINES = 3
+        const val MINIMUM_WIDTH_DP = 80f
+        const val MAXIMUM_WIDTH_DP = 260f
+        const val WIDTH_STEP_DP = 8f
+        const val MINIMUM_HEIGHT_DP = 48f
+        const val MAXIMUM_HEIGHT_DP = 112f
+        const val HORIZONTAL_TEXT_INSET_DP = 14f
+        const val VERTICAL_TEXT_INSET_DP = 10f
+        const val MAX_TEXT_LINES = 4
+        const val MINIMUM_ASPECT_RATIO = 1.65f
     }
 }

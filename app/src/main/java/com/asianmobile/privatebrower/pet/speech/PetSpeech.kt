@@ -38,8 +38,7 @@ class PetSpeechCatalog(
 sealed interface PetSpeechDirective {
     data class Show(
         val petId: Int,
-        val line: PetSpeechLine,
-        val durationMillis: Long
+        val line: PetSpeechLine
     ) : PetSpeechDirective
 
     data class Hide(val petId: Int) : PetSpeechDirective
@@ -86,20 +85,6 @@ class PetSpeechDirector(
         return directives
     }
 
-    fun advance(elapsedMillis: Long): List<PetSpeechDirective> {
-        if (elapsedMillis <= 0) return emptyList()
-
-        val current = active ?: return startNext()
-        current.remainingMillis -= elapsedMillis
-        if (current.remainingMillis > 0) return emptyList()
-
-        active = null
-        return buildList {
-            add(PetSpeechDirective.Hide(current.petId))
-            addAll(startNext())
-        }
-    }
-
     fun reset() {
         active = null
         pending.clear()
@@ -123,13 +108,8 @@ class PetSpeechDirector(
         val queued = PendingSpeech(petId, tone, priority)
         if (priority == PetSpeechPriority.USER) {
             pending.removeIf { it.petId == petId }
-            val interrupted = active
-            active = null
             pending.addFirst(queued)
-            return buildList {
-                if (interrupted != null) add(PetSpeechDirective.Hide(interrupted.petId))
-                addAll(startNext())
-            }
+            return startNext()
         }
 
         if (pending.size >= MAX_PENDING_SPEECH) return emptyList()
@@ -145,10 +125,9 @@ class PetSpeechDirector(
             ?: return emptyList()
         pending.remove(next)
         val line = chooseLine(next.tone) ?: return startNext()
-        val duration = readingDurationMillis(line.text)
-        active = ActiveSpeech(next.petId, line, duration)
+        active = ActiveSpeech(next.petId, line)
         return listOf(
-            PetSpeechDirective.Show(next.petId, line, duration)
+            PetSpeechDirective.Show(next.petId, line)
         )
     }
 
@@ -171,12 +150,6 @@ class PetSpeechDirector(
         }
     }
 
-    private fun readingDurationMillis(text: String): Long {
-        val readableCharacters = text.codePointCount(0, text.length)
-        return (BASE_READING_MILLIS + readableCharacters * MILLIS_PER_CHARACTER)
-            .coerceIn(MIN_READING_MILLIS, MAX_READING_MILLIS)
-    }
-
     private data class PendingSpeech(
         val petId: Int,
         val tone: PetSpeechTone,
@@ -185,16 +158,11 @@ class PetSpeechDirector(
 
     private data class ActiveSpeech(
         val petId: Int,
-        val line: PetSpeechLine,
-        var remainingMillis: Long
+        val line: PetSpeechLine
     )
 
     private companion object {
         val INTERRUPTING_ACTIONS = setOf(PetAction.DRAGGED, PetAction.FLUNG)
-        const val BASE_READING_MILLIS = 3_400L
-        const val MILLIS_PER_CHARACTER = 90L
-        const val MIN_READING_MILLIS = 4_500L
-        const val MAX_READING_MILLIS = 8_500L
         const val MAX_PENDING_SPEECH = 4
     }
 }

@@ -12,12 +12,14 @@
 | Speed | 50–150%, bước 25% | map duration/velocity một lần khi Start |
 | Sound | on/off | reserved; pack v1 chưa hỗ trợ audio |
 | Pet messages | on/off | bật/tắt speech director và transient bubble window |
-| Custom messages | 0–30 câu, tối đa 120 code point/câu | mỗi câu một dòng; danh sách rỗng dùng catalog có sẵn |
+| Custom messages | 0–30 câu, tối đa 80 code point/câu | mỗi câu một dòng; danh sách rỗng dùng catalog có sẵn |
 | Interaction | on/off | off thêm `FLAG_NOT_TOUCHABLE` |
 | Position | x/y chuẩn hóa 0–1 | lưu khi Stop, restore/clamp theo bounds mới |
 
-Editor lời thoại nằm trong Settings, hỗ trợ lưu, hủy và reset về câu có sẵn. Repository
-chuẩn hóa khoảng trắng, bỏ câu rỗng/trùng và persist dạng newline-delimited string.
+Editor lời thoại nằm trong Settings, hỗ trợ lưu, hủy và reset về câu có sẵn. Counter
+hiển thị cả số câu và độ dài câu dài nhất; nút Save bị khóa khi vượt 30 câu hoặc 80
+Unicode code point/câu nên emoji không bị tính hai lần. Repository chuẩn hóa khoảng
+trắng, bỏ câu rỗng/trùng và persist dạng newline-delimited string.
 Pet chọn ngẫu nhiên nhưng không lặp ngay câu vừa nói; thay đổi áp dụng ở lần Start tiếp
 theo theo cùng snapshot policy với các setting runtime khác.
 

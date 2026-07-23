@@ -24,7 +24,7 @@
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.
 
 `pet_custom_messages` là dữ liệu nhỏ có giới hạn nên vẫn dùng Preferences DataStore:
-tối đa 30 câu, 120 Unicode code point/câu. `PetMessageListPolicy` chuẩn hóa khoảng
+tối đa 30 câu, 80 Unicode code point/câu. `PetMessageListPolicy` chuẩn hóa khoảng
 trắng, bỏ câu rỗng/trùng, cắt theo code point để không làm vỡ emoji và dùng chuỗi rỗng
 để biểu diễn fallback về catalog có sẵn. Khi danh sách có dữ liệu, nó thay catalog mặc
 định cho mọi tone ở session pet kế tiếp.

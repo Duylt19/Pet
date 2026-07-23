@@ -24,6 +24,8 @@
 | Pet message personalization V3.8 | Done | Editable 30-line list, Unicode-safe persistence, random anti-repeat, 48 fallback lines, broader triggers and slower 4.5–8.5s pacing |
 | TALK box attachment V3.9 | Done | Frame 34–36 box follows original -64px IE offset, mirrors in front of pet and cannot outlive/queue past TALK pose |
 | Pose-gated speech choreography V3.10 | Done | All messages require TALK, combo tone/priority is context-only, silent combos stay silent and carried box is rectangular without a tail |
+| Synchronized TALK lifecycle V3.11 | Done | Bubble and frame share TALK enter/exit transitions; independent reading timer removed so neither can finish before the other |
+| Adaptive speech layout V3.12 | Done | Glyph-aware 80–260dp × 48–112dp box, balanced four-line wrapping, viewport clamp and explicit 80-code-point Settings limit |
 | Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
 | Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |

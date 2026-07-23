@@ -23,7 +23,7 @@ class PetMessageListPolicy {
 
     companion object {
         const val MAX_CUSTOM_MESSAGES = 30
-        const val MAX_MESSAGE_CODE_POINTS = 120
+        const val MAX_MESSAGE_CODE_POINTS = 80
         private val WHITESPACE = Regex("\\s+")
     }
 }

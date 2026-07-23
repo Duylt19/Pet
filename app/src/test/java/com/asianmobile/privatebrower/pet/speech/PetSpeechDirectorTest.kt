@@ -6,7 +6,10 @@ import com.asianmobile.privatebrower.pet.engine.PetBounds
 import com.asianmobile.privatebrower.pet.engine.PetComboCatalog
 import com.asianmobile.privatebrower.pet.engine.PetComboId
 import com.asianmobile.privatebrower.pet.engine.PetDirection
+import com.asianmobile.privatebrower.pet.engine.PetEngine
+import com.asianmobile.privatebrower.pet.engine.PetEngineConfig
 import com.asianmobile.privatebrower.pet.engine.PetEffect
+import com.asianmobile.privatebrower.pet.engine.PetEvent
 import com.asianmobile.privatebrower.pet.engine.PetSize
 import com.asianmobile.privatebrower.pet.engine.PetState
 import com.asianmobile.privatebrower.pet.engine.PetTransition
@@ -44,7 +47,6 @@ class PetSpeechDirectorTest {
 
         val directive = shown.single() as PetSpeechDirective.Show
         assertEquals(PetSpeechTone.AFFECTION, directive.line.tone)
-        assertTrue(directive.durationMillis >= 4_500L)
     }
 
     @Test
@@ -97,6 +99,88 @@ class PetSpeechDirectorTest {
     }
 
     @Test
+    fun `bubble lifecycle matches the complete engine talk beat`() {
+        val director = PetSpeechDirector(catalog)
+        val engine = PetEngine(PetEngineConfig(maxTickMillis = 100L))
+        var current = engine.initialState(
+            bounds = PetBounds(0f, 0f, 1_000f, 2_000f),
+            size = PetSize(100f, 100f),
+            position = PetVector(400f, 1_900f)
+        )
+        val tapped = engine.reduce(current, PetEvent.Tap)
+        director.onTransition(1, current, tapped)
+        current = tapped.state
+        var showCount = 0
+        var hideCount = 0
+        var talkTickCount = 0
+        var totalTickCount = 0
+
+        while (hideCount == 0 && totalTickCount < 200) {
+            val previous = current
+            val transition = engine.reduce(previous, PetEvent.Tick(100L))
+            val directives = director.onTransition(1, previous, transition)
+            directives.forEach { directive ->
+                when (directive) {
+                    is PetSpeechDirective.Show -> {
+                        assertEquals(PetAction.TALK, transition.state.action)
+                        showCount += 1
+                    }
+
+                    is PetSpeechDirective.Hide -> {
+                        assertEquals(PetAction.TALK, previous.action)
+                        assertTrue(transition.state.action != PetAction.TALK)
+                        hideCount += 1
+                    }
+                }
+            }
+            current = transition.state
+            if (current.action == PetAction.TALK) talkTickCount += 1
+            totalTickCount += 1
+        }
+
+        assertEquals(1, showCount)
+        assertEquals(1, hideCount)
+        assertTrue(talkTickCount in 90..110)
+    }
+
+    @Test
+    fun `user priority queues without hiding a pet that is still talking`() {
+        val director = PetSpeechDirector(catalog)
+        val idle = state(PetAction.IDLE)
+        val ambientTalk = idle.copy(
+            action = PetAction.TALK,
+            activeComboId = PetComboId.CHATTER
+        )
+        val userTalk = idle.copy(
+            action = PetAction.TALK,
+            activeComboId = PetComboId.USER_AFFECTION
+        )
+
+        val ambientShown = director.onTransition(
+            1,
+            idle,
+            PetTransition(ambientTalk)
+        )
+        val userQueued = director.onTransition(
+            2,
+            idle,
+            PetTransition(userTalk)
+        )
+
+        assertEquals(1, ambientShown.size)
+        assertTrue(userQueued.isEmpty())
+
+        val switched = director.onTransition(
+            1,
+            ambientTalk,
+            PetTransition(ambientTalk.copy(action = PetAction.WINK))
+        )
+
+        assertEquals(PetSpeechDirective.Hide(1), switched.first())
+        assertEquals(2, (switched.last() as PetSpeechDirective.Show).petId)
+    }
+
+    @Test
     fun `queued speech is discarded if its owner leaves talk before its turn`() {
         val director = PetSpeechDirector(catalog)
         val idle = state(PetAction.IDLE)
@@ -119,7 +203,13 @@ class PetSpeechDirectorTest {
             ).isEmpty()
         )
 
-        assertEquals(listOf(PetSpeechDirective.Hide(1)), director.advance(10_000L))
+        val greetingEnded = director.onTransition(
+            1,
+            greeting,
+            PetTransition(greeting.copy(action = PetAction.WINK))
+        )
+
+        assertEquals(listOf(PetSpeechDirective.Hide(1)), greetingEnded)
     }
 
     @Test
@@ -193,7 +283,11 @@ class PetSpeechDirectorTest {
 
         val first = director.onTransition(1, walking, PetTransition(talking))
             .single() as PetSpeechDirective.Show
-        director.advance(20_000L)
+        director.onTransition(
+            1,
+            talking,
+            PetTransition(talking.copy(action = PetAction.IDLE))
+        )
         val second = director.onTransition(2, walking, PetTransition(talking))
             .single() as PetSpeechDirective.Show
 
@@ -222,7 +316,11 @@ class PetSpeechDirectorTest {
             (greeting.single() as PetSpeechDirective.Show).line.tone
         )
         assertTrue(reply.isEmpty())
-        val switched = director.advance(10_000)
+        val switched = director.onTransition(
+            1,
+            greetingState,
+            PetTransition(greetingState.copy(action = PetAction.WINK))
+        )
         assertEquals(PetSpeechDirective.Hide(1), switched.first())
         assertEquals(
             PetSpeechTone.SOCIAL_REPLY,

@@ -59,6 +59,9 @@ internal fun PetMessageEditorDialog(
         message.codePointCount(0, message.length) <=
             PetMessageListPolicy.MAX_MESSAGE_CODE_POINTS
     }
+    val longestMessageLength = draftMessages.maxOfOrNull { message ->
+        message.codePointCount(0, message.length)
+    } ?: 0
     val isValid = isWithinCountLimit && isWithinLengthLimit
     val fontRegular = FontFamily(Font(R.font.inter_regular))
     val fontMedium = FontFamily(Font(R.font.inter_medium))
@@ -182,10 +185,16 @@ internal fun PetMessageEditorDialog(
                         stringResource(
                             R.string.settings_pet_message_editor_counter,
                             draftMessages.size,
-                            PetMessageListPolicy.MAX_CUSTOM_MESSAGES
+                            PetMessageListPolicy.MAX_CUSTOM_MESSAGES,
+                            longestMessageLength,
+                            PetMessageListPolicy.MAX_MESSAGE_CODE_POINTS
                         )
                     } else {
-                        stringResource(R.string.settings_pet_message_editor_limit_error)
+                        stringResource(
+                            R.string.settings_pet_message_editor_limit_error,
+                            PetMessageListPolicy.MAX_CUSTOM_MESSAGES,
+                            PetMessageListPolicy.MAX_MESSAGE_CODE_POINTS
+                        )
                     },
                     color = colorResource(
                         if (isValid) R.color.colors_9B9C9E else R.color.colors_FF5A5A

@@ -28,8 +28,10 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 ## Runtime invariants
 
 - Window trong suốt có kích thước 64–196dp theo pack/setting, chỉ bắt touch trong hitbox pet; không dùng full-screen overlay.
-- Khi pet nói, controller tạo tối đa một window 220×84dp non-touchable; window bị remove
-  khi hết thời gian đọc, drag/fling, Stop hoặc service destroy.
+- Khi pet nói, controller tạo tối đa một window non-touchable thích ứng
+  80–260dp × 48–112dp. Width lấy từ glyph/dòng thực tế và usable viewport; height tăng
+  tới bốn dòng, sau đó ellipsis. Window bị remove đúng khi action rời TALK, drag/fling,
+  Stop hoặc service destroy. Không có timer speech độc lập với engine.
 - 1–3 instance dùng chung đúng một `Choreographer.FrameCallback` trên main thread; 30 FPS mặc định, 24 FPS cho 3 pet hoặc low-RAM budget.
 - Frame loop chỉ reduce engine + invalidate/update layout; không decode bitmap, parse file hoặc tạo thread.
 - Mọi instance dùng chung visual đã preload; mỗi instance chỉ giữ engine state/view/layout params riêng.
@@ -68,6 +70,10 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   đầu đúng X `49`, xác nhận inward-facing giữ attachment chính xác. Box tự remove khi
   TALK kết thúc. Clean Stop còn 0 overlay/speech window, 0 service và không có
   fatal/window leak trong logcat.
+- Pet Speech V3.12 verified với custom text ngắn: window co theo glyph còn 345×168 px
+  (~98,6×48dp) thay vì fixed 770×294 px; chu kỳ speech tồn tại 10.052 ms (~10,05 giây)
+  rồi remove ở cuối TALK. Settings hiển thị rõ counter 14/80 code point; sau smoke test
+  đã Stop sạch và restore cấu hình ba pet.
 
 ## Chưa thuộc runtime hiện tại
 

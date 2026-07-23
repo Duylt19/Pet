@@ -99,7 +99,6 @@ internal class PetOverlayController(
                 val event = PetEvent.Tick(elapsedMillis)
                 instances.toList().forEach { dispatch(it, event) }
                 resolveCrowdSpacing()
-                speechDirector?.advance(elapsedMillis)?.forEach(::applySpeechDirective)
             }
             choreographer.postFrameCallback(this)
         }
@@ -271,13 +270,24 @@ internal class PetOverlayController(
         val existing = speechWindow
         if (existing?.petId == petId) {
             existing.line = line
+            existing.view.measureBox(
+                text = line.text,
+                maximumWidthPixels = speechMaximumWidth(instance)
+            ).let { size ->
+                existing.params.width = size.width
+                existing.params.height = size.height
+            }
             updateSpeechPosition(existing, instance)
             return
         }
         if (existing != null) hideSpeech()
 
         val view = PetSpeechBubbleView(appContext)
-        val params = createSpeechLayoutParams(petId)
+        val boxSize = view.measureBox(
+            text = line.text,
+            maximumWidthPixels = speechMaximumWidth(instance)
+        )
+        val params = createSpeechLayoutParams(petId, boxSize.width, boxSize.height)
         val created = SpeechWindow(petId, view, params, line)
         updateSpeechPosition(created, instance)
         try {
@@ -349,9 +359,13 @@ internal class PetOverlayController(
         title = "$OVERLAY_WINDOW_TITLE ${index + 1}"
     }
 
-    private fun createSpeechLayoutParams(petId: Int) = WindowManager.LayoutParams(
-        appContext.dpToPixels(SPEECH_WIDTH_DP),
-        appContext.dpToPixels(SPEECH_HEIGHT_DP),
+    private fun createSpeechLayoutParams(
+        petId: Int,
+        width: Int,
+        height: Int
+    ) = WindowManager.LayoutParams(
+        width,
+        height,
         overlayWindowType(),
         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
@@ -367,6 +381,13 @@ internal class PetOverlayController(
             )
         }
         title = "$SPEECH_WINDOW_TITLE ${petId + 1}"
+    }
+
+    private fun speechMaximumWidth(instance: PetInstance): Int {
+        val edgeOverflow = instance.state.size.width / SCREEN_EDGE_OVERFLOW_DIVISOR
+        val viewportWidth = (instance.state.bounds.right - edgeOverflow).roundToInt()
+        val margin = appContext.dpToPixels(SPEECH_MARGIN_DP)
+        return (viewportWidth - margin * 2).coerceAtLeast(1)
     }
 
     private fun removeAllViews() {
@@ -443,8 +464,6 @@ internal class PetOverlayController(
         const val START_MARGIN_DP = 20
         const val OVERLAY_WINDOW_TITLE = "Cute Pet overlay"
         const val SPEECH_WINDOW_TITLE = "Cute Pet speech"
-        const val SPEECH_WIDTH_DP = 220
-        const val SPEECH_HEIGHT_DP = 84
         const val SPEECH_MARGIN_DP = 6
         const val SCREEN_EDGE_OVERFLOW_DIVISOR = 3f
         const val NANOS_PER_MILLISECOND = 1_000_000L

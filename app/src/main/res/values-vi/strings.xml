@@ -11,8 +11,8 @@
     <string name="settings_pet_message_editor_title">Danh sách lời thoại của pet</string>
     <string name="settings_pet_message_editor_description">Nhập mỗi lời thoại trên một dòng. Pet sẽ chọn ngẫu nhiên tối đa %1$d câu, mỗi câu không quá %2$d ký tự.</string>
     <string name="settings_pet_message_editor_placeholder">Chào bạn! Bạn đang làm gì vậy?\nCùng khám phá màn hình nhé!\nĐến giờ ăn vặt chưa?</string>
-    <string name="settings_pet_message_editor_counter">%1$d/%2$d lời thoại</string>
-    <string name="settings_pet_message_editor_limit_error">Danh sách quá nhiều câu hoặc có câu quá dài</string>
+    <string name="settings_pet_message_editor_counter">%1$d/%2$d lời thoại • câu dài nhất %3$d/%4$d ký tự</string>
+    <string name="settings_pet_message_editor_limit_error">Tối đa %1$d lời thoại, mỗi câu không quá %2$d ký tự</string>
     <string name="settings_pet_message_editor_use_builtin">Dùng câu có sẵn</string>
     <string name="settings_pet_message_editor_save">Lưu</string>
     <string name="settings_pet_message_editor_close">Đóng trình sửa lời thoại</string>

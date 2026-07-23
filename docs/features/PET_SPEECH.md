@@ -73,8 +73,12 @@ Pacing:
 
 - toàn scene chỉ có tối đa một bubble;
 - queue tối đa bốn câu, user và social được ưu tiên hơn ambient;
+- priority chỉ sắp thứ tự queue, không preempt pet đang TALK; vì vậy pet hiện tại luôn
+  giữ box đến hết beat trước khi pet kế tiếp nhận lượt;
 - cùng pet/tone không được xếp trùng;
-- thời gian đọc = `3.400 ms + 90 ms × số code point`, clamp 4,5–8,5 giây;
+- box và frame dùng cùng lifecycle: `Show` khi vào TALK, giữ suốt beat 9–11 giây và
+  `Hide` trên đúng transition rời TALK;
+- speech director không còn reading timer hoặc lệnh `advance(elapsedMillis)` riêng;
 - mọi item trong queue bị loại nếu pet đã rời TALK trước khi tới lượt;
 - director nhớ câu cuối toàn scene và tránh lặp ngay khi còn lựa chọn khác.
 
@@ -86,7 +90,14 @@ không dùng cooldown độc lập có thể làm pet giữ frame TALK nhưng kh
 
 Speech dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn tại khi có câu đang hiển thị:
 
-- fixed 220×84 dp, transparent, `FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE`;
+- kích thước thích ứng trong khoảng 80–260dp × 48–112dp, transparent,
+  `FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE`;
+- câu một dòng lấy `usedWidth` glyph thực tế cộng padding thay vì lấy số ký tự; text rất
+  ngắn vẫn giữ minimum 80×48dp để box không bị tóp mất cân đối;
+- text dài hoặc có xuống dòng được thử theo từng bước width 8dp; policy chọn box nhỏ nhất
+  vừa tối đa bốn dòng và ưu tiên tỷ lệ rộng/cao ít nhất 1,65;
+- maximum width tiếp tục bị clamp theo usable viewport. Nếu text không thể vừa giới hạn,
+  box dùng maximum 260×112dp và renderer ellipsis ở dòng thứ tư;
 - không tạo full-screen window và không chặn app bên dưới;
 - mọi message dùng attachment gốc của `WalkWithIE`: canvas 128 có `ImageAnchor=64,128`,
   `IeOffsetX=0`, `IeOffsetY=-64`, nên đáy box nằm ở nửa chiều cao pet;
@@ -96,22 +107,24 @@ Speech dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn tại khi có c
 - trước TALK, pet solo ở nửa trái/phải tự quay vào tâm viewport để box có đủ chỗ và cạnh
   vẫn chạm đúng hand/anchor thay vì bị horizontal clamp đẩy xuyên qua sprite; social TALK
   giữ nguyên facing giữa hai pet;
-- câu TALK đang active hoặc queued bị hủy nếu pet rời pose 34–36; beat TALK 9–11 giây
-  luôn dài hơn reading-time tối đa 8,5 giây nên box không thể tồn tại trên action kế tiếp;
+- câu TALK đang active hoặc queued bị hủy trên chính transition rời pose 34–36; không có
+  timeout độc lập nên box không thể tắt trước frame hoặc tồn tại trên action kế tiếp;
 - mọi placement vẫn clamp trong usable viewport;
 - update vị trí bằng cùng shared frame clock, không tạo thread/coroutine/timer riêng;
-- text tối đa ba dòng, tương phản cao và có `contentDescription`;
+- text tối đa bốn dòng, căn giữa theo cả hai trục, tương phản cao và có
+  `contentDescription`;
 - stop/service destroy remove bubble trước khi remove các pet window.
 
 Catalog có sẵn hiện có 48 câu trong Android resources: tám câu cho mỗi tone, với English
 base và Vietnamese. `Pet messages` trong Settings được persist bằng
 `pet_messages_enabled`, mặc định bật.
 
-`Custom message list` cho nhập mỗi câu một dòng, tối đa 30 câu và 120 Unicode code
-point/câu. DataStore lưu qua `pet_custom_messages`; parser chuẩn hóa khoảng trắng, bỏ
-câu rỗng/trùng và không cắt giữa surrogate pair/emoji. Khi list không rỗng, mọi trigger
-dùng list này và pet chọn ngẫu nhiên không lặp ngay; `Use built-in` xóa list để trở lại
-catalog 48 câu. Cả toggle và list mới áp dụng ở lần Start pet kế tiếp.
+`Custom message list` cho nhập mỗi câu một dòng, tối đa 30 câu và 80 Unicode code
+point/câu. Counter trong Settings hiển thị số câu và độ dài câu dài nhất; Save bị khóa
+khi vượt giới hạn. DataStore lưu qua `pet_custom_messages`; parser chuẩn hóa khoảng trắng,
+bỏ câu rỗng/trùng và không cắt giữa surrogate pair/emoji. Khi list không rỗng, mọi
+trigger dùng list này và pet chọn ngẫu nhiên không lặp ngay; `Use built-in` xóa list để
+trở lại catalog 48 câu. Cả toggle và list mới áp dụng ở lần Start pet kế tiếp.
 
 ## Hướng mở rộng server
 
@@ -127,9 +140,11 @@ sàng, nên thêm `SpeechCatalogRepository` độc lập với pack binary:
 
 ## Verification matrix
 
-- JVM: sanitize/codec custom list, random không lặp ngay, tap show/hide theo reading
-  time, TALK placement trái/phải theo `IeOffset`, hủy active/queued TALK khi pose kết
-  thúc, speaking/silent combo mapping, social reply tuần tự và drag đóng bubble.
+- JVM: sanitize/codec custom list, random không lặp ngay, lifecycle engine–speech giữ box
+  xuyên suốt 90–110 tick TALK, adaptive sizing cho short/single-line/explicit newline/
+  long/fallback/narrow viewport, placement trái/phải theo `IeOffset`, hủy active/queued
+  TALK khi pose kết thúc, speaking/silent combo mapping, social reply tuần tự và drag
+  đóng bubble.
 - Pack: contract sequence 34/35/34/36 và immutable owner conversion revision 4.
 - Android: rectangular TALK box theo pet và hướng mirror, không tail, clamp hai mép,
   1/2/3 pet turn-taking, rotation, screen-off/resume, Settings off và Stop không còn
@@ -142,13 +157,24 @@ Pixel 3 XL / Android 12 / API 31:
 - owner pack `Natsu` từ `4.zip` được convert thành `owner.shimeji.4@4`;
 - manifest app-private chứa đúng clip loop
   `shime34 → shime35 → shime34 → shime36`, 240 ms/frame;
-- `Cute Pet speech` window có kích thước 770×294 px, tương ứng 220×84 dp ở density
-  thiết bị, có `NOT_TOUCHABLE`;
+- baseline V3.10 dùng `Cute Pet speech` window 770×294 px, tương ứng 220×84 dp ở
+  density thiết bị, có `NOT_TOUCHABLE`; fixed size này đã được thay bằng adaptive
+  V3.12;
 - tap không tạo window trong `TAPPED/IDLE`; window chỉ xuất hiện khi Natsu chuyển sang
   đúng pose TALK 34–36 với tay đưa ra;
 - screenshot xác nhận box có bốn góc vuông, không tail/tam giác và bám phía trước vùng
   tay theo hướng pet;
 - edge-case bên trái xác nhận pet tự mirror vào trong: owner window `[-98, 196]` có
   anchor X `49`, speech window bắt đầu đúng X `49` thay vì bị clamp xuyên qua sprite;
-- bubble tự remove khi reading time/TALK pose kết thúc;
+- bubble tự remove trên cùng transition kết thúc TALK;
 - Stop còn 0 pet/speech window, 0 `PetOverlayService` và logcat không có lỗi feature.
+
+Adaptive layout V3.12 được xác minh tiếp trên cùng thiết bị:
+
+- hai custom message ban đầu được giữ nguyên; Settings hiển thị giới hạn 80 ký tự và
+  counter `2/30 messages • longest 14/80 characters`;
+- câu ngắn `a Duy đẹp trai` tạo window 345×168 px, tương ứng khoảng 98,6×48dp, thay vì
+  luôn chiếm 770×294 px như fixed layout cũ;
+- tap tạo một chu kỳ speech hiển thị 10.052 ms (~10,05 giây); window biến mất ở cuối
+  TALK và pet tiếp tục action kế tiếp không còn giữ frame speech;
+- session test được Stop sạch và cấu hình ban đầu đã được restore về ba pet.
