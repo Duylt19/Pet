@@ -91,7 +91,7 @@ class PetEngine(
     }
 
     private fun onTap(state: PetState): PetTransition {
-        if (state.action == PetAction.DRAGGED) return PetTransition(state)
+        if (!state.isGroundedSurface()) return PetTransition(state)
         val followUp = preferredActionOrNull(PetAction.WINK, PetAction.LOOK_UP)
             ?.takeUnless { it == config.tapAction }
         val tapBeat = PetComboBeat(
@@ -119,7 +119,7 @@ class PetEngine(
     }
 
     private fun onShowcase(state: PetState): PetTransition {
-        if (state.action == PetAction.DRAGGED) return PetTransition(state)
+        if (!state.isGroundedSurface()) return PetTransition(state)
         val definition = PetComboCatalog.supportedDefinition(
             PetComboId.USER_SHOWCASE,
             config.supportedActions
@@ -143,6 +143,9 @@ class PetEngine(
             id = event.comboId,
             supportedActions = config.supportedActions
         ) ?: return PetTransition(state)
+        if (definition.habitat == PetComboHabitat.GROUND && !state.isGroundedSurface()) {
+            return PetTransition(state)
+        }
         val directedState = event.direction?.let { state.copy(direction = it) }
             ?: state.withComboStartDirection(definition.startDirection)
         return startRoutine(
@@ -241,15 +244,13 @@ class PetEngine(
                     beat = nextBeat,
                     pendingBeats = state.pendingComboBeats.drop(1)
                 )
-                if (state.action != nextBeat.action) {
-                    effects += PetEffect.ActionChanged(state.action, nextBeat.action)
-                }
-                scheduled.copy(
+                val changed = changeAction(
+                    state = scheduled,
                     action = nextBeat.action,
-                    animationCursor = PetAnimationCursor(),
-                    actionElapsedMillis = 0,
-                    actionTargetMillis = 0
+                    restartAnimation = true
                 )
+                effects += changed.effects
+                changed.state
             }
 
             else -> state.copy(
@@ -428,26 +429,35 @@ class PetEngine(
         action: PetAction,
         restartAnimation: Boolean = false
     ): PetTransition {
-        if (state.action == action && !restartAnimation) return PetTransition(state)
-        val directedState = if (action.isSpeechAction &&
-            !state.action.isSpeechAction &&
-            state.activeComboId !in SOCIAL_SPEECH_COMBOS
-        ) {
-            state.faceViewportCenter()
+        val speechRejected = action.isSpeechAction && !state.isGroundedSurface()
+        val transitionState = if (speechRejected) state.cancelRoutine() else state
+        val resolvedAction = if (speechRejected) {
+            preferredAction(PetAction.FALL, PetAction.WALK, PetAction.IDLE)
         } else {
-            state
+            action
+        }
+        if (transitionState.action == resolvedAction && !restartAnimation) {
+            return PetTransition(transitionState)
+        }
+        val directedState = if (resolvedAction.isSpeechAction &&
+            !transitionState.action.isSpeechAction &&
+            transitionState.activeComboId !in SOCIAL_SPEECH_COMBOS
+        ) {
+            transitionState.faceViewportCenter()
+        } else {
+            transitionState
         }
         return PetTransition(
             state = directedState.copy(
-                action = action,
+                action = resolvedAction,
                 animationCursor = PetAnimationCursor(),
                 actionElapsedMillis = 0,
                 actionTargetMillis = 0
             ),
-            effects = if (state.action == action) {
+            effects = if (state.action == resolvedAction) {
                 emptyList()
             } else {
-                listOf(PetEffect.ActionChanged(state.action, action))
+                listOf(PetEffect.ActionChanged(state.action, resolvedAction))
             }
         )
     }

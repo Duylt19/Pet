@@ -5,7 +5,6 @@ import com.asianmobile.privatebrower.pet.engine.PetComboId
 import com.asianmobile.privatebrower.pet.engine.PetState
 import com.asianmobile.privatebrower.pet.engine.PetTransition
 import com.asianmobile.privatebrower.pet.engine.isSpeechAction
-import java.util.ArrayDeque
 import kotlin.random.Random
 
 enum class PetSpeechTone {
@@ -46,19 +45,16 @@ sealed interface PetSpeechDirective {
 }
 
 /**
- * Serializes pose-gated speech across all overlay pets. A message may only start while its owner is
- * rendering a stationary or moving speech action, so text can never float over an unrelated
- * movement or skill frame.
+ * Owns one pose-gated speech session per pet. Different pets may speak simultaneously, while each
+ * bubble remains strictly tied to its owner's stationary or moving speech action.
  */
 class PetSpeechDirector(
     private val catalog: PetSpeechCatalog,
     seed: Int = 0
 ) {
     private val random = Random(seed)
-    private val pending = ArrayDeque<PendingSpeech>()
-    private val actionByPet = mutableMapOf<Int, PetAction>()
+    private val activeByPet = mutableMapOf<Int, PetSpeechLine>()
     private var lastLineText: String? = null
-    private var active: ActiveSpeech? = null
 
     fun onTransition(
         petId: Int,
@@ -66,7 +62,6 @@ class PetSpeechDirector(
         transition: PetTransition
     ): List<PetSpeechDirective> {
         val directives = mutableListOf<PetSpeechDirective>()
-        actionByPet[petId] = transition.state.action
         if (transition.state.action in INTERRUPTING_ACTIONS) {
             directives += cancel(petId)
             return directives
@@ -81,56 +76,27 @@ class PetSpeechDirector(
             transition.state.action.isSpeechAction
         ) {
             PetComboSpeechPolicy.cueFor(transition.state.activeComboId)?.let { cue ->
-                directives += request(petId, cue.tone, cue.priority)
+                directives += request(petId, cue.tone)
             }
         }
         return directives
     }
 
     fun reset() {
-        active = null
-        pending.clear()
-        actionByPet.clear()
+        activeByPet.clear()
         lastLineText = null
     }
 
     private fun request(
         petId: Int,
-        tone: PetSpeechTone,
-        priority: PetSpeechPriority
+        tone: PetSpeechTone
     ): List<PetSpeechDirective> {
+        if (petId in activeByPet) return emptyList()
         val available = catalog.lines(tone)
         if (available.isEmpty()) return emptyList()
-        if (active?.let { it.petId == petId && it.line.tone == tone } == true ||
-            pending.any { it.petId == petId && it.tone == tone }
-        ) {
-            return emptyList()
-        }
-
-        val queued = PendingSpeech(petId, tone, priority)
-        if (priority == PetSpeechPriority.USER) {
-            pending.removeIf { it.petId == petId }
-            pending.addFirst(queued)
-            return startNext()
-        }
-
-        if (pending.size >= MAX_PENDING_SPEECH) return emptyList()
-        pending.addLast(queued)
-        return startNext()
-    }
-
-    private fun startNext(): List<PetSpeechDirective> {
-        if (active != null) return emptyList()
-        pending.removeIf { queued -> actionByPet[queued.petId]?.isSpeechAction != true }
-        val next = pending
-            .maxByOrNull(PendingSpeech::priority)
-            ?: return emptyList()
-        pending.remove(next)
-        val line = chooseLine(next.tone) ?: return startNext()
-        active = ActiveSpeech(next.petId, line)
-        return listOf(
-            PetSpeechDirective.Show(next.petId, line)
-        )
+        val line = chooseLine(tone) ?: return emptyList()
+        activeByPet[petId] = line
+        return listOf(PetSpeechDirective.Show(petId, line))
     }
 
     private fun chooseLine(tone: PetSpeechTone): PetSpeechLine? {
@@ -143,41 +109,17 @@ class PetSpeechDirector(
     }
 
     private fun cancel(petId: Int): List<PetSpeechDirective> {
-        pending.removeIf { it.petId == petId }
-        val current = active?.takeIf { it.petId == petId } ?: return emptyList()
-        active = null
-        return buildList {
-            add(PetSpeechDirective.Hide(current.petId))
-            addAll(startNext())
-        }
+        if (activeByPet.remove(petId) == null) return emptyList()
+        return listOf(PetSpeechDirective.Hide(petId))
     }
-
-    private data class PendingSpeech(
-        val petId: Int,
-        val tone: PetSpeechTone,
-        val priority: PetSpeechPriority
-    )
-
-    private data class ActiveSpeech(
-        val petId: Int,
-        val line: PetSpeechLine
-    )
 
     private companion object {
         val INTERRUPTING_ACTIONS = setOf(PetAction.DRAGGED, PetAction.FLUNG)
-        const val MAX_PENDING_SPEECH = 4
     }
 }
 
-internal enum class PetSpeechPriority {
-    AMBIENT,
-    SOCIAL,
-    USER
-}
-
 internal data class PetSpeechCue(
-    val tone: PetSpeechTone,
-    val priority: PetSpeechPriority
+    val tone: PetSpeechTone
 )
 
 /**
@@ -193,29 +135,24 @@ internal object PetComboSpeechPolicy {
         PetComboId.CHATTER -> cue(PetSpeechTone.CHATTER)
 
         PetComboId.USER_AFFECTION -> cue(
-            PetSpeechTone.AFFECTION,
-            PetSpeechPriority.USER
+            PetSpeechTone.AFFECTION
         )
 
         PetComboId.USER_SHOWCASE -> cue(
-            PetSpeechTone.CELEBRATION,
-            PetSpeechPriority.USER
+            PetSpeechTone.CELEBRATION
         )
 
         PetComboId.SOCIAL_HELLO -> cue(
-            PetSpeechTone.SOCIAL_HELLO,
-            PetSpeechPriority.SOCIAL
+            PetSpeechTone.SOCIAL_HELLO
         )
 
         PetComboId.SOCIAL_HELLO_REPLY -> cue(
-            PetSpeechTone.SOCIAL_REPLY,
-            PetSpeechPriority.SOCIAL
+            PetSpeechTone.SOCIAL_REPLY
         )
 
         PetComboId.SOCIAL_SHOW_OFF,
         PetComboId.SOCIAL_ADMIRE -> cue(
-            PetSpeechTone.CELEBRATION,
-            PetSpeechPriority.SOCIAL
+            PetSpeechTone.CELEBRATION
         )
 
         PetComboId.CURIOUS_SCOUT,
@@ -254,8 +191,5 @@ internal object PetComboSpeechPolicy {
         PetComboId.SOCIAL_DUET_B -> null
     }
 
-    private fun cue(
-        tone: PetSpeechTone,
-        priority: PetSpeechPriority = PetSpeechPriority.AMBIENT
-    ) = PetSpeechCue(tone, priority)
+    private fun cue(tone: PetSpeechTone) = PetSpeechCue(tone)
 }

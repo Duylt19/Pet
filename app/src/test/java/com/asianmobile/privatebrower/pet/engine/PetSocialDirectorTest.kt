@@ -116,6 +116,62 @@ class PetSocialDirectorTest {
     }
 
     @Test
+    fun `declined social invitation leaves both pets autonomous`() {
+        val director = PetSocialDirector(
+            config = PetSocialConfig(
+                initialDelayMillis = 0,
+                interactionChancePercent = 0
+            )
+        )
+        val pets = listOf(snapshot(0, x = 20f), snapshot(1, x = 42f))
+
+        val directives = director.update(pets, elapsedMillis = 1)
+
+        assertTrue(directives.isEmpty())
+    }
+
+    @Test
+    fun `distant pets keep their autonomous stories instead of forced approach`() {
+        val director = PetSocialDirector(
+            config = PetSocialConfig(
+                initialDelayMillis = 0,
+                interactionChancePercent = 100,
+                maximumApproachDistanceInPetWidths = 2f
+            )
+        )
+        val pets = listOf(snapshot(0, x = 20f), snapshot(1, x = 300f))
+
+        val directives = director.update(pets, elapsedMillis = 1)
+
+        assertTrue(directives.isEmpty())
+    }
+
+    @Test
+    fun `approach releases ownership instead of overriding an interrupted pet`() {
+        val director = director()
+        val available = listOf(snapshot(0, x = 20f), snapshot(1, x = 90f))
+        director.update(available, elapsedMillis = 1)
+        val interrupted = listOf(
+            snapshot(
+                id = 0,
+                x = 25f,
+                action = PetAction.TAPPED,
+                activeComboId = PetComboId.USER_AFFECTION
+            ),
+            snapshot(
+                id = 1,
+                x = 85f,
+                action = PetAction.RUN,
+                activeComboId = PetComboId.SOCIAL_APPROACH
+            )
+        )
+
+        val directives = director.update(interrupted, elapsedMillis = 100)
+
+        assertTrue(directives.isEmpty())
+    }
+
+    @Test
     fun `stable social roles are not forced to face again every frame`() {
         val director = director()
         val available = listOf(
@@ -213,7 +269,9 @@ class PetSocialDirectorTest {
             interactionCooldownMillis = 100,
             retryDelayMillis = 100,
             approachTimeoutMillis = 1_000,
-            performanceTimeoutMillis = 1_000
+            performanceTimeoutMillis = 1_000,
+            interactionChancePercent = 100,
+            maximumApproachDistanceInPetWidths = 20f
         ),
         sceneOffset = sceneOffset
     )

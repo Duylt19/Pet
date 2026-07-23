@@ -1,14 +1,24 @@
 package com.asianmobile.privatebrower.pet.engine
 
-import kotlin.math.abs
 import kotlin.math.max
 
+/**
+ * Repairs deep overlap only after autonomous pets have both settled into resting poses.
+ *
+ * Moving pets intentionally do not participate: they may cross each other unless a
+ * [PetSocialDirector] session has explicitly paired them. This keeps visual overlap from
+ * becoming an invisible wall or a source of forced direction changes.
+ */
 class PetCrowdResolver(
     private val minimumGapInPetWidths: Float = 0.05f,
+    private val overlapRepairThresholdInPetWidths: Float = 0.55f,
     private val floorToleranceInPetHeights: Float = 0.45f
 ) {
     init {
         require(minimumGapInPetWidths >= 0f) { "minimum pet gap must not be negative" }
+        require(overlapRepairThresholdInPetWidths in 0f..1f) {
+            "overlap repair threshold must be between zero and one pet width"
+        }
         require(floorToleranceInPetHeights >= 0f) {
             "crowd floor tolerance must not be negative"
         }
@@ -17,11 +27,11 @@ class PetCrowdResolver(
     fun resolve(states: List<PetState>): List<PetState> {
         if (states.size < 2) return states
         val resolved = states.toMutableList()
-        val grounded = states.indices.filter { index -> states[index].usesFloorPersonalSpace() }
-        if (grounded.size < 2) return states
+        val resting = states.indices.filter { index -> states[index].usesRestingPersonalSpace() }
+        if (resting.size < 2) return states
 
-        repeat(grounded.size) {
-            val ordered = grounded.sortedWith(
+        repeat(resting.size) {
+            val ordered = resting.sortedWith(
                 compareBy<Int> { index -> centerX(resolved[index]) }
                     .thenBy { index -> index }
             )
@@ -45,9 +55,10 @@ class PetCrowdResolver(
             }
             val previous = states[current.last()]
             val next = states[index]
-            val gap = max(previous.size.width, next.size.width) * minimumGapInPetWidths
-            val overlaps = next.position.x <
-                previous.position.x + previous.size.width + gap - POSITION_TOLERANCE
+            val sharedWidth = max(previous.size.width, next.size.width)
+            val overlap = previous.position.x + previous.size.width - next.position.x
+            val overlaps = overlap >
+                sharedWidth * overlapRepairThresholdInPetWidths + POSITION_TOLERANCE
             if (overlaps) {
                 current += index
             } else {
@@ -78,19 +89,10 @@ class PetCrowdResolver(
         val averageCenter = clusterStates.map(::centerX).average().toFloat()
         val maximumStart = (rightBound - span).coerceAtLeast(leftBound)
         var cursor = (averageCenter - span * 0.5f).coerceIn(leftBound, maximumStart)
-        val clusterCenter = cursor + span * 0.5f
 
         cluster.forEachIndexed { position, stateIndex ->
             val state = states[stateIndex]
-            val outwardDirection = if (
-                centerX(state) < clusterCenter ||
-                (centerX(state) == clusterCenter && position < cluster.size / 2)
-            ) {
-                PetDirection.LEFT
-            } else {
-                PetDirection.RIGHT
-            }
-            states[stateIndex] = state.separated(cursor, outwardDirection)
+            states[stateIndex] = state.separated(cursor)
             if (position < cluster.lastIndex) {
                 val next = states[cluster[position + 1]]
                 cursor += state.size.width +
@@ -99,25 +101,14 @@ class PetCrowdResolver(
         }
     }
 
-    private fun PetState.usesFloorPersonalSpace(): Boolean {
-        if (action in AIRBORNE_OR_CONTROLLED_ACTIONS) return false
-        val floorY = bounds.bottom - size.height
-        return abs(position.y - floorY) <= size.height * floorToleranceInPetHeights
-    }
+    private fun PetState.usesRestingPersonalSpace(): Boolean =
+        action in RESTING_ACTIONS &&
+            activeComboId !in SOCIAL_COMBO_IDS &&
+            isGroundedSurface(floorToleranceInPetHeights)
 
-    private fun PetState.separated(
-        x: Float,
-        outwardDirection: PetDirection
-    ): PetState {
+    private fun PetState.separated(x: Float): PetState {
         val correctedPosition = bounds.clampTopLeft(position.copy(x = x), size)
-        val correctedDirection = if (
-            action in GROUND_MOVEMENT_ACTIONS && activeComboId !in SOCIAL_COMBO_IDS
-        ) {
-            outwardDirection
-        } else {
-            direction
-        }
-        return copy(position = correctedPosition, direction = correctedDirection)
+        return copy(position = correctedPosition)
     }
 
     private fun centerX(state: PetState): Float = state.position.x + state.size.width * 0.5f
@@ -125,21 +116,14 @@ class PetCrowdResolver(
     private companion object {
         const val POSITION_TOLERANCE = 0.01f
 
-        val AIRBORNE_OR_CONTROLLED_ACTIONS = setOf(
-            PetAction.FALL,
-            PetAction.JUMP,
-            PetAction.FLUNG,
-            PetAction.DRAGGED,
-            PetAction.CLIMB_WALL,
-            PetAction.CLIMB_DOWN,
-            PetAction.CLIMB_CEILING,
-            PetAction.DANGLE
-        )
-        val GROUND_MOVEMENT_ACTIONS = setOf(
-            PetAction.WALK,
-            PetAction.RUN,
-            PetAction.CREEP,
-            PetAction.TALK_WALK
+        val RESTING_ACTIONS = setOf(
+            PetAction.IDLE,
+            PetAction.SIT,
+            PetAction.WINK,
+            PetAction.LOOK_UP,
+            PetAction.TALK,
+            PetAction.SPECIAL,
+            PetAction.SPECIAL_2
         )
         val SOCIAL_COMBO_IDS = setOf(
             PetComboId.SOCIAL_APPROACH,

@@ -72,7 +72,7 @@ Catalog giữ 20 solo story. 12 combo nền được cân lại theo từng beat
 | `SHY_SNEAK` | Idle 3–5s | Creep 5–8s → Look 3–5s | Idle 2.5–4.5s | Rón rén có dừng nghe/ngó |
 | `CLUMSY_RECOVERY` | Run 2.5–4s | Trip once | Sit 7–11s → Wink once | Vấp một lần, hồi phục lâu rồi trấn an |
 | `TINY_PERFORMANCE` | Sit 3–5s | Special 4.5–7s → pause 2–3.5s → Special 2 4.5–7s | Sit 4–7s | Hai tiết mục có nghỉ giữa và pose kết |
-| `DAYDREAM` | Sit 6–10s | Look 4–7s → Dangle 4–7s | Sit 5–9s | Một đoạn mơ màng dài, ít transition |
+| `DAYDREAM` | Sit 6–10s | Look 4–7s → Dangle 4–7s → Sit 2.5–4s | Talk → Sit 5–9s | Có pose ngồi hồi phục trước khi nói, không chuyển thẳng từ pose treo |
 | `BUSY_PATROL` | Walk 6–10s | Idle 2–4s → Run 2.5–4.5s | Look 3–5s | Tuần tra có checkpoint thay vì đi liên tục |
 | `PEEK_AND_DASH` | Creep 5–8s | Look 3–5s → pause 1.5–3s | Run 2.5–4.5s | Thăm dò, xác nhận rồi mới chạy |
 | `SLOW_MORNING` | Idle 5–9s | Sit 8–14s → Look 3–6s | Walk 4–7s | Nhịp chậm nhất, ưu tiên nghỉ |
@@ -128,8 +128,8 @@ selector chỉ chọn `WALL`/`CEILING` ở lượt kế tiếp. Khi pack không 
 climb, selector bỏ quota và fallback về các story tương thích thay vì mắc kẹt.
 
 Multi-pet social bắt đầu sau 12 giây thay vì 6 giây để từng pet có cơ hội chọn autonomous
-story đầu tiên; cooldown social tăng từ 10 lên 20 giây để social scene ở mặt đất không chiếm
-phần lớn thời gian.
+story đầu tiên. Contract V3.14 bên dưới tiếp tục giảm social occupancy bằng invitation
+chance, range guard và cooldown dài hơn.
 
 ## V3.4 — wall-to-wall leap
 
@@ -205,7 +205,7 @@ Khi solo pet bắt đầu TALK, engine quay pet vào tâm viewport dựa trên v
 đó box nằm ở vùng màn hình còn trống và cạnh box tiếp tục chạm đúng anchor của frame tay
 cầm; các combo social được miễn policy này để hai pet luôn giữ facing với nhau.
 
-`PetComboSpeechPolicy` chỉ map combo đang active sang tone/priority khi engine đã chuyển
+`PetComboSpeechPolicy` chỉ map combo đang active sang tone khi engine đã chuyển
 vào speech action. Unit test khóa hai chiều: mọi combo trong speaking policy phải có đúng
 một `TALK` hoặc `TALK_WALK` beat và mọi combo ngoài policy không được chứa speech action.
 
@@ -216,9 +216,9 @@ chỉ phát `Show` khi engine đi vào TALK và chỉ phát `Hide` trên transit
 drag/fling hoặc cleanup. Vì vậy beat TALK 9–11 giây và box luôn bắt đầu/kết thúc cùng
 nhau, không có khoảng pet tiếp tục giữ frame 34–36 sau khi text đã tắt.
 
-User/social priority chỉ thay đổi thứ tự queue và không được preempt bubble đang active.
-Điều này đóng case nhiều pet trong đó pet thứ hai vào TALK có thể làm box của pet thứ
-nhất biến mất trong khi frame 34–36 của pet thứ nhất vẫn còn chạy.
+V3.11 ban đầu serialize speech toàn scene để tránh pet thứ hai preempt bubble đang active.
+V3.14 thay contract này bằng session/window độc lập theo pet ID: không preempt và cũng
+không bắt một pet đang TALK phải chờ pet khác.
 
 Frame loop cũng không còn gọi `speechDirector.advance(elapsedMillis)`. Unit test tích hợp
 chạy engine theo tick 100 ms và khóa một lần Show, 90–110 tick TALK, rồi đúng một lần Hide
@@ -236,10 +236,37 @@ Speech action được tách theo chuyển động thay vì dùng toàn bộ chu
   runtime clip và expose `TALK_WALK` như supported action nên pet đã cài không cần Set lại;
 - speech director xem cả hai là cùng một lifecycle. Chuyển giữa hai speech pose không
   flicker box, rời cả hai mới Hide; bubble follow pet bằng shared frame clock khi đi;
-- `TALK_WALK` quay lại ở mép màn hình và tham gia crowd spacing như ground movement.
+- `TALK_WALK` quay lại ở mép màn hình nhưng được phép đi xuyên pet tự chủ khác.
 
 Unit test khóa frame count, velocity/displacement, legacy normalization, combo mapping và
 Show/Hide xuyên qua transition giữa hai speech action.
+
+## V3.14 — independent interaction và surface-safe speech
+
+V3.14 tách ba khái niệm trước đây bị trộn vào nhau:
+
+- **autonomous movement** không phải collision vật lý: `WALK`, `RUN`, `CREEP` và
+  `TALK_WALK` được đi xuyên nhau, không bị dịch vị trí hay quay đầu khi sprite giao nhau;
+- **overlap repair** chỉ chạy khi hai pet tự chủ đã cùng dừng ở pose nghỉ và overlap sâu
+  hơn 55% chiều rộng. Đây là cleanup hiếm, giữ nguyên direction và bỏ qua social pair;
+- **social interaction** là một invitation có điều kiện: chỉ cặp rảnh trên sàn, gần hơn
+  4,5 pet-width mới được xét; 35% nhận lời, decline nghỉ 18 giây, hoàn tất nghỉ 45 giây.
+
+Session social sở hữu đúng hai combo role. Nếu một pet bị tap/drag/fling, bắt đầu combo
+khác, rơi hoặc leo, ownership bị mất và director release cả session ngay; không restart
+`SOCIAL_APPROACH` để ghi đè hành động mới. Nhờ vậy social là một lựa chọn thỉnh thoảng,
+không phải lực hút luôn bật.
+
+Speech dùng `MutableMap<petId, session/window>` thay cho một active toàn scene. Hai pet vào
+`TALK` cùng lúc đều nhận `Show`, mỗi pet tự `Hide` khi rời speech action. Direction của
+sprite và placement box cùng lấy từ `PetState.direction`; solo talk quay vào viewport,
+social talk giữ hướng director cấp.
+
+`isGroundedSurface` là guard chung cho tap, showcase, ground combo, social eligibility và
+transition vào speech. Climb/dangle/airborne không thể bị chuyển trực tiếp sang TALK.
+Catalog còn khóa speech predecessor: các story leo/bay phải landing rồi qua
+`BOUNCE`/`SIT`/`LOOK`/ground recovery trước khi nói; `DAYDREAM` thêm SIT giữa DANGLE và
+TALK.
 
 ## Social state machine
 
@@ -253,12 +280,11 @@ Phiên tương tác có hai pha:
    Khi một vai kết thúc, director giải phóng cả cặp khỏi social ownership ngay; combo của
    vai còn lại vẫn tự hoàn tất nhưng không còn ép pet đã rảnh quay qua lại.
 
-Các guardrail gồm: chỉ ghép pet đang rảnh trên cùng mặt sàn, không chiếm pet đang drag,
-fling, fall, jump hoặc climb; approach/performance đều có timeout; mất một instance sẽ hủy
-session an toàn. `PetCrowdResolver` chạy sau tick chung, giữ khoảng cách sàn tối thiểu bằng
-1,05 pet-width, quay các pet tự chủ ra ngoài khi va nhau nhưng không phá facing của social
-combo; pet đang bay/leo/drag không bị correction. Với một pet, director không phát directive
-social.
+Các guardrail gồm: chỉ ghép pet đang rảnh trên cùng mặt sàn, đủ gần và vượt qua invitation
+chance; không chiếm pet đang drag, fling, fall, jump, dangle hoặc climb; approach/performance
+đều có timeout; mất instance hoặc mất đúng social combo ownership sẽ hủy session an toàn.
+`PetCrowdResolver` không sửa cặp social và không chặn pet đang di chuyển. Với một pet,
+director không phát directive social.
 
 ## Verification
 
@@ -272,9 +298,12 @@ social.
   screen-relative, cạnh đích, facing, opposite-wall catch và combo lifecycle không bị hủy.
 - JVM test xác nhận upward variant giữ vận tốc Y âm sau takeoff, giảm tọa độ Y trong lúc
   bay bằng action `FLUNG` và bắt tường đối diện ở vị trí cao hơn.
-- JVM test kiểm tra approach direction, greeting/duet roles, closest-pair selection, bỏ qua
-  pet đang climb, facing dead-zone, early role release và no-op khi chỉ có một pet.
-- JVM test khóa personal-space cho ba pet ở sàn, autonomous collision turn-away, giữ social
-  facing và không can thiệp pet đang bay.
+- JVM test kiểm tra approach direction, invitation decline, maximum range, greeting/duet
+  roles, closest-pair selection, bỏ qua pet climb, facing dead-zone, release khi ownership
+  bị ngắt và no-op khi chỉ có một pet.
+- JVM test khóa mover pass-through, không đổi direction, nearby rest no-op, chỉ repair deep
+  resting overlap và không can thiệp social/airborne pet.
+- JVM test khóa tap/social không ngắt wall climb, mọi speech predecessor đều là ground-safe,
+  hai pet TALK nhận session riêng và mỗi Hide chỉ tác động đúng owner.
 - Device smoke test cần chạy với 2–3 pet để quan sát đủ approach và ít nhất hai scene liên
   tiếp; overlay vẫn phải có đúng một foreground service và một shared render clock.

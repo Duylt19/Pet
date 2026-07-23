@@ -103,6 +103,35 @@ class PetComboCatalogTest {
     }
 
     @Test
+    fun `speech beats never follow a climbing hanging or airborne pose`() {
+        val unsafeSpeechPredecessors = setOf(
+            PetAction.CLIMB_WALL,
+            PetAction.CLIMB_DOWN,
+            PetAction.CLIMB_CEILING,
+            PetAction.DANGLE,
+            PetAction.JUMP,
+            PetAction.FALL,
+            PetAction.FLUNG,
+            PetAction.DRAGGED
+        )
+
+        PetComboId.entries.forEach { comboId ->
+            val beats = PetComboCatalog.definition(comboId)?.beats.orEmpty()
+            beats.forEachIndexed { index, beat ->
+                if (!beat.action.isSpeechAction) return@forEachIndexed
+                if (index == 0) {
+                    assertEquals(PetComboId.SOCIAL_HELLO, comboId)
+                    return@forEachIndexed
+                }
+                assertTrue(
+                    "$comboId enters speech directly from ${beats[index - 1].action}",
+                    beats[index - 1].action !in unsafeSpeechPredecessors
+                )
+            }
+        }
+    }
+
+    @Test
     fun `autonomous profile keeps only distinct ground basics and gives climb meaningful weight`() {
         val rules = PetBehaviorProfile().autonomousComboRules
         val retiredGroundBasics = setOf(

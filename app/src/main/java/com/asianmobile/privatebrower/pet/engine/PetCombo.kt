@@ -186,6 +186,7 @@ object PetComboCatalog {
             sustain(PetAction.SIT, 6_000L..10_000L),
             sustain(PetAction.LOOK_UP, 4_000L..7_000L),
             sustain(PetAction.DANGLE, 4_000L..7_000L),
+            sustain(PetAction.SIT, 2_500L..4_000L),
             speak(),
             sustain(PetAction.SIT, 5_000L..9_000L)
         ),

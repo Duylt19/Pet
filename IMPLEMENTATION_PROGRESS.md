@@ -19,14 +19,15 @@
 | Spatial behavior balance V3.3 | Done | Reduced ground basics, two-story climb quota and longer wall/ceiling dwell |
 | Wall-to-wall traversal V3.4 | Done | Screen-relative leap, mirrored airborne travel, opposite-wall catch and continued climb choreography |
 | Upward wall-to-wall rise V3.5 | Done | Ballistic upward launch with FLUNG pose, higher opposite-wall catch and independent downward/upward combo weights |
-| Multi-pet stability V3.6 | Done | Social ownership release, facing dead-zone, grounded personal space and autonomous collision turn-away |
-| Pet speech and dialogue V3.7 | Done | Frame 34–36 TALK pose, localized bubble, tap/skill/social lines, reading-time pacing and anti-spam turn-taking |
+| Multi-pet stability V3.6 | Done | Initial social ownership/facing and grounded overlap policy; superseded by opt-in interaction V3.14 |
+| Pet speech and dialogue V3.7 | Done | Frame 34–36 TALK pose, localized bubble and tap/skill/social lines; speech ownership superseded by V3.14 |
 | Pet message personalization V3.8 | Done | Editable 30-line list, Unicode-safe persistence, random anti-repeat, 48 fallback lines, broader triggers and slower 4.5–8.5s pacing |
-| TALK box attachment V3.9 | Done | Frame 34–36 box follows original -64px IE offset, mirrors in front of pet and cannot outlive/queue past TALK pose |
-| Pose-gated speech choreography V3.10 | Done | All messages require TALK, combo tone/priority is context-only, silent combos stay silent and carried box is rectangular without a tail |
+| TALK box attachment V3.9 | Done | Frame 34–36 box follows original -64px IE offset, mirrors in front of pet and cannot outlive its TALK pose |
+| Pose-gated speech choreography V3.10 | Done | All messages require TALK, combo tone is context-only, silent combos stay silent and carried box is rectangular without a tail |
 | Synchronized TALK lifecycle V3.11 | Done | Bubble and frame share TALK enter/exit transitions; independent reading timer removed so neither can finish before the other |
 | Adaptive speech layout V3.12 | Done | Glyph-aware 80–260dp × 48–112dp box, balanced four-line wrapping, viewport clamp and explicit 80-code-point Settings limit |
 | Stationary/moving speech V3.13 | Done | TALK holds frame 34; TALK_WALK uses 34/35/34/36 at walking speed, legacy packs normalize without reinstall and bubble lifecycle covers both |
+| Independent multi-pet interaction V3.14 | Done | Autonomous movers pass through, social invitations are probabilistic/interruptible, each TALK pet owns a box and off-ground speech is rejected |
 | Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
 | Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |

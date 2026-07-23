@@ -79,7 +79,7 @@ internal class PetOverlayController(
         null
     }
     private val instances = mutableListOf<PetInstance>()
-    private var speechWindow: SpeechWindow? = null
+    private val speechWindows = mutableMapOf<Int, SpeechWindow>()
     private var isRendering = false
     private var lastTickNanos = 0L
 
@@ -193,7 +193,7 @@ internal class PetOverlayController(
         instances.toList().forEach { instance ->
             render(instance, instance.engine.reduce(instance.state, PetEvent.BoundsChanged(bounds)).state)
         }
-        speechWindow?.let(::updateSpeechPosition)
+        speechWindows.values.toList().forEach(::updateSpeechPosition)
     }
 
     private fun dispatch(instance: PetInstance, event: PetEvent) {
@@ -246,7 +246,7 @@ internal class PetOverlayController(
                 previousState.direction != updatedState.direction ||
                 previousState.action != updatedState.action
         if (speechPlacementChanged) {
-            speechWindow?.takeIf { it.petId == instance.id }?.let(::updateSpeechPosition)
+            speechWindows[instance.id]?.let(::updateSpeechPosition)
         }
     }
 
@@ -258,7 +258,7 @@ internal class PetOverlayController(
             )
 
             is PetSpeechDirective.Hide -> {
-                if (speechWindow?.petId == directive.petId) hideSpeech()
+                hideSpeech(directive.petId)
             }
         }
     }
@@ -268,8 +268,8 @@ internal class PetOverlayController(
         line: PetSpeechLine
     ) {
         val instance = instances.firstOrNull { it.id == petId } ?: return
-        val existing = speechWindow
-        if (existing?.petId == petId) {
+        val existing = speechWindows[petId]
+        if (existing != null) {
             existing.line = line
             existing.view.measureBox(
                 text = line.text,
@@ -281,7 +281,6 @@ internal class PetOverlayController(
             updateSpeechPosition(existing, instance)
             return
         }
-        if (existing != null) hideSpeech()
 
         val view = PetSpeechBubbleView(appContext)
         val boxSize = view.measureBox(
@@ -297,7 +296,7 @@ internal class PetOverlayController(
             Log.w(TAG, "Unable to show pet speech bubble", error)
             return
         }
-        speechWindow = created
+        speechWindows[petId] = created
     }
 
     private fun updateSpeechPosition(window: SpeechWindow) {
@@ -328,14 +327,17 @@ internal class PetOverlayController(
         }
     }
 
-    private fun hideSpeech() {
-        val window = speechWindow ?: return
-        speechWindow = null
+    private fun hideSpeech(petId: Int) {
+        val window = speechWindows.remove(petId) ?: return
         try {
             windowManager.removeViewImmediate(window.view)
         } catch (error: RuntimeException) {
             Log.w(TAG, "Unable to remove pet speech bubble", error)
         }
+    }
+
+    private fun hideAllSpeech() {
+        speechWindows.keys.toList().forEach(::hideSpeech)
     }
 
     private fun createLayoutParams(state: PetState, index: Int) = WindowManager.LayoutParams(
@@ -392,7 +394,7 @@ internal class PetOverlayController(
     }
 
     private fun removeAllViews() {
-        hideSpeech()
+        hideAllSpeech()
         instances.forEach { instance ->
             runCatching { windowManager.removeViewImmediate(instance.view) }
         }

@@ -86,16 +86,16 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Rebalance Living Behavior V3.3: reduce the autonomous pool to distinct high-value stories, guarantee climb after two non-climb stories, extend wall/ceiling dwell and reduce ground-only social occupancy.
 - [Done] Add Living Behavior V3.4 wall-to-wall traversal with screen-relative airborne motion, opposite-wall catch, mirrored choreography and safe collision fallback.
 - [Done] Add Living Behavior V3.5 upward wall-to-wall traversal with a ballistic launch arc, higher opposite-wall catch and a separately weighted downward variant.
-- [Done] Stabilize multi-pet behavior V3.6 with social ownership release, facing dead-zone, grounded personal space and airborne-safe crowd resolution.
+- [Done] Stabilize multi-pet behavior V3.6 with initial social ownership, facing dead-zone and grounded overlap handling; V3.14 replaces forced collision turn-away.
 - [Done] Add Pet Speech V3.7: forensic frame 34–36 mapping, sustained TALK combo,
-  localized bubble, tap/skill/social dialogue triggers, serialized turn-taking and
-  user-visible message toggle.
+  localized bubble, tap/skill/social dialogue triggers and user-visible message toggle;
+  V3.14 replaces scene-wide serialization with per-pet sessions.
 - [Done] Add Pet Speech V3.8 personalization and pacing: editable 30-line custom
   catalog, Unicode-safe DataStore codec, global random anti-repeat, 48 localized
   fallback lines, broader context-aware combo triggers and 4.5–8.5 second reading time.
 - [Done] Fix Pet Speech V3.9 TALK attachment: reproduce the original frame 34–36
   `IeOffsetX=0/IeOffsetY=-64` carried-window geometry, mirror the box with pet direction,
-  keep it synchronized with pet movement and discard active/queued text when TALK ends.
+  keep it synchronized with pet movement and discard text when its owner leaves TALK.
 - [Done] Redesign Pet Speech V3.10 choreography: gate every message behind the actual
   TALK frame, add one deliberate 9–11 second speech beat only to speaking combos, keep
   physical combos silent and render a sharp rectangular carried box without a tail.
@@ -107,6 +107,9 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Split Pet Speech V3.13 poses: stationary TALK holds frame 34, moving
   TALK_WALK keeps the 34/35/34/36 gait, legacy packs normalize at runtime and both
   actions share one bubble lifecycle.
+- [Done] Redesign multi-pet interaction V3.14: autonomous movers pass through instead
+  of blocking/turning each other, social invitations use chance/range/cooldown and release
+  on interruption, speech windows are keyed by pet ID, and TALK is ground-surface gated.
 - Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
 - Treat tap popup, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
 - Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs. Local device sync is enabled for validation, while production distribution must use a provenance-preserving server import.

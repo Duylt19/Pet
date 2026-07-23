@@ -40,7 +40,7 @@ com.asianmobile.privatebrower/
 │   ├── overlay/                # Android service/window/input/render adapter
 │   ├── pack/                   # Schema/parser/validator/installer/repository/cache
 │   ├── settings/               # Pure policy cho budget/vị trí/session settings
-│   └── speech/                 # Pure speech catalog/director/turn-taking policy
+│   └── speech/                 # Pure speech catalog + per-pet pose-gated sessions
 ├── ui/
 │   ├── component/              # Shared stateless UI
 │   ├── splash/
@@ -89,7 +89,8 @@ ui/feature/
 - `PetOverlayService` là `specialUse` foreground service `exported=false`; `PetOverlayController` sở hữu một window/state machine cho mỗi instance nhưng chỉ một `Choreographer` loop dùng chung.
 - `PetOverlayView` chỉ vẽ/touch; mọi state transition vẫn đi qua `PetEngine`.
 - `PetSpeechDirector` tiêu thụ effect/action transition bằng Kotlin thuần; Android adapter
-  chỉ render tối đa một transient, non-touchable speech window và không tạo clock riêng.
+  render tối đa một transient, non-touchable speech window cho mỗi pet và không tạo clock
+  riêng.
 - Asset pack được parse/validate thành model nội bộ trước khi engine sử dụng; renderer không đọc JSON/storage mỗi frame.
 - Pack installer chỉ promote version hợp lệ từ random staging directory; repository luôn giữ built-in fallback.
 - Bitmap cache decode asset trước khi render loop bắt đầu và có memory budget 4–24 MiB.

@@ -31,44 +31,53 @@ class PetCrowdResolverTest {
     }
 
     @Test
-    fun `autonomous movers including walking talk turn outward after crowd collision`() {
-        val resolved = resolver.resolve(
-            listOf(
-                grounded(
-                    x = 120f,
-                    action = PetAction.TALK_WALK,
-                    direction = PetDirection.RIGHT
-                ),
-                grounded(x = 180f, action = PetAction.WALK, direction = PetDirection.LEFT)
-            )
+    fun `nearby resting pets are not magnetically pushed apart`() {
+        val states = listOf(
+            grounded(x = 100f, action = PetAction.SIT),
+            grounded(x = 170f, action = PetAction.IDLE)
         )
 
-        assertEquals(PetDirection.LEFT, resolved[0].direction)
-        assertEquals(PetDirection.RIGHT, resolved[1].direction)
+        val resolved = resolver.resolve(states)
+
+        assertEquals(states, resolved)
     }
 
     @Test
-    fun `social movers keep director facing while personal space is restored`() {
+    fun `autonomous movers pass through each other without forced position or direction`() {
+        val states = listOf(
+            grounded(
+                x = 120f,
+                action = PetAction.TALK_WALK,
+                direction = PetDirection.RIGHT
+            ),
+            grounded(x = 180f, action = PetAction.WALK, direction = PetDirection.LEFT)
+        )
         val resolved = resolver.resolve(
-            listOf(
-                grounded(
-                    x = 120f,
-                    action = PetAction.RUN,
-                    direction = PetDirection.RIGHT,
-                    comboId = PetComboId.SOCIAL_APPROACH
-                ),
-                grounded(
-                    x = 180f,
-                    action = PetAction.RUN,
-                    direction = PetDirection.LEFT,
-                    comboId = PetComboId.SOCIAL_APPROACH
-                )
-            )
+            states
         )
 
-        assertEquals(PetDirection.RIGHT, resolved[0].direction)
-        assertEquals(PetDirection.LEFT, resolved[1].direction)
-        assertTrue(resolved[1].position.x >= resolved[0].position.x + size.width * 1.05f - 0.01f)
+        assertEquals(states, resolved)
+    }
+
+    @Test
+    fun `social pair keeps director owned position and facing`() {
+        val states = listOf(
+            grounded(
+                x = 120f,
+                action = PetAction.RUN,
+                direction = PetDirection.RIGHT,
+                comboId = PetComboId.SOCIAL_APPROACH
+            ),
+            grounded(
+                x = 180f,
+                action = PetAction.RUN,
+                direction = PetDirection.LEFT,
+                comboId = PetComboId.SOCIAL_APPROACH
+            )
+        )
+        val resolved = resolver.resolve(states)
+
+        assertEquals(states, resolved)
     }
 
     @Test

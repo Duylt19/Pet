@@ -65,7 +65,7 @@ UI riêng:
 Contract duy nhất để mở message là transition thật sự đi vào `PetAction.TALK` hoặc
 `PetAction.TALK_WALK`.
 `Tapped`, `ShowcaseStarted` và `ComboStarted` không còn trực tiếp phát text. Combo ID chỉ
-xác định vocabulary và priority sau khi frame TALK đã xuất hiện:
+xác định vocabulary/tone sau khi frame TALK đã xuất hiện:
 
 | Combo có TALK | Tone | Vị trí nhịp nói |
 |---|---|---|
@@ -80,15 +80,14 @@ xác định vocabulary và priority sau khi frame TALK đã xuất hiện:
 
 Pacing:
 
-- toàn scene chỉ có tối đa một bubble;
-- queue tối đa bốn câu, user và social được ưu tiên hơn ambient;
-- priority chỉ sắp thứ tự queue, không preempt pet đang TALK; vì vậy pet hiện tại luôn
-  giữ box đến hết beat trước khi pet kế tiếp nhận lượt;
-- cùng pet/tone không được xếp trùng;
+- mỗi pet có tối đa một speech session; 1–3 pet có thể hiện box cùng lúc nếu đều đang
+  render `TALK`/`TALK_WALK`;
+- session được key bằng `petId`, không có active/queue chung toàn scene và pet này không
+  thể preempt hoặc trì hoãn box của pet khác;
+- cùng pet không thể mở lặp một session trong khi vẫn ở speech action;
 - box và frame dùng cùng lifecycle: `Show` khi vào một speech action, giữ suốt beat
   9–11 giây và `Hide` trên đúng transition rời cả `TALK`/`TALK_WALK`;
 - speech director không còn reading timer hoặc lệnh `advance(elapsedMillis)` riêng;
-- mọi item trong queue bị loại nếu pet đã rời TALK trước khi tới lượt;
 - director nhớ câu cuối toàn scene và tránh lặp ngay khi còn lựa chọn khác.
 
 Các combo vận động thuần (`SHY_SNEAK`, patrol, chase, rest, copycat, duet...) không có
@@ -97,7 +96,8 @@ không dùng cooldown độc lập có thể làm pet giữ frame TALK nhưng kh
 
 ## Bubble overlay
 
-Speech dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn tại khi có câu đang hiển thị:
+Mỗi pet đang nói dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn tại khi session của pet
+đó có câu đang hiển thị:
 
 - kích thước thích ứng trong khoảng 80–260dp × 48–112dp, transparent,
   `FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE`;
@@ -116,14 +116,31 @@ Speech dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn tại khi có c
 - trước speech, pet solo ở nửa trái/phải tự quay vào tâm viewport để box có đủ chỗ và
   cạnh vẫn chạm đúng hand/anchor thay vì bị horizontal clamp đẩy xuyên qua sprite;
   `TALK_WALK` đi theo hướng này và tự quay lại nếu chạm mép; social TALK giữ nguyên facing;
-- câu đang active hoặc queued bị hủy trên chính transition rời cả hai speech action;
+- session của pet bị hủy trên chính transition rời cả hai speech action;
   chuyển nội bộ `TALK ↔ TALK_WALK` không đóng/mở lại box;
 - mọi placement vẫn clamp trong usable viewport;
 - update vị trí bằng cùng shared frame clock nên box follow liên tục khi `TALK_WALK`,
   không tạo thread/coroutine/timer riêng;
 - text tối đa bốn dòng, căn giữa theo cả hai trục, tương phản cao và có
   `contentDescription`;
-- stop/service destroy remove bubble trước khi remove các pet window.
+- stop/service destroy duyệt và remove toàn bộ bubble trước khi remove các pet window.
+
+## Multi-pet và direction contract V3.14
+
+- `PetSpeechDirector.activeByPet` và `PetOverlayController.speechWindows` đều được key
+  bằng cùng `petId`; mỗi `Show/Hide` chỉ mutate đúng owner.
+- Hai pet cùng TALK nhận hai window độc lập. Một pet kết thúc/drag không đóng box còn lại.
+- `PetOverlayView` mirror sprite và `PetSpeechPlacementPolicy` đều đọc
+  `PetState.direction`. Khi direction đổi, controller update cả pet window và đúng speech
+  window trong cùng render pass.
+- Solo speech quay vào tâm viewport; social speech nhận direction hướng tới partner. Box
+  luôn nằm trước mặt pet theo direction cuối cùng, không giữ một hướng cache riêng.
+- Tap/showcase/social ground combo bị bỏ qua khi action hoặc tọa độ cho thấy pet không ở
+  sàn. Guard cuối trong `changeAction` từ chối `TALK` off-ground, clear combo và trả pet về
+  `FALL`/ground fallback.
+- Combo catalog không cho speech đi ngay sau climb/dangle/jump/fall/flung; wall, ceiling và
+  aerial story phải landing/recovery trước. `DAYDREAM` cũng có SIT recovery giữa DANGLE và
+  TALK.
 
 Catalog có sẵn hiện có 48 câu trong Android resources: tám câu cho mỗi tone, với English
 base và Vietnamese. `Pet messages` trong Settings được persist bằng
@@ -153,11 +170,12 @@ sàng, nên thêm `SpeechCatalogRepository` độc lập với pack binary:
 - JVM: TALK đứng yên một frame/zero displacement, TALK_WALK bốn frame/24 px/s, legacy
   runtime normalization, lifecycle engine–speech giữ box xuyên suốt 90–110 tick,
   adaptive sizing cho short/single-line/explicit newline/long/fallback/narrow viewport,
-  placement trái/phải theo `IeOffset`, hủy active/queued speech khi pose kết thúc,
-  speaking/silent combo mapping, social reply tuần tự và drag đóng bubble.
+  placement trái/phải theo `IeOffset`, hủy đúng owner khi pose kết thúc,
+  speaking/silent combo mapping, simultaneous multi-pet Show/independent Hide và drag chỉ
+  đóng bubble của pet đó.
 - Pack: raw contract sequence 34/35/34/36 và immutable owner conversion revision 4.
 - Android: rectangular TALK box theo pet và hướng mirror, không tail, clamp hai mép,
-  1/2/3 pet turn-taking, rotation, screen-off/resume, Settings off và Stop không còn
+  1/2/3 per-pet window, rotation, screen-off/resume, Settings off và Stop không còn
   window.
 
 ## Device verification
@@ -201,3 +219,14 @@ không reinstall:
   xác nhận cả vị trí, frame chân và bubble không thay đổi;
 - sau smoke test đã restore ba pet/size 75%, force-stop dọn sạch service và mọi overlay
   window.
+
+Independent multi-pet speech V3.14 được xác minh tiếp trên cùng thiết bị:
+
+- APK mới chạy với ba pet, giữ nguyên size 75% và speed 150%;
+- tap pet đang wall traversal không tạo `Cute Pet speech`; pet tiếp tục wall movement,
+  xác nhận ground guard không cắt climb thành TALK;
+- khi hai grounded pet được trigger sát nhau, `dumpsys window` ghi nhận đồng thời hai
+  title riêng `Cute Pet speech 1` và `Cute Pet speech 2`; window của pet sau không remove
+  window của pet trước;
+- smoke test không có `FATAL EXCEPTION`, `BadTokenException` hoặc lỗi add/remove speech
+  window; force-stop dọn sạch toàn bộ overlay/service.

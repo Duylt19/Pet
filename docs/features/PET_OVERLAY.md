@@ -13,7 +13,7 @@ Platform và product vertical slice đã hoàn tất. `PetOverlay.start(context)
 | `PetOverlayService` | Promote foreground, notification/channel, lifecycle cleanup |
 | `PetOverlayController` | Danh sách bounded window/state machine và một shared frame clock |
 | `PetOverlayView` | Code-native demo cat, tap/drag/fling input, không giữ business state |
-| `PetSpeechBubbleView` | Bubble non-touchable, tối đa một window tạm thời cho toàn scene |
+| `PetSpeechBubbleView` | Bubble non-touchable; mỗi pet đang TALK sở hữu một window tạm thời riêng |
 
 ## Manifest và policy
 
@@ -28,11 +28,11 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 ## Runtime invariants
 
 - Window trong suốt có kích thước 64–196dp theo pack/setting, chỉ bắt touch trong hitbox pet; không dùng full-screen overlay.
-- Khi pet nói, controller tạo tối đa một window non-touchable thích ứng
+- Khi pet nói, controller tạo tối đa một window non-touchable thích ứng cho chính pet đó
   80–260dp × 48–112dp. Width lấy từ glyph/dòng thực tế và usable viewport; height tăng
   tới bốn dòng, sau đó ellipsis. Window bị remove đúng khi action rời cả `TALK` và
   `TALK_WALK`, drag/fling, Stop hoặc service destroy. Không có timer speech độc lập với
-  engine.
+  engine. Hai pet cùng TALK có hai window/lifecycle độc lập.
 - 1–3 instance dùng chung đúng một `Choreographer.FrameCallback` trên main thread; 30 FPS mặc định, 24 FPS cho 3 pet hoặc low-RAM budget.
 - Frame loop chỉ reduce engine + invalidate/update layout; không decode bitmap, parse file hoặc tạo thread.
 - Mọi instance dùng chung visual đã preload; mỗi instance chỉ giữ engine state/view/layout params riêng.
@@ -43,13 +43,25 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   34/35/34/36. Box chữ nhật góc vuông dùng contract `WalkWithIE`, bám đáy ở
   `anchorY - 0,5 × petHeight`, nằm trước hướng nhìn, mirror theo direction và follow
   shared tick khi pet đi. Solo speech quay vào tâm viewport; social TALK giữ facing với
-  pet kia. Box không bo góc, không có tail tam giác và không còn overhead fallback.
+  pet kia. Sprite mirror và box placement cùng đọc `PetState.direction`, nên không có hai
+  nguồn hướng riêng. Box không bo góc, không có tail tam giác và không còn overhead
+  fallback.
 - Living Behavior dùng weighted scheduler với khoảng chờ biến thiên, continue/turn-around decisions, recent-action memory và deterministic seed riêng cho từng instance. Vì vậy nhiều pet không chạy đồng bộ nhưng mọi transition vẫn tái lập được trong JVM test.
-- Sau mỗi shared tick, crowd resolver tách các pet cùng mặt sàn với khoảng cách 5% canvas; pet tự chủ quay ra ngoài khi va nhau, social combo giữ facing do director quyết định, còn pet đang bay/leo/drag được phép đi qua mà không bị correction.
+- Pet đang `WALK`/`RUN`/`CREEP`/`TALK_WALK` được phép đi xuyên nhau và không bị đổi hướng
+  bởi crowd resolver. Resolver chỉ sửa overlap sâu trên 55% canvas khi cả hai pet đã dừng
+  ở pose nghỉ, không can thiệp cặp social và không biến pet khác thành “bức tường”.
+- Social director chỉ ghép pet rảnh trên sàn, ở cách nhau tối đa 4,5 pet-width. Mỗi lần
+  đủ điều kiện có 35% xác suất nhận lời; từ chối sẽ giữ khoảng riêng 18 giây, hoàn tất
+  social cooldown 45 giây. Tap/drag/fling/combo khác làm mất ownership và hủy session
+  ngay, không tự ép pet quay lại social approach.
+- Tap, showcase và combo habitat `GROUND` bị từ chối khi pet đang leo, treo hoặc bay.
+  Mọi transition vào `TALK` còn có guard cuối trong engine: nếu không đứng trên sàn thì
+  combo bị hủy về physics `FALL`/ground fallback thay vì render frame nói trên tường.
 - State graph hỗ trợ `fall → bounce → walk`, run/creep có timeout, leo lên/leo xuống, cùng routine như `sit → wink`, `trip → sit` và `special → special-2 → wink`. Wall timeout chọn jump/descend/fall; pet tới mép trần có thể leo xuống thay vì luôn rơi. Pack v1 cũ chỉ tham gia action thật sự khai báo và vẫn fallback walk/idle an toàn.
 - Fall dùng gravity/terminal velocity thay cho tốc độ dọc cố định. Thả kéo nhẹ phát `DragEnd → Fall`; chỉ thao tác vượt system minimum-fling velocity mới vào physics fling.
 - Stop chuẩn hóa vị trí 0–1 vào DataStore; Start sau process/orientation change restore và clamp theo usable bounds mới.
-- Default multi-pet layout giãn ngang 1,05 pet-width; vị trí restore trùng nhau được crowd resolver tách sau khi pet đáp xuống.
+- Default multi-pet layout giãn ngang 1,05 pet-width; vị trí restore trùng sâu được sửa
+  sau khi cả hai pet đã đáp và cùng ở pose nghỉ.
 - Stop action, `onDestroy` và lỗi add window đều remove callback/toàn bộ window và reset runtime state.
 - Dynamic `SCREEN_OFF`/`SCREEN_ON` receiver dừng và nối lại shared frame clock; resume reset mốc tick để không chạy bù toàn bộ thời gian màn hình tắt.
 
@@ -79,6 +91,13 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   40 px/s ở speed 150%, còn tap speech giữ nguyên window qua năm mẫu 400 ms. Hai capture
   cách nhau một giây trong stationary beat có SHA-256 giống hệt, xác nhận frame 34 không
   còn bước chân. Session test đã được cleanup và restore ba pet/size 75%.
+- Multi-pet V3.14 verified trên cùng thiết bị với ba pet/size 75%/speed 150%: hai mover
+  khởi động overlap sâu tại X 964/998 px nhưng tiếp tục hành trình độc lập, không bị
+  crowd resolver ép quay đầu. Tap trong wall traversal không tạo speech window và pet
+  tiếp tục đổi từ wall phải sang wall trái. Một poll runtime ghi nhận đồng thời
+  `Cute Pet speech 1` và `Cute Pet speech 2`, xác nhận controller giữ hai window theo
+  owner ID. Không có fatal/window error; force-stop kết thúc với 0 overlay, 0 speech
+  window và 0 service.
 
 ## Chưa thuộc runtime hiện tại
 

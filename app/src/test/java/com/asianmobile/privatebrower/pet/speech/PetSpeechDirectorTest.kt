@@ -175,7 +175,7 @@ class PetSpeechDirectorTest {
     }
 
     @Test
-    fun `user priority queues without hiding a pet that is still talking`() {
+    fun `two talking pets receive independent speech sessions`() {
         val director = PetSpeechDirector(catalog)
         val idle = state(PetAction.IDLE)
         val ambientTalk = idle.copy(
@@ -192,27 +192,31 @@ class PetSpeechDirectorTest {
             idle,
             PetTransition(ambientTalk)
         )
-        val userQueued = director.onTransition(
+        val userShown = director.onTransition(
             2,
             idle,
             PetTransition(userTalk)
         )
 
         assertEquals(1, ambientShown.size)
-        assertTrue(userQueued.isEmpty())
+        assertEquals(1, userShown.size)
+        assertEquals(1, (ambientShown.single() as PetSpeechDirective.Show).petId)
+        assertEquals(2, (userShown.single() as PetSpeechDirective.Show).petId)
 
-        val switched = director.onTransition(
+        val ambientEnded = director.onTransition(
             1,
             ambientTalk,
             PetTransition(ambientTalk.copy(action = PetAction.WINK))
         )
 
-        assertEquals(PetSpeechDirective.Hide(1), switched.first())
-        assertEquals(2, (switched.last() as PetSpeechDirective.Show).petId)
+        assertEquals(listOf(PetSpeechDirective.Hide(1)), ambientEnded)
+        assertTrue(
+            director.onTransition(2, userTalk, PetTransition(userTalk)).isEmpty()
+        )
     }
 
     @Test
-    fun `queued speech is discarded if its owner leaves talk before its turn`() {
+    fun `ending one speech session never closes another pet bubble`() {
         val director = PetSpeechDirector(catalog)
         val idle = state(PetAction.IDLE)
         val greeting = idle.copy(
@@ -225,22 +229,22 @@ class PetSpeechDirectorTest {
         )
 
         director.onTransition(1, idle, PetTransition(greeting))
-        assertTrue(director.onTransition(2, idle, PetTransition(reply)).isEmpty())
+        assertEquals(
+            2,
+            (director.onTransition(2, idle, PetTransition(reply))
+                .single() as PetSpeechDirective.Show).petId
+        )
+
+        val replyEnded = director.onTransition(
+            2,
+            reply,
+            PetTransition(reply.copy(action = PetAction.WINK))
+        )
+
+        assertEquals(listOf(PetSpeechDirective.Hide(2)), replyEnded)
         assertTrue(
-            director.onTransition(
-                2,
-                reply,
-                PetTransition(reply.copy(action = PetAction.WINK))
-            ).isEmpty()
+            director.onTransition(1, greeting, PetTransition(greeting)).isEmpty()
         )
-
-        val greetingEnded = director.onTransition(
-            1,
-            greeting,
-            PetTransition(greeting.copy(action = PetAction.WINK))
-        )
-
-        assertEquals(listOf(PetSpeechDirective.Hide(1)), greetingEnded)
     }
 
     @Test
@@ -336,7 +340,7 @@ class PetSpeechDirectorTest {
     }
 
     @Test
-    fun `social reply waits until greeting bubble finishes`() {
+    fun `social greeting and reply can render at the same time`() {
         val director = PetSpeechDirector(catalog)
         val idle = state(PetAction.IDLE)
         val greetingState = idle.copy(
@@ -355,21 +359,23 @@ class PetSpeechDirectorTest {
             PetSpeechTone.SOCIAL_HELLO,
             (greeting.single() as PetSpeechDirective.Show).line.tone
         )
-        assertTrue(reply.isEmpty())
-        val switched = director.onTransition(
+        assertEquals(
+            PetSpeechTone.SOCIAL_REPLY,
+            (reply.single() as PetSpeechDirective.Show).line.tone
+        )
+        val greetingEnded = director.onTransition(
             1,
             greetingState,
             PetTransition(greetingState.copy(action = PetAction.WINK))
         )
-        assertEquals(PetSpeechDirective.Hide(1), switched.first())
-        assertEquals(
-            PetSpeechTone.SOCIAL_REPLY,
-            (switched.last() as PetSpeechDirective.Show).line.tone
+        assertEquals(listOf(PetSpeechDirective.Hide(1)), greetingEnded)
+        assertTrue(
+            director.onTransition(2, replyState, PetTransition(replyState)).isEmpty()
         )
     }
 
     @Test
-    fun `dragging a speaking pet removes its bubble and queued lines`() {
+    fun `dragging a speaking pet removes only its own bubble`() {
         val director = PetSpeechDirector(catalog)
         val idle = state(PetAction.IDLE)
         val talking = idle.copy(

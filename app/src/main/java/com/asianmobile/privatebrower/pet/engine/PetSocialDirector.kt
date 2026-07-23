@@ -2,6 +2,7 @@ package com.asianmobile.privatebrower.pet.engine
 
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.random.Random
 
 enum class PetSocialScene {
     GREETING,
@@ -34,10 +35,13 @@ sealed interface PetSocialDirective {
 
 data class PetSocialConfig(
     val initialDelayMillis: Long = 12_000,
-    val interactionCooldownMillis: Long = 20_000,
+    val interactionCooldownMillis: Long = 45_000,
     val retryDelayMillis: Long = 3_000,
+    val declinedCooldownMillis: Long = 18_000,
     val approachTimeoutMillis: Long = 12_000,
     val performanceTimeoutMillis: Long = 45_000,
+    val interactionChancePercent: Int = 35,
+    val maximumApproachDistanceInPetWidths: Float = 4.5f,
     val meetDistanceInPetWidths: Float = 1.35f,
     val facingDeadZoneInPetWidths: Float = 0.2f,
     val floorToleranceInPetHeights: Float = 0.45f,
@@ -47,9 +51,18 @@ data class PetSocialConfig(
         require(initialDelayMillis >= 0) { "initial social delay must not be negative" }
         require(interactionCooldownMillis >= 0) { "social cooldown must not be negative" }
         require(retryDelayMillis >= 0) { "social retry delay must not be negative" }
+        require(declinedCooldownMillis >= 0) {
+            "declined social cooldown must not be negative"
+        }
         require(approachTimeoutMillis > 0) { "approach timeout must be positive" }
         require(performanceTimeoutMillis > 0) { "performance timeout must be positive" }
+        require(interactionChancePercent in 0..100) {
+            "social interaction chance must be between 0 and 100"
+        }
         require(meetDistanceInPetWidths > 0f) { "meet distance must be positive" }
+        require(maximumApproachDistanceInPetWidths > meetDistanceInPetWidths) {
+            "maximum approach distance must exceed meet distance"
+        }
         require(facingDeadZoneInPetWidths >= 0f) {
             "facing dead zone must not be negative"
         }
@@ -62,16 +75,19 @@ data class PetSocialConfig(
 
 class PetSocialDirector(
     private val config: PetSocialConfig = PetSocialConfig(),
-    private val sceneOffset: Int = 0
+    private val sceneOffset: Int = 0,
+    private val decisionSeed: Int = sceneOffset
 ) {
     private var cooldownMillis = config.initialDelayMillis
     private var sceneCursor = sceneOffset.mod(PetSocialScene.entries.size)
     private var session: SocialSession? = null
+    private var random = Random(decisionSeed)
 
     fun reset() {
         cooldownMillis = config.initialDelayMillis
         sceneCursor = sceneOffset.mod(PetSocialScene.entries.size)
         session = null
+        random = Random(decisionSeed)
     }
 
     fun update(
@@ -89,15 +105,21 @@ class PetSocialDirector(
 
         val first = pets.firstOrNull { it.id == activeSession.firstPetId }
         val second = pets.firstOrNull { it.id == activeSession.secondPetId }
-        if (first == null || second == null || !canContinue(first.state) ||
-            !canContinue(second.state)
-        ) {
+        if (first == null || second == null) {
             endSession(config.retryDelayMillis)
             return emptyList()
         }
 
         return when (activeSession.phase) {
-            SocialPhase.APPROACHING -> updateApproach(activeSession, first, second, elapsedMillis)
+            SocialPhase.APPROACHING -> {
+                if (!ownsApproach(first.state) || !ownsApproach(second.state)) {
+                    endSession(config.retryDelayMillis)
+                    emptyList()
+                } else {
+                    updateApproach(activeSession, first, second, elapsedMillis)
+                }
+            }
+
             SocialPhase.PERFORMING -> updatePerformance(
                 activeSession,
                 first,
@@ -111,6 +133,18 @@ class PetSocialDirector(
         val candidates = pets.filter { isAvailable(it.state) }
         val pair = closestPair(candidates) ?: run {
             cooldownMillis = config.retryDelayMillis
+            return emptyList()
+        }
+        val pairDistance = horizontalCenterDistance(pair.first.state, pair.second.state)
+        val maximumApproachDistance =
+            max(pair.first.state.size.width, pair.second.state.size.width) *
+                config.maximumApproachDistanceInPetWidths
+        if (pairDistance > maximumApproachDistance) {
+            cooldownMillis = config.retryDelayMillis
+            return emptyList()
+        }
+        if (random.nextInt(PERCENT_MAX) >= config.interactionChancePercent) {
+            cooldownMillis = config.declinedCooldownMillis
             return emptyList()
         }
         val scene = PetSocialScene.entries[sceneCursor]
@@ -166,10 +200,8 @@ class PetSocialDirector(
     ): List<PetSocialDirective> {
         val elapsed = current.elapsedMillis + elapsedMillis
         val (firstCombo, secondCombo) = comboPair(current.scene)
-        val completed = elapsed >= MIN_PERFORMANCE_MILLIS && (
-            first.state.activeComboId != firstCombo ||
-                second.state.activeComboId != secondCombo
-            )
+        val completed = first.state.activeComboId != firstCombo ||
+            second.state.activeComboId != secondCombo
         if (completed || elapsed >= config.performanceTimeoutMillis) {
             endSession(config.interactionCooldownMillis)
             return emptyList()
@@ -293,11 +325,13 @@ class PetSocialDirector(
 
     private fun isAvailable(state: PetState): Boolean =
         state.activeComboId == null &&
-            canContinue(state) &&
-            abs(state.position.y - (state.bounds.bottom - state.size.height)) <=
-            state.size.height * config.floorToleranceInPetHeights
+            state.action !in INTERRUPTING_ACTIONS &&
+            state.isGroundedSurface(config.floorToleranceInPetHeights)
 
-    private fun canContinue(state: PetState): Boolean = state.action !in INTERRUPTING_ACTIONS
+    private fun ownsApproach(state: PetState): Boolean =
+        state.activeComboId == PetComboId.SOCIAL_APPROACH &&
+            state.action !in INTERRUPTING_ACTIONS &&
+            state.isGroundedSurface(config.floorToleranceInPetHeights)
 
     private fun directionToward(from: PetState, to: PetState): PetDirection =
         if (centerX(to) < centerX(from)) PetDirection.LEFT else PetDirection.RIGHT
@@ -342,7 +376,7 @@ class PetSocialDirector(
     }
 
     private companion object {
-        const val MIN_PERFORMANCE_MILLIS = 500L
+        const val PERCENT_MAX = 100
         val INTERRUPTING_ACTIONS = setOf(
             PetAction.DRAGGED,
             PetAction.FLUNG,

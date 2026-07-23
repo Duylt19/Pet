@@ -11,7 +11,7 @@ class PetEngineTest {
     @Test
     fun `tap reaction includes a calm recovery before its affectionate wink`() {
         val engine = engine(maxTickMillis = 1_000)
-        val initial = engine.initialState(bounds, size, position = PetVector(10f, 10f))
+        val initial = engine.initialState(bounds, size, position = PetVector(10f, 80f))
 
         val tapped = engine.reduce(initial, PetEvent.Tap)
         val recovering = engine.reduce(tapped.state, PetEvent.Tick(elapsedMillis = 300))
@@ -36,13 +36,13 @@ class PetEngineTest {
         val leftPet = engine.initialState(
             bounds,
             size,
-            position = PetVector(0f, 10f),
+            position = PetVector(0f, 80f),
             direction = PetDirection.LEFT
         )
         val rightPet = engine.initialState(
             bounds,
             size,
-            position = PetVector(80f, 10f),
+            position = PetVector(80f, 80f),
             direction = PetDirection.RIGHT
         )
 
@@ -91,7 +91,7 @@ class PetEngineTest {
     @Test
     fun `showcase uses anticipation pauses and sustained special performances`() {
         val engine = engine(maxTickMillis = 1_000)
-        val initial = engine.initialState(bounds, size)
+        val initial = engine.initialState(bounds, size, position = PetVector(0f, 80f))
 
         val started = engine.reduce(initial, PetEvent.Showcase)
         val firstSpecial = advanceUntil(engine, started.state) {
@@ -125,12 +125,35 @@ class PetEngineTest {
     @Test
     fun `tap uses pack configured interaction action`() {
         val engine = PetEngine(PetEngineConfig(tapAction = PetAction.WALK))
-        val initial = engine.initialState(bounds, size)
+        val initial = engine.initialState(bounds, size, position = PetVector(0f, 80f))
 
         val tapped = engine.reduce(initial, PetEvent.Tap)
 
         assertEquals(PetAction.WALK, tapped.state.action)
         assertTrue(tapped.effects.contains(PetEffect.Tapped))
+    }
+
+    @Test
+    fun `tap and ground social combo cannot interrupt a wall climb`() {
+        val engine = engine()
+        val climbing = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(80f, 30f),
+            action = PetAction.CLIMB_WALL,
+            direction = PetDirection.RIGHT
+        )
+
+        val tapped = engine.reduce(climbing, PetEvent.Tap)
+        val social = engine.reduce(
+            climbing,
+            PetEvent.StartCombo(PetComboId.SOCIAL_HELLO, PetDirection.LEFT)
+        )
+
+        assertEquals(climbing, tapped.state)
+        assertEquals(climbing, social.state)
+        assertTrue(tapped.effects.isEmpty())
+        assertTrue(social.effects.isEmpty())
     }
 
     @Test
@@ -712,6 +735,7 @@ class PetEngineTest {
         val initial = engine.initialState(
             PetBounds(0f, 0f, 10_000f, 1_000f),
             size,
+            position = PetVector(0f, 980f),
             action = PetAction.WALK
         )
 
@@ -744,7 +768,12 @@ class PetEngineTest {
                 behaviorProfile = behaviorProfile(idleDurationMillis = 100L..100L)
             )
         )
-        val initial = engine.initialState(bounds, size, direction = PetDirection.RIGHT)
+        val initial = engine.initialState(
+            bounds,
+            size,
+            position = PetVector(0f, 80f),
+            direction = PetDirection.RIGHT
+        )
 
         val started = engine.reduce(
             initial,
@@ -779,7 +808,12 @@ class PetEngineTest {
     @Test
     fun `long sitting beat repeats its pose instead of flashing into the next action`() {
         val engine = engine(maxTickMillis = 2_500)
-        val initial = engine.initialState(bounds, size, action = PetAction.WALK)
+        val initial = engine.initialState(
+            bounds,
+            size,
+            position = PetVector(0f, 80f),
+            action = PetAction.WALK
+        )
         val started = engine.reduce(
             initial,
             PetEvent.StartCombo(PetComboId.SOCIAL_REST_A)
@@ -797,7 +831,12 @@ class PetEngineTest {
     @Test
     fun `special performance repeats seamlessly until its sustained beat is complete`() {
         val engine = engine(maxTickMillis = 1_000)
-        val initial = engine.initialState(bounds, size, action = PetAction.WALK)
+        val initial = engine.initialState(
+            bounds,
+            size,
+            position = PetVector(0f, 80f),
+            action = PetAction.WALK
+        )
         val showcase = engine.reduce(initial, PetEvent.Showcase).state
         val special = advanceUntil(engine, showcase) { it.action == PetAction.SPECIAL }
 

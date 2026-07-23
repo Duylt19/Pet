@@ -1,5 +1,7 @@
 package com.asianmobile.privatebrower.pet.engine
 
+import kotlin.math.abs
+
 enum class PetDirection {
     LEFT,
     RIGHT
@@ -61,4 +63,29 @@ sealed interface PetEffect {
 data class PetTransition(
     val state: PetState,
     val effects: List<PetEffect> = emptyList()
+)
+
+internal fun PetState.isGroundedSurface(
+    toleranceInPetHeights: Float = 0.2f
+): Boolean {
+    if (action !in GROUND_SURFACE_ACTIONS) return false
+    val floorY = bounds.bottom - size.height
+    return abs(position.y - floorY) <= size.height * toleranceInPetHeights
+}
+
+private val GROUND_SURFACE_ACTIONS = setOf(
+    PetAction.IDLE,
+    PetAction.WALK,
+    PetAction.RUN,
+    PetAction.CREEP,
+    PetAction.SIT,
+    PetAction.WINK,
+    PetAction.LOOK_UP,
+    PetAction.BOUNCE,
+    PetAction.TRIP,
+    PetAction.TALK,
+    PetAction.TALK_WALK,
+    PetAction.SPECIAL,
+    PetAction.SPECIAL_2,
+    PetAction.TAPPED
 )
