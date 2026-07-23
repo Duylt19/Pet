@@ -39,7 +39,7 @@ không khẳng định sai rằng PNG gốc chứa text.
 - Legacy converter revision 4 thêm clip loop `TALK`, 240 ms/frame, chỉ khi đủ frame
   34/35/36.
 - Combo `CHATTER` chạy
-  `IDLE 1,5–2,5 s → TALK 6,5–10 s → WINK → SIT 3–5 s`.
+  `IDLE 1,5–2,5 s → TALK 9–11 s → WINK → SIT 3–5 s`.
 - Pack thiếu 34/35/36 không khai báo `TALK`; combo tự loại qua `requiredActions`, không
   dùng ảnh fallback giả làm pose nói.
 - Built-in cat có clip code-native tương đương để feature không phụ thuộc riêng owner
@@ -82,8 +82,15 @@ Speech dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn tại khi có c
 
 - fixed 220×84 dp, transparent, `FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE`;
 - không tạo full-screen window và không chặn app bên dưới;
-- bám tâm pet, clamp ngang trong viewport;
-- mặc định nằm trên pet; khi pet sát trần thì chuyển xuống dưới và đảo hướng đuôi bubble;
+- reaction thông thường bám tâm pet; khi pet sát trần thì chuyển xuống dưới;
+- riêng TALK dùng attachment gốc của `WalkWithIE`: canvas 128 có `ImageAnchorY=128`,
+  `IeOffsetX=0`, `IeOffsetY=-64`, nên đáy box nằm ở nửa chiều cao pet;
+- box TALK nằm hoàn toàn phía trước pet: cạnh phải chạm anchor khi quay trái, cạnh trái
+  chạm anchor khi quay phải; tail nối đúng điểm giữ box và toàn placement được mirror;
+- attachment là một phần của speech directive, không suy đoán từ bubble view;
+- câu TALK đang active hoặc queued bị hủy nếu pet rời pose 34–36; beat TALK 9–11 giây
+  luôn dài hơn reading-time tối đa 8,5 giây nên box không nhảy về overhead cuối câu;
+- mọi placement vẫn clamp trong usable viewport;
 - update vị trí bằng cùng shared frame clock, không tạo thread/coroutine/timer riêng;
 - text tối đa ba dòng, tương phản cao và có `contentDescription`;
 - stop/service destroy remove bubble trước khi remove các pet window.
@@ -113,11 +120,12 @@ sàng, nên thêm `SpeechCatalogRepository` độc lập với pack binary:
 ## Verification matrix
 
 - JVM: sanitize/codec custom list, random không lặp ngay, tap show/hide theo reading
-  time, TALK chỉ trigger một lần, ambient combo mapping, social reply tuần tự và drag
-  đóng bubble.
+  time, TALK attachment trái/phải theo `IeOffset`, hủy active/queued TALK khi pose kết
+  thúc, ambient combo mapping, social reply tuần tự và drag đóng bubble.
 - Pack: contract sequence 34/35/34/36 và immutable owner conversion revision 4.
-- Android: bubble trên/dưới pet, clamp hai mép, 1/2/3 pet turn-taking, rotation,
-  screen-off/resume, Settings off, Stop không còn window.
+- Android: carried TALK box theo pet và hướng mirror, reaction bubble trên/dưới pet,
+  clamp hai mép, 1/2/3 pet turn-taking, rotation, screen-off/resume, Settings off và
+  Stop không còn window.
 
 ## Device verification
 

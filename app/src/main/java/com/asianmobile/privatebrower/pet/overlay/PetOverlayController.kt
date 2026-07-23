@@ -28,6 +28,7 @@ import com.asianmobile.privatebrower.pet.pack.PetPackVisual
 import com.asianmobile.privatebrower.pet.pack.toEngineClips
 import com.asianmobile.privatebrower.pet.settings.PetSessionLayout
 import com.asianmobile.privatebrower.pet.settings.PetSettingsPolicy
+import com.asianmobile.privatebrower.pet.speech.PetSpeechAttachment
 import com.asianmobile.privatebrower.pet.speech.PetSpeechDirective
 import com.asianmobile.privatebrower.pet.speech.PetSpeechDirector
 import com.asianmobile.privatebrower.pet.speech.PetSpeechLine
@@ -228,24 +229,34 @@ internal class PetOverlayController(
     }
 
     private fun render(instance: PetInstance, updatedState: PetState) {
-        val previousPosition = instance.state.position
+        val previousState = instance.state
         instance.state = updatedState
         instance.view.render(updatedState)
-        if (previousPosition == updatedState.position) return
 
-        instance.params.x = updatedState.position.x.roundToInt()
-        instance.params.y = updatedState.position.y.roundToInt()
-        if (instance.view.isAttachedToWindow) {
-            windowManager.updateViewLayout(instance.view, instance.params)
+        if (previousState.position != updatedState.position) {
+            instance.params.x = updatedState.position.x.roundToInt()
+            instance.params.y = updatedState.position.y.roundToInt()
+            if (instance.view.isAttachedToWindow) {
+                windowManager.updateViewLayout(instance.view, instance.params)
+            }
         }
-        speechWindow?.takeIf { it.petId == instance.id }?.let(::updateSpeechPosition)
+        val speechPlacementChanged =
+            previousState.position != updatedState.position ||
+                previousState.size != updatedState.size ||
+                previousState.bounds != updatedState.bounds ||
+                previousState.direction != updatedState.direction ||
+                previousState.action != updatedState.action
+        if (speechPlacementChanged) {
+            speechWindow?.takeIf { it.petId == instance.id }?.let(::updateSpeechPosition)
+        }
     }
 
     private fun applySpeechDirective(directive: PetSpeechDirective) {
         when (directive) {
             is PetSpeechDirective.Show -> showSpeech(
                 petId = directive.petId,
-                line = directive.line
+                line = directive.line,
+                attachment = directive.attachment
             )
 
             is PetSpeechDirective.Hide -> {
@@ -254,11 +265,16 @@ internal class PetOverlayController(
         }
     }
 
-    private fun showSpeech(petId: Int, line: PetSpeechLine) {
+    private fun showSpeech(
+        petId: Int,
+        line: PetSpeechLine,
+        attachment: PetSpeechAttachment
+    ) {
         val instance = instances.firstOrNull { it.id == petId } ?: return
         val existing = speechWindow
         if (existing?.petId == petId) {
             existing.line = line
+            existing.attachment = attachment
             updateSpeechPosition(existing, instance)
             return
         }
@@ -266,7 +282,7 @@ internal class PetOverlayController(
 
         val view = PetSpeechBubbleView(appContext)
         val params = createSpeechLayoutParams(petId)
-        val created = SpeechWindow(petId, view, params, line)
+        val created = SpeechWindow(petId, view, params, line, attachment)
         updateSpeechPosition(created, instance)
         try {
             windowManager.addView(view, params)
@@ -294,7 +310,9 @@ internal class PetOverlayController(
             viewportHeight = viewportHeight,
             bubbleWidth = window.params.width,
             bubbleHeight = window.params.height,
-            margin = appContext.dpToPixels(SPEECH_MARGIN_DP)
+            margin = appContext.dpToPixels(SPEECH_MARGIN_DP),
+            direction = state.direction,
+            attachment = window.attachment
         )
         window.params.x = placement.x
         window.params.y = placement.y
@@ -424,7 +442,8 @@ internal class PetOverlayController(
         val petId: Int,
         val view: PetSpeechBubbleView,
         val params: WindowManager.LayoutParams,
-        var line: PetSpeechLine
+        var line: PetSpeechLine,
+        var attachment: PetSpeechAttachment
     )
 
     private companion object {

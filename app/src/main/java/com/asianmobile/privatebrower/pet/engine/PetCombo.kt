@@ -222,7 +222,7 @@ object PetComboCatalog {
             PetComboId.CHATTER,
             requiredActions = setOf(PetAction.TALK),
             sustain(PetAction.IDLE, 1_500L..2_500L),
-            sustain(PetAction.TALK, 6_500L..10_000L),
+            sustain(PetAction.TALK, 9_000L..11_000L),
             once(PetAction.WINK),
             sustain(PetAction.SIT, 3_000L..5_000L)
         ),

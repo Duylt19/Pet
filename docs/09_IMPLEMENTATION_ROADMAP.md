@@ -93,6 +93,9 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Add Pet Speech V3.8 personalization and pacing: editable 30-line custom
   catalog, Unicode-safe DataStore codec, global random anti-repeat, 48 localized
   fallback lines, broader context-aware combo triggers and 4.5–8.5 second reading time.
+- [Done] Fix Pet Speech V3.9 TALK attachment: reproduce the original frame 34–36
+  `IeOffsetX=0/IeOffsetY=-64` carried-window geometry, mirror the box with pet direction,
+  keep it synchronized with pet movement and discard active/queued text when TALK ends.
 - Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
 - Treat tap popup, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
 - Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs. Local device sync is enabled for validation, while production distribution must use a provenance-preserving server import.

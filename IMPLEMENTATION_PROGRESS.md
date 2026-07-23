@@ -22,6 +22,7 @@
 | Multi-pet stability V3.6 | Done | Social ownership release, facing dead-zone, grounded personal space and autonomous collision turn-away |
 | Pet speech and dialogue V3.7 | Done | Frame 34–36 TALK pose, localized bubble, tap/skill/social lines, reading-time pacing and anti-spam turn-taking |
 | Pet message personalization V3.8 | Done | Editable 30-line list, Unicode-safe persistence, random anti-repeat, 48 fallback lines, broader triggers and slower 4.5–8.5s pacing |
+| TALK box attachment V3.9 | Done | Frame 34–36 box follows original -64px IE offset, mirrors in front of pet and cannot outlive/queue past TALK pose |
 | Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
 | Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |

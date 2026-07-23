@@ -82,7 +82,7 @@ class PetComboCatalogTest {
         )
         val talkBeat = supported?.beats?.single { it.action == PetAction.TALK }
 
-        assertEquals(6_500L..10_000L, talkBeat?.durationMillis)
+        assertEquals(9_000L..11_000L, talkBeat?.durationMillis)
         assertNull(withoutTalk)
     }
 

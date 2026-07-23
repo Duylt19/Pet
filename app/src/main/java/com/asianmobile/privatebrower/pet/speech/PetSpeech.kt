@@ -40,7 +40,8 @@ sealed interface PetSpeechDirective {
     data class Show(
         val petId: Int,
         val line: PetSpeechLine,
-        val durationMillis: Long
+        val durationMillis: Long,
+        val attachment: PetSpeechAttachment = PetSpeechAttachment.OVERHEAD
     ) : PetSpeechDirective
 
     data class Hide(val petId: Int) : PetSpeechDirective
@@ -58,6 +59,7 @@ class PetSpeechDirector(
     private val random = Random(seed)
     private val pending = ArrayDeque<PendingSpeech>()
     private val cooldownByPet = mutableMapOf<Int, Long>()
+    private val actionByPet = mutableMapOf<Int, PetAction>()
     private var lastLineText: String? = null
     private var active: ActiveSpeech? = null
 
@@ -67,9 +69,15 @@ class PetSpeechDirector(
         transition: PetTransition
     ): List<PetSpeechDirective> {
         val directives = mutableListOf<PetSpeechDirective>()
+        actionByPet[petId] = transition.state.action
         if (transition.state.action in INTERRUPTING_ACTIONS) {
             directives += cancel(petId)
             return directives
+        }
+        if (previousState.action == PetAction.TALK &&
+            transition.state.action != PetAction.TALK
+        ) {
+            directives += cancelTalkWindowSpeech(petId)
         }
 
         transition.effects.forEach { effect ->
@@ -98,7 +106,8 @@ class PetSpeechDirector(
             directives += request(
                 petId = petId,
                 tone = PetSpeechTone.CHATTER,
-                priority = SpeechPriority.AMBIENT
+                priority = SpeechPriority.AMBIENT,
+                attachment = PetSpeechAttachment.TALK_WINDOW
             )
         }
         return directives
@@ -127,6 +136,7 @@ class PetSpeechDirector(
         active = null
         pending.clear()
         cooldownByPet.clear()
+        actionByPet.clear()
         lastLineText = null
     }
 
@@ -200,7 +210,8 @@ class PetSpeechDirector(
         petId: Int,
         tone: PetSpeechTone,
         priority: SpeechPriority,
-        delayMillis: Long = 0
+        delayMillis: Long = 0,
+        attachment: PetSpeechAttachment = PetSpeechAttachment.OVERHEAD
     ): List<PetSpeechDirective> {
         val available = catalog.lines(tone)
         if (available.isEmpty()) return emptyList()
@@ -215,7 +226,7 @@ class PetSpeechDirector(
             return emptyList()
         }
 
-        val queued = PendingSpeech(petId, tone, priority, delayMillis)
+        val queued = PendingSpeech(petId, tone, priority, delayMillis, attachment)
         if (priority == SpeechPriority.USER) {
             pending.removeIf { it.petId == petId }
             val interrupted = active
@@ -234,6 +245,10 @@ class PetSpeechDirector(
 
     private fun startNext(): List<PetSpeechDirective> {
         if (active != null) return emptyList()
+        pending.removeIf { queued ->
+            queued.attachment == PetSpeechAttachment.TALK_WINDOW &&
+                actionByPet[queued.petId] != PetAction.TALK
+        }
         val next = pending
             .filter { it.delayMillis == 0L }
             .maxByOrNull(PendingSpeech::priority)
@@ -241,8 +256,10 @@ class PetSpeechDirector(
         pending.remove(next)
         val line = chooseLine(next.tone) ?: return startNext()
         val duration = readingDurationMillis(line.text)
-        active = ActiveSpeech(next.petId, line, duration)
-        return listOf(PetSpeechDirective.Show(next.petId, line, duration))
+        active = ActiveSpeech(next.petId, line, duration, next.attachment)
+        return listOf(
+            PetSpeechDirective.Show(next.petId, line, duration, next.attachment)
+        )
     }
 
     private fun chooseLine(tone: PetSpeechTone): PetSpeechLine? {
@@ -257,6 +274,23 @@ class PetSpeechDirector(
     private fun cancel(petId: Int): List<PetSpeechDirective> {
         pending.removeIf { it.petId == petId }
         val current = active?.takeIf { it.petId == petId } ?: return emptyList()
+        active = null
+        cooldownByPet[petId] = SPEAKER_COOLDOWN_MILLIS
+        return buildList {
+            add(PetSpeechDirective.Hide(current.petId))
+            addAll(startNext())
+        }
+    }
+
+    private fun cancelTalkWindowSpeech(petId: Int): List<PetSpeechDirective> {
+        pending.removeIf { queued ->
+            queued.petId == petId &&
+                queued.attachment == PetSpeechAttachment.TALK_WINDOW
+        }
+        val current = active?.takeIf { speech ->
+            speech.petId == petId &&
+                speech.attachment == PetSpeechAttachment.TALK_WINDOW
+        } ?: return emptyList()
         active = null
         cooldownByPet[petId] = SPEAKER_COOLDOWN_MILLIS
         return buildList {
@@ -281,13 +315,15 @@ class PetSpeechDirector(
         val petId: Int,
         val tone: PetSpeechTone,
         val priority: SpeechPriority,
-        var delayMillis: Long
+        var delayMillis: Long,
+        val attachment: PetSpeechAttachment
     )
 
     private data class ActiveSpeech(
         val petId: Int,
         val line: PetSpeechLine,
-        var remainingMillis: Long
+        var remainingMillis: Long,
+        val attachment: PetSpeechAttachment
     )
 
     private companion object {

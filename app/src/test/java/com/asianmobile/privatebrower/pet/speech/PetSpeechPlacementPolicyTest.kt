@@ -1,5 +1,6 @@
 package com.asianmobile.privatebrower.pet.speech
 
+import com.asianmobile.privatebrower.pet.engine.PetDirection
 import com.asianmobile.privatebrower.pet.engine.PetSize
 import com.asianmobile.privatebrower.pet.engine.PetVector
 import org.junit.Assert.assertEquals
@@ -36,13 +37,47 @@ class PetSpeechPlacementPolicyTest {
         assertEquals(1_616, placement.y)
     }
 
-    private fun resolve(position: PetVector) = PetSpeechPlacementPolicy.resolve(
+    @Test
+    fun `talk window follows legacy shime35 attachment on the left`() {
+        val placement = resolve(
+            position = PetVector(400f, 800f),
+            direction = PetDirection.LEFT,
+            attachment = PetSpeechAttachment.TALK_WINDOW
+        )
+
+        assertFalse(placement.tailAtTop)
+        assertEquals(240, placement.x)
+        assertEquals(776, placement.y)
+        assertEquals(220f, placement.tailCenterX)
+    }
+
+    @Test
+    fun `mirrored talk window moves in front of a right facing pet`() {
+        val placement = resolve(
+            position = PetVector(400f, 800f),
+            direction = PetDirection.RIGHT,
+            attachment = PetSpeechAttachment.TALK_WINDOW
+        )
+
+        assertFalse(placement.tailAtTop)
+        assertEquals(460, placement.x)
+        assertEquals(776, placement.y)
+        assertEquals(0f, placement.tailCenterX)
+    }
+
+    private fun resolve(
+        position: PetVector,
+        direction: PetDirection = PetDirection.LEFT,
+        attachment: PetSpeechAttachment = PetSpeechAttachment.OVERHEAD
+    ) = PetSpeechPlacementPolicy.resolve(
         petPosition = position,
         petSize = petSize,
         viewportWidth = 1_080,
         viewportHeight = 1_920,
         bubbleWidth = 220,
         bubbleHeight = 84,
-        margin = 6
+        margin = 6,
+        direction = direction,
+        attachment = attachment
     )
 }

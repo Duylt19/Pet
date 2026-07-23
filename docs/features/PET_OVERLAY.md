@@ -36,6 +36,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Tap/drag/fling đều được chuyển thành `PetEvent`. Hệ tọa độ overlay chỉ fit status bar/display cutout một lần, không trừ navigation bar ở đáy; vì vậy đáy pet chạm đáy màn hình vật lý thay vì dừng phía trên thanh điều hướng.
 - Playground cho phép cửa sổ pet tràn `1/3` chiều rộng qua mép trái/phải và `1/3` chiều rộng qua mép trên, còn mép dưới không tràn. `FLAG_LAYOUT_NO_LIMITS` là bắt buộc để WindowManager không clamp lại cửa sổ nhỏ; hit target vẫn chỉ bằng đúng kích thước pet.
 - Sprite pack dùng quy ước frame gốc quay sang trái. Renderer mirror ngang khi engine đi sang phải và chỉ thêm squash/stretch/lean nhẹ quanh bottom anchor cho motion nhanh, va chạm và Special; pose climb wall/ceiling không bị xoay sai hướng.
+- Speech TALK không neo theo tâm pet: box dùng contract `WalkWithIE` của frame 34–36,
+  bám đáy ở `anchorY - 0,5 × petHeight`, nằm trước hướng nhìn và mirror theo direction.
+  Reaction không dùng TALK tiếp tục dùng overhead placement.
 - Living Behavior dùng weighted scheduler với khoảng chờ biến thiên, continue/turn-around decisions, recent-action memory và deterministic seed riêng cho từng instance. Vì vậy nhiều pet không chạy đồng bộ nhưng mọi transition vẫn tái lập được trong JVM test.
 - Sau mỗi shared tick, crowd resolver tách các pet cùng mặt sàn với khoảng cách 5% canvas; pet tự chủ quay ra ngoài khi va nhau, social combo giữ facing do director quyết định, còn pet đang bay/leo/drag được phép đi qua mà không bị correction.
 - State graph hỗ trợ `fall → bounce → walk`, run/creep có timeout, leo lên/leo xuống, cùng routine như `sit → wink`, `trip → sit` và `special → special-2 → wink`. Wall timeout chọn jump/descend/fall; pet tới mép trần có thể leo xuống thay vì luôn rơi. Pack v1 cũ chỉ tham gia action thật sự khai báo và vẫn fallback walk/idle an toàn.
