@@ -89,7 +89,12 @@ internal class PetOverlayController(
 
         try {
             positions.forEachIndexed { index, position ->
-                val engine = PetEngine(engineConfig)
+                val engine = PetEngine(
+                    engineConfig.copy(
+                        behaviorSeed = pack.manifest.id.hashCode().toLong() xor
+                            ((index + 1L) * PET_BEHAVIOR_SEED_STEP)
+                    )
+                )
                 val initialState = engine.initialState(
                     bounds = bounds,
                     size = size,
@@ -261,5 +266,6 @@ internal class PetOverlayController(
         const val OVERLAY_WINDOW_TITLE = "Cute Pet overlay"
         const val NANOS_PER_MILLISECOND = 1_000_000L
         const val NANOS_PER_SECOND = 1_000_000_000L
+        const val PET_BEHAVIOR_SEED_STEP = 1_103_515_245L
     }
 }

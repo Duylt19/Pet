@@ -9,19 +9,16 @@ data class OwnerPetCatalogEntry(
     val hasLocalArchive: Boolean
 ) {
     val installedPackKey: String
-        get() = "${installedPackId(id)}@1"
+        get() = "${installedPackId(id)}@$OWNER_PET_PACK_VERSION"
 
     companion object {
         private const val PACK_ID_PREFIX = "owner.shimeji."
 
         fun installedPackId(id: Int): String = "$PACK_ID_PREFIX$id"
-
-        fun petIdFromPackId(packId: String): Int? = packId
-            .takeIf { it.startsWith(PACK_ID_PREFIX) }
-            ?.removePrefix(PACK_ID_PREFIX)
-            ?.toIntOrNull()
     }
 }
+
+const val OWNER_PET_PACK_VERSION = 2
 
 data class OwnerPetCatalogSnapshot(
     val entries: List<OwnerPetCatalogEntry> = emptyList(),

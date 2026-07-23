@@ -78,6 +78,7 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 
 - [Done] Pause the render clock while the display is off and resume without a large catch-up tick.
 - [Done] Extend autonomous behavior through explicit pack actions and boundary transitions without assuming the competitor's numbered-frame format.
+- [Done] Add Living Behavior scheduling: weighted seeded decisions, anti-repeat memory, variable action timing, wall jump/drop, ceiling drop, timed creep, gravity fall and velocity-aware drag release.
 - Add multi-pack session selection before considering swarm mode; keep the current device performance budget authoritative.
 - Treat tap popup, double-tap, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
 - Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs. Local device sync is enabled for validation, while production distribution must use a provenance-preserving server import.

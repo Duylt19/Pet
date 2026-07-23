@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.asianmobile.privatebrower.data.model.OwnerPetCatalogEntry
+import com.asianmobile.privatebrower.data.model.OWNER_PET_PACK_VERSION
 import com.asianmobile.privatebrower.pet.engine.PetAction
 import com.asianmobile.privatebrower.pet.engine.PetVector
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -30,7 +31,7 @@ class LegacyShimejiPackInstaller @Inject constructor(
         val destination = PetPackInstaller.installedDirectory(
             root = root,
             id = OwnerPetCatalogEntry.installedPackId(entry.id),
-            version = PACK_VERSION
+            version = OWNER_PET_PACK_VERSION
         )
         if (destination.exists()) {
             return try {
@@ -166,44 +167,121 @@ class LegacyShimejiPackInstaller @Inject constructor(
             nextAction: PetAction? = null,
             duration: Long = 130L,
             velocityX: Float = 0f,
-            velocityY: Float = 0f
-        ) = PetPackClip(
-            action = action,
-            loops = loops,
-            nextAction = nextAction,
-            frames = numbers.map { frame(it, duration, velocityX, velocityY) }
-        )
+            velocityY: Float = 0f,
+            allowFallback: Boolean = false
+        ): PetPackClip? {
+            if (!allowFallback && !LegacyShimejiFrameContract.isAvailable(numbers, assets.keys)) {
+                return null
+            }
+            return PetPackClip(
+                action = action,
+                loops = loops,
+                nextAction = nextAction,
+                frames = numbers.map { frame(it, duration, velocityX, velocityY) }
+            )
+        }
 
-        val clips = listOf(
-            clip(PetAction.IDLE, listOf(11, 15, 11, 17), loops = true, duration = 220L),
-            clip(PetAction.WALK, listOf(1, 2, 1, 3), loops = true, velocityX = 42f),
-            clip(PetAction.FALL, listOf(4), loops = true, velocityY = 220f),
-            clip(PetAction.BOUNCE, listOf(18, 19), false, PetAction.WALK),
-            clip(PetAction.CLIMB_WALL, listOf(12, 13, 14), true, velocityY = -36f),
-            clip(PetAction.CLIMB_CEILING, listOf(23, 24, 25), true, velocityX = 36f),
-            clip(PetAction.SIT, listOf(11, 31, 32), false, PetAction.WALK, duration = 260L),
-            clip(PetAction.WINK, listOf(15, 17), false, PetAction.WALK, duration = 240L),
-            clip(PetAction.CREEP, listOf(20, 21), true, velocityX = 16f),
-            clip(PetAction.TRIP, listOf(18, 19, 20), false, PetAction.WALK),
-            clip(PetAction.SPECIAL, listOf(1, 38, 39, 40, 41), false, PetAction.WALK, 180L),
+        val clips = buildList {
+            add(checkNotNull(clip(
+                PetAction.IDLE,
+                listOf(11, 15, 11, 17),
+                loops = true,
+                duration = 220L,
+                allowFallback = true
+            )))
+            add(checkNotNull(clip(
+                PetAction.WALK,
+                listOf(1, 2, 1, 3),
+                loops = true,
+                velocityX = 42f,
+                allowFallback = true
+            )))
+            val fall = clip(PetAction.FALL, listOf(4), loops = true)
+            fall?.let(::add)
+            clip(PetAction.BOUNCE, listOf(18, 19), false, PetAction.WALK)?.let(::add)
             clip(
-                PetAction.SPECIAL_2,
-                (42..46).toList(),
+                PetAction.CLIMB_WALL,
+                LegacyShimejiFrameContract.wallClimb,
+                loops = true,
+                duration = 80L,
+                velocityY = -36f
+            )?.let(::add)
+            clip(
+                PetAction.CLIMB_CEILING,
+                LegacyShimejiFrameContract.ceilingClimb,
+                loops = true,
+                duration = 80L,
+                velocityX = 36f
+            )?.let(::add)
+            clip(PetAction.SIT, listOf(11), false, PetAction.WALK, duration = 1_600L)
+                ?.let(::add)
+            clip(PetAction.WINK, listOf(15, 17), false, PetAction.WALK, duration = 240L)
+                ?.let(::add)
+            clip(PetAction.LOOK_UP, listOf(26), false, PetAction.WALK, duration = 1_200L)
+                ?.let(::add)
+            clip(
+                PetAction.DANGLE,
+                listOf(31, 32, 31, 32),
+                false,
+                PetAction.WALK,
+                duration = 320L
+            )?.let(::add)
+            clip(
+                PetAction.CREEP,
+                LegacyShimejiFrameContract.creep,
+                loops = true,
+                velocityX = 16f
+            )?.let(::add)
+            clip(
+                PetAction.TRIP,
+                LegacyShimejiFrameContract.trip,
+                false,
+                PetAction.WALK
+            )
+                ?.let(::add)
+            if (fall != null) {
+                clip(
+                    PetAction.JUMP,
+                    listOf(22),
+                    false,
+                    PetAction.FALL,
+                    duration = 220L,
+                    velocityX = 110f,
+                    velocityY = -80f
+                )?.let(::add)
+            }
+            clip(
+                PetAction.SPECIAL,
+                LegacyShimejiFrameContract.special,
                 false,
                 PetAction.WALK,
                 duration = 180L
-            ),
-            clip(PetAction.TAPPED, listOf(15, 17), false, PetAction.IDLE, duration = 180L),
-            clip(PetAction.DRAGGED, listOf(5, 6, 7, 8), loops = true),
-            clip(PetAction.FLUNG, listOf(22), loops = true)
-        ).associateBy(PetPackClip::action)
+            )?.let(::add)
+            clip(
+                PetAction.SPECIAL_2,
+                LegacyShimejiFrameContract.special2,
+                false,
+                PetAction.WALK,
+                duration = 180L
+            )?.let(::add)
+            clip(PetAction.TAPPED, listOf(15, 17), false, PetAction.IDLE, duration = 180L)
+                ?.let(::add)
+            clip(
+                PetAction.DRAGGED,
+                LegacyShimejiFrameContract.dragged,
+                loops = true,
+                duration = 100L
+            )
+                ?.let(::add)
+            clip(PetAction.FLUNG, listOf(22), loops = true)?.let(::add)
+        }.associateBy(PetPackClip::action)
         val canvasWidth = assets.values.maxOf(LegacyFrameAsset::width)
         val canvasHeight = assets.values.maxOf(LegacyFrameAsset::height)
         val largestSide = maxOf(canvasWidth, canvasHeight)
         return PetPackManifest(
             schemaVersion = PET_PACK_SCHEMA_VERSION,
             id = OwnerPetCatalogEntry.installedPackId(entry.id),
-            version = PACK_VERSION,
+            version = OWNER_PET_PACK_VERSION,
             name = entry.name.take(PetPackValidator.MAX_NAME_LENGTH),
             author = entry.author?.take(PetPackValidator.MAX_AUTHOR_LENGTH),
             canvas = PetPackCanvas(
@@ -215,7 +293,9 @@ class LegacyShimejiPackInstaller @Inject constructor(
                 )
             ),
             anchor = PetPackAnchor(0.5f, 1f),
-            interaction = PetPackInteraction(PetAction.TAPPED),
+            interaction = PetPackInteraction(
+                if (PetAction.TAPPED in clips) PetAction.TAPPED else PetAction.IDLE
+            ),
             clips = clips
         )
     }
@@ -260,7 +340,6 @@ class LegacyShimejiPackInstaller @Inject constructor(
     }
 
     private companion object {
-        const val PACK_VERSION = 1
         const val STAGING_DIRECTORY = ".legacy-staging"
         const val UNPACKED_DIRECTORY = "unpacked"
         const val COPY_BUFFER_BYTES = 16 * 1024
@@ -285,6 +364,19 @@ data class LegacyFrameAsset(
     val width: Int,
     val height: Int
 )
+
+internal object LegacyShimejiFrameContract {
+    val dragged = listOf(7, 5, 6, 8, 6)
+    val wallClimb = listOf(14, 14, 12, 13, 13, 13, 12, 14)
+    val creep = listOf(20, 20, 21, 21, 21)
+    val trip = listOf(19, 18, 20, 20)
+    val ceilingClimb = listOf(25, 25, 23, 24, 24, 24, 23, 25)
+    val special = listOf(1, 38, 39, 40)
+    val special2 = listOf(42, 43, 44, 45, 46, 45, 44, 43)
+
+    fun isAvailable(sequence: List<Int>, availableFrames: Set<Int>): Boolean =
+        sequence.all(availableFrames::contains)
+}
 
 object LegacyShimejiFrameSelector {
     private val framePattern = Regex("^shime(\\d+).*\\.png$", RegexOption.IGNORE_CASE)

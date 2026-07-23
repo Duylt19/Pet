@@ -29,7 +29,8 @@ private fun fallbackClip(
         PetAction.WALK,
         PetAction.CREEP,
         PetAction.CLIMB_WALL,
-        PetAction.CLIMB_CEILING -> walkFrames
+        PetAction.CLIMB_CEILING,
+        PetAction.JUMP -> walkFrames
         else -> idleFrames
     }
     val frames = sourceFrames.mapIndexed { index, frame ->
@@ -38,6 +39,7 @@ private fun fallbackClip(
             PetAction.CLIMB_WALL -> PetVector(y = -CLIMB_VELOCITY)
             PetAction.CLIMB_CEILING -> PetVector(x = CLIMB_VELOCITY)
             PetAction.CREEP -> PetVector(x = CREEP_VELOCITY)
+            PetAction.JUMP -> PetVector(x = JUMP_HORIZONTAL_VELOCITY, y = JUMP_VERTICAL_VELOCITY)
             else -> frame.velocity
         }
         PetFrame(
@@ -75,11 +77,16 @@ private const val MIN_FRAME_MILLIS = 16L
 private const val FALL_VELOCITY = 220f
 private const val CLIMB_VELOCITY = 36f
 private const val CREEP_VELOCITY = 16f
+private const val JUMP_HORIZONTAL_VELOCITY = 110f
+private const val JUMP_VERTICAL_VELOCITY = -80f
 private val ONE_SHOT_FALLBACK_ACTIONS = setOf(
     PetAction.BOUNCE,
     PetAction.SIT,
     PetAction.WINK,
+    PetAction.LOOK_UP,
+    PetAction.DANGLE,
     PetAction.TRIP,
+    PetAction.JUMP,
     PetAction.SPECIAL,
     PetAction.SPECIAL_2,
     PetAction.TAPPED

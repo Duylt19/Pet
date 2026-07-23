@@ -33,7 +33,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Tap/drag/fling đều được chuyển thành `PetEvent`. Hệ tọa độ overlay chỉ fit status bar/display cutout một lần, không trừ navigation bar ở đáy; vì vậy đáy pet chạm đáy màn hình vật lý thay vì dừng phía trên thanh điều hướng.
 - Playground cho phép cửa sổ pet tràn `1/3` chiều rộng qua mép trái/phải và `1/3` chiều rộng qua mép trên, còn mép dưới không tràn. `FLAG_LAYOUT_NO_LIMITS` là bắt buộc để WindowManager không clamp lại cửa sổ nhỏ; hit target vẫn chỉ bằng đúng kích thước pet.
 - Sprite pack dùng quy ước frame gốc quay sang trái. Renderer chỉ mirror ngang khi engine đi sang phải; không thêm rotate/scale/bob lên các frame action vì climb wall/ceiling đã có pose riêng trong asset.
-- Pack có action mở rộng chạy state graph `fall → bounce → walk → wall/ceiling climb` và luân phiên các one-shot thụ động. Lựa chọn autonomous là deterministic trong pure engine; idle tự quay về walk sau một khoảng nghỉ, còn pack v1 cũ chỉ có action cơ bản vẫn giữ walk/idle an toàn.
+- Living Behavior dùng weighted scheduler với khoảng chờ biến thiên, continue/turn-around decisions, recent-action memory và deterministic seed riêng cho từng instance. Vì vậy nhiều pet không chạy đồng bộ nhưng mọi transition vẫn tái lập được trong JVM test.
+- State graph hỗ trợ `fall → bounce → walk`, passive `idle/sit/wink/look-up/dangle/trip/special`, timed creep, wall climb timeout thành jump/fall và ceiling climb timeout thành fall. Pack v1 cũ chỉ tham gia action thật sự khai báo và vẫn fallback walk/idle an toàn.
+- Fall dùng gravity/terminal velocity thay cho tốc độ dọc cố định. Thả kéo nhẹ phát `DragEnd → Fall`; chỉ thao tác vượt system minimum-fling velocity mới vào physics fling.
 - Stop chuẩn hóa vị trí 0–1 vào DataStore; Start sau process/orientation change restore và clamp theo usable bounds mới.
 - Stop action, `onDestroy` và lỗi add window đều remove callback/toàn bộ window và reset runtime state.
 - Dynamic `SCREEN_OFF`/`SCREEN_ON` receiver dừng và nối lại shared frame clock; resume reset mốc tick để không chạy bù toàn bộ thời gian màn hình tắt.
@@ -43,6 +45,7 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Google Pixel 3 XL (`crosshatch`), Android 12 / API 31: verified start/stop, foreground notification, render over launcher, drag/fling and permission revocation cleanup.
 - Cùng thiết bị đã verified 3 `Sunny Cat` window, một service/shared clock, selection/count/position qua force-stop/relaunch và clean stop không fatal/OOM/window leak.
 - Extended built-in behavior verified trên cùng thiết bị: initial fall, bottom landing, horizontal/autonomous movement, stable overlay position trong doze và tiếp tục di chuyển sau wake.
+- Living Behavior revision 2 verified với owner pet `Levi Ackerman`: manifest chỉ expose các action đủ frame; runtime ghi nhận mid-screen turn, passive pause/resume, wall climb timeout → fall, landing và climb retry mà không fatal/OOM.
 - Edge contract verified trên cùng thiết bị với pet 392 px: parent overlay bắt đầu tại status bar `y=171`, mép trái đạt `x=-131`, mép phải đạt `x=1179` và mép trên đạt `y=-131`; cửa sổ được phép tràn ra ngoài display thay vì bị WindowManager clamp. Playground bottom là `2789`, tương ứng đáy vật lý `2960`, nên không còn bị navigation bar 168 px đẩy lên.
 - Overlay window remained 112dp and touch did not block the rest of the launcher.
 - No fatal exception was recorded during the full flow; service, window and notification were all removed after Stop/revocation.

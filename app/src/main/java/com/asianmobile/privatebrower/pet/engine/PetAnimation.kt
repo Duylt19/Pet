@@ -11,8 +11,11 @@ enum class PetAction {
     CLIMB_CEILING,
     SIT,
     WINK,
+    LOOK_UP,
+    DANGLE,
     CREEP,
     TRIP,
+    JUMP,
     SPECIAL,
     SPECIAL_2,
     TAPPED,
@@ -201,6 +204,8 @@ object DemoPetAnimation {
         ),
         oneShot(PetAction.SIT, frameCount = 1, frameDurationMillis = 2_400),
         oneShot(PetAction.WINK, frameCount = 2, frameDurationMillis = 260),
+        oneShot(PetAction.LOOK_UP, frameCount = 1, frameDurationMillis = 1_200),
+        oneShot(PetAction.DANGLE, frameCount = 4, frameDurationMillis = 320),
         PetClip(
             action = PetAction.CREEP,
             frames = List(4) { index ->
@@ -209,6 +214,18 @@ object DemoPetAnimation {
             loops = true
         ),
         oneShot(PetAction.TRIP, frameCount = 4, frameDurationMillis = 140),
+        PetClip(
+            action = PetAction.JUMP,
+            frames = listOf(
+                PetFrame(
+                    index = 0,
+                    durationMillis = 220,
+                    velocity = PetVector(x = 110f, y = -80f)
+                )
+            ),
+            loops = false,
+            nextAction = PetAction.FALL
+        ),
         oneShot(PetAction.SPECIAL, frameCount = 4, frameDurationMillis = 220),
         oneShot(PetAction.SPECIAL_2, frameCount = 8, frameDurationMillis = 160),
         PetClip(

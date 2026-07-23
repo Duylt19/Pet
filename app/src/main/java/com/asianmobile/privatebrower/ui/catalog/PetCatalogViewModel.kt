@@ -3,7 +3,6 @@ package com.asianmobile.privatebrower.ui.catalog
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.asianmobile.privatebrower.data.model.OwnerPetCatalogEntry
 import com.asianmobile.privatebrower.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.privatebrower.pet.pack.PetPackInstallResult
 import com.asianmobile.privatebrower.pet.pack.PetPackInstaller
@@ -51,9 +50,6 @@ class PetCatalogViewModel @Inject constructor(
                                 current.selectedCategory
                             ),
                             categories = PetCatalogFilter.categories(catalog.entries),
-                            selectedOwnerPetId = OwnerPetCatalogEntry.petIdFromPackId(
-                                selected.manifest.id
-                            ),
                             localRootPath = catalog.localRootPath,
                             isLoading = catalog.isLoading,
                             catalogError = catalog.error

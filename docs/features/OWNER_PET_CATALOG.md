@@ -33,12 +33,12 @@ The tool verifies that the device contains the same archive/thumbnail counts as 
 The raw data is not expanded eagerly. `LegacyShimejiPackInstaller` converts only the selected ZIP into the validated pack-v1 directory:
 
 ```text
-files/pet_packs/installed/owner.shimeji.<petId>/1/
+files/pet_packs/installed/owner.shimeji.<petId>/2/
 ├── manifest.json
 └── frames/<normalized available frame>.png
 ```
 
-Conversion is staged and atomically promoted. It applies archive size/entry/path/unpacked limits, validates decoded image bounds, prefers canonical frame names, normalizes upper-case/suffixed names, uses a safe fallback for missing numbered frames, and converts the two GIF frames mislabeled as PNG in pack `136` into real PNG files. The pinned owner snapshot is never modified.
+Conversion is staged and atomically promoted. Revision 2 preserves the canonical repeated-frame rhythm for drag, wall/ceiling climb, creep, trip and special actions; exposes look-up, dangle and wall-jump poses; and only advertises an optional action when all of its required frames exist. Safe fallback is limited to mandatory idle/walk compatibility. The converter also applies archive size/entry/path/unpacked limits, validates decoded image bounds, prefers canonical frame names, normalizes upper-case/suffixed names, and converts the two GIF frames mislabeled as PNG in pack `136` into real PNG files. The pinned owner snapshot is never modified, and installed revision 1 remains readable.
 
 ## Server migration boundary
 

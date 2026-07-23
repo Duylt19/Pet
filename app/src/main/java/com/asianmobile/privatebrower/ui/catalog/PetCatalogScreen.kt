@@ -323,7 +323,7 @@ private fun CatalogList(
                     val isInstalled = uiState.packs.any { it.key == pet.installedPackKey }
                     OwnerPetCard(
                         pet = pet,
-                        isSelected = pet.id == uiState.selectedOwnerPetId,
+                        isSelected = pet.installedPackKey == uiState.selectedKey,
                         isPreparing = pet.id == uiState.preparingPetId,
                         isAnotherPreparing = uiState.preparingPetId != null &&
                             pet.id != uiState.preparingPetId,

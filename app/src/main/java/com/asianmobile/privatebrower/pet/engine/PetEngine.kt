@@ -10,15 +10,11 @@ data class PetEngineConfig(
     val flingDeceleration: Float = 3_500f,
     val flingStopSpeed: Float = 24f,
     val supportedActions: Set<PetAction> = clips.keys,
-    val autonomousIntervalMillis: Long = 4_000,
-    val autonomousActions: List<PetAction> = listOf(
-        PetAction.SIT,
-        PetAction.WINK,
-        PetAction.TRIP,
-        PetAction.SPECIAL,
-        PetAction.SPECIAL_2,
-        PetAction.CREEP
-    )
+    val behaviorProfile: PetBehaviorProfile = PetBehaviorProfile(),
+    val behaviorSeed: Long = 0,
+    val fallGravity: Float = 900f,
+    val initialFallSpeed: Float = 120f,
+    val terminalFallSpeed: Float = 900f
 ) {
     init {
         require(clips.keys.containsAll(PetAction.entries)) {
@@ -32,11 +28,13 @@ data class PetEngineConfig(
         require(flingStopSpeed < maxFlingSpeed) {
             "flingStopSpeed must be lower than maxFlingSpeed"
         }
-        require(autonomousIntervalMillis > 0) {
-            "autonomousIntervalMillis must be positive"
-        }
         require(supportedActions.all(clips::containsKey)) {
             "supported actions must reference configured clips"
+        }
+        require(fallGravity > 0f) { "fall gravity must be positive" }
+        require(initialFallSpeed >= 0f) { "initial fall speed must not be negative" }
+        require(terminalFallSpeed > initialFallSpeed) {
+            "terminal fall speed must exceed initial fall speed"
         }
     }
 }
@@ -117,7 +115,7 @@ class PetEngine(
         if (velocity.magnitude <= config.flingStopSpeed) {
             return changeAction(
                 state = state.copy(velocity = PetVector.Zero),
-                action = PetAction.IDLE
+                action = preferredAction(PetAction.FALL, PetAction.IDLE)
             )
         }
         val direction = when {
@@ -147,9 +145,16 @@ class PetEngine(
         val effects = animation.actionTransitions.map { (from, to) ->
             PetEffect.ActionChanged(from, to)
         }.toMutableList<PetEffect>()
+        val actionChangedByTimeline = animation.action != state.action
         var updatedState = state.copy(
             action = animation.action,
-            animationCursor = animation.cursor
+            animationCursor = animation.cursor,
+            actionElapsedMillis = if (actionChangedByTimeline) {
+                0
+            } else {
+                state.actionElapsedMillis + elapsedMillis
+            },
+            actionTargetMillis = if (actionChangedByTimeline) 0 else state.actionTargetMillis
         )
 
         if (updatedState.action == PetAction.FLUNG) {
@@ -192,6 +197,10 @@ class PetEngine(
             return PetTransition(updatedState, effects)
         }
 
+        if (updatedState.action == PetAction.FALL) {
+            return advanceFall(updatedState, scriptedDisplacement, elapsedMillis, effects)
+        }
+
         val requestedPosition = updatedState.position + scriptedDisplacement
         val constrainedPosition = updatedState.bounds.clampTopLeft(
             requestedPosition,
@@ -219,12 +228,45 @@ class PetEngine(
             val collided = changeAction(updatedState, collisionAction)
             return collided.copy(effects = effects + collided.effects)
         }
-        return applyAutonomousBehavior(
+        return applyLivingBehavior(
             state = updatedState,
-            elapsedMillis = elapsedMillis,
-            effects = effects,
-            previousAction = state.action
+            effects = effects
         )
+    }
+
+    private fun advanceFall(
+        state: PetState,
+        scriptedDisplacement: PetVector,
+        elapsedMillis: Long,
+        effects: List<PetEffect>
+    ): PetTransition {
+        val seconds = elapsedMillis / MILLIS_PER_SECOND
+        val oldSpeed = state.velocity.y.coerceAtLeast(config.initialFallSpeed)
+        val newSpeed = (oldSpeed + config.fallGravity * seconds)
+            .coerceAtMost(config.terminalFallSpeed)
+        val fallDistance = (oldSpeed + newSpeed) * 0.5f * seconds
+        val requestedPosition = state.position + PetVector(
+            x = scriptedDisplacement.x,
+            y = fallDistance
+        )
+        val constrainedPosition = state.bounds.clampTopLeft(requestedPosition, state.size)
+        val collisionAction = collisionAction(
+            action = PetAction.FALL,
+            requested = requestedPosition,
+            constrained = constrainedPosition,
+            bounds = state.bounds
+        )
+        val falling = state.copy(
+            position = constrainedPosition,
+            velocity = PetVector(y = newSpeed)
+        )
+        if (collisionAction == null) return PetTransition(falling, effects)
+
+        val collided = changeAction(
+            state = falling.copy(velocity = PetVector.Zero),
+            action = collisionAction
+        )
+        return collided.copy(effects = effects + collided.effects)
     }
 
     private fun advanceFling(
@@ -254,11 +296,8 @@ class PetEngine(
             state = state.copy(
                 action = action,
                 animationCursor = PetAnimationCursor(),
-                autonomousElapsedMillis = if (action == PetAction.WALK) {
-                    state.autonomousElapsedMillis
-                } else {
-                    0
-                }
+                actionElapsedMillis = 0,
+                actionTargetMillis = 0
             ),
             effects = if (state.action == action) {
                 emptyList()
@@ -330,46 +369,177 @@ class PetEngine(
         }
     }
 
-    private fun applyAutonomousBehavior(
+    private fun applyLivingBehavior(
         state: PetState,
-        elapsedMillis: Long,
-        effects: List<PetEffect>,
-        previousAction: PetAction
+        effects: List<PetEffect>
+    ): PetTransition = when (state.action) {
+        PetAction.IDLE -> timedTransition(
+            state,
+            config.behaviorProfile.idleDurationMillis,
+            preferredAction(PetAction.WALK, PetAction.IDLE),
+            effects,
+            IDLE_DURATION_SALT
+        )
+
+        PetAction.WALK -> applyGroundBehavior(state, effects)
+        PetAction.CREEP -> timedTransition(
+            state,
+            config.behaviorProfile.creepDurationMillis,
+            preferredAction(PetAction.WALK, PetAction.IDLE),
+            effects,
+            CREEP_DURATION_SALT
+        )
+
+        PetAction.CLIMB_WALL -> applyWallTimeout(state, effects)
+        PetAction.CLIMB_CEILING -> timedTransition(
+            state,
+            config.behaviorProfile.ceilingDurationMillis,
+            preferredAction(PetAction.FALL, PetAction.WALK),
+            effects,
+            CEILING_DURATION_SALT
+        )
+
+        else -> PetTransition(state, effects)
+    }
+
+    private fun applyGroundBehavior(
+        state: PetState,
+        effects: List<PetEffect>
     ): PetTransition {
-        if (state.action == PetAction.IDLE && previousAction == PetAction.IDLE) {
-            val total = state.autonomousElapsedMillis + elapsedMillis
-            if (total >= config.autonomousIntervalMillis && PetAction.WALK in config.supportedActions) {
-                val changed = changeAction(
-                    state.copy(autonomousElapsedMillis = 0),
-                    PetAction.WALK
-                )
-                return changed.copy(effects = effects + changed.effects)
+        val scheduled = ensureActionTarget(
+            state,
+            config.behaviorProfile.groundDelayMillis,
+            GROUND_DELAY_SALT
+        )
+        if (scheduled.actionElapsedMillis < scheduled.actionTargetMillis) {
+            return PetTransition(scheduled, effects)
+        }
+
+        val supportedRules = config.behaviorProfile.autonomousRules.filter { rule ->
+            rule.action in config.supportedActions && rule.action != PetAction.WALK
+        }
+        val freshRules = supportedRules.filterNot { it.action in scheduled.recentAutonomousActions }
+        val eligibleRules = freshRules.ifEmpty { supportedRules }
+        val totalWeight = config.behaviorProfile.continueWalkWeight +
+            config.behaviorProfile.turnAroundWeight + eligibleRules.sumOf(PetBehaviorRule::weight)
+        if (totalWeight <= 0) {
+            return PetTransition(scheduled.resetActionTimer(), effects)
+        }
+
+        val draw = draw(scheduled, 0 until totalWeight, GROUND_CHOICE_SALT)
+        var cursor = draw.value
+        if (cursor < config.behaviorProfile.continueWalkWeight) {
+            return PetTransition(draw.state.resetActionTimer(), effects)
+        }
+        cursor -= config.behaviorProfile.continueWalkWeight
+        if (cursor < config.behaviorProfile.turnAroundWeight) {
+            return PetTransition(
+                draw.state.copy(direction = draw.state.direction.opposite()).resetActionTimer(),
+                effects
+            )
+        }
+        cursor -= config.behaviorProfile.turnAroundWeight
+        val selected = eligibleRules.first { rule ->
+            if (cursor < rule.weight) {
+                true
+            } else {
+                cursor -= rule.weight
+                false
             }
-            return PetTransition(state.copy(autonomousElapsedMillis = total), effects)
-        }
-        if (state.action != PetAction.WALK || previousAction != PetAction.WALK) {
-            return PetTransition(state.copy(autonomousElapsedMillis = 0), effects)
-        }
-        val eligible = config.autonomousActions.filter { action ->
-            action in config.supportedActions && action != PetAction.WALK
-        }
-        if (eligible.isEmpty()) {
-            return PetTransition(state.copy(autonomousElapsedMillis = 0), effects)
-        }
-        val total = state.autonomousElapsedMillis + elapsedMillis
-        if (total < config.autonomousIntervalMillis) {
-            return PetTransition(state.copy(autonomousElapsedMillis = total), effects)
-        }
-        val next = eligible[state.autonomousStep.mod(eligible.size)]
+        }.action
+        val recent = (listOf(selected) + draw.state.recentAutonomousActions)
+            .distinct()
+            .take(config.behaviorProfile.recentActionMemory)
         val changed = changeAction(
-            state.copy(
-                autonomousElapsedMillis = 0,
-                autonomousStep = state.autonomousStep + 1
-            ),
-            next
+            draw.state.copy(recentAutonomousActions = recent),
+            selected
         )
         return changed.copy(effects = effects + changed.effects)
     }
+
+    private fun applyWallTimeout(
+        state: PetState,
+        effects: List<PetEffect>
+    ): PetTransition {
+        val scheduled = ensureActionTarget(
+            state,
+            config.behaviorProfile.wallDurationMillis,
+            WALL_DURATION_SALT
+        )
+        if (scheduled.actionElapsedMillis < scheduled.actionTargetMillis) {
+            return PetTransition(scheduled, effects)
+        }
+        val chance = draw(scheduled, 0 until PERCENT_MAX, WALL_EXIT_SALT)
+        val canJump = PetAction.JUMP in config.supportedActions
+        val nextAction = if (
+            canJump && chance.value < config.behaviorProfile.wallJumpChancePercent
+        ) {
+            PetAction.JUMP
+        } else {
+            preferredAction(PetAction.FALL, PetAction.WALK)
+        }
+        val exiting = if (nextAction == PetAction.JUMP) {
+            chance.state.copy(direction = chance.state.direction.opposite())
+        } else {
+            chance.state
+        }
+        val changed = changeAction(exiting, nextAction)
+        return changed.copy(effects = effects + changed.effects)
+    }
+
+    private fun timedTransition(
+        state: PetState,
+        durationRange: LongRange,
+        nextAction: PetAction,
+        effects: List<PetEffect>,
+        salt: Long
+    ): PetTransition {
+        val scheduled = ensureActionTarget(state, durationRange, salt)
+        if (scheduled.actionElapsedMillis < scheduled.actionTargetMillis ||
+            nextAction == scheduled.action
+        ) {
+            return PetTransition(scheduled, effects)
+        }
+        val changed = changeAction(scheduled, nextAction)
+        return changed.copy(effects = effects + changed.effects)
+    }
+
+    private fun ensureActionTarget(
+        state: PetState,
+        durationRange: LongRange,
+        salt: Long
+    ): PetState = if (state.actionTargetMillis > 0) {
+        state
+    } else {
+        val draw = draw(state, durationRange, salt)
+        draw.state.copy(actionTargetMillis = draw.value)
+    }
+
+    private fun draw(state: PetState, range: IntRange, salt: Long): RandomDraw<Int> {
+        require(!range.isEmpty()) { "random range must not be empty" }
+        val span = range.last.toLong() - range.first + 1
+        val value = range.first + (mixedRandom(state.behaviorSequence, salt) % span).toInt()
+        return RandomDraw(value, state.copy(behaviorSequence = state.behaviorSequence + 1))
+    }
+
+    private fun draw(state: PetState, range: LongRange, salt: Long): RandomDraw<Long> {
+        val span = range.last - range.first + 1
+        val value = range.first + mixedRandom(state.behaviorSequence, salt) % span
+        return RandomDraw(value, state.copy(behaviorSequence = state.behaviorSequence + 1))
+    }
+
+    private fun mixedRandom(sequence: Long, salt: Long): Long {
+        var value = config.behaviorSeed xor (sequence * RANDOM_SEQUENCE_MULTIPLIER) xor salt
+        value = value xor (value shl 13)
+        value = value xor (value ushr 7)
+        value = value xor (value shl 17)
+        return value and Long.MAX_VALUE
+    }
+
+    private fun PetState.resetActionTimer(): PetState = copy(
+        actionElapsedMillis = 0,
+        actionTargetMillis = 0
+    )
 
     private fun preferredActionOrNull(vararg actions: PetAction): PetAction? =
         actions.firstOrNull { it in config.supportedActions }
@@ -382,7 +552,21 @@ class PetEngine(
         val displacement: PetVector
     )
 
+    private data class RandomDraw<T>(
+        val value: T,
+        val state: PetState
+    )
+
     private companion object {
         const val MILLIS_PER_SECOND = 1_000f
+        const val PERCENT_MAX = 100
+        const val RANDOM_SEQUENCE_MULTIPLIER = 1_103_515_245L
+        const val GROUND_DELAY_SALT = 0x101L
+        const val GROUND_CHOICE_SALT = 0x102L
+        const val IDLE_DURATION_SALT = 0x201L
+        const val CREEP_DURATION_SALT = 0x301L
+        const val WALL_DURATION_SALT = 0x401L
+        const val WALL_EXIT_SALT = 0x402L
+        const val CEILING_DURATION_SALT = 0x501L
     }
 }

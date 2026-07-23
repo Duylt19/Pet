@@ -120,7 +120,7 @@ class PetPackValidator {
         const val MAX_CANVAS_SIDE = 2_048
         const val MIN_DEFAULT_SCALE = 0.25f
         const val MAX_DEFAULT_SCALE = 4f
-        const val MAX_CLIPS = 16
+        const val MAX_CLIPS = 24
         const val MAX_TOTAL_FRAMES = 256
         const val MIN_FRAME_DURATION = 16L
         const val MAX_FRAME_DURATION = 10_000L

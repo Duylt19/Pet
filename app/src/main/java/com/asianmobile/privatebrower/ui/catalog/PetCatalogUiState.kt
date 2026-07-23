@@ -12,7 +12,6 @@ data class PetCatalogUiState(
     val categories: List<PetCatalogCategory> = emptyList(),
     val selectedCategory: String? = null,
     val searchQuery: String = "",
-    val selectedOwnerPetId: Int? = null,
     val preparingPetId: Int? = null,
     val localRootPath: String = "",
     val isLoading: Boolean = true,

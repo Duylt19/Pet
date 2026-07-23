@@ -14,6 +14,7 @@ import com.asianmobile.privatebrower.R
 import com.asianmobile.privatebrower.pet.engine.PetAction
 import com.asianmobile.privatebrower.pet.engine.PetDirection
 import com.asianmobile.privatebrower.pet.engine.PetEvent
+import com.asianmobile.privatebrower.pet.engine.PetGesturePolicy
 import com.asianmobile.privatebrower.pet.engine.PetState
 import com.asianmobile.privatebrower.pet.engine.PetVector
 import com.asianmobile.privatebrower.pet.engine.requiresMirror
@@ -26,6 +27,8 @@ internal class PetOverlayView(
     private val onEvent: (PetEvent) -> Unit
 ) : View(context) {
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
+    private val minimumFlingVelocity =
+        ViewConfiguration.get(context).scaledMinimumFlingVelocity.toFloat()
     private var petState: PetState? = null
     private var downRawX = 0f
     private var downRawY = 0f
@@ -103,6 +106,9 @@ internal class PetOverlayView(
             PetAction.CLIMB_WALL -> canvas.rotate(-4f, viewWidth / 2f, viewHeight / 2f)
             PetAction.CLIMB_CEILING -> canvas.rotate(180f, viewWidth / 2f, viewHeight / 2f)
             PetAction.SIT -> canvas.translate(0f, viewHeight * 0.04f)
+            PetAction.LOOK_UP -> canvas.translate(0f, -viewHeight * 0.02f)
+            PetAction.DANGLE -> canvas.translate(0f, viewHeight * 0.06f)
+            PetAction.JUMP -> canvas.rotate(-8f, viewWidth / 2f, viewHeight / 2f)
             PetAction.WINK,
             PetAction.CREEP,
             PetAction.SPECIAL,
@@ -169,14 +175,11 @@ internal class PetOverlayView(
             MotionEvent.ACTION_UP -> {
                 if (isDragging) {
                     velocityTracker?.computeCurrentVelocity(MILLIS_PER_SECOND)
-                    onEvent(
-                        PetEvent.Fling(
-                            PetVector(
-                                x = velocityTracker?.xVelocity ?: 0f,
-                                y = velocityTracker?.yVelocity ?: 0f
-                            )
-                        )
+                    val velocity = PetVector(
+                        x = velocityTracker?.xVelocity ?: 0f,
+                        y = velocityTracker?.yVelocity ?: 0f
                     )
+                    onEvent(PetGesturePolicy.releaseEvent(velocity, minimumFlingVelocity))
                 } else {
                     performClick()
                     onEvent(PetEvent.Tap)

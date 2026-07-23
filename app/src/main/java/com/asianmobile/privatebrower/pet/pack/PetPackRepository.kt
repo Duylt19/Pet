@@ -110,8 +110,16 @@ class FilePetPackRepository @Inject constructor(
             ),
             PetPackClip(PetAction.SIT, false, PetAction.WALK, listOf(frame(2_400))),
             PetPackClip(PetAction.WINK, false, PetAction.WALK, List(2) { frame(260) }),
+            PetPackClip(PetAction.LOOK_UP, false, PetAction.WALK, listOf(frame(1_200))),
+            PetPackClip(PetAction.DANGLE, false, PetAction.WALK, List(4) { frame(320) }),
             PetPackClip(PetAction.CREEP, true, null, List(4) { frame(180, 16f) }),
             PetPackClip(PetAction.TRIP, false, PetAction.WALK, List(4) { frame(140) }),
+            PetPackClip(
+                PetAction.JUMP,
+                false,
+                PetAction.FALL,
+                listOf(frame(220, velocityX = 110f, velocityY = -80f))
+            ),
             PetPackClip(PetAction.SPECIAL, false, PetAction.WALK, List(4) { frame(220) }),
             PetPackClip(PetAction.SPECIAL_2, false, PetAction.WALK, List(8) { frame(160) }),
             PetPackClip(PetAction.TAPPED, false, PetAction.IDLE, List(3) { frame(100) }),

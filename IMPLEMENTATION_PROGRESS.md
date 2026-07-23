@@ -14,7 +14,7 @@
 | Pixel 3 XL device verification | Done | API 31 start/stop, notification, launcher overlay, drag/fling, revoke cleanup |
 | Pet catalog + validated pack v1 | Done | Secure ZIP import, repository/cache, detail/select, sprite overlay verified on API 31 |
 | Competitor technical audit | Done | Catalog/pack/engine/overlay/lifecycle/business/security evidence documented without copying decompiled implementation code |
-| Extended pet behavior graph | Done | Fall, bounce, wall/ceiling climb, passive actions and legacy pack fallback verified by JVM tests/API 31 |
+| Living pet behavior graph | Done | Weighted seeded scheduling, anti-repeat memory, look-up/dangle/jump, timed wall/ceiling/creep exits, gravity fall and full legacy frame rhythm covered by JVM tests |
 | Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
 | Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |

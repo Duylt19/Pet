@@ -91,6 +91,20 @@ class PetEngineTest {
     }
 
     @Test
+    fun `release below fling threshold starts falling`() {
+        val engine = engine(flingStopSpeed = 24f)
+        val dragged = engine.reduce(
+            engine.initialState(bounds, size, position = PetVector(10f, 10f)),
+            PetEvent.DragStart
+        ).state
+
+        val released = engine.reduce(dragged, PetEvent.Fling(PetVector(x = 10f)))
+
+        assertEquals(PetAction.FALL, released.state.action)
+        assertEquals(PetVector.Zero, released.state.velocity)
+    }
+
+    @Test
     fun `walking pet keeps edge direction when entering wall climb`() {
         val engine = engine(maxTickMillis = 1_000)
         val walking = engine.initialState(
@@ -146,33 +160,90 @@ class PetEngineTest {
     }
 
     @Test
-    fun `walking cycles through supported autonomous actions deterministically`() {
+    fun `walking selects a supported weighted behavior after its scheduled delay`() {
         val engine = PetEngine(
             PetEngineConfig(
                 maxTickMillis = 3_000,
-                autonomousIntervalMillis = 100,
-                autonomousActions = listOf(PetAction.SIT, PetAction.WINK)
+                behaviorProfile = behaviorProfile(
+                    groundDelayMillis = 100L..100L,
+                    autonomousRules = listOf(PetBehaviorRule(PetAction.SIT, 1))
+                )
             )
         )
-        var state = engine.initialState(
+        val walking = engine.initialState(
             bounds = PetBounds(0f, 0f, 1_000f, 1_000f),
             size = size,
             action = PetAction.WALK
         )
 
-        state = engine.reduce(state, PetEvent.Tick(100)).state
-        assertEquals(PetAction.SIT, state.action)
+        val selected = engine.reduce(walking, PetEvent.Tick(100))
 
-        state = engine.reduce(state, PetEvent.Tick(2_400)).state
-        assertEquals(PetAction.WALK, state.action)
-
-        state = engine.reduce(state, PetEvent.Tick(100)).state
-        assertEquals(PetAction.WINK, state.action)
+        assertEquals(PetAction.SIT, selected.state.action)
+        assertTrue(
+            selected.effects.contains(PetEffect.ActionChanged(PetAction.WALK, PetAction.SIT))
+        )
     }
 
     @Test
-    fun `idle resumes walking after autonomous interval`() {
-        val engine = PetEngine(PetEngineConfig(autonomousIntervalMillis = 500))
+    fun `same behavior seed produces the same schedule`() {
+        val config = PetEngineConfig(
+            behaviorSeed = 42,
+            behaviorProfile = behaviorProfile(
+                groundDelayMillis = 100L..10_000L,
+                autonomousRules = listOf(PetBehaviorRule(PetAction.SIT, 1))
+            )
+        )
+        val firstEngine = PetEngine(config)
+        val secondEngine = PetEngine(config)
+        val firstInitial = firstEngine.initialState(bounds, size, action = PetAction.WALK)
+        val secondInitial = secondEngine.initialState(bounds, size, action = PetAction.WALK)
+
+        val first = firstEngine.reduce(firstInitial, PetEvent.Tick(50)).state
+        val second = secondEngine.reduce(secondInitial, PetEvent.Tick(50)).state
+
+        assertEquals(first.actionTargetMillis, second.actionTargetMillis)
+        assertEquals(first.behaviorSequence, second.behaviorSequence)
+    }
+
+    @Test
+    fun `recent behavior memory prevents immediate action repetition`() {
+        val engine = PetEngine(
+            PetEngineConfig(
+                maxTickMillis = 3_000,
+                behaviorSeed = 9,
+                behaviorProfile = behaviorProfile(
+                    groundDelayMillis = 100L..100L,
+                    recentActionMemory = 1,
+                    autonomousRules = listOf(
+                        PetBehaviorRule(PetAction.SIT, 1),
+                        PetBehaviorRule(PetAction.WINK, 1)
+                    )
+                )
+            )
+        )
+        var state = engine.initialState(
+            PetBounds(0f, 0f, 1_000f, 1_000f),
+            size,
+            action = PetAction.WALK
+        )
+        state = engine.reduce(state, PetEvent.Tick(100)).state
+        val firstAction = state.action
+        val firstDuration = if (firstAction == PetAction.SIT) 2_400L else 520L
+        state = engine.reduce(state, PetEvent.Tick(firstDuration)).state
+        state = engine.reduce(state, PetEvent.Tick(100)).state
+
+        assertTrue(firstAction == PetAction.SIT || firstAction == PetAction.WINK)
+        assertTrue(state.action == PetAction.SIT || state.action == PetAction.WINK)
+        assertTrue(firstAction != state.action)
+    }
+
+    @Test
+    fun `idle resumes walking after its seeded duration`() {
+        val engine = PetEngine(
+            PetEngineConfig(
+                behaviorProfile = behaviorProfile(idleDurationMillis = 500L..500L)
+            )
+        )
         val idle = engine.initialState(bounds, size, action = PetAction.IDLE)
 
         val waiting = engine.reduce(idle, PetEvent.Tick(250)).state
@@ -183,6 +254,83 @@ class PetEngineTest {
         assertTrue(
             walking.effects.contains(PetEffect.ActionChanged(PetAction.IDLE, PetAction.WALK))
         )
+    }
+
+    @Test
+    fun `creep returns to walking after its behavior timeout`() {
+        val engine = PetEngine(
+            PetEngineConfig(
+                behaviorProfile = behaviorProfile(creepDurationMillis = 100L..100L)
+            )
+        )
+        val creeping = engine.initialState(
+            PetBounds(0f, 0f, 1_000f, 1_000f),
+            size,
+            action = PetAction.CREEP
+        )
+
+        val timedOut = engine.reduce(creeping, PetEvent.Tick(100))
+
+        assertEquals(PetAction.WALK, timedOut.state.action)
+    }
+
+    @Test
+    fun `wall climber can jump inward after its behavior timeout`() {
+        val engine = PetEngine(
+            PetEngineConfig(
+                behaviorProfile = behaviorProfile(
+                    wallDurationMillis = 100L..100L,
+                    wallJumpChancePercent = 100
+                )
+            )
+        )
+        val climbing = engine.initialState(
+            PetBounds(0f, 0f, 1_000f, 1_000f),
+            size,
+            position = PetVector(980f, 500f),
+            action = PetAction.CLIMB_WALL,
+            direction = PetDirection.RIGHT
+        )
+
+        val jumped = engine.reduce(climbing, PetEvent.Tick(100))
+
+        assertEquals(PetAction.JUMP, jumped.state.action)
+        assertEquals(PetDirection.LEFT, jumped.state.direction)
+    }
+
+    @Test
+    fun `ceiling climber drops after its behavior timeout`() {
+        val engine = PetEngine(
+            PetEngineConfig(
+                behaviorProfile = behaviorProfile(ceilingDurationMillis = 100L..100L)
+            )
+        )
+        val climbing = engine.initialState(
+            PetBounds(0f, 0f, 1_000f, 1_000f),
+            size,
+            position = PetVector(500f, 0f),
+            action = PetAction.CLIMB_CEILING
+        )
+
+        val dropped = engine.reduce(climbing, PetEvent.Tick(100))
+
+        assertEquals(PetAction.FALL, dropped.state.action)
+    }
+
+    @Test
+    fun `fall accelerates until collision instead of using constant speed`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val falling = engine.initialState(
+            PetBounds(0f, 0f, 1_000f, 10_000f),
+            size,
+            position = PetVector(10f, 10f),
+            action = PetAction.FALL
+        )
+
+        val advanced = engine.reduce(falling, PetEvent.Tick(100)).state
+
+        assertEquals(210f, advanced.velocity.y, FLOAT_TOLERANCE)
+        assertEquals(26.5f, advanced.position.y, FLOAT_TOLERANCE)
     }
 
     @Test
@@ -197,7 +345,7 @@ class PetEngineTest {
         val engine = PetEngine(
             PetEngineConfig(
                 supportedActions = legacyActions,
-                autonomousIntervalMillis = 100
+                behaviorProfile = behaviorProfile(groundDelayMillis = 100L..100L)
             )
         )
         val walking = engine.initialState(
@@ -254,6 +402,28 @@ class PetEngineTest {
             flingDeceleration = flingDeceleration,
             flingStopSpeed = flingStopSpeed
         )
+    )
+
+    private fun behaviorProfile(
+        groundDelayMillis: LongRange = 100L..100L,
+        idleDurationMillis: LongRange = 100L..100L,
+        creepDurationMillis: LongRange = 100L..100L,
+        wallDurationMillis: LongRange = 100L..100L,
+        ceilingDurationMillis: LongRange = 100L..100L,
+        wallJumpChancePercent: Int = 70,
+        recentActionMemory: Int = 2,
+        autonomousRules: List<PetBehaviorRule> = emptyList()
+    ) = PetBehaviorProfile(
+        groundDelayMillis = groundDelayMillis,
+        idleDurationMillis = idleDurationMillis,
+        creepDurationMillis = creepDurationMillis,
+        wallDurationMillis = wallDurationMillis,
+        ceilingDurationMillis = ceilingDurationMillis,
+        continueWalkWeight = if (autonomousRules.isEmpty()) 1 else 0,
+        turnAroundWeight = 0,
+        wallJumpChancePercent = wallJumpChancePercent,
+        recentActionMemory = recentActionMemory,
+        autonomousRules = autonomousRules
     )
 
     private companion object {

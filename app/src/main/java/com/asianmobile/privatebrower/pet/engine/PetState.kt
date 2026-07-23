@@ -15,8 +15,10 @@ data class PetState(
     val action: PetAction,
     val direction: PetDirection,
     val animationCursor: PetAnimationCursor,
-    val autonomousElapsedMillis: Long = 0,
-    val autonomousStep: Int = 0
+    val actionElapsedMillis: Long = 0,
+    val actionTargetMillis: Long = 0,
+    val behaviorSequence: Long = 0,
+    val recentAutonomousActions: List<PetAction> = emptyList()
 ) {
     val frameIndex: Int
         get() = animationCursor.frameIndex
