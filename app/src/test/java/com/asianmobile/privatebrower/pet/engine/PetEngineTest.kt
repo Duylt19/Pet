@@ -216,7 +216,7 @@ class PetEngineTest {
         assertEquals(PetAction.RUN, started.state.action)
         assertEquals(PetAction.CLIMB_WALL, climbing.state.action)
         assertEquals(PetComboId.WALL_PARKOUR, climbing.state.activeComboId)
-        assertEquals(PetAction.JUMP, climbing.state.pendingComboBeats.first().action)
+        assertEquals(PetAction.DANGLE, climbing.state.pendingComboBeats.first().action)
     }
 
     @Test
@@ -242,7 +242,33 @@ class PetEngineTest {
         assertEquals(PetAction.CLIMB_CEILING, onCeiling.state.action)
         assertEquals(PetDirection.LEFT, onCeiling.state.direction)
         assertEquals(PetComboId.CEILING_EXPEDITION, onCeiling.state.activeComboId)
-        assertEquals(PetAction.JUMP, onCeiling.state.pendingComboBeats.first().action)
+        assertEquals(PetAction.DANGLE, onCeiling.state.pendingComboBeats.first().action)
+        assertTrue(onCeiling.state.comboBeatTargetMillis >= 12_000L)
+    }
+
+    @Test
+    fun `parkour holds a wall dangle before jumping back into the screen`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val largeBounds = PetBounds(0f, 0f, 2_000f, 2_000f)
+        val initial = engine.initialState(
+            bounds = largeBounds,
+            size = size,
+            position = PetVector(1_975f, 1_500f),
+            action = PetAction.WALK
+        )
+        val started = engine.reduce(
+            initial,
+            PetEvent.StartCombo(PetComboId.WALL_PARKOUR)
+        )
+        val climbing = engine.reduce(started.state, PetEvent.Tick(200)).state
+
+        val dangling = advanceUntil(engine, climbing) { it.action == PetAction.DANGLE }
+        val jumped = advanceUntil(engine, dangling) { it.action == PetAction.JUMP }
+
+        assertEquals(1_980f, dangling.position.x, FLOAT_TOLERANCE)
+        assertTrue(dangling.comboBeatTargetMillis >= 6_000L)
+        assertEquals(PetDirection.LEFT, jumped.direction)
+        assertEquals(PetComboId.WALL_PARKOUR, jumped.activeComboId)
     }
 
     @Test
@@ -370,6 +396,66 @@ class PetEngineTest {
         assertTrue(
             selected.effects.contains(PetEffect.ActionChanged(PetAction.WALK, PetAction.SIT))
         )
+    }
+
+    @Test
+    fun `two non-climb stories force the next autonomous choice into a climb habitat`() {
+        val engine = PetEngine(
+            PetEngineConfig(
+                maxTickMillis = 1_000,
+                behaviorProfile = behaviorProfile(
+                    groundDelayMillis = 100L..100L,
+                    maxNonClimbCombosBeforeClimb = 2,
+                    autonomousComboRules = listOf(
+                        PetComboRule(PetComboId.CURIOUS_SCOUT, 10_000),
+                        PetComboRule(PetComboId.WALL_PARKOUR, 1)
+                    )
+                )
+            )
+        )
+        val walking = engine.initialState(
+            bounds = PetBounds(0f, 0f, 1_000f, 1_000f),
+            size = size,
+            position = PetVector(500f, 980f),
+            action = PetAction.WALK
+        ).copy(nonClimbComboStreak = 2)
+
+        val selected = engine.reduce(walking, PetEvent.Tick(100))
+
+        assertEquals(PetComboId.WALL_PARKOUR, selected.state.activeComboId)
+        assertEquals(PetComboHabitat.WALL, PetComboCatalog.definition(
+            checkNotNull(selected.state.activeComboId)
+        )?.habitat)
+        assertEquals(0, selected.state.nonClimbComboStreak)
+    }
+
+    @Test
+    fun `climb quota falls back to compatible ground story for a pack without climb frames`() {
+        val supportedWithoutClimb = PetAction.entries.toSet() - PetAction.CLIMB_WALL
+        val engine = PetEngine(
+            PetEngineConfig(
+                maxTickMillis = 1_000,
+                supportedActions = supportedWithoutClimb,
+                behaviorProfile = behaviorProfile(
+                    groundDelayMillis = 100L..100L,
+                    maxNonClimbCombosBeforeClimb = 2,
+                    autonomousComboRules = listOf(
+                        PetComboRule(PetComboId.CURIOUS_SCOUT, 1),
+                        PetComboRule(PetComboId.WALL_PARKOUR, 10_000)
+                    )
+                )
+            )
+        )
+        val walking = engine.initialState(
+            bounds = PetBounds(0f, 0f, 1_000f, 1_000f),
+            size = size,
+            action = PetAction.WALK
+        ).copy(nonClimbComboStreak = 2)
+
+        val selected = engine.reduce(walking, PetEvent.Tick(100))
+
+        assertEquals(PetComboId.CURIOUS_SCOUT, selected.state.activeComboId)
+        assertEquals(3, selected.state.nonClimbComboStreak)
     }
 
     @Test
@@ -750,6 +836,7 @@ class PetEngineTest {
         wallJumpChancePercent: Int = 70,
         wallDescendChancePercent: Int = 0,
         recentComboMemory: Int = 2,
+        maxNonClimbCombosBeforeClimb: Int = 2,
         autonomousComboRules: List<PetComboRule> = listOf(
             PetComboRule(PetComboId.CURIOUS_SCOUT, 1)
         )
@@ -763,6 +850,7 @@ class PetEngineTest {
         wallJumpChancePercent = wallJumpChancePercent,
         wallDescendChancePercent = wallDescendChancePercent,
         recentComboMemory = recentComboMemory,
+        maxNonClimbCombosBeforeClimb = maxNonClimbCombosBeforeClimb,
         autonomousComboRules = autonomousComboRules
     )
 

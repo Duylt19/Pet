@@ -57,12 +57,12 @@ pose và tạo cảm giác chớp. V3.1 thay mỗi action bằng `PetComboBeat` 
   sit, idle, look, walk/run/creep, dangle và special performance.
 
 Mỗi combo đi theo nhịp `anticipation → primary action → recovery`. Khoảng nghỉ tự chủ giữa
-hai combo là 5–12 giây; pet không phải lúc nào cũng “diễn”. Duration beat không bị rút ngắn
+hai combo là 4–8 giây; pet không phải lúc nào cũng “diễn”. Duration beat không bị rút ngắn
 bởi slider speed, nên tăng tốc di chuyển không làm cảm xúc chớp nhanh hơn.
 
 ## Combo catalog
 
-Catalog hiện có 20 combo tự chủ. 12 combo nền được cân lại theo từng beat:
+Catalog giữ 20 solo story. 12 combo nền được cân lại theo từng beat:
 
 | Combo | Anticipation | Primary action | Recovery | Mục đích |
 |---|---|---|---|---|
@@ -83,9 +83,9 @@ V3.2 thêm 8 choreography dùng chính action/frame mà pack đã khai báo:
 
 | Combo | Choreography | Chi tiết tự nhiên |
 |---|---|---|
-| `WALL_PARKOUR` | Run tới mép → climb 4–7s → jump vào trong → fall → bounce → sit | Hướng chạy chọn mép gần nhất; jump đảo hướng tại beat |
-| `CEILING_EXPEDITION` | Run tới mép → climb tới trần → ceiling walk 5–9s → jump/fall → bounce → look | Hai chặng đầu hoàn tất bằng collision thật, không dùng thời lượng màn hình cố định |
-| `WALL_DIVE` | Run tới mép → climb 5–8s → wall jump → fall/bounce → Special | Nếu tường kết thúc sớm, jump thay cho chuyển sai sang ceiling |
+| `WALL_PARKOUR` | Run tới mép → climb 10–16s → dangle 6–10s → jump vào trong → fall/bounce → sit | Leo nhanh 1,8× rồi giữ pose trên tường đủ lâu; jump đảo hướng tại beat |
+| `CEILING_EXPEDITION` | Run tới mép → climb tới trần → ceiling walk 12–20s → dangle 8–14s → jump/fall → bounce/look | Hai chặng tiếp cận hoàn tất bằng collision thật; pet sinh hoạt trên trần 20–34s |
+| `WALL_DIVE` | Run tới mép → climb 8–13s → wall jump → fall/bounce → Special | Leo nhanh 1,8×; nếu tường kết thúc sớm, jump thay cho chuyển sai sang ceiling |
 | `SKY_DIVER` | Anticipation → boosted jump → fall → bounce → sit/wink | Giữ đầy đủ landing recovery thay vì đổi thẳng sang idle |
 | `NINJA_SKILL` | Creep → sprint → boosted jump/fall → Special → sit | Có stealth, burst, skill và cooldown rõ ràng |
 | `BATTLE_DANCE` | Look → Special → pause → Special 2 → Dangle → sit | Hai skill có nhịp nghỉ nên không flash liên tục |
@@ -109,6 +109,27 @@ Ngoài ra có combo riêng cho phản ứng tap/showcase và 6 scene social, m�
   call-and-response thay vì hai sprite phát cùng một frame.
 
 Tính cả approach, user reaction và hai vai social, catalog có 35 combo ID.
+
+## V3.3 — spatial balance
+
+Catalog vẫn giữ toàn bộ story để dùng cho trigger cụ thể, nhưng pool tự chủ mặc định giảm
+từ 20 xuống 14 combo:
+
+- chỉ giữ 6 ground basic khác biệt nhất: `CURIOUS_SCOUT`, `COZY_BREAK`,
+  `HAPPY_ZOOMIES`, `CLUMSY_RECOVERY`, `TINY_PERFORMANCE`, `DAYDREAM`;
+- loại 6 ground basic trùng nhịp khỏi random pool: `SHY_SNEAK`, `BUSY_PATROL`,
+  `PEEK_AND_DASH`, `SLOW_MORNING`, `BRAVE_EXPLORER`, `CHEERFUL_ENCORE`;
+- giữ 3 climb, 3 aerial và 2 skill/dance story;
+- climb có tổng weight 34/124, tức 27,4% trước khi áp quota.
+
+Mỗi definition có `PetComboHabitat`: `GROUND`, `AERIAL`, `WALL` hoặc `CEILING`.
+`nonClimbComboStreak` tồn tại xuyên qua vòng đời combo. Sau tối đa hai story không leo,
+selector chỉ chọn `WALL`/`CEILING` ở lượt kế tiếp. Khi pack không đủ required action cho
+climb, selector bỏ quota và fallback về các story tương thích thay vì mắc kẹt.
+
+Multi-pet social bắt đầu sau 12 giây thay vì 6 giây để từng pet có cơ hội chọn autonomous
+story đầu tiên; cooldown social tăng từ 10 lên 20 giây để social scene ở mặt đất không chiếm
+phần lớn thời gian.
 
 ## Runtime contract
 
@@ -139,7 +160,7 @@ Phiên tương tác có hai pha:
 1. `APPROACHING`: chọn cặp pet ở sàn gần nhau nhất, hai pet chạy về phía tâm của nhau và
    cập nhật facing mỗi frame. Khi đạt khoảng cách 1,35 pet-width thì chuyển pha.
 2. `PERFORMING`: phát combo theo hai vai của scene, giữ facing phù hợp (đối mặt hoặc cùng
-   hướng khi đuổi bắt), chờ cả hai combo hoàn tất rồi cooldown 10 giây trước scene tiếp theo.
+   hướng khi đuổi bắt), chờ cả hai combo hoàn tất rồi cooldown 20 giây trước scene tiếp theo.
 
 Các guardrail gồm: chỉ ghép pet đang rảnh trên cùng mặt sàn, không chiếm pet đang drag,
 fling, fall, jump hoặc climb; approach/performance đều có timeout; mất một instance sẽ hủy
@@ -151,6 +172,8 @@ session an toàn. Với một pet, director không phát directive social.
   thứ tự, combo completion, anti-repeat, long Sit hold và sustained Special.
 - JVM test khóa hướng mép gần nhất, run-to-wall, wall-to-ceiling, inward wall jump,
   distance/velocity timeout, fall-to-bounce và việc giữ nguyên combo qua collision.
+- JVM test khóa autonomous pool 14 story, climb weight tối thiểu 25%, quota sau hai
+  non-climb story, reset streak và fallback khi pack thiếu frame leo.
 - JVM test kiểm tra approach direction, greeting/duet roles, closest-pair selection, bỏ qua
   pet đang climb và no-op khi chỉ có một pet.
 - Device smoke test cần chạy với 2–3 pet để quan sát đủ approach và ít nhất hai scene liên

@@ -18,6 +18,7 @@ data class PetState(
     val actionElapsedMillis: Long = 0,
     val actionTargetMillis: Long = 0,
     val behaviorSequence: Long = 0,
+    val nonClimbComboStreak: Int = 0,
     val activeComboId: PetComboId? = null,
     val recentComboIds: List<PetComboId> = emptyList(),
     val activeComboBeat: PetComboBeat? = null,

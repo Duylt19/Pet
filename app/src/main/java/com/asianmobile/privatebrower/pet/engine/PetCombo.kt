@@ -54,6 +54,16 @@ enum class PetBeatCompletion {
     COLLISION
 }
 
+enum class PetComboHabitat {
+    GROUND,
+    AERIAL,
+    WALL,
+    CEILING;
+
+    val isClimb: Boolean
+        get() = this == WALL || this == CEILING
+}
+
 data class PetComboBeat(
     val action: PetAction,
     val durationMillis: LongRange? = null,
@@ -78,7 +88,8 @@ data class PetComboDefinition(
     val id: PetComboId,
     val beats: List<PetComboBeat>,
     val startDirection: PetComboStartDirection = PetComboStartDirection.KEEP,
-    val requiredActions: Set<PetAction> = emptySet()
+    val requiredActions: Set<PetAction> = emptySet(),
+    val habitat: PetComboHabitat = PetComboHabitat.GROUND
 ) {
     init {
         require(beats.isNotEmpty()) { "combo must contain at least one beat" }
@@ -192,12 +203,15 @@ object PetComboCatalog {
             requiredActions = setOf(
                 PetAction.RUN,
                 PetAction.CLIMB_WALL,
+                PetAction.DANGLE,
                 PetAction.JUMP,
                 PetAction.FALL,
                 PetAction.BOUNCE
             ),
+            habitat = PetComboHabitat.WALL,
             untilCollision(PetAction.RUN, motionMultiplier = 1.15f),
-            sustain(PetAction.CLIMB_WALL, 4_000L..7_000L),
+            sustain(PetAction.CLIMB_WALL, 10_000L..16_000L, motionMultiplier = 1.8f),
+            sustain(PetAction.DANGLE, 6_000L..10_000L),
             once(
                 PetAction.JUMP,
                 directionChange = PetBeatDirectionChange.REVERSE,
@@ -213,13 +227,16 @@ object PetComboCatalog {
                 PetAction.RUN,
                 PetAction.CLIMB_WALL,
                 PetAction.CLIMB_CEILING,
+                PetAction.DANGLE,
                 PetAction.JUMP,
                 PetAction.FALL,
                 PetAction.BOUNCE
             ),
+            habitat = PetComboHabitat.CEILING,
             untilCollision(PetAction.RUN, motionMultiplier = 1.15f),
             untilCollision(PetAction.CLIMB_WALL, motionMultiplier = 2.4f),
-            sustain(PetAction.CLIMB_CEILING, 5_000L..9_000L),
+            sustain(PetAction.CLIMB_CEILING, 12_000L..20_000L),
+            sustain(PetAction.DANGLE, 8_000L..14_000L),
             once(PetAction.JUMP, motionMultiplier = 2.2f),
             sustain(PetAction.FALL, 15_000L..22_000L),
             once(PetAction.BOUNCE),
@@ -234,8 +251,9 @@ object PetComboCatalog {
                 PetAction.FALL,
                 PetAction.BOUNCE
             ),
+            habitat = PetComboHabitat.WALL,
             untilCollision(PetAction.RUN, motionMultiplier = 1.15f),
-            sustain(PetAction.CLIMB_WALL, 5_000L..8_000L),
+            sustain(PetAction.CLIMB_WALL, 8_000L..13_000L, motionMultiplier = 1.8f),
             once(
                 PetAction.JUMP,
                 directionChange = PetBeatDirectionChange.REVERSE,
@@ -245,7 +263,7 @@ object PetComboCatalog {
             once(PetAction.BOUNCE),
             sustain(PetAction.SPECIAL, 3_500L..6_000L)
         ),
-        requiredCombo(
+        aerialCombo(
             PetComboId.SKY_DIVER,
             requiredActions = setOf(PetAction.JUMP, PetAction.FALL, PetAction.BOUNCE),
             sustain(PetAction.IDLE, 2_000L..3_500L),
@@ -255,7 +273,7 @@ object PetComboCatalog {
             sustain(PetAction.SIT, 4_000L..7_000L),
             once(PetAction.WINK)
         ),
-        requiredCombo(
+        aerialCombo(
             PetComboId.NINJA_SKILL,
             requiredActions = setOf(
                 PetAction.CREEP,
@@ -290,7 +308,7 @@ object PetComboCatalog {
             sustain(PetAction.SPECIAL, 4_000L..7_000L),
             sustain(PetAction.IDLE, 3_000L..5_000L)
         ),
-        requiredCombo(
+        aerialCombo(
             PetComboId.ACROBATIC_FINALE,
             requiredActions = setOf(
                 PetAction.RUN,
@@ -444,12 +462,14 @@ object PetComboCatalog {
     private fun spatialCombo(
         id: PetComboId,
         requiredActions: Set<PetAction>,
+        habitat: PetComboHabitat,
         vararg beats: PetComboBeat
     ) = PetComboDefinition(
         id = id,
         beats = beats.toList(),
         startDirection = PetComboStartDirection.NEAREST_WALL,
-        requiredActions = requiredActions
+        requiredActions = requiredActions,
+        habitat = habitat
     )
 
     private fun requiredCombo(
@@ -462,6 +482,17 @@ object PetComboCatalog {
         requiredActions = requiredActions
     )
 
+    private fun aerialCombo(
+        id: PetComboId,
+        requiredActions: Set<PetAction>,
+        vararg beats: PetComboBeat
+    ) = PetComboDefinition(
+        id = id,
+        beats = beats.toList(),
+        requiredActions = requiredActions,
+        habitat = PetComboHabitat.AERIAL
+    )
+
     private fun once(
         action: PetAction,
         directionChange: PetBeatDirectionChange = PetBeatDirectionChange.KEEP,
@@ -472,8 +503,15 @@ object PetComboCatalog {
         motionMultiplier = motionMultiplier
     )
 
-    private fun sustain(action: PetAction, durationMillis: LongRange) =
-        PetComboBeat(action, durationMillis)
+    private fun sustain(
+        action: PetAction,
+        durationMillis: LongRange,
+        motionMultiplier: Float = 1f
+    ) = PetComboBeat(
+        action = action,
+        durationMillis = durationMillis,
+        motionMultiplier = motionMultiplier
+    )
 
     private fun untilCollision(
         action: PetAction,

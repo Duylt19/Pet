@@ -33,8 +33,8 @@ sealed interface PetSocialDirective {
 }
 
 data class PetSocialConfig(
-    val initialDelayMillis: Long = 6_000,
-    val interactionCooldownMillis: Long = 10_000,
+    val initialDelayMillis: Long = 12_000,
+    val interactionCooldownMillis: Long = 20_000,
     val retryDelayMillis: Long = 3_000,
     val approachTimeoutMillis: Long = 12_000,
     val performanceTimeoutMillis: Long = 45_000,

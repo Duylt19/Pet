@@ -1,7 +1,7 @@
 package com.asianmobile.privatebrower.pet.engine
 
 data class PetBehaviorProfile(
-    val groundDelayMillis: LongRange = 5_000L..12_000L,
+    val groundDelayMillis: LongRange = 4_000L..8_000L,
     val idleDurationMillis: LongRange = 3_000L..7_000L,
     val runDurationMillis: LongRange = 1_800L..4_000L,
     val creepDurationMillis: LongRange = 3_500L..7_500L,
@@ -10,27 +10,22 @@ data class PetBehaviorProfile(
     val wallJumpChancePercent: Int = 55,
     val wallDescendChancePercent: Int = 30,
     val recentComboMemory: Int = 3,
+    val maxNonClimbCombosBeforeClimb: Int = 2,
     val autonomousComboRules: List<PetComboRule> = listOf(
-        PetComboRule(PetComboId.CURIOUS_SCOUT, 15),
-        PetComboRule(PetComboId.COZY_BREAK, 13),
-        PetComboRule(PetComboId.HAPPY_ZOOMIES, 11),
-        PetComboRule(PetComboId.SHY_SNEAK, 10),
-        PetComboRule(PetComboId.CLUMSY_RECOVERY, 8),
-        PetComboRule(PetComboId.TINY_PERFORMANCE, 7),
-        PetComboRule(PetComboId.DAYDREAM, 9),
-        PetComboRule(PetComboId.BUSY_PATROL, 12),
-        PetComboRule(PetComboId.PEEK_AND_DASH, 10),
-        PetComboRule(PetComboId.SLOW_MORNING, 12),
-        PetComboRule(PetComboId.BRAVE_EXPLORER, 9),
-        PetComboRule(PetComboId.CHEERFUL_ENCORE, 6),
-        PetComboRule(PetComboId.WALL_PARKOUR, 5),
-        PetComboRule(PetComboId.CEILING_EXPEDITION, 4),
-        PetComboRule(PetComboId.WALL_DIVE, 5),
-        PetComboRule(PetComboId.SKY_DIVER, 6),
-        PetComboRule(PetComboId.NINJA_SKILL, 6),
-        PetComboRule(PetComboId.BATTLE_DANCE, 5),
-        PetComboRule(PetComboId.MAGIC_RITUAL, 4),
-        PetComboRule(PetComboId.ACROBATIC_FINALE, 5)
+        PetComboRule(PetComboId.CURIOUS_SCOUT, 8),
+        PetComboRule(PetComboId.COZY_BREAK, 6),
+        PetComboRule(PetComboId.HAPPY_ZOOMIES, 8),
+        PetComboRule(PetComboId.CLUMSY_RECOVERY, 7),
+        PetComboRule(PetComboId.TINY_PERFORMANCE, 6),
+        PetComboRule(PetComboId.DAYDREAM, 5),
+        PetComboRule(PetComboId.WALL_PARKOUR, 12),
+        PetComboRule(PetComboId.CEILING_EXPEDITION, 10),
+        PetComboRule(PetComboId.WALL_DIVE, 12),
+        PetComboRule(PetComboId.SKY_DIVER, 10),
+        PetComboRule(PetComboId.NINJA_SKILL, 12),
+        PetComboRule(PetComboId.BATTLE_DANCE, 8),
+        PetComboRule(PetComboId.MAGIC_RITUAL, 8),
+        PetComboRule(PetComboId.ACROBATIC_FINALE, 12)
     )
 ) {
     init {
@@ -51,6 +46,9 @@ data class PetBehaviorProfile(
             "wall exit chances must not exceed 100 percent"
         }
         require(recentComboMemory >= 0) { "recent combo memory must not be negative" }
+        require(maxNonClimbCombosBeforeClimb > 0) {
+            "non-climb combo limit must be positive"
+        }
     }
 }
 

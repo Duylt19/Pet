@@ -427,10 +427,19 @@ class PetEngine(
         val recentCombos = (listOf(comboId) + state.recentComboIds)
             .distinct()
             .take(config.behaviorProfile.recentComboMemory)
+        val habitat = PetComboCatalog.definition(comboId)?.habitat ?: PetComboHabitat.GROUND
+        val nonClimbComboStreak = if (habitat.isClimb) {
+            0
+        } else if (state.nonClimbComboStreak == Int.MAX_VALUE) {
+            Int.MAX_VALUE
+        } else {
+            state.nonClimbComboStreak + 1
+        }
         val scheduled = scheduleComboBeat(
             state = state.copy(
                 activeComboId = comboId,
                 recentComboIds = recentCombos,
+                nonClimbComboStreak = nonClimbComboStreak,
                 behaviorSequence = state.behaviorSequence + 1
             ),
             beat = first,
@@ -528,12 +537,13 @@ class PetEngine(
 
     private fun PetState.comboCollisionAction(defaultAction: PetAction): PetAction {
         val nextAction = pendingComboBeats.firstOrNull()?.action
-        return if (nextAction == PetAction.JUMP &&
-            (action == PetAction.CLIMB_WALL || action == PetAction.CLIMB_CEILING)
-        ) {
-            PetAction.JUMP
-        } else {
-            defaultAction
+        return when {
+            nextAction == PetAction.JUMP &&
+                (action == PetAction.CLIMB_WALL || action == PetAction.CLIMB_CEILING) -> {
+                PetAction.JUMP
+            }
+            nextAction == PetAction.DANGLE && action == PetAction.CLIMB_WALL -> PetAction.DANGLE
+            else -> defaultAction
         }
     }
 
@@ -718,10 +728,20 @@ class PetEngine(
             PetComboCatalog.supportedDefinition(rule.comboId, config.supportedActions)
                 ?.let { definition -> rule to definition }
         }
-        val freshRules = supportedRules.filterNot { (rule, _) ->
+        val climbRules = supportedRules.filter { (_, definition) ->
+            definition.habitat.isClimb
+        }
+        val habitatRules = if (scheduled.nonClimbComboStreak >=
+            config.behaviorProfile.maxNonClimbCombosBeforeClimb && climbRules.isNotEmpty()
+        ) {
+            climbRules
+        } else {
+            supportedRules
+        }
+        val freshRules = habitatRules.filterNot { (rule, _) ->
             rule.comboId in scheduled.recentComboIds
         }
-        val eligibleRules = freshRules.ifEmpty { supportedRules }
+        val eligibleRules = freshRules.ifEmpty { habitatRules }
         val totalWeight = eligibleRules.sumOf { (rule, _) -> rule.weight }
         if (totalWeight <= 0) {
             return PetTransition(scheduled.resetActionTimer(), effects)

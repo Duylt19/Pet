@@ -54,6 +54,42 @@ class PetComboCatalogTest {
     }
 
     @Test
+    fun `autonomous profile keeps only distinct ground basics and gives climb meaningful weight`() {
+        val rules = PetBehaviorProfile().autonomousComboRules
+        val retiredGroundBasics = setOf(
+            PetComboId.SHY_SNEAK,
+            PetComboId.BUSY_PATROL,
+            PetComboId.PEEK_AND_DASH,
+            PetComboId.SLOW_MORNING,
+            PetComboId.BRAVE_EXPLORER,
+            PetComboId.CHEERFUL_ENCORE
+        )
+        val climbWeight = rules.filter { rule ->
+            PetComboCatalog.definition(rule.comboId)?.habitat?.isClimb == true
+        }.sumOf(PetComboRule::weight)
+
+        assertEquals(14, rules.size)
+        assertTrue(rules.none { it.comboId in retiredGroundBasics })
+        assertTrue(climbWeight * 4 >= rules.sumOf(PetComboRule::weight))
+    }
+
+    @Test
+    fun `catalog marks spatial and aerial stories with their actual habitat`() {
+        assertEquals(
+            PetComboHabitat.WALL,
+            PetComboCatalog.definition(PetComboId.WALL_PARKOUR)?.habitat
+        )
+        assertEquals(
+            PetComboHabitat.CEILING,
+            PetComboCatalog.definition(PetComboId.CEILING_EXPEDITION)?.habitat
+        )
+        assertEquals(
+            PetComboHabitat.AERIAL,
+            PetComboCatalog.definition(PetComboId.NINJA_SKILL)?.habitat
+        )
+    }
+
+    @Test
     fun `catalog exposes many solo and paired stories without adjacent empty steps`() {
         val ids = PetComboId.entries
         val resolved = ids.mapNotNull { id ->
