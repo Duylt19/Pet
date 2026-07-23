@@ -115,6 +115,7 @@ internal class PetOverlayView(
             PetAction.WINK,
             PetAction.RUN,
             PetAction.CREEP,
+            PetAction.TALK,
             PetAction.SPECIAL,
             PetAction.SPECIAL_2,
             PetAction.IDLE,

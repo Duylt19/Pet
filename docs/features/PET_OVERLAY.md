@@ -13,6 +13,7 @@ Platform và product vertical slice đã hoàn tất. `PetOverlay.start(context)
 | `PetOverlayService` | Promote foreground, notification/channel, lifecycle cleanup |
 | `PetOverlayController` | Danh sách bounded window/state machine và một shared frame clock |
 | `PetOverlayView` | Code-native demo cat, tap/drag/fling input, không giữ business state |
+| `PetSpeechBubbleView` | Bubble non-touchable, tối đa một window tạm thời cho toàn scene |
 
 ## Manifest và policy
 
@@ -27,6 +28,8 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 ## Runtime invariants
 
 - Window trong suốt có kích thước 64–196dp theo pack/setting, chỉ bắt touch trong hitbox pet; không dùng full-screen overlay.
+- Khi pet nói, controller tạo tối đa một window 220×84dp non-touchable; window bị remove
+  khi hết thời gian đọc, drag/fling, Stop hoặc service destroy.
 - 1–3 instance dùng chung đúng một `Choreographer.FrameCallback` trên main thread; 30 FPS mặc định, 24 FPS cho 3 pet hoặc low-RAM budget.
 - Frame loop chỉ reduce engine + invalidate/update layout; không decode bitmap, parse file hoặc tạo thread.
 - Mọi instance dùng chung visual đã preload; mỗi instance chỉ giữ engine state/view/layout params riêng.
@@ -51,6 +54,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Edge contract verified trên cùng thiết bị với pet 392 px: parent overlay bắt đầu tại status bar `y=171`, mép trái đạt `x=-131`, mép phải đạt `x=1179` và mép trên đạt `y=-131`; cửa sổ được phép tràn ra ngoài display thay vì bị WindowManager clamp. Playground bottom là `2789`, tương ứng đáy vật lý `2960`, nên không còn bị navigation bar 168 px đẩy lên.
 - Overlay window remained 112dp and touch did not block the rest of the launcher.
 - No fatal exception was recorded during the full flow; service, window and notification were all removed after Stop/revocation.
+- Pet Speech V3.7 verified với `Natsu` conversion revision 4: tap tạo đúng một
+  non-touchable bubble 220×84dp, bubble tự hết hạn; Stop remove cả ba pet window,
+  speech window và service.
 
 ## Chưa thuộc runtime hiện tại
 

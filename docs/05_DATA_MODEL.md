@@ -16,6 +16,7 @@
 | `pet_size_percent` | Int | 75–150%, bước 25% |
 | `pet_speed_percent` | Int | 50–150%, bước 25% |
 | `pet_sound_enabled` | Boolean | Opt-in âm thanh khi schema pack hỗ trợ |
+| `pet_messages_enabled` | Boolean | Cho phép reaction/chat/dialogue bubble |
 | `pet_interaction_enabled` | Boolean | Cho phép tap/drag/fling |
 | `pet_last_positions` | String | Tối đa 3 cặp tọa độ chuẩn hóa 0–1 |
 
@@ -25,7 +26,7 @@ Language được mirror sang SharedPreferences `language_cache` để có thể
 
 - `PetState`: position, velocity, size, usable bounds, action/direction, animation cursor, action timer, deterministic behavior sequence, recent-action memory và pending routine immutable.
 - `PetEvent`: tick, tap, drag start/by/end, fling và bounds change.
-- `PetTransition`: state mới + effect (`ActionChanged`, `Tapped`).
+- `PetTransition`: state mới + effect action/tap/showcase/combo start-complete.
 - `PetClip`/`PetFrame`: action timeline version-independent với frame duration và scripted velocity.
 - `PetBounds`: clamp top-left position theo kích thước pet, kể cả pet lớn hơn usable area.
 
@@ -48,7 +49,10 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 - `OwnerPetCatalogEntry`: owner ID, name, category, author, optional local thumbnail path và archive availability.
 - `OwnerPetCatalogSnapshot`: immutable loading/content/error state cùng app-specific local root.
 - `OwnerPetCatalogRepository`: boundary dùng chung cho local test source hiện tại và network/cache source tương lai.
-- Raw ZIP chỉ được normalize khi user bấm `Set`; Living Behavior V2 normalization hiện tạo immutable revision `owner.shimeji.<id>@3` và persist qua `pet_selected_pack_key`. Các revision cũ đã cài vẫn đọc được để tương thích, còn thao tác `Set` mới chọn revision 3.
+- Raw ZIP chỉ được normalize khi user bấm `Set`; normalization hiện tạo immutable
+  revision `owner.shimeji.<id>@4`, thêm `TALK` từ frame 34–36 khi đủ dữ liệu và persist
+  qua `pet_selected_pack_key`. Revision cũ đã cài vẫn đọc được; thao tác `Set` mới chọn
+  revision 4.
 - Catalog 1,026 item không dùng Room trong local test: metadata parse một lần vào memory, filter 1,026 record bằng pure policy; binary vẫn nằm ngoài APK/Git.
 
 ## Không có database

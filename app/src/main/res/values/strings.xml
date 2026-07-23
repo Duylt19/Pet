@@ -133,6 +133,8 @@
     <string name="settings_pet_speed_title">Animation speed</string>
     <string name="settings_pet_sound_title">Pet sounds</string>
     <string name="settings_pet_sound_subtitle">Used when the selected pack includes sound</string>
+    <string name="settings_pet_messages_title">Pet messages</string>
+    <string name="settings_pet_messages_subtitle">Let pets chat, react, and talk to each other</string>
     <string name="settings_pet_interaction_title">Touch interaction</string>
     <string name="settings_pet_interaction_subtitle">Allow tap, drag, and fling gestures</string>
     <string name="settings_pet_apply_on_restart">Changes apply the next time pets start</string>
@@ -419,6 +421,30 @@
     <string name="pet_overlay_notification_text">Tap to open Cute Pet or stop the pet from this notification.</string>
     <string name="pet_overlay_notification_stop">Stop pet</string>
     <string name="pet_overlay_content_description">Animated screen pet</string>
+    <string name="pet_speech_affection_1">Hi! I missed you 💕</string>
+    <string name="pet_speech_affection_2">Hehe, that tickles!</string>
+    <string name="pet_speech_affection_3">One more pat, please?</string>
+    <string name="pet_speech_affection_4">You found me!</string>
+    <string name="pet_speech_chatter_1">What adventure is next?</string>
+    <string name="pet_speech_chatter_2">I am keeping your screen safe.</string>
+    <string name="pet_speech_chatter_3">Snack break soon?</string>
+    <string name="pet_speech_chatter_4">I have a tiny secret…</string>
+    <string name="pet_speech_social_hello_1">Hey, over here!</string>
+    <string name="pet_speech_social_hello_2">Hi, little buddy!</string>
+    <string name="pet_speech_social_hello_3">Want to play?</string>
+    <string name="pet_speech_social_hello_4">I found you!</string>
+    <string name="pet_speech_social_reply_1">Coming!</string>
+    <string name="pet_speech_social_reply_2">Yes! Let\'s go!</string>
+    <string name="pet_speech_social_reply_3">Hi hi! 👋</string>
+    <string name="pet_speech_social_reply_4">Show me what you found!</string>
+    <string name="pet_speech_skill_1">Watch this!</string>
+    <string name="pet_speech_skill_2">Secret technique!</string>
+    <string name="pet_speech_skill_3">Maximum tiny power!</string>
+    <string name="pet_speech_skill_4">Ta-da! ✨</string>
+    <string name="pet_speech_celebration_1">This show is just for you!</string>
+    <string name="pet_speech_celebration_2">Ready for something amazing?</string>
+    <string name="pet_speech_celebration_3">My best move—watch closely!</string>
+    <string name="pet_speech_celebration_4">Encore! Encore!</string>
 
     <!-- Privacy Policy -->
     <string name="privacy_policy_title">Privacy Policy</string>

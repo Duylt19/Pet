@@ -13,6 +13,7 @@ enum class PetComboId {
     SLOW_MORNING,
     BRAVE_EXPLORER,
     CHEERFUL_ENCORE,
+    CHATTER,
     WALL_PARKOUR,
     CEILING_EXPEDITION,
     WALL_DIVE,
@@ -216,6 +217,14 @@ object PetComboCatalog {
             sustain(PetAction.SIT, 3_000L..5_000L),
             sustain(PetAction.SPECIAL, 4_000L..6_500L),
             sustain(PetAction.IDLE, 3_000L..5_000L)
+        ),
+        requiredCombo(
+            PetComboId.CHATTER,
+            requiredActions = setOf(PetAction.TALK),
+            sustain(PetAction.IDLE, 1_500L..2_500L),
+            sustain(PetAction.TALK, 4_500L..7_000L),
+            once(PetAction.WINK),
+            sustain(PetAction.SIT, 3_000L..5_000L)
         ),
         spatialCombo(
             PetComboId.WALL_PARKOUR,

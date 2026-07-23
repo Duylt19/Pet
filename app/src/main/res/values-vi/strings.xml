@@ -1,5 +1,31 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
+    <string name="settings_pet_messages_title">Tin nhắn của pet</string>
+    <string name="settings_pet_messages_subtitle">Cho phép pet trò chuyện, phản ứng và nói chuyện với nhau</string>
+    <string name="pet_speech_affection_1">Chào bạn! Nhớ bạn quá 💕</string>
+    <string name="pet_speech_affection_2">Hihi, nhột quá!</string>
+    <string name="pet_speech_affection_3">Vuốt thêm một cái nữa nha?</string>
+    <string name="pet_speech_affection_4">Bạn tìm thấy mình rồi!</string>
+    <string name="pet_speech_chatter_1">Tiếp theo mình phiêu lưu ở đâu nhỉ?</string>
+    <string name="pet_speech_chatter_2">Mình đang bảo vệ màn hình đây.</string>
+    <string name="pet_speech_chatter_3">Sắp đến giờ ăn vặt chưa?</string>
+    <string name="pet_speech_chatter_4">Mình có một bí mật nhỏ…</string>
+    <string name="pet_speech_social_hello_1">Này, bên này nè!</string>
+    <string name="pet_speech_social_hello_2">Chào bạn nhỏ!</string>
+    <string name="pet_speech_social_hello_3">Chơi cùng mình không?</string>
+    <string name="pet_speech_social_hello_4">Tìm thấy bạn rồi!</string>
+    <string name="pet_speech_social_reply_1">Tới ngay đây!</string>
+    <string name="pet_speech_social_reply_2">Được! Đi thôi!</string>
+    <string name="pet_speech_social_reply_3">Xin chào! 👋</string>
+    <string name="pet_speech_social_reply_4">Cho mình xem bạn tìm thấy gì nào!</string>
+    <string name="pet_speech_skill_1">Xem mình nè!</string>
+    <string name="pet_speech_skill_2">Tuyệt kỹ bí mật!</string>
+    <string name="pet_speech_skill_3">Sức mạnh tí hon tối đa!</string>
+    <string name="pet_speech_skill_4">Ta-da! ✨</string>
+    <string name="pet_speech_celebration_1">Màn trình diễn này dành cho bạn!</string>
+    <string name="pet_speech_celebration_2">Sẵn sàng xem điều tuyệt vời chưa?</string>
+    <string name="pet_speech_celebration_3">Chiêu hay nhất của mình—xem kỹ nha!</string>
+    <string name="pet_speech_celebration_4">Diễn tiếp! Diễn tiếp!</string>
     <string name="language">Ngôn ngữ</string>
     <string name="settings">Cài đặt</string>
     <string name="back">Quay lại</string>

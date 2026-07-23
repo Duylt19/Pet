@@ -142,6 +142,17 @@ fun SettingsScreen(
                 )
                 SettingsDivider()
                 SettingsRow(
+                    iconRes = R.drawable.ic_chat_bubble,
+                    title = stringResource(R.string.settings_pet_messages_title),
+                    subtitle = stringResource(R.string.settings_pet_messages_subtitle),
+                    trailing = SettingsTrailing.SwitchTrailing(
+                        checked = state.messagesEnabled,
+                        onCheckedChange = viewModel::setMessagesEnabled
+                    ),
+                    onClick = { viewModel.setMessagesEnabled(!state.messagesEnabled) }
+                )
+                SettingsDivider()
+                SettingsRow(
                     iconRes = R.drawable.ic_settings_outline,
                     title = stringResource(R.string.settings_pet_interaction_title),
                     subtitle = stringResource(R.string.settings_pet_interaction_subtitle),

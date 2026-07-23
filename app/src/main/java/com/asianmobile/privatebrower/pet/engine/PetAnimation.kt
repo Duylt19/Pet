@@ -18,6 +18,7 @@ enum class PetAction {
     CREEP,
     TRIP,
     JUMP,
+    TALK,
     SPECIAL,
     SPECIAL_2,
     TAPPED,
@@ -238,6 +239,11 @@ object DemoPetAnimation {
             loops = true
         ),
         oneShot(PetAction.TRIP, frameCount = 4, frameDurationMillis = 140),
+        PetClip(
+            action = PetAction.TALK,
+            frames = List(4) { index -> PetFrame(index = index, durationMillis = 240) },
+            loops = true
+        ),
         PetClip(
             action = PetAction.JUMP,
             frames = listOf(

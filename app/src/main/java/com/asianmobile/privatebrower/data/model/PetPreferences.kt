@@ -6,6 +6,7 @@ data class PetPreferences(
     val sizePercent: Int = DEFAULT_SIZE_PERCENT,
     val speedPercent: Int = DEFAULT_SPEED_PERCENT,
     val soundEnabled: Boolean = false,
+    val messagesEnabled: Boolean = true,
     val interactionEnabled: Boolean = true,
     val lastPositions: List<PetPositionFraction> = emptyList()
 )

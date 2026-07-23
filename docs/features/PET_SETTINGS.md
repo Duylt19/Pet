@@ -11,6 +11,7 @@
 | Size | 75/100/125/150% | kết hợp `defaultScale`, clamp 64–196dp |
 | Speed | 50–150%, bước 25% | map duration/velocity một lần khi Start |
 | Sound | on/off | reserved; pack v1 chưa hỗ trợ audio |
+| Pet messages | on/off | bật/tắt speech director và transient bubble window |
 | Interaction | on/off | off thêm `FLAG_NOT_TOUCHABLE` |
 | Position | x/y chuẩn hóa 0–1 | lưu khi Stop, restore/clamp theo bounds mới |
 

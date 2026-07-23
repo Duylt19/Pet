@@ -121,6 +121,7 @@ class FilePetPackRepository @Inject constructor(
             PetPackClip(PetAction.DANGLE, false, PetAction.WALK, List(4) { frame(320) }),
             PetPackClip(PetAction.CREEP, true, null, List(4) { frame(180, 16f) }),
             PetPackClip(PetAction.TRIP, false, PetAction.WALK, List(4) { frame(140) }),
+            PetPackClip(PetAction.TALK, true, null, List(4) { frame(240) }),
             PetPackClip(
                 PetAction.JUMP,
                 false,

@@ -71,6 +71,22 @@ class PetComboCatalogTest {
     }
 
     @Test
+    fun `chatter requires a real talk pose and sustains it long enough to read`() {
+        val supported = PetComboCatalog.supportedDefinition(
+            PetComboId.CHATTER,
+            PetAction.entries.toSet()
+        )
+        val withoutTalk = PetComboCatalog.supportedDefinition(
+            PetComboId.CHATTER,
+            PetAction.entries.toSet() - PetAction.TALK
+        )
+        val talkBeat = supported?.beats?.single { it.action == PetAction.TALK }
+
+        assertEquals(4_500L..7_000L, talkBeat?.durationMillis)
+        assertNull(withoutTalk)
+    }
+
+    @Test
     fun `autonomous profile keeps only distinct ground basics and gives climb meaningful weight`() {
         val rules = PetBehaviorProfile().autonomousComboRules
         val retiredGroundBasics = setOf(
@@ -85,7 +101,8 @@ class PetComboCatalogTest {
             PetComboCatalog.definition(rule.comboId)?.habitat?.isClimb == true
         }.sumOf(PetComboRule::weight)
 
-        assertEquals(16, rules.size)
+        assertEquals(17, rules.size)
+        assertTrue(rules.any { it.comboId == PetComboId.CHATTER })
         assertTrue(rules.none { it.comboId in retiredGroundBasics })
         assertTrue(climbWeight * 4 >= rules.sumOf(PetComboRule::weight))
     }

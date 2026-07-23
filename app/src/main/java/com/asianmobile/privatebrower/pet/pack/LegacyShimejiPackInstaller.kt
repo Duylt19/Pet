@@ -271,6 +271,12 @@ class LegacyShimejiPackInstaller @Inject constructor(
                 PetAction.WALK
             )
                 ?.let(::add)
+            clip(
+                PetAction.TALK,
+                LegacyShimejiFrameContract.talk,
+                loops = true,
+                duration = 240L
+            )?.let(::add)
             if (fall != null) {
                 clip(
                     PetAction.JUMP,
@@ -398,6 +404,7 @@ internal object LegacyShimejiFrameContract {
     val wallClimb = listOf(14, 14, 12, 13, 13, 13, 12, 14)
     val creep = listOf(20, 20, 21, 21, 21)
     val trip = listOf(19, 18, 20, 20)
+    val talk = listOf(34, 35, 34, 36)
     val ceilingClimb = listOf(25, 25, 23, 24, 24, 24, 23, 25)
     val special = listOf(1, 38, 39, 40, 41)
     val special2 = listOf(42, 43, 44, 45, 46, 45, 44, 43)

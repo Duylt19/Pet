@@ -55,6 +55,9 @@ https://github.com/CluelessCatBurger/wl_shimeji
   có frame 40 vẫn biểu diễn nội dung đặc biệt.
 - Sprite motion polish: squash/stretch/lean rất nhẹ quanh bottom anchor; không thay đổi
   tọa độ physics hoặc inset-safe bounds.
+- Revision 4 tái sử dụng sequence desktop `WalkWithIe` frame 34–36 thành `TALK` trên
+  Android; chữ được vẽ bằng bubble riêng và được pace bởi speech director. Xem
+  [`PET_SPEECH.md`](PET_SPEECH.md).
 
 ## Giới hạn có chủ đích
 

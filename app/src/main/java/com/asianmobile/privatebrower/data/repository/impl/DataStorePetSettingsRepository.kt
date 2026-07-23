@@ -79,6 +79,10 @@ class DataStorePetSettingsRepository @Inject constructor(
         preferences[SOUND_ENABLED] = enabled
     }
 
+    override fun updateMessagesEnabled(enabled: Boolean) = edit { preferences ->
+        preferences[MESSAGES_ENABLED] = enabled
+    }
+
     override fun updateInteractionEnabled(enabled: Boolean) = edit { preferences ->
         preferences[INTERACTION_ENABLED] = enabled
     }
@@ -100,6 +104,7 @@ class DataStorePetSettingsRepository @Inject constructor(
             preferences[SPEED_PERCENT] ?: DEFAULT_SPEED_PERCENT
         ),
         soundEnabled = preferences[SOUND_ENABLED] ?: false,
+        messagesEnabled = preferences[MESSAGES_ENABLED] ?: true,
         interactionEnabled = preferences[INTERACTION_ENABLED] ?: true,
         lastPositions = positionCodec.decode(preferences[LAST_POSITIONS].orEmpty())
     )
@@ -114,6 +119,7 @@ class DataStorePetSettingsRepository @Inject constructor(
         val SIZE_PERCENT = intPreferencesKey("pet_size_percent")
         val SPEED_PERCENT = intPreferencesKey("pet_speed_percent")
         val SOUND_ENABLED = booleanPreferencesKey("pet_sound_enabled")
+        val MESSAGES_ENABLED = booleanPreferencesKey("pet_messages_enabled")
         val INTERACTION_ENABLED = booleanPreferencesKey("pet_interaction_enabled")
         val LAST_POSITIONS = stringPreferencesKey("pet_last_positions")
     }

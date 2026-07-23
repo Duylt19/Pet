@@ -18,6 +18,7 @@ data class PetBehaviorProfile(
         PetComboRule(PetComboId.CLUMSY_RECOVERY, 7),
         PetComboRule(PetComboId.TINY_PERFORMANCE, 6),
         PetComboRule(PetComboId.DAYDREAM, 5),
+        PetComboRule(PetComboId.CHATTER, 6),
         PetComboRule(PetComboId.WALL_PARKOUR, 12),
         PetComboRule(PetComboId.CEILING_EXPEDITION, 10),
         PetComboRule(PetComboId.WALL_DIVE, 12),
