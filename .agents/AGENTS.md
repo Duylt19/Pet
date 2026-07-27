@@ -1,10 +1,13 @@
-# Project Rules — Cute Pet Android Base
+# Project Rules — Cute Pet/Shimeji Android App
 
 ## Trạng thái bắt buộc phải hiểu
 
-- Đây là base cho app mới, không phải codebase Private Browser đang hoạt động.
+- Đây là ứng dụng Cute Pet/Shimeji đang phát triển, không phải codebase Private Browser.
 - App name hiện tại là `Cute Pet`.
 - Package/application ID canonical: `com.asianmobile.emojibattery.shimeji`.
+- `PrivateBrowser` trong `rootProject.name`, `Theme.PrivateBrowser` và Firebase project ID
+  `privatebrower-7168d` là legacy identifier còn giữ có chủ đích; chúng không phải package name.
+- Đọc `docs/PACKAGE_IDENTITY.md` trước khi sửa app identity, Firebase hoặc app-specific storage.
 - Flow hiện tại: Splash → Language → Intro → Permission → Home; Home Start/Stop 1–3 pet khác nhau và mở Catalog/Settings/Premium.
 - Không tham chiếu các class/module browser, search/clear-browsing, broad storage, download, media, Room hoặc service cũ vì chúng đã bị xóa.
 - Permission request overlay special access/notification; pet chạy bằng `specialUse` foreground service và small overlay window.
@@ -28,6 +31,7 @@
 
 ## Source of truth
 
+- Package identity: `docs/PACKAGE_IDENTITY.md`
 - Architecture: `docs/02_ARCHITECTURE.md`
 - Navigation: `docs/04_NAVIGATION_FLOW.md`
 - Coding rules: `.agents/skills/android_developer/SKILL.md`

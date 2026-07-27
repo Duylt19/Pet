@@ -1,6 +1,8 @@
-# Cute Pet — Android Base Project
+# Cute Pet — Android Shimeji App
 
-Cute Pet là base Android đang được chuyển thành ứng dụng pet animation chạy nổi trên màn hình. Base giữ flow onboarding, quảng cáo, billing, localization, settings và các quy ước kiến trúc hiện có.
+Cute Pet là ứng dụng Android pet animation chạy nổi trên màn hình theo mô hình Shimeji.
+Project kế thừa app shell ổn định gồm onboarding, quảng cáo, billing, localization,
+settings và các quy ước kiến trúc hiện có.
 
 > Trạng thái nguồn chuẩn: tài liệu phải khớp với code hiện tại. Không xem lịch sử Private Browser là chức năng còn tồn tại.
 
@@ -29,6 +31,7 @@ Cute Pet là base Android đang được chuyển thành ứng dụng pet animat
 - Module `:ads` tiếp tục tách riêng khỏi `:app`.
 
 Chi tiết contract: [docs/02_ARCHITECTURE.md](docs/02_ARCHITECTURE.md) và [android_developer/SKILL.md](.agents/skills/android_developer/SKILL.md).
+Thông tin package canonical và các tên legacy còn giữ: [docs/PACKAGE_IDENTITY.md](docs/PACKAGE_IDENTITY.md).
 
 ## Source tree hiện tại
 
@@ -85,7 +88,8 @@ Không dùng `assembleDebug`/`assembleRelease` chỉ để kiểm tra compile.
 ## Tài liệu
 
 - [Documentation index](docs/README.md)
-- [Base architecture](docs/02_ARCHITECTURE.md)
+- [Package identity](docs/PACKAGE_IDENTITY.md)
+- [Architecture contract](docs/02_ARCHITECTURE.md)
 - [Navigation flow](docs/04_NAVIGATION_FLOW.md)
 - [Agent coding guidelines](docs/08_AGENT_CODING_GUIDELINES.md)
 - [Current progress](IMPLEMENTATION_PROGRESS.md)

@@ -5,18 +5,18 @@
 | Thuộc tính | Giá trị |
 |---|---|
 | Display name | Cute Pet |
-| Vai trò repository | Android base project cho sản phẩm mới |
+| Vai trò repository | Ứng dụng Android pet overlay/Shimeji |
 | Namespace/application ID | `com.asianmobile.emojibattery.shimeji` |
 | UI | Jetpack Compose Material 3 |
 | Architecture | Single-Activity + MVVM + Hilt + Flow |
 
 Cute Pet có domain chính thức: một hoặc nhiều pet animation có thể hiển thị và tương tác trên các ứng dụng khác bằng Android overlay. Runtime hỗ trợ tối đa 3 pet theo performance budget của thiết bị và chỉ dùng asset do project/user sở hữu.
 
-## Mục tiêu của base
+## Kiến trúc kế thừa
 
 - Tái sử dụng app shell và flow onboarding ổn định.
 - Giữ cách tổ chức feature, state, DI, navigation, resource, ads và billing.
-- Cho phép thay domain layer mà không viết lại infrastructure chung.
+- Cho phép mở rộng domain pet mà không viết lại infrastructure chung.
 - Giảm tối đa class/dependency từ sản phẩm cũ gây hiểu sai hoặc tăng maintenance.
 
 ## Những gì đang được giữ

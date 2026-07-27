@@ -1,6 +1,6 @@
-# Current Base Capabilities
+# Current Product Capabilities
 
-Base hiện chỉ giữ các capability hỗ trợ sau:
+Ứng dụng hiện có các capability sau:
 
 | Capability | Source chính | Trạng thái |
 |---|---|---|

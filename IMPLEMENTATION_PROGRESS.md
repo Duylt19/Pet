@@ -1,4 +1,4 @@
-# Implementation Progress — Cute Pet Base
+# Implementation Progress — Cute Pet/Shimeji
 
 | Hạng mục | Trạng thái | Ghi chú |
 |---|---|---|

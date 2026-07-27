@@ -1,4 +1,4 @@
-# Cute Pet Base — Agent Context
+# Cute Pet/Shimeji — Agent Context
 
 Đây là project Android Cute Pet/Shimeji, không còn là ứng dụng Private Browser. Package hiện hành là `com.asianmobile.emojibattery.shimeji`.
 
@@ -8,12 +8,13 @@
 
 1. `.agents/AGENTS.md`
 2. `.agents/skills/android_developer/SKILL.md`
-3. `docs/README.md`
-4. Các file foundation liên quan trong `docs/`
+3. `docs/PACKAGE_IDENTITY.md`
+4. `docs/README.md`
+5. Các file foundation liên quan trong `docs/`
 
 Nếu tài liệu và source khác nhau, source hiện tại là bằng chứng thực thi; agent phải cập nhật tài liệu trong cùng thay đổi để khôi phục tính nhất quán.
 
-## Base được giữ lại
+## App shell và infrastructure được giữ lại
 
 - Single-Activity, Compose, MVVM, Hilt, Flow.
 - Splash, Language, Intro, Permission, Home, Settings, Premium.

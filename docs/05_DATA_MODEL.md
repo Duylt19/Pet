@@ -73,7 +73,7 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 
 ## Không có database
 
-Base hiện không có Room, entity, DAO hay schema. Khi feature mới cần database:
+Ứng dụng hiện không có Room, entity, DAO hay schema. Khi feature mới cần database:
 
 1. Xác định data ownership, retention và migration policy.
 2. Thêm version catalog/build dependency.

@@ -45,3 +45,6 @@ Hai file `google-services.json` đã được đồng bộ package để build n
 `com.asianmobile.emojibattery.shimeji`. Trước khi phát hành, owner phải đăng ký Android app
 với package mới trong Firebase Console và thay các file này bằng config được Firebase tạo chính
 thức; không dùng lâu dài `mobilesdk_app_id` của app registration cũ.
+
+Xem thêm [PACKAGE_IDENTITY.md](PACKAGE_IDENTITY.md) để phân biệt package canonical với
+Firebase project ID và các resource name legacy còn được giữ.

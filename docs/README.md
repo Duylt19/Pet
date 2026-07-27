@@ -1,6 +1,10 @@
-# Cute Pet Base — Documentation Index
+# Cute Pet/Shimeji — Documentation Index
 
 Đây là nguồn tài liệu hiện hành cho AI agent và developer. Bộ docs cũ mô tả Private Browser đã được loại bỏ để tránh tham chiếu class, route và feature không còn trong source.
+
+> Package canonical duy nhất: `com.asianmobile.emojibattery.shimeji`.
+> Xem [PACKAGE_IDENTITY.md](PACKAGE_IDENTITY.md) trước khi sửa namespace, Firebase,
+> external app data path hoặc các fully qualified class name.
 
 ## Thứ tự đọc
 
@@ -15,7 +19,8 @@
 
 | File | Nội dung |
 |---|---|
-| [01_PROJECT_OVERVIEW.md](01_PROJECT_OVERVIEW.md) | Identity và phạm vi base |
+| [PACKAGE_IDENTITY.md](PACKAGE_IDENTITY.md) | Package canonical, source roots và legacy identifier |
+| [01_PROJECT_OVERVIEW.md](01_PROJECT_OVERVIEW.md) | Identity và phạm vi sản phẩm |
 | [02_ARCHITECTURE.md](02_ARCHITECTURE.md) | Module, layer, feature template |
 | [03_TECH_STACK.md](03_TECH_STACK.md) | Stack/dependency hiện tại |
 | [04_NAVIGATION_FLOW.md](04_NAVIGATION_FLOW.md) | Routes và back stack |
@@ -23,7 +28,7 @@
 | [06_UI_DESIGN_SYSTEM.md](06_UI_DESIGN_SYSTEM.md) | Resource, sizing, component rules |
 | [07_ADS_INTEGRATION.md](07_ADS_INTEGRATION.md) | Ads/billing integration contract |
 | [08_AGENT_CODING_GUIDELINES.md](08_AGENT_CODING_GUIDELINES.md) | Checklist bắt buộc cho agent |
-| [09_IMPLEMENTATION_ROADMAP.md](09_IMPLEMENTATION_ROADMAP.md) | Cách phát triển product mới từ base |
+| [09_IMPLEMENTATION_ROADMAP.md](09_IMPLEMENTATION_ROADMAP.md) | Roadmap phát triển Cute Pet/Shimeji |
 | [10_SCREEN_TRACKING.md](10_SCREEN_TRACKING.md) | Analytics screen names hiện tại |
 
 ## Runtime specs

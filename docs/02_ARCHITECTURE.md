@@ -109,7 +109,7 @@ ui/feature/
 - Feature Screen nhận callback như `onBack`, `onOpenSettings`; không nhận NavController nếu không có lý do đặc biệt.
 - Back-stack behavior là một phần contract và phải được document/test.
 
-## Cách mở rộng base
+## Cách mở rộng ứng dụng
 
 1. Chốt requirement/domain boundary.
 2. Tạo feature UI contract.

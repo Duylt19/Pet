@@ -1,6 +1,7 @@
 # 09 — Cute Pet Implementation Roadmap
 
-Roadmap này chuyển base hiện tại thành app pet animation chạy nổi trên màn hình. Mỗi phase là một commit độc lập, phải compile/test/docs pass trước khi chuyển phase.
+Roadmap này theo dõi quá trình phát triển app Cute Pet/Shimeji chạy nổi trên màn hình.
+Mỗi phase là một commit độc lập, phải compile/test/docs pass trước khi chuyển phase.
 
 ## Quyết định đã chốt
 

@@ -1,17 +1,23 @@
 ---
 name: android-developer
-description: Quy tắc kiến trúc, coding, UI và verification cho Cute Pet Android base project.
+description: Quy tắc kiến trúc, coding, UI và verification cho ứng dụng Cute Pet/Shimeji Android.
 ---
 
-# Android Developer Skill — Cute Pet Base
+# Android Developer Skill — Cute Pet/Shimeji
 
-Agent làm việc trong repository này PHẢI tuân thủ các contract dưới đây. Mục tiêu là dùng base sạch để phát triển nhiều sản phẩm mới mà vẫn giữ cấu trúc và phương thức đã ổn định từ project trước.
+Agent làm việc trong repository này PHẢI tuân thủ các contract dưới đây. Đây là app
+Cute Pet/Shimeji đang phát triển trên app shell đã được làm sạch, không còn là base trống và
+không còn là Private Browser.
 
 ## 0. Trạng thái project
 
 - Display name: `Cute Pet`.
 - Namespace/application ID canonical: `com.asianmobile.emojibattery.shimeji`.
 - Không tự đổi tiếp package, namespace, root project name hoặc provider authority nếu owner chưa yêu cầu.
+- `rootProject.name = "PrivateBrowser"`, resource `Theme.PrivateBrowser` và Firebase project ID
+  `privatebrower-7168d` là legacy identifier được giữ có chủ đích; không dùng chúng làm package
+  và không tự đổi theo package.
+- Trước mọi thay đổi app identity/Firebase/app-specific storage, đọc `docs/PACKAGE_IDENTITY.md`.
 - Flow hiện tại: Splash → Language → Intro → Permission → Home.
 - Home điều khiển Start/Stop session 1–3 pet khác nhau và có action Catalog/Settings/Premium.
 - Browser, search/clear-browsing, broad storage access, tab manager, bookmark/history, download, media/file manager, Room và foreground service cũ đã bị xóa.
@@ -63,7 +69,7 @@ Repository implementation / local / network / platform API
 - UI không truy cập DataStore, database, network hoặc service trực tiếp.
 - ViewModel không giữ `Activity`, `View`, `NavController` hoặc Composable state.
 - Repository interface đặt ở `data/repository/`; implementation đặt ở `data/repository/impl/` theo convention hiện tại.
-- Use case đặt ở `data/usecase/` trong base hiện tại. Nếu sau này tách domain layer, phải thực hiện nhất quán và cập nhật docs.
+- Use case đặt ở `data/usecase/` theo convention hiện tại. Nếu sau này tách domain layer, phải thực hiện nhất quán và cập nhật docs.
 - Platform API cần `Context` phải dùng `@ApplicationContext` nếu lifetime vượt screen.
 
 ### 3.3. Package-by-feature cho UI
