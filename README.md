@@ -7,8 +7,8 @@ Cute Pet là base Android đang được chuyển thành ứng dụng pet animat
 ## Trạng thái hiện tại
 
 - App display name: `Cute Pet`.
-- Namespace/application ID tạm giữ: `com.asianmobile.privatebrower`.
-- Root Gradle project name tạm giữ: `PrivateBrowser`.
+- Namespace/application ID: `com.asianmobile.emojibattery.shimeji`.
+- Root Gradle project name hiện vẫn là `PrivateBrowser` (không ảnh hưởng package cài đặt).
 - Flow: Splash → Language → Intro → Permission → Home.
 - Permission giải thích/request overlay special access và notification permission; user vẫn có thể Skip.
 - Home điều khiển Start/Stop session 1–3 pet, đồng thời mở Catalog, Settings và Premium.
@@ -33,7 +33,7 @@ Chi tiết contract: [docs/02_ARCHITECTURE.md](docs/02_ARCHITECTURE.md) và [and
 ## Source tree hiện tại
 
 ```text
-app/src/main/java/com/asianmobile/privatebrower/
+app/src/main/java/com/asianmobile/emojibattery/shimeji/
 ├── BaseApplication.kt
 ├── MainActivity.kt
 ├── constant/

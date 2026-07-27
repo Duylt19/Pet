@@ -11,11 +11,11 @@ plugins {
 }
 
 android {
-    namespace = "com.asianmobile.privatebrower"
+    namespace = "com.asianmobile.emojibattery.shimeji"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.asianmobile.privatebrower"
+        applicationId = "com.asianmobile.emojibattery.shimeji"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

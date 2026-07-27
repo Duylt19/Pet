@@ -4,7 +4,7 @@
 
 - Đây là base cho app mới, không phải codebase Private Browser đang hoạt động.
 - App name hiện tại là `Cute Pet`.
-- Package/application ID legacy `com.asianmobile.privatebrower` được giữ cho đến khi owner yêu cầu đổi.
+- Package/application ID canonical: `com.asianmobile.emojibattery.shimeji`.
 - Flow hiện tại: Splash → Language → Intro → Permission → Home; Home Start/Stop 1–3 pet khác nhau và mở Catalog/Settings/Premium.
 - Không tham chiếu các class/module browser, search/clear-browsing, broad storage, download, media, Room hoặc service cũ vì chúng đã bị xóa.
 - Permission request overlay special access/notification; pet chạy bằng `specialUse` foreground service và small overlay window.

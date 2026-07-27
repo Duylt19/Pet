@@ -429,7 +429,7 @@ Khi tạo màn hình mới, **LUÔN** tạo 3 file trong feature package `ui/<fe
 ### 4.2. Screen Template
 
 ```kotlin
-package com.asianmobile.privatebrower.ui.<feature>
+package com.asianmobile.emojibattery.shimeji.ui.<feature>
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.colorResource
@@ -437,7 +437,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.asianmobile.privatebrower.R
+import com.asianmobile.emojibattery.shimeji.R
 
 @Composable
 fun <Feature>Screen(
@@ -473,7 +473,7 @@ private fun <Feature>ScreenPreview() {
 ### 4.3. ViewModel Template
 
 ```kotlin
-package com.asianmobile.privatebrower.ui.<feature>
+package com.asianmobile.emojibattery.shimeji.ui.<feature>
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -492,7 +492,7 @@ class <Feature>ViewModel @Inject constructor() : ViewModel() {
 ### 4.4. UiState Template
 
 ```kotlin
-package com.asianmobile.privatebrower.ui.<feature>
+package com.asianmobile.emojibattery.shimeji.ui.<feature>
 
 data class <Feature>UiState(
     val isLoading: Boolean = false

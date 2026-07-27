@@ -1,6 +1,6 @@
 # Cute Pet Base — Agent Context
 
-Đây là base project Android cho sản phẩm mới, không còn là ứng dụng Private Browser hoàn chỉnh. Tên package legacy `com.asianmobile.privatebrower` được giữ tạm thời và chỉ đổi khi owner yêu cầu.
+Đây là project Android Cute Pet/Shimeji, không còn là ứng dụng Private Browser. Package hiện hành là `com.asianmobile.emojibattery.shimeji`.
 
 ## Nguồn hướng dẫn
 

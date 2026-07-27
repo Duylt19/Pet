@@ -5,7 +5,7 @@ Nguồn chi tiết bắt buộc: [android developer skill](../.agents/skills/and
 ## Checklist trước khi sửa
 
 - Đọc source và docs liên quan; không dựa vào docs Private Browser lịch sử.
-- Xác nhận package name chưa được phép đổi.
+- Package canonical hiện tại là `com.asianmobile.emojibattery.shimeji`; không tự đổi tiếp nếu owner chưa yêu cầu.
 - Xác định feature boundary, state ownership và navigation impact.
 - Nếu UI từ Figma, phải xem screenshot/design context trước.
 

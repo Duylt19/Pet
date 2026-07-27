@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.asianmobile.privatebrower.ads"
+    namespace = "com.asianmobile.emojibattery.shimeji.ads"
     compileSdk = 36
 
     defaultConfig {

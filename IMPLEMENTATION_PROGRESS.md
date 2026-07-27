@@ -7,7 +7,7 @@
 | Product Home | Done | Overlay access + Start/Stop pet + Settings/Premium |
 | Settings/Premium infrastructure | Done | Giữ để tái sử dụng và cập nhật sau |
 | Chuẩn hóa tài liệu cho AI agent | Done | Docs phản ánh source và base contract |
-| Product foundation cleanup | Done | Branding/copy active đã chuyển sang Cute Pet; giữ package legacy |
+| Product foundation cleanup | Done | Branding/copy active đã chuyển sang Cute Pet |
 | Pure Kotlin pet engine | Done | Deterministic state machine, frame timeline, drag/fling và bounds |
 | Overlay foreground service | Done | specialUse FGS, một small-window pet, notification Stop, 30 FPS |
 | Product Home/permission flow | Done | Special access + notification permission + Start/Stop policy |
@@ -36,7 +36,7 @@
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |
 | Different pet per slot + Settings refactor | Done | 1–3 slot selections, per-pack overlay instances, slot-aware Catalog/Detail, grouped Settings and reset-position guard |
 | Per-pet customization + Settings redesign | Done | Pet-first roster, commit-on-selection Add flow, independent size/speed/touch/speech/messages/position per slot, remove/shift migration và app-only Settings section |
-| Đổi namespace/application ID | Deferred | Vẫn là `com.asianmobile.privatebrower` theo yêu cầu owner |
+| Đổi namespace/application ID | Done | `com.asianmobile.emojibattery.shimeji` |
 
 ## Nguyên tắc cập nhật
 

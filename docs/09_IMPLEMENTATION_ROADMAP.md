@@ -4,7 +4,7 @@ Roadmap này chuyển base hiện tại thành app pet animation chạy nổi tr
 
 ## Quyết định đã chốt
 
-- Giữ namespace/application ID legacy `com.asianmobile.privatebrower` cho đến khi owner yêu cầu đổi.
+- Dùng namespace/application ID canonical `com.asianmobile.emojibattery.shimeji`.
 - Giữ module `:ads`, chưa thêm placement mới.
 - MVP dùng asset pet demo do project sở hữu; snapshot pet được owner ủy quyền nằm ngoài Git và chưa được nối trực tiếp vào runtime; không copy code decompile.
 - Chưa dùng Room; persistence nhỏ dùng DataStore.

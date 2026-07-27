@@ -38,3 +38,10 @@ Không thêm lại dependency chỉ vì từng tồn tại. Mọi dependency m�
 ./gradlew compileDebugKotlin
 ./gradlew testDebugUnitTest
 ```
+
+## Firebase sau khi đổi package
+
+Hai file `google-services.json` đã được đồng bộ package để build nhận diện
+`com.asianmobile.emojibattery.shimeji`. Trước khi phát hành, owner phải đăng ký Android app
+với package mới trong Firebase Console và thay các file này bằng config được Firebase tạo chính
+thức; không dùng lâu dài `mobilesdk_app_id` của app registration cũ.

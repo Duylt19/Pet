@@ -61,7 +61,7 @@
                     android:orientation="horizontal">
 
                     <!-- App Icon -->
-                    <com.asianmobile.privatebrower.ads.customview.BorderImageView
+                    <com.asianmobile.emojibattery.shimeji.ads.customview.BorderImageView
                         android:id="@+id/imgIcon"
                         android:layout_width="@dimen/_32sdp"
                         android:layout_height="@dimen/_32sdp"

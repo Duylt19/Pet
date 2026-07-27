@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 
-DEFAULT_PACKAGE = "com.asianmobile.privatebrower"
+DEFAULT_PACKAGE = "com.asianmobile.emojibattery.shimeji"
 DEFAULT_SOURCE = Path("private_data/anime-shimeji")
 PUSH_BATCH_SIZE = 128
 

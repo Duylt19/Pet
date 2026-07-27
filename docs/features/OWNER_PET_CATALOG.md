@@ -5,11 +5,14 @@
 The Catalog screen reads the owner-authorized snapshot from app-specific external storage:
 
 ```text
-/sdcard/Android/data/com.asianmobile.privatebrower/files/pet_catalog/
+/sdcard/Android/data/com.asianmobile.emojibattery.shimeji/files/pet_catalog/
 ├── shimeji.json
 ├── data/<petId>.zip
 └── thumb/<petId>.png
 ```
+
+Sau khi đổi package, dữ liệu từng sync dưới thư mục package cũ không tự chuyển sang app mới.
+Chạy lại `tools/sync_pet_catalog_to_device.py` để nạp catalog vào đường dẫn canonical ở trên.
 
 This location needs no broad storage permission and keeps the 657 MB payload out of the APK and Git. Run the checked-in sync tool after installing a debug build:
 

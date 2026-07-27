@@ -6,7 +6,7 @@
 |---|---|
 | Display name | Cute Pet |
 | Vai trò repository | Android base project cho sản phẩm mới |
-| Namespace/application ID | `com.asianmobile.privatebrower` (legacy, đổi sau) |
+| Namespace/application ID | `com.asianmobile.emojibattery.shimeji` |
 | UI | Jetpack Compose Material 3 |
 | Architecture | Single-Activity + MVVM + Hilt + Flow |
 
@@ -43,7 +43,7 @@ Cute Pet có domain chính thức: một hoặc nhiều pet animation có thể 
 
 ## Quyết định deferred
 
-- Package/application ID và root Gradle project name chưa đổi.
+- Root Gradle project name vẫn là `PrivateBrowser`; đây chỉ là tên build nội bộ và không ảnh hưởng package cài đặt.
 - UI visual final, icon và pet asset production chờ design/asset chính thức; vertical slice chức năng đã hoạt động.
 - Overlay permission, foreground-service notification và policy disclosure phải được triển khai/test trước release.
 - Không tự khởi động pet sau boot trong MVP; chỉ bổ sung khi user chủ động bật trong Settings.

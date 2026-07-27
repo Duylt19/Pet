@@ -23,7 +23,7 @@ Dependency đi từ presentation xuống data boundary. Composable không truy c
 ## Cấu trúc hiện hành
 
 ```text
-com.asianmobile.privatebrower/
+com.asianmobile.emojibattery.shimeji/
 ├── BaseApplication.kt
 ├── MainActivity.kt
 ├── constant/

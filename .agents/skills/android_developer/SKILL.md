@@ -10,8 +10,8 @@ Agent làm việc trong repository này PHẢI tuân thủ các contract dưới
 ## 0. Trạng thái project
 
 - Display name: `Cute Pet`.
-- Namespace/application ID tạm thời: `com.asianmobile.privatebrower`.
-- Không tự đổi package, namespace, root project name hoặc provider authority nếu owner chưa yêu cầu.
+- Namespace/application ID canonical: `com.asianmobile.emojibattery.shimeji`.
+- Không tự đổi tiếp package, namespace, root project name hoặc provider authority nếu owner chưa yêu cầu.
 - Flow hiện tại: Splash → Language → Intro → Permission → Home.
 - Home điều khiển Start/Stop session 1–3 pet khác nhau và có action Catalog/Settings/Premium.
 - Browser, search/clear-browsing, broad storage access, tab manager, bookmark/history, download, media/file manager, Room và foreground service cũ đã bị xóa.
