@@ -158,8 +158,8 @@
     <string name="settings_pet_interaction_title">Touch interaction</string>
     <string name="settings_pet_interaction_subtitle">Allow tap, drag, and fling gestures</string>
     <string name="settings_pet_reset_positions_title">Reset pet positions</string>
-    <string name="settings_pet_reset_positions_subtitle">Place pets at their default starting points next time</string>
-    <string name="settings_pet_apply_on_restart">Changes apply the next time pets start</string>
+    <string name="settings_pet_reset_positions_subtitle">Move pets to their default starting points now</string>
+    <string name="settings_pet_apply_on_restart">Changes apply immediately to running pets</string>
     <string name="settings_decrease_value">Decrease %1$s</string>
     <string name="settings_increase_value">Increase %1$s</string>
     <string name="settings_pet_hub_description">Each pet has its own character, size, speed, touch controls, and messages. Tap a pet to make it yours.</string>
@@ -175,9 +175,9 @@
     <string name="pet_customization_size_hint">Updates instantly while this pet is running</string>
     <string name="pet_customization_speed_hint">Updates this pet’s movement instantly</string>
     <string name="pet_customization_reset_position">Reset this pet\'s position</string>
-    <string name="pet_customization_reset_position_hint">Use its default starting point next time</string>
+    <string name="pet_customization_reset_position_hint">Move this pet to its default starting point now</string>
     <string name="pet_customization_messages_hint">Let this pet chat and react</string>
-    <string name="pet_customization_apply_note">Character and behavior changes apply the next time pets start. Other pet profiles are not affected.</string>
+    <string name="pet_customization_apply_note">Changes apply immediately to this pet when it is running. Other pet profiles are not affected.</string>
     <string name="pet_customization_remove">Remove this pet</string>
     <string name="pet_customization_remove_title">Remove pet?</string>
     <string name="pet_customization_remove_message">%1$s will be removed from the active group. Other pets keep their own settings.</string>
@@ -436,7 +436,7 @@
     <string name="home_open_premium">Open Premium</string>
     <string name="pet_catalog_open">Choose a pet</string>
     <string name="pet_catalog_title">Pet catalog</string>
-    <string name="pet_catalog_target_slot">Choose a character for Pet %1$d. The change applies the next time pets start.</string>
+    <string name="pet_catalog_target_slot">Choose a character for Pet %1$d. A running pet updates immediately.</string>
     <string name="pet_catalog_subtitle">Browse the local owner catalog, filter by category, then set a pet for the next start.</string>
     <string name="pet_catalog_import">Import</string>
     <string name="pet_catalog_selected">Selected</string>

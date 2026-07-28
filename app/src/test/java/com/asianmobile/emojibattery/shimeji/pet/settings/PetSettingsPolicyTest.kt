@@ -42,6 +42,26 @@ class PetSettingsPolicyTest {
         assertEquals(true, policy.shouldPersistPositions(4, 4))
         assertEquals(false, policy.shouldPersistPositions(4, 5))
     }
+
+    @Test
+    fun `position reset changes are isolated to active slots`() {
+        assertEquals(
+            listOf(1),
+            policy.changedPositionResetSlots(
+                previousRevisions = listOf(3, 4, 5),
+                currentRevisions = listOf(3, 5, 9),
+                petCount = 2
+            )
+        )
+        assertEquals(
+            listOf(0, 1),
+            policy.changedPositionResetSlots(
+                previousRevisions = emptyList(),
+                currentRevisions = listOf(1, 2, 3),
+                petCount = 2
+            )
+        )
+    }
 }
 
 class PetPositionCodecTest {

@@ -20,10 +20,13 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.asianmobile.emojibattery.shimeji.MainActivity
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogSnapshot
+import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetBitmapCache
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
+import com.asianmobile.emojibattery.shimeji.pet.settings.PetSettingsPolicy
 import com.asianmobile.emojibattery.shimeji.pet.speech.OwnerPetSpeechAnchorPolicy
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -33,9 +36,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -47,10 +48,12 @@ class PetOverlayService : Service() {
     @Inject lateinit var ownerPetCatalogRepository: OwnerPetCatalogRepository
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val settingsPolicy = PetSettingsPolicy()
     private var overlayStartJob: Job? = null
     private var liveSettingsJob: Job? = null
     private var overlayController: PetOverlayController? = null
     private var sessionPositionResetRevisions: List<Int>? = null
+    private var activeSessionSignature: PetSessionSignature? = null
     private var isScreenReceiverRegistered = false
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -100,31 +103,13 @@ class PetOverlayService : Service() {
                     } ?: ownerPetCatalogRepository.snapshot.value
                 }
             }
-            val packs = List(preferences.petCount) { slotIndex ->
-                OwnerPetSpeechAnchorPolicy.enrich(
-                    pack = petPackRepository.selectedPackForSlot(slotIndex),
-                    catalog = catalog
-                )
-            }
-            val visuals = packs.distinctBy { it.key }.associate { pack ->
-                pack.key to petBitmapCache.prepare(pack)
-            }
-            overlayController = PetOverlayController(
-                context = this,
-                assets = packs.map { pack ->
-                    PetOverlayAsset(
-                        pack = pack,
-                        visual = checkNotNull(visuals[pack.key])
-                    )
-                },
-                preferences = preferences,
-                performanceBudget = petSettingsRepository.performanceBudget
-            ).also { controller ->
+            overlayController = createOverlayController(preferences, catalog).also { controller ->
                 controller.start()
                 if (!getSystemService(PowerManager::class.java).isInteractive) {
                     controller.pauseRendering()
                 }
             }
+            activeSessionSignature = preferences.sessionSignature()
             observeLiveSettings()
             PetOverlayRuntime.updateRunning(true, preferences.petCount)
         } catch (error: CancellationException) {
@@ -141,22 +126,95 @@ class PetOverlayService : Service() {
         liveSettingsJob?.cancel()
         liveSettingsJob = serviceScope.launch {
             petSettingsRepository.preferences
-                .map { preferences ->
-                    preferences.petSlots.map { slot ->
-                        PetLiveSettings(
-                            sizePercent = slot.sizePercent,
-                            speedPercent = slot.speedPercent
-                        )
+                .collect { preferences ->
+                    if (activeSessionSignature != preferences.sessionSignature()) {
+                        restartOverlay(preferences)
+                        return@collect
                     }
-                }
-                .distinctUntilChanged()
-                .collect { settings ->
-                    overlayController?.let { controller ->
-                        controller.updateSizePercents(settings.map(PetLiveSettings::sizePercent))
-                        controller.updateSpeedPercents(settings.map(PetLiveSettings::speedPercent))
-                    }
+
+                    val controller = overlayController ?: return@collect
+                    val previousResetRevisions =
+                        sessionPositionResetRevisions.orEmpty()
+                    val resetSlots = settingsPolicy.changedPositionResetSlots(
+                        previousRevisions = previousResetRevisions,
+                        currentRevisions = preferences.positionResetRevisions,
+                        petCount = preferences.petCount
+                    )
+                    controller.updateSizePercents(
+                        preferences.petSlots.map { it.sizePercent }
+                    )
+                    controller.updateSpeedPercents(
+                        preferences.petSlots.map { it.speedPercent }
+                    )
+                    controller.updateInteractionSettings(preferences.petSlots)
+                    controller.updateSpeechSettings(preferences.petSlots)
+                    controller.resetPositions(resetSlots)
+                    sessionPositionResetRevisions = preferences.positionResetRevisions
                 }
         }
+    }
+
+    private fun restartOverlay(preferences: PetPreferences) {
+        try {
+            val replacementPreferences = if (
+                activeSessionSignature?.petCount == preferences.petCount
+            ) {
+                preferences.copy(
+                    lastPositions = overlayController?.currentPositions()
+                        ?: preferences.lastPositions
+                )
+            } else {
+                preferences
+            }
+            val replacement = createOverlayController(
+                preferences = replacementPreferences,
+                catalog = ownerPetCatalogRepository.snapshot.value
+            )
+            overlayController?.stop()
+            overlayController = replacement.also { controller ->
+                controller.start()
+                if (!getSystemService(PowerManager::class.java).isInteractive) {
+                    controller.pauseRendering()
+                }
+            }
+            sessionPositionResetRevisions = preferences.positionResetRevisions
+            activeSessionSignature = preferences.sessionSignature()
+            PetOverlayRuntime.updateRunning(true, preferences.petCount)
+        } catch (error: RuntimeException) {
+            Log.e(TAG, "Unable to update running pet session", error)
+            overlayController?.stop()
+            overlayController = null
+            stopSelf()
+        }
+    }
+
+    private fun createOverlayController(
+        preferences: PetPreferences,
+        catalog: OwnerPetCatalogSnapshot
+    ): PetOverlayController {
+        val packs = List(preferences.petCount) { slotIndex ->
+            val requestedPack = petPackRepository.find(
+                preferences.packKeyForSlot(slotIndex)
+            ) ?: petPackRepository.selectedPackForSlot(slotIndex)
+            OwnerPetSpeechAnchorPolicy.enrich(
+                pack = requestedPack,
+                catalog = catalog
+            )
+        }
+        val visuals = packs.distinctBy { it.key }.associate { pack ->
+            pack.key to petBitmapCache.prepare(pack)
+        }
+        return PetOverlayController(
+            context = this,
+            assets = packs.map { pack ->
+                PetOverlayAsset(
+                    pack = pack,
+                    visual = checkNotNull(visuals[pack.key])
+                )
+            },
+            preferences = preferences,
+            performanceBudget = petSettingsRepository.performanceBudget
+        )
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -177,6 +235,7 @@ class PetOverlayService : Service() {
         }
         overlayController = null
         sessionPositionResetRevisions = null
+        activeSessionSignature = null
         liveSettingsJob = null
         PetOverlayRuntime.updateRunning(false)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
@@ -185,10 +244,16 @@ class PetOverlayService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private data class PetLiveSettings(
-        val sizePercent: Int,
-        val speedPercent: Int
+    private data class PetSessionSignature(
+        val petCount: Int,
+        val packKeys: List<String>
     )
+
+    private fun PetPreferences.sessionSignature(): PetSessionSignature =
+        PetSessionSignature(
+            petCount = petCount,
+            packKeys = selectedPackKeys.take(petCount)
+        )
 
     private fun promoteToForeground() {
         val foregroundServiceType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {

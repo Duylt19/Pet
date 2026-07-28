@@ -27,6 +27,14 @@ class PetSettingsPolicy {
         currentResetRevision: Int
     ): Boolean = sessionResetRevision == currentResetRevision
 
+    fun changedPositionResetSlots(
+        previousRevisions: List<Int>,
+        currentRevisions: List<Int>,
+        petCount: Int
+    ): List<Int> = (0 until petCount.coerceAtLeast(0)).filter { slotIndex ->
+        previousRevisions.getOrNull(slotIndex) != currentRevisions.getOrNull(slotIndex)
+    }
+
     private fun nearestStep(value: Int, minimum: Int, maximum: Int, step: Int): Int {
         val clamped = value.coerceIn(minimum, maximum)
         val stepsFromMinimum = ((clamped - minimum) + step / 2) / step

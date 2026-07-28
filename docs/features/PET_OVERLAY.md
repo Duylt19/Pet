@@ -39,11 +39,17 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Mỗi slot resolve pack/visual/engine config riêng, gồm size, speed, touch flag và speech
   catalog/toggle; slot trùng pack dùng chung bitmap cache đã preload. Tất cả instance vẫn
   dùng chung một clock/service.
-- Service observe riêng size và speed trong DataStore. Khi một slot đổi size, controller
+- Service observe toàn bộ profile active trong DataStore. Khi một slot đổi size, controller
   update đúng window ngay lập tức, giữ chân/tâm hoặc edge attachment theo surface hiện tại,
   rồi cập nhật bounds, social geometry và speech placement từ cùng `PetState`. Khi speed
   đổi, controller thay timeline/config của đúng engine nhưng tái sử dụng nguyên state đang
   chạy; frame timing và scripted velocity mới có hiệu lực ở tick kế tiếp.
+- Touch toggle đổi trực tiếp `FLAG_NOT_TOUCHABLE`. Messages và custom-message list thay
+  speech director/window của đúng slot; bubble đang hiện được đóng để catalog mới có hiệu
+  lực ở lần TALK kế tiếp. Reset revision đưa instance về default position ngay.
+- Pack key hoặc active pet count thay đổi làm service preload visual rồi rebuild controller
+  ngay trong cùng foreground session. Character selection và Remove vì vậy không cần
+  Stop/Start thủ công; character-only rebuild giữ normalized live positions của session.
 - Tap/drag/fling đều được chuyển thành `PetEvent`. Hệ tọa độ overlay chỉ fit status bar/display cutout một lần, không trừ navigation bar ở đáy; vì vậy đáy pet chạm đáy màn hình vật lý thay vì dừng phía trên thanh điều hướng.
 - Playground cho phép cửa sổ pet tràn `1/3` chiều rộng qua mép trái/phải và `1/3` chiều rộng qua mép trên, còn mép dưới không tràn. `FLAG_LAYOUT_NO_LIMITS` là bắt buộc để WindowManager không clamp lại cửa sổ nhỏ; hit target vẫn chỉ bằng đúng kích thước pet.
 - Sprite pack dùng quy ước frame gốc quay sang trái. Renderer mirror ngang khi engine đi
@@ -87,8 +93,8 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   collision tương ứng.
 - Fall dùng gravity/terminal velocity thay cho tốc độ dọc cố định. Thả kéo nhẹ phát `DragEnd → Fall`; chỉ thao tác vượt system minimum-fling velocity mới vào physics fling.
 - Stop chuẩn hóa vị trí 0–1 vào DataStore; Start sau process/orientation change restore và
-  clamp theo usable bounds mới. Reset position/revision theo slot nên session đã chạy chỉ
-  merge lại pet chưa bị reset hoặc reorder.
+  clamp theo usable bounds mới. Reset position/revision theo slot cập nhật instance ngay
+  và ngăn position snapshot cũ ghi đè reset hoặc reorder.
 - Default multi-pet layout giãn ngang 1,05 pet-width; vị trí restore trùng sâu được sửa
   sau khi cả hai pet đã đáp và cùng ở pose nghỉ.
 - Stop action, `onDestroy` và lỗi add window đều remove callback/toàn bộ window và reset runtime state.
@@ -136,6 +142,12 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Standing/rest V3.16 đã verified tiếp trên cùng thiết bị: owner pet ở bottom hiển thị
   pose đứng khi window giữ nguyên X, không còn dùng frame 11 ngồi cho mọi IDLE. Ba overlay
   tiếp tục chạy sau cài đè và không có fatal/window error.
+- Live Customize V3.18 verified trên Pixel 3 XL với roster Nanami/Pein/Gojo: touch toggle
+  thêm/gỡ `NOT_TOUCHABLE`, messages/custom list remove/recreate speech window, reset đưa
+  Nanami về default X trong cùng session, character replacement đổi window identity,
+  Remove giảm 3→2 và Add tăng 2→3 overlay/speech window mà foreground service không dừng.
+  Roster/profile ban đầu đã được restore; clean Stop còn 0 service/window và log không có
+  fatal, bad-token hoặc replacement error.
 
 ## Chưa thuộc runtime hiện tại
 

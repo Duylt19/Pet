@@ -76,14 +76,22 @@ internal class PetOverlayController(
         }
     )
     private val crowdResolver = PetCrowdResolver()
-    private val speechDirectors = selectedAssets.mapIndexedNotNull { index, asset ->
+    private val speechSettings = selectedAssets.mapIndexed { index, _ ->
         val slot = preferences.slot(index)
-        if (!slot.messagesEnabled) return@mapIndexedNotNull null
-        index to PetSpeechDirector(
-            catalog = appContext.petSpeechCatalog(slot.customMessages),
-            seed = 31 * asset.pack.manifest.id.hashCode() + index
+        index to SpeechSettings(
+            enabled = slot.messagesEnabled,
+            customMessages = slot.customMessages
         )
-    }.toMap()
+    }.toMap().toMutableMap()
+    private val speechDirectors = selectedAssets.mapIndexedNotNull { index, asset ->
+        val settings = speechSettings.getValue(index)
+        if (!settings.enabled) return@mapIndexedNotNull null
+        index to createSpeechDirector(
+            pack = asset.pack,
+            index = index,
+            customMessages = settings.customMessages
+        )
+    }.toMap().toMutableMap()
     private val instances = mutableListOf<PetInstance>()
     private val speechWindows = mutableMapOf<Int, SpeechWindow>()
     private var isRendering = false
@@ -158,6 +166,7 @@ internal class PetOverlayController(
                     params = params,
                     speechAttachment = speechAttachment(pack),
                     speedPercent = slotPreferences.speedPercent,
+                    interactionEnabled = slotPreferences.interactionEnabled,
                     state = initialState
                 )
                 instances += instance
@@ -179,13 +188,7 @@ internal class PetOverlayController(
     }
 
     fun stop(): List<PetPositionFraction> {
-        val positions = instances.map { instance ->
-            sessionLayout.normalize(
-                position = instance.state.position,
-                bounds = instance.state.bounds,
-                size = instance.state.size
-            )
-        }
+        val positions = currentPositions()
         isRendering = false
         choreographer.removeFrameCallback(frameCallback)
         removeAllViews()
@@ -193,6 +196,14 @@ internal class PetOverlayController(
         speechDirectors.values.forEach(PetSpeechDirector::reset)
         lastTickNanos = 0L
         return positions
+    }
+
+    fun currentPositions(): List<PetPositionFraction> = instances.map { instance ->
+        sessionLayout.normalize(
+            position = instance.state.position,
+            bounds = instance.state.bounds,
+            size = instance.state.size
+        )
     }
 
     fun pauseRendering() {
@@ -240,6 +251,79 @@ internal class PetOverlayController(
                 speedPercent = speedPercent
             )
             instance.speedPercent = speedPercent
+        }
+    }
+
+    fun updateInteractionSettings(slotPreferences: List<PetSlotPreferences>) {
+        instances.forEach { instance ->
+            val interactionEnabled = slotPreferences
+                .getOrNull(instance.id)
+                ?.interactionEnabled
+                ?: return@forEach
+            if (instance.interactionEnabled == interactionEnabled) return@forEach
+            instance.interactionEnabled = interactionEnabled
+            instance.params.flags = if (interactionEnabled) {
+                instance.params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
+            } else {
+                instance.params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            }
+            if (instance.view.isAttachedToWindow) {
+                windowManager.updateViewLayout(instance.view, instance.params)
+            }
+        }
+    }
+
+    fun updateSpeechSettings(slotPreferences: List<PetSlotPreferences>) {
+        instances.forEach { instance ->
+            val slot = slotPreferences.getOrNull(instance.id) ?: return@forEach
+            val requested = SpeechSettings(
+                enabled = slot.messagesEnabled,
+                customMessages = slot.customMessages
+            )
+            if (speechSettings[instance.id] == requested) return@forEach
+
+            speechDirectors.remove(instance.id)?.reset()
+            removeSpeechWindow(instance.id)
+            speechSettings[instance.id] = requested
+            if (requested.enabled) {
+                speechDirectors[instance.id] = createSpeechDirector(
+                    pack = selectedAssets[instance.id].pack,
+                    index = instance.id,
+                    customMessages = requested.customMessages
+                ).also(PetSpeechDirector::reset)
+                addSpeechWindow(instance)
+            }
+        }
+    }
+
+    fun resetPositions(slotIndexes: List<Int>) {
+        slotIndexes.forEach { slotIndex ->
+            val instance = instances.firstOrNull { it.id == slotIndex } ?: return@forEach
+            val pack = selectedAssets[instance.id].pack
+            val position = sessionLayout.resolvePosition(
+                index = instance.id,
+                bounds = instance.state.bounds,
+                size = instance.state.size,
+                saved = emptyList(),
+                marginPixels = appContext.dpToPixels(START_MARGIN_DP).toFloat()
+            )
+            val action = when {
+                PetAction.FALL in pack.manifest.clips -> PetAction.FALL
+                PetAction.WALK in pack.manifest.clips -> PetAction.WALK
+                else -> PetAction.IDLE
+            }
+            speechDirectors[instance.id]?.reset()
+            hideSpeech(instance.id)
+            render(
+                instance = instance,
+                updatedState = instance.engine.initialState(
+                    bounds = instance.state.bounds,
+                    size = instance.state.size,
+                    position = position,
+                    action = action,
+                    direction = instance.state.direction
+                )
+            )
         }
     }
 
@@ -337,6 +421,7 @@ internal class PetOverlayController(
     }
 
     private fun addSpeechWindow(instance: PetInstance) {
+        if (speechWindows.containsKey(instance.id)) return
         val view = PetSpeechBubbleView(appContext).apply {
             visibility = View.INVISIBLE
         }
@@ -348,6 +433,11 @@ internal class PetOverlayController(
         } catch (error: RuntimeException) {
             Log.w(TAG, "Unable to prepare pet speech bubble", error)
         }
+    }
+
+    private fun removeSpeechWindow(petId: Int) {
+        val window = speechWindows.remove(petId) ?: return
+        runCatching { windowManager.removeViewImmediate(window.view) }
     }
 
     private fun updateSpeechPosition(window: SpeechWindow) {
@@ -545,6 +635,15 @@ internal class PetOverlayController(
         )
     )
 
+    private fun createSpeechDirector(
+        pack: PetPack,
+        index: Int,
+        customMessages: List<String>
+    ): PetSpeechDirector = PetSpeechDirector(
+        catalog = appContext.petSpeechCatalog(customMessages),
+        seed = 31 * pack.manifest.id.hashCode() + index
+    )
+
     @Suppress("DiscouragedApi")
     private fun Context.systemBarSize(resourceName: String): Int {
         val resourceId = resources.getIdentifier(resourceName, "dimen", "android")
@@ -558,7 +657,13 @@ internal class PetOverlayController(
         val params: WindowManager.LayoutParams,
         val speechAttachment: PetSpeechAttachment,
         var speedPercent: Int,
+        var interactionEnabled: Boolean,
         var state: PetState
+    )
+
+    private data class SpeechSettings(
+        val enabled: Boolean,
+        val customMessages: List<String>
     )
 
     private data class SpeechWindow(

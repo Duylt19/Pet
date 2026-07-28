@@ -152,12 +152,12 @@
     <string name="settings_pet_interaction_title">Tương tác chạm</string>
     <string name="settings_pet_interaction_subtitle">Cho phép chạm, kéo và ném pet</string>
     <string name="settings_pet_reset_positions_title">Đặt lại vị trí pet</string>
-    <string name="settings_pet_reset_positions_subtitle">Đưa pet về vị trí bắt đầu mặc định trong lần chạy tới</string>
-    <string name="settings_pet_apply_on_restart">Thay đổi được áp dụng trong lần khởi động pet tiếp theo</string>
+    <string name="settings_pet_reset_positions_subtitle">Đưa pet về vị trí bắt đầu mặc định ngay</string>
+    <string name="settings_pet_apply_on_restart">Thay đổi được áp dụng ngay cho pet đang chạy</string>
     <string name="settings_decrease_value">Giảm %1$s</string>
     <string name="settings_increase_value">Tăng %1$s</string>
     <string name="home_pet_default_name">Mèo Cam</string>
-    <string name="pet_catalog_target_slot">Chọn nhân vật cho Pet %1$d. Thay đổi được áp dụng trong lần khởi động pet tiếp theo.</string>
+    <string name="pet_catalog_target_slot">Chọn nhân vật cho Pet %1$d. Pet đang chạy sẽ cập nhật ngay.</string>
     <string name="pet_detail_select_for_slot">Dùng cho Pet %1$d</string>
     <string name="premium_subscription_title">Nâng cấp lên Premium</string>
     <string name="files_videos_label">Video</string>
@@ -602,9 +602,9 @@
     <string name="pet_customization_size_hint">Áp dụng ngay khi pet này đang chạy</string>
     <string name="pet_customization_speed_hint">Cập nhật chuyển động của pet này ngay lập tức</string>
     <string name="pet_customization_reset_position">Đặt lại vị trí pet này</string>
-    <string name="pet_customization_reset_position_hint">Dùng vị trí bắt đầu mặc định ở lần chạy sau</string>
+    <string name="pet_customization_reset_position_hint">Đưa pet này về vị trí bắt đầu mặc định ngay</string>
     <string name="pet_customization_messages_hint">Cho phép pet này trò chuyện và phản ứng</string>
-    <string name="pet_customization_apply_note">Thay đổi nhân vật và hành vi áp dụng ở lần chạy pet tiếp theo. Các pet khác không bị ảnh hưởng.</string>
+    <string name="pet_customization_apply_note">Thay đổi được áp dụng ngay cho pet này khi đang chạy. Các pet khác không bị ảnh hưởng.</string>
     <string name="pet_customization_remove">Xóa pet này</string>
     <string name="pet_customization_remove_title">Xóa pet?</string>
     <string name="pet_customization_remove_message">%1$s sẽ bị xóa khỏi nhóm đang hoạt động. Các pet khác vẫn giữ cài đặt riêng.</string>

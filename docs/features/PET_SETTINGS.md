@@ -5,8 +5,8 @@
 `PetSettingsRepository` expose một `StateFlow<PetPreferences>` trên DataStore. Settings
 và pack selection ghi qua repository; Home/catalog/service không truy cập key storage
 trực tiếp. `PetPreferences` materialize đúng ba `PetSlotPreferences`, còn `petCount` quyết
-định bao nhiêu slot active. Service chụp pack/count/behavior snapshot lúc Start; riêng
-size và speed tiếp tục observe để hai điều khiển này có hiệu lực live.
+định bao nhiêu slot active. Service observe toàn bộ profile active; mọi thay đổi từ
+Customize Pet được áp dụng ngay cho session đang chạy.
 
 | Setting | Giá trị hợp lệ | Runtime |
 |---|---|---|
@@ -29,20 +29,24 @@ Size/speed/messages/custom messages/interaction global cũ là migration fallbac
 slot mới chưa có, giá trị cũ được duplicate sang cả ba profile. Lần user chỉnh một pet,
 repository ghi đủ ba record và chỉ mutate slot đích.
 
-Reset position đặt record đúng slot về `null` và tăng revision của slot đó. Session chụp
-ba revision lúc Start; Stop chỉ merge lại vị trí của slot có revision không đổi, nên
-reset pet 2 không bị session cũ ghi đè và cũng không xóa vị trí pet 1/3.
+Reset position đặt record đúng slot về `null`, tăng revision của slot đó và đưa instance
+đang chạy về điểm mặc định ngay. Session cập nhật revision sau khi reset; Stop chỉ merge
+vị trí theo revision hiện hành nên reset pet 2 không xóa hoặc ghi đè vị trí pet 1/3.
 
 Editor lời thoại nằm trong Customize Pet, hỗ trợ lưu, hủy và reset về câu có sẵn. Counter
 hiển thị cả số câu và độ dài câu dài nhất; nút Save bị khóa khi vượt 30 câu hoặc 80
 Unicode code point/câu nên emoji không bị tính hai lần. Repository chuẩn hóa khoảng
 trắng, bỏ câu rỗng/trùng và persist dạng newline-delimited string.
-Mỗi pet chọn từ catalog riêng; thay đổi pack và các behavior setting còn lại áp dụng ở lần
-Start tiếp theo. Riêng size và speed được service observe theo từng slot. Size resize
-window ngay khi user bấm stepper hoặc kéo qua một nấc slider; runtime giữ tâm/chân trên
+Mỗi pet chọn từ catalog riêng. Size resize window ngay khi user bấm stepper hoặc kéo qua
+một nấc slider; runtime giữ tâm/chân trên
 sàn, giữ attachment ở tường/trần và clamp lại vào playground. Speed thay engine timeline
 của đúng slot ngay khi user bấm stepper hoặc kéo slider nhưng giữ nguyên `PetState`, nên
 action, combo, vị trí và animation cursor không bị reset.
+Touch cập nhật `FLAG_NOT_TOUCHABLE` của đúng window. Messages/custom messages thay speech
+director và bubble window của đúng pet. Reset position cập nhật instance ngay. Khi pack
+hoặc số slot đổi, service preload asset mới rồi rebuild session đang chạy tự động; user
+không cần Stop/Start. Đổi character với count không đổi giữ normalized live position của
+các pet; add/remove dùng position list đã được repository materialize theo roster mới.
 
 ## Settings UX
 
@@ -54,7 +58,7 @@ action, combo, vị trí và animation cursor không bị reset.
   khiển dùng chung optimistic state và cập nhật pet đang chạy ngay lập tức.
 - Add mở Catalog ở `slotIndex == petCount`; chỉ khi Set/Import thành công mới tăng count.
 - Remove có confirm, shift profile/position của slot sau lên trước, append một profile
-  mặc định và invalidate position revision để session cũ không ghi đè thứ tự mới.
+  mặc định, invalidate position revision và rebuild ngay session đang chạy.
 - Sound không xuất hiện trong UI cho đến khi schema/runtime có audio thật.
 
 Speed là mức năng lượng di chuyển, không còn là hệ số tua đều cho mọi animation. `WALK`,

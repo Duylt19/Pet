@@ -56,7 +56,9 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 - `PetPackManifest` là schema v1 versioned gồm identity, canvas, anchor, interaction và action clips/frame metadata.
 - `PetPackRepository.packs/selectedPacks` là `StateFlow`; selection thiếu slot được materialize một lần từ slot 1 thành ba giá trị độc lập, và built-in Orange Cat luôn là fallback khi key không còn hợp lệ.
 - Installed source chỉ trỏ tới app-private directory sau khi secure installer validate và atomic promote.
-- Pack đang chạy vẫn là snapshot theo từng slot. Selection/settings mới chỉ áp dụng ở lần Start tiếp theo để không mutate renderer giữa session.
+- Pack của controller là snapshot theo từng rebuild. Khi selected key/count thay đổi,
+  service preload visual rồi thay controller ngay trong foreground session; invalid/missing
+  key vẫn fallback built-in và không đưa file chưa validate vào renderer.
 - Android bitmap/`File` không đi vào pure engine state. Manifest được map sang `PetClip`; renderer giữ `PetPackVisual` đã preload.
 
 ## Owner catalog model

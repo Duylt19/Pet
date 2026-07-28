@@ -4,7 +4,10 @@
 
 Phase 4 hỗ trợ một built-in code-native pet và các pack `.zip` do user import. Pack chỉ chứa `manifest.json` cùng ảnh PNG/WebP; không chứa code, executable, font, audio hoặc network metadata.
 
-Pack đang được overlay giữ là snapshot đã load. Import/select pack khác không thay renderer đang chạy; pack mới được áp dụng ở lần Start tiếp theo. Vì vậy lỗi import hoặc file pack hỏng không làm crash pet hiện tại.
+Mỗi controller giữ snapshot pack đã load. Khi import/select thành công, service preload
+visual đã qua installer validation rồi rebuild controller ngay trong foreground session.
+Pack missing/invalid vẫn fallback built-in; lỗi chuẩn bị replacement dừng session sạch
+thay vì giữ một renderer nửa cũ nửa mới.
 
 ## Cấu trúc archive
 

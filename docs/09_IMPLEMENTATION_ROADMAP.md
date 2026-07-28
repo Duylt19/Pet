@@ -137,6 +137,9 @@ Before release hardening, complete the clean-room parity items confirmed by the 
   Shimeji actions, derive emote/floor-play/sprawl/wall-hold/ceiling-hold poses, play skills
   once with explicit recovery, use energy-aware combo transitions, and keep physical
   wall/aerial stories silent.
+- [Done] Make Customize Pet live V3.18: size/speed, touch flags, speech toggle/catalog,
+  reset position, character replacement and roster removal update the running foreground
+  session without requiring a manual Stop/Start.
 - [Done] Add multi-pack session selection before considering swarm mode: 1–3 typed slots can select different packs while the current device performance budget remains authoritative.
 - Treat tap popup and boot restart as separate product/policy decisions, not implicit APK parity.
 - [Done] Import the 1.026-pack owner snapshot into the private GitHub static server with
