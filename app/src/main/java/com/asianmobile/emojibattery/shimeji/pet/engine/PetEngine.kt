@@ -86,8 +86,51 @@ class PetEngine(
                 position = event.bounds.clampTopLeft(state.position, state.size)
             )
         )
+        is PetEvent.SizeChanged -> onSizeChanged(state, event)
         is PetEvent.Face -> PetTransition(state.copy(direction = event.direction))
         is PetEvent.StartCombo -> onStartCombo(state, event)
+    }
+
+    private fun onSizeChanged(
+        state: PetState,
+        event: PetEvent.SizeChanged
+    ): PetTransition {
+        val centeredX = state.position.x + (state.size.width - event.size.width) / 2f
+        val centeredY = state.position.y + (state.size.height - event.size.height) / 2f
+        val position = when {
+            state.action in WALL_ACTIONS -> {
+                val oldMaximumX = state.bounds.right - state.size.width
+                val staysOnLeft = abs(state.position.x - state.bounds.left) <=
+                    abs(state.position.x - oldMaximumX)
+                PetVector(
+                    x = if (staysOnLeft) {
+                        event.bounds.left
+                    } else {
+                        event.bounds.right - event.size.width
+                    },
+                    y = centeredY
+                )
+            }
+
+            state.action in CEILING_ACTIONS -> PetVector(
+                x = centeredX,
+                y = event.bounds.top
+            )
+
+            state.isGroundedSurface() -> PetVector(
+                x = centeredX,
+                y = event.bounds.bottom - event.size.height
+            )
+
+            else -> PetVector(centeredX, centeredY)
+        }
+        return PetTransition(
+            state.copy(
+                size = event.size,
+                bounds = event.bounds,
+                position = event.bounds.clampTopLeft(position, event.size)
+            )
+        )
     }
 
     private fun onTap(state: PetState): PetTransition {
@@ -1096,6 +1139,15 @@ class PetEngine(
     )
 
     private companion object {
+        val WALL_ACTIONS = setOf(
+            PetAction.CLIMB_WALL,
+            PetAction.CLIMB_DOWN,
+            PetAction.HOLD_WALL
+        )
+        val CEILING_ACTIONS = setOf(
+            PetAction.CLIMB_CEILING,
+            PetAction.HOLD_CEILING
+        )
         val SOCIAL_SPEECH_COMBOS = setOf(
             PetComboId.SOCIAL_HELLO,
             PetComboId.SOCIAL_HELLO_REPLY,

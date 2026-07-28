@@ -1070,6 +1070,68 @@ class PetEngineTest {
     }
 
     @Test
+    fun `grounded resize preserves feet and horizontal center`() {
+        val engine = engine()
+        val initial = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(20f, 80f),
+            action = PetAction.WALK
+        )
+        val largerSize = PetSize(width = 40f, height = 40f)
+
+        val updated = engine.reduce(
+            initial,
+            PetEvent.SizeChanged(size = largerSize, bounds = bounds)
+        )
+
+        assertEquals(PetVector(10f, 60f), updated.state.position)
+        assertEquals(largerSize, updated.state.size)
+    }
+
+    @Test
+    fun `wall resize keeps pet attached to its nearest wall`() {
+        val engine = engine()
+        val initial = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(0f, 30f),
+            action = PetAction.CLIMB_WALL
+        )
+        val largerSize = PetSize(width = 40f, height = 40f)
+        val expandedBounds = PetBounds(left = -10f, top = 0f, right = 110f, bottom = 100f)
+
+        val updated = engine.reduce(
+            initial,
+            PetEvent.SizeChanged(size = largerSize, bounds = expandedBounds)
+        )
+
+        assertEquals(PetVector(-10f, 20f), updated.state.position)
+        assertEquals(expandedBounds, updated.state.bounds)
+    }
+
+    @Test
+    fun `ceiling resize keeps pet attached to the top edge`() {
+        val engine = engine()
+        val initial = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(30f, 0f),
+            action = PetAction.CLIMB_CEILING
+        )
+        val largerSize = PetSize(width = 40f, height = 40f)
+        val expandedBounds = PetBounds(left = -10f, top = -10f, right = 110f, bottom = 100f)
+
+        val updated = engine.reduce(
+            initial,
+            PetEvent.SizeChanged(size = largerSize, bounds = expandedBounds)
+        )
+
+        assertEquals(PetVector(20f, -10f), updated.state.position)
+        assertEquals(largerSize, updated.state.size)
+    }
+
+    @Test
     fun `large delayed tick is capped to prevent animation catch-up storms`() {
         val engine = engine(maxTickMillis = 100)
         val walking = engine.initialState(

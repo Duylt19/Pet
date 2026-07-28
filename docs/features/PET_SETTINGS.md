@@ -12,7 +12,7 @@ trực tiếp. `PetPreferences` materialize đúng ba `PetSlotPreferences`, còn
 |---|---|---|
 | Pack key / slot | đúng 3 installed/built-in key | missing/invalid fallback Orange Cat |
 | Count | 1–3; low-RAM 1–2 | một window/state machine mỗi pet |
-| Size / slot | 75/100/125/150% | kết hợp `defaultScale`, clamp 64–196dp cho đúng pet |
+| Size / slot | 50–150%, bước 10% | 100% = 84dp trước `defaultScale`, clamp 48–144dp |
 | Speed / slot | 50–150%, bước 25% | locomotion/physics/expression scale từ profile đúng pet |
 | Sound | on/off | reserved; pack v1 chưa hỗ trợ audio |
 | Pet messages / slot | on/off | pet off không tạo speech director/window; pet khác không bị ảnh hưởng |
@@ -37,12 +37,17 @@ Editor lời thoại nằm trong Customize Pet, hỗ trợ lưu, hủy và reset
 hiển thị cả số câu và độ dài câu dài nhất; nút Save bị khóa khi vượt 30 câu hoặc 80
 Unicode code point/câu nên emoji không bị tính hai lần. Repository chuẩn hóa khoảng
 trắng, bỏ câu rỗng/trùng và persist dạng newline-delimited string.
-Mỗi pet chọn từ catalog riêng; thay đổi áp dụng ở lần Start tiếp theo.
+Mỗi pet chọn từ catalog riêng; thay đổi pack và các behavior setting áp dụng ở lần Start
+tiếp theo. Riêng size được service observe theo từng slot và resize window ngay khi user
+bấm stepper hoặc kéo qua một nấc slider. Runtime giữ tâm/chân trên sàn, giữ attachment ở
+tường/trần và clamp lại vào playground nên không cần Stop/Start hoặc Reset position.
 
 ## Settings UX
 
 - Settings hub chỉ hiển thị roster + trạng thái tóm tắt và app/support.
 - Tap card mở `pet_customization/{slotIndex}`.
+- Size editor dùng slider 11 nấc `50–150%` kèm stepper `−/+`; giá trị optimistic trên UI
+  trong khi DataStore persist và overlay đang chạy nhận cùng state flow.
 - Add mở Catalog ở `slotIndex == petCount`; chỉ khi Set/Import thành công mới tăng count.
 - Remove có confirm, shift profile/position của slot sau lên trước, append một profile
   mặc định và invalidate position revision để session cũ không ghi đè thứ tự mới.

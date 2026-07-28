@@ -35,9 +35,9 @@ class PetSettingsPolicy {
 
     companion object {
         const val MIN_PET_COUNT = 1
-        const val MIN_SIZE_PERCENT = 75
+        const val MIN_SIZE_PERCENT = 50
         const val MAX_SIZE_PERCENT = 150
-        const val SIZE_STEP_PERCENT = 25
+        const val SIZE_STEP_PERCENT = 10
         const val MIN_SPEED_PERCENT = 50
         const val MAX_SPEED_PERCENT = 150
         const val SPEED_STEP_PERCENT = 25

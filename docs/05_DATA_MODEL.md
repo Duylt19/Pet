@@ -14,7 +14,7 @@
 | `pet_selected_pack_keys` | String | Ba pack key độc lập theo slot, newline-delimited |
 | `pet_selected_pack_key` | String | Legacy/mirror slot 1 để migrate dữ liệu cũ |
 | `pet_count` | Int | Số instance, clamp theo device budget |
-| `pet_slot_size_percents` | JSON String | Ba mức size độc lập 75–150%, bước 25% |
+| `pet_slot_size_percents` | JSON String | Ba mức size độc lập 50–150%, bước 10% |
 | `pet_slot_speed_percents` | JSON String | Ba mức speed độc lập 50–150%, bước 25% |
 | `pet_size_percent`, `pet_speed_percent` | Int | Legacy global fallback cho migration |
 | `pet_sound_enabled` | Boolean | Opt-in âm thanh khi schema pack hỗ trợ |

@@ -33,7 +33,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -46,6 +48,7 @@ class PetOverlayService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var overlayStartJob: Job? = null
+    private var sizeUpdatesJob: Job? = null
     private var overlayController: PetOverlayController? = null
     private var sessionPositionResetRevisions: List<Int>? = null
     private var isScreenReceiverRegistered = false
@@ -122,6 +125,7 @@ class PetOverlayService : Service() {
                     controller.pauseRendering()
                 }
             }
+            observeSizeUpdates()
             PetOverlayRuntime.updateRunning(true, preferences.petCount)
         } catch (error: CancellationException) {
             throw error
@@ -130,6 +134,20 @@ class PetOverlayService : Service() {
             overlayController?.stop()
             overlayController = null
             stopSelf()
+        }
+    }
+
+    private fun observeSizeUpdates() {
+        sizeUpdatesJob?.cancel()
+        sizeUpdatesJob = serviceScope.launch {
+            petSettingsRepository.preferences
+                .map { preferences ->
+                    preferences.petSlots.map { slot -> slot.sizePercent }
+                }
+                .distinctUntilChanged()
+                .collect { sizePercents ->
+                    overlayController?.updateSizePercents(sizePercents)
+                }
         }
     }
 
@@ -151,6 +169,7 @@ class PetOverlayService : Service() {
         }
         overlayController = null
         sessionPositionResetRevisions = null
+        sizeUpdatesJob = null
         PetOverlayRuntime.updateRunning(false)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         super.onDestroy()

@@ -74,6 +74,9 @@ Definition of done: multi-pet không nhân thread tuyến tính, restore an toà
 
 Verified trên Pixel 3 XL / API 31 với 3 instance `Sunny Cat`: một foreground service + ba bounded overlay window, shared bitmap/clock, drag/stop/restart khôi phục vị trí chuẩn hóa, pack/count giữ qua process restart và cleanup không để lại service/window. Settings hiện đã refactor thành `PetSlotPreferences`: character/size/speed/touch/speech/messages/position độc lập, Add commit sau selection và Remove shift an toàn. Thiết bị thường giới hạn 3 pet/30 FPS (24 FPS khi chạy 3); low-RAM giới hạn 2 pet/24 FPS. Sound vẫn hidden/reserved vì schema pack v1 chưa nhận audio. Boot auto-start vẫn chưa được thêm.
 
+Size UX dùng 11 nấc `50–150%`, mốc 100% giảm từ 112dp xuống 84dp và service resize đúng
+pet đang chạy ngay khi settings đổi, đồng thời giữ surface attachment và speech placement.
+
 ## Phase 6 — Monetization, performance and release policy
 
 - [Done] Redesign all in-app product screens after onboarding around a cozy Cute Pet flow:

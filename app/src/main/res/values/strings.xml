@@ -172,7 +172,7 @@
     <string name="pet_customization_title">Customize Pet %1$d</string>
     <string name="pet_customization_by_author">by %1$s</string>
     <string name="pet_customization_change_character">Change character</string>
-    <string name="pet_customization_size_hint">Only changes this pet</string>
+    <string name="pet_customization_size_hint">Updates instantly while this pet is running</string>
     <string name="pet_customization_speed_hint">Movement energy for this pet</string>
     <string name="pet_customization_reset_position">Reset this pet\'s position</string>
     <string name="pet_customization_reset_position_hint">Use its default starting point next time</string>

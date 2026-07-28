@@ -42,6 +42,10 @@ sealed interface PetEvent {
     data object DragEnd : PetEvent
     data class Fling(val velocity: PetVector) : PetEvent
     data class BoundsChanged(val bounds: PetBounds) : PetEvent
+    data class SizeChanged(
+        val size: PetSize,
+        val bounds: PetBounds
+    ) : PetEvent
     data class Face(val direction: PetDirection) : PetEvent
     data class StartCombo(
         val comboId: PetComboId,

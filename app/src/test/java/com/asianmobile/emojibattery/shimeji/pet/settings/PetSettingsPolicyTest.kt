@@ -16,9 +16,15 @@ class PetSettingsPolicyTest {
 
     @Test
     fun `size and speed snap to bounded product steps`() {
-        assertEquals(75, policy.sanitizeSizePercent(10))
-        assertEquals(125, policy.sanitizeSizePercent(119))
+        assertEquals(50, policy.sanitizeSizePercent(10))
+        assertEquals(80, policy.sanitizeSizePercent(75))
+        assertEquals(120, policy.sanitizeSizePercent(119))
+        assertEquals(130, policy.sanitizeSizePercent(125))
         assertEquals(150, policy.sanitizeSizePercent(999))
+        assertEquals(
+            listOf(50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150),
+            (50..150 step 10).map(policy::sanitizeSizePercent)
+        )
         assertEquals(50, policy.sanitizeSpeedPercent(0))
         assertEquals(100, policy.sanitizeSpeedPercent(110))
         assertEquals(150, policy.sanitizeSpeedPercent(999))

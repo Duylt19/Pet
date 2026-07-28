@@ -27,7 +27,8 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 
 ## Runtime invariants
 
-- Window trong suốt có kích thước 64–196dp theo pack/setting, chỉ bắt touch trong hitbox pet; không dùng full-screen overlay.
+- Window trong suốt có kích thước 48–144dp theo pack/setting; owner pet ở 100% dùng
+  84dp. Window chỉ bắt touch trong hitbox pet, không dùng full-screen overlay.
 - Khi pet nói, controller tạo tối đa một window non-touchable thích ứng cho chính pet đó
   80–260dp × 48–112dp. Width lấy từ glyph/dòng thực tế và usable viewport; height tăng
   tới bốn dòng, sau đó ellipsis. Window bị remove đúng khi action rời cả `TALK` và
@@ -38,6 +39,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Mỗi slot resolve pack/visual/engine config riêng, gồm size, speed, touch flag và speech
   catalog/toggle; slot trùng pack dùng chung bitmap cache đã preload. Tất cả instance vẫn
   dùng chung một clock/service.
+- Service observe riêng danh sách size trong DataStore. Khi một slot đổi size, controller
+  update đúng window ngay lập tức, giữ chân/tâm hoặc edge attachment theo surface hiện tại,
+  rồi cập nhật bounds, social geometry và speech placement từ cùng `PetState`.
 - Tap/drag/fling đều được chuyển thành `PetEvent`. Hệ tọa độ overlay chỉ fit status bar/display cutout một lần, không trừ navigation bar ở đáy; vì vậy đáy pet chạm đáy màn hình vật lý thay vì dừng phía trên thanh điều hướng.
 - Playground cho phép cửa sổ pet tràn `1/3` chiều rộng qua mép trái/phải và `1/3` chiều rộng qua mép trên, còn mép dưới không tràn. `FLAG_LAYOUT_NO_LIMITS` là bắt buộc để WindowManager không clamp lại cửa sổ nhỏ; hit target vẫn chỉ bằng đúng kích thước pet.
 - Sprite pack dùng quy ước frame gốc quay sang trái. Renderer mirror ngang khi engine đi

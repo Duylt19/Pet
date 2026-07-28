@@ -222,6 +222,18 @@ internal class PetOverlayController(
         speechWindows.values.toList().forEach(::updateSpeechPosition)
     }
 
+    fun updateSizePercents(sizePercents: List<Int>) {
+        instances.toList().forEach { instance ->
+            val percent = sizePercents.getOrNull(instance.id) ?: return@forEach
+            val pack = selectedAssets[instance.id].pack
+            val sizePixels = petSizePixels(pack, percent)
+            if (instance.state.size.width.roundToInt() == sizePixels) return@forEach
+            val size = PetSize(sizePixels.toFloat(), sizePixels.toFloat())
+            val bounds = currentPlaygroundBounds(size)
+            dispatch(instance, PetEvent.SizeChanged(size = size, bounds = bounds))
+        }
+    }
+
     private fun dispatch(instance: PetInstance, event: PetEvent) {
         if (instance !in instances) return
         val previousState = instance.state
@@ -258,9 +270,17 @@ internal class PetOverlayController(
         instance.state = updatedState
         instance.view.render(updatedState)
 
+        if (previousState.size != updatedState.size) {
+            instance.params.width = updatedState.size.width.roundToInt()
+            instance.params.height = updatedState.size.height.roundToInt()
+        }
         if (previousState.position != updatedState.position) {
             instance.params.x = updatedState.position.x.roundToInt()
             instance.params.y = updatedState.position.y.roundToInt()
+        }
+        if (previousState.position != updatedState.position ||
+            previousState.size != updatedState.size
+        ) {
             if (instance.view.isAttachedToWindow) {
                 windowManager.updateViewLayout(instance.view, instance.params)
             }
@@ -491,8 +511,13 @@ internal class PetOverlayController(
     private fun petSizePixels(
         pack: PetPack,
         slotPreferences: PetSlotPreferences
+    ): Int = petSizePixels(pack, slotPreferences.sizePercent)
+
+    private fun petSizePixels(
+        pack: PetPack,
+        sizePercent: Int
     ): Int = appContext.dpToPixels(
-        (PET_SIZE_DP * pack.manifest.canvas.defaultScale * slotPreferences.sizePercent / 100f)
+        (PET_SIZE_DP * pack.manifest.canvas.defaultScale * sizePercent / 100f)
             .roundToInt()
             .coerceIn(MIN_PET_SIZE_DP, MAX_PET_SIZE_DP)
     )
@@ -520,9 +545,9 @@ internal class PetOverlayController(
     )
 
     private companion object {
-        const val PET_SIZE_DP = 112
-        const val MIN_PET_SIZE_DP = 64
-        const val MAX_PET_SIZE_DP = 196
+        const val PET_SIZE_DP = 84
+        const val MIN_PET_SIZE_DP = 48
+        const val MAX_PET_SIZE_DP = 144
         const val START_MARGIN_DP = 20
         const val OVERLAY_WINDOW_TITLE = "Cute Pet overlay"
         const val SPEECH_WINDOW_TITLE = "Cute Pet speech"

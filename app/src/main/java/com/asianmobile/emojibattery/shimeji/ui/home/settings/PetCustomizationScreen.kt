@@ -18,10 +18,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,6 +59,7 @@ import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
+import kotlin.math.roundToInt
 
 @Composable
 fun PetCustomizationScreen(
@@ -134,23 +139,12 @@ fun PetCustomizationScreen(
             SettingsSection(
                 title = stringResource(R.string.settings_section_appearance_motion)
             ) {
-                PetValueSettingsRow(
+                PetSizeSettingsRow(
                     iconRes = R.drawable.ic_pet_size,
                     title = stringResource(R.string.settings_pet_size_title),
                     subtitle = stringResource(R.string.pet_customization_size_hint),
-                    value = "${state.sizePercent}%",
-                    canDecrease = state.sizePercent > PetSettingsPolicy.MIN_SIZE_PERCENT,
-                    canIncrease = state.sizePercent < PetSettingsPolicy.MAX_SIZE_PERCENT,
-                    onDecrease = {
-                        viewModel.updateSize(
-                            state.sizePercent - PetSettingsPolicy.SIZE_STEP_PERCENT
-                        )
-                    },
-                    onIncrease = {
-                        viewModel.updateSize(
-                            state.sizePercent + PetSettingsPolicy.SIZE_STEP_PERCENT
-                        )
-                    }
+                    sizePercent = state.sizePercent,
+                    onSizeChange = viewModel::updateSize
                 )
                 SettingsDivider()
                 PetValueSettingsRow(
@@ -322,6 +316,74 @@ private fun PetIdentityCard(
                     horizontal = dimensionResource(SdpR.dimen._14sdp),
                     vertical = dimensionResource(SdpR.dimen._8sdp)
                 )
+        )
+    }
+}
+
+@Composable
+private fun PetSizeSettingsRow(
+    iconRes: Int,
+    title: String,
+    subtitle: String,
+    sizePercent: Int,
+    onSizeChange: (Int) -> Unit
+) {
+    val policy = remember { PetSettingsPolicy() }
+    var sliderValue by remember {
+        mutableFloatStateOf(sizePercent.toFloat())
+    }
+    var pendingSizePercent by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(sizePercent) {
+        if (pendingSizePercent == null || pendingSizePercent == sizePercent) {
+            sliderValue = sizePercent.toFloat()
+            pendingSizePercent = null
+        }
+    }
+    val updateSize = { requestedPercent: Int ->
+        val sanitized = policy.sanitizeSizePercent(requestedPercent)
+        sliderValue = sanitized.toFloat()
+        if (sanitized != (pendingSizePercent ?: sizePercent)) {
+            pendingSizePercent = sanitized
+            onSizeChange(sanitized)
+        }
+    }
+
+    Column {
+        PetValueSettingsRow(
+            iconRes = iconRes,
+            title = title,
+            subtitle = subtitle,
+            value = "${sliderValue.roundToInt()}%",
+            canDecrease = sliderValue > PetSettingsPolicy.MIN_SIZE_PERCENT,
+            canIncrease = sliderValue < PetSettingsPolicy.MAX_SIZE_PERCENT,
+            onDecrease = {
+                updateSize(sliderValue.roundToInt() - PetSettingsPolicy.SIZE_STEP_PERCENT)
+            },
+            onIncrease = {
+                updateSize(sliderValue.roundToInt() + PetSettingsPolicy.SIZE_STEP_PERCENT)
+            }
+        )
+        Slider(
+            value = sliderValue,
+            onValueChange = { value ->
+                updateSize(value.roundToInt())
+            },
+            valueRange = PetSettingsPolicy.MIN_SIZE_PERCENT.toFloat()..
+                PetSettingsPolicy.MAX_SIZE_PERCENT.toFloat(),
+            steps = (
+                (PetSettingsPolicy.MAX_SIZE_PERCENT - PetSettingsPolicy.MIN_SIZE_PERCENT) /
+                    PetSettingsPolicy.SIZE_STEP_PERCENT
+                ) - 1,
+            colors = SliderDefaults.colors(
+                thumbColor = colorResource(R.color.colors_7B61FF),
+                activeTrackColor = colorResource(R.color.colors_7B61FF),
+                activeTickColor = colorResource(R.color.colors_FFFFFF),
+                inactiveTrackColor = colorResource(R.color.colors_E9DFEF),
+                inactiveTickColor = colorResource(R.color.colors_776D84)
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = title }
         )
     }
 }
