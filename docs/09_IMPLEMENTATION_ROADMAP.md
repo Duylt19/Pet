@@ -75,6 +75,11 @@ Verified trên Pixel 3 XL / API 31 với 3 instance `Sunny Cat`: một foregroun
 
 ## Phase 6 — Monetization, performance and release policy
 
+- [Done] Redesign all in-app product screens after onboarding around a cozy Cute Pet flow:
+  Home pet room → Catalog discovery → Detail confirmation → My Pet Family → per-pet
+  customization. Keep Splash, Language, Intro, Permission and Premium unchanged for their
+  dedicated follow-up redesigns.
+
 Before release hardening, complete the clean-room parity items confirmed by the local competitor audit:
 
 - [Done] Pause the render clock while the display is off and resume without a large catch-up tick.

@@ -17,6 +17,8 @@ settings và các quy ước kiến trúc hiện có.
 - Mỗi slot pet chọn được character riêng; Catalog hỗ trợ chọn theo slot, preview và import pack `.zip` qua schema v1 được validate an toàn.
 - Settings là pet roster + app/support; mỗi slot mở một hồ sơ Customize Pet riêng cho
   character, size, speed, touch, speech, custom messages và position.
+- Product UI từ Home trở đi dùng cozy light design: pet room, discovery grid, friendly
+  detail, My Pet Family và per-pet profile; onboarding/Premium giữ visual hiện tại.
 - Browser, search engine, clear browsing data, storage permission, download, media, Room và service cũ đã bị xóa.
 
 ## Kiến trúc bắt buộc

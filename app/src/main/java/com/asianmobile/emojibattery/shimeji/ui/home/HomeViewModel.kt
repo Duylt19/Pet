@@ -14,9 +14,11 @@ import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayStartResult
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
+import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import java.io.File
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +58,11 @@ class HomeViewModel @Inject constructor(
             petPackRepository.selectedPacks.collect { selected ->
                 _uiState.update { current ->
                     current.copy(
-                        selectedPetNames = selectedNames(selected, current.petCount)
+                        selectedPetNames = selectedNames(selected, current.petCount),
+                        selectedPetPreviewPaths = selectedPreviewPaths(
+                            selected,
+                            current.petCount
+                        )
                     )
                 }
             }
@@ -67,6 +73,10 @@ class HomeViewModel @Inject constructor(
                     it.copy(
                         petCount = preferences.petCount,
                         selectedPetNames = selectedNames(
+                            petPackRepository.selectedPacks.value,
+                            preferences.petCount
+                        ),
+                        selectedPetPreviewPaths = selectedPreviewPaths(
                             petPackRepository.selectedPacks.value,
                             preferences.petCount
                         )
@@ -163,6 +173,10 @@ class HomeViewModel @Inject constructor(
             petPackRepository.selectedPacks.value,
             petSettingsRepository.preferences.value.petCount
         ),
+        selectedPetPreviewPaths = selectedPreviewPaths(
+            petPackRepository.selectedPacks.value,
+            petSettingsRepository.preferences.value.petCount
+        ),
         petCount = petSettingsRepository.preferences.value.petCount
     )
 
@@ -173,6 +187,21 @@ class HomeViewModel @Inject constructor(
         selected.getOrNull(slotIndex)?.manifest?.name
             ?: selected.firstOrNull()?.manifest?.name
             ?: context.getString(R.string.home_pet_default_name)
+    }
+
+    private fun selectedPreviewPaths(
+        selected: List<PetPack>,
+        count: Int
+    ): List<String?> = List(count) { slotIndex ->
+        selected.getOrNull(slotIndex)?.previewPath()
+            ?: selected.firstOrNull()?.previewPath()
+    }
+
+    private fun PetPack.previewPath(): String? {
+        val installed = source as? PetPackSource.Installed ?: return null
+        val firstFrame = manifest.clips.values.firstOrNull()?.frames?.firstOrNull()
+            ?: return null
+        return File(installed.directoryPath, firstFrame.file).absolutePath
     }
 
     private fun isNotificationGranted(): Boolean =

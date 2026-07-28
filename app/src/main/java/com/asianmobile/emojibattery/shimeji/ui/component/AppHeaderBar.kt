@@ -28,7 +28,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.asianmobile.emojibattery.shimeji.R
 import com.intuit.sdp.R as SdpR
@@ -50,9 +49,8 @@ fun AppHeaderBar(
     trailing: @Composable RowScope.() -> Unit = {}
 ) {
     val fontSemiBold = FontFamily(Font(R.font.inter_semibold))
-    val bgColor = colorResource(R.color.colors_161718)
-    val borderColor = colorResource(R.color.colors_333333)
-    val contentColor = colorResource(R.color.colors_FFFFFF)
+    val bgColor = colorResource(R.color.colors_FFF9F4)
+    val contentColor = colorResource(R.color.colors_2F2440)
 
     Column(
         modifier = modifier
@@ -93,8 +91,9 @@ fun AppHeaderBar(
 
                 Box(
                     modifier = Modifier
-                        .size(dimensionResource(SdpR.dimen._25sdp))
+                        .size(dimensionResource(SdpR.dimen._34sdp))
                         .clip(CircleShape)
+                        .background(colorResource(R.color.colors_FFFFFB))
                         .clickable(onClick = onLeadingClick),
                     contentAlignment = Alignment.Center
                 ) {
@@ -102,7 +101,7 @@ fun AppHeaderBar(
                         painter = painterResource(iconRes),
                         contentDescription = null,
                         tint = contentColor,
-                        modifier = Modifier.size(dimensionResource(SdpR.dimen._25sdp))
+                        modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
                     )
                 }
 

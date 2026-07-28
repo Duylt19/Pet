@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -46,7 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -87,8 +86,7 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.colors_161718))
-            .statusBarsPadding()
+            .background(colorResource(R.color.colors_FFF9F4))
     ) {
         AppHeaderBar(
             title = stringResource(R.string.settings_title),
@@ -104,13 +102,24 @@ fun SettingsScreen(
         ) {
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
             Text(
-                text = stringResource(R.string.settings_pet_hub_description),
-                color = colorResource(R.color.colors_9B9C9E),
+                text = stringResource(R.string.settings_heading),
+                color = colorResource(R.color.colors_2F2440),
+                fontFamily = FontFamily(Font(R.font.inter_bold)),
+                fontSize = dimensionResource(SspR.dimen._20ssp).value.sp,
+                modifier = Modifier.padding(
+                    start = dimensionResource(SdpR.dimen._4sdp),
+                    end = dimensionResource(SdpR.dimen._4sdp)
+                )
+            )
+            Text(
+                text = stringResource(R.string.settings_subtitle),
+                color = colorResource(R.color.colors_776D84),
                 fontFamily = FontFamily(Font(R.font.inter_regular)),
                 fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
                 modifier = Modifier.padding(
                     start = dimensionResource(SdpR.dimen._4sdp),
                     end = dimensionResource(SdpR.dimen._4sdp),
+                    top = dimensionResource(SdpR.dimen._3sdp),
                     bottom = dimensionResource(SdpR.dimen._14sdp)
                 )
             )
@@ -121,7 +130,7 @@ fun SettingsScreen(
             ) {
                 Text(
                     text = stringResource(R.string.settings_section_my_pets),
-                    color = colorResource(R.color.colors_C0D1FE),
+                    color = colorResource(R.color.colors_2F2440),
                     fontFamily = FontFamily(Font(R.font.inter_semibold)),
                     fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
                 )
@@ -131,7 +140,7 @@ fun SettingsScreen(
                         state.petCount,
                         state.maxPets
                     ),
-                    color = colorResource(R.color.colors_9B9C9E),
+                    color = colorResource(R.color.colors_776D84),
                     fontFamily = FontFamily(Font(R.font.inter_regular)),
                     fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
                 )
@@ -148,29 +157,29 @@ fun SettingsScreen(
                 OutlinedButton(
                     onClick = { viewModel.nextPetSlotForAdd()?.let(onAddPet) },
                     border = BorderStroke(
-                        width = 1.dp,
-                        color = colorResource(R.color.colors_C0D1FE)
+                        width = dimensionResource(SdpR.dimen._1sdp),
+                        color = colorResource(R.color.colors_7B61FF)
                     ),
-                    shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)),
+                    shape = RoundedCornerShape(dimensionResource(SdpR.dimen._16sdp)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_plus),
                         contentDescription = null,
-                        tint = colorResource(R.color.colors_C0D1FE),
+                        tint = colorResource(R.color.colors_7B61FF),
                         modifier = Modifier.size(dimensionResource(SdpR.dimen._16sdp))
                     )
                     Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
                     Text(
                         text = stringResource(R.string.settings_add_pet),
-                        color = colorResource(R.color.colors_C0D1FE),
+                        color = colorResource(R.color.colors_7B61FF),
                         fontFamily = FontFamily(Font(R.font.inter_semibold)),
                         fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
                     )
                 }
             }
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-            SettingsSection(title = stringResource(R.string.settings_section_app_support)) {
+            SettingsSection(title = stringResource(R.string.settings_app_title)) {
                 LanguageSettingsRow(
                     context = context,
                     onClick = onNavigateToLanguage
@@ -198,7 +207,7 @@ fun SettingsScreen(
             }
             Text(
                 text = stringResource(R.string.settings_version_format, state.versionName),
-                color = colorResource(R.color.colors_9B9C9E),
+                color = colorResource(R.color.colors_776D84),
                 fontFamily = FontFamily(Font(R.font.inter_regular)),
                 fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
                 modifier = Modifier
@@ -229,12 +238,12 @@ private fun PetProfileCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
-            .background(colorResource(R.color.colors_212327))
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp)))
+            .background(colorResource(R.color.colors_FFFFFB))
             .border(
-                width = 1.dp,
-                color = colorResource(R.color.colors_333538),
-                shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
+                width = dimensionResource(SdpR.dimen._1sdp),
+                color = colorResource(R.color.colors_E9DFEF),
+                shape = RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp))
             )
             .clickable(onClick = onClick)
             .padding(dimensionResource(SdpR.dimen._11sdp)),
@@ -248,8 +257,8 @@ private fun PetProfileCard(
                     colorResource(
                         when (slot.slotIndex % 3) {
                             0 -> R.color.pet_demo_fur
-                            1 -> R.color.colors_6C90FB
-                            else -> R.color.colors_E5242D
+                            1 -> R.color.colors_BFEBDD
+                            else -> R.color.colors_FF7A9E
                         }
                     )
                 ),
@@ -277,7 +286,7 @@ private fun PetProfileCard(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = slot.name,
-                color = colorResource(R.color.white),
+                color = colorResource(R.color.colors_2F2440),
                 fontFamily = FontFamily(Font(R.font.inter_semibold)),
                 fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
             )
@@ -287,7 +296,7 @@ private fun PetProfileCard(
                     slot.sizePercent,
                     slot.speedPercent
                 ),
-                color = colorResource(R.color.colors_9B9C9E),
+                color = colorResource(R.color.colors_776D84),
                 fontFamily = FontFamily(Font(R.font.inter_regular)),
                 fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
             )
@@ -299,7 +308,7 @@ private fun PetProfileCard(
                         R.string.settings_pet_profile_limited
                     }
                 ),
-                color = colorResource(R.color.colors_C0D1FE),
+                color = colorResource(R.color.colors_7B61FF),
                 fontFamily = FontFamily(Font(R.font.inter_medium)),
                 fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
             )
@@ -307,7 +316,7 @@ private fun PetProfileCard(
         Icon(
             painter = painterResource(R.drawable.ic_setting_chevron_right_v2),
             contentDescription = stringResource(R.string.settings_customize_pet, slot.name),
-            tint = Color.Unspecified,
+            tint = colorResource(R.color.colors_776D84),
             modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
         )
     }
@@ -436,7 +445,24 @@ private fun LanguageSettingsRow(
 @Composable
 private fun SettingsDivider() {
     HorizontalDivider(
-        thickness = 1.dp,
-        color = colorResource(R.color.colors_333538)
+        thickness = dimensionResource(SdpR.dimen._1sdp),
+        color = colorResource(R.color.colors_E9DFEF)
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PetProfileCardPreview() {
+    PetProfileCard(
+        slot = SettingsPetSlotUiState(
+            slotIndex = 0,
+            name = stringResource(R.string.home_pet_default_name),
+            previewImagePath = null,
+            sizePercent = 100,
+            speedPercent = 100,
+            messagesEnabled = true,
+            interactionEnabled = true
+        ),
+        onClick = {}
     )
 }

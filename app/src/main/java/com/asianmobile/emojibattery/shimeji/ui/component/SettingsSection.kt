@@ -32,7 +32,7 @@ fun SettingsSection(
     Column(modifier = modifier) {
         Text(
             text = title,
-            color = colorResource(R.color.colors_9B9C9E),
+            color = colorResource(R.color.colors_2F2440),
             fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
             fontWeight = FontWeight.SemiBold,
             fontFamily = fontSemiBold,
@@ -41,16 +41,15 @@ fun SettingsSection(
             )
         )
 
-        val cardShape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+        val cardShape = RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(cardShape)
-                .background(colorResource(R.color.colors_212327))
-                .padding(dimensionResource(SdpR.dimen._12sdp)),
+                .background(colorResource(R.color.colors_FFFFFB))
+                .padding(dimensionResource(SdpR.dimen._14sdp)),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp)),
             content = content
         )
     }
 }
-

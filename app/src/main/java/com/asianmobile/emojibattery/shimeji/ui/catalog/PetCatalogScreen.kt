@@ -16,13 +16,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -50,7 +50,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,6 +62,10 @@ import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogError
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackSource
+import com.asianmobile.emojibattery.shimeji.ui.component.CutePetCard
+import com.asianmobile.emojibattery.shimeji.ui.component.CutePetPrimaryButton
+import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTitleFont
+import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTopBar
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -111,38 +117,63 @@ private fun PetCatalogContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.colors_161718))
-            .statusBarsPadding()
+            .background(colorResource(R.color.colors_FFF9F4))
             .navigationBarsPadding()
     ) {
-        CatalogHeader(
-            isInstalling = uiState.isInstalling,
+        CutePetTopBar(
+            title = stringResource(R.string.pet_catalog_title),
             onBack = onBack,
-            onImport = onImport
-        )
-        Text(
-            text = stringResource(
-                R.string.pet_catalog_target_slot,
-                uiState.targetSlotIndex + 1
-            ),
-            color = colorResource(R.color.colors_9B9C9E),
-            fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
-            modifier = Modifier.padding(
-                horizontal = dimensionResource(SdpR.dimen._18sdp),
-                vertical = dimensionResource(SdpR.dimen._4sdp)
-            )
-        )
-        uiState.message?.let { message ->
-            Text(
-                text = catalogMessageText(message),
-                color = colorResource(R.color.colors_C0D1FE),
-                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-                modifier = Modifier.padding(
-                    horizontal = dimensionResource(SdpR.dimen._18sdp),
-                    vertical = dimensionResource(SdpR.dimen._3sdp)
+            trailing = {
+                ImportButton(
+                    isInstalling = uiState.isInstalling,
+                    onImport = onImport
                 )
+            }
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = dimensionResource(SdpR.dimen._16sdp))
+        ) {
+            Text(
+                text = stringResource(R.string.pet_catalog_heading),
+                color = colorResource(R.color.colors_2F2440),
+                fontFamily = CutePetTitleFont,
+                fontSize = dimensionResource(SspR.dimen._20ssp).value.sp
             )
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._4sdp)))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(
+                        R.string.pet_catalog_slot_badge,
+                        uiState.targetSlotIndex + 1
+                    ),
+                    color = colorResource(R.color.colors_5D46D7),
+                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
+                        .background(colorResource(R.color.colors_EDE4FF))
+                        .padding(
+                            horizontal = dimensionResource(SdpR.dimen._9sdp),
+                            vertical = dimensionResource(SdpR.dimen._5sdp)
+                        )
+                )
+                Spacer(Modifier.size(dimensionResource(SdpR.dimen._7sdp)))
+                Text(
+                    text = stringResource(R.string.pet_catalog_import_hint),
+                    color = colorResource(R.color.colors_776D84),
+                    fontFamily = FontFamily(Font(R.font.inter_regular)),
+                    fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
+                )
+            }
+            uiState.message?.let { message ->
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
+                CatalogMessage(message)
+            }
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._10sdp)))
         }
+
         when {
             uiState.isLoading -> CatalogLoading()
             uiState.catalogError != null -> CatalogError(
@@ -150,7 +181,7 @@ private fun PetCatalogContent(
                 localRootPath = uiState.localRootPath,
                 onRetry = onRetry
             )
-            else -> CatalogList(
+            else -> CatalogGrid(
                 uiState = uiState,
                 onOpenPack = onOpenPack,
                 onSearchQueryChanged = onSearchQueryChanged,
@@ -162,61 +193,37 @@ private fun PetCatalogContent(
 }
 
 @Composable
-private fun CatalogHeader(
-    isInstalling: Boolean,
-    onBack: () -> Unit,
-    onImport: () -> Unit
-) {
-    Row(
+private fun ImportButton(isInstalling: Boolean, onImport: () -> Unit) {
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
+            .background(colorResource(R.color.colors_FFF0D6))
+            .clickable(enabled = !isInstalling, onClick = onImport)
             .padding(
-                horizontal = dimensionResource(SdpR.dimen._8sdp),
-                vertical = dimensionResource(SdpR.dimen._5sdp)
+                horizontal = dimensionResource(SdpR.dimen._10sdp),
+                vertical = dimensionResource(SdpR.dimen._7sdp)
             ),
-        verticalAlignment = Alignment.CenterVertically
+        contentAlignment = Alignment.Center
     ) {
-        IconButton(onClick = onBack) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(R.string.back),
-                tint = colorResource(R.color.white)
+        if (isInstalling) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp)),
+                strokeWidth = dimensionResource(SdpR.dimen._2sdp),
+                color = colorResource(R.color.colors_7B61FF)
             )
-        }
-        Text(
-            text = stringResource(R.string.pet_catalog_title),
-            color = colorResource(R.color.white),
-            fontFamily = FontFamily(Font(R.font.inter_semibold)),
-            fontSize = dimensionResource(SspR.dimen._17ssp).value.sp,
-            modifier = Modifier.weight(1f)
-        )
-        Button(
-            onClick = onImport,
-            enabled = !isInstalling,
-            contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(R.color.colors_3369FD),
-                contentColor = colorResource(R.color.white)
+        } else {
+            Text(
+                text = stringResource(R.string.pet_catalog_import),
+                color = colorResource(R.color.colors_2F2440),
+                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
             )
-        ) {
-            if (isInstalling) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._16sdp)),
-                    strokeWidth = dimensionResource(SdpR.dimen._2sdp),
-                    color = colorResource(R.color.white)
-                )
-            } else {
-                Text(
-                    text = stringResource(R.string.pet_catalog_import),
-                    fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
-                )
-            }
         }
     }
 }
 
 @Composable
-private fun CatalogList(
+private fun CatalogGrid(
     uiState: PetCatalogUiState,
     onOpenPack: (String) -> Unit,
     onSearchQueryChanged: (String) -> Unit,
@@ -224,51 +231,20 @@ private fun CatalogList(
     onSetPet: (Int) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        OutlinedTextField(
-            value = uiState.searchQuery,
-            onValueChange = onSearchQueryChanged,
-            singleLine = true,
-            placeholder = { Text(stringResource(R.string.pet_catalog_search_hint)) },
-            leadingIcon = {
-                Icon(Icons.Default.Search, contentDescription = null)
-            },
-            trailingIcon = if (uiState.searchQuery.isNotEmpty()) {
-                {
-                    IconButton(onClick = { onSearchQueryChanged("") }) {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = stringResource(R.string.pet_catalog_clear_search)
-                        )
-                    }
-                }
-            } else {
-                null
-            },
-            shape = RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = colorResource(R.color.colors_212327),
-                unfocusedContainerColor = colorResource(R.color.colors_212327),
-                focusedTextColor = colorResource(R.color.white),
-                unfocusedTextColor = colorResource(R.color.white),
-                focusedIndicatorColor = colorResource(R.color.colors_3369FD),
-                unfocusedIndicatorColor = colorResource(R.color.colors_4D4D4D),
-                focusedLeadingIconColor = colorResource(R.color.colors_C0D1FE),
-                unfocusedLeadingIconColor = colorResource(R.color.colors_9B9C9E),
-                focusedTrailingIconColor = colorResource(R.color.colors_C0D1FE),
-                unfocusedTrailingIconColor = colorResource(R.color.colors_9B9C9E),
-                focusedPlaceholderColor = colorResource(R.color.colors_9B9C9E),
-                unfocusedPlaceholderColor = colorResource(R.color.colors_9B9C9E)
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = dimensionResource(SdpR.dimen._18sdp))
+        CatalogSearch(
+            query = uiState.searchQuery,
+            onQueryChanged = onSearchQueryChanged
         )
         LazyRow(
-            contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._18sdp)),
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._7sdp)),
+            contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._16sdp)),
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp)),
             modifier = Modifier.padding(vertical = dimensionResource(SdpR.dimen._7sdp))
         ) {
-            items(uiState.categories, key = { it.name ?: ALL_CATEGORY_KEY }) { category ->
+            items(
+                count = uiState.categories.size,
+                key = { index -> uiState.categories[index].name ?: ALL_CATEGORY_KEY }
+            ) { index ->
+                val category = uiState.categories[index]
                 val selected = uiState.selectedCategory == category.name
                 FilterChip(
                     selected = selected,
@@ -287,11 +263,18 @@ private fun CatalogList(
                             maxLines = 1
                         )
                     },
+                    shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)),
                     colors = FilterChipDefaults.filterChipColors(
-                        containerColor = colorResource(R.color.colors_212327),
-                        labelColor = colorResource(R.color.colors_B3B3B3),
-                        selectedContainerColor = colorResource(R.color.colors_4254A6),
-                        selectedLabelColor = colorResource(R.color.white)
+                        containerColor = colorResource(R.color.colors_FFFFFB),
+                        labelColor = colorResource(R.color.colors_776D84),
+                        selectedContainerColor = colorResource(R.color.colors_EDE4FF),
+                        selectedLabelColor = colorResource(R.color.colors_5D46D7)
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = selected,
+                        borderColor = colorResource(R.color.colors_E9DFEF),
+                        selectedBorderColor = colorResource(R.color.colors_7B61FF)
                     )
                 )
             }
@@ -302,25 +285,32 @@ private fun CatalogList(
                 uiState.visiblePets.size,
                 uiState.visiblePets.size
             ),
-            color = colorResource(R.color.colors_9B9C9E),
-            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            color = colorResource(R.color.colors_776D84),
+            fontFamily = FontFamily(Font(R.font.inter_medium)),
+            fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
             modifier = Modifier.padding(
-                start = dimensionResource(SdpR.dimen._18sdp),
-                end = dimensionResource(SdpR.dimen._18sdp),
-                bottom = dimensionResource(SdpR.dimen._5sdp)
+                start = dimensionResource(SdpR.dimen._16sdp),
+                end = dimensionResource(SdpR.dimen._16sdp),
+                bottom = dimensionResource(SdpR.dimen._7sdp)
             )
         )
         if (uiState.visiblePets.isEmpty()) {
             CatalogEmpty()
         } else {
-            LazyColumn(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
-                    start = dimensionResource(SdpR.dimen._18sdp),
-                    end = dimensionResource(SdpR.dimen._18sdp),
+                    start = dimensionResource(SdpR.dimen._16sdp),
+                    end = dimensionResource(SdpR.dimen._16sdp),
                     bottom = dimensionResource(SdpR.dimen._18sdp)
                 ),
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
+                horizontalArrangement = Arrangement.spacedBy(
+                    dimensionResource(SdpR.dimen._9sdp)
+                ),
+                verticalArrangement = Arrangement.spacedBy(
+                    dimensionResource(SdpR.dimen._9sdp)
+                )
             ) {
                 items(uiState.visiblePets, key = OwnerPetCatalogEntry::id) { pet ->
                     val isInstalled = uiState.packs.any { it.key == pet.installedPackKey }
@@ -342,6 +332,52 @@ private fun CatalogList(
 }
 
 @Composable
+private fun CatalogSearch(query: String, onQueryChanged: (String) -> Unit) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChanged,
+        singleLine = true,
+        placeholder = {
+            Text(
+                text = stringResource(R.string.pet_catalog_search_hint),
+                fontFamily = FontFamily(Font(R.font.inter_regular))
+            )
+        },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+        trailingIcon = if (query.isNotEmpty()) {
+            {
+                IconButton(onClick = { onQueryChanged("") }) {
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = stringResource(R.string.pet_catalog_clear_search)
+                    )
+                }
+            }
+        } else {
+            null
+        },
+        shape = RoundedCornerShape(dimensionResource(SdpR.dimen._16sdp)),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = colorResource(R.color.colors_FFFFFB),
+            unfocusedContainerColor = colorResource(R.color.colors_FFFFFB),
+            focusedTextColor = colorResource(R.color.colors_2F2440),
+            unfocusedTextColor = colorResource(R.color.colors_2F2440),
+            focusedIndicatorColor = colorResource(R.color.colors_7B61FF),
+            unfocusedIndicatorColor = colorResource(R.color.colors_E9DFEF),
+            focusedLeadingIconColor = colorResource(R.color.colors_7B61FF),
+            unfocusedLeadingIconColor = colorResource(R.color.colors_776D84),
+            focusedTrailingIconColor = colorResource(R.color.colors_7B61FF),
+            unfocusedTrailingIconColor = colorResource(R.color.colors_776D84),
+            focusedPlaceholderColor = colorResource(R.color.colors_776D84),
+            unfocusedPlaceholderColor = colorResource(R.color.colors_776D84)
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = dimensionResource(SdpR.dimen._16sdp))
+    )
+}
+
+@Composable
 private fun OwnerPetCard(
     pet: OwnerPetCatalogEntry,
     isSelected: Boolean,
@@ -350,83 +386,108 @@ private fun OwnerPetCard(
     onClick: () -> Unit,
     onSet: () -> Unit
 ) {
-    Row(
+    CutePetCard(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
-            .background(
-                colorResource(if (isSelected) R.color.colors_4254A6 else R.color.colors_212327)
-            )
-            .clickable(onClick = onClick)
-            .padding(dimensionResource(SdpR.dimen._10sdp)),
-        verticalAlignment = Alignment.CenterVertically
+            .clickable(onClick = onClick),
+        contentPadding = PaddingValues(dimensionResource(SdpR.dimen._9sdp))
     ) {
         Box(
             modifier = Modifier
-                .size(dimensionResource(SdpR.dimen._62sdp))
-                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
-                .background(colorResource(R.color.colors_161718)),
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._112sdp))
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._16sdp)))
+                .background(
+                    colorResource(
+                        when (pet.id % 3) {
+                            0 -> R.color.colors_F7F0FF
+                            1 -> R.color.colors_FFF0D6
+                            else -> R.color.colors_E7F7F1
+                        }
+                    )
+                ),
             contentAlignment = Alignment.Center
         ) {
             if (pet.thumbnailPath != null) {
                 AsyncImage(
                     model = File(pet.thumbnailPath),
-                    contentDescription = pet.name,
+                    contentDescription = stringResource(
+                        R.string.pet_catalog_pet_image,
+                        pet.name
+                    ),
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize().padding(dimensionResource(SdpR.dimen._4sdp))
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(dimensionResource(SdpR.dimen._6sdp))
                 )
             } else {
                 Icon(
                     painter = painterResource(R.drawable.ic_notification_pet),
-                    contentDescription = pet.name,
+                    contentDescription = null,
                     tint = colorResource(R.color.pet_demo_fur),
-                    modifier = Modifier.padding(dimensionResource(SdpR.dimen._8sdp))
+                    modifier = Modifier.padding(dimensionResource(SdpR.dimen._18sdp))
+                )
+            }
+            if (isSelected) {
+                Text(
+                    text = stringResource(R.string.pet_catalog_selected_badge),
+                    color = colorResource(R.color.colors_FFFFFF),
+                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontSize = dimensionResource(SspR.dimen._7ssp).value.sp,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(dimensionResource(SdpR.dimen._7sdp))
+                        .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._8sdp)))
+                        .background(colorResource(R.color.colors_39B87A))
+                        .padding(
+                            horizontal = dimensionResource(SdpR.dimen._7sdp),
+                            vertical = dimensionResource(SdpR.dimen._4sdp)
+                        )
                 )
             }
         }
-        Spacer(Modifier.size(dimensionResource(SdpR.dimen._10sdp)))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = pet.name,
-                color = colorResource(R.color.white),
-                fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = pet.category,
-                color = colorResource(R.color.colors_C0D1FE),
-                fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = pet.author ?: stringResource(R.string.pet_catalog_unknown_author),
-                color = colorResource(R.color.colors_9B9C9E),
-                fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
+        Text(
+            text = pet.name,
+            color = colorResource(R.color.colors_2F2440),
+            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = pet.category,
+            color = colorResource(R.color.colors_7B61FF),
+            fontFamily = FontFamily(Font(R.font.inter_medium)),
+            fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._7sdp)))
         Button(
             onClick = onSet,
             enabled = pet.hasLocalArchive && !isSelected && !isAnotherPreparing && !isPreparing,
-            contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._10sdp)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._34sdp)),
+            shape = RoundedCornerShape(dimensionResource(SdpR.dimen._11sdp)),
+            contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._7sdp)),
             colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(R.color.colors_3369FD),
+                containerColor = colorResource(R.color.colors_7B61FF),
                 disabledContainerColor = colorResource(
-                    if (isSelected) R.color.colors_00C950 else R.color.colors_3D3D3D
+                    if (isSelected) R.color.colors_E7F7F1 else R.color.colors_E9DFEF
                 ),
-                contentColor = colorResource(R.color.white),
-                disabledContentColor = colorResource(R.color.white)
+                contentColor = colorResource(R.color.colors_FFFFFF),
+                disabledContentColor = colorResource(
+                    if (isSelected) R.color.colors_39B87A else R.color.colors_776D84
+                )
             )
         ) {
             if (isPreparing) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp)),
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._14sdp)),
                     strokeWidth = dimensionResource(SdpR.dimen._2sdp),
-                    color = colorResource(R.color.white)
+                    color = colorResource(R.color.colors_FFFFFF)
                 )
             } else {
                 Text(
@@ -435,7 +496,8 @@ private fun OwnerPetCard(
                         !pet.hasLocalArchive -> stringResource(R.string.pet_catalog_not_synced)
                         else -> stringResource(R.string.pet_catalog_set)
                     },
-                    fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
+                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
                 )
             }
         }
@@ -443,9 +505,24 @@ private fun OwnerPetCard(
 }
 
 @Composable
+private fun CatalogMessage(message: PetCatalogMessage) {
+    Text(
+        text = catalogMessageText(message),
+        color = colorResource(R.color.colors_5D46D7),
+        fontFamily = FontFamily(Font(R.font.inter_medium)),
+        fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
+            .background(colorResource(R.color.colors_EDE4FF))
+            .padding(dimensionResource(SdpR.dimen._9sdp))
+    )
+}
+
+@Composable
 private fun CatalogLoading() {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = colorResource(R.color.colors_3369FD))
+        CircularProgressIndicator(color = colorResource(R.color.colors_7B61FF))
     }
 }
 
@@ -474,15 +551,25 @@ private fun CatalogError(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = message,
-            color = colorResource(R.color.colors_B3B3B3),
-            fontSize = dimensionResource(SspR.dimen._12ssp).value.sp
+        Icon(
+            painter = painterResource(R.drawable.ic_notification_pet),
+            contentDescription = null,
+            tint = colorResource(R.color.colors_FF7A9E),
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._52sdp))
         )
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-        Button(onClick = onRetry) {
-            Text(stringResource(R.string.pet_catalog_retry))
-        }
+        Text(
+            text = message,
+            color = colorResource(R.color.colors_776D84),
+            fontFamily = FontFamily(Font(R.font.inter_regular)),
+            fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+        CutePetPrimaryButton(
+            text = stringResource(R.string.pet_catalog_retry),
+            onClick = onRetry
+        )
     }
 }
 
@@ -491,7 +578,8 @@ private fun CatalogEmpty() {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
             text = stringResource(R.string.pet_catalog_no_results),
-            color = colorResource(R.color.colors_9B9C9E)
+            color = colorResource(R.color.colors_776D84),
+            fontFamily = FontFamily(Font(R.font.inter_regular))
         )
     }
 }
@@ -523,10 +611,9 @@ internal fun PetPackThumbnail(pack: PetPack, modifier: Modifier = Modifier) {
         null
     }
     Box(
-        modifier = modifier.background(
-            colorResource(R.color.colors_161718),
-            RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
-        ),
+        modifier = modifier
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._24sdp)))
+            .background(colorResource(R.color.colors_F7F0FF)),
         contentAlignment = Alignment.Center
     ) {
         if (image != null) {
@@ -534,17 +621,27 @@ internal fun PetPackThumbnail(pack: PetPack, modifier: Modifier = Modifier) {
                 model = image,
                 contentDescription = pack.manifest.name,
                 contentScale = ContentScale.Fit,
-                modifier = Modifier.fillMaxSize().padding(dimensionResource(SdpR.dimen._5sdp))
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(dimensionResource(SdpR.dimen._8sdp))
             )
         } else {
             Icon(
                 painter = painterResource(R.drawable.ic_notification_pet),
                 contentDescription = pack.manifest.name,
                 tint = colorResource(R.color.pet_demo_fur),
-                modifier = Modifier.fillMaxSize().padding(dimensionResource(SdpR.dimen._7sdp))
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(dimensionResource(SdpR.dimen._14sdp))
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CatalogEmptyPreview() {
+    CatalogEmpty()
 }
 
 private const val ALL_CATEGORY_KEY = "__all__"

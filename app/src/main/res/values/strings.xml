@@ -186,6 +186,8 @@
     <string name="files_videos_label">Videos</string>
     <string name="common_ok_label">OK</string>
     <string name="common_cancel_label">Cancel</string>
+    <string name="common_decrease_symbol" translatable="false">−</string>
+    <string name="common_increase_symbol" translatable="false">+</string>
     <string name="common_delete_label">Delete</string>
     <string name="tab_home">Home</string>
     <string name="tab_tab">Tab</string>
@@ -422,6 +424,16 @@
     <string name="home_pet_action_starting">Starting…</string>
     <string name="home_pet_action_stop">Stop pet</string>
     <string name="home_pet_start_failed">The pet could not start. Check display access and try again.</string>
+    <string name="home_brand_name" translatable="false">Cute Pet</string>
+    <string name="home_greeting">Your tiny friends are ready</string>
+    <string name="home_family_title">Your pet family</string>
+    <string name="home_family_manage">Manage</string>
+    <string name="home_explore_title">Meet a new friend</string>
+    <string name="home_explore_subtitle">Browse characters and find the perfect screen buddy.</string>
+    <string name="home_status_live">Playing on your screen</string>
+    <string name="home_status_resting">Taking a cozy nap</string>
+    <string name="home_open_settings">Open pet settings</string>
+    <string name="home_open_premium">Open Premium</string>
     <string name="pet_catalog_open">Choose a pet</string>
     <string name="pet_catalog_title">Pet catalog</string>
     <string name="pet_catalog_target_slot">Choose a character for Pet %1$d. The change applies the next time pets start.</string>
@@ -458,6 +470,21 @@
     <string name="pet_catalog_storage_unavailable">Local catalog storage is unavailable on this device.</string>
     <string name="pet_catalog_retry">Retry</string>
     <string name="pet_catalog_prepare_failed">This local pet could not be prepared. Check its archive and try again.</string>
+    <string name="pet_catalog_heading">Find your screen buddy</string>
+    <string name="pet_catalog_import_hint">Add a pet pack from your device</string>
+    <string name="pet_catalog_slot_badge">For Pet %1$d</string>
+    <string name="pet_catalog_selected_badge">In your family</string>
+    <string name="pet_catalog_pet_image">Preview of %1$s</string>
+    <string name="pet_detail_heading">Say hello to %1$s</string>
+    <string name="pet_detail_description">A playful screen companion with %1$d little actions.</string>
+    <string name="settings_heading">My pet family</string>
+    <string name="settings_subtitle">Give every buddy their own look and personality.</string>
+    <string name="settings_add_pet_hint">There is room for one more tiny friend.</string>
+    <string name="settings_app_title">Cute Pet app</string>
+    <string name="pet_customization_heading">%1$s’s little profile</string>
+    <string name="pet_customization_subtitle">Make this buddy feel just right for you.</string>
+    <string name="pet_customization_size_value">%1$d%% size</string>
+    <string name="pet_customization_speed_value">%1$d%% energy</string>
 
     <!-- Pet overlay foreground service -->
     <string name="pet_overlay_notification_channel_name">Screen pet</string>

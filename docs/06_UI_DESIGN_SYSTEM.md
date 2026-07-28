@@ -1,6 +1,21 @@
 # 06 — UI Design System Contract
 
-Base giữ infrastructure/theme và component pattern. Home/Permission hiện là functional MVP cho pet overlay, chưa phải visual design final từ Figma.
+Base giữ infrastructure/theme và component pattern. Product screens từ Home trở đi dùng
+visual system Cute Pet; onboarding và Premium vẫn giữ UI hiện tại cho tới task update riêng.
+
+## Cute Pet product direction
+
+- Nền chính warm cream `#FFF9F4`, surface gần trắng và outline lavender nhạt.
+- Primary purple cho CTA, coral cho điểm nhấn, amber/mint/pink tint cho pet stage và status.
+- Pet thumbnail thật là visual chính; icon notification chỉ là fallback khi pack chưa có ảnh.
+- Corner radius lớn 16–24 sdp, card rõ hierarchy nhưng ít chrome và không dùng dark utility
+  dashboard cho product screens.
+- Home là pet room và session control; Catalog ưu tiên discovery bằng grid; Settings là pet
+  family roster; Customize biểu diễn một hồ sơ pet độc lập.
+- Shared primitives nằm ở `ui/component/CutePetComponents.kt`; component dark cũ không được
+  dùng cho product screen mới nếu không có lý do tương thích.
+
+Các màn Splash, Language, Intro, Permission và Premium cố ý không đổi trong refresh này.
 
 Settings dùng cấu trúc pet-first:
 

@@ -7,6 +7,7 @@ data class HomeUiState(
     val isPetRunning: Boolean = false,
     val isStartingPet: Boolean = false,
     val selectedPetNames: List<String> = emptyList(),
+    val selectedPetPreviewPaths: List<String?> = emptyList(),
     val petCount: Int = 1,
     val message: HomeMessage? = null
 ) {

@@ -121,12 +121,14 @@ class PetCatalogViewModel @Inject constructor(
         }
     }
 
-    fun select(key: String) {
+    fun select(key: String): Boolean {
         if (repository.select(key, targetSlotIndex)) {
             activateTargetSlot()
-            val name = repository.find(key)?.manifest?.name ?: return
+            val name = repository.find(key)?.manifest?.name ?: return true
             _uiState.update { it.copy(message = PetCatalogMessage.Selected(name)) }
+            return true
         }
+        return false
     }
 
     fun setOwnerPet(petId: Int) {

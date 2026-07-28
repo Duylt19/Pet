@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -62,20 +61,28 @@ fun SettingsRow(
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (renderIconAsImage) {
-            Image(
-                painter = painterResource(iconRes),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
-            )
-        } else {
-            Icon(
-                painter = painterResource(iconRes),
-                contentDescription = null,
-                tint = Color.Unspecified,
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
-            )
+        Box(
+            modifier = Modifier
+                .size(dimensionResource(SdpR.dimen._32sdp))
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
+                .background(colorResource(R.color.colors_F7F0FF)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (renderIconAsImage) {
+                Image(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._17sdp))
+                )
+            } else {
+                Icon(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    tint = colorResource(R.color.colors_7B61FF),
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._17sdp))
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(dimensionResource(SdpR.dimen._9sdp)))
@@ -83,14 +90,14 @@ fun SettingsRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                color = colorResource(R.color.colors_FFFFFF),
+                color = colorResource(R.color.colors_2F2440),
                 fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
                 fontFamily = fontMedium
             )
             if (subtitle != null) {
                 Text(
                     text = subtitle,
-                    color = colorResource(R.color.colors_9B9C9E),
+                    color = colorResource(R.color.colors_776D84),
                     fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
                     fontFamily = fontRegular
                 )
@@ -102,14 +109,14 @@ fun SettingsRow(
                 Icon(
                     painter = painterResource(R.drawable.ic_setting_chevron_right_v2),
                     contentDescription = null,
-                    tint = Color.Unspecified,
+                    tint = colorResource(R.color.colors_776D84),
                     modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
                 )
             }
             is SettingsTrailing.TextTrailing -> {
                 Text(
                     text = trailing.value,
-                    color = colorResource(R.color.colors_A6A7B1),
+                    color = colorResource(R.color.colors_776D84),
                     fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
                     fontFamily = fontRegular
                 )
@@ -117,7 +124,7 @@ fun SettingsRow(
                 Icon(
                     painter = painterResource(R.drawable.ic_setting_chevron_right_v2),
                     contentDescription = null,
-                    tint = Color.Unspecified,
+                    tint = colorResource(R.color.colors_776D84),
                     modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
                 )
             }
@@ -136,15 +143,15 @@ fun SettingsRow(
                     Modifier.background(
                         brush = Brush.horizontalGradient(
                             listOf(
-                                colorResource(R.color.colors_1E86F6),
-                                colorResource(R.color.colors_0D45ED)
+                                colorResource(R.color.colors_7B61FF),
+                                colorResource(R.color.colors_5D46D7)
                             )
                         ),
                         shape = switchShape
                     )
                 } else {
                     Modifier.background(
-                        color = colorResource(R.color.colors_4D4D4D),
+                        color = colorResource(R.color.colors_E9DFEF),
                         shape = switchShape
                     )
                 }

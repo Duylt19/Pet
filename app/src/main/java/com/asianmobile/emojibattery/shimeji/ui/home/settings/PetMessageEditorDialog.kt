@@ -77,7 +77,7 @@ internal fun PetMessageEditorDialog(
                 modifier = Modifier
                     .width(dialogWidth.dp)
                     .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._16sdp)))
-                    .background(colorResource(R.color.colors_212327))
+                    .background(colorResource(R.color.colors_FFFFFB))
                     .padding(dimensionResource(SdpR.dimen._14sdp))
             ) {
                 Row(
@@ -86,7 +86,7 @@ internal fun PetMessageEditorDialog(
                 ) {
                     Text(
                         text = stringResource(R.string.settings_pet_message_editor_title),
-                        color = colorResource(R.color.colors_FFFFFF),
+                        color = colorResource(R.color.colors_2F2440),
                         fontFamily = fontSemiBold,
                         fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
                         modifier = Modifier.weight(1f)
@@ -104,7 +104,7 @@ internal fun PetMessageEditorDialog(
                         contentDescription = stringResource(
                             R.string.settings_pet_message_editor_close
                         ),
-                        tint = colorResource(R.color.colors_FFFFFF),
+                        tint = colorResource(R.color.colors_2F2440),
                         modifier = Modifier
                             .size(dimensionResource(SdpR.dimen._20sdp))
                             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
@@ -118,7 +118,7 @@ internal fun PetMessageEditorDialog(
                         PetMessageListPolicy.MAX_CUSTOM_MESSAGES,
                         PetMessageListPolicy.MAX_MESSAGE_CODE_POINTS
                     ),
-                    color = colorResource(R.color.colors_9B9C9E),
+                    color = colorResource(R.color.colors_776D84),
                     fontFamily = fontRegular,
                     fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
                     modifier = Modifier.padding(
@@ -132,11 +132,11 @@ internal fun PetMessageEditorDialog(
                     value = draft,
                     onValueChange = { draft = it },
                     textStyle = TextStyle(
-                        color = colorResource(R.color.colors_FFFFFF),
+                        color = colorResource(R.color.colors_2F2440),
                         fontFamily = fontRegular,
                         fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
                     ),
-                    cursorBrush = SolidColor(colorResource(R.color.colors_C0D1FE)),
+                    cursorBrush = SolidColor(colorResource(R.color.colors_7B61FF)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(
@@ -152,14 +152,14 @@ internal fun PetMessageEditorDialog(
                                     max = dimensionResource(SdpR.dimen._260sdp)
                                 )
                                 .clip(editorShape)
-                                .background(colorResource(R.color.colors_161718))
+                                .background(colorResource(R.color.colors_F7F0FF))
                                 .border(
-                                    width = 1.dp,
+                                    width = dimensionResource(SdpR.dimen._1sdp),
                                     color = colorResource(
                                         if (isValid) {
-                                            R.color.colors_424447
+                                            R.color.colors_E9DFEF
                                         } else {
-                                            R.color.colors_FF5A5A
+                                            R.color.colors_E45D6A
                                         }
                                     ),
                                     shape = editorShape
@@ -171,7 +171,7 @@ internal fun PetMessageEditorDialog(
                                     text = stringResource(
                                         R.string.settings_pet_message_editor_placeholder
                                     ),
-                                    color = colorResource(R.color.colors_6F7073),
+                                    color = colorResource(R.color.colors_776D84),
                                     fontFamily = fontRegular,
                                     fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
                                 )
@@ -197,7 +197,7 @@ internal fun PetMessageEditorDialog(
                         )
                     },
                     color = colorResource(
-                        if (isValid) R.color.colors_9B9C9E else R.color.colors_FF5A5A
+                        if (isValid) R.color.colors_776D84 else R.color.colors_E45D6A
                     ),
                     fontFamily = fontRegular,
                     fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
@@ -244,9 +244,9 @@ private fun MessageEditorAction(
             .clip(shape)
             .background(
                 if (isPrimary && enabled) {
-                    colorResource(R.color.colors_3268FC)
+                    colorResource(R.color.colors_7B61FF)
                 } else {
-                    colorResource(R.color.colors_333538)
+                    colorResource(R.color.colors_EDE4FF)
                 }
             )
             .clickable(enabled = enabled, onClick = onClick)
@@ -258,7 +258,13 @@ private fun MessageEditorAction(
         Text(
             text = text,
             color = colorResource(
-                if (enabled) R.color.colors_FFFFFF else R.color.colors_6F7073
+                if (isPrimary && enabled) {
+                    R.color.colors_FFFFFF
+                } else if (enabled) {
+                    R.color.colors_5D46D7
+                } else {
+                    R.color.colors_776D84
+                }
             ),
             fontFamily = fontFamily,
             fontSize = dimensionResource(SspR.dimen._9ssp).value.sp

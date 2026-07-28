@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +39,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -93,8 +92,7 @@ fun PetCustomizationScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.colors_161718))
-            .statusBarsPadding()
+            .background(colorResource(R.color.colors_FFF9F4))
             .navigationBarsPadding()
     ) {
         AppHeaderBar(
@@ -112,6 +110,22 @@ fun PetCustomizationScreen(
                 .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
         ) {
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._10sdp)))
+            Text(
+                text = stringResource(
+                    R.string.pet_customization_heading,
+                    state.name.ifBlank { stringResource(R.string.home_pet_default_name) }
+                ),
+                color = colorResource(R.color.colors_2F2440),
+                fontFamily = FontFamily(Font(R.font.inter_bold)),
+                fontSize = dimensionResource(SspR.dimen._20ssp).value.sp
+            )
+            Text(
+                text = stringResource(R.string.pet_customization_subtitle),
+                color = colorResource(R.color.colors_776D84),
+                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
+            )
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
             PetIdentityCard(
                 state = state,
                 onChangeCharacter = { onChangeCharacter(state.slotIndex) }
@@ -213,7 +227,7 @@ fun PetCustomizationScreen(
             }
             Text(
                 text = stringResource(R.string.pet_customization_apply_note),
-                color = colorResource(R.color.colors_9B9C9E),
+                color = colorResource(R.color.colors_776D84),
                 fontFamily = FontFamily(Font(R.font.inter_regular)),
                 fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
                 modifier = Modifier.padding(
@@ -224,14 +238,14 @@ fun PetCustomizationScreen(
             if (state.canRemove) {
                 Text(
                     text = stringResource(R.string.pet_customization_remove),
-                    color = colorResource(R.color.colors_FF5959),
+                    color = colorResource(R.color.colors_E45D6A),
                     fontFamily = FontFamily(Font(R.font.inter_semibold)),
                     fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
-                        .background(colorResource(R.color.colors_212327))
+                        .background(colorResource(R.color.colors_FFE8EF))
                         .clickable { isRemoveConfirmationVisible = true }
                         .padding(vertical = dimensionResource(SdpR.dimen._12sdp))
                 )
@@ -249,8 +263,8 @@ private fun PetIdentityCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
-            .background(colorResource(R.color.colors_212327))
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._20sdp)))
+            .background(colorResource(R.color.colors_EDE4FF))
             .padding(dimensionResource(SdpR.dimen._14sdp)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -258,7 +272,7 @@ private fun PetIdentityCard(
             modifier = Modifier
                 .size(dimensionResource(SdpR.dimen._64sdp))
                 .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._16sdp)))
-                .background(colorResource(R.color.pet_demo_fur)),
+                .background(colorResource(R.color.colors_FFF9F4)),
             contentAlignment = Alignment.Center
         ) {
             if (state.previewImagePath != null) {
@@ -273,7 +287,7 @@ private fun PetIdentityCard(
             } else {
                 Text(
                     text = (state.slotIndex + 1).toString(),
-                    color = colorResource(R.color.white),
+                    color = colorResource(R.color.colors_7B61FF),
                     fontFamily = FontFamily(Font(R.font.inter_semibold)),
                     fontSize = dimensionResource(SspR.dimen._17ssp).value.sp
                 )
@@ -282,14 +296,14 @@ private fun PetIdentityCard(
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
         Text(
             text = state.name.ifBlank { stringResource(R.string.home_pet_default_name) },
-            color = colorResource(R.color.white),
+            color = colorResource(R.color.colors_2F2440),
             fontFamily = FontFamily(Font(R.font.inter_semibold)),
             fontSize = dimensionResource(SspR.dimen._14ssp).value.sp
         )
         if (state.author.isNotBlank()) {
             Text(
                 text = stringResource(R.string.pet_customization_by_author, state.author),
-                color = colorResource(R.color.colors_9B9C9E),
+                color = colorResource(R.color.colors_776D84),
                 fontFamily = FontFamily(Font(R.font.inter_regular)),
                 fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
             )
@@ -297,12 +311,12 @@ private fun PetIdentityCard(
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
         Text(
             text = stringResource(R.string.pet_customization_change_character),
-            color = colorResource(R.color.colors_C0D1FE),
+            color = colorResource(R.color.colors_5D46D7),
             fontFamily = FontFamily(Font(R.font.inter_semibold)),
             fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
             modifier = Modifier
                 .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp)))
-                .background(colorResource(R.color.colors_333538))
+                .background(colorResource(R.color.colors_FFFFFB))
                 .clickable(onClick = onChangeCharacter)
                 .padding(
                     horizontal = dimensionResource(SdpR.dimen._14sdp),
@@ -333,26 +347,26 @@ private fun PetValueSettingsRow(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.background(
-                    colorResource(R.color.colors_333538),
+                    colorResource(R.color.colors_F7F0FF),
                     RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
                 )
             ) {
                 StepperButton(
-                    symbol = "−",
+                    symbol = stringResource(R.string.common_decrease_symbol),
                     enabled = canDecrease,
                     contentDescription = decreaseDescription,
                     onClick = onDecrease
                 )
                 Text(
                     text = value,
-                    color = colorResource(R.color.white),
+                    color = colorResource(R.color.colors_2F2440),
                     fontFamily = FontFamily(Font(R.font.inter_medium)),
                     fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.width(dimensionResource(SdpR.dimen._34sdp))
                 )
                 StepperButton(
-                    symbol = "+",
+                    symbol = stringResource(R.string.common_increase_symbol),
                     enabled = canIncrease,
                     contentDescription = increaseDescription,
                     onClick = onIncrease
@@ -373,7 +387,7 @@ private fun StepperButton(
     Text(
         text = symbol,
         color = colorResource(
-            if (enabled) R.color.colors_C0D1FE else R.color.colors_9B9C9E
+            if (enabled) R.color.colors_7B61FF else R.color.colors_776D84
         ),
         fontFamily = FontFamily(Font(R.font.inter_semibold)),
         fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
@@ -407,7 +421,7 @@ private fun RemovePetDialog(
             TextButton(onClick = onConfirm) {
                 Text(
                     stringResource(R.string.pet_customization_remove_confirm),
-                    color = colorResource(R.color.colors_FF5959)
+                    color = colorResource(R.color.colors_E45D6A)
                 )
             }
         },
@@ -416,16 +430,28 @@ private fun RemovePetDialog(
                 Text(stringResource(R.string.common_cancel_label))
             }
         },
-        containerColor = colorResource(R.color.colors_212327),
-        titleContentColor = colorResource(R.color.white),
-        textContentColor = colorResource(R.color.colors_9B9C9E)
+        containerColor = colorResource(R.color.colors_FFFFFB),
+        titleContentColor = colorResource(R.color.colors_2F2440),
+        textContentColor = colorResource(R.color.colors_776D84)
     )
 }
 
 @Composable
 private fun SettingsDivider() {
     HorizontalDivider(
-        thickness = 1.dp,
-        color = colorResource(R.color.colors_333538)
+        thickness = dimensionResource(SdpR.dimen._1sdp),
+        color = colorResource(R.color.colors_E9DFEF)
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PetIdentityCardPreview() {
+    PetIdentityCard(
+        state = PetCustomizationUiState(
+            name = stringResource(R.string.home_pet_default_name),
+            author = stringResource(R.string.pet_catalog_unknown_author)
+        ),
+        onChangeCharacter = {}
     )
 }

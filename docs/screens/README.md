@@ -7,12 +7,19 @@
 | `language_settings` | `ui/language/LanguageScreen` | Chọn language từ Settings rồi restart app shell |
 | `intro` | `ui/intro/IntroScreen` | Pager ba trang, có native ads theo config |
 | `permission` | `ui/permission/PermissionScreen` | Overlay special access + notification permission, có Continue/Skip |
-| `home` | `ui/home/HomeScreen` | Selected pet/count, permission status, Start/Stop, Catalog/Settings/Premium; scroll thích ứng |
-| `pet_catalog/{slotIndex}` | `ui/catalog/PetCatalogScreen` | Local owner catalog, search, 268 categories, thumbnail, availability và on-demand Set cho đúng slot |
-| `pet_detail/{slotIndex}/{packKey}` | `ui/catalog/PetDetailScreen` | Pack preview/metadata và select action cho đúng slot |
-| `settings` | `ui/home/settings/SettingsScreen` | Pet roster, commit-on-selection Add flow và app/support |
-| `pet_customization/{slotIndex}` | `ui/home/settings/PetCustomizationScreen` | Hồ sơ độc lập: character, size, speed, touch, speech, custom messages, position và remove |
+| `home` | `ui/home/HomeScreen` | Cozy pet room, thumbnail đội pet, permission-aware Start/Stop và entry Catalog/Settings/Premium |
+| `pet_catalog/{slotIndex}` | `ui/catalog/PetCatalogScreen` | Lưới 2 cột local owner catalog, search, 268 categories, thumbnail, availability và on-demand Set đúng slot |
+| `pet_detail/{slotIndex}/{packKey}` | `ui/catalog/PetDetailScreen` | Hero preview, metadata thân thiện và select action đúng slot |
+| `settings` | `ui/home/settings/SettingsScreen` | My Pet Family roster, commit-on-selection Add flow và app/support |
+| `pet_customization/{slotIndex}` | `ui/home/settings/PetCustomizationScreen` | Hồ sơ cute-pet độc lập: character, size, speed, touch, speech, custom messages, position và remove |
 | `premium/{startByIndex}` | `ui/premium/PremiumScreen` | Subscription UI, close behavior theo entry source |
+
+## Visual scope hiện tại
+
+- Product screens từ Home trở đi dùng light cozy palette, rounded cards, thumbnail pet thật
+  và purple/coral accents để tạo cảm giác companion thay vì utility dashboard.
+- Splash, Language/Language Settings, Intro, Permission và Premium giữ nguyên visual hiện
+  tại theo quyết định owner; chúng sẽ được update trong các task riêng.
 
 ## Screen implementation contract
 
