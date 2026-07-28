@@ -25,9 +25,7 @@ import com.asianmobile.emojibattery.shimeji.pet.engine.PetSocialDirective
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetSocialDirector
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetSocialSnapshot
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetState
-import com.asianmobile.emojibattery.shimeji.pet.pack.LegacySpeechAnchorResolver
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
-import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackAnchor
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
 import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineClips
 import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineSupportedActions
@@ -164,7 +162,7 @@ internal class PetOverlayController(
                     engine = engine,
                     view = view,
                     params = params,
-                    speechAttachment = speechAttachment(asset),
+                    speechAttachment = speechAttachment(pack),
                     state = initialState
                 )
                 instances += instance
@@ -429,10 +427,8 @@ internal class PetOverlayController(
         return (viewportWidth - margin * 2).coerceAtLeast(1)
     }
 
-    private fun speechAttachment(asset: PetOverlayAsset): PetSpeechAttachment {
-        val pack = asset.pack
+    private fun speechAttachment(pack: PetPack): PetSpeechAttachment {
         val speechAnchor = pack.manifest.speechAnchor
-            ?: runtimeSpeechAnchor(asset.visual)
             ?: return PetSpeechAttachment.Default
         val canvas = pack.manifest.canvas
         val imageAnchor = pack.manifest.anchor
@@ -444,18 +440,6 @@ internal class PetOverlayController(
             speechAnchorX = speechAnchor.x,
             speechAnchorY = speechAnchor.y
         )
-    }
-
-    private fun runtimeSpeechAnchor(
-        visual: PetPackVisual
-    ): PetPackAnchor? {
-        val sprite = visual as? PetPackVisual.Sprite ?: return null
-        val frame = sprite.frames[PetAction.TALK]?.firstOrNull() ?: return null
-        val source = frame.source
-        if (source.width() <= 0 || source.height() <= 0) return null
-        return LegacySpeechAnchorResolver.resolveArgb(source.width(), source.height()) { x, y ->
-            frame.bitmap.getPixel(source.left + x, source.top + y)
-        }
     }
 
     private fun removeAllViews() {

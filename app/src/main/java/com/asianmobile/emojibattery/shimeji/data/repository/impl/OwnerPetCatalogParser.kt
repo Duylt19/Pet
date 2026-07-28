@@ -11,13 +11,19 @@ data class OwnerPetCatalogRecord(
     val category: String,
     val author: String?,
     val thumbnail: OwnerPetCatalogAssetRecord? = null,
-    val archive: OwnerPetCatalogAssetRecord? = null
+    val archive: OwnerPetCatalogAssetRecord? = null,
+    val speechAnchor: OwnerPetCatalogSpeechAnchorRecord? = null
 )
 
 data class OwnerPetCatalogAssetRecord(
     val path: String,
     val sizeBytes: Long,
     val sha256: String
+)
+
+data class OwnerPetCatalogSpeechAnchorRecord(
+    val x: Float,
+    val y: Float
 )
 
 data class OwnerPetCatalogDocument(
@@ -65,7 +71,12 @@ class OwnerPetCatalogParser {
                     ?.trim()
                     ?.takeIf(String::isNotEmpty),
                 thumbnail = item.optJSONObject("thumbnail")?.toAsset("thumbnail", index),
-                archive = item.optJSONObject("archive")?.toAsset("archive", index)
+                archive = item.optJSONObject("archive")?.toAsset("archive", index),
+                speechAnchor = if (item.has("speechAnchor")) {
+                    item.getJSONObject("speechAnchor").toSpeechAnchor(index)
+                } else {
+                    null
+                }
             )
         }
         validate(records)
@@ -117,6 +128,24 @@ class OwnerPetCatalogParser {
             )
         }
         return OwnerPetCatalogAssetRecord(path, sizeBytes, sha256)
+    }
+
+    private fun JSONObject.toSpeechAnchor(index: Int): OwnerPetCatalogSpeechAnchorRecord {
+        val xValue = get("x")
+        val yValue = get("y")
+        if (xValue !is Number || yValue !is Number) {
+            throw OwnerPetCatalogParseException(
+                "Catalog item $index has invalid speech anchor metadata"
+            )
+        }
+        val x = xValue.toFloat()
+        val y = yValue.toFloat()
+        if (!x.isFinite() || x !in 0f..1f || !y.isFinite() || y !in 0f..1f) {
+            throw OwnerPetCatalogParseException(
+                "Catalog item $index has invalid speech anchor metadata"
+            )
+        }
+        return OwnerPetCatalogSpeechAnchorRecord(x, y)
     }
 
     private fun isSafeRelativePath(path: String): Boolean {

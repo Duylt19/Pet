@@ -46,7 +46,7 @@ class LegacyShimejiPackInstaller @Inject constructor(
         return try {
             if (!unpacked.mkdirs()) throw PetPackInstallException("Unable to create staging area")
             val assets = extractFrames(archive, unpacked)
-            val manifest = buildManifest(entry, assets, unpacked)
+            val manifest = buildManifest(entry, assets)
             File(unpacked, PET_PACK_MANIFEST_FILE).writeText(
                 manifest.toJson().toString(),
                 Charsets.UTF_8
@@ -142,8 +142,7 @@ class LegacyShimejiPackInstaller @Inject constructor(
 
     private fun buildManifest(
         entry: OwnerPetCatalogEntry,
-        assets: Map<Int, LegacyFrameAsset>,
-        unpacked: File
+        assets: Map<Int, LegacyFrameAsset>
     ): PetPackManifest {
         val fallbackNumber = assets.keys.minOrNull()
             ?: throw PetPackInstallException("Local archive has no usable frames")
@@ -333,40 +332,13 @@ class LegacyShimejiPackInstaller @Inject constructor(
             ),
             clips = clips,
             speechAnchor = if (PetAction.TALK in clips) {
-                assets[TALK_STILL_FRAME]?.let { asset ->
-                    resolveSpeechAnchor(File(unpacked, asset.file))
+                entry.speechAnchor?.let { anchor ->
+                    PetPackAnchor(x = anchor.x, y = anchor.y)
                 }
             } else {
                 null
             }
         )
-    }
-
-    private fun resolveSpeechAnchor(frame: File): PetPackAnchor? {
-        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        BitmapFactory.decodeFile(frame.absolutePath, bounds)
-        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
-
-        var sampleSize = 1
-        while (maxOf(bounds.outWidth, bounds.outHeight) / sampleSize > SPEECH_ANCHOR_MAX_SIDE) {
-            sampleSize *= 2
-        }
-        val bitmap = BitmapFactory.decodeFile(
-            frame.absolutePath,
-            BitmapFactory.Options().apply {
-                inSampleSize = sampleSize
-                inPreferredConfig = Bitmap.Config.ARGB_8888
-            }
-        ) ?: return null
-        return try {
-            val pixels = IntArray(bitmap.width * bitmap.height)
-            bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-            LegacySpeechAnchorResolver.resolveArgb(bitmap.width, bitmap.height) { x, y ->
-                pixels[y * bitmap.width + x]
-            }
-        } finally {
-            bitmap.recycle()
-        }
     }
 
     private fun isSafeLegacyEntry(entry: ZipEntry): Boolean {
@@ -414,8 +386,6 @@ class LegacyShimejiPackInstaller @Inject constructor(
         const val COPY_BUFFER_BYTES = 16 * 1024
         const val TARGET_CANVAS_SIDE = 128f
         const val PNG_QUALITY = 100
-        const val TALK_STILL_FRAME = 34
-        const val SPEECH_ANCHOR_MAX_SIDE = 256
         val REQUIRED_FRAME_RANGE = 1..46
         val PNG_SIGNATURE = byteArrayOf(
             0x89.toByte(),

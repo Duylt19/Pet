@@ -9,7 +9,8 @@ data class OwnerPetCatalogEntry(
     val hasLocalArchive: Boolean,
     val archiveUrl: String? = null,
     val archiveSizeBytes: Long? = null,
-    val archiveSha256: String? = null
+    val archiveSha256: String? = null,
+    val speechAnchor: OwnerPetSpeechAnchor? = null
 ) {
     val installedPackKey: String
         get() = "${installedPackId(id)}@$OWNER_PET_PACK_VERSION"
@@ -21,7 +22,12 @@ data class OwnerPetCatalogEntry(
     }
 }
 
-const val OWNER_PET_PACK_VERSION = 6
+data class OwnerPetSpeechAnchor(
+    val x: Float,
+    val y: Float
+)
+
+const val OWNER_PET_PACK_VERSION = 7
 
 data class OwnerPetCatalogSnapshot(
     val entries: List<OwnerPetCatalogEntry> = emptyList(),

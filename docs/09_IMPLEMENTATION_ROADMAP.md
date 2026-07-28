@@ -103,9 +103,9 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Fix Pet Speech V3.9 TALK attachment: reproduce the original frame 34–36
   `IeOffsetX=0/IeOffsetY=-64` carried-window geometry, mirror the box with pet direction,
   keep it synchronized with pet movement and discard text when its owner leaves TALK.
-- [Done] Add per-pet TALK holding anchors: derive the normalized notch corner from frame
-  34, persist it in owner revision 6, mirror it with direction and keep the pet sprite
-  above the speech box so the hand covers the attachment edge.
+- [Done] Add per-pet TALK holding anchors: audit frame 34 server-side, persist metadata
+  for 631 supported pets in owner revision 7, keep default placement for 395 unsupported
+  pets, mirror with direction and render the sprite above the speech box.
 - [Done] Redesign Pet Speech V3.10 choreography: gate every message behind the actual
   TALK frame, add one deliberate 9–11 second speech beat only to speaking combos, keep
   physical combos silent and render a sharp rectangular carried box without a tail.

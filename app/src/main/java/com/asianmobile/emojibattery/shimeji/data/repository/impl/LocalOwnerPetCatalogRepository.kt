@@ -4,6 +4,7 @@ import android.content.Context
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogSnapshot
+import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetSpeechAnchor
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.LegacyShimejiPackInstaller
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackInstallResult
@@ -64,7 +65,10 @@ class LocalOwnerPetCatalogRepository @Inject constructor(
                     category = record.category,
                     author = record.author,
                     thumbnailPath = thumbnail.takeIf(File::isFile)?.absolutePath,
-                    hasLocalArchive = archive.isFile
+                    hasLocalArchive = archive.isFile,
+                    speechAnchor = record.speechAnchor?.let {
+                        OwnerPetSpeechAnchor(x = it.x, y = it.y)
+                    }
                 )
             }
             _snapshot.value = OwnerPetCatalogSnapshot(

@@ -41,11 +41,11 @@ UI riêng:
 
 ### Action và combo
 
-- Owner manifest revision 6 giữ raw clip `TALK` 34/35/34/36 và thêm `speechAnchor`
-  được suy ra từ alpha của frame 34. `PetPackEngineMapper` normalize clip này lúc Start
+- Owner manifest revision 7 giữ raw clip `TALK` 34/35/34/36 và copy `speechAnchor`
+  đã audit theo từng pet từ server catalog. `PetPackEngineMapper` normalize clip này lúc Start
   thành `TALK` một frame 34, zero velocity và `TALK_WALK` bốn frame với velocity
-  24 px/s. Manifest cũ không có field mới vẫn parse được; runtime suy lại attachment
-  từ visual TALK nên pet revision 4 đang được chọn không cần `Set` lại.
+  24 px/s. Manifest cũ không có field mới vẫn parse được và dùng attachment mặc định;
+  user cần `Set` lại pet để cài revision 7 có metadata.
 - Combo `CHATTER` chạy
   `IDLE 2–4 s → LOOK 2–4 s → TALK 9–11 s → EMOTE → IDLE 3–5 s`.
 - Speech choreography không còn là effect phát ngay khi combo bắt đầu. Mỗi combo được
@@ -114,14 +114,13 @@ Mỗi pet bật message dùng một `TYPE_APPLICATION_OVERLAY` phụ. Window đ�
 - maximum width tiếp tục bị clamp theo usable viewport. Nếu text không thể vừa giới hạn,
   box dùng maximum 260×112dp và renderer ellipsis ở dòng thứ tư;
 - không tạo full-screen window và không chặn app bên dưới;
-- owner pack revision 6 dò cạnh alpha đứng ổn định của vùng khuyết và hàng mà bàn tay
-  bắt đầu nhô sang trái trên frame 34. Góc lõm này được dùng làm attachment riêng cho
-  từng pet; giá trị được chuẩn hóa 0–1, transform qua canvas/anchor của renderer và
-  mirror theo direction;
-- detector chỉ nhận góc lõm trong vùng hình học có độ tin cậy cao; frame không có cạnh
-  đứng rõ dùng X giữa canvas và median Y của dải bàn tay để tránh bắt nhầm tóc/phụ kiện;
-- pack sprite cũ không có `speechAnchor` được suy lại một lần từ visual TALK lúc Start;
-  code-native hoặc pack không có visual TALK dùng attachment `(0.5, 0.5)`;
+- server pipeline dò cạnh alpha đứng ổn định của vùng khuyết và hàng mà bàn tay bắt đầu
+  nhô sang trái trên frame 34. Detector chỉ đánh dấu pet có đủ 34/35/36 và góc lõm thuộc
+  vùng hình học tin cậy: 631 pet có metadata riêng, 395 pet không hỗ trợ;
+- tọa độ góc lõm được chuẩn hóa 0–1 trong optional `pets[].speechAnchor`, copy vào owner
+  pack revision 7, transform qua canvas/anchor của renderer và mirror theo direction;
+- app không dò alpha ở runtime. Pack không có `speechAnchor`, gồm pet không hỗ trợ và
+  revision cũ, giữ attachment mặc định `(0.5, 0.5)`;
 - box là hình chữ nhật góc vuông, không bo tròn và không có tail/tam giác phía dưới;
 - box nằm phía sau sprite và lấn 3dp vào attachment: cạnh phải chạm tay khi quay trái,
   cạnh trái chạm tay khi quay phải. Tay/pose TALK được render phía trên mép box để tạo
@@ -183,11 +182,11 @@ sàng, nên thêm `SpeechCatalogRepository` độc lập với pack binary:
 - JVM: TALK đứng yên một frame/zero displacement, TALK_WALK bốn frame/24 px/s, legacy
   runtime normalization, lifecycle engine–speech giữ box xuyên suốt 90–110 tick,
   adaptive sizing cho short/single-line/explicit newline/long/fallback/narrow viewport,
-  alpha-anchor extraction, canvas transform và placement trái/phải theo attachment,
+  catalog-anchor parsing, canvas transform và placement trái/phải theo attachment,
   hủy đúng owner khi pose kết thúc,
   speaking/silent combo mapping, simultaneous multi-pet Show/independent Hide và drag chỉ
   đóng bubble của pet đó.
-- Pack: raw contract sequence 34/35/34/36 và immutable owner conversion revision 6.
+- Pack: raw contract sequence 34/35/34/36 và immutable owner conversion revision 7.
 - Android: rectangular TALK box theo pet và hướng mirror, không tail, clamp hai mép,
   1/2/3 per-pet window, rotation, screen-off/resume, Settings off và Stop không còn
   window.

@@ -62,7 +62,7 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 ## Owner catalog model
 
 - `OwnerPetCatalogEntry`: owner ID, name, category, author, thumbnail source, archive URL,
-  byte size và SHA-256 metadata.
+  byte size, SHA-256 và optional `speechAnchor` chuẩn hóa.
 - `OwnerPetCatalogSnapshot`: immutable loading/content/error state cùng server catalog version.
 - `OwnerPetCatalogRepository`: boundary dùng chung cho UI; production implementation dùng
   private GitHub raw + app-private catalog cache + on-demand verified archive cache.
@@ -71,13 +71,13 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
   mỗi device tối đa một catalog revalidation/ngày, còn `304 Not Modified` tránh tải lại body.
   `403`/`429` giữ catalog cũ và chặn retry đến `Retry-After`/`X-RateLimit-Reset` (tối đa 24 giờ).
 - Raw ZIP chỉ được normalize khi user bấm `Set`; normalization hiện tạo immutable
-  revision `owner.shimeji.<id>@6`, thêm `TALK` từ frame 34–36 khi đủ dữ liệu, tự
-  suy ra `speechAnchor` từ góc lõm giữa cạnh đứng và bàn tay của frame 34 rồi persist
-  qua selection của slot đích trong `pet_selected_pack_keys`. Revision cũ đã cài vẫn đọc
-  được và runtime suy `speechAnchor` từ visual TALK nếu field chưa tồn tại, nên không cần
-  `Set` lại; thao tác `Set` mới chọn revision 6. Khi map vào engine, raw TALK bốn frame
-  được tách tương thích thành TALK đứng yên một frame và TALK_WALK bốn frame; manifest
-  app-private không bị mutate.
+  revision `owner.shimeji.<id>@7`, thêm `TALK` từ frame 34–36 khi đủ dữ liệu và copy
+  optional `speechAnchor` đã audit từ server vào manifest. Server đánh dấu 631/1.026 pet
+  có điểm khuyết tin cậy; 395 pet không có metadata giữ attachment mặc định `(0.5, 0.5)`.
+  Runtime không dò pixel hoặc tự đoán attachment. Revision cũ vẫn đọc được nhưng cần `Set`
+  lại để nhận metadata revision 7. Khi map vào engine, raw TALK bốn frame được tách tương
+  thích thành TALK đứng yên một frame và TALK_WALK bốn frame; manifest app-private không
+  bị mutate.
 - Catalog 1.026 item không dùng Room: metadata parse một lần vào memory, filter bằng pure
   policy; binary nằm ngoài APK và chỉ ZIP được chọn mới tải về. Cache JSON cuối hợp lệ dùng
   khi offline; ZIP cache vẫn phải qua secure installer trước khi trở thành installed pack.

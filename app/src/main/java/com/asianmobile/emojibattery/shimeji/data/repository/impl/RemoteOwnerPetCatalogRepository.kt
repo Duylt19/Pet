@@ -3,6 +3,7 @@ package com.asianmobile.emojibattery.shimeji.data.repository.impl
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogSnapshot
+import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetSpeechAnchor
 import com.asianmobile.emojibattery.shimeji.data.remote.GithubPetCatalogClient
 import com.asianmobile.emojibattery.shimeji.data.remote.PetCatalogFetchResult
 import com.asianmobile.emojibattery.shimeji.data.remote.PetServerConfig
@@ -141,7 +142,10 @@ class RemoteOwnerPetCatalogRepository @Inject constructor(
                     hasLocalArchive = record.archive != null,
                     archiveUrl = record.archive?.let { PetServerConfig.resolve(it.path) },
                     archiveSizeBytes = record.archive?.sizeBytes,
-                    archiveSha256 = record.archive?.sha256
+                    archiveSha256 = record.archive?.sha256,
+                    speechAnchor = record.speechAnchor?.let {
+                        OwnerPetSpeechAnchor(x = it.x, y = it.y)
+                    }
                 )
             },
             catalogVersion = catalogVersion,
