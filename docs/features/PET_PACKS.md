@@ -39,7 +39,8 @@ Action names được schema v1 nhận: `idle`, `walk`, `run`, `fall`, `bounce`,
 
 Các sprite Shimeji legacy trong owner catalog dùng hướng gốc sang trái. Overlay mirror ngang frame khi `PetDirection.RIGHT` và giữ nguyên khi đi trái. Motion polish chỉ biến đổi nhẹ quanh bottom anchor cho locomotion/physics; `SPECIAL`/`SPECIAL_2` không còn scale luân phiên vì chính sprite đã chứa chuyển động. Wall/ceiling pose vẫn giữ orientation gốc, còn hướng đổi vào trong khi pet chuyển biên được quyết định trong pure engine.
 
-Owner pack revision 5 vẫn immutable trên disk và lưu `speechAnchor` suy ra từ frame 34.
+Owner pack revision 6 vẫn immutable trên disk và lưu `speechAnchor` suy ra từ góc lõm
+giữa cạnh vùng khuyết và bàn tay trong frame 34.
 Khi service Start, mapper áp dụng profile nhịp frame tương thích theo prefix
 `owner.shimeji.`: engine idle chỉ có một frame và zero velocity; renderer lấy frame đứng
 đầu tiên của clip WALK thay cho frame 11 đang ngồi trong raw IDLE. Runtime còn tạo các

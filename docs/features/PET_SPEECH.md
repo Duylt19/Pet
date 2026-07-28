@@ -41,7 +41,7 @@ UI riêng:
 
 ### Action và combo
 
-- Owner manifest revision 5 giữ raw clip `TALK` 34/35/34/36 và thêm `speechAnchor`
+- Owner manifest revision 6 giữ raw clip `TALK` 34/35/34/36 và thêm `speechAnchor`
   được suy ra từ alpha của frame 34. `PetPackEngineMapper` normalize clip này lúc Start
   thành `TALK` một frame 34, zero velocity và `TALK_WALK` bốn frame với velocity
   24 px/s. Manifest cũ không có field mới vẫn parse được; runtime suy lại attachment
@@ -114,9 +114,12 @@ Mỗi pet bật message dùng một `TYPE_APPLICATION_OVERLAY` phụ. Window đ�
 - maximum width tiếp tục bị clamp theo usable viewport. Nếu text không thể vừa giới hạn,
   box dùng maximum 260×112dp và renderer ellipsis ở dòng thứ tư;
 - không tạo full-screen window và không chặn app bên dưới;
-- owner pack revision 5 tự dò cột alpha ngoài cùng bên trái và median Y của dải biên
-  trên frame 34 để tạo attachment riêng cho từng pet. Giá trị được chuẩn hóa 0–1,
-  transform qua canvas/anchor của renderer và mirror theo direction;
+- owner pack revision 6 dò cạnh alpha đứng ổn định của vùng khuyết và hàng mà bàn tay
+  bắt đầu nhô sang trái trên frame 34. Góc lõm này được dùng làm attachment riêng cho
+  từng pet; giá trị được chuẩn hóa 0–1, transform qua canvas/anchor của renderer và
+  mirror theo direction;
+- detector chỉ nhận góc lõm trong vùng hình học có độ tin cậy cao; frame không có cạnh
+  đứng rõ dùng X giữa canvas và median Y của dải bàn tay để tránh bắt nhầm tóc/phụ kiện;
 - pack sprite cũ không có `speechAnchor` được suy lại một lần từ visual TALK lúc Start;
   code-native hoặc pack không có visual TALK dùng attachment `(0.5, 0.5)`;
 - box là hình chữ nhật góc vuông, không bo tròn và không có tail/tam giác phía dưới;
@@ -184,7 +187,7 @@ sàng, nên thêm `SpeechCatalogRepository` độc lập với pack binary:
   hủy đúng owner khi pose kết thúc,
   speaking/silent combo mapping, simultaneous multi-pet Show/independent Hide và drag chỉ
   đóng bubble của pet đó.
-- Pack: raw contract sequence 34/35/34/36 và immutable owner conversion revision 5.
+- Pack: raw contract sequence 34/35/34/36 và immutable owner conversion revision 6.
 - Android: rectangular TALK box theo pet và hướng mirror, không tail, clamp hai mép,
   1/2/3 per-pet window, rotation, screen-off/resume, Settings off và Stop không còn
   window.

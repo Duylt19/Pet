@@ -6,11 +6,13 @@ import org.junit.Test
 
 class LegacySpeechAnchorResolverTest {
     @Test
-    fun `anchor follows the median opaque point on the left holding edge`() {
+    fun `anchor follows the corner where the hand enters the window notch`() {
         val opaque = buildSet {
-            for (y in 60..70) {
-                add(20 to y)
-                add(21 to y)
+            for (y in 20..120) {
+                for (x in 54..100) add(x to y)
+            }
+            for (y in 86..90) {
+                for (x in 34..53) add(x to y)
             }
         }
 
@@ -18,16 +20,25 @@ class LegacySpeechAnchorResolverTest {
             x to y in opaque
         }
 
-        assertEquals(PetPackAnchor(0.15625f, 0.5078125f), anchor)
+        assertEquals(PetPackAnchor(0.421875f, 0.671875f), anchor)
     }
 
     @Test
-    fun `extreme transparent edge noise is clamped to safe holding range`() {
+    fun `missing notch falls back to center x and hand edge y`() {
+        val anchor = LegacySpeechAnchorResolver.resolve(128, 128) { x, y ->
+            x in 20..21 && y in 60..70
+        }
+
+        assertEquals(PetPackAnchor(0.5f, 0.5078125f), anchor)
+    }
+
+    @Test
+    fun `extreme transparent edge noise keeps safe fallback anchor`() {
         val anchor = LegacySpeechAnchorResolver.resolve(128, 128) { x, y ->
             x == 0 && y == 2
         }
 
-        assertEquals(PetPackAnchor(0.05f, 0.25f), anchor)
+        assertEquals(PetPackAnchor(0.5f, 0.25f), anchor)
     }
 
     @Test
@@ -47,6 +58,6 @@ class LegacySpeechAnchorResolverTest {
             }
         }
 
-        assertEquals(PetPackAnchor(0.25f, 0.5f), anchor)
+        assertEquals(PetPackAnchor(0.5f, 0.5f), anchor)
     }
 }
