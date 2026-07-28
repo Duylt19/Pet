@@ -28,15 +28,22 @@ sang request khác.
 
 `RemoteOwnerPetCatalogRepository`:
 
-1. fetch và parse catalog server;
-2. cache JSON cuối hợp lệ tại `files/pet_catalog/pets.json`;
-3. fallback cache khi server/network không khả dụng;
-4. expose cùng `OwnerPetCatalogSnapshot` cho UI;
-5. tải ZIP vào `cache/pet_catalog_archives` chỉ khi user bấm `Set`;
-6. stream download với giới hạn 20 MiB, kiểm tra declared size + SHA-256;
-7. chỉ đưa ZIP hợp lệ qua `LegacyShimejiPackInstaller`.
+1. đọc và parse cache app-private trước để Catalog hiển thị ngay;
+2. chỉ revalidate GitHub tối đa một lần trong 24 giờ trên mỗi device;
+3. lưu `ETag` và gửi `If-None-Match`; response `304` chỉ cập nhật thời điểm validation,
+   không tải lại JSON;
+4. lưu `Retry-After`/`X-RateLimit-Reset` khi GitHub trả `403`/`429` và không request lại
+   trước thời điểm cho phép;
+5. cache JSON cuối hợp lệ tại `files/pet_catalog/pets.json`, metadata refresh tại
+   `files/pet_catalog/metadata.json`, fallback cache khi server/network không khả dụng;
+6. expose cùng `OwnerPetCatalogSnapshot` cho UI;
+7. tải ZIP vào `cache/pet_catalog_archives` chỉ khi user bấm `Set`;
+8. stream download với giới hạn 20 MiB, kiểm tra declared size + SHA-256;
+9. chỉ đưa ZIP hợp lệ qua `LegacyShimejiPackInstaller`.
 
 Thumbnail được Coil tải lazy và dùng disk cache. Catalog không preload 1.026 thumbnail/ZIP.
+URL thumbnail ổn định nên memory/disk cache được tái sử dụng trên cùng device; không thêm Glide
+chỉ để tải lại cùng tài nguyên.
 
 ## UI behavior
 

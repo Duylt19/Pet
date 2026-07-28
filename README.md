@@ -15,8 +15,9 @@ settings và các quy ước kiến trúc hiện có.
 - Permission giải thích/request overlay special access và notification permission; user vẫn có thể Skip.
 - Home điều khiển Start/Stop session 1–3 pet, đồng thời mở Catalog, Settings và Premium.
 - Mỗi slot pet chọn được character riêng; Catalog tải 1.026 owner pet từ private GitHub
-  static server, cache metadata, tải/verify ZIP theo SHA-256 khi user bấm Set và vẫn hỗ trợ
-  import pack `.zip` schema v1 được validate an toàn.
+  static server, đọc cache trước và revalidate theo TTL 24 giờ + ETag/rate-limit backoff,
+  tải/verify ZIP theo SHA-256 khi user bấm Set và vẫn hỗ trợ import pack `.zip` schema v1
+  được validate an toàn.
 - Settings là pet roster + app/support; mỗi slot mở một hồ sơ Customize Pet riêng cho
   character, size, speed, touch, speech, custom messages và position.
 - Product UI từ Home trở đi dùng cozy light design: pet room, discovery grid, friendly

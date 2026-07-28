@@ -76,9 +76,10 @@ ui/feature/
 
 - Interface repository cho phép thay data source và test ViewModel/use case.
 - `OwnerPetCatalogRepository` giữ Catalog UI độc lập với network/cache. Production
-  implementation fetch catalog từ private GitHub raw, cache JSON cuối hợp lệ trong
-  app-private storage, tải ZIP on-demand vào cache và chỉ chuyển sang installer sau khi
-  size/SHA-256 khớp. Pack được chọn tiếp tục normalize/cài vào app-private storage.
+  implementation đọc cache trước, revalidate private GitHub raw theo TTL 24 giờ + ETag,
+  tôn trọng rate-limit retry deadline, cache JSON/metadata trong app-private storage, tải
+  ZIP on-demand vào cache và chỉ chuyển sang installer sau khi size/SHA-256 khớp. Pack
+  được chọn tiếp tục normalize/cài vào app-private storage.
 - Coil chỉ gắn GitHub `Authorization` cho đúng host + repository path của Pet; token đọc
   bằng sensitive Remote Config key và không được log/commit.
 - Implementation không leak entity/SDK object lên UI nếu model đó không thuộc UI contract.
