@@ -72,8 +72,8 @@ files/pet_packs/installed/owner.shimeji.<petId>/7/
 Conversion dùng staging + atomic promote, guard path/entry/size/expansion/image bounds, ưu
 tiên canonical filenames, normalize upper-case/suffixed filenames và sửa hai GIF mislabeled
 PNG của pack `136`. Installer copy optional server anchor vào manifest; không tự phân tích
-bitmap. Pinned source ZIP không bị mutate và installed revision cũ vẫn đọc được, nhưng cần
-`Set` lại để nhận metadata revision 7.
+bitmap. Pinned source ZIP không bị mutate. Installed revision cũ vẫn đọc được và nhận
+canonical anchor theo pet ID trong memory khi overlay Start, không cần download/`Set` lại.
 
 ## Source snapshot và server import
 

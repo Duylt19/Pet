@@ -19,6 +19,14 @@ data class OwnerPetCatalogEntry(
         private const val PACK_ID_PREFIX = "owner.shimeji."
 
         fun installedPackId(id: Int): String = "$PACK_ID_PREFIX$id"
+
+        fun installedPetId(packId: String): Int? {
+            if (!packId.startsWith(PACK_ID_PREFIX)) return null
+            return packId.removePrefix(PACK_ID_PREFIX)
+                .takeIf(String::isNotEmpty)
+                ?.toIntOrNull()
+                ?.takeIf { it >= 0 }
+        }
     }
 }
 

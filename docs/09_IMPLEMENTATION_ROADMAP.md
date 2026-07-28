@@ -105,7 +105,8 @@ Before release hardening, complete the clean-room parity items confirmed by the 
   keep it synchronized with pet movement and discard text when its owner leaves TALK.
 - [Done] Add per-pet TALK holding anchors: audit frame 34 server-side, persist metadata
   for 631 supported pets in owner revision 7, keep default placement for 395 unsupported
-  pets, mirror with direction and render the sprite above the speech box.
+  pets, enrich previously installed owner revisions from catalog at Start, mirror with
+  direction and render the sprite above the speech box.
 - [Done] Redesign Pet Speech V3.10 choreography: gate every message behind the actual
   TALK frame, add one deliberate 9–11 second speech beat only to speaking combos, keep
   physical combos silent and render a sharp rectangular carried box without a tail.
