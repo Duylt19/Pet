@@ -44,8 +44,8 @@ UI riêng:
 - Owner manifest revision 7 giữ raw clip `TALK` 34/35/34/36 và copy `speechAnchor`
   đã audit theo từng pet từ server catalog. `PetPackEngineMapper` normalize clip này lúc Start
   thành `TALK` một frame 34, zero velocity và `TALK_WALK` bốn frame với velocity
-  24 px/s. Manifest cũ không có field mới vẫn parse được và dùng attachment mặc định;
-  user cần `Set` lại pet để cài revision 7 có metadata.
+  24 px/s. Manifest cũ không có field mới vẫn parse được; overlay enrich owner pack trong
+  memory bằng catalog theo pet ID nên user không cần `Set` lại.
 - Combo `CHATTER` chạy
   `IDLE 2–4 s → LOOK 2–4 s → TALK 9–11 s → EMOTE → IDLE 3–5 s`.
 - Speech choreography không còn là effect phát ngay khi combo bắt đầu. Mỗi combo được
@@ -119,8 +119,10 @@ Mỗi pet bật message dùng một `TYPE_APPLICATION_OVERLAY` phụ. Window đ�
   vùng hình học tin cậy: 631 pet có metadata riêng, 395 pet không hỗ trợ;
 - tọa độ góc lõm được chuẩn hóa 0–1 trong optional `pets[].speechAnchor`, copy vào owner
   pack revision 7, transform qua canvas/anchor của renderer và mirror theo direction;
-- app không dò alpha ở runtime. Pack không có `speechAnchor`, gồm pet không hỗ trợ và
-  revision cũ, giữ attachment mặc định `(0.5, 0.5)`;
+- app không dò alpha ở runtime. Khi Start, service chờ catalog cache tối đa hai giây rồi
+  enrich mọi `owner.shimeji.<id>` trong memory: revision cũ nhận canonical metadata,
+  pet unsupported bị xóa anchor heuristic cũ và giữ `(0.5, 0.5)`. Nếu catalog chưa khả
+  dụng, revision 7 dùng metadata đã persist còn revision cũ dùng default an toàn;
 - box là hình chữ nhật góc vuông, không bo tròn và không có tail/tam giác phía dưới;
 - box nằm phía sau sprite và lấn 3dp vào attachment: cạnh phải chạm tay khi quay trái,
   cạnh trái chạm tay khi quay phải. Tay/pose TALK được render phía trên mép box để tạo
@@ -195,6 +197,11 @@ sàng, nên thêm `SpeechCatalogRepository` độc lập với pack binary:
 
 Pixel 3 XL / Android 12 / API 31:
 
+- installed Nanami remained `owner.shimeji.558@4` without `speechAnchor`; cached catalog
+  contained `(0.421875, 0.671875)`. Runtime enrichment placed its 392×392 pet window at
+  `(406, 2397)` and 448×241 speech window at `(622, 2419)`, exactly matching the
+  catalog anchor after mirror/overlap; default `(0.5, 0.5)` would have produced
+  approximately `(591, 2352)`;
 - owner pack `Natsu` từ `4.zip` được convert thành `owner.shimeji.4@4`;
 - manifest app-private chứa đúng clip loop
   `shime34 → shime35 → shime34 → shime36`, 240 ms/frame;

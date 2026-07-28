@@ -17,4 +17,12 @@ class OwnerPetCatalogEntryTest {
 
         assertEquals("owner.shimeji.112@7", entry.installedPackKey)
     }
+
+    @Test
+    fun `installed pet ID is parsed only from canonical owner pack IDs`() {
+        assertEquals(558, OwnerPetCatalogEntry.installedPetId("owner.shimeji.558"))
+        assertEquals(null, OwnerPetCatalogEntry.installedPetId("owner.shimeji."))
+        assertEquals(null, OwnerPetCatalogEntry.installedPetId("owner.shimeji.-1"))
+        assertEquals(null, OwnerPetCatalogEntry.installedPetId("builtin.orange-cat"))
+    }
 }

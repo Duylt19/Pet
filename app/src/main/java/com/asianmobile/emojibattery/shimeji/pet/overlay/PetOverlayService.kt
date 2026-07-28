@@ -20,18 +20,32 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.asianmobile.emojibattery.shimeji.MainActivity
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetBitmapCache
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
+import com.asianmobile.emojibattery.shimeji.pet.speech.OwnerPetSpeechAnchorPolicy
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 @AndroidEntryPoint
 class PetOverlayService : Service() {
     @Inject lateinit var petPackRepository: PetPackRepository
     @Inject lateinit var petBitmapCache: PetBitmapCache
     @Inject lateinit var petSettingsRepository: PetSettingsRepository
+    @Inject lateinit var ownerPetCatalogRepository: OwnerPetCatalogRepository
 
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var overlayStartJob: Job? = null
     private var overlayController: PetOverlayController? = null
     private var sessionPositionResetRevisions: List<Int>? = null
     private var isScreenReceiverRegistered = false
@@ -62,41 +76,61 @@ class PetOverlayService : Service() {
             return START_NOT_STICKY
         }
 
-        if (overlayController == null) {
-            try {
-                val preferences = petSettingsRepository.preferences.value
-                sessionPositionResetRevisions = preferences.positionResetRevisions
-                val packs = List(preferences.petCount) { slotIndex ->
-                    petPackRepository.selectedPackForSlot(slotIndex)
-                }
-                val visuals = packs.distinctBy { it.key }.associate { pack ->
-                    pack.key to petBitmapCache.prepare(pack)
-                }
-                overlayController = PetOverlayController(
-                    context = this,
-                    assets = packs.map { pack ->
-                        PetOverlayAsset(
-                            pack = pack,
-                            visual = checkNotNull(visuals[pack.key])
-                        )
-                    },
-                    preferences = preferences,
-                    performanceBudget = petSettingsRepository.performanceBudget
-                ).also { controller ->
-                    controller.start()
-                    if (!getSystemService(PowerManager::class.java).isInteractive) {
-                        controller.pauseRendering()
-                    }
-                }
-                PetOverlayRuntime.updateRunning(true, preferences.petCount)
-            } catch (error: RuntimeException) {
-                Log.e(TAG, "Unable to start pet overlay", error)
-                overlayController?.stop()
-                overlayController = null
-                stopSelf()
+        if (overlayController == null && overlayStartJob == null) {
+            overlayStartJob = serviceScope.launch {
+                startOverlay()
             }
         }
         return START_NOT_STICKY
+    }
+
+    private suspend fun startOverlay() {
+        try {
+            val preferences = petSettingsRepository.preferences.value
+            sessionPositionResetRevisions = preferences.positionResetRevisions
+            val catalog = ownerPetCatalogRepository.snapshot.value.let { current ->
+                if (!current.isLoading) {
+                    current
+                } else {
+                    withTimeoutOrNull(CATALOG_WAIT_MILLIS) {
+                        ownerPetCatalogRepository.snapshot.first { !it.isLoading }
+                    } ?: ownerPetCatalogRepository.snapshot.value
+                }
+            }
+            val packs = List(preferences.petCount) { slotIndex ->
+                OwnerPetSpeechAnchorPolicy.enrich(
+                    pack = petPackRepository.selectedPackForSlot(slotIndex),
+                    catalog = catalog
+                )
+            }
+            val visuals = packs.distinctBy { it.key }.associate { pack ->
+                pack.key to petBitmapCache.prepare(pack)
+            }
+            overlayController = PetOverlayController(
+                context = this,
+                assets = packs.map { pack ->
+                    PetOverlayAsset(
+                        pack = pack,
+                        visual = checkNotNull(visuals[pack.key])
+                    )
+                },
+                preferences = preferences,
+                performanceBudget = petSettingsRepository.performanceBudget
+            ).also { controller ->
+                controller.start()
+                if (!getSystemService(PowerManager::class.java).isInteractive) {
+                    controller.pauseRendering()
+                }
+            }
+            PetOverlayRuntime.updateRunning(true, preferences.petCount)
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: RuntimeException) {
+            Log.e(TAG, "Unable to start pet overlay", error)
+            overlayController?.stop()
+            overlayController = null
+            stopSelf()
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -105,6 +139,7 @@ class PetOverlayService : Service() {
     }
 
     override fun onDestroy() {
+        serviceScope.cancel()
         unregisterScreenStateReceiver()
         val resetRevisions = sessionPositionResetRevisions
         if (resetRevisions != null) {
@@ -209,6 +244,7 @@ class PetOverlayService : Service() {
         private const val NOTIFICATION_ID = 10_201
         private const val CONTENT_REQUEST_CODE = 10_202
         private const val STOP_REQUEST_CODE = 10_203
+        private const val CATALOG_WAIT_MILLIS = 2_000L
         private const val TAG = "PetOverlayService"
 
         internal fun startIntent(context: Context): Intent =

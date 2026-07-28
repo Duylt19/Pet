@@ -41,7 +41,8 @@ Các sprite Shimeji legacy trong owner catalog dùng hướng gốc sang trái. 
 
 Owner pack revision 7 vẫn immutable trên disk và lưu optional `speechAnchor` đã audit
 theo từng pet trong server catalog. Pet không có metadata giữ attachment mặc định; app
-không suy tọa độ từ bitmap ở runtime.
+không suy tọa độ từ bitmap ở runtime. Revision cũ được enrich từ catalog trong memory khi
+overlay Start, không rewrite manifest và không yêu cầu user cài lại.
 Khi service Start, mapper áp dụng profile nhịp frame tương thích theo prefix
 `owner.shimeji.`: engine idle chỉ có một frame và zero velocity; renderer lấy frame đứng
 đầu tiên của clip WALK thay cho frame 11 đang ngồi trong raw IDLE. Runtime còn tạo các
