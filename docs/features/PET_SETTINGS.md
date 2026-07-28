@@ -5,8 +5,8 @@
 `PetSettingsRepository` expose một `StateFlow<PetPreferences>` trên DataStore. Settings
 và pack selection ghi qua repository; Home/catalog/service không truy cập key storage
 trực tiếp. `PetPreferences` materialize đúng ba `PetSlotPreferences`, còn `petCount` quyết
-định bao nhiêu slot active. Service chụp snapshot lúc Start để session đang chạy không
-đổi hành vi giữa chừng.
+định bao nhiêu slot active. Service chụp pack/count/behavior snapshot lúc Start; riêng
+size và speed tiếp tục observe để hai điều khiển này có hiệu lực live.
 
 | Setting | Giá trị hợp lệ | Runtime |
 |---|---|---|
@@ -37,10 +37,12 @@ Editor lời thoại nằm trong Customize Pet, hỗ trợ lưu, hủy và reset
 hiển thị cả số câu và độ dài câu dài nhất; nút Save bị khóa khi vượt 30 câu hoặc 80
 Unicode code point/câu nên emoji không bị tính hai lần. Repository chuẩn hóa khoảng
 trắng, bỏ câu rỗng/trùng và persist dạng newline-delimited string.
-Mỗi pet chọn từ catalog riêng; thay đổi pack và các behavior setting áp dụng ở lần Start
-tiếp theo. Riêng size được service observe theo từng slot và resize window ngay khi user
-bấm stepper hoặc kéo qua một nấc slider. Runtime giữ tâm/chân trên sàn, giữ attachment ở
-tường/trần và clamp lại vào playground nên không cần Stop/Start hoặc Reset position.
+Mỗi pet chọn từ catalog riêng; thay đổi pack và các behavior setting còn lại áp dụng ở lần
+Start tiếp theo. Riêng size và speed được service observe theo từng slot. Size resize
+window ngay khi user bấm stepper hoặc kéo qua một nấc slider; runtime giữ tâm/chân trên
+sàn, giữ attachment ở tường/trần và clamp lại vào playground. Speed thay engine timeline
+của đúng slot ngay khi bấm stepper nhưng giữ nguyên `PetState`, nên action, combo, vị trí
+và animation cursor không bị reset.
 
 ## Settings UX
 
@@ -57,7 +59,8 @@ Speed là mức năng lượng di chuyển, không còn là hệ số tua đều
 `RUN`, `CREEP`, climb và `TALK_WALK` scale frame timing đầy đủ; bounce/trip/jump/dragged
 scale một nửa; idle, sit, wink, look, speech, Special và các pose cảm xúc chỉ scale một
 phần tư. Scripted velocity vẫn scale đầy đủ để pet thật sự đi nhanh/chậm theo setting,
-nhưng nét mặt và skill không chớp ở 150%.
+nhưng nét mặt và skill không chớp ở 150%. Năm option `50/75/100/125/150%` giữ nguyên;
+thay đổi đang chạy có hiệu lực từ tick kế tiếp.
 
 ## Performance/degradation
 

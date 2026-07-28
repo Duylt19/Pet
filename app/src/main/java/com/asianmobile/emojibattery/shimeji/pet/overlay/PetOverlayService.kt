@@ -48,7 +48,7 @@ class PetOverlayService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var overlayStartJob: Job? = null
-    private var sizeUpdatesJob: Job? = null
+    private var liveSettingsJob: Job? = null
     private var overlayController: PetOverlayController? = null
     private var sessionPositionResetRevisions: List<Int>? = null
     private var isScreenReceiverRegistered = false
@@ -125,7 +125,7 @@ class PetOverlayService : Service() {
                     controller.pauseRendering()
                 }
             }
-            observeSizeUpdates()
+            observeLiveSettings()
             PetOverlayRuntime.updateRunning(true, preferences.petCount)
         } catch (error: CancellationException) {
             throw error
@@ -137,16 +137,24 @@ class PetOverlayService : Service() {
         }
     }
 
-    private fun observeSizeUpdates() {
-        sizeUpdatesJob?.cancel()
-        sizeUpdatesJob = serviceScope.launch {
+    private fun observeLiveSettings() {
+        liveSettingsJob?.cancel()
+        liveSettingsJob = serviceScope.launch {
             petSettingsRepository.preferences
                 .map { preferences ->
-                    preferences.petSlots.map { slot -> slot.sizePercent }
+                    preferences.petSlots.map { slot ->
+                        PetLiveSettings(
+                            sizePercent = slot.sizePercent,
+                            speedPercent = slot.speedPercent
+                        )
+                    }
                 }
                 .distinctUntilChanged()
-                .collect { sizePercents ->
-                    overlayController?.updateSizePercents(sizePercents)
+                .collect { settings ->
+                    overlayController?.let { controller ->
+                        controller.updateSizePercents(settings.map(PetLiveSettings::sizePercent))
+                        controller.updateSpeedPercents(settings.map(PetLiveSettings::speedPercent))
+                    }
                 }
         }
     }
@@ -169,13 +177,18 @@ class PetOverlayService : Service() {
         }
         overlayController = null
         sessionPositionResetRevisions = null
-        sizeUpdatesJob = null
+        liveSettingsJob = null
         PetOverlayRuntime.updateRunning(false)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    private data class PetLiveSettings(
+        val sizePercent: Int,
+        val speedPercent: Int
+    )
 
     private fun promoteToForeground() {
         val foregroundServiceType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {

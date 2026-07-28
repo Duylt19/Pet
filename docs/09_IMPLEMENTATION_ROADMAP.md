@@ -76,6 +76,8 @@ Verified trên Pixel 3 XL / API 31 với 3 instance `Sunny Cat`: một foregroun
 
 Size UX dùng 11 nấc `50–150%`, mốc 100% giảm từ 112dp xuống 84dp và service resize đúng
 pet đang chạy ngay khi settings đổi, đồng thời giữ surface attachment và speech placement.
+Speed giữ năm nấc `50/75/100/125/150%` và thay engine timeline live theo đúng slot mà
+không reset action, combo, vị trí hoặc animation cursor.
 
 ## Phase 6 — Monetization, performance and release policy
 

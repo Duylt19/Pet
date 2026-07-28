@@ -130,16 +130,10 @@ internal class PetOverlayController(
                     saved = preferences.lastPositions,
                     marginPixels = appContext.dpToPixels(START_MARGIN_DP).toFloat()
                 )
-                val engineConfig = PetEngineConfig(
-                    clips = pack.manifest.toEngineClips(slotPreferences.speedPercent / 100f),
-                    tapAction = pack.manifest.interaction.tapAction,
-                    supportedActions = pack.manifest.toEngineSupportedActions()
-                )
-                val engine = PetEngine(
-                    engineConfig.copy(
-                        behaviorSeed = pack.manifest.id.hashCode().toLong() xor
-                            ((index + 1L) * PET_BEHAVIOR_SEED_STEP)
-                    )
+                val engine = createEngine(
+                    pack = pack,
+                    index = index,
+                    speedPercent = slotPreferences.speedPercent
                 )
                 val initialState = engine.initialState(
                     bounds = bounds,
@@ -163,6 +157,7 @@ internal class PetOverlayController(
                     view = view,
                     params = params,
                     speechAttachment = speechAttachment(pack),
+                    speedPercent = slotPreferences.speedPercent,
                     state = initialState
                 )
                 instances += instance
@@ -231,6 +226,20 @@ internal class PetOverlayController(
             val size = PetSize(sizePixels.toFloat(), sizePixels.toFloat())
             val bounds = currentPlaygroundBounds(size)
             dispatch(instance, PetEvent.SizeChanged(size = size, bounds = bounds))
+        }
+    }
+
+    fun updateSpeedPercents(speedPercents: List<Int>) {
+        instances.forEach { instance ->
+            val speedPercent = speedPercents.getOrNull(instance.id) ?: return@forEach
+            if (instance.speedPercent == speedPercent) return@forEach
+            val pack = selectedAssets[instance.id].pack
+            instance.engine = createEngine(
+                pack = pack,
+                index = instance.id,
+                speedPercent = speedPercent
+            )
+            instance.speedPercent = speedPercent
         }
     }
 
@@ -522,6 +531,20 @@ internal class PetOverlayController(
             .coerceIn(MIN_PET_SIZE_DP, MAX_PET_SIZE_DP)
     )
 
+    private fun createEngine(
+        pack: PetPack,
+        index: Int,
+        speedPercent: Int
+    ): PetEngine = PetEngine(
+        PetEngineConfig(
+            clips = pack.manifest.toEngineClips(speedPercent / 100f),
+            tapAction = pack.manifest.interaction.tapAction,
+            supportedActions = pack.manifest.toEngineSupportedActions(),
+            behaviorSeed = pack.manifest.id.hashCode().toLong() xor
+                ((index + 1L) * PET_BEHAVIOR_SEED_STEP)
+        )
+    )
+
     @Suppress("DiscouragedApi")
     private fun Context.systemBarSize(resourceName: String): Int {
         val resourceId = resources.getIdentifier(resourceName, "dimen", "android")
@@ -530,10 +553,11 @@ internal class PetOverlayController(
 
     private data class PetInstance(
         val id: Int,
-        val engine: PetEngine,
+        var engine: PetEngine,
         val view: PetOverlayView,
         val params: WindowManager.LayoutParams,
         val speechAttachment: PetSpeechAttachment,
+        var speedPercent: Int,
         var state: PetState
     )
 

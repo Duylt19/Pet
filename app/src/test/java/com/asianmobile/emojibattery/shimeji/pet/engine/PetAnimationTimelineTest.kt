@@ -93,6 +93,39 @@ class PetAnimationTimelineTest {
     }
 
     @Test
+    fun `new speed timeline accepts the active cursor without resetting animation`() {
+        val normalClips = DemoPetAnimation.clips()
+        val walking = PetAnimationTimeline(normalClips).advance(
+            action = PetAction.WALK,
+            cursor = PetAnimationCursor(),
+            elapsedMillis = 100
+        )
+        val fasterClips = normalClips.mapValues { (_, clip) ->
+            clip.copy(
+                frames = clip.frames.map { frame ->
+                    frame.copy(
+                        durationMillis = (frame.durationMillis / 1.5f).toLong(),
+                        velocity = frame.velocity * 1.5f
+                    )
+                }
+            )
+        }
+
+        val continued = PetAnimationTimeline(fasterClips).advance(
+            action = walking.action,
+            cursor = walking.cursor,
+            elapsedMillis = 100
+        )
+
+        assertEquals(PetAction.WALK, continued.action)
+        assertEquals(
+            PetAnimationCursor(frameIndex = 2, elapsedInFrameMillis = 19),
+            continued.cursor
+        )
+        assertEquals(63f * 0.1f, continued.displacement.x, FLOAT_TOLERANCE)
+    }
+
+    @Test
     fun `stationary talk holds one frame while walking talk animates and moves`() {
         val clips = DemoPetAnimation.clips()
         val stillTalk = clips.getValue(PetAction.TALK)

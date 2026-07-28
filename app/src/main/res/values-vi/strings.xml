@@ -600,7 +600,7 @@
     <string name="pet_customization_by_author">bởi %1$s</string>
     <string name="pet_customization_change_character">Đổi nhân vật</string>
     <string name="pet_customization_size_hint">Áp dụng ngay khi pet này đang chạy</string>
-    <string name="pet_customization_speed_hint">Mức năng lượng di chuyển của pet này</string>
+    <string name="pet_customization_speed_hint">Cập nhật chuyển động của pet này ngay lập tức</string>
     <string name="pet_customization_reset_position">Đặt lại vị trí pet này</string>
     <string name="pet_customization_reset_position_hint">Dùng vị trí bắt đầu mặc định ở lần chạy sau</string>
     <string name="pet_customization_messages_hint">Cho phép pet này trò chuyện và phản ứng</string>
