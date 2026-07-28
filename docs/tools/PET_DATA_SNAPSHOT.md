@@ -40,6 +40,12 @@ Exit code is `0` when every catalog pack is runtime-ready, `2` when the audit fi
 
 Upload immutable files using their SHA-256 as the integrity contract. Keep the generated report and CSV beside the server import job. Do not expose the nested `.git` directory or use the Git checkout itself as a public web root.
 
+Production handoff is implemented in the private
+`Server-Emoji-Battery-Shimeji-Pet-AM` repository. Its `tools/catalog_pipeline.py` imports
+only catalog-referenced ZIP/PNG files, regenerates `json/pets.json` with byte size/SHA-256
+metadata and validates all runtime assets before push. The pinned source checkout and nested
+Git history remain outside that server repository.
+
 ## Current snapshot
 
 The owner-authorized snapshot captured on 2026-07-22 is stored at `private_data/anime-shimeji` and pinned to commit `ed39a3d61e1a733b3f21cf6575650a17f359127f`.

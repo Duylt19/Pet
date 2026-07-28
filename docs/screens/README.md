@@ -8,7 +8,7 @@
 | `intro` | `ui/intro/IntroScreen` | Pager ba trang, có native ads theo config |
 | `permission` | `ui/permission/PermissionScreen` | Overlay special access + notification permission, có Continue/Skip |
 | `home` | `ui/home/HomeScreen` | Cozy pet room, thumbnail đội pet, permission-aware Start/Stop và entry Catalog/Settings/Premium |
-| `pet_catalog/{slotIndex}` | `ui/catalog/PetCatalogScreen` | Lưới 2 cột local owner catalog, search, 268 categories, thumbnail, availability và on-demand Set đúng slot |
+| `pet_catalog/{slotIndex}` | `ui/catalog/PetCatalogScreen` | Lưới 2 cột GitHub raw/cache, 1.026 pet, 268 categories, authenticated thumbnail và download/verify/Set đúng slot |
 | `pet_detail/{slotIndex}/{packKey}` | `ui/catalog/PetDetailScreen` | Hero preview, metadata thân thiện và select action đúng slot |
 | `settings` | `ui/home/settings/SettingsScreen` | My Pet Family roster, commit-on-selection Add flow và app/support |
 | `pet_customization/{slotIndex}` | `ui/home/settings/PetCustomizationScreen` | Hồ sơ cute-pet độc lập: character, size, speed, touch, speech, custom messages, position và remove |

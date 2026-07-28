@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <defaultsMap>
     <entry>
+        <key>github_token_pet_server</key>
+        <value></value>
+    </entry>
+    <entry>
         <key>app_password_mail</key>
         <value>ookx ibja hcoa jojl</value>
     </entry>

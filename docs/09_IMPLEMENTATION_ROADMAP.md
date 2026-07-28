@@ -7,7 +7,8 @@ Mỗi phase là một commit độc lập, phải compile/test/docs pass trướ
 
 - Dùng namespace/application ID canonical `com.asianmobile.emojibattery.shimeji`.
 - Giữ module `:ads`, chưa thêm placement mới.
-- MVP dùng asset pet demo do project sở hữu; snapshot pet được owner ủy quyền nằm ngoài Git và chưa được nối trực tiếp vào runtime; không copy code decompile.
+- MVP dùng asset pet demo do project sở hữu; snapshot pet được owner ủy quyền đã được import
+  vào private GitHub static server bằng catalog version/SHA-256; không copy code decompile.
 - Chưa dùng Room; persistence nhỏ dùng DataStore.
 - Runtime tối đa 3 pet theo device budget, không auto-start sau boot.
 
@@ -128,8 +129,10 @@ Before release hardening, complete the clean-room parity items confirmed by the 
   once with explicit recovery, use energy-aware combo transitions, and keep physical
   wall/aerial stories silent.
 - [Done] Add multi-pack session selection before considering swarm mode: 1–3 typed slots can select different packs while the current device performance budget remains authoritative.
-- Treat tap popup, boot restart and remote catalog as separate product/policy decisions, not implicit APK parity.
-- Use only owner-authorized pack metadata and assets. The APK's 991-entry bundled catalog remains analysis evidence; the separately authorized upstream snapshot contains 1,026 catalog packs. Local device sync is enabled for validation, while production distribution must use a provenance-preserving server import.
+- Treat tap popup and boot restart as separate product/policy decisions, not implicit APK parity.
+- [Done] Import the 1.026-pack owner snapshot into the private GitHub static server with
+  versioned catalog, relative raw paths, byte sizes and SHA-256; fetch/cache metadata,
+  authenticate thumbnails and download/verify only the selected ZIP.
 
 - Map entitlement free/premium lên catalog/slot/animation; billing failure không phá pet đang chạy.
 - Chỉ thêm ads placement khi có screen code/policy được owner duyệt; không đặt ad trong overlay.
@@ -152,6 +155,12 @@ The first parity slice is verified on Pixel 3 XL / API 31: falling reaches the b
 
 Edge parity is also verified on that device: status/cutout coordinates are applied exactly once, navigation-bar inset no longer shortens the bottom playground, side/top windows can extend one third of the pet size outside the display, and legacy sprites mirror only when moving right.
 
-The owner-authorized upstream data snapshot is complete and kept outside Git under `private_data/`. Server migration must consume the generated SHA-256 manifest/inventory and normalize the 78 reported naming/content/frame-contract exceptions without mutating the pinned source snapshot.
+The owner-authorized upstream source snapshot remains pinned outside the app repository under
+`private_data/`. The private server import contains only runtime catalog/ZIP/thumbnail files,
+preserves source commit metadata and calculates a SHA-256 contract without copying nested Git
+history. Existing on-demand normalization continues to handle the 78 reported exceptions
+without mutating the pinned source snapshot.
 
-The local catalog vertical slice is verified with all 1,026 metadata/archive/thumbnail records on Pixel 3 XL / API 31: category/search filtering, on-demand Set, DataStore selection and sprite overlay all work. `OwnerPetCatalogRepository` remains the replacement boundary for the production server source.
+The local catalog vertical slice was verified with all 1.026 records on Pixel 3 XL / API 31.
+Production now uses `RemoteOwnerPetCatalogRepository`; the same boundary preserves
+category/search filtering, on-demand Set, DataStore selection and sprite overlay behavior.

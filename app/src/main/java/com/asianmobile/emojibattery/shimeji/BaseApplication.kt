@@ -7,6 +7,8 @@ import com.adjust.sdk.Adjust
 import com.adjust.sdk.AdjustConfig
 import com.adjust.sdk.LogLevel
 import com.asianmobile.emojibattery.shimeji.ads.BuildConfig
+import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
+import com.asianmobile.emojibattery.shimeji.data.remote.PetServerConfig
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
@@ -26,10 +28,21 @@ class BaseApplication : Application(),
             .okHttpClient {
                 okhttp3.OkHttpClient.Builder()
                     .addInterceptor { chain ->
-                        val request = chain.request().newBuilder()
+                        val original = chain.request()
+                        val builder = original.newBuilder()
                             .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
-                            .build()
-                        chain.proceed(request)
+                        if (PetServerConfig.isPetServerUrl(
+                                host = original.url.host,
+                                encodedPath = original.url.encodedPath
+                            )
+                        ) {
+                            SafeRemoteConfig.getSensitiveString(
+                                PetServerConfig.REMOTE_CONFIG_TOKEN_KEY
+                            ).trim().takeIf(String::isNotEmpty)?.let { token ->
+                                builder.header("Authorization", "Bearer $token")
+                            }
+                        }
+                        chain.proceed(builder.build())
                     }
                     .build()
             }
@@ -73,5 +86,4 @@ class BaseApplication : Application(),
     override fun onActivityDestroyed(activity: Activity) {
     }
 }
-
 

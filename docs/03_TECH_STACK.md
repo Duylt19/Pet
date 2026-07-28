@@ -13,6 +13,7 @@
 | Async/state | Coroutines, Flow | Async work và reactive state |
 | Preferences | DataStore Preferences | Onboarding/settings state |
 | Image | Coil Compose | Image loading khi cần |
+| Pet catalog network | `HttpURLConnection`, Coil OkHttp transport | Private GitHub raw JSON/ZIP/thumbnail với token Remote Config |
 | Animation | Lottie Compose | Splash/onboarding animation |
 | Monetization | `:ads`, Google BillingClient | Ads và premium |
 | Observability | Firebase Analytics/Crashlytics/Remote Config | Tracking/config/crash |
@@ -26,7 +27,8 @@
 
 - Room database/compiler.
 - AndroidX WebKit.
-- OkHttp/network layer của browser.
+- OkHttp/network layer của browser. Coil vẫn sở hữu transport ảnh; pet catalog dùng
+  client giới hạn riêng, không phục hồi browser networking.
 - Coil Video decoder.
 - Download/remux service dependencies.
 
@@ -45,6 +47,10 @@ Hai file `google-services.json` đã được đồng bộ package để build n
 `com.asianmobile.emojibattery.shimeji`. Trước khi phát hành, owner phải đăng ký Android app
 với package mới trong Firebase Console và thay các file này bằng config được Firebase tạo chính
 thức; không dùng lâu dài `mobilesdk_app_id` của app registration cũ.
+
+Firebase Remote Config production phải khai báo `github_token_pet_server`. Default trong
+source luôn rỗng; token cần quyền read-only Contents cho đúng private server repository và
+phải rotate ngoài source code.
 
 Xem thêm [PACKAGE_IDENTITY.md](PACKAGE_IDENTITY.md) để phân biệt package canonical với
 Firebase project ID và các resource name legacy còn được giữ.

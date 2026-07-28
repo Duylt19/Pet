@@ -5,8 +5,8 @@ import com.asianmobile.emojibattery.shimeji.data.local.DataStoreManager
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStorePetSettingsRepository
-import com.asianmobile.emojibattery.shimeji.data.repository.impl.LocalOwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.OwnerPetCatalogParser
+import com.asianmobile.emojibattery.shimeji.data.repository.impl.RemoteOwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.FilePetPackRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackArchiveExtractor
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackManifestParser
@@ -60,6 +60,6 @@ object DataModule {
     @Provides
     @Singleton
     fun provideOwnerPetCatalogRepository(
-        repository: LocalOwnerPetCatalogRepository
+        repository: RemoteOwnerPetCatalogRepository
     ): OwnerPetCatalogRepository = repository
 }

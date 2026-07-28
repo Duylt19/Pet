@@ -410,7 +410,8 @@ private fun OwnerPetCard(
         ) {
             if (pet.thumbnailPath != null) {
                 AsyncImage(
-                    model = File(pet.thumbnailPath),
+                    model = pet.thumbnailPath.takeIf { it.startsWith("http") }
+                        ?: File(pet.thumbnailPath),
                     contentDescription = stringResource(
                         R.string.pet_catalog_pet_image,
                         pet.name
@@ -542,6 +543,12 @@ private fun CatalogError(
         )
         OwnerPetCatalogError.LOCAL_STORAGE_UNAVAILABLE -> stringResource(
             R.string.pet_catalog_storage_unavailable
+        )
+        OwnerPetCatalogError.REMOTE_CATALOG_UNAVAILABLE -> stringResource(
+            R.string.pet_catalog_server_unavailable
+        )
+        OwnerPetCatalogError.REMOTE_CATALOG_INVALID -> stringResource(
+            R.string.pet_catalog_server_invalid
         )
     }
     Column(

@@ -13,7 +13,8 @@ Tài liệu này là nguồn chuẩn cho application identity sau lần đổi p
 | App source root | `app/src/main/java/com/asianmobile/emojibattery/shimeji/` |
 | App test root | `app/src/test/java/com/asianmobile/emojibattery/shimeji/` |
 | Ads source root | `ads/src/main/java/com/asianmobile/emojibattery/shimeji/` |
-| External catalog root | `/sdcard/Android/data/com.asianmobile.emojibattery.shimeji/files/pet_catalog/` |
+| Legacy debug catalog root | `/sdcard/Android/data/com.asianmobile.emojibattery.shimeji/files/pet_catalog/` |
+| Production catalog cache | `files/pet_catalog/pets.json` under canonical app sandbox |
 
 Mọi package declaration, import, fully qualified custom view, ProGuard rule, tool default và
 tài liệu mới phải dùng identity canonical ở trên.
@@ -52,8 +53,8 @@ Không chỉnh tay `mobilesdk_app_id` hoặc API key để giả lập Firebase 
 Android xem package mới là một ứng dụng độc lập:
 
 - DataStore/app-private files của package cũ không tự chuyển sang package mới.
-- Catalog từng sync dưới `/Android/data/<package-cũ>/` không tự xuất hiện.
-- Chạy lại `tools/sync_pet_catalog_to_device.py` để nạp catalog vào package canonical.
+- Catalog debug từng sync dưới `/Android/data/<package-cũ>/` không tự xuất hiện. Production
+  catalog được fetch/cache lại từ private GitHub server trong sandbox package canonical.
 - Hai package có thể từng tồn tại song song trên thiết bị cho đến khi app cũ được uninstall.
 
 ## Checklist cho agent

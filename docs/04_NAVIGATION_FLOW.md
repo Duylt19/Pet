@@ -10,7 +10,7 @@
 | `intro` | Intro pager | First-run |
 | `permission` | Permission | Request overlay/notification, có Continue/Skip |
 | `home` | Home | Cozy pet room + family preview + Start/Stop + Catalog/Settings/Premium |
-| `pet_catalog/{slotIndex}` | Pet Catalog | Lưới khám phá character cho slot typed 0–2; 1,026 owner pets, search/category, Set + secure file import |
+| `pet_catalog/{slotIndex}` | Pet Catalog | Lưới 1.026 owner pet từ GitHub raw/cache cho slot typed 0–2; search/category, download + SHA-256 + Set, secure file import |
 | `pet_detail/{slotIndex}/{packKey}` | Pet Detail | Preview metadata, xác nhận dùng pack và quay lại Catalog |
 | `settings` | Settings | My Pet Family roster + app/support hub |
 | `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
@@ -30,7 +30,7 @@ Permission ──continue/skip──> Home
 Home ──Start(no overlay)──> System Overlay Settings ──back──> Home
 Home ──Start(API 33+, notification missing)──> Notification permission ──result──> Start pet
 Home ──Start/Stop──> Pet overlay foreground service
-Home ──Meet a new friend──> Catalog(slot 0) ──search/category──> Set local owner pet
+Home ──Meet a new friend──> Catalog(slot 0) ──search/category──> Download/verify/Set owner pet
 Settings ──Pet card──> Customize Pet(slot) ──Change character──> Catalog(slot)
 Settings ──Add pet──> Catalog(slot trống) ──Set/Import──> kích hoạt slot
 Customize Pet ──Remove──> Settings (shift slot sau, giữ profile riêng)

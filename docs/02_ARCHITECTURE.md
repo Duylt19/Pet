@@ -30,8 +30,9 @@ com.asianmobile.emojibattery.shimeji/
 ├── data/
 │   ├── local/                  # DataStoreManager
 │   ├── model/                  # Domain/data models nhỏ
+│   ├── remote/                 # Private GitHub raw client/config + integrity download
 │   ├── repository/             # Interface
-│   │   └── impl/               # DataStore + local owner catalog implementations
+│   │   └── impl/               # DataStore + remote/cache owner catalog implementations
 │   └── usecase/                # Nghiệp vụ tái sử dụng/testable
 ├── di/                         # Hilt modules đang có dependency thật
 ├── navigation/                 # Routes, NavGraph, safe navigation
@@ -74,7 +75,12 @@ ui/feature/
 ## Data boundary
 
 - Interface repository cho phép thay data source và test ViewModel/use case.
-- `OwnerPetCatalogRepository` giữ Catalog UI độc lập với local test source hiện tại và backend owner-controlled sau này; local binary nằm trong app-specific external storage, còn pack được chọn được normalize/cài vào app-private storage.
+- `OwnerPetCatalogRepository` giữ Catalog UI độc lập với network/cache. Production
+  implementation fetch catalog từ private GitHub raw, cache JSON cuối hợp lệ trong
+  app-private storage, tải ZIP on-demand vào cache và chỉ chuyển sang installer sau khi
+  size/SHA-256 khớp. Pack được chọn tiếp tục normalize/cài vào app-private storage.
+- Coil chỉ gắn GitHub `Authorization` cho đúng host + repository path của Pet; token đọc
+  bằng sensitive Remote Config key và không được log/commit.
 - Implementation không leak entity/SDK object lên UI nếu model đó không thuộc UI contract.
 - Use case không bắt buộc cho CRUD một dòng; dùng khi logic phối hợp nhiều nguồn, có policy hoặc cần reuse/test riêng.
 - DataStore cho key-value nhỏ; Room chỉ thêm lại khi có requirement về dữ liệu quan hệ/offline.

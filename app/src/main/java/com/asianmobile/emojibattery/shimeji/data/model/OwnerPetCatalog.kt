@@ -6,7 +6,10 @@ data class OwnerPetCatalogEntry(
     val category: String,
     val author: String?,
     val thumbnailPath: String?,
-    val hasLocalArchive: Boolean
+    val hasLocalArchive: Boolean,
+    val archiveUrl: String? = null,
+    val archiveSizeBytes: Long? = null,
+    val archiveSha256: String? = null
 ) {
     val installedPackKey: String
         get() = "${installedPackId(id)}@$OWNER_PET_PACK_VERSION"
@@ -23,6 +26,7 @@ const val OWNER_PET_PACK_VERSION = 4
 data class OwnerPetCatalogSnapshot(
     val entries: List<OwnerPetCatalogEntry> = emptyList(),
     val localRootPath: String = "",
+    val catalogVersion: String? = null,
     val isLoading: Boolean = true,
     val error: OwnerPetCatalogError? = null
 )
@@ -30,5 +34,7 @@ data class OwnerPetCatalogSnapshot(
 enum class OwnerPetCatalogError {
     LOCAL_CATALOG_MISSING,
     LOCAL_CATALOG_INVALID,
-    LOCAL_STORAGE_UNAVAILABLE
+    LOCAL_STORAGE_UNAVAILABLE,
+    REMOTE_CATALOG_UNAVAILABLE,
+    REMOTE_CATALOG_INVALID
 }

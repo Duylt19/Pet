@@ -61,15 +61,19 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 
 ## Owner catalog model
 
-- `OwnerPetCatalogEntry`: owner ID, name, category, author, optional local thumbnail path và archive availability.
-- `OwnerPetCatalogSnapshot`: immutable loading/content/error state cùng app-specific local root.
-- `OwnerPetCatalogRepository`: boundary dùng chung cho local test source hiện tại và network/cache source tương lai.
+- `OwnerPetCatalogEntry`: owner ID, name, category, author, thumbnail source, archive URL,
+  byte size và SHA-256 metadata.
+- `OwnerPetCatalogSnapshot`: immutable loading/content/error state cùng server catalog version.
+- `OwnerPetCatalogRepository`: boundary dùng chung cho UI; production implementation dùng
+  private GitHub raw + app-private catalog cache + on-demand verified archive cache.
 - Raw ZIP chỉ được normalize khi user bấm `Set`; normalization hiện tạo immutable
   revision `owner.shimeji.<id>@4`, thêm `TALK` từ frame 34–36 khi đủ dữ liệu và persist
   qua selection của slot đích trong `pet_selected_pack_keys`. Revision cũ đã cài vẫn đọc
   được; thao tác `Set` mới chọn revision 4. Khi map vào engine, raw TALK bốn frame được tách tương thích thành TALK
   đứng yên một frame và TALK_WALK bốn frame; manifest app-private không bị mutate.
-- Catalog 1,026 item không dùng Room trong local test: metadata parse một lần vào memory, filter 1,026 record bằng pure policy; binary vẫn nằm ngoài APK/Git.
+- Catalog 1.026 item không dùng Room: metadata parse một lần vào memory, filter bằng pure
+  policy; binary nằm ngoài APK và chỉ ZIP được chọn mới tải về. Cache JSON cuối hợp lệ dùng
+  khi offline; ZIP cache vẫn phải qua secure installer trước khi trở thành installed pack.
 
 ## Không có database
 

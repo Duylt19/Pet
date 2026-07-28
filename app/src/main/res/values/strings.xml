@@ -468,6 +468,8 @@
     <string name="pet_catalog_local_missing">Local catalog data was not found. Sync the owner snapshot to:\n%1$s</string>
     <string name="pet_catalog_local_invalid">The local pet catalog is invalid. Sync the snapshot again.</string>
     <string name="pet_catalog_storage_unavailable">Local catalog storage is unavailable on this device.</string>
+    <string name="pet_catalog_server_unavailable">Unable to connect to the pet catalog. Check your connection and try again.</string>
+    <string name="pet_catalog_server_invalid">The pet catalog data is invalid. Please try again later.</string>
     <string name="pet_catalog_retry">Retry</string>
     <string name="pet_catalog_prepare_failed">This local pet could not be prepared. Check its archive and try again.</string>
     <string name="pet_catalog_heading">Find your screen buddy</string>
