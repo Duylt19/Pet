@@ -147,23 +147,12 @@ fun PetCustomizationScreen(
                     onSizeChange = viewModel::updateSize
                 )
                 SettingsDivider()
-                PetValueSettingsRow(
+                PetSpeedSettingsRow(
                     iconRes = R.drawable.ic_pet_speed,
                     title = stringResource(R.string.settings_pet_speed_title),
                     subtitle = stringResource(R.string.pet_customization_speed_hint),
-                    value = "${state.speedPercent}%",
-                    canDecrease = state.speedPercent > PetSettingsPolicy.MIN_SPEED_PERCENT,
-                    canIncrease = state.speedPercent < PetSettingsPolicy.MAX_SPEED_PERCENT,
-                    onDecrease = {
-                        viewModel.updateSpeed(
-                            state.speedPercent - PetSettingsPolicy.SPEED_STEP_PERCENT
-                        )
-                    },
-                    onIncrease = {
-                        viewModel.updateSpeed(
-                            state.speedPercent + PetSettingsPolicy.SPEED_STEP_PERCENT
-                        )
-                    }
+                    speedPercent = state.speedPercent,
+                    onSpeedChange = viewModel::updateSpeed
                 )
                 SettingsDivider()
                 SettingsRow(
@@ -329,22 +318,69 @@ private fun PetSizeSettingsRow(
     onSizeChange: (Int) -> Unit
 ) {
     val policy = remember { PetSettingsPolicy() }
+    PetPercentageSettingsRow(
+        iconRes = iconRes,
+        title = title,
+        subtitle = subtitle,
+        percent = sizePercent,
+        minimumPercent = PetSettingsPolicy.MIN_SIZE_PERCENT,
+        maximumPercent = PetSettingsPolicy.MAX_SIZE_PERCENT,
+        stepPercent = PetSettingsPolicy.SIZE_STEP_PERCENT,
+        sanitizePercent = policy::sanitizeSizePercent,
+        onPercentChange = onSizeChange
+    )
+}
+
+@Composable
+private fun PetSpeedSettingsRow(
+    iconRes: Int,
+    title: String,
+    subtitle: String,
+    speedPercent: Int,
+    onSpeedChange: (Int) -> Unit
+) {
+    val policy = remember { PetSettingsPolicy() }
+    PetPercentageSettingsRow(
+        iconRes = iconRes,
+        title = title,
+        subtitle = subtitle,
+        percent = speedPercent,
+        minimumPercent = PetSettingsPolicy.MIN_SPEED_PERCENT,
+        maximumPercent = PetSettingsPolicy.MAX_SPEED_PERCENT,
+        stepPercent = PetSettingsPolicy.SPEED_STEP_PERCENT,
+        sanitizePercent = policy::sanitizeSpeedPercent,
+        onPercentChange = onSpeedChange
+    )
+}
+
+@Composable
+private fun PetPercentageSettingsRow(
+    iconRes: Int,
+    title: String,
+    subtitle: String,
+    percent: Int,
+    minimumPercent: Int,
+    maximumPercent: Int,
+    stepPercent: Int,
+    sanitizePercent: (Int) -> Int,
+    onPercentChange: (Int) -> Unit
+) {
     var sliderValue by remember {
-        mutableFloatStateOf(sizePercent.toFloat())
+        mutableFloatStateOf(percent.toFloat())
     }
-    var pendingSizePercent by remember { mutableStateOf<Int?>(null) }
-    LaunchedEffect(sizePercent) {
-        if (pendingSizePercent == null || pendingSizePercent == sizePercent) {
-            sliderValue = sizePercent.toFloat()
-            pendingSizePercent = null
+    var pendingPercent by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(percent) {
+        if (pendingPercent == null || pendingPercent == percent) {
+            sliderValue = percent.toFloat()
+            pendingPercent = null
         }
     }
-    val updateSize = { requestedPercent: Int ->
-        val sanitized = policy.sanitizeSizePercent(requestedPercent)
+    val updatePercent = { requestedPercent: Int ->
+        val sanitized = sanitizePercent(requestedPercent)
         sliderValue = sanitized.toFloat()
-        if (sanitized != (pendingSizePercent ?: sizePercent)) {
-            pendingSizePercent = sanitized
-            onSizeChange(sanitized)
+        if (sanitized != (pendingPercent ?: percent)) {
+            pendingPercent = sanitized
+            onPercentChange(sanitized)
         }
     }
 
@@ -354,26 +390,22 @@ private fun PetSizeSettingsRow(
             title = title,
             subtitle = subtitle,
             value = "${sliderValue.roundToInt()}%",
-            canDecrease = sliderValue > PetSettingsPolicy.MIN_SIZE_PERCENT,
-            canIncrease = sliderValue < PetSettingsPolicy.MAX_SIZE_PERCENT,
+            canDecrease = sliderValue > minimumPercent,
+            canIncrease = sliderValue < maximumPercent,
             onDecrease = {
-                updateSize(sliderValue.roundToInt() - PetSettingsPolicy.SIZE_STEP_PERCENT)
+                updatePercent(sliderValue.roundToInt() - stepPercent)
             },
             onIncrease = {
-                updateSize(sliderValue.roundToInt() + PetSettingsPolicy.SIZE_STEP_PERCENT)
+                updatePercent(sliderValue.roundToInt() + stepPercent)
             }
         )
         Slider(
             value = sliderValue,
             onValueChange = { value ->
-                updateSize(value.roundToInt())
+                updatePercent(value.roundToInt())
             },
-            valueRange = PetSettingsPolicy.MIN_SIZE_PERCENT.toFloat()..
-                PetSettingsPolicy.MAX_SIZE_PERCENT.toFloat(),
-            steps = (
-                (PetSettingsPolicy.MAX_SIZE_PERCENT - PetSettingsPolicy.MIN_SIZE_PERCENT) /
-                    PetSettingsPolicy.SIZE_STEP_PERCENT
-                ) - 1,
+            valueRange = minimumPercent.toFloat()..maximumPercent.toFloat(),
+            steps = ((maximumPercent - minimumPercent) / stepPercent) - 1,
             colors = SliderDefaults.colors(
                 thumbColor = colorResource(R.color.colors_7B61FF),
                 activeTrackColor = colorResource(R.color.colors_7B61FF),

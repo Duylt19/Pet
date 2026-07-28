@@ -41,8 +41,8 @@ Mỗi pet chọn từ catalog riêng; thay đổi pack và các behavior setting
 Start tiếp theo. Riêng size và speed được service observe theo từng slot. Size resize
 window ngay khi user bấm stepper hoặc kéo qua một nấc slider; runtime giữ tâm/chân trên
 sàn, giữ attachment ở tường/trần và clamp lại vào playground. Speed thay engine timeline
-của đúng slot ngay khi bấm stepper nhưng giữ nguyên `PetState`, nên action, combo, vị trí
-và animation cursor không bị reset.
+của đúng slot ngay khi user bấm stepper hoặc kéo slider nhưng giữ nguyên `PetState`, nên
+action, combo, vị trí và animation cursor không bị reset.
 
 ## Settings UX
 
@@ -50,6 +50,8 @@ và animation cursor không bị reset.
 - Tap card mở `pet_customization/{slotIndex}`.
 - Size editor dùng slider 11 nấc `50–150%` kèm stepper `−/+`; giá trị optimistic trên UI
   trong khi DataStore persist và overlay đang chạy nhận cùng state flow.
+- Speed editor dùng slider 5 nấc `50/75/100/125/150%` kèm stepper `−/+`; cả hai điều
+  khiển dùng chung optimistic state và cập nhật pet đang chạy ngay lập tức.
 - Add mở Catalog ở `slotIndex == petCount`; chỉ khi Set/Import thành công mới tăng count.
 - Remove có confirm, shift profile/position của slot sau lên trước, append một profile
   mặc định và invalidate position revision để session cũ không ghi đè thứ tự mới.
