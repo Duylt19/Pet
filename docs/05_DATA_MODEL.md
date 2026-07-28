@@ -66,6 +66,10 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 - `OwnerPetCatalogSnapshot`: immutable loading/content/error state cùng server catalog version.
 - `OwnerPetCatalogRepository`: boundary dùng chung cho UI; production implementation dùng
   private GitHub raw + app-private catalog cache + on-demand verified archive cache.
+- Catalog cache gồm `pets.json` cuối hợp lệ và `metadata.json` chứa ETag, thời điểm validation
+  gần nhất và rate-limit retry deadline. Cache được đọc trước network; TTL 24 giờ giới hạn
+  mỗi device tối đa một catalog revalidation/ngày, còn `304 Not Modified` tránh tải lại body.
+  `403`/`429` giữ catalog cũ và chặn retry đến `Retry-After`/`X-RateLimit-Reset` (tối đa 24 giờ).
 - Raw ZIP chỉ được normalize khi user bấm `Set`; normalization hiện tạo immutable
   revision `owner.shimeji.<id>@4`, thêm `TALK` từ frame 34–36 khi đủ dữ liệu và persist
   qua selection của slot đích trong `pet_selected_pack_keys`. Revision cũ đã cài vẫn đọc

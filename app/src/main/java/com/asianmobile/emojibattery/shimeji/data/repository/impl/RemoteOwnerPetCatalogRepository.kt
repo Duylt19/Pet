@@ -4,6 +4,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.remote.GithubPetCatalogClient
+import com.asianmobile.emojibattery.shimeji.data.remote.PetCatalogFetchResult
 import com.asianmobile.emojibattery.shimeji.data.remote.PetServerConfig
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.LegacyShimejiPackInstaller
@@ -40,34 +41,70 @@ class RemoteOwnerPetCatalogRepository @Inject constructor(
         refreshMutex.withLock {
             _snapshot.value = _snapshot.value.copy(isLoading = true, error = null)
 
-            val remoteJson = client.fetchCatalogJson()
-            val remoteDocument = remoteJson?.let { json ->
+            val cached = client.readCachedCatalog()
+            val cachedDocument = cached?.json?.let { json ->
                 runCatching { parser.parseDocument(json) }.getOrNull()
             }
-            if (remoteDocument != null) {
-                client.cacheCatalogJson(remoteJson)
-                _snapshot.value = remoteDocument.toSnapshot()
-                return@withLock
-            }
-
-            val cachedDocument = client.readCachedCatalogJson()?.let { json ->
-                runCatching { parser.parseDocument(json) }.getOrNull()
-            }
+            val metadata = cached?.metadata ?: client.readCatalogCacheMetadata()
             if (cachedDocument != null) {
                 _snapshot.value = cachedDocument.toSnapshot()
+            }
+            if (!client.shouldRefreshCatalog(metadata)) {
+                if (cachedDocument == null) {
+                    _snapshot.value = errorSnapshot(
+                        OwnerPetCatalogError.REMOTE_CATALOG_UNAVAILABLE
+                    )
+                }
                 return@withLock
             }
 
-            _snapshot.value = OwnerPetCatalogSnapshot(
-                isLoading = false,
-                error = if (remoteJson == null) {
-                    OwnerPetCatalogError.REMOTE_CATALOG_UNAVAILABLE
-                } else {
-                    OwnerPetCatalogError.REMOTE_CATALOG_INVALID
+            when (val result = client.fetchCatalog(metadata.etag)) {
+                is PetCatalogFetchResult.Updated -> {
+                    val remoteDocument = runCatching {
+                        parser.parseDocument(result.json)
+                    }.getOrNull()
+                    if (remoteDocument != null) {
+                        client.cacheCatalog(result.json, result.etag)
+                        _snapshot.value = remoteDocument.toSnapshot()
+                    } else if (cachedDocument == null) {
+                        _snapshot.value = errorSnapshot(OwnerPetCatalogError.REMOTE_CATALOG_INVALID)
+                    }
                 }
-            )
+
+                is PetCatalogFetchResult.NotModified -> {
+                    if (cachedDocument != null) {
+                        client.markCatalogNotModified(result.etag)
+                        _snapshot.value = cachedDocument.toSnapshot()
+                    } else {
+                        _snapshot.value = errorSnapshot(OwnerPetCatalogError.REMOTE_CATALOG_INVALID)
+                    }
+                }
+
+                is PetCatalogFetchResult.RateLimited -> {
+                    client.deferCatalogRefresh(result.retryAtEpochMillis)
+                    if (cachedDocument == null) {
+                        _snapshot.value = errorSnapshot(
+                            OwnerPetCatalogError.REMOTE_CATALOG_UNAVAILABLE
+                        )
+                    }
+                }
+
+                PetCatalogFetchResult.Failed -> {
+                    if (cachedDocument == null) {
+                        _snapshot.value = errorSnapshot(
+                            OwnerPetCatalogError.REMOTE_CATALOG_UNAVAILABLE
+                        )
+                    }
+                }
+            }
         }
     }
+
+    private fun errorSnapshot(error: OwnerPetCatalogError): OwnerPetCatalogSnapshot =
+        OwnerPetCatalogSnapshot(
+            isLoading = false,
+            error = error
+        )
 
     override suspend fun preparePack(petId: Int): PetPackInstallResult =
         withContext(Dispatchers.IO) {
