@@ -28,6 +28,7 @@ Ví dụ đầy đủ: [`docs/examples/pet-pack-v1`](../examples/pet-pack-v1).
 | `name`, `author` | Display metadata có giới hạn độ dài |
 | `canvas` | Logical width/height và `defaultScale` 0.25–4 |
 | `anchor` | Điểm neo chuẩn hóa `x/y` trong khoảng 0–1 |
+| `speechAnchor` | Optional điểm tay cầm hộp TALK chuẩn hóa `x/y` trong khoảng 0–1 |
 | `interaction.tapAction` | Action clip chạy khi pet được tap |
 | `clips[]` | Action, loop/nextAction và danh sách frame |
 | `frames[]` | File, source rect, `durationMs`, optional scripted velocity |
@@ -38,19 +39,20 @@ Action names được schema v1 nhận: `idle`, `walk`, `run`, `fall`, `bounce`,
 
 Các sprite Shimeji legacy trong owner catalog dùng hướng gốc sang trái. Overlay mirror ngang frame khi `PetDirection.RIGHT` và giữ nguyên khi đi trái. Motion polish chỉ biến đổi nhẹ quanh bottom anchor cho locomotion/physics; `SPECIAL`/`SPECIAL_2` không còn scale luân phiên vì chính sprite đã chứa chuyển động. Wall/ceiling pose vẫn giữ orientation gốc, còn hướng đổi vào trong khi pet chuyển biên được quyết định trong pure engine.
 
-Owner pack revision 4 vẫn immutable trên disk. Khi service Start, mapper áp dụng profile
-nhịp frame tương thích theo prefix `owner.shimeji.`: engine idle chỉ có một frame và zero
-velocity; renderer lấy frame đứng đầu tiên của clip WALK thay cho frame 11 đang ngồi trong
-raw IDLE. Runtime còn tạo các alias semantic chỉ cho owner pack: `EMOTE` từ clip `wink`
-frame 15/17, `FLOOR_PLAY` từ `dangle` frame 31/32, `SPRAWL` từ cuối clip `creep`,
-`HOLD_WALL` từ frame bám tường 13 và `HOLD_CEILING` từ frame bám trần 23. Nhờ vậy combo
-không còn dùng pose chơi chân trên sàn để giả bám tường/trần.
+Owner pack revision 5 vẫn immutable trên disk và lưu `speechAnchor` suy ra từ frame 34.
+Khi service Start, mapper áp dụng profile nhịp frame tương thích theo prefix
+`owner.shimeji.`: engine idle chỉ có một frame và zero velocity; renderer lấy frame đứng
+đầu tiên của clip WALK thay cho frame 11 đang ngồi trong raw IDLE. Runtime còn tạo các
+alias semantic chỉ cho owner pack: `EMOTE` từ clip `wink` frame 15/17, `FLOOR_PLAY` từ
+`dangle` frame 31/32, `SPRAWL` từ cuối clip `creep`, `HOLD_WALL` từ frame bám tường 13
+và `HOLD_CEILING` từ frame bám trần 23. Nhờ vậy combo không còn dùng pose chơi chân trên
+sàn để giả bám tường/trần.
 
 Wink/bounce/trip/jump/tapped có nhịp đọc được; Special dùng sequence một chiều
 `420/480/560/680/860 ms` và playback `PLAY_ONCE`, sau đó chuyển sang beat recovery riêng
 thay vì giữ vô hạn endpoint không ổn định. `SPECIAL_2` loại các frame lặp ngược theo file
 ở runtime. Việc normalize này không rewrite archive/manifest và không yêu cầu user Set
-lại 1.026 pet đã cài.
+lại pet của cùng revision đã cài.
 
 ## Installer pipeline
 

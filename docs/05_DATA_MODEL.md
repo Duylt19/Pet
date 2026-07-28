@@ -71,10 +71,13 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
   mỗi device tối đa một catalog revalidation/ngày, còn `304 Not Modified` tránh tải lại body.
   `403`/`429` giữ catalog cũ và chặn retry đến `Retry-After`/`X-RateLimit-Reset` (tối đa 24 giờ).
 - Raw ZIP chỉ được normalize khi user bấm `Set`; normalization hiện tạo immutable
-  revision `owner.shimeji.<id>@4`, thêm `TALK` từ frame 34–36 khi đủ dữ liệu và persist
+  revision `owner.shimeji.<id>@5`, thêm `TALK` từ frame 34–36 khi đủ dữ liệu, tự
+  suy ra `speechAnchor` từ frame 34 và persist
   qua selection của slot đích trong `pet_selected_pack_keys`. Revision cũ đã cài vẫn đọc
-  được; thao tác `Set` mới chọn revision 4. Khi map vào engine, raw TALK bốn frame được tách tương thích thành TALK
-  đứng yên một frame và TALK_WALK bốn frame; manifest app-private không bị mutate.
+  được và runtime suy `speechAnchor` từ visual TALK nếu field chưa tồn tại, nên không cần
+  `Set` lại; thao tác `Set` mới chọn revision 5. Khi map vào engine, raw TALK bốn frame
+  được tách tương thích thành TALK đứng yên một frame và TALK_WALK bốn frame; manifest
+  app-private không bị mutate.
 - Catalog 1.026 item không dùng Room: metadata parse một lần vào memory, filter bằng pure
   policy; binary nằm ngoài APK và chỉ ZIP được chọn mới tải về. Cache JSON cuối hợp lệ dùng
   khi offline; ZIP cache vẫn phải qua secure installer trước khi trở thành installed pack.

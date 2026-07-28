@@ -34,6 +34,13 @@ class PetPackValidator {
         ) {
             errors += "Anchor must be normalized"
         }
+        manifest.speechAnchor?.let { speechAnchor ->
+            if (!speechAnchor.x.isFinite() || speechAnchor.x !in 0f..1f ||
+                !speechAnchor.y.isFinite() || speechAnchor.y !in 0f..1f
+            ) {
+                errors += "Speech anchor must be normalized"
+            }
+        }
         if (manifest.clips.size !in 1..MAX_CLIPS) errors += "Invalid clip count"
         val idle = manifest.clips[PetAction.IDLE]
         if (idle == null || !idle.loops) errors += "A looping idle clip is required"

@@ -15,6 +15,6 @@ class OwnerPetCatalogEntryTest {
             hasLocalArchive = true
         )
 
-        assertEquals("owner.shimeji.112@4", entry.installedPackKey)
+        assertEquals("owner.shimeji.112@5", entry.installedPackKey)
     }
 }

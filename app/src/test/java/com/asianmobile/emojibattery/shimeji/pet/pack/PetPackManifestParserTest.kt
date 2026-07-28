@@ -9,15 +9,28 @@ class PetPackManifestParserTest {
     private val parser = PetPackManifestParser()
 
     @Test
-    fun `parse reads versioned clips frame rect anchor and interaction`() {
-        val manifest = parser.parse(validManifestJson())
+    fun `parse reads versioned clips frame rect anchors and interaction`() {
+        val manifest = parser.parse(
+            validManifestJson().replace(
+                "\"interaction\"",
+                "\"speechAnchor\": { \"x\": 0.15, \"y\": 0.69 }, \"interaction\""
+            )
+        )
 
         assertEquals(PET_PACK_SCHEMA_VERSION, manifest.schemaVersion)
         assertEquals("demo.orange-cat", manifest.id)
         assertEquals(3, manifest.clips.size)
         assertEquals(PetAction.TAPPED, manifest.interaction.tapAction)
         assertEquals(PetPackAnchor(0.5f, 1f), manifest.anchor)
+        assertEquals(PetPackAnchor(0.15f, 0.69f), manifest.speechAnchor)
         assertEquals(120L, manifest.clips.getValue(PetAction.WALK).frames.first().durationMillis)
+    }
+
+    @Test
+    fun `parse keeps speech anchor optional for existing packs`() {
+        val manifest = parser.parse(validManifestJson())
+
+        assertEquals(null, manifest.speechAnchor)
     }
 
     @Test

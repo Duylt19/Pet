@@ -21,7 +21,7 @@ data class OwnerPetCatalogEntry(
     }
 }
 
-const val OWNER_PET_PACK_VERSION = 4
+const val OWNER_PET_PACK_VERSION = 5
 
 data class OwnerPetCatalogSnapshot(
     val entries: List<OwnerPetCatalogEntry> = emptyList(),
