@@ -11,6 +11,7 @@ class PetPackManifestParser {
         val root = JSONObject(json)
         val canvasJson = root.requiredObject("canvas")
         val anchorJson = root.requiredObject("anchor")
+        val speechAnchorJson = root.optJSONObject("speechAnchor")
         val interactionJson = root.optJSONObject("interaction") ?: JSONObject()
         val clipList = root.requiredArray("clips").objects("clips").map { clipJson ->
             val action = clipJson.requiredAction("action")
@@ -66,7 +67,13 @@ class PetPackManifestParser {
                 tapAction = interactionJson.optString("tapAction", "tapped")
                     .toPetAction("interaction.tapAction")
             ),
-            clips = clips
+            clips = clips,
+            speechAnchor = speechAnchorJson?.let {
+                PetPackAnchor(
+                    x = it.requiredDouble("x").toFloat(),
+                    y = it.requiredDouble("y").toFloat()
+                )
+            }
         )
     } catch (error: PetPackFormatException) {
         throw error

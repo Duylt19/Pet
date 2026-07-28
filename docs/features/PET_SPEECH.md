@@ -41,9 +41,11 @@ UI riêng:
 
 ### Action và combo
 
-- Legacy manifest revision 4 vẫn giữ raw clip `TALK` 34/35/34/36 để tương thích dữ liệu
-  đã cài. `PetPackEngineMapper` normalize clip này lúc Start thành `TALK` một frame 34,
-  zero velocity và `TALK_WALK` bốn frame với velocity 24 px/s; user không cần cài lại pet.
+- Owner manifest revision 7 giữ raw clip `TALK` 34/35/34/36 và copy `speechAnchor`
+  đã audit theo từng pet từ server catalog. `PetPackEngineMapper` normalize clip này lúc Start
+  thành `TALK` một frame 34, zero velocity và `TALK_WALK` bốn frame với velocity
+  24 px/s. Manifest cũ không có field mới vẫn parse được và dùng attachment mặc định;
+  user cần `Set` lại pet để cài revision 7 có metadata.
 - Combo `CHATTER` chạy
   `IDLE 2–4 s → LOOK 2–4 s → TALK 9–11 s → EMOTE → IDLE 3–5 s`.
 - Speech choreography không còn là effect phát ngay khi combo bắt đầu. Mỗi combo được
@@ -100,8 +102,8 @@ không dùng cooldown độc lập có thể làm pet giữ frame TALK nhưng kh
 
 ## Bubble overlay
 
-Mỗi pet đang nói dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn tại khi session của pet
-đó có câu đang hiển thị:
+Mỗi pet bật message dùng một `TYPE_APPLICATION_OVERLAY` phụ. Window được tạo ở trạng thái
+ẩn trước pet window để giữ z-order ổn định, và chỉ visible khi session có câu hiển thị:
 
 - kích thước thích ứng trong khoảng 80–260dp × 48–112dp, transparent,
   `FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE`;
@@ -112,11 +114,17 @@ Mỗi pet đang nói dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn t
 - maximum width tiếp tục bị clamp theo usable viewport. Nếu text không thể vừa giới hạn,
   box dùng maximum 260×112dp và renderer ellipsis ở dòng thứ tư;
 - không tạo full-screen window và không chặn app bên dưới;
-- mọi message dùng attachment gốc của `WalkWithIE`: canvas 128 có `ImageAnchor=64,128`,
-  `IeOffsetX=0`, `IeOffsetY=-64`, nên đáy box nằm ở nửa chiều cao pet;
+- server pipeline dò cạnh alpha đứng ổn định của vùng khuyết và hàng mà bàn tay bắt đầu
+  nhô sang trái trên frame 34. Detector chỉ đánh dấu pet có đủ 34/35/36 và góc lõm thuộc
+  vùng hình học tin cậy: 631 pet có metadata riêng, 395 pet không hỗ trợ;
+- tọa độ góc lõm được chuẩn hóa 0–1 trong optional `pets[].speechAnchor`, copy vào owner
+  pack revision 7, transform qua canvas/anchor của renderer và mirror theo direction;
+- app không dò alpha ở runtime. Pack không có `speechAnchor`, gồm pet không hỗ trợ và
+  revision cũ, giữ attachment mặc định `(0.5, 0.5)`;
 - box là hình chữ nhật góc vuông, không bo tròn và không có tail/tam giác phía dưới;
-- box nằm hoàn toàn phía trước pet: cạnh phải chạm anchor khi quay trái, cạnh trái chạm
-  anchor khi quay phải; toàn placement được mirror;
+- box nằm phía sau sprite và lấn 3dp vào attachment: cạnh phải chạm tay khi quay trái,
+  cạnh trái chạm tay khi quay phải. Tay/pose TALK được render phía trên mép box để tạo
+  cảm giác pet đang cầm; toàn placement được mirror;
 - trước speech, pet solo ở nửa trái/phải tự quay vào tâm viewport để box có đủ chỗ và
   cạnh vẫn chạm đúng hand/anchor thay vì bị horizontal clamp đẩy xuyên qua sprite;
   `TALK_WALK` đi theo hướng này và tự quay lại nếu chạm mép; social TALK giữ nguyên facing;
@@ -127,7 +135,7 @@ Mỗi pet đang nói dùng một `TYPE_APPLICATION_OVERLAY` phụ, chỉ tồn t
   không tạo thread/coroutine/timer riêng;
 - text tối đa bốn dòng, căn giữa theo cả hai trục, tương phản cao và có
   `contentDescription`;
-- stop/service destroy duyệt và remove toàn bộ bubble trước khi remove các pet window.
+- stop/service destroy remove toàn bộ bubble trước khi remove các pet window.
 
 ## Multi-pet và direction contract V3.14
 
@@ -174,10 +182,11 @@ sàng, nên thêm `SpeechCatalogRepository` độc lập với pack binary:
 - JVM: TALK đứng yên một frame/zero displacement, TALK_WALK bốn frame/24 px/s, legacy
   runtime normalization, lifecycle engine–speech giữ box xuyên suốt 90–110 tick,
   adaptive sizing cho short/single-line/explicit newline/long/fallback/narrow viewport,
-  placement trái/phải theo `IeOffset`, hủy đúng owner khi pose kết thúc,
+  catalog-anchor parsing, canvas transform và placement trái/phải theo attachment,
+  hủy đúng owner khi pose kết thúc,
   speaking/silent combo mapping, simultaneous multi-pet Show/independent Hide và drag chỉ
   đóng bubble của pet đó.
-- Pack: raw contract sequence 34/35/34/36 và immutable owner conversion revision 4.
+- Pack: raw contract sequence 34/35/34/36 và immutable owner conversion revision 7.
 - Android: rectangular TALK box theo pet và hướng mirror, không tail, clamp hai mép,
   1/2/3 per-pet window, rotation, screen-off/resume, Settings off và Stop không còn
   window.

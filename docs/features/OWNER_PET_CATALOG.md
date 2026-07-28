@@ -7,13 +7,16 @@ Catalog production được đọc từ private GitHub repository:
 ```text
 Server-Emoji-Battery-Shimeji-Pet-AM/
 ├── json/pets.json
+├── json/speech-anchors.json
 ├── data/<petId>.zip
 └── thumb/<petId>.png
 ```
 
 `json/pets.json` schema v1 chứa `catalogVersion`, source commit, 268 category và 1.026
 record. Mỗi record giữ identity/name/category/author cùng relative path, byte size và SHA-256
-của thumbnail/ZIP.
+của thumbnail/ZIP. Optional `speechAnchor` giữ tọa độ góc khuyết chuẩn hóa cho 631 pet
+được detector xác nhận; 395 pet còn lại không có field này. `speech-anchors.json` lưu thêm
+pixel nguồn/kích thước để audit, còn app chỉ đọc field gọn trong `pets.json`.
 
 App dùng raw base URL:
 
@@ -61,14 +64,16 @@ Raw archive không được expand trên server hoặc khi load catalog. Sau khi
 `LegacyShimejiPackInstaller` convert đúng pet được chọn vào:
 
 ```text
-files/pet_packs/installed/owner.shimeji.<petId>/4/
+files/pet_packs/installed/owner.shimeji.<petId>/7/
 ├── manifest.json
 └── frames/<normalized available frame>.png
 ```
 
 Conversion dùng staging + atomic promote, guard path/entry/size/expansion/image bounds, ưu
 tiên canonical filenames, normalize upper-case/suffixed filenames và sửa hai GIF mislabeled
-PNG của pack `136`. Pinned source ZIP không bị mutate và installed revision cũ vẫn đọc được.
+PNG của pack `136`. Installer copy optional server anchor vào manifest; không tự phân tích
+bitmap. Pinned source ZIP không bị mutate và installed revision cũ vẫn đọc được, nhưng cần
+`Set` lại để nhận metadata revision 7.
 
 ## Source snapshot và server import
 
@@ -84,6 +89,7 @@ Server validator đối chiếu:
 - path theo ID;
 - category counts;
 - file existence, byte size và SHA-256.
+- per-pet speech anchor khớp lại detector và audit JSON.
 
 Local device sync tool vẫn tồn tại để audit/debug snapshot độc lập, nhưng không còn là data
 source production.

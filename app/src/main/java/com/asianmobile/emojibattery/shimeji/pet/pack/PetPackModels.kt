@@ -12,7 +12,8 @@ data class PetPackManifest(
     val canvas: PetPackCanvas,
     val anchor: PetPackAnchor,
     val interaction: PetPackInteraction,
-    val clips: Map<PetAction, PetPackClip>
+    val clips: Map<PetAction, PetPackClip>,
+    val speechAnchor: PetPackAnchor? = null
 )
 
 data class PetPackCanvas(

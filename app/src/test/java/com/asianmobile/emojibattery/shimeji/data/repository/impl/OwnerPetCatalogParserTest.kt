@@ -63,6 +63,10 @@ class OwnerPetCatalogParserTest {
                     "path": "thumb/42.png",
                     "sizeBytes": 321,
                     "sha256": "${"b".repeat(64)}"
+                  },
+                  "speechAnchor": {
+                    "x": 0.421875,
+                    "y": 0.671875
                   }
                 }
               ]
@@ -76,6 +80,10 @@ class OwnerPetCatalogParserTest {
         assertEquals("data/42.zip", document.records.single().archive?.path)
         assertEquals(1234L, document.records.single().archive?.sizeBytes)
         assertEquals("thumb/42.png", document.records.single().thumbnail?.path)
+        assertEquals(
+            OwnerPetCatalogSpeechAnchorRecord(0.421875f, 0.671875f),
+            document.records.single().speechAnchor
+        )
     }
 
     @Test
@@ -92,6 +100,37 @@ class OwnerPetCatalogParserTest {
         )
 
         assertEquals(null, document.records.single().author)
+        assertEquals(null, document.records.single().speechAnchor)
+    }
+
+    @Test
+    fun `parseDocument rejects invalid speech anchor metadata`() {
+        listOf(
+            """{"x":-0.1,"y":0.5}""",
+            """{"x":0.5,"y":1.1}""",
+            """{"x":"0.5","y":0.5}""",
+            """null"""
+        ).forEach { speechAnchor ->
+            assertThrows(OwnerPetCatalogParseException::class.java) {
+                parser.parseDocument(
+                    """
+                    {
+                      "schemaVersion": 1,
+                      "catalogVersion": "v1",
+                      "petCount": 1,
+                      "pets": [
+                        {
+                          "id": 42,
+                          "name": "Pikachu",
+                          "category": "Pokemon",
+                          "speechAnchor": $speechAnchor
+                        }
+                      ]
+                    }
+                    """.trimIndent()
+                )
+            }
+        }
     }
 
     @Test

@@ -330,7 +330,14 @@ class LegacyShimejiPackInstaller @Inject constructor(
             interaction = PetPackInteraction(
                 if (PetAction.TAPPED in clips) PetAction.TAPPED else PetAction.IDLE
             ),
-            clips = clips
+            clips = clips,
+            speechAnchor = if (PetAction.TALK in clips) {
+                entry.speechAnchor?.let { anchor ->
+                    PetPackAnchor(x = anchor.x, y = anchor.y)
+                }
+            } else {
+                null
+            }
         )
     }
 
@@ -467,6 +474,12 @@ private fun PetPackManifest.toJson(): JSONObject = JSONObject().apply {
         put("x", anchor.x.toDouble())
         put("y", anchor.y.toDouble())
     })
+    speechAnchor?.let { anchor ->
+        put("speechAnchor", JSONObject().apply {
+            put("x", anchor.x.toDouble())
+            put("y", anchor.y.toDouble())
+        })
+    }
     put("interaction", JSONObject().put("tapAction", interaction.tapAction.jsonName()))
     put("clips", JSONArray().apply {
         clips.values.forEach { clip ->

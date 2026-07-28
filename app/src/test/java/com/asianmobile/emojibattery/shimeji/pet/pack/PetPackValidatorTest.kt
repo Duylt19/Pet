@@ -49,4 +49,15 @@ class PetPackValidatorTest {
         assertTrue(result.errors.any { "Unsupported schemaVersion" in it })
         assertTrue(result.errors.any { "image is missing" in it })
     }
+
+    @Test
+    fun `speech anchor outside normalized range is rejected`() {
+        val manifest = parser.parse(validManifestJson()).copy(
+            speechAnchor = PetPackAnchor(x = -0.1f, y = 1.1f)
+        )
+        val result = validator.validate(manifest, mapOf("sprites/cat.png" to imageInfo))
+
+        assertFalse(result.isValid)
+        assertTrue(result.errors.any { "Speech anchor must be normalized" in it })
+    }
 }

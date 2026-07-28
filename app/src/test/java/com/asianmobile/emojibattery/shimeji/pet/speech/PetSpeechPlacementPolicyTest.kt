@@ -49,9 +49,49 @@ class PetSpeechPlacementPolicyTest {
         assertEquals(776, placement.y)
     }
 
+    @Test
+    fun `per pet attachment positions the box at the holding hand`() {
+        val attachment = PetSpeechAttachment(x = 0.15f, y = 0.69f)
+
+        val left = resolve(
+            position = PetVector(400f, 800f),
+            direction = PetDirection.LEFT,
+            attachment = attachment,
+            attachmentOverlap = 3
+        )
+        val right = resolve(
+            position = PetVector(400f, 800f),
+            direction = PetDirection.RIGHT,
+            attachment = attachment,
+            attachmentOverlap = 3
+        )
+
+        assertEquals(201, left.x)
+        assertEquals(499, right.x)
+        assertEquals(799, left.y)
+        assertEquals(799, right.y)
+    }
+
+    @Test
+    fun `attachment maps from a rectangular canvas into square overlay space`() {
+        val attachment = PetSpeechAttachmentPolicy.resolve(
+            canvasWidth = 64,
+            canvasHeight = 128,
+            imageAnchorX = 0.5f,
+            imageAnchorY = 1f,
+            speechAnchorX = 0.25f,
+            speechAnchorY = 0.75f
+        )
+
+        assertEquals(0.375f, attachment.x)
+        assertEquals(0.75f, attachment.y)
+    }
+
     private fun resolve(
         position: PetVector,
-        direction: PetDirection = PetDirection.LEFT
+        direction: PetDirection = PetDirection.LEFT,
+        attachment: PetSpeechAttachment = PetSpeechAttachment.Default,
+        attachmentOverlap: Int = 0
     ) = PetSpeechPlacementPolicy.resolve(
         petPosition = position,
         petSize = petSize,
@@ -60,6 +100,8 @@ class PetSpeechPlacementPolicyTest {
         bubbleWidth = 220,
         bubbleHeight = 84,
         margin = 6,
-        direction = direction
+        direction = direction,
+        attachment = attachment,
+        attachmentOverlap = attachmentOverlap
     )
 }

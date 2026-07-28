@@ -351,7 +351,7 @@ Pusheen và ba biến thể Satoru Gojo. Kết luận:
 - frame cuối 41/46 có thể là payoff ổn định, nhưng cũng có thể là motion blur, clone hoặc
   portal trung gian; không thể giữ đồng loạt nhiều giây.
 
-Runtime tạo năm semantic alias mà không rewrite owner revision 4:
+Runtime tạo năm semantic alias mà không rewrite owner revision 4/5:
 
 | Action runtime | Nguồn visual/engine | Độ phủ snapshot |
 |---|---|---:|

@@ -7,6 +7,7 @@ import android.os.Build
 import android.util.Log
 import android.view.Choreographer
 import android.view.Gravity
+import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import com.asianmobile.emojibattery.shimeji.data.model.PetPerformanceBudget
@@ -30,6 +31,8 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineClips
 import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineSupportedActions
 import com.asianmobile.emojibattery.shimeji.pet.settings.PetSessionLayout
 import com.asianmobile.emojibattery.shimeji.pet.settings.PetSettingsPolicy
+import com.asianmobile.emojibattery.shimeji.pet.speech.PetSpeechAttachment
+import com.asianmobile.emojibattery.shimeji.pet.speech.PetSpeechAttachmentPolicy
 import com.asianmobile.emojibattery.shimeji.pet.speech.PetSpeechDirective
 import com.asianmobile.emojibattery.shimeji.pet.speech.PetSpeechDirector
 import com.asianmobile.emojibattery.shimeji.pet.speech.PetSpeechLine
@@ -154,9 +157,21 @@ internal class PetOverlayController(
                 }
                     .apply { render(initialState) }
                 val params = createLayoutParams(initialState, index, slotPreferences)
-                instance = PetInstance(index, engine, view, params, initialState)
-                windowManager.addView(view, params)
+                instance = PetInstance(
+                    id = index,
+                    engine = engine,
+                    view = view,
+                    params = params,
+                    speechAttachment = speechAttachment(pack),
+                    state = initialState
+                )
                 instances += instance
+            }
+            speechDirectors.keys.forEach { petId ->
+                instances.firstOrNull { it.id == petId }?.let(::addSpeechWindow)
+            }
+            instances.forEach { instance ->
+                windowManager.addView(instance.view, instance.params)
             }
         } catch (error: RuntimeException) {
             removeAllViews()
@@ -279,43 +294,41 @@ internal class PetOverlayController(
         line: PetSpeechLine
     ) {
         val instance = instances.firstOrNull { it.id == petId } ?: return
-        val existing = speechWindows[petId]
-        if (existing != null) {
-            existing.line = line
-            existing.view.measureBox(
-                text = line.text,
-                maximumWidthPixels = speechMaximumWidth(instance)
-            ).let { size ->
-                existing.params.width = size.width
-                existing.params.height = size.height
-            }
-            updateSpeechPosition(existing, instance)
-            return
-        }
-
-        val view = PetSpeechBubbleView(appContext)
-        val boxSize = view.measureBox(
+        val window = speechWindows[petId] ?: return
+        window.line = line
+        window.view.measureBox(
             text = line.text,
             maximumWidthPixels = speechMaximumWidth(instance)
-        )
-        val params = createSpeechLayoutParams(petId, boxSize.width, boxSize.height)
-        val created = SpeechWindow(petId, view, params, line)
-        updateSpeechPosition(created, instance)
+        ).let { size ->
+            window.params.width = size.width
+            window.params.height = size.height
+        }
+        updateSpeechPosition(window, instance)
+        window.view.visibility = View.VISIBLE
+    }
+
+    private fun addSpeechWindow(instance: PetInstance) {
+        val view = PetSpeechBubbleView(appContext).apply {
+            visibility = View.INVISIBLE
+        }
+        val params = createSpeechLayoutParams(instance.id, width = 1, height = 1)
+        val window = SpeechWindow(instance.id, view, params, line = null)
         try {
             windowManager.addView(view, params)
+            speechWindows[instance.id] = window
         } catch (error: RuntimeException) {
-            Log.w(TAG, "Unable to show pet speech bubble", error)
-            return
+            Log.w(TAG, "Unable to prepare pet speech bubble", error)
         }
-        speechWindows[petId] = created
     }
 
     private fun updateSpeechPosition(window: SpeechWindow) {
+        if (window.line == null) return
         val instance = instances.firstOrNull { it.id == window.petId } ?: return
         updateSpeechPosition(window, instance)
     }
 
     private fun updateSpeechPosition(window: SpeechWindow, instance: PetInstance) {
+        val line = window.line ?: return
         val state = instance.state
         val edgeOverflow = state.size.width / SCREEN_EDGE_OVERFLOW_DIVISOR
         val viewportWidth = (state.bounds.right - edgeOverflow).roundToInt()
@@ -328,27 +341,29 @@ internal class PetOverlayController(
             bubbleWidth = window.params.width,
             bubbleHeight = window.params.height,
             margin = appContext.dpToPixels(SPEECH_MARGIN_DP),
-            direction = state.direction
+            direction = state.direction,
+            attachment = instance.speechAttachment,
+            attachmentOverlap = appContext.dpToPixels(SPEECH_ATTACHMENT_OVERLAP_DP)
         )
         window.params.x = placement.x
         window.params.y = placement.y
-        window.view.render(window.line)
+        window.view.render(line)
         if (window.view.isAttachedToWindow) {
             windowManager.updateViewLayout(window.view, window.params)
         }
     }
 
     private fun hideSpeech(petId: Int) {
-        val window = speechWindows.remove(petId) ?: return
-        try {
-            windowManager.removeViewImmediate(window.view)
-        } catch (error: RuntimeException) {
-            Log.w(TAG, "Unable to remove pet speech bubble", error)
-        }
+        val window = speechWindows[petId] ?: return
+        window.line = null
+        window.view.visibility = View.INVISIBLE
     }
 
-    private fun hideAllSpeech() {
-        speechWindows.keys.toList().forEach(::hideSpeech)
+    private fun removeAllSpeechWindows() {
+        speechWindows.values.forEach { window ->
+            runCatching { windowManager.removeViewImmediate(window.view) }
+        }
+        speechWindows.clear()
     }
 
     private fun createLayoutParams(
@@ -412,8 +427,23 @@ internal class PetOverlayController(
         return (viewportWidth - margin * 2).coerceAtLeast(1)
     }
 
+    private fun speechAttachment(pack: PetPack): PetSpeechAttachment {
+        val speechAnchor = pack.manifest.speechAnchor
+            ?: return PetSpeechAttachment.Default
+        val canvas = pack.manifest.canvas
+        val imageAnchor = pack.manifest.anchor
+        return PetSpeechAttachmentPolicy.resolve(
+            canvasWidth = canvas.width,
+            canvasHeight = canvas.height,
+            imageAnchorX = imageAnchor.x,
+            imageAnchorY = imageAnchor.y,
+            speechAnchorX = speechAnchor.x,
+            speechAnchorY = speechAnchor.y
+        )
+    }
+
     private fun removeAllViews() {
-        hideAllSpeech()
+        removeAllSpeechWindows()
         instances.forEach { instance ->
             runCatching { windowManager.removeViewImmediate(instance.view) }
         }
@@ -478,6 +508,7 @@ internal class PetOverlayController(
         val engine: PetEngine,
         val view: PetOverlayView,
         val params: WindowManager.LayoutParams,
+        val speechAttachment: PetSpeechAttachment,
         var state: PetState
     )
 
@@ -485,7 +516,7 @@ internal class PetOverlayController(
         val petId: Int,
         val view: PetSpeechBubbleView,
         val params: WindowManager.LayoutParams,
-        var line: PetSpeechLine
+        var line: PetSpeechLine?
     )
 
     private companion object {
@@ -496,6 +527,7 @@ internal class PetOverlayController(
         const val OVERLAY_WINDOW_TITLE = "Cute Pet overlay"
         const val SPEECH_WINDOW_TITLE = "Cute Pet speech"
         const val SPEECH_MARGIN_DP = 6
+        const val SPEECH_ATTACHMENT_OVERLAP_DP = 3
         const val SCREEN_EDGE_OVERFLOW_DIVISOR = 3f
         const val NANOS_PER_MILLISECOND = 1_000_000L
         const val NANOS_PER_SECOND = 1_000_000_000L
