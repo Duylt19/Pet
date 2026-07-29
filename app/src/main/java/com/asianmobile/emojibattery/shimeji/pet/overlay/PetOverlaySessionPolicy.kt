@@ -6,6 +6,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.PetSwarmPreferences
 
 internal enum class PetOverlaySessionUpdate {
     NONE,
+    MIXED_ROSTER,
     SWARM_COUNT,
     REBUILD
 }
@@ -24,11 +25,11 @@ internal object PetOverlaySessionPolicy {
     ): PetOverlaySessionUpdate {
         val requested = preferences.overlaySessionSignature()
         if (active == requested) return PetOverlaySessionUpdate.NONE
-        if (active == null ||
-            active.mode != PetDisplayMode.SWARM ||
-            requested.mode != PetDisplayMode.SWARM
-        ) {
+        if (active == null || active.mode != requested.mode) {
             return PetOverlaySessionUpdate.REBUILD
+        }
+        if (requested.mode == PetDisplayMode.MIXED) {
+            return PetOverlaySessionUpdate.MIXED_ROSTER
         }
 
         val activeSwarm = active.swarm ?: return PetOverlaySessionUpdate.REBUILD
@@ -39,6 +40,25 @@ internal object PetOverlaySessionPolicy {
             PetOverlaySessionUpdate.SWARM_COUNT
         } else {
             PetOverlaySessionUpdate.REBUILD
+        }
+    }
+}
+
+internal object PetRosterReconciliationPolicy {
+    fun retainedIndexes(
+        existingPackKeys: List<String>,
+        requestedPackKeys: List<String>
+    ): List<Int?> {
+        val unmatched = existingPackKeys.indices.toMutableList()
+        return requestedPackKeys.map { requestedKey ->
+            val matchPosition = unmatched.indexOfFirst { existingIndex ->
+                existingPackKeys[existingIndex] == requestedKey
+            }
+            if (matchPosition < 0) {
+                null
+            } else {
+                unmatched.removeAt(matchPosition)
+            }
         }
     }
 }

@@ -38,6 +38,11 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Mixed dùng 1–3 slot, mỗi slot có visibility riêng; instance hidden không tick, không
   tham gia social/crowd và không giữ speech window. Visibility thay đổi trực tiếp, không
   cần Stop/Start.
+- Mixed Add/Remove/character replacement được reconcile theo `pack.key`: pet còn tồn tại
+  giữ nguyên view, engine, action, animation cursor và vị trí kể cả khi Remove làm slot
+  phía sau dịch index. Chỉ pack mới tạo instance mới; pack bị xóa mới remove window.
+  Duplicate pack được ghép theo thứ tự ổn định. Speech window/director nhẹ được dựng lại
+  theo ID mới, còn pet bitmap/window không bị reset.
 - Swarm dùng 1–12 instance cùng pack (low-RAM tối đa 6). Controller không khởi tạo
   social director/crowd resolver và engine loại `TALK`/`TALK_WALK` khỏi tập action thật
   sự hỗ trợ, kể cả khi pack dùng TALK cho tap hoặc khai báo TALK làm `nextAction`. Vì vậy
@@ -55,7 +60,7 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   tạo engine/view cho các index mới, giảm count chỉ remove các index cuối. Pet đang tồn
   tại giữ nguyên `PetState`, action, animation cursor, vị trí và window; visual đã preload
   được dùng lại. Controller chỉ tính lại shared FPS budget, không stop/start service hay
-  reset cả đàn. Đổi mode, character hoặc runtime profile vẫn rebuild an toàn.
+  reset cả đàn. Đổi mode, Swarm character hoặc runtime profile vẫn rebuild an toàn.
 - Mỗi instance được thêm live lấy 12 vị trí ngẫu nhiên trong vùng movement đang áp dụng
   và chọn ứng viên xa các pet hiện có nhất. Vùng spawn loại phần screen-edge overflow nên
   pet mới luôn xuất hiện đầy đủ trên màn hình; khi movement constraint bật, vị trí random
@@ -73,9 +78,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Touch toggle đổi trực tiếp `FLAG_NOT_TOUCHABLE`. Messages và custom-message list thay
   speech director/window của đúng slot; bubble đang hiện được đóng để catalog mới có hiệu
   lực ở lần TALK kế tiếp. Reset revision đưa instance về default position ngay.
-- Mode, Swarm pack/count, Mixed pack key hoặc active slot count thay đổi làm service preload visual rồi rebuild controller
-  ngay trong cùng foreground session. Character selection và Remove vì vậy không cần
-  Stop/Start thủ công; character-only rebuild giữ normalized live positions của session.
+- Đổi mode hoặc Swarm pack/runtime profile làm service preload visual rồi rebuild
+  controller an toàn trong cùng foreground session. Swarm count và Mixed roster dùng
+  đường incremental riêng nên không Stop/Start service hoặc reset các pet còn tồn tại.
 - Tap/drag/fling đều được chuyển thành `PetEvent`. Hệ tọa độ overlay chỉ fit status bar/display cutout một lần, không trừ navigation bar ở đáy; vì vậy đáy pet chạm đáy màn hình vật lý thay vì dừng phía trên thanh điều hướng.
 - Playground cho phép cửa sổ pet tràn `1/3` chiều rộng qua mép trái/phải và `1/3` chiều rộng qua mép trên, còn mép dưới không tràn. `FLAG_LAYOUT_NO_LIMITS` là bắt buộc để WindowManager không clamp lại cửa sổ nhỏ; hit target vẫn chỉ bằng đúng kích thước pet.
 - Sprite pack dùng quy ước frame gốc quay sang trái. Renderer mirror ngang khi engine đi

@@ -145,6 +145,24 @@ class PetOverlayService : Service() {
                             return@collect
                         }
 
+                        PetOverlaySessionUpdate.MIXED_ROSTER -> {
+                            val controller = overlayController ?: return@collect
+                            try {
+                                controller.updateMixedRoster(
+                                    updatedPreferences = preferences,
+                                    requestedAssets = createOverlayAssets(
+                                        preferences = preferences,
+                                        catalog = ownerPetCatalogRepository.snapshot.value
+                                    )
+                                )
+                                activeSessionSignature = preferences.overlaySessionSignature()
+                            } catch (error: RuntimeException) {
+                                Log.e(TAG, "Unable to reconcile running mixed pets", error)
+                                restartOverlay(preferences)
+                                return@collect
+                            }
+                        }
+
                         PetOverlaySessionUpdate.SWARM_COUNT -> {
                             val controller = overlayController ?: return@collect
                             try {
@@ -232,7 +250,17 @@ class PetOverlayService : Service() {
     private fun createOverlayController(
         preferences: PetPreferences,
         catalog: OwnerPetCatalogSnapshot
-    ): PetOverlayController {
+    ): PetOverlayController = PetOverlayController(
+        context = this,
+        assets = createOverlayAssets(preferences, catalog),
+        preferences = preferences,
+        performanceBudget = petSettingsRepository.performanceBudget
+    )
+
+    private fun createOverlayAssets(
+        preferences: PetPreferences,
+        catalog: OwnerPetCatalogSnapshot
+    ): List<PetOverlayAsset> {
         val requestedPackKeys = when (preferences.displayMode) {
             PetDisplayMode.MIXED -> List(preferences.petCount) { slotIndex ->
                 preferences.packKeyForSlot(slotIndex)
@@ -253,17 +281,12 @@ class PetOverlayService : Service() {
         val visuals = packs.distinctBy { it.key }.associate { pack ->
             pack.key to petBitmapCache.prepare(pack)
         }
-        return PetOverlayController(
-            context = this,
-            assets = packs.map { pack ->
-                PetOverlayAsset(
-                    pack = pack,
-                    visual = checkNotNull(visuals[pack.key])
-                )
-            },
-            preferences = preferences,
-            performanceBudget = petSettingsRepository.performanceBudget
-        )
+        return packs.map { pack ->
+            PetOverlayAsset(
+                pack = pack,
+                visual = checkNotNull(visuals[pack.key])
+            )
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

@@ -59,7 +59,7 @@ class PetOverlaySessionPolicyTest {
     }
 
     @Test
-    fun `mode or mixed roster change requires rebuild`() {
+    fun `mode change rebuilds while mixed roster change reconciles instances`() {
         val mixed = PetPreferences(displayMode = PetDisplayMode.MIXED, petCount = 2)
         val modeUpdate = PetOverlaySessionPolicy.resolveUpdate(
             active = activeSwarm.overlaySessionSignature(),
@@ -71,6 +71,54 @@ class PetOverlaySessionPolicyTest {
         )
 
         assertEquals(PetOverlaySessionUpdate.REBUILD, modeUpdate)
-        assertEquals(PetOverlaySessionUpdate.REBUILD, rosterUpdate)
+        assertEquals(PetOverlaySessionUpdate.MIXED_ROSTER, rosterUpdate)
+    }
+
+    @Test
+    fun `mixed character replacement reconciles only changed roster entries`() {
+        val mixed = PetPreferences(
+            displayMode = PetDisplayMode.MIXED,
+            petCount = 2
+        )
+        val updatedSlots = mixed.petSlots.toMutableList().apply {
+            this[1] = this[1].copy(packKey = "owner.shimeji.77@7")
+        }
+
+        val update = PetOverlaySessionPolicy.resolveUpdate(
+            active = mixed.overlaySessionSignature(),
+            preferences = mixed.copy(petSlots = updatedSlots)
+        )
+
+        assertEquals(PetOverlaySessionUpdate.MIXED_ROSTER, update)
+    }
+
+    @Test
+    fun `mixed roster matcher preserves surviving pets across remove add and replace`() {
+        val removeMiddle = PetRosterReconciliationPolicy.retainedIndexes(
+            existingPackKeys = listOf("cat", "dog", "fox"),
+            requestedPackKeys = listOf("cat", "fox")
+        )
+        val addPet = PetRosterReconciliationPolicy.retainedIndexes(
+            existingPackKeys = listOf("cat", "dog"),
+            requestedPackKeys = listOf("cat", "dog", "fox")
+        )
+        val replacePet = PetRosterReconciliationPolicy.retainedIndexes(
+            existingPackKeys = listOf("cat", "dog", "fox"),
+            requestedPackKeys = listOf("cat", "bird", "fox")
+        )
+
+        assertEquals(listOf(0, 2), removeMiddle)
+        assertEquals(listOf(0, 1, null), addPet)
+        assertEquals(listOf(0, null, 2), replacePet)
+    }
+
+    @Test
+    fun `mixed roster matcher consumes duplicate pets in stable order`() {
+        val retained = PetRosterReconciliationPolicy.retainedIndexes(
+            existingPackKeys = listOf("cat", "cat", "dog"),
+            requestedPackKeys = listOf("cat", "dog")
+        )
+
+        assertEquals(listOf(0, 2), retained)
     }
 }

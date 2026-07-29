@@ -98,6 +98,9 @@ không reset action, combo, vị trí hoặc animation cursor.
   shared FPS budget without rebuilding the foreground session.
 - [Done] Randomize each live-added Swarm pet inside the safe movement area and choose the
   best-spaced candidate, while leaving initial session layout and surviving pets untouched.
+- [Done] Reconcile Mixed Add/Remove/character changes by pack identity: retain and reindex
+  surviving instances, replace only changed assets and handle duplicate packs stably
+  without rebuilding the foreground session.
 
 Before release hardening, complete the clean-room parity items confirmed by the local competitor audit:
 

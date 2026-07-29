@@ -28,6 +28,7 @@ import com.asianmobile.emojibattery.shimeji.pet.engine.PetSocialDirective
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetSocialDirector
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetSocialSnapshot
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetState
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetVector
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
 import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineClips
@@ -50,7 +51,7 @@ internal data class PetOverlayAsset(
 internal class PetOverlayController(
     context: Context,
     assets: List<PetOverlayAsset>,
-    private val preferences: PetPreferences,
+    private var preferences: PetPreferences,
     performanceBudget: PetPerformanceBudget,
     private val windowManager: WindowManager =
         context.getSystemService(WindowManager::class.java),
@@ -72,6 +73,7 @@ internal class PetOverlayController(
         )
     }
     private val budgetFramesPerSecond = performanceBudget.targetFramesPerSecond
+    private val maxMixedPets = performanceBudget.maxPets
     private val maxSwarmPets = performanceBudget.maxSwarmPets
     private val availableAssets = assets.also {
         require(it.isNotEmpty()) { "At least one pet asset is required" }
@@ -194,6 +196,83 @@ internal class PetOverlayController(
                 }
             }
         }
+        targetFrameNanos = targetFrameNanos(instances.size)
+    }
+
+    fun updateMixedRoster(
+        updatedPreferences: PetPreferences,
+        requestedAssets: List<PetOverlayAsset>
+    ) {
+        if (isSwarm || requestedAssets.isEmpty()) return
+        val targetCount = settingsPolicy.sanitizePetCount(
+            updatedPreferences.petCount,
+            maxMixedPets
+        )
+        val targetAssets = MutableList(targetCount) { index ->
+            requestedAssets.getOrNull(index) ?: requestedAssets.first()
+        }
+        val existing = instances.mapIndexed { index, instance ->
+            ExistingInstance(instance, selectedAssets[index])
+        }
+        val retainedIndexes = PetRosterReconciliationPolicy.retainedIndexes(
+            existingPackKeys = existing.map { entry -> entry.asset.pack.key },
+            requestedPackKeys = targetAssets.map { asset -> asset.pack.key }
+        )
+        val retainedIndexSet = retainedIndexes.filterNotNull().toSet()
+        val unmatched = existing.filterIndexed { index, _ ->
+            index !in retainedIndexSet
+        }
+        val retained = retainedIndexes.map { existingIndex ->
+            existingIndex?.let { index -> existing[index].instance }
+        }.toMutableList()
+
+        val previousPreferences = preferences
+        val addedInstances = mutableListOf<PetInstance>()
+        preferences = updatedPreferences
+        try {
+            retained.forEachIndexed { targetIndex, retainedInstance ->
+                if (retainedInstance != null) return@forEachIndexed
+                val replacementPosition = unmatched
+                    .firstOrNull { existing -> existing.instance.id == targetIndex }
+                    ?.instance
+                    ?.state
+                    ?.position
+                val instance = createInstance(
+                    index = targetIndex,
+                    asset = targetAssets[targetIndex],
+                    randomSpawn = replacementPosition == null,
+                    initialPosition = replacementPosition
+                )
+                windowManager.addView(instance.view, instance.params)
+                retained[targetIndex] = instance
+                addedInstances += instance
+            }
+        } catch (error: RuntimeException) {
+            preferences = previousPreferences
+            addedInstances.forEach { instance ->
+                runCatching { windowManager.removeViewImmediate(instance.view) }
+            }
+            throw error
+        }
+
+        speechDirectors.values.forEach(PetSpeechDirector::reset)
+        speechDirectors.clear()
+        speechSettings.clear()
+        removeAllSpeechWindows()
+        unmatched.forEach { existing ->
+            runCatching { windowManager.removeViewImmediate(existing.instance.view) }
+        }
+
+        instances.clear()
+        instances += retained.map(::checkNotNull)
+        selectedAssets.clear()
+        selectedAssets += targetAssets
+        instances.forEachIndexed { index, instance ->
+            instance.id = index
+            instance.params.title = "$OVERLAY_WINDOW_TITLE ${index + 1}"
+        }
+        rebuildSpeechRuntime()
+        socialDirector?.reset()
         targetFrameNanos = targetFrameNanos(instances.size)
     }
 
@@ -616,22 +695,23 @@ internal class PetOverlayController(
     private fun createInstance(
         index: Int,
         asset: PetOverlayAsset,
-        randomSpawn: Boolean = false
+        randomSpawn: Boolean = false,
+        initialPosition: PetVector? = null
     ): PetInstance {
         val pack = asset.pack
         val slotPreferences = runtimeSlot(index)
         val petSizePixels = petSizePixels(pack, slotPreferences)
         val size = PetSize(petSizePixels.toFloat(), petSizePixels.toFloat())
         val bounds = currentPlaygroundBounds(size)
-        val position = if (randomSpawn) {
-            sessionLayout.randomPosition(
+        val position = when {
+            initialPosition != null -> bounds.clampTopLeft(initialPosition, size)
+            randomSpawn -> sessionLayout.randomPosition(
                 bounds = currentSpawnBounds(size, bounds),
                 size = size,
                 seed = nextSpawnSeed(index, pack),
                 occupiedPositions = instances.map { instance -> instance.state.position }
             )
-        } else {
-            sessionLayout.resolvePosition(
+            else -> sessionLayout.resolvePosition(
                 index = index,
                 bounds = bounds,
                 size = size,
@@ -687,6 +767,24 @@ internal class PetOverlayController(
         speechSettings.remove(instance.id)
         removeSpeechWindow(instance.id)
         runCatching { windowManager.removeViewImmediate(instance.view) }
+    }
+
+    private fun rebuildSpeechRuntime() {
+        instances.forEach { instance ->
+            val slot = runtimeSlot(instance.id)
+            val settings = SpeechSettings(
+                enabled = slot.messagesEnabled,
+                customMessages = slot.customMessages
+            )
+            speechSettings[instance.id] = settings
+            if (!settings.enabled || !instance.isVisible) return@forEach
+            speechDirectors[instance.id] = createSpeechDirector(
+                pack = selectedAssets[instance.id].pack,
+                index = instance.id,
+                customMessages = settings.customMessages
+            ).also(PetSpeechDirector::reset)
+            addSpeechWindow(instance)
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -812,7 +910,7 @@ internal class PetOverlayController(
     }
 
     private data class PetInstance(
-        val id: Int,
+        var id: Int,
         var engine: PetEngine,
         val view: PetOverlayView,
         val params: WindowManager.LayoutParams,
@@ -821,6 +919,11 @@ internal class PetOverlayController(
         var interactionEnabled: Boolean,
         var isVisible: Boolean,
         var state: PetState
+    )
+
+    private data class ExistingInstance(
+        val instance: PetInstance,
+        val asset: PetOverlayAsset
     )
 
     private data class SpeechSettings(
