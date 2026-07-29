@@ -30,10 +30,11 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Window trong suốt có kích thước 48–144dp theo pack/setting; owner pet ở 100% dùng
   84dp. Window chỉ bắt touch trong hitbox pet, không dùng full-screen overlay.
 - Khi pet nói, controller tạo tối đa một window non-touchable thích ứng cho chính pet đó
-  80–260dp × 48–112dp. Width lấy từ glyph/dòng thực tế và usable viewport; height tăng
-  tới bốn dòng, sau đó ellipsis. Window bị remove đúng khi action rời cả `TALK` và
-  `TALK_WALK`, drag/fling, Stop hoặc service destroy. Không có timer speech độc lập với
-  engine. Hai pet cùng TALK có hai window/lifecycle độc lập.
+  80–220dp × 48–112dp. Width lấy từ glyph/dòng thực tế và usable viewport; câu vừa đủ dài
+  cũng được wrap để giữ tỷ lệ width/height trong khoảng 1,65–2,6 thay vì kéo thành một
+  dòng quá rộng. Height tăng tới bốn dòng, sau đó ellipsis. Window bị remove đúng khi
+  action rời cả `TALK` và `TALK_WALK`, drag/fling, Stop hoặc service destroy. Không có
+  timer speech độc lập với engine. Hai pet cùng TALK có hai window/lifecycle độc lập.
 - 1–3 instance dùng chung đúng một `Choreographer.FrameCallback` trên main thread; 30 FPS mặc định, 24 FPS cho 3 pet hoặc low-RAM budget.
 - Frame loop chỉ reduce engine + invalidate/update layout; không decode bitmap, parse file hoặc tạo thread.
 - Mỗi slot resolve pack/visual/engine config riêng, gồm size, speed, touch flag và speech

@@ -26,7 +26,8 @@ data class PetSpeechBoxConstraints(
     val horizontalPadding: Int,
     val verticalPadding: Int,
     val maximumLines: Int,
-    val minimumAspectRatio: Float
+    val minimumAspectRatio: Float,
+    val maximumAspectRatio: Float
 ) {
     init {
         require(minimumWidth > 0 && maximumWidth >= minimumWidth) {
@@ -44,6 +45,9 @@ data class PetSpeechBoxConstraints(
         }
         require(maximumLines > 0) { "maximum speech lines must be positive" }
         require(minimumAspectRatio > 0f) { "minimum speech aspect ratio must be positive" }
+        require(maximumAspectRatio >= minimumAspectRatio) {
+            "speech aspect ratio bounds must be valid"
+        }
     }
 }
 
@@ -63,10 +67,13 @@ object PetSpeechBoxSizingPolicy {
                 naturalWidth - constraints.horizontalPadding * 2
             )
             if (naturalMetrics.lineCount == 1 && naturalMetrics.fitsHeight(constraints)) {
-                return PetSpeechBoxSize(
+                val naturalSize = PetSpeechBoxSize(
                     width = naturalWidth,
                     height = naturalMetrics.boxHeight(constraints)
                 )
+                if (naturalSize.aspectRatio <= constraints.maximumAspectRatio) {
+                    return naturalSize
+                }
             }
         }
 
@@ -84,8 +91,14 @@ object PetSpeechBoxSizingPolicy {
             }
         }
         return candidates.firstOrNull { size ->
-            size.width.toFloat() / size.height >= constraints.minimumAspectRatio
-        } ?: candidates.firstOrNull()
+            size.aspectRatio in
+                constraints.minimumAspectRatio..constraints.maximumAspectRatio
+        } ?: candidates.minByOrNull { size ->
+            size.aspectRatio.distanceTo(
+                constraints.minimumAspectRatio,
+                constraints.maximumAspectRatio
+            )
+        }
             ?: PetSpeechBoxSize(constraints.maximumWidth, constraints.maximumHeight)
     }
 
@@ -109,6 +122,15 @@ object PetSpeechBoxSizingPolicy {
 
     private val PetSpeechBoxConstraints.maximumContentWidth: Int
         get() = maximumWidth - horizontalPadding * 2
+
+    private val PetSpeechBoxSize.aspectRatio: Float
+        get() = width.toFloat() / height
+
+    private fun Float.distanceTo(minimum: Float, maximum: Float): Float = when {
+        this < minimum -> minimum - this
+        this > maximum -> this - maximum
+        else -> 0f
+    }
 
     private const val SINGLE_LINE_ROUNDING_BUFFER = 1
 }

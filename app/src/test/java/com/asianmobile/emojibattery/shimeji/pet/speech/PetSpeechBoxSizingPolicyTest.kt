@@ -10,14 +10,15 @@ import org.junit.Test
 class PetSpeechBoxSizingPolicyTest {
     private val constraints = PetSpeechBoxConstraints(
         minimumWidth = 80,
-        maximumWidth = 260,
+        maximumWidth = 220,
         widthStep = 8,
         minimumHeight = 48,
         maximumHeight = 112,
         horizontalPadding = 14,
         verticalPadding = 10,
         maximumLines = 4,
-        minimumAspectRatio = 1.65f
+        minimumAspectRatio = 1.65f,
+        maximumAspectRatio = 2.6f
     )
 
     @Test
@@ -33,6 +34,14 @@ class PetSpeechBoxSizingPolicyTest {
         assertEquals(
             PetSpeechBoxSize(width = 101, height = 48),
             resolve("Hello pet")
+        )
+    }
+
+    @Test
+    fun `medium text wraps instead of creating an overly wide single line`() {
+        assertEquals(
+            PetSpeechBoxSize(width = 112, height = 56),
+            resolve("A".repeat(20))
         )
     }
 
@@ -55,13 +64,16 @@ class PetSpeechBoxSizingPolicyTest {
 
         assertEquals(PetSpeechBoxSize(width = 192, height = 92), size)
         assertTrue(metrics.lineCount <= constraints.maximumLines)
-        assertTrue(size.width.toFloat() / size.height >= constraints.minimumAspectRatio)
+        assertTrue(
+            size.width.toFloat() / size.height in
+                constraints.minimumAspectRatio..constraints.maximumAspectRatio
+        )
     }
 
     @Test
     fun `unfittable text falls back to maximum box for render ellipsis`() {
         assertEquals(
-            PetSpeechBoxSize(width = 260, height = 112),
+            PetSpeechBoxSize(width = 220, height = 112),
             resolve("A".repeat(500))
         )
     }

@@ -67,7 +67,8 @@ internal class PetSpeechBubbleView(context: Context) : View(context) {
                 horizontalPadding = horizontalPadding,
                 verticalPadding = dp(VERTICAL_TEXT_INSET_DP),
                 maximumLines = MAX_TEXT_LINES,
-                minimumAspectRatio = MINIMUM_ASPECT_RATIO
+                minimumAspectRatio = MINIMUM_ASPECT_RATIO,
+                maximumAspectRatio = MAXIMUM_ASPECT_RATIO
             ),
             measureText = { contentWidth -> measureText(text, contentWidth) }
         )
@@ -152,7 +153,7 @@ internal class PetSpeechBubbleView(context: Context) : View(context) {
 
     private companion object {
         const val MINIMUM_WIDTH_DP = 80f
-        const val MAXIMUM_WIDTH_DP = 260f
+        const val MAXIMUM_WIDTH_DP = 220f
         const val WIDTH_STEP_DP = 8f
         const val MINIMUM_HEIGHT_DP = 48f
         const val MAXIMUM_HEIGHT_DP = 112f
@@ -160,5 +161,6 @@ internal class PetSpeechBubbleView(context: Context) : View(context) {
         const val VERTICAL_TEXT_INSET_DP = 10f
         const val MAX_TEXT_LINES = 4
         const val MINIMUM_ASPECT_RATIO = 1.65f
+        const val MAXIMUM_ASPECT_RATIO = 2.6f
     }
 }
