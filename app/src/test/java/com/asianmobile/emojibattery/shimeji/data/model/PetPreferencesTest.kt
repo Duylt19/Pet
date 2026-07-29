@@ -5,6 +5,16 @@ import org.junit.Test
 
 class PetPreferencesTest {
     @Test
+    fun `mixed preferences expose twelve slots with first three free`() {
+        val preferences = PetPreferences()
+
+        assertEquals(12, preferences.petSlots.size)
+        assertEquals(3, preferences.mixedRewardUnlockedSlotCount)
+        assertEquals(12, MAX_PET_SLOTS)
+        assertEquals(3, FREE_MIXED_PET_SLOTS)
+    }
+
+    @Test
     fun `slot selection falls back to first configured pet`() {
         val preferences = PetPreferences(
             petSlots = listOf(

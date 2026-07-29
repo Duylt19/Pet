@@ -139,7 +139,9 @@ fun PetDetailScreen(
             }
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._18sdp)))
             CutePetPrimaryButton(
-                text = if (uiState.selectedKey == pack.key) {
+                text = if (uiState.requiresMixedSlotReward) {
+                    stringResource(R.string.pet_detail_unlock_slot_first)
+                } else if (uiState.selectedKey == pack.key) {
                     stringResource(R.string.pet_catalog_selected)
                 } else if (uiState.target == PetCatalogTarget.SWARM) {
                     stringResource(R.string.pet_detail_select_for_swarm)
@@ -152,7 +154,7 @@ fun PetDetailScreen(
                 onClick = {
                     if (viewModel.select(pack.key)) onBack()
                 },
-                enabled = uiState.selectedKey != pack.key,
+                enabled = !uiState.requiresMixedSlotReward && uiState.selectedKey != pack.key,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._24sdp)))

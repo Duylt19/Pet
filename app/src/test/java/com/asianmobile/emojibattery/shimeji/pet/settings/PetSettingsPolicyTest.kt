@@ -15,7 +15,14 @@ class PetSettingsPolicyTest {
     fun `pet count respects device budget`() {
         assertEquals(1, policy.sanitizePetCount(0, maxPets = 3))
         assertEquals(2, policy.sanitizePetCount(3, maxPets = 2))
-        assertEquals(3, policy.sanitizePetCount(10, maxPets = 3))
+        assertEquals(12, policy.sanitizePetCount(20, maxPets = 12))
+    }
+
+    @Test
+    fun `mixed rewarded capacity always keeps three free slots and caps at twelve`() {
+        assertEquals(3, policy.sanitizeMixedRewardUnlockedSlotCount(0))
+        assertEquals(4, policy.sanitizeMixedRewardUnlockedSlotCount(4))
+        assertEquals(12, policy.sanitizeMixedRewardUnlockedSlotCount(99))
     }
 
     @Test
@@ -54,6 +61,14 @@ class PetSettingsPolicyTest {
         assertEquals(20, policy.targetSwarmFramesPerSecond(4, 30))
         assertEquals(16, policy.targetSwarmFramesPerSecond(7, 30))
         assertEquals(16, policy.targetSwarmFramesPerSecond(12, 24))
+    }
+
+    @Test
+    fun `larger mixed sessions use the same progressive frame budget`() {
+        assertEquals(30, policy.targetFramesPerSecond(2, 30))
+        assertEquals(24, policy.targetFramesPerSecond(3, 30))
+        assertEquals(20, policy.targetFramesPerSecond(6, 30))
+        assertEquals(16, policy.targetFramesPerSecond(12, 30))
     }
 
     @Test
@@ -168,21 +183,20 @@ class PetPositionCodecTest {
         )
 
         assertEquals(
-            listOf(
-                PetPositionFraction(0f, 0.25f),
-                PetPositionFraction(0.75f, 1f),
-                null
-            ),
-            decoded
+            listOf(PetPositionFraction(0f, 0.25f), PetPositionFraction(0.75f, 1f)),
+            decoded.take(2)
         )
+        assertEquals(12, decoded.size)
+        assertEquals(true, decoded.drop(2).all { it == null })
     }
 
     @Test
     fun `malformed positions are ignored`() {
-        assertEquals(
-            listOf(null, PetPositionFraction(0.5f, 0.5f), null),
-            codec.decode("broken;0.5,0.5;NaN,1")
-        )
+        val decoded = codec.decode("broken;0.5,0.5;NaN,1")
+
+        assertEquals(listOf(null, PetPositionFraction(0.5f, 0.5f), null), decoded.take(3))
+        assertEquals(12, decoded.size)
+        assertEquals(true, decoded.drop(3).all { it == null })
     }
 
     @Test
@@ -193,7 +207,11 @@ class PetPositionCodecTest {
             PetPositionFraction(0.8f, 0.9f)
         )
 
-        assertEquals(positions, codec.decode(codec.encode(positions)))
+        val decoded = codec.decode(codec.encode(positions))
+
+        assertEquals(positions, decoded.take(positions.size))
+        assertEquals(12, decoded.size)
+        assertEquals(true, decoded.drop(positions.size).all { it == null })
     }
 }
 
@@ -209,9 +227,11 @@ class PetSelectionCodecTest {
 
     @Test
     fun `pack selections drop blanks and cap persisted slots`() {
+        val encoded = (1..13).joinToString("\n") { index -> "pack.$index@1" }
+
         assertEquals(
-            listOf("pack.one@1", "pack.two@1", "pack.three@1"),
-            codec.decode(" pack.one@1 \n\npack.two@1\npack.three@1\npack.four@1")
+            (1..12).map { index -> "pack.$index@1" },
+            codec.decode(encoded)
         )
     }
 
@@ -219,10 +239,11 @@ class PetSelectionCodecTest {
     fun `legacy selection is materialized before one slot changes`() {
         val migrated = codec.materialize(listOf("pack.old@1"))
 
-        assertEquals(
-            listOf("pack.new@1", "pack.old@1", "pack.old@1"),
-            codec.replace(migrated, slotIndex = 0, key = "pack.new@1")
-        )
+        val replaced = codec.replace(migrated, slotIndex = 0, key = "pack.new@1")
+
+        assertEquals(12, replaced.size)
+        assertEquals("pack.new@1", replaced.first())
+        assertEquals(true, replaced.drop(1).all { it == "pack.old@1" })
     }
 }
 
@@ -231,31 +252,26 @@ class PetSlotValueCodecTest {
 
     @Test
     fun `slot values preserve independent order`() {
-        assertEquals(
-            listOf(75, 100, 150),
-            codec.decodeInts(codec.encodeInts(listOf(75, 100, 150)), fallback = 100)
+        val ints = codec.decodeInts(codec.encodeInts(listOf(75, 100, 150)), fallback = 100)
+        val booleans = codec.decodeBooleans(
+            codec.encodeBooleans(listOf(true, false, true)),
+            fallback = true
         )
-        assertEquals(
-            listOf(true, false, true),
-            codec.decodeBooleans(
-                codec.encodeBooleans(listOf(true, false, true)),
-                fallback = true
-            )
+        val strings = codec.decodeStrings(
+            codec.encodeStrings(listOf("hello\nthere", "", "third"))
         )
-        assertEquals(
-            listOf("hello\nthere", "", "third"),
-            codec.decodeStrings(
-                codec.encodeStrings(listOf("hello\nthere", "", "third"))
-            )
-        )
+
+        assertEquals(listOf(75, 100, 150), ints.take(3))
+        assertEquals(true, ints.drop(3).all { it == 100 })
+        assertEquals(listOf(true, false, true), booleans.take(3))
+        assertEquals(true, booleans.drop(3).all { it })
+        assertEquals(listOf("hello\nthere", "", "third"), strings.take(3))
+        assertEquals(true, strings.drop(3).all(String::isEmpty))
     }
 
     @Test
     fun `missing and corrupt slot values use defaults`() {
-        assertEquals(listOf(100, 100, 100), codec.decodeInts("broken", fallback = 100))
-        assertEquals(
-            listOf(false, false, false),
-            codec.decodeBooleans("[]", fallback = false)
-        )
+        assertEquals(List(12) { 100 }, codec.decodeInts("broken", fallback = 100))
+        assertEquals(List(12) { false }, codec.decodeBooleans("[]", fallback = false))
     }
 }

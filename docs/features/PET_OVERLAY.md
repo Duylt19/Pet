@@ -35,7 +35,7 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   dòng quá rộng. Height tăng tới bốn dòng, sau đó ellipsis. Window bị remove đúng khi
   action rời cả `TALK` và `TALK_WALK`, drag/fling, Stop hoặc service destroy. Không có
   timer speech độc lập với engine. Hai pet cùng TALK có hai window/lifecycle độc lập.
-- Mixed dùng 1–3 slot, mỗi slot có visibility riêng; instance hidden không tick, không
+- Mixed dùng 1–12 slot, mỗi slot có visibility riêng; instance hidden không tick, không
   tham gia social/crowd và không giữ speech window. Visibility thay đổi trực tiếp, không
   cần Stop/Start.
 - Mixed Add/Remove/character replacement được reconcile theo `pack.key`: pet còn tồn tại

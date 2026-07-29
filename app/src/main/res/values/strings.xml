@@ -443,6 +443,8 @@
     <string name="home_mode_pet_visible">Hide %1$s</string>
     <string name="home_mode_pet_hidden">Show %1$s</string>
     <string name="home_mode_add_pet">Add pet</string>
+    <string name="home_mode_add_pet_slot">Add Pet %1$d</string>
+    <string name="home_mode_unlock_pet_slot">Unlock Pet %1$d</string>
     <string name="home_mode_swarm_title">Pet Swarm Mode</string>
     <string name="home_mode_swarm_description">Fill your screen with copies of one favorite pet.</string>
     <string name="home_mode_swarm_locked_title">Unlock Pet Swarm</string>
@@ -521,6 +523,12 @@
     <string name="pet_catalog_server_invalid">The pet catalog data is invalid. Please try again later.</string>
     <string name="pet_catalog_retry">Retry</string>
     <string name="pet_catalog_prepare_failed">This local pet could not be prepared. Check its archive and try again.</string>
+    <string name="pet_catalog_mixed_slot_locked_title">Unlock Pet %1$d</string>
+    <string name="pet_catalog_mixed_slot_locked_description">Watch one rewarded video to unlock this Mixed slot permanently on this device.</string>
+    <string name="pet_catalog_mixed_slot_watch_reward">Watch video to unlock</string>
+    <string name="pet_catalog_mixed_slot_premium_hint">Premium unlocks all 12 Mixed slots automatically.</string>
+    <string name="pet_catalog_mixed_slot_previous_required">Add the previous pet slot before unlocking this one.</string>
+    <string name="pet_detail_unlock_slot_first">Unlock this pet slot first</string>
     <string name="pet_catalog_heading">Find your screen buddy</string>
     <string name="pet_catalog_import_hint">Add a pet pack from your device</string>
     <string name="pet_catalog_slot_badge">For Pet %1$d</string>

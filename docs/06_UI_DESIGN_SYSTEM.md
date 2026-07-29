@@ -29,6 +29,10 @@ Home mode contract:
 
 - `Pet Swarm` và `Mixed Mode` là segmented control loại trừ nhau;
 - global switch điều khiển foreground overlay, không dùng để thay pet selection;
+- Mixed hiển thị lưới 3 cột × tối đa 4 hàng cho 12 slot; pet đã cấu hình giữ card hiện
+  tại, chỉ slot trống kế tiếp có thể thao tác để roster luôn liên tục;
+- slot Mixed 1–3 miễn phí; slot 4–12 có trạng thái khóa và Catalog Rewarded gate. Chỉ
+  earned callback mở đúng slot hiện tại, Premium bypass gate;
 - Mixed dùng icon mắt trực tiếp trên từng card để hiện/ẩn ngay khi overlay đang chạy;
 - không cho ẩn pet Mixed cuối cùng, vì global switch đã đảm nhiệm trường hợp không hiện pet;
 - Swarm locked hiển thị CTA Rewarded và Premium; Premium bypass Rewarded;

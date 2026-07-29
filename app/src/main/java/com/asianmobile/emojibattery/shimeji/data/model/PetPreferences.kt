@@ -4,6 +4,7 @@ data class PetPreferences(
     val petSlots: List<PetSlotPreferences> =
         List(MAX_PET_SLOTS) { PetSlotPreferences() },
     val petCount: Int = DEFAULT_PET_COUNT,
+    val mixedRewardUnlockedSlotCount: Int = FREE_MIXED_PET_SLOTS,
     val displayMode: PetDisplayMode = PetDisplayMode.MIXED,
     val swarm: PetSwarmPreferences = PetSwarmPreferences(),
     val soundEnabled: Boolean = false,
@@ -85,6 +86,7 @@ const val DEFAULT_SPEED_PERCENT = 100
 const val DEFAULT_SWARM_COUNT = 6
 const val DEFAULT_SWARM_SIZE_PERCENT = 80
 const val DEFAULT_SWARM_SPEED_PERCENT = 100
-const val MAX_PET_SLOTS = 3
+const val FREE_MIXED_PET_SLOTS = 3
+const val MAX_PET_SLOTS = 12
 const val MIN_SWARM_PETS = 1
 const val MAX_SWARM_PETS = 12

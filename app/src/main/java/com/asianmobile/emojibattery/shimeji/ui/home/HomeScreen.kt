@@ -404,26 +404,42 @@ private fun MixedModeContent(
         description = stringResource(R.string.home_mode_mixed_description)
     )
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
+    Column(
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
     ) {
-        repeat(uiState.maxMixedPets) { slotIndex ->
-            val pet = uiState.mixedPets.getOrNull(slotIndex)
-            if (pet == null) {
-                AddMixedPetCard(
-                    onClick = { onOpenPet(slotIndex) },
-                    modifier = Modifier.weight(1f)
-                )
-            } else {
-                MixedPetCard(
-                    pet = pet,
-                    onVisibilityToggle = { onVisibilityToggle(slotIndex) },
-                    onClick = { onOpenPet(slotIndex) },
-                    modifier = Modifier.weight(1f)
-                )
+        (0 until uiState.maxMixedPets)
+            .chunked(MIXED_GRID_COLUMN_COUNT)
+            .forEach { rowSlots ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        dimensionResource(SdpR.dimen._8sdp)
+                    )
+                ) {
+                    rowSlots.forEach { slotIndex ->
+                        val pet = uiState.mixedPets.getOrNull(slotIndex)
+                        if (pet == null) {
+                            AddMixedPetCard(
+                                slotNumber = slotIndex + 1,
+                                isLocked = slotIndex >= uiState.mixedUnlockedSlotCount,
+                                enabled = slotIndex == uiState.petCount,
+                                onClick = { onOpenPet(slotIndex) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        } else {
+                            MixedPetCard(
+                                pet = pet,
+                                onVisibilityToggle = { onVisibilityToggle(slotIndex) },
+                                onClick = { onOpenPet(slotIndex) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                    repeat(MIXED_GRID_COLUMN_COUNT - rowSlots.size) {
+                        Spacer(Modifier.weight(1f))
+                    }
+                }
             }
-        }
     }
 }
 
@@ -509,6 +525,9 @@ private fun MixedPetCard(
 
 @Composable
 private fun AddMixedPetCard(
+    slotNumber: Int,
+    isLocked: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -516,28 +535,44 @@ private fun AddMixedPetCard(
     Column(
         modifier = modifier
             .aspectRatio(0.82f)
+            .alpha(if (enabled) 1f else 0.55f)
             .clip(shape)
             .background(colorResource(R.color.colors_FFFFFF))
             .border(
                 dimensionResource(SdpR.dimen._1sdp),
-                colorResource(R.color.colors_12B890),
+                colorResource(
+                    if (enabled) R.color.colors_12B890 else R.color.colors_9297A5
+                ),
                 shape
             )
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(dimensionResource(SdpR.dimen._8sdp)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_plus),
+            painter = painterResource(
+                if (isLocked) R.drawable.ic_lock_fill else R.drawable.ic_plus
+            ),
             contentDescription = null,
-            tint = colorResource(R.color.colors_12B890),
+            tint = colorResource(
+                if (enabled) R.color.colors_12B890 else R.color.colors_9297A5
+            ),
             modifier = Modifier.size(dimensionResource(SdpR.dimen._30sdp))
         )
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._7sdp)))
         Text(
-            text = stringResource(R.string.home_mode_add_pet),
-            color = colorResource(R.color.colors_12B890),
+            text = stringResource(
+                if (isLocked) {
+                    R.string.home_mode_unlock_pet_slot
+                } else {
+                    R.string.home_mode_add_pet_slot
+                },
+                slotNumber
+            ),
+            color = colorResource(
+                if (enabled) R.color.colors_12B890 else R.color.colors_9297A5
+            ),
             fontFamily = FontFamily(Font(R.font.inter_semibold)),
             fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
             textAlign = TextAlign.Center
@@ -1000,3 +1035,4 @@ private fun HomeScreenPreview() {
 
 private const val MESSAGE_DURATION_MILLIS = 3_500L
 private const val HOME_MODE_BANNER_POSITION = "home_mode_bottom"
+private const val MIXED_GRID_COLUMN_COUNT = 3

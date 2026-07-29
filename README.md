@@ -13,7 +13,8 @@ settings và các quy ước kiến trúc hiện có.
 - Root Gradle project name hiện vẫn là `PrivateBrowser` (không ảnh hưởng package cài đặt).
 - Flow: Splash → Language → Intro → Permission → Home.
 - Permission giải thích/request overlay special access và notification permission; user vẫn có thể Skip.
-- Home điều khiển Start/Stop session 1–3 pet, đồng thời mở Catalog, Settings và Premium.
+- Home điều khiển Start/Stop Mixed 1–12 pet hoặc Swarm 1–12 bản sao, đồng thời mở Catalog,
+  Settings và Premium. Ba slot Mixed đầu miễn phí; slot 4–12 mở khóa tuần tự bằng Rewarded.
 - Mỗi slot pet chọn được character riêng; Catalog tải 1.026 owner pet từ private GitHub
   static server, đọc cache trước và revalidate theo TTL 24 giờ + ETag/rate-limit backoff,
   tải/verify ZIP theo SHA-256 khi user bấm Set và vẫn hỗ trợ import pack `.zip` schema v1

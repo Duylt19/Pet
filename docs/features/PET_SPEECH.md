@@ -85,7 +85,7 @@ xác định vocabulary/tone sau khi frame TALK đã xuất hiện:
 
 Pacing:
 
-- mỗi pet có tối đa một speech session; 1–3 pet có thể hiện box cùng lúc nếu đều đang
+- mỗi pet có tối đa một speech session; tối đa 12 Mixed pet có thể hiện box cùng lúc nếu đều đang
   render `TALK`/`TALK_WALK`;
 - session được key bằng `petId`, không có active/queue chung toàn scene và pet này không
   thể preempt hoặc trì hoãn box của pet khác;

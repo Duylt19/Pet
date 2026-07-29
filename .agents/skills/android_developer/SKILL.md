@@ -19,10 +19,10 @@ không còn là Private Browser.
   và không tự đổi theo package.
 - Trước mọi thay đổi app identity/Firebase/app-specific storage, đọc `docs/PACKAGE_IDENTITY.md`.
 - Flow hiện tại: Splash → Language → Intro → Permission → Home.
-- Home điều khiển Start/Stop session 1–3 pet khác nhau và có action Catalog/Settings/Premium.
+- Home điều khiển Start/Stop Mixed 1–12 pet khác nhau hoặc Swarm 1–12 bản sao và có action Catalog/Settings/Premium.
 - Browser, search/clear-browsing, broad storage access, tab manager, bookmark/history, download, media/file manager, Room và foreground service cũ đã bị xóa.
 - Permission xử lý overlay special access + notification permission và cho phép Skip.
-- Pet overlay mới nằm trong `pet/overlay`: một `specialUse` foreground service, 1–3 small `TYPE_APPLICATION_OVERLAY` window có pack riêng theo slot và notification bắt buộc.
+- Pet overlay mới nằm trong `pet/overlay`: một `specialUse` foreground service, tối đa 12 small `TYPE_APPLICATION_OVERLAY` window có pack riêng theo slot và notification bắt buộc.
 - Không viết code/docs dựa trên giả định các module đã xóa vẫn tồn tại.
 
 ## 1. Giao tiếp và làm rõ yêu cầu

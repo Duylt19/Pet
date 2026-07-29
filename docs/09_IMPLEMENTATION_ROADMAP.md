@@ -10,7 +10,8 @@ Mỗi phase là một commit độc lập, phải compile/test/docs pass trướ
 - MVP dùng asset pet demo do project sở hữu; snapshot pet được owner ủy quyền đã được import
   vào private GitHub static server bằng catalog version/SHA-256; không copy code decompile.
 - Chưa dùng Room; persistence nhỏ dùng DataStore.
-- Runtime tối đa 3 pet theo device budget, không auto-start sau boot.
+- Mixed runtime tối đa 12 pet với adaptive shared FPS; slot 1–3 miễn phí, slot 4–12 mở
+  tuần tự bằng Rewarded và Premium bypass. Không auto-start sau boot.
 
 ## Phase 0 — Product foundation cleanup — Done
 
@@ -106,6 +107,9 @@ không reset action, combo, vị trí hoặc animation cursor.
   animation cursor and position.
 - [Done] Remap Swarm positions proportionally when movement spacing contracts or expands,
   and raise wall-jump plus wall-to-wall scheduling in the playful runtime profile.
+- [Done] Expand Mixed to 12 contiguous slots with a 3-column Home grid, first three slots
+  free, sequential earned-Rewarded unlock for slots 4–12, persisted capacity, Catalog
+  enforcement and Premium bypass.
 
 Before release hardening, complete the clean-room parity items confirmed by the local competitor audit:
 
@@ -161,7 +165,8 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Make Customize Pet live V3.18: size/speed, touch flags, speech toggle/catalog,
   reset position, character replacement and roster removal update the running foreground
   session without requiring a manual Stop/Start.
-- [Done] Add multi-pack session selection before considering swarm mode: 1–3 typed slots can select different packs while the current device performance budget remains authoritative.
+- [Done] Add multi-pack session selection: 12 typed Mixed slots can select different packs
+  while the adaptive shared FPS budget remains authoritative.
 - Treat tap popup and boot restart as separate product/policy decisions, not implicit APK parity.
 - [Done] Import the 1.026-pack owner snapshot into the private GitHub static server with
   versioned catalog, relative raw paths, byte sizes and SHA-256; fetch/cache metadata,

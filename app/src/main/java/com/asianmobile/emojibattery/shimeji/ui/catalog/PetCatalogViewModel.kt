@@ -1,9 +1,11 @@
 package com.asianmobile.emojibattery.shimeji.ui.catalog
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_PET_SLOTS
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
@@ -14,17 +16,21 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackInstallResult
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackInstaller
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class PetCatalogViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    @param:ApplicationContext private val context: Context,
     private val repository: PetPackRepository,
     private val installer: PetPackInstaller,
     private val ownerCatalogRepository: OwnerPetCatalogRepository,
@@ -42,10 +48,13 @@ class PetCatalogViewModel @Inject constructor(
             selectedKey = selectedKey(initialPreferences, repository.selectedPacks.value),
             target = target,
             targetSlotIndex = targetSlotIndex,
+            requiresMixedSlotReward = requiresMixedSlotReward(initialPreferences),
             localRootPath = ownerCatalogRepository.snapshot.value.localRootPath
         )
     )
     val uiState: StateFlow<PetCatalogUiState> = _uiState.asStateFlow()
+    private val _effects = Channel<PetCatalogEffect>(Channel.BUFFERED)
+    val effects = _effects.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -69,6 +78,8 @@ class PetCatalogViewModel @Inject constructor(
                             sources.preferences,
                             sources.selected
                         ),
+                        requiresMixedSlotReward =
+                            requiresMixedSlotReward(sources.preferences),
                         pets = sources.catalog.entries,
                         visiblePets = PetCatalogFilter.apply(
                             sources.catalog.entries,
@@ -86,7 +97,7 @@ class PetCatalogViewModel @Inject constructor(
     }
 
     fun install(uri: Uri) {
-        if (_uiState.value.isInstalling) return
+        if (_uiState.value.isInstalling || _uiState.value.requiresMixedSlotReward) return
         viewModelScope.launch {
             _uiState.update { it.copy(isInstalling = true, message = null) }
             when (val result = installer.install(uri)) {
@@ -116,6 +127,7 @@ class PetCatalogViewModel @Inject constructor(
     }
 
     fun select(key: String): Boolean {
+        if (_uiState.value.requiresMixedSlotReward || !isTargetSlotSequential()) return false
         val selected = when (target) {
             PetCatalogTarget.MIXED -> repository.select(key, targetSlotIndex)
             PetCatalogTarget.SWARM -> repository.find(key)?.let {
@@ -133,7 +145,12 @@ class PetCatalogViewModel @Inject constructor(
     }
 
     fun setOwnerPet(petId: Int) {
-        if (_uiState.value.preparingPetId != null) return
+        if (_uiState.value.preparingPetId != null ||
+            _uiState.value.requiresMixedSlotReward ||
+            !isTargetSlotSequential()
+        ) {
+            return
+        }
         val name = _uiState.value.pets.firstOrNull { it.id == petId }?.name ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(preparingPetId = petId, message = null) }
@@ -200,6 +217,52 @@ class PetCatalogViewModel @Inject constructor(
         _uiState.update { it.copy(message = null) }
     }
 
+    fun requestMixedSlotUnlock() {
+        if (!_uiState.value.requiresMixedSlotReward) return
+        val preferences = petSettingsRepository.preferences.value
+        if (!MixedSlotUnlockPolicy.canUnlockWithReward(
+                slotIndex = targetSlotIndex,
+                petCount = preferences.petCount,
+                rewardUnlockedSlotCount = preferences.mixedRewardUnlockedSlotCount
+            )
+        ) {
+            _uiState.update { it.copy(message = PetCatalogMessage.PreviousSlotRequired) }
+            return
+        }
+        emit(PetCatalogEffect.ShowMixedSlotRewardedAd)
+    }
+
+    fun onMixedSlotRewardResult(rewardEarned: Boolean) {
+        if (!rewardEarned) {
+            _uiState.update { it.copy(message = PetCatalogMessage.RewardUnavailable) }
+            return
+        }
+        val preferences = petSettingsRepository.preferences.value
+        if (!MixedSlotUnlockPolicy.canUnlockWithReward(
+                slotIndex = targetSlotIndex,
+                petCount = preferences.petCount,
+                rewardUnlockedSlotCount = preferences.mixedRewardUnlockedSlotCount
+            )
+        ) {
+            _uiState.update { it.copy(message = PetCatalogMessage.PreviousSlotRequired) }
+            return
+        }
+        petSettingsRepository.unlockMixedSlotByReward(targetSlotIndex)
+        _uiState.update {
+            it.copy(requiresMixedSlotReward = false, message = null)
+        }
+    }
+
+    fun refreshEntitlement() {
+        _uiState.update {
+            it.copy(
+                requiresMixedSlotReward = requiresMixedSlotReward(
+                    petSettingsRepository.preferences.value
+                )
+            )
+        }
+    }
+
     private fun activateTargetSlot() {
         if (target != PetCatalogTarget.MIXED) return
         val currentCount = petSettingsRepository.preferences.value.petCount
@@ -233,6 +296,24 @@ class PetCatalogViewModel @Inject constructor(
             ""
         }
         PetCatalogTarget.SWARM -> preferences.swarm.packKey
+    }
+
+    private fun requiresMixedSlotReward(preferences: PetPreferences): Boolean =
+        MixedSlotUnlockPolicy.requiresReward(
+            target = target,
+            slotIndex = targetSlotIndex,
+            petCount = preferences.petCount,
+            rewardUnlockedSlotCount = preferences.mixedRewardUnlockedSlotCount,
+            isPremium = SharedPreferencesUtils.getIsPremium(context)
+        )
+
+    private fun isTargetSlotSequential(): Boolean {
+        if (target != PetCatalogTarget.MIXED) return true
+        return targetSlotIndex <= petSettingsRepository.preferences.value.petCount
+    }
+
+    private fun emit(effect: PetCatalogEffect) {
+        viewModelScope.launch { _effects.send(effect) }
     }
 
     private data class CatalogSources(

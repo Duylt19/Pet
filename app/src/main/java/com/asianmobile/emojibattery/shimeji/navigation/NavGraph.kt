@@ -218,6 +218,12 @@ fun AppNavGraph(
                     ?: PetCatalogTarget.MIXED
                 PetCatalogScreen(
                     onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                    onNavigateToPremium = {
+                        navController.safeNavigate(
+                            "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
+                            ignoreDebounce = true
+                        )
+                    },
                     onOpenPack = { packKey ->
                         navController.safeNavigate(
                             Routes.petDetail(target, slotIndex, packKey),

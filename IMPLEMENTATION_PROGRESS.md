@@ -35,7 +35,7 @@
 | Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |
 | Private GitHub pet server | Done | 1.026 JSON records + 2.052 ZIP/PNG assets, size/SHA-256 validation, Remote Config token, cache-first catalog with 24h TTL/ETag/rate-limit backoff, and on-demand verified download |
-| Different pet per slot + Settings refactor | Done | 1–3 slot selections, per-pack overlay instances, slot-aware Catalog/Detail, grouped Settings and reset-position guard |
+| Different pet per slot + Settings refactor | Done | 1–12 slot selections, per-pack overlay instances, slot-aware Catalog/Detail, grouped Settings and reset-position guard |
 | Per-pet customization + Settings redesign | Done | Pet-first roster, commit-on-selection Add flow, independent size/speed/touch/speech/messages/position per slot, remove/shift migration và app-only Settings section |
 | Cute Pet product UI refresh | Done | Home pet room, Catalog discovery grid, friendly Detail, My Pet Family Settings và per-pet Customize dùng chung cozy light design; onboarding/Premium giữ nguyên |
 | Mixed + Pet Swarm home flow | Done | Hai mode loại trừ nhau; Mixed visibility theo pet cập nhật live, Swarm 1–12 có Rewarded unlock/Premium bypass và adaptive FPS |
@@ -47,6 +47,7 @@
 | Live Swarm size/speed | Done | Size, speed, randomization và movement bounds cập nhật tại chỗ; giữ PetState/action/combo/position thay vì rebuild |
 | Swarm zero-inset edge parity | Done | Left/Right/Top 0% giữ screen-edge overflow theo size pet; bật movement constraint không còn tạo lề canvas lớn ở hai bên |
 | Swarm spacing remap + jump rate | Done | Spacing co/giãn remap vị trí tương đối hai chiều không reset; wall jump 90% và wall-to-wall stories chiếm tối thiểu 25% raw weight |
+| Mixed 12-slot Rewarded capacity | Done | Slot 1–3 miễn phí; slot 4–12 mở tuần tự bằng earned Rewarded, persist theo device, Premium bypass và Catalog chặn Set/Import trước unlock |
 | Đổi namespace/application ID | Done | `com.asianmobile.emojibattery.shimeji` |
 
 ## Nguyên tắc cập nhật

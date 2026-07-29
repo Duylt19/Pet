@@ -9,8 +9,8 @@ toàn bộ profile; đổi mode, visibility, count và pack đều cập nhật 
 
 | Setting | Giá trị hợp lệ | Runtime |
 |---|---|---|
-| Pack key / slot | đúng 3 installed/built-in key | missing/invalid fallback Orange Cat |
-| Count | 1–3; low-RAM 1–2 | một window/state machine mỗi pet |
+| Pack key / slot | đúng 12 installed/built-in key | missing/invalid fallback Orange Cat |
+| Count | Mixed 1–12 | một window/state machine mỗi pet |
 | Mixed visibility / slot | on/off; giữ tối thiểu một slot visible | hide/show đúng window và speech ngay |
 | Swarm pack | một installed/built-in key riêng | lặp cùng pack cho mọi instance |
 | Swarm count | 1–12; low-RAM tối đa 6 | add/remove phần chênh lệch ngay, không reset pet cũ |
@@ -25,14 +25,14 @@ toàn bộ profile; đổi mode, visibility, count và pack đều cập nhật 
 | Interaction / slot | on/off | off chỉ thêm `FLAG_NOT_TOUCHABLE` cho window đúng pet |
 | Position / slot | nullable x/y chuẩn hóa 0–1 | lưu khi Stop, restore/clamp theo bounds mới |
 
-Legacy `pet_selected_pack_key` được materialize thành ba slot cùng giá trị khi
+Legacy `pet_selected_pack_key` được materialize thành 12 slot cùng giá trị khi
 `pet_selected_pack_keys` chưa tồn tại hoặc chưa đủ record, sau đó mỗi slot được update
 độc lập. Key legacy tiếp tục mirror slot 1 để migration tương thích. Remove từ UI shift
 toàn bộ profile/position của slot sau lên trước và append một profile mặc định ở cuối.
 
 Size/speed/messages/custom messages/interaction global cũ là migration fallback: khi key
-slot mới chưa có, giá trị cũ được duplicate sang cả ba profile. Lần user chỉnh một pet,
-repository ghi đủ ba record và chỉ mutate slot đích.
+slot mới chưa có, giá trị cũ được duplicate sang cả 12 profile. Lần user chỉnh một pet,
+repository ghi đủ 12 record và chỉ mutate slot đích.
 
 Reset position đặt record đúng slot về `null`, tăng revision của slot đó và đưa instance
 đang chạy về điểm mặc định ngay. Session cập nhật revision sau khi reset; Stop chỉ merge
@@ -57,6 +57,9 @@ các pet; add/remove dùng position list đã được repository materialize th
 
 - Home dùng segmented control cho Mixed/Swarm. Icon mắt trên từng Mixed card thay dropdown
   count và áp dụng ngay; global switch vẫn là quyền bật/tắt toàn bộ overlay.
+- Mixed có 12 slot liên tục: slot 1–3 miễn phí, slot 4–12 mở tuần tự sau earned Rewarded;
+  Premium bypass gate. Catalog chặn Set/Import khi slot đích chưa mở, còn capacity đã mở
+  không bị mất khi user remove pet.
 - Swarm free được unlock sau Rewarded thành công; Premium tự unlock. Unlock không tự Start.
 - Tap Swarm đã cấu hình mở màn Edit riêng. Count, size, speed, random variation và bốn
   movement insets được persist độc lập với Mixed và áp dụng ngay cho session đang chạy.
@@ -84,10 +87,10 @@ thay đổi đang chạy có hiệu lực từ tick kế tiếp.
 
 ## Performance/degradation
 
-- Thiết bị thường: tối đa 3 pet, shared clock 30 FPS cho 1–2 pet và 24 FPS cho 3 pet.
-- Low-RAM device: tối đa 2 pet và shared clock 24 FPS.
-- Swarm: 1–3 pet theo FPS budget hiện tại, 4–6 pet tối đa 20 FPS, 7–12 pet tối đa
-  16 FPS; low-RAM clamp 6.
+- Mixed/Swarm dùng adaptive shared clock: 1–2 pet theo device base budget, 3 pet tối đa
+  24 FPS, 4–6 pet tối đa 20 FPS và 7–12 pet tối đa 16 FPS.
+- Mixed hỗ trợ đủ 12 pet trên cả normal và low-RAM; Swarm vẫn clamp 6 trên low-RAM để
+  giữ profile bay/nhảy dày đặc trong budget.
 - Bitmap visual/cache được chia sẻ theo pack key; mỗi slot có engine/visual/speech director
   và input flag từ profile riêng nhưng không decode, parse DataStore hoặc tạo
   coroutine/thread trong frame loop.

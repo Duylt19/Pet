@@ -244,6 +244,11 @@ class HomeViewModel @Inject constructor(
             },
             petCount = preferences.petCount,
             maxMixedPets = petSettingsRepository.performanceBudget.maxPets,
+            mixedUnlockedSlotCount = if (isPremium) {
+                petSettingsRepository.performanceBudget.maxPets
+            } else {
+                preferences.mixedRewardUnlockedSlotCount
+            },
             swarmUnlocked = isPremium || preferences.swarm.unlockedByReward,
             isPremium = isPremium,
             swarmPackName = swarmPack?.manifest?.name,

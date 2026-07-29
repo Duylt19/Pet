@@ -32,12 +32,15 @@ Home ──Start(no overlay)──> System Overlay Settings ──back──> Ho
 Home ──Start(API 33+, notification missing)──> Notification permission ──result──> Start pet
 Home ──Start/Stop──> Pet overlay foreground service
 Home ──Mixed──> bật/tắt từng pet; tối thiểu một pet visible
+Home ──Mixed slot 1–3──> Catalog(target=MIXED, slot) ──Set/Import──> kích hoạt slot
+Home ──Mixed slot 4–12──> Catalog reward gate ──Rewarded earned──> Set/Import
+Home ──Mixed slot 4–12 + Premium──> Catalog, bỏ qua Rewarded
 Home ──Swarm locked──> Rewarded completed ──persist unlock──> chọn một pet + count 1–12
 Home ──Swarm + Premium──> tự unlock, không hiển thị Rewarded
 Home ──Swarm configured──> Edit Pet Swarm ──Change character──> Catalog(SWARM)
 Home ──Add/Change──> Catalog(target, slot) ──search/category──> Download/verify/Set
 Settings ──Pet card──> Customize Pet(slot) ──Change character──> Catalog(slot)
-Settings ──Add pet──> Catalog(slot trống) ──Set/Import──> kích hoạt slot
+Settings ──Add pet──> Catalog(slot trống) ──Rewarded nếu là slot 4–12──> Set/Import
 Customize Pet ──Remove──> Settings (shift slot sau, giữ profile riêng)
 Catalog ──already prepared pack──> Detail ──Use for Pet──> Catalog
 Home ──Settings──> Settings ──Language──> Language Settings
@@ -54,6 +57,9 @@ Home ──Premium──> Premium(in-app)
   `target` parse an toàn về enum, `slotIndex` là typed Int và `packKey` luôn URI-encode
   trước navigation.
 - Edit Pet Swarm pop về Home; Catalog mở từ màn này pop về Edit Pet Swarm.
+- Catalog là boundary authoritative cho Mixed slot Rewarded dù được mở từ Home, Settings
+  hay deep route. Chỉ slot kế tiếp được mở; đóng/fail ad không tăng capacity. Premium
+  bypass gate và entitlement được refresh khi Catalog resume.
 - Premium onboarding close/success đi tiếp Permission.
 - Premium splash-return close/success đi Home.
 - Language settings restart activity với `skip_splash=true` sau confirm.

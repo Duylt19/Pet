@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.ui.catalog
 
+import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -36,12 +37,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -55,9 +58,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogError
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
@@ -77,13 +84,45 @@ import kotlinx.coroutines.delay
 fun PetCatalogScreen(
     onBack: () -> Unit,
     onOpenPack: (String) -> Unit,
+    onNavigateToPremium: () -> Unit,
     viewModel: PetCatalogViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let(viewModel::install)
     }
     TrackScreenView(ScreenName.PET_CATALOG)
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshEntitlement()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    LaunchedEffect(context, uiState.requiresMixedSlotReward) {
+        if (uiState.requiresMixedSlotReward) {
+            RewardedVideoAds.getInstance().loadRewardedVideo(context.applicationContext)
+        }
+    }
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                PetCatalogEffect.ShowMixedSlotRewardedAd -> {
+                    val activity = context as? Activity
+                    if (activity == null) {
+                        viewModel.onMixedSlotRewardResult(rewardEarned = false)
+                    } else {
+                        RewardedVideoAds.getInstance().showRewardedAd(activity) { earned ->
+                            viewModel.onMixedSlotRewardResult(earned)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     PetCatalogContent(
         uiState = uiState,
@@ -93,7 +132,9 @@ fun PetCatalogScreen(
         onSearchQueryChanged = viewModel::updateSearchQuery,
         onSelectCategory = viewModel::selectCategory,
         onSetPet = viewModel::setOwnerPet,
-        onRetry = viewModel::refreshCatalog
+        onRetry = viewModel::refreshCatalog,
+        onUnlockMixedSlot = viewModel::requestMixedSlotUnlock,
+        onNavigateToPremium = onNavigateToPremium
     )
     if (uiState.message != null) {
         LaunchedEffect(uiState.message) {
@@ -112,7 +153,9 @@ private fun PetCatalogContent(
     onSearchQueryChanged: (String) -> Unit,
     onSelectCategory: (String?) -> Unit,
     onSetPet: (Int) -> Unit,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    onUnlockMixedSlot: () -> Unit,
+    onNavigateToPremium: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -124,10 +167,12 @@ private fun PetCatalogContent(
             title = stringResource(R.string.pet_catalog_title),
             onBack = onBack,
             trailing = {
-                ImportButton(
-                    isInstalling = uiState.isInstalling,
-                    onImport = onImport
-                )
+                if (!uiState.requiresMixedSlotReward) {
+                    ImportButton(
+                        isInstalling = uiState.isInstalling,
+                        onImport = onImport
+                    )
+                }
             }
         )
         Column(
@@ -179,6 +224,11 @@ private fun PetCatalogContent(
         }
 
         when {
+            uiState.requiresMixedSlotReward -> MixedSlotRewardGate(
+                slotNumber = uiState.targetSlotIndex + 1,
+                onUnlock = onUnlockMixedSlot,
+                onPremium = onNavigateToPremium
+            )
             uiState.isLoading -> CatalogLoading()
             uiState.catalogError != null -> CatalogError(
                 error = uiState.catalogError,
@@ -193,6 +243,62 @@ private fun PetCatalogContent(
                 onSetPet = onSetPet
             )
         }
+    }
+}
+
+@Composable
+private fun MixedSlotRewardGate(
+    slotNumber: Int,
+    onUnlock: () -> Unit,
+    onPremium: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(dimensionResource(SdpR.dimen._20sdp)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_lock_fill),
+            contentDescription = null,
+            tint = colorResource(R.color.colors_12B890),
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._48sdp))
+        )
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+        Text(
+            text = stringResource(R.string.pet_catalog_mixed_slot_locked_title, slotNumber),
+            color = colorResource(R.color.colors_2F2440),
+            fontFamily = CutePetTitleFont,
+            fontWeight = FontWeight.Bold,
+            fontSize = dimensionResource(SspR.dimen._18ssp).value.sp,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
+        Text(
+            text = stringResource(R.string.pet_catalog_mixed_slot_locked_description),
+            color = colorResource(R.color.colors_776D84),
+            fontFamily = FontFamily(Font(R.font.inter_regular)),
+            fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._16sdp)))
+        CutePetPrimaryButton(
+            text = stringResource(R.string.pet_catalog_mixed_slot_watch_reward),
+            onClick = onUnlock,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = stringResource(R.string.pet_catalog_mixed_slot_premium_hint),
+            color = colorResource(R.color.colors_12B890),
+            fontFamily = FontFamily(Font(R.font.inter_medium)),
+            fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._8sdp)))
+                .clickable(onClick = onPremium)
+                .padding(dimensionResource(SdpR.dimen._10sdp))
+        )
     }
 }
 
@@ -610,6 +716,10 @@ private fun catalogMessageText(message: PetCatalogMessage): String = when (messa
         message.reason
     )
     is PetCatalogMessage.Failed -> stringResource(R.string.pet_catalog_prepare_failed)
+    PetCatalogMessage.RewardUnavailable ->
+        stringResource(R.string.home_mode_reward_unavailable)
+    PetCatalogMessage.PreviousSlotRequired ->
+        stringResource(R.string.pet_catalog_mixed_slot_previous_required)
 }
 
 @Composable

@@ -11,11 +11,12 @@
 | `is_permission_completed` | Boolean | Hoàn thành/skip permission step |
 | `key_language` | String | Language code |
 | `country_language` | String | Region code |
-| `pet_selected_pack_keys` | String | Ba pack key độc lập theo slot, newline-delimited |
+| `pet_selected_pack_keys` | String | 12 pack key độc lập theo slot, newline-delimited |
 | `pet_selected_pack_key` | String | Legacy/mirror slot 1 để migrate dữ liệu cũ |
 | `pet_count` | Int | Số instance, clamp theo device budget |
 | `pet_display_mode` | String enum | `MIXED` hoặc `SWARM`; hai mode loại trừ nhau |
-| `pet_slot_enabled` | JSON String | Ba trạng thái visible độc lập của Mixed |
+| `pet_slot_enabled` | JSON String | 12 trạng thái visible độc lập của Mixed |
+| `pet_mixed_reward_unlocked_slot_count` | Int | Capacity Mixed đã mở, mặc định 3 và clamp 3–12 |
 | `pet_swarm_pack_key` | String | Pack được nhân bản trong Swarm |
 | `pet_swarm_count` | Int | Số instance Swarm, 1–12 hoặc tối đa 6 trên low-RAM |
 | `pet_swarm_reward_unlocked` | Boolean | Rewarded unlock vĩnh viễn trên device |
@@ -23,24 +24,27 @@
 | `pet_swarm_randomize_size_speed` | Boolean | Tạo variation deterministic theo instance |
 | `pet_swarm_constrain_movement_area` | Boolean | Bật vùng di chuyển tùy chỉnh |
 | `pet_swarm_inset_*_percent` | Int | Top/bottom/left/right 0–30%, bước 5% |
-| `pet_slot_size_percents` | JSON String | Ba mức size độc lập 50–150%, bước 10% |
-| `pet_slot_speed_percents` | JSON String | Ba mức speed độc lập 50–150%, bước 25% |
+| `pet_slot_size_percents` | JSON String | 12 mức size độc lập 50–150%, bước 10% |
+| `pet_slot_speed_percents` | JSON String | 12 mức speed độc lập 50–150%, bước 25% |
 | `pet_size_percent`, `pet_speed_percent` | Int | Legacy global fallback cho migration |
 | `pet_sound_enabled` | Boolean | Opt-in âm thanh khi schema pack hỗ trợ |
 | `pet_slot_messages_enabled` | JSON String | Toggle speech độc lập theo slot |
-| `pet_slot_custom_messages` | JSON String | Ba message catalog encoded độc lập |
+| `pet_slot_custom_messages` | JSON String | 12 message catalog encoded độc lập |
 | `pet_slot_interaction_enabled` | JSON String | Toggle tap/drag/fling độc lập theo slot |
 | `pet_messages_enabled`, `pet_custom_messages`, `pet_interaction_enabled` | mixed | Legacy global fallback cho migration |
-| `pet_last_positions` | String | Đúng 3 record nullable, tọa độ chuẩn hóa 0–1 theo slot |
-| `pet_position_reset_revisions` | JSON String | Ba reset revision độc lập |
+| `pet_last_positions` | String | Đúng 12 record nullable, tọa độ chuẩn hóa 0–1 theo slot |
+| `pet_position_reset_revisions` | JSON String | 12 reset revision độc lập |
 | `pet_position_reset_revision` | Int | Legacy global fallback cho migration |
 
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.
 
-`PetPreferences.petSlots` luôn materialize thành ba `PetSlotPreferences`. Mỗi record sở hữu
+`PetPreferences.petSlots` luôn materialize thành 12 `PetSlotPreferences`. Mỗi record sở hữu
 `packKey`, size, speed, messages, custom messages, interaction và `isEnabled`; `petCount`
 quyết định số slot Mixed đã cấu hình, còn `isEnabled` quyết định slot nào thật sự xuất
 hiện. Mixed luôn giữ tối thiểu một pet visible; global Start/Stop là cách tắt toàn bộ.
+Ba slot đầu miễn phí. Slot 4–12 mở tuần tự sau earned Rewarded callback, còn Premium bypass
+toàn bộ gate. Capacity đã mở được persist độc lập với roster nên remove pet không làm user
+phải xem lại quảng cáo của slot đó.
 `PetSwarmPreferences` tách riêng pack/count/unlock, size/speed và movement area nên không
 ghi đè hồ sơ Mixed. Random variation dùng pack key + instance index làm seed ổn định;
 không persist một record riêng cho từng bản sao.
@@ -69,7 +73,7 @@ không được restore sau process death/reboot.
 ## Pet pack model
 
 - `PetPackManifest` là schema v1 versioned gồm identity, canvas, anchor, interaction và action clips/frame metadata.
-- `PetPackRepository.packs/selectedPacks` là `StateFlow`; selection thiếu slot được materialize một lần từ slot 1 thành ba giá trị độc lập, và built-in Orange Cat luôn là fallback khi key không còn hợp lệ.
+- `PetPackRepository.packs/selectedPacks` là `StateFlow`; selection thiếu slot được materialize một lần từ slot 1 thành 12 giá trị độc lập, và built-in Orange Cat luôn là fallback khi key không còn hợp lệ.
 - Installed source chỉ trỏ tới app-private directory sau khi secure installer validate và atomic promote.
 - Pack của controller là snapshot theo từng rebuild. Khi selected key/count thay đổi,
   service preload visual rồi thay controller ngay trong foreground session; invalid/missing

@@ -166,6 +166,8 @@
     <string name="home_mode_pet_visible">Ẩn %1$s</string>
     <string name="home_mode_pet_hidden">Hiện %1$s</string>
     <string name="home_mode_add_pet">Thêm pet</string>
+    <string name="home_mode_add_pet_slot">Thêm Pet %1$d</string>
+    <string name="home_mode_unlock_pet_slot">Mở khóa Pet %1$d</string>
     <string name="home_mode_swarm_title">Chế độ bầy pet</string>
     <string name="home_mode_swarm_description">Lấp đầy màn hình bằng nhiều bản sao của một pet bạn thích.</string>
     <string name="home_mode_swarm_locked_title">Mở khóa bầy pet</string>
@@ -206,6 +208,12 @@
     <string name="home_mode_settings_tab">Cài đặt</string>
     <string name="pet_catalog_swarm_badge">Pet bầy đàn</string>
     <string name="pet_catalog_target_slot">Chọn nhân vật cho Pet %1$d. Pet đang chạy sẽ cập nhật ngay.</string>
+    <string name="pet_catalog_mixed_slot_locked_title">Mở khóa Pet %1$d</string>
+    <string name="pet_catalog_mixed_slot_locked_description">Xem một video có thưởng để mở khóa vĩnh viễn slot Mixed này trên thiết bị.</string>
+    <string name="pet_catalog_mixed_slot_watch_reward">Xem video để mở khóa</string>
+    <string name="pet_catalog_mixed_slot_premium_hint">Premium tự động mở khóa toàn bộ 12 slot Mixed.</string>
+    <string name="pet_catalog_mixed_slot_previous_required">Hãy thêm slot pet trước đó trước khi mở khóa slot này.</string>
+    <string name="pet_detail_unlock_slot_first">Hãy mở khóa slot pet này trước</string>
     <string name="pet_detail_select_for_slot">Dùng cho Pet %1$d</string>
     <string name="pet_detail_select_for_swarm">Dùng cho Bầy đàn Pet</string>
     <string name="premium_subscription_title">Nâng cấp lên Premium</string>

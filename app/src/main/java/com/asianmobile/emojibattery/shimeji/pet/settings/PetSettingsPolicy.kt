@@ -1,6 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.pet.settings
 
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SELECTED_PACK_KEY
+import com.asianmobile.emojibattery.shimeji.data.model.FREE_MIXED_PET_SLOTS
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_PET_SLOTS
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_SWARM_PETS
 import com.asianmobile.emojibattery.shimeji.data.model.MIN_SWARM_PETS
@@ -14,6 +15,9 @@ import org.json.JSONArray
 class PetSettingsPolicy {
     fun sanitizePetCount(value: Int, maxPets: Int): Int =
         value.coerceIn(MIN_PET_COUNT, maxPets.coerceAtLeast(MIN_PET_COUNT))
+
+    fun sanitizeMixedRewardUnlockedSlotCount(value: Int): Int =
+        value.coerceIn(FREE_MIXED_PET_SLOTS, MAX_PET_SLOTS)
 
     fun sanitizeSwarmCount(value: Int, maxPets: Int = MAX_SWARM_PETS): Int =
         value.coerceIn(MIN_SWARM_PETS, maxPets.coerceAtLeast(MIN_SWARM_PETS))
@@ -96,21 +100,17 @@ class PetSettingsPolicy {
     fun sanitizeSpeedPercent(value: Int): Int =
         nearestStep(value, MIN_SPEED_PERCENT, MAX_SPEED_PERCENT, SPEED_STEP_PERCENT)
 
-    fun targetFramesPerSecond(petCount: Int, budgetFramesPerSecond: Int): Int =
-        if (petCount >= 3) {
-            minOf(budgetFramesPerSecond, THREE_PET_FRAMES_PER_SECOND)
-        } else {
-            budgetFramesPerSecond
-        }
+    fun targetFramesPerSecond(petCount: Int, budgetFramesPerSecond: Int): Int = when {
+        petCount > 6 -> minOf(budgetFramesPerSecond, LARGE_SESSION_FRAMES_PER_SECOND)
+        petCount > 3 -> minOf(budgetFramesPerSecond, MEDIUM_SESSION_FRAMES_PER_SECOND)
+        petCount >= 3 -> minOf(budgetFramesPerSecond, THREE_PET_FRAMES_PER_SECOND)
+        else -> budgetFramesPerSecond
+    }
 
     fun targetSwarmFramesPerSecond(
         petCount: Int,
         budgetFramesPerSecond: Int
-    ): Int = when {
-        petCount > 6 -> minOf(budgetFramesPerSecond, LARGE_SWARM_FRAMES_PER_SECOND)
-        petCount > 3 -> minOf(budgetFramesPerSecond, SMALL_SWARM_FRAMES_PER_SECOND)
-        else -> targetFramesPerSecond(petCount, budgetFramesPerSecond)
-    }
+    ): Int = targetFramesPerSecond(petCount, budgetFramesPerSecond)
 
     fun shouldPersistPositions(
         sessionResetRevision: Int,
@@ -140,8 +140,8 @@ class PetSettingsPolicy {
         const val MAX_SPEED_PERCENT = 150
         const val SPEED_STEP_PERCENT = 25
         const val THREE_PET_FRAMES_PER_SECOND = 24
-        const val SMALL_SWARM_FRAMES_PER_SECOND = 20
-        const val LARGE_SWARM_FRAMES_PER_SECOND = 16
+        const val MEDIUM_SESSION_FRAMES_PER_SECOND = 20
+        const val LARGE_SESSION_FRAMES_PER_SECOND = 16
         const val MIN_SWARM_MOVEMENT_INSET_PERCENT = 0
         const val MAX_SWARM_MOVEMENT_INSET_PERCENT = 30
         const val SWARM_MOVEMENT_INSET_STEP_PERCENT = 5
@@ -196,7 +196,7 @@ class PetSelectionCodec {
 
 class PetPositionCodec {
     fun encode(positions: List<PetPositionFraction?>): String = positions
-        .materialize(MAX_POSITIONS, null)
+        .materialize(MAX_PET_SLOTS, null)
         .joinToString(separator = ";") { position ->
             position?.let {
                 "${it.x.coerceIn(0f, 1f)},${it.y.coerceIn(0f, 1f)}"
@@ -204,7 +204,7 @@ class PetPositionCodec {
         }
 
     fun decode(encoded: String): List<PetPositionFraction?> = encoded
-        .split(';', limit = MAX_POSITIONS)
+        .split(';', limit = MAX_PET_SLOTS)
         .map { item ->
             val values = item.split(',')
             if (values.size != 2) return@map null
@@ -212,11 +212,7 @@ class PetPositionCodec {
             val y = values[1].toFloatOrNull()?.takeIf(Float::isFinite) ?: return@map null
             PetPositionFraction(x.coerceIn(0f, 1f), y.coerceIn(0f, 1f))
         }
-        .materialize(MAX_POSITIONS, null)
-
-    private companion object {
-        const val MAX_POSITIONS = 3
-    }
+        .materialize(MAX_PET_SLOTS, null)
 }
 
 class PetSlotValueCodec {

@@ -16,6 +16,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SPEED_PERCENT
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SWARM_COUNT
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SWARM_SIZE_PERCENT
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SWARM_SPEED_PERCENT
+import com.asianmobile.emojibattery.shimeji.data.model.FREE_MIXED_PET_SLOTS
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_SWARM_PETS
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_PET_SLOTS
 import com.asianmobile.emojibattery.shimeji.data.model.PetDisplayMode
@@ -58,10 +59,14 @@ class DataStorePetSettingsRepository @Inject constructor(
     private val activityManager = context.getSystemService(ActivityManager::class.java)
 
     override val performanceBudget = if (activityManager.isLowRamDevice) {
-        PetPerformanceBudget(maxPets = 2, targetFramesPerSecond = 24, maxSwarmPets = 6)
+        PetPerformanceBudget(
+            maxPets = MAX_PET_SLOTS,
+            targetFramesPerSecond = 24,
+            maxSwarmPets = 6
+        )
     } else {
         PetPerformanceBudget(
-            maxPets = 3,
+            maxPets = MAX_PET_SLOTS,
             targetFramesPerSecond = 30,
             maxSwarmPets = MAX_SWARM_PETS
         )
@@ -101,6 +106,17 @@ class DataStorePetSettingsRepository @Inject constructor(
 
     override fun updatePetCount(count: Int) = edit { preferences ->
         preferences[PET_COUNT] = policy.sanitizePetCount(count, performanceBudget.maxPets)
+    }
+
+    override fun unlockMixedSlotByReward(slotIndex: Int) = edit { preferences ->
+        val current = decode(preferences)
+        if (slotIndex !in FREE_MIXED_PET_SLOTS until MAX_PET_SLOTS ||
+            slotIndex != current.mixedRewardUnlockedSlotCount
+        ) {
+            return@edit
+        }
+        preferences[MIXED_REWARD_UNLOCKED_SLOT_COUNT] =
+            policy.sanitizeMixedRewardUnlockedSlotCount(slotIndex + 1)
     }
 
     override fun updateDisplayMode(mode: PetDisplayMode) = edit { preferences ->
@@ -313,6 +329,9 @@ class DataStorePetSettingsRepository @Inject constructor(
         return PetPreferences(
             petSlots = policy.ensureMixedPetVisible(decodedSlots, petCount),
             petCount = petCount,
+            mixedRewardUnlockedSlotCount = policy.sanitizeMixedRewardUnlockedSlotCount(
+                preferences[MIXED_REWARD_UNLOCKED_SLOT_COUNT] ?: FREE_MIXED_PET_SLOTS
+            ),
             displayMode = preferences[DISPLAY_MODE]
                 ?.let { encoded ->
                     PetDisplayMode.entries.firstOrNull { it.name == encoded }
@@ -411,6 +430,8 @@ class DataStorePetSettingsRepository @Inject constructor(
         val SELECTED_PACK_KEY = stringPreferencesKey("pet_selected_pack_key")
         val SELECTED_PACK_KEYS = stringPreferencesKey("pet_selected_pack_keys")
         val PET_COUNT = intPreferencesKey("pet_count")
+        val MIXED_REWARD_UNLOCKED_SLOT_COUNT =
+            intPreferencesKey("pet_mixed_reward_unlocked_slot_count")
         val DISPLAY_MODE = stringPreferencesKey("pet_display_mode")
         val SIZE_PERCENT = intPreferencesKey("pet_size_percent")
         val SPEED_PERCENT = intPreferencesKey("pet_speed_percent")
