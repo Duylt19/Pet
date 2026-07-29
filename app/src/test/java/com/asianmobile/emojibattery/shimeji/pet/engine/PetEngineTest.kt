@@ -92,6 +92,56 @@ class PetEngineTest {
     }
 
     @Test
+    fun `swarm profile blocks speech even when the pack uses talk as its tap action`() {
+        val engine = PetEngine(
+            PetEngineConfig(
+                tapAction = PetAction.TALK,
+                maxTickMillis = 1_000,
+                behaviorProfile = PetBehaviorProfiles.SWARM
+            )
+        )
+        var state = engine.initialState(
+            bounds = PetBounds(0f, 0f, 1_000f, 1_000f),
+            size = size,
+            position = PetVector(100f, 980f)
+        )
+
+        state = engine.reduce(state, PetEvent.Tap).state
+        assertFalse(state.action.isSpeechAction)
+        repeat(500) {
+            state = engine.reduce(state, PetEvent.Tick(100)).state
+            assertFalse(state.action.isSpeechAction)
+            assertTrue(state.pendingComboBeats.none { beat -> beat.action.isSpeechAction })
+        }
+    }
+
+    @Test
+    fun `swarm profile rejects a speech next action declared by a pack clip`() {
+        val clips = DemoPetAnimation.clips().toMutableMap().apply {
+            this[PetAction.TAPPED] = getValue(PetAction.TAPPED).copy(
+                nextAction = PetAction.TALK
+            )
+        }
+        val engine = PetEngine(
+            PetEngineConfig(
+                clips = clips,
+                maxTickMillis = 1_000,
+                behaviorProfile = PetBehaviorProfiles.SWARM
+            )
+        )
+        val tapped = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(10f, 80f),
+            action = PetAction.TAPPED
+        )
+
+        val advanced = engine.reduce(tapped, PetEvent.Tick(1_000)).state
+
+        assertFalse(advanced.action.isSpeechAction)
+    }
+
+    @Test
     fun `showcase uses anticipation pauses and sustained special performances`() {
         val engine = engine(maxTickMillis = 1_000)
         val initial = engine.initialState(bounds, size, position = PetVector(0f, 80f))

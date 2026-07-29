@@ -44,6 +44,7 @@ data class PetEngineConfig(
 class PetEngine(
     private val config: PetEngineConfig = PetEngineConfig()
 ) {
+    private val supportedActions = config.supportedActions - config.behaviorProfile.blockedActions
     private val timeline = PetAnimationTimeline(config.clips)
 
     fun initialState(
@@ -57,7 +58,8 @@ class PetEngine(
         velocity = PetVector.Zero,
         size = size,
         bounds = bounds,
-        action = action,
+        action = action.takeIf { it in supportedActions }
+            ?: preferredAction(PetAction.IDLE, PetAction.WALK),
         direction = direction,
         animationCursor = PetAnimationCursor()
     )
@@ -135,15 +137,24 @@ class PetEngine(
 
     private fun onTap(state: PetState): PetTransition {
         if (!state.isGroundedSurface()) return PetTransition(state)
+        val tapAction = preferredAction(
+            config.tapAction,
+            PetAction.TAPPED,
+            PetAction.EMOTE,
+            PetAction.JUMP,
+            PetAction.RUN,
+            PetAction.WALK,
+            PetAction.IDLE
+        )
         val followUp = preferredActionOrNull(
             PetAction.EMOTE,
             PetAction.WINK,
             PetAction.LOOK_UP
         )
-            ?.takeUnless { it == config.tapAction }
+            ?.takeUnless { it == tapAction }
         val tapBeat = PetComboBeat(
-            action = config.tapAction,
-            durationMillis = if (config.clips.getValue(config.tapAction).loops) {
+            action = tapAction,
+            durationMillis = if (config.clips.getValue(tapAction).loops) {
                 TAP_LOOP_DURATION
             } else {
                 null
@@ -154,9 +165,9 @@ class PetEngine(
             beats = listOfNotNull(
                 tapBeat,
                 PetComboBeat(PetAction.IDLE, TAP_RECOVERY_DURATION)
-                    .takeIf { PetAction.IDLE in config.supportedActions },
+                    .takeIf { PetAction.IDLE in supportedActions },
                 PetComboBeat(PetAction.TALK, PET_TALK_BEAT_DURATION_MILLIS)
-                    .takeIf { PetAction.TALK in config.supportedActions },
+                    .takeIf { PetAction.TALK in supportedActions },
                 followUp?.let(::PetComboBeat)
             ),
             comboId = PetComboId.USER_AFFECTION,
@@ -169,7 +180,7 @@ class PetEngine(
         if (!state.isGroundedSurface()) return PetTransition(state)
         val definition = PetComboCatalog.supportedDefinition(
             PetComboId.USER_SHOWCASE,
-            config.supportedActions
+            supportedActions
         ) ?: return onTap(state)
 
         val transition = startRoutine(
@@ -188,7 +199,7 @@ class PetEngine(
         if (state.action in USER_CONTROLLED_ACTIONS) return PetTransition(state)
         val definition = PetComboCatalog.supportedDefinition(
             id = event.comboId,
-            supportedActions = config.supportedActions
+            supportedActions = supportedActions
         ) ?: return PetTransition(state)
         if (definition.habitat == PetComboHabitat.GROUND && !state.isGroundedSurface()) {
             return PetTransition(state)
@@ -338,6 +349,16 @@ class PetEngine(
                 changed.state
             }
 
+            actionChangedByTimeline && animation.action !in supportedActions -> {
+                val changed = changeAction(
+                    state = state.copy(comboBeatElapsedMillis = beatElapsedMillis),
+                    action = animation.action,
+                    restartAnimation = true
+                )
+                effects += changed.effects
+                changed.state
+            }
+
             else -> state.copy(
                 action = animation.action,
                 animationCursor = animation.cursor,
@@ -350,7 +371,9 @@ class PetEngine(
                 comboBeatElapsedMillis = beatElapsedMillis
             )
         }
-        if (!repeatSustainedBeat && !holdSustainedBeat && nextBeat == null) {
+        if (!repeatSustainedBeat && !holdSustainedBeat && nextBeat == null &&
+            animation.action in supportedActions
+        ) {
             effects += animation.actionTransitions.map { (from, to) ->
                 PetEffect.ActionChanged(from, to)
             }
@@ -515,9 +538,10 @@ class PetEngine(
         action: PetAction,
         restartAnimation: Boolean = false
     ): PetTransition {
-        val speechRejected = action.isSpeechAction && !state.isGroundedSurface()
-        val transitionState = if (speechRejected) state.cancelRoutine() else state
-        val resolvedAction = if (speechRejected) {
+        val actionRejected = action !in supportedActions ||
+            (action.isSpeechAction && !state.isGroundedSurface())
+        val transitionState = if (actionRejected) state.cancelRoutine() else state
+        val resolvedAction = if (actionRejected) {
             preferredAction(PetAction.FALL, PetAction.WALK, PetAction.IDLE)
         } else {
             action
@@ -566,7 +590,7 @@ class PetEngine(
         comboId: PetComboId,
         restartFirstAnimation: Boolean = false
     ): PetTransition {
-        val supported = beats.filter { it.action in config.supportedActions }
+        val supported = beats.filter { it.action in supportedActions }
         val first = supported.firstOrNull() ?: PetComboBeat(
             preferredAction(PetAction.WALK, PetAction.IDLE),
             config.behaviorProfile.groundDelayMillis
@@ -937,7 +961,7 @@ class PetEngine(
         }
 
         val supportedRules = config.behaviorProfile.autonomousComboRules.mapNotNull { rule ->
-            PetComboCatalog.supportedDefinition(rule.comboId, config.supportedActions)
+            PetComboCatalog.supportedDefinition(rule.comboId, supportedActions)
                 ?.let { definition -> rule to definition }
         }
         val climbRules = supportedRules.filter { (_, definition) ->
@@ -999,12 +1023,12 @@ class PetEngine(
             return PetTransition(scheduled, effects)
         }
         val chance = draw(scheduled, 0 until PERCENT_MAX, WALL_EXIT_SALT)
-        val canJump = PetAction.JUMP in config.supportedActions
+        val canJump = PetAction.JUMP in supportedActions
         val jumpThreshold = config.behaviorProfile.wallJumpChancePercent
         val descendThreshold = jumpThreshold + config.behaviorProfile.wallDescendChancePercent
         val nextAction = when {
             canJump && chance.value < jumpThreshold -> PetAction.JUMP
-            PetAction.CLIMB_DOWN in config.supportedActions && chance.value < descendThreshold -> {
+            PetAction.CLIMB_DOWN in supportedActions && chance.value < descendThreshold -> {
                 PetAction.CLIMB_DOWN
             }
             else -> preferredAction(PetAction.FALL, PetAction.WALK)
@@ -1123,7 +1147,7 @@ class PetEngine(
     )
 
     private fun preferredActionOrNull(vararg actions: PetAction): PetAction? =
-        actions.firstOrNull { it in config.supportedActions }
+        actions.firstOrNull { it in supportedActions }
 
     private fun preferredAction(vararg actions: PetAction): PetAction =
         preferredActionOrNull(*actions) ?: PetAction.IDLE

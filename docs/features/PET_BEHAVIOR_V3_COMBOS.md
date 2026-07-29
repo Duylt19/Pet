@@ -395,6 +395,19 @@ sẽ hủy session an toàn.
 `PetCrowdResolver` không sửa cặp social và không chặn pet đang di chuyển. Với một pet,
 director không phát directive social.
 
+## Swarm behavior profile
+
+Swarm cố ý không dùng cùng nhịp sống với Mixed. Runtime loại `TALK` và `TALK_WALK` ở
+engine policy, không chỉ tắt speech window; configured tap, combo beat và clip
+`nextAction` đều phải đi qua cùng tập action đã lọc. Autonomous pool của Swarm chỉ chứa
+story không lời và dành phần lớn weight cho wall/ceiling/aerial stunt.
+
+Mỗi instance vẫn dùng seed riêng, nhưng thời gian chờ/idle ngắn hơn, wall jump có xác
+suất 80% và climb quota kích hoạt sau một non-climb story. Các pack thiếu action stunt
+được degrade về zoomies, patrol, peek-and-dash hoặc explorer. Controller không khởi tạo
+`PetSocialDirector` hay `PetCrowdResolver` trong Swarm, nên các instance không mời nhau
+vào scene, không đổi facing theo pet khác và không sửa overlap của nhau.
+
 ## Verification
 
 - JVM test kiểm tra catalog degrade/required-action theo pack, combo loop/one-shot chạy đúng
@@ -419,6 +432,9 @@ director không phát directive social.
   `PLAY_ONCE` và hai lượt duet có recovery.
 - JVM test khóa owner IDLE visual sang standing frame, autonomous SIT đúng 4/17 story,
   social SIT đúng 2 role và mọi autonomous SIT còn lại kéo dài ít nhất 5 giây.
+- JVM test khóa Swarm profile không chứa speaking story, stunt weight lớn hơn phần còn
+  lại, thời gian chờ ngắn hơn và engine không thể vào TALK qua tap action hoặc clip
+  `nextAction` do pack khai báo.
 - Device smoke test cần chạy với 2–3 pet để quan sát đủ approach và ít nhất hai scene liên
   tiếp; overlay vẫn phải có đúng một foreground service và một shared render clock.
 

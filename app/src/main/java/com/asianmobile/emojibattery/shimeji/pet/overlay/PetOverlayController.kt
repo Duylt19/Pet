@@ -16,6 +16,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.PetPositionFraction
 import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
 import com.asianmobile.emojibattery.shimeji.data.model.PetSlotPreferences
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetAction
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetBehaviorProfile
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetBehaviorProfiles
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetBounds
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetCrowdResolver
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetEngine
@@ -86,12 +88,16 @@ internal class PetOverlayController(
             performanceBudget.targetFramesPerSecond
         )
     }
-    private val socialDirector = PetSocialDirector(
-        sceneOffset = selectedAssets.fold(1) { hash, asset ->
-            31 * hash + asset.pack.manifest.id.hashCode()
-        }
-    )
-    private val crowdResolver = PetCrowdResolver()
+    private val socialDirector = if (isSwarm) {
+        null
+    } else {
+        PetSocialDirector(
+            sceneOffset = selectedAssets.fold(1) { hash, asset ->
+                31 * hash + asset.pack.manifest.id.hashCode()
+            }
+        )
+    }
+    private val crowdResolver = PetCrowdResolver().takeUnless { isSwarm }
     private val speechSettings = selectedAssets.mapIndexed { index, _ ->
         val slot = runtimeSlot(index)
         index to SpeechSettings(
@@ -122,17 +128,17 @@ internal class PetOverlayController(
                 lastTickNanos = frameTimeNanos
                 val elapsedMillis = elapsedNanos / NANOS_PER_MILLISECOND
                 val visibleInstances = instances.filter(PetInstance::isVisible)
-                if (!isSwarm) {
-                    socialDirector.update(
+                socialDirector
+                    ?.update(
                         pets = visibleInstances.map { instance ->
                             PetSocialSnapshot(instance.id, instance.state)
                         },
                         elapsedMillis = elapsedMillis
-                    ).forEach(::dispatchSocialDirective)
-                }
+                    )
+                    ?.forEach(::dispatchSocialDirective)
                 val event = PetEvent.Tick(elapsedMillis)
                 visibleInstances.forEach { dispatch(it, event) }
-                if (!isSwarm) resolveCrowdSpacing(visibleInstances)
+                resolveCrowdSpacing(visibleInstances)
             }
             choreographer.postFrameCallback(this)
         }
@@ -140,7 +146,7 @@ internal class PetOverlayController(
 
     fun start() {
         if (instances.isNotEmpty()) return
-        socialDirector.reset()
+        socialDirector?.reset()
         speechDirectors.values.forEach(PetSpeechDirector::reset)
 
         try {
@@ -221,7 +227,7 @@ internal class PetOverlayController(
         isRendering = false
         choreographer.removeFrameCallback(frameCallback)
         removeAllViews()
-        socialDirector.reset()
+        socialDirector?.reset()
         speechDirectors.values.forEach(PetSpeechDirector::reset)
         lastTickNanos = 0L
         return positions
@@ -353,7 +359,7 @@ internal class PetOverlayController(
                 }
             }
         }
-        socialDirector.reset()
+        socialDirector?.reset()
     }
 
     fun resetPositions(slotIndexes: List<Int>) {
@@ -410,7 +416,8 @@ internal class PetOverlayController(
     }
 
     private fun resolveCrowdSpacing(visibleInstances: List<PetInstance>) {
-        val resolvedStates = crowdResolver.resolve(
+        val resolver = crowdResolver ?: return
+        val resolvedStates = resolver.resolve(
             visibleInstances.map(PetInstance::state)
         )
         visibleInstances.zip(resolvedStates).forEach { (instance, resolvedState) ->
@@ -700,6 +707,11 @@ internal class PetOverlayController(
             clips = pack.manifest.toEngineClips(speedPercent / 100f),
             tapAction = pack.manifest.interaction.tapAction,
             supportedActions = pack.manifest.toEngineSupportedActions(),
+            behaviorProfile = if (isSwarm) {
+                PetBehaviorProfiles.SWARM
+            } else {
+                PetBehaviorProfile()
+            },
             behaviorSeed = pack.manifest.id.hashCode().toLong() xor
                 ((index + 1L) * PET_BEHAVIOR_SEED_STEP)
         )

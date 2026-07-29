@@ -38,8 +38,15 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Mixed dùng 1–3 slot, mỗi slot có visibility riêng; instance hidden không tick, không
   tham gia social/crowd và không giữ speech window. Visibility thay đổi trực tiếp, không
   cần Stop/Start.
-- Swarm dùng 1–12 instance cùng pack (low-RAM tối đa 6), không tạo speech/social/crowd
-  session để giữ chi phí dự đoán được. 4–6 pet tối đa 20 FPS, 7–12 pet tối đa 16 FPS.
+- Swarm dùng 1–12 instance cùng pack (low-RAM tối đa 6). Controller không khởi tạo
+  social director/crowd resolver và engine loại `TALK`/`TALK_WALK` khỏi tập action thật
+  sự hỗ trợ, kể cả khi pack dùng TALK cho tap hoặc khai báo TALK làm `nextAction`. Vì vậy
+  Swarm không có pet-to-pet scene, overlap correction, speech action hay bubble window.
+  4–6 pet tối đa 20 FPS, 7–12 pet tối đa 16 FPS.
+- Swarm dùng behavior profile riêng: khoảng nghỉ trên sàn giảm còn 0,9–2,4 giây, idle
+  còn 0,8–1,8 giây, wall jump tăng từ 55% lên 80%, và stunt chiếm phần lớn tổng weight.
+  Sau tối đa một story không leo, pack có đủ action sẽ ưu tiên wall/ceiling/aerial story;
+  pack ít frame vẫn fallback sang zoomies/patrol/dash/explorer mà không giả action.
 - Swarm size/speed lấy từ base profile; khi randomization bật, mỗi instance nhận variation
   deterministic tối đa ±2 step nên không đổi ngẫu nhiên sau mỗi rebuild. Optional movement
   area inset 0–30% theo từng cạnh được áp dụng vào `PetBounds`; khi bật, pet không dùng

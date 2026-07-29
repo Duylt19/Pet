@@ -154,6 +154,28 @@ class PetComboCatalogTest {
     }
 
     @Test
+    fun `swarm profile is silent and strongly favors playful stunt stories`() {
+        val defaultProfile = PetBehaviorProfile()
+        val profile = PetBehaviorProfiles.SWARM
+        val definitions = profile.autonomousComboRules.mapNotNull { rule ->
+            PetComboCatalog.definition(rule.comboId)?.let { rule to it }
+        }
+        val stuntWeight = definitions
+            .filter { (_, definition) -> definition.energy == PetComboEnergy.STUNT }
+            .sumOf { (rule, _) -> rule.weight }
+        val otherWeight = definitions
+            .filterNot { (_, definition) -> definition.energy == PetComboEnergy.STUNT }
+            .sumOf { (rule, _) -> rule.weight }
+
+        assertEquals(setOf(PetAction.TALK, PetAction.TALK_WALK), profile.blockedActions)
+        assertTrue(definitions.none { (_, definition) -> definition.hasSpeech })
+        assertTrue(stuntWeight > otherWeight)
+        assertTrue(profile.groundDelayMillis.last < defaultProfile.groundDelayMillis.first)
+        assertTrue(profile.wallJumpChancePercent > defaultProfile.wallJumpChancePercent)
+        assertEquals(1, profile.maxNonClimbCombosBeforeClimb)
+    }
+
+    @Test
     fun `autonomous sitting is reserved for stories where rest has meaning`() {
         val sittingCombos = PetBehaviorProfile().autonomousComboRules
             .mapNotNull { rule -> PetComboCatalog.definition(rule.comboId) }

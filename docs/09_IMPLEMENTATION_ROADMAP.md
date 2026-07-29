@@ -90,6 +90,9 @@ không reset action, combo, vị trí hoặc animation cursor.
   only after a real Rewarded callback for free users, and bypasses Rewarded for Premium.
 - [Done] Add a dedicated Pet Swarm editor with live count, base size/speed, deterministic
   per-instance variation and optional four-edge movement constraints.
+- [Done] Add a Swarm-only runtime profile: block TALK/TALK_WALK at engine level, remove
+  social/crowd coordination entirely and favor short-delay wall, ceiling and aerial
+  stunt stories with safe pack-aware degradation.
 
 Before release hardening, complete the clean-room parity items confirmed by the local competitor audit:
 
