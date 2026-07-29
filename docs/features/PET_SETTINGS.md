@@ -13,10 +13,10 @@ toàn bộ profile; đổi mode, visibility, count và pack đều cập nhật 
 | Count | 1–3; low-RAM 1–2 | một window/state machine mỗi pet |
 | Mixed visibility / slot | on/off; giữ tối thiểu một slot visible | hide/show đúng window và speech ngay |
 | Swarm pack | một installed/built-in key riêng | lặp cùng pack cho mọi instance |
-| Swarm count | 1–12; low-RAM tối đa 6 | rebuild controller ngay trong session |
-| Swarm base size/speed | cùng range và step của pet thường | rebuild Swarm với profile mới |
+| Swarm count | 1–12; low-RAM tối đa 6 | add/remove phần chênh lệch ngay, không reset pet cũ |
+| Swarm base size/speed | cùng range và step của pet thường | cập nhật runtime ngay, không rebuild Swarm |
 | Swarm random variation | on/off | variation deterministic ±2 step theo instance |
-| Swarm movement insets | mỗi cạnh 0–30%, bước 5% | giới hạn playground ngay |
+| Swarm movement insets | mỗi cạnh 0–30%, bước 5% | giới hạn playground ngay; 0% không tạo lề bounds và vẫn giữ screen-edge overflow theo size pet |
 | Size / slot | 50–150%, bước 10% | 100% = 84dp trước `defaultScale`, clamp 48–144dp |
 | Speed / slot | 50–150%, bước 25% | locomotion/physics/expression scale từ profile đúng pet |
 | Sound | on/off | reserved; pack v1 chưa hỗ trợ audio |
@@ -60,6 +60,8 @@ các pet; add/remove dùng position list đã được repository materialize th
 - Swarm free được unlock sau Rewarded thành công; Premium tự unlock. Unlock không tự Start.
 - Tap Swarm đã cấu hình mở màn Edit riêng. Count, size, speed, random variation và bốn
   movement insets được persist độc lập với Mixed và áp dụng ngay cho session đang chạy.
+  Inset được tính trên viewport vật lý trước, sau đó bù screen-edge overflow theo kích thước
+  pet; vì vậy Left/Right 0% không vô tình tạo khoảng trống lớn khi tăng size.
 - Settings hub chỉ hiển thị roster + trạng thái tóm tắt và app/support.
 - Tap card mở `pet_customization/{slotIndex}`.
 - Size editor dùng slider 11 nấc `50–150%` kèm stepper `−/+`; giá trị optimistic trên UI

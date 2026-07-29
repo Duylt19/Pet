@@ -56,7 +56,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   deterministic tối đa ±2 step nên cùng index không đổi variation giữa các lần update.
   Size thay đổi dispatch `SizeChanged` để giữ surface/tâm hiện tại; speed chỉ thay engine
   timeline/config rồi tiếp tục cùng `PetState`, action, combo và animation cursor ở tick
-  kế tiếp. Optional movement area inset 0–30% cập nhật `PetBounds` tại chỗ.
+  kế tiếp. Optional movement area inset 0–30% cập nhật `PetBounds` tại chỗ. Inset được
+  tính trên viewport trước khi bù edge-overflow theo size, nên giá trị 0% giữ đúng hành vi
+  chạm mép và không phát sinh lề ngang tỷ lệ với kích thước pet.
 - Thay đổi riêng Swarm count được reconcile incremental trong controller: tăng count chỉ
   tạo engine/view cho các index mới, giảm count chỉ remove các index cuối. Pet đang tồn
   tại giữ nguyên `PetState`, action, animation cursor, vị trí và window; visual đã preload

@@ -8,6 +8,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.PetPositionFraction
 import com.asianmobile.emojibattery.shimeji.data.model.PetSlotPreferences
 import com.asianmobile.emojibattery.shimeji.data.model.PetSwarmMovementInsets
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetBounds
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetSize
 import org.json.JSONArray
 
 class PetSettingsPolicy {
@@ -36,7 +37,8 @@ class PetSettingsPolicy {
 
     fun constrainSwarmBounds(
         bounds: PetBounds,
-        insets: PetSwarmMovementInsets
+        insets: PetSwarmMovementInsets,
+        petSize: PetSize
     ): PetBounds {
         val sanitized = sanitizeSwarmMovementInsets(insets)
         val width = bounds.right - bounds.left
@@ -46,7 +48,7 @@ class PetSettingsPolicy {
             top = bounds.top + height * sanitized.topPercent / 100f,
             right = bounds.right - width * sanitized.rightPercent / 100f,
             bottom = bounds.bottom - height * sanitized.bottomPercent / 100f
-        )
+        ).expandedForScreenEdges(petSize)
     }
 
     fun swarmVariationPercent(

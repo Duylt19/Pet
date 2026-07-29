@@ -849,7 +849,8 @@ internal class PetOverlayController(
         return if (isSwarm && preferences.swarm.constrainMovementArea) {
             settingsPolicy.constrainSwarmBounds(
                 baseBounds,
-                preferences.swarm.movementInsets
+                preferences.swarm.movementInsets,
+                size
             )
         } else {
             baseBounds.expandedForScreenEdges(size)

@@ -4,6 +4,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.PetPositionFraction
 import com.asianmobile.emojibattery.shimeji.data.model.PetSlotPreferences
 import com.asianmobile.emojibattery.shimeji.data.model.PetSwarmMovementInsets
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetBounds
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetSize
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -101,11 +102,26 @@ class PetSettingsPolicyTest {
                 bottomPercent = 100,
                 leftPercent = 11,
                 rightPercent = -5
-            )
+            ),
+            petSize = PetSize(width = 90f, height = 90f)
         )
 
         assertEquals(
-            PetBounds(left = 100f, top = 100f, right = 1000f, bottom = 1400f),
+            PetBounds(left = 70f, top = 70f, right = 1030f, bottom = 1400f),
+            constrained
+        )
+    }
+
+    @Test
+    fun `zero swarm movement insets retain normal screen edge overflow`() {
+        val constrained = policy.constrainSwarmBounds(
+            bounds = PetBounds(left = 0f, top = 0f, right = 1000f, bottom = 2000f),
+            insets = PetSwarmMovementInsets(),
+            petSize = PetSize(width = 300f, height = 300f)
+        )
+
+        assertEquals(
+            PetBounds(left = -100f, top = -100f, right = 1100f, bottom = 2000f),
             constrained
         )
     }
