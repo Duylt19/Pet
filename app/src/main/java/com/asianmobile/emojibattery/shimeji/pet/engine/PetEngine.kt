@@ -85,7 +85,10 @@ class PetEngine(
         is PetEvent.BoundsChanged -> PetTransition(
             state.copy(
                 bounds = event.bounds,
-                position = event.bounds.clampTopLeft(state.position, state.size)
+                position = event.bounds.clampTopLeft(
+                    event.position ?: state.position,
+                    state.size
+                )
             )
         )
         is PetEvent.SizeChanged -> onSizeChanged(state, event)

@@ -61,7 +61,9 @@ các pet; add/remove dùng position list đã được repository materialize th
 - Tap Swarm đã cấu hình mở màn Edit riêng. Count, size, speed, random variation và bốn
   movement insets được persist độc lập với Mixed và áp dụng ngay cho session đang chạy.
   Inset được tính trên viewport vật lý trước, sau đó bù screen-edge overflow theo kích thước
-  pet; vì vậy Left/Right 0% không vô tình tạo khoảng trống lớn khi tăng size.
+  pet; vì vậy Left/Right 0% không vô tình tạo khoảng trống lớn khi tăng size. Mỗi lần đổi
+  inset remap tọa độ tương đối giữa bounds cũ/mới, nên tăng rồi giảm spacing là hai chiều
+  và không làm pet mắc lại tại vị trí đã clamp.
 - Settings hub chỉ hiển thị roster + trạng thái tóm tắt và app/support.
 - Tap card mở `pet_customization/{slotIndex}`.
 - Size editor dùng slider 11 nấc `50–150%` kèm stepper `−/+`; giá trị optimistic trên UI

@@ -167,6 +167,12 @@ internal class PetOverlayController(
 
     fun updateSwarmPreferences(updatedPreferences: PetPreferences) {
         if (!isSwarm) return
+        val previousSwarm = preferences.swarm
+        val movementInsetsChanged = updatedPreferences.swarm.constrainMovementArea &&
+            previousSwarm.movementInsets != updatedPreferences.swarm.movementInsets
+        val movementAreaChanged =
+            previousSwarm.constrainMovementArea != updatedPreferences.swarm.constrainMovementArea ||
+                movementInsetsChanged
         preferences = updatedPreferences
         reconcileSwarmCount(updatedPreferences.swarm.count)
         instances.forEach { instance ->
@@ -175,8 +181,22 @@ internal class PetOverlayController(
             val sizePixels = petSizePixels(pack, slot)
             val size = PetSize(sizePixels.toFloat(), sizePixels.toFloat())
             val bounds = currentPlaygroundBounds(size)
+            val remappedPosition = if (movementAreaChanged) {
+                sessionLayout.remapPosition(
+                    position = instance.state.position,
+                    sourceBounds = instance.state.bounds,
+                    sourceSize = instance.state.size,
+                    targetBounds = bounds,
+                    targetSize = size
+                )
+            } else {
+                null
+            }
             if (instance.state.size != size) {
                 dispatch(instance, PetEvent.SizeChanged(size = size, bounds = bounds))
+            }
+            if (remappedPosition != null) {
+                dispatch(instance, PetEvent.BoundsChanged(bounds, remappedPosition))
             } else if (instance.state.bounds != bounds) {
                 dispatch(instance, PetEvent.BoundsChanged(bounds))
             }

@@ -64,8 +64,8 @@ object PetBehaviorProfiles {
         creepDurationMillis = 1_200L..2_800L,
         wallDurationMillis = 900L..2_800L,
         ceilingDurationMillis = 800L..2_400L,
-        wallJumpChancePercent = 80,
-        wallDescendChancePercent = 10,
+        wallJumpChancePercent = 90,
+        wallDescendChancePercent = 5,
         recentComboMemory = 2,
         maxNonClimbCombosBeforeClimb = 1,
         blockedActions = setOf(PetAction.TALK, PetAction.TALK_WALK),
@@ -74,15 +74,15 @@ object PetBehaviorProfiles {
             PetComboRule(PetComboId.BUSY_PATROL, 10),
             PetComboRule(PetComboId.PEEK_AND_DASH, 12),
             PetComboRule(PetComboId.BRAVE_EXPLORER, 10),
-            PetComboRule(PetComboId.WALL_PARKOUR, 18),
+            PetComboRule(PetComboId.WALL_PARKOUR, 22),
             PetComboRule(PetComboId.CEILING_EXPEDITION, 14),
-            PetComboRule(PetComboId.WALL_DIVE, 16),
-            PetComboRule(PetComboId.WALL_TO_WALL_LEAP, 20),
-            PetComboRule(PetComboId.WALL_TO_WALL_RISE, 20),
-            PetComboRule(PetComboId.SKY_DIVER, 22),
-            PetComboRule(PetComboId.NINJA_SKILL, 18),
+            PetComboRule(PetComboId.WALL_DIVE, 20),
+            PetComboRule(PetComboId.WALL_TO_WALL_LEAP, 36),
+            PetComboRule(PetComboId.WALL_TO_WALL_RISE, 36),
+            PetComboRule(PetComboId.SKY_DIVER, 28),
+            PetComboRule(PetComboId.NINJA_SKILL, 22),
             PetComboRule(PetComboId.BATTLE_DANCE, 8),
-            PetComboRule(PetComboId.ACROBATIC_FINALE, 20)
+            PetComboRule(PetComboId.ACROBATIC_FINALE, 24)
         )
     )
 }

@@ -166,12 +166,20 @@ class PetComboCatalogTest {
         val otherWeight = definitions
             .filterNot { (_, definition) -> definition.energy == PetComboEnergy.STUNT }
             .sumOf { (rule, _) -> rule.weight }
+        val wallToWallWeight = profile.autonomousComboRules
+            .filter { rule ->
+                rule.comboId == PetComboId.WALL_TO_WALL_LEAP ||
+                    rule.comboId == PetComboId.WALL_TO_WALL_RISE
+            }
+            .sumOf(PetComboRule::weight)
+        val totalWeight = profile.autonomousComboRules.sumOf(PetComboRule::weight)
 
         assertEquals(setOf(PetAction.TALK, PetAction.TALK_WALK), profile.blockedActions)
         assertTrue(definitions.none { (_, definition) -> definition.hasSpeech })
         assertTrue(stuntWeight > otherWeight)
+        assertTrue(wallToWallWeight * 4 >= totalWeight)
         assertTrue(profile.groundDelayMillis.last < defaultProfile.groundDelayMillis.first)
-        assertTrue(profile.wallJumpChancePercent > defaultProfile.wallJumpChancePercent)
+        assertEquals(90, profile.wallJumpChancePercent)
         assertEquals(1, profile.maxNonClimbCombosBeforeClimb)
     }
 

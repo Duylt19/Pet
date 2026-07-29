@@ -41,7 +41,10 @@ sealed interface PetEvent {
     data class DragBy(val delta: PetVector) : PetEvent
     data object DragEnd : PetEvent
     data class Fling(val velocity: PetVector) : PetEvent
-    data class BoundsChanged(val bounds: PetBounds) : PetEvent
+    data class BoundsChanged(
+        val bounds: PetBounds,
+        val position: PetVector? = null
+    ) : PetEvent
     data class SizeChanged(
         val size: PetSize,
         val bounds: PetBounds

@@ -58,6 +58,18 @@ class PetSessionLayout {
         )
     }
 
+    fun remapPosition(
+        position: PetVector,
+        sourceBounds: PetBounds,
+        sourceSize: PetSize,
+        targetBounds: PetBounds,
+        targetSize: PetSize
+    ): PetVector = restore(
+        fraction = normalize(position, sourceBounds, sourceSize),
+        bounds = targetBounds,
+        size = targetSize
+    )
+
     private fun restore(
         fraction: PetPositionFraction,
         bounds: PetBounds,

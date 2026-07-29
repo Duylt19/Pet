@@ -1120,6 +1120,29 @@ class PetEngineTest {
     }
 
     @Test
+    fun `bounds change accepts remapped position without resetting behavior`() {
+        val engine = engine()
+        val initial = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(70f, 70f),
+            action = PetAction.RUN
+        )
+        val smallerBounds = PetBounds(left = 10f, top = 10f, right = 80f, bottom = 80f)
+        val remappedPosition = PetVector(25f, 35f)
+
+        val updated = engine.reduce(
+            initial,
+            PetEvent.BoundsChanged(smallerBounds, remappedPosition)
+        )
+
+        assertEquals(remappedPosition, updated.state.position)
+        assertEquals(smallerBounds, updated.state.bounds)
+        assertEquals(initial.action, updated.state.action)
+        assertEquals(initial.animationCursor, updated.state.animationCursor)
+    }
+
+    @Test
     fun `grounded resize preserves feet and horizontal center`() {
         val engine = engine()
         val initial = engine.initialState(

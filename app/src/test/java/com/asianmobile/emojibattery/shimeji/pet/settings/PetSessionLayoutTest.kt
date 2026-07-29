@@ -67,6 +67,32 @@ class PetSessionLayoutTest {
     }
 
     @Test
+    fun `movement area remap returns pet when bounds contract and expand`() {
+        val originalBounds = PetBounds(left = -100f, top = -100f, right = 1100f, bottom = 2000f)
+        val constrainedBounds = PetBounds(left = 200f, top = 200f, right = 800f, bottom = 1400f)
+        val petSize = PetSize(width = 300f, height = 300f)
+        val original = PetVector(x = 620f, y = 860f)
+
+        val constrained = layout.remapPosition(
+            position = original,
+            sourceBounds = originalBounds,
+            sourceSize = petSize,
+            targetBounds = constrainedBounds,
+            targetSize = petSize
+        )
+        val restored = layout.remapPosition(
+            position = constrained,
+            sourceBounds = constrainedBounds,
+            sourceSize = petSize,
+            targetBounds = originalBounds,
+            targetSize = petSize
+        )
+
+        assertEquals(original.x, restored.x, 0.001f)
+        assertEquals(original.y, restored.y, 0.001f)
+    }
+
+    @Test
     fun `live pet spawn is random deterministic and inside safe bounds`() {
         val first = layout.randomPosition(
             bounds = bounds,
