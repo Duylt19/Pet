@@ -21,6 +21,7 @@ import com.asianmobile.emojibattery.shimeji.ui.catalog.PetCatalogTarget
 import com.asianmobile.emojibattery.shimeji.ui.catalog.PetDetailScreen
 import com.asianmobile.emojibattery.shimeji.ui.home.settings.PetCustomizationScreen
 import com.asianmobile.emojibattery.shimeji.ui.home.settings.SettingsScreen
+import com.asianmobile.emojibattery.shimeji.ui.home.swarm.SwarmCustomizationScreen
 import com.asianmobile.emojibattery.shimeji.ui.intro.IntroScreen
 import com.asianmobile.emojibattery.shimeji.ui.language.LanguageScreen
 import com.asianmobile.emojibattery.shimeji.ui.main.MainViewModel
@@ -39,6 +40,7 @@ object Routes {
     const val PET_CATALOG = "pet_catalog"
     const val PET_DETAIL = "pet_detail"
     const val PET_CUSTOMIZATION = "pet_customization"
+    const val SWARM_CUSTOMIZATION = "swarm_customization"
     const val SETTINGS = "settings"
     const val PREMIUM = "premium"
 
@@ -191,6 +193,12 @@ fun AppNavGraph(
                     },
                     onNavigateToPremium = {
                         navigateFromHome(Routes.PREMIUM)
+                    },
+                    onNavigateToSwarmCustomization = {
+                        navController.safeNavigate(
+                            Routes.SWARM_CUSTOMIZATION,
+                            ignoreDebounce = true
+                        )
                     }
                 )
             }
@@ -274,6 +282,20 @@ fun AppNavGraph(
                     },
                     onPetRemoved = {
                         navController.safePopBackStack(ignoreDebounce = true)
+                    }
+                )
+            }
+
+            composable(Routes.SWARM_CUSTOMIZATION) {
+                SwarmCustomizationScreen(
+                    onBack = {
+                        navController.safePopBackStack(ignoreDebounce = true)
+                    },
+                    onChangeCharacter = {
+                        navController.safeNavigate(
+                            Routes.petCatalog(PetCatalogTarget.SWARM),
+                            ignoreDebounce = true
+                        )
                     }
                 )
             }

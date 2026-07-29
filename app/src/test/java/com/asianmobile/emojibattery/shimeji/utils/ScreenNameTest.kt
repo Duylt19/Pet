@@ -31,6 +31,7 @@ class ScreenNameTest {
             "pet_catalog",
             "pet_detail",
             "pet_customization",
+            "swarm_customization",
             "premium",
             "settings"
         )

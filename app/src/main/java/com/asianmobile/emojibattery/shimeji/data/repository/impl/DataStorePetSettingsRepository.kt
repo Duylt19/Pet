@@ -14,6 +14,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SELECTED_PACK_KEY
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SIZE_PERCENT
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SPEED_PERCENT
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SWARM_COUNT
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SWARM_SIZE_PERCENT
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SWARM_SPEED_PERCENT
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_SWARM_PETS
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_PET_SLOTS
 import com.asianmobile.emojibattery.shimeji.data.model.PetDisplayMode
@@ -21,6 +23,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.PetPerformanceBudget
 import com.asianmobile.emojibattery.shimeji.data.model.PetPositionFraction
 import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
 import com.asianmobile.emojibattery.shimeji.data.model.PetSlotPreferences
+import com.asianmobile.emojibattery.shimeji.data.model.PetSwarmMovementInsets
 import com.asianmobile.emojibattery.shimeji.data.model.PetSwarmPreferences
 import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.pet.settings.PetPositionCodec
@@ -155,6 +158,31 @@ class DataStorePetSettingsRepository @Inject constructor(
             performanceBudget.maxSwarmPets
         )
     }
+
+    override fun updateSwarmSizePercent(percent: Int) = edit { preferences ->
+        preferences[SWARM_SIZE_PERCENT] = policy.sanitizeSizePercent(percent)
+    }
+
+    override fun updateSwarmSpeedPercent(percent: Int) = edit { preferences ->
+        preferences[SWARM_SPEED_PERCENT] = policy.sanitizeSpeedPercent(percent)
+    }
+
+    override fun updateSwarmRandomization(enabled: Boolean) = edit { preferences ->
+        preferences[SWARM_RANDOMIZE_SIZE_SPEED] = enabled
+    }
+
+    override fun updateSwarmMovementAreaEnabled(enabled: Boolean) = edit { preferences ->
+        preferences[SWARM_CONSTRAIN_MOVEMENT_AREA] = enabled
+    }
+
+    override fun updateSwarmMovementInsets(insets: PetSwarmMovementInsets) =
+        edit { preferences ->
+            val sanitized = policy.sanitizeSwarmMovementInsets(insets)
+            preferences[SWARM_INSET_TOP_PERCENT] = sanitized.topPercent
+            preferences[SWARM_INSET_BOTTOM_PERCENT] = sanitized.bottomPercent
+            preferences[SWARM_INSET_LEFT_PERCENT] = sanitized.leftPercent
+            preferences[SWARM_INSET_RIGHT_PERCENT] = sanitized.rightPercent
+        }
 
     override fun unlockSwarmByReward() = edit { preferences ->
         preferences[SWARM_REWARD_UNLOCKED] = true
@@ -296,7 +324,25 @@ class DataStorePetSettingsRepository @Inject constructor(
                     preferences[SWARM_COUNT] ?: DEFAULT_SWARM_COUNT,
                     performanceBudget.maxSwarmPets
                 ),
-                unlockedByReward = preferences[SWARM_REWARD_UNLOCKED] ?: false
+                unlockedByReward = preferences[SWARM_REWARD_UNLOCKED] ?: false,
+                sizePercent = policy.sanitizeSizePercent(
+                    preferences[SWARM_SIZE_PERCENT] ?: DEFAULT_SWARM_SIZE_PERCENT
+                ),
+                speedPercent = policy.sanitizeSpeedPercent(
+                    preferences[SWARM_SPEED_PERCENT] ?: DEFAULT_SWARM_SPEED_PERCENT
+                ),
+                randomizeSizeAndSpeed =
+                    preferences[SWARM_RANDOMIZE_SIZE_SPEED] ?: false,
+                constrainMovementArea =
+                    preferences[SWARM_CONSTRAIN_MOVEMENT_AREA] ?: false,
+                movementInsets = policy.sanitizeSwarmMovementInsets(
+                    PetSwarmMovementInsets(
+                        topPercent = preferences[SWARM_INSET_TOP_PERCENT] ?: 0,
+                        bottomPercent = preferences[SWARM_INSET_BOTTOM_PERCENT] ?: 0,
+                        leftPercent = preferences[SWARM_INSET_LEFT_PERCENT] ?: 0,
+                        rightPercent = preferences[SWARM_INSET_RIGHT_PERCENT] ?: 0
+                    )
+                )
             ),
             soundEnabled = preferences[SOUND_ENABLED] ?: false,
             lastPositions = positionCodec.decode(preferences[LAST_POSITIONS].orEmpty()),
@@ -381,6 +427,16 @@ class DataStorePetSettingsRepository @Inject constructor(
         val SWARM_PACK_KEY = stringPreferencesKey("pet_swarm_pack_key")
         val SWARM_COUNT = intPreferencesKey("pet_swarm_count")
         val SWARM_REWARD_UNLOCKED = booleanPreferencesKey("pet_swarm_reward_unlocked")
+        val SWARM_SIZE_PERCENT = intPreferencesKey("pet_swarm_size_percent")
+        val SWARM_SPEED_PERCENT = intPreferencesKey("pet_swarm_speed_percent")
+        val SWARM_RANDOMIZE_SIZE_SPEED =
+            booleanPreferencesKey("pet_swarm_randomize_size_speed")
+        val SWARM_CONSTRAIN_MOVEMENT_AREA =
+            booleanPreferencesKey("pet_swarm_constrain_movement_area")
+        val SWARM_INSET_TOP_PERCENT = intPreferencesKey("pet_swarm_inset_top_percent")
+        val SWARM_INSET_BOTTOM_PERCENT = intPreferencesKey("pet_swarm_inset_bottom_percent")
+        val SWARM_INSET_LEFT_PERCENT = intPreferencesKey("pet_swarm_inset_left_percent")
+        val SWARM_INSET_RIGHT_PERCENT = intPreferencesKey("pet_swarm_inset_right_percent")
         val LAST_POSITIONS = stringPreferencesKey("pet_last_positions")
         val POSITION_RESET_REVISION = intPreferencesKey("pet_position_reset_revision")
         val POSITION_RESET_REVISIONS =

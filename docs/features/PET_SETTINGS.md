@@ -14,6 +14,9 @@ toàn bộ profile; đổi mode, visibility, count và pack đều cập nhật 
 | Mixed visibility / slot | on/off; giữ tối thiểu một slot visible | hide/show đúng window và speech ngay |
 | Swarm pack | một installed/built-in key riêng | lặp cùng pack cho mọi instance |
 | Swarm count | 1–12; low-RAM tối đa 6 | rebuild controller ngay trong session |
+| Swarm base size/speed | cùng range và step của pet thường | rebuild Swarm với profile mới |
+| Swarm random variation | on/off | variation deterministic ±2 step theo instance |
+| Swarm movement insets | mỗi cạnh 0–30%, bước 5% | giới hạn playground ngay |
 | Size / slot | 50–150%, bước 10% | 100% = 84dp trước `defaultScale`, clamp 48–144dp |
 | Speed / slot | 50–150%, bước 25% | locomotion/physics/expression scale từ profile đúng pet |
 | Sound | on/off | reserved; pack v1 chưa hỗ trợ audio |
@@ -55,6 +58,8 @@ các pet; add/remove dùng position list đã được repository materialize th
 - Home dùng segmented control cho Mixed/Swarm. Icon mắt trên từng Mixed card thay dropdown
   count và áp dụng ngay; global switch vẫn là quyền bật/tắt toàn bộ overlay.
 - Swarm free được unlock sau Rewarded thành công; Premium tự unlock. Unlock không tự Start.
+- Tap Swarm đã cấu hình mở màn Edit riêng. Count, size, speed, random variation và bốn
+  movement insets được persist độc lập với Mixed và áp dụng ngay cho session đang chạy.
 - Settings hub chỉ hiển thị roster + trạng thái tóm tắt và app/support.
 - Tap card mở `pet_customization/{slotIndex}`.
 - Size editor dùng slider 11 nấc `50–150%` kèm stepper `−/+`; giá trị optimistic trên UI

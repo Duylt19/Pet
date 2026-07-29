@@ -28,6 +28,7 @@ enum class ScreenName(val value: String) {
     PET_CATALOG("pet_catalog"),
     PET_DETAIL("pet_detail"),
     PET_CUSTOMIZATION("pet_customization"),
+    SWARM_CUSTOMIZATION("swarm_customization"),
     PREMIUM("premium"),
     SETTINGS("settings")
 }

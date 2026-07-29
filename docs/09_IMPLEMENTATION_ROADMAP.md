@@ -88,6 +88,8 @@ không reset action, combo, vị trí hoặc animation cursor.
 - [Done] Add mutually exclusive Mixed/Pet Swarm modes on Home. Mixed supports live
   per-pet visibility; Swarm repeats one selected pack up to the device budget, unlocks
   only after a real Rewarded callback for free users, and bypasses Rewarded for Premium.
+- [Done] Add a dedicated Pet Swarm editor with live count, base size/speed, deterministic
+  per-instance variation and optional four-edge movement constraints.
 
 Before release hardening, complete the clean-room parity items confirmed by the local competitor audit:
 

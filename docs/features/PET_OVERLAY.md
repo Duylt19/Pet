@@ -40,6 +40,10 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   cần Stop/Start.
 - Swarm dùng 1–12 instance cùng pack (low-RAM tối đa 6), không tạo speech/social/crowd
   session để giữ chi phí dự đoán được. 4–6 pet tối đa 20 FPS, 7–12 pet tối đa 16 FPS.
+- Swarm size/speed lấy từ base profile; khi randomization bật, mỗi instance nhận variation
+  deterministic tối đa ±2 step nên không đổi ngẫu nhiên sau mỗi rebuild. Optional movement
+  area inset 0–30% theo từng cạnh được áp dụng vào `PetBounds`; khi bật, pet không dùng
+  screen-edge overflow ngoài vùng đã chọn.
 - Mọi instance dùng chung đúng một `Choreographer.FrameCallback` trên main thread.
 - Frame loop chỉ reduce engine + invalidate/update layout; không decode bitmap, parse file hoặc tạo thread.
 - Mỗi slot resolve pack/visual/engine config riêng, gồm size, speed, touch flag và speech

@@ -15,6 +15,7 @@
 | Pet catalog | `pet_catalog` |
 | Pet detail | `pet_detail` |
 | Customize Pet | `pet_customization` |
+| Edit Pet Swarm | `swarm_customization` |
 | Settings | `settings` |
 | Premium | `premium` |
 

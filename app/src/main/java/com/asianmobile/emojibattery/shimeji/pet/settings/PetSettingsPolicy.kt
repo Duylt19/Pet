@@ -6,6 +6,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.MAX_SWARM_PETS
 import com.asianmobile.emojibattery.shimeji.data.model.MIN_SWARM_PETS
 import com.asianmobile.emojibattery.shimeji.data.model.PetPositionFraction
 import com.asianmobile.emojibattery.shimeji.data.model.PetSlotPreferences
+import com.asianmobile.emojibattery.shimeji.data.model.PetSwarmMovementInsets
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetBounds
 import org.json.JSONArray
 
 class PetSettingsPolicy {
@@ -14,6 +16,64 @@ class PetSettingsPolicy {
 
     fun sanitizeSwarmCount(value: Int, maxPets: Int = MAX_SWARM_PETS): Int =
         value.coerceIn(MIN_SWARM_PETS, maxPets.coerceAtLeast(MIN_SWARM_PETS))
+
+    fun sanitizeSwarmMovementInset(value: Int): Int =
+        nearestStep(
+            value,
+            MIN_SWARM_MOVEMENT_INSET_PERCENT,
+            MAX_SWARM_MOVEMENT_INSET_PERCENT,
+            SWARM_MOVEMENT_INSET_STEP_PERCENT
+        )
+
+    fun sanitizeSwarmMovementInsets(
+        insets: PetSwarmMovementInsets
+    ): PetSwarmMovementInsets = PetSwarmMovementInsets(
+        topPercent = sanitizeSwarmMovementInset(insets.topPercent),
+        bottomPercent = sanitizeSwarmMovementInset(insets.bottomPercent),
+        leftPercent = sanitizeSwarmMovementInset(insets.leftPercent),
+        rightPercent = sanitizeSwarmMovementInset(insets.rightPercent)
+    )
+
+    fun constrainSwarmBounds(
+        bounds: PetBounds,
+        insets: PetSwarmMovementInsets
+    ): PetBounds {
+        val sanitized = sanitizeSwarmMovementInsets(insets)
+        val width = bounds.right - bounds.left
+        val height = bounds.bottom - bounds.top
+        return PetBounds(
+            left = bounds.left + width * sanitized.leftPercent / 100f,
+            top = bounds.top + height * sanitized.topPercent / 100f,
+            right = bounds.right - width * sanitized.rightPercent / 100f,
+            bottom = bounds.bottom - height * sanitized.bottomPercent / 100f
+        )
+    }
+
+    fun swarmVariationPercent(
+        basePercent: Int,
+        instanceIndex: Int,
+        seed: Int,
+        minimumPercent: Int,
+        maximumPercent: Int,
+        stepPercent: Int,
+        enabled: Boolean
+    ): Int {
+        val sanitizedBase = nearestStep(
+            basePercent,
+            minimumPercent,
+            maximumPercent,
+            stepPercent
+        )
+        if (!enabled) return sanitizedBase
+        val variationStep = Math.floorMod(seed + instanceIndex * 31, VARIATION_STEP_COUNT) -
+            VARIATION_STEP_RADIUS
+        return nearestStep(
+            sanitizedBase + variationStep * stepPercent,
+            minimumPercent,
+            maximumPercent,
+            stepPercent
+        )
+    }
 
     fun ensureMixedPetVisible(
         slots: List<PetSlotPreferences>,
@@ -80,6 +140,11 @@ class PetSettingsPolicy {
         const val THREE_PET_FRAMES_PER_SECOND = 24
         const val SMALL_SWARM_FRAMES_PER_SECOND = 20
         const val LARGE_SWARM_FRAMES_PER_SECOND = 16
+        const val MIN_SWARM_MOVEMENT_INSET_PERCENT = 0
+        const val MAX_SWARM_MOVEMENT_INSET_PERCENT = 30
+        const val SWARM_MOVEMENT_INSET_STEP_PERCENT = 5
+        private const val VARIATION_STEP_RADIUS = 2
+        private const val VARIATION_STEP_COUNT = VARIATION_STEP_RADIUS * 2 + 1
     }
 }
 

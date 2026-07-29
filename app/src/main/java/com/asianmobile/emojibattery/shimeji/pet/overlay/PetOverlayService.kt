@@ -23,6 +23,7 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.model.PetDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
+import com.asianmobile.emojibattery.shimeji.data.model.PetSwarmPreferences
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetBitmapCache
@@ -273,7 +274,7 @@ class PetOverlayService : Service() {
         val mode: PetDisplayMode,
         val petCount: Int,
         val packKeys: List<String>,
-        val swarmCount: Int
+        val swarm: PetSwarmPreferences?
     )
 
     private fun PetPreferences.sessionSignature(): PetSessionSignature =
@@ -284,7 +285,7 @@ class PetOverlayService : Service() {
                 PetDisplayMode.MIXED -> selectedPackKeys.take(petCount)
                 PetDisplayMode.SWARM -> listOf(swarm.packKey)
             },
-            swarmCount = swarm.count
+            swarm = swarm.takeIf { displayMode == PetDisplayMode.SWARM }
         )
 
     private fun promoteToForeground() {

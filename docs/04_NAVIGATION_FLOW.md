@@ -14,6 +14,7 @@
 | `pet_detail/{target}/{slotIndex}/{packKey}` | Pet Detail | Preview metadata, xác nhận pack cho đúng mode/slot và quay lại Catalog |
 | `settings` | Settings | My Pet Family roster + app/support hub |
 | `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
+| `swarm_customization` | Edit Pet Swarm | Character, count, base size/speed, random variation và vùng di chuyển |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
 ## Flow
@@ -33,6 +34,7 @@ Home ──Start/Stop──> Pet overlay foreground service
 Home ──Mixed──> bật/tắt từng pet; tối thiểu một pet visible
 Home ──Swarm locked──> Rewarded completed ──persist unlock──> chọn một pet + count 1–12
 Home ──Swarm + Premium──> tự unlock, không hiển thị Rewarded
+Home ──Swarm configured──> Edit Pet Swarm ──Change character──> Catalog(SWARM)
 Home ──Add/Change──> Catalog(target, slot) ──search/category──> Download/verify/Set
 Settings ──Pet card──> Customize Pet(slot) ──Change character──> Catalog(slot)
 Settings ──Add pet──> Catalog(slot trống) ──Set/Import──> kích hoạt slot
@@ -51,6 +53,7 @@ Home ──Premium──> Premium(in-app)
   tăng `petCount` sau Set/Import thành công; Back khỏi Catalog không tạo pet.
   `target` parse an toàn về enum, `slotIndex` là typed Int và `packKey` luôn URI-encode
   trước navigation.
+- Edit Pet Swarm pop về Home; Catalog mở từ màn này pop về Edit Pet Swarm.
 - Premium onboarding close/success đi tiếp Permission.
 - Premium splash-return close/success đi Home.
 - Language settings restart activity với `skip_splash=true` sau confirm.

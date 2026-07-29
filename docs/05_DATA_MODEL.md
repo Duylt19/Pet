@@ -19,6 +19,10 @@
 | `pet_swarm_pack_key` | String | Pack được nhân bản trong Swarm |
 | `pet_swarm_count` | Int | Số instance Swarm, 1–12 hoặc tối đa 6 trên low-RAM |
 | `pet_swarm_reward_unlocked` | Boolean | Rewarded unlock vĩnh viễn trên device |
+| `pet_swarm_size_percent`, `pet_swarm_speed_percent` | Int | Base size/speed của Swarm |
+| `pet_swarm_randomize_size_speed` | Boolean | Tạo variation deterministic theo instance |
+| `pet_swarm_constrain_movement_area` | Boolean | Bật vùng di chuyển tùy chỉnh |
+| `pet_swarm_inset_*_percent` | Int | Top/bottom/left/right 0–30%, bước 5% |
 | `pet_slot_size_percents` | JSON String | Ba mức size độc lập 50–150%, bước 10% |
 | `pet_slot_speed_percents` | JSON String | Ba mức speed độc lập 50–150%, bước 25% |
 | `pet_size_percent`, `pet_speed_percent` | Int | Legacy global fallback cho migration |
@@ -37,7 +41,9 @@ Language được mirror sang SharedPreferences `language_cache` để có thể
 `packKey`, size, speed, messages, custom messages, interaction và `isEnabled`; `petCount`
 quyết định số slot Mixed đã cấu hình, còn `isEnabled` quyết định slot nào thật sự xuất
 hiện. Mixed luôn giữ tối thiểu một pet visible; global Start/Stop là cách tắt toàn bộ.
-`PetSwarmPreferences` tách riêng pack/count/unlock và không ghi đè hồ sơ Mixed.
+`PetSwarmPreferences` tách riêng pack/count/unlock, size/speed và movement area nên không
+ghi đè hồ sơ Mixed. Random variation dùng pack key + instance index làm seed ổn định;
+không persist một record riêng cho từng bản sao.
 
 Custom messages vẫn là dữ liệu nhỏ: tối đa 30 câu, 80 Unicode code point/câu.
 `PetMessageListPolicy` chuẩn hóa khoảng trắng, bỏ câu rỗng/trùng và cắt theo code point.

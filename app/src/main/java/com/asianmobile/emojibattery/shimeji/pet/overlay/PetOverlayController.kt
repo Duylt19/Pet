@@ -639,31 +639,39 @@ internal class PetOverlayController(
     }
 
     private fun currentPlaygroundBounds(size: PetSize): PetBounds {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val baseBounds = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val metrics = windowManager.currentWindowMetrics
             val windowBounds = metrics.bounds
             val insets = metrics.windowInsets.getInsetsIgnoringVisibility(
                 WindowInsets.Type.statusBars() or WindowInsets.Type.displayCutout()
             )
-            return PetBounds(
+            PetBounds(
                 left = 0f,
                 top = 0f,
                 right = (windowBounds.width() - insets.left - insets.right).toFloat(),
                 bottom = (windowBounds.height() - insets.top - insets.bottom).toFloat()
-            ).expandedForScreenEdges(size)
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            val display = windowManager.defaultDisplay
+            val displaySize = Point()
+            @Suppress("DEPRECATION")
+            display.getRealSize(displaySize)
+            PetBounds(
+                left = 0f,
+                top = 0f,
+                right = displaySize.x.toFloat(),
+                bottom = (displaySize.y - appContext.systemBarSize("status_bar_height")).toFloat()
+            )
         }
-
-        @Suppress("DEPRECATION")
-        val display = windowManager.defaultDisplay
-        val displaySize = Point()
-        @Suppress("DEPRECATION")
-        display.getRealSize(displaySize)
-        return PetBounds(
-            left = 0f,
-            top = 0f,
-            right = displaySize.x.toFloat(),
-            bottom = (displaySize.y - appContext.systemBarSize("status_bar_height")).toFloat()
-        ).expandedForScreenEdges(size)
+        return if (isSwarm && preferences.swarm.constrainMovementArea) {
+            settingsPolicy.constrainSwarmBounds(
+                baseBounds,
+                preferences.swarm.movementInsets
+            )
+        } else {
+            baseBounds.expandedForScreenEdges(size)
+        }
     }
 
     private fun Context.dpToPixels(dp: Int): Int =
@@ -750,14 +758,33 @@ internal class PetOverlayController(
         const val NANOS_PER_SECOND = 1_000_000_000L
         const val PET_BEHAVIOR_SEED_STEP = 1_103_515_245L
         const val TAG = "PetOverlayController"
-        const val SWARM_SIZE_PERCENT = 75
+        const val SWARM_SIZE_VARIATION_SALT = 0x2B7E
+        const val SWARM_SPEED_VARIATION_SALT = 0x61D3
     }
 
     private fun runtimeSlot(index: Int): PetSlotPreferences = if (isSwarm) {
+        val swarm = preferences.swarm
+        val seed = swarm.packKey.hashCode()
         PetSlotPreferences(
-            packKey = preferences.swarm.packKey,
-            sizePercent = SWARM_SIZE_PERCENT,
-            speedPercent = 100,
+            packKey = swarm.packKey,
+            sizePercent = settingsPolicy.swarmVariationPercent(
+                basePercent = swarm.sizePercent,
+                instanceIndex = index,
+                seed = seed xor SWARM_SIZE_VARIATION_SALT,
+                minimumPercent = PetSettingsPolicy.MIN_SIZE_PERCENT,
+                maximumPercent = PetSettingsPolicy.MAX_SIZE_PERCENT,
+                stepPercent = PetSettingsPolicy.SIZE_STEP_PERCENT,
+                enabled = swarm.randomizeSizeAndSpeed
+            ),
+            speedPercent = settingsPolicy.swarmVariationPercent(
+                basePercent = swarm.speedPercent,
+                instanceIndex = index,
+                seed = seed xor SWARM_SPEED_VARIATION_SALT,
+                minimumPercent = PetSettingsPolicy.MIN_SPEED_PERCENT,
+                maximumPercent = PetSettingsPolicy.MAX_SPEED_PERCENT,
+                stepPercent = PetSettingsPolicy.SPEED_STEP_PERCENT,
+                enabled = swarm.randomizeSizeAndSpeed
+            ),
             messagesEnabled = false,
             interactionEnabled = true,
             isEnabled = true

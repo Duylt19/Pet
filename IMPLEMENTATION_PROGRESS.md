@@ -39,6 +39,7 @@
 | Per-pet customization + Settings redesign | Done | Pet-first roster, commit-on-selection Add flow, independent size/speed/touch/speech/messages/position per slot, remove/shift migration và app-only Settings section |
 | Cute Pet product UI refresh | Done | Home pet room, Catalog discovery grid, friendly Detail, My Pet Family Settings và per-pet Customize dùng chung cozy light design; onboarding/Premium giữ nguyên |
 | Mixed + Pet Swarm home flow | Done | Hai mode loại trừ nhau; Mixed visibility theo pet cập nhật live, Swarm 1–12 có Rewarded unlock/Premium bypass và adaptive FPS |
+| Pet Swarm customization | Done | Màn edit riêng với character/count, base size/speed, deterministic variation và movement area bốn cạnh cập nhật live |
 | Đổi namespace/application ID | Done | `com.asianmobile.emojibattery.shimeji` |
 
 ## Nguyên tắc cập nhật

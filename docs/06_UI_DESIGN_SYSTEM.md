@@ -33,6 +33,9 @@ Home mode contract:
 - không cho ẩn pet Mixed cuối cùng, vì global switch đã đảm nhiệm trường hợp không hiện pet;
 - Swarm locked hiển thị CTA Rewarded và Premium; Premium bypass Rewarded;
 - Swarm unlocked hiển thị một pack, stepper count và Change/Remove.
+- Tap Swarm card mở `swarm_customization`; screen riêng giữ teal hierarchy của Home,
+  identity card ở đầu, setup/movement sections và CTA Done cố định. Mọi slider/toggle
+  persist và cập nhật runtime ngay, Done chỉ đóng màn chứ không phải bước commit.
 
 Mỗi card phải cho user thấy nhanh character, size, speed và trạng thái tương tác; option
 pet không được lặp ở app-wide Settings hoặc ghi vào global state.

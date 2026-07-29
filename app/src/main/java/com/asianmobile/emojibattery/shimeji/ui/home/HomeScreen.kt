@@ -79,6 +79,7 @@ fun HomeScreen(
     onNavigateToCatalog: (PetCatalogTarget, Int) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToPremium: () -> Unit,
+    onNavigateToSwarmCustomization: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -156,7 +157,8 @@ fun HomeScreen(
         onDismissMessage = viewModel::clearMessage,
         onNavigateToCatalog = onNavigateToCatalog,
         onNavigateToSettings = onNavigateToSettings,
-        onNavigateToPremium = onNavigateToPremium
+        onNavigateToPremium = onNavigateToPremium,
+        onNavigateToSwarmCustomization = onNavigateToSwarmCustomization
     )
 }
 
@@ -172,7 +174,8 @@ private fun HomeScreenContent(
     onDismissMessage: () -> Unit,
     onNavigateToCatalog: (PetCatalogTarget, Int) -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToPremium: () -> Unit
+    onNavigateToPremium: () -> Unit,
+    onNavigateToSwarmCustomization: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -225,7 +228,8 @@ private fun HomeScreenContent(
                         onNavigateToCatalog(PetCatalogTarget.SWARM, 0)
                     },
                     onCountChanged = onSwarmCountChanged,
-                    onRemove = onRemoveSwarmPet
+                    onRemove = onRemoveSwarmPet,
+                    onEdit = onNavigateToSwarmCustomization
                 )
             }
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._20sdp)))
@@ -548,7 +552,8 @@ private fun SwarmModeContent(
     onPremium: () -> Unit,
     onChoosePet: () -> Unit,
     onCountChanged: (Int) -> Unit,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    onEdit: () -> Unit
 ) {
     ModeSectionHeading(
         title = stringResource(R.string.home_mode_swarm_title),
@@ -568,7 +573,8 @@ private fun SwarmModeContent(
             maxCount = uiState.maxSwarmPets,
             onChoosePet = onChoosePet,
             onCountChanged = onCountChanged,
-            onRemove = onRemove
+            onRemove = onRemove,
+            onEdit = onEdit
         )
     }
 }
@@ -702,13 +708,15 @@ private fun SwarmConfiguredCard(
     maxCount: Int,
     onChoosePet: () -> Unit,
     onCountChanged: (Int) -> Unit,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    onEdit: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._20sdp)))
             .background(colorResource(R.color.colors_D8F4EE))
+            .clickable(onClick = onEdit)
             .padding(dimensionResource(SdpR.dimen._14sdp))
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -736,6 +744,16 @@ private fun SwarmConfiguredCard(
                         .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
                         .clickable(onClick = onChoosePet)
                         .padding(vertical = dimensionResource(SdpR.dimen._5sdp))
+                )
+                Text(
+                    text = stringResource(R.string.home_mode_swarm_edit),
+                    color = colorResource(R.color.colors_2F2440),
+                    fontFamily = FontFamily(Font(R.font.inter_medium)),
+                    fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
+                        .clickable(onClick = onEdit)
+                        .padding(vertical = dimensionResource(SdpR.dimen._3sdp))
                 )
             }
             IconButton(
@@ -975,7 +993,8 @@ private fun HomeScreenPreview() {
         onDismissMessage = {},
         onNavigateToCatalog = { _, _ -> },
         onNavigateToSettings = {},
-        onNavigateToPremium = {}
+        onNavigateToPremium = {},
+        onNavigateToSwarmCustomization = {}
     )
 }
 

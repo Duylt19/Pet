@@ -4,6 +4,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.PetPerformanceBudget
 import com.asianmobile.emojibattery.shimeji.data.model.PetDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.PetPositionFraction
 import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
+import com.asianmobile.emojibattery.shimeji.data.model.PetSwarmMovementInsets
 import kotlinx.coroutines.flow.StateFlow
 
 interface PetSettingsRepository {
@@ -19,6 +20,11 @@ interface PetSettingsRepository {
     fun updateSwarmPack(key: String)
     fun clearSwarmPack()
     fun updateSwarmCount(count: Int)
+    fun updateSwarmSizePercent(percent: Int)
+    fun updateSwarmSpeedPercent(percent: Int)
+    fun updateSwarmRandomization(enabled: Boolean)
+    fun updateSwarmMovementAreaEnabled(enabled: Boolean)
+    fun updateSwarmMovementInsets(insets: PetSwarmMovementInsets)
     fun unlockSwarmByReward()
     fun updateSizePercent(slotIndex: Int, percent: Int)
     fun updateSpeedPercent(slotIndex: Int, percent: Int)

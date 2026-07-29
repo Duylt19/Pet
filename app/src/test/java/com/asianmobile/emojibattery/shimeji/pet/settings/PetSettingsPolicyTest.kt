@@ -2,6 +2,8 @@ package com.asianmobile.emojibattery.shimeji.pet.settings
 
 import com.asianmobile.emojibattery.shimeji.data.model.PetPositionFraction
 import com.asianmobile.emojibattery.shimeji.data.model.PetSlotPreferences
+import com.asianmobile.emojibattery.shimeji.data.model.PetSwarmMovementInsets
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetBounds
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -63,6 +65,48 @@ class PetSettingsPolicyTest {
         assertEquals(
             listOf(false, false, false),
             policy.ensureMixedPetVisible(hiddenSlots, petCount = 0).map { it.isEnabled }
+        )
+    }
+
+    @Test
+    fun `swarm variation is deterministic bounded and optional`() {
+        val varied = List(8) { index ->
+            policy.swarmVariationPercent(
+                basePercent = 100,
+                instanceIndex = index,
+                seed = 42,
+                minimumPercent = 50,
+                maximumPercent = 150,
+                stepPercent = 10,
+                enabled = true
+            )
+        }
+
+        assertEquals(varied, List(8) { index ->
+            policy.swarmVariationPercent(100, index, 42, 50, 150, 10, true)
+        })
+        assertEquals(true, varied.all { it in 50..150 && it % 10 == 0 })
+        assertEquals(
+            100,
+            policy.swarmVariationPercent(100, 5, 42, 50, 150, 10, false)
+        )
+    }
+
+    @Test
+    fun `swarm movement area applies sanitized edge percentages`() {
+        val constrained = policy.constrainSwarmBounds(
+            bounds = PetBounds(left = 0f, top = 0f, right = 1000f, bottom = 2000f),
+            insets = PetSwarmMovementInsets(
+                topPercent = 7,
+                bottomPercent = 100,
+                leftPercent = 11,
+                rightPercent = -5
+            )
+        )
+
+        assertEquals(
+            PetBounds(left = 100f, top = 100f, right = 1000f, bottom = 1400f),
+            constrained
         )
     }
 

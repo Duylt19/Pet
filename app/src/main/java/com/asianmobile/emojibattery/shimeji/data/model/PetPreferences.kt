@@ -49,11 +49,23 @@ enum class PetDisplayMode {
 data class PetSwarmPreferences(
     val packKey: String = "",
     val count: Int = DEFAULT_SWARM_COUNT,
-    val unlockedByReward: Boolean = false
+    val unlockedByReward: Boolean = false,
+    val sizePercent: Int = DEFAULT_SWARM_SIZE_PERCENT,
+    val speedPercent: Int = DEFAULT_SWARM_SPEED_PERCENT,
+    val randomizeSizeAndSpeed: Boolean = false,
+    val constrainMovementArea: Boolean = false,
+    val movementInsets: PetSwarmMovementInsets = PetSwarmMovementInsets()
 ) {
     val hasSelectedPack: Boolean
         get() = packKey.isNotBlank()
 }
+
+data class PetSwarmMovementInsets(
+    val topPercent: Int = 0,
+    val bottomPercent: Int = 0,
+    val leftPercent: Int = 0,
+    val rightPercent: Int = 0
+)
 
 data class PetPerformanceBudget(
     val maxPets: Int,
@@ -71,6 +83,8 @@ const val DEFAULT_PET_COUNT = 1
 const val DEFAULT_SIZE_PERCENT = 100
 const val DEFAULT_SPEED_PERCENT = 100
 const val DEFAULT_SWARM_COUNT = 6
+const val DEFAULT_SWARM_SIZE_PERCENT = 80
+const val DEFAULT_SWARM_SPEED_PERCENT = 100
 const val MAX_PET_SLOTS = 3
 const val MIN_SWARM_PETS = 1
 const val MAX_SWARM_PETS = 12
