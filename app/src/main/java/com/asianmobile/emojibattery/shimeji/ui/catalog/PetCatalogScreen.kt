@@ -144,10 +144,14 @@ private fun PetCatalogContent(
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._4sdp)))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = stringResource(
-                        R.string.pet_catalog_slot_badge,
-                        uiState.targetSlotIndex + 1
-                    ),
+                    text = if (uiState.target == PetCatalogTarget.SWARM) {
+                        stringResource(R.string.pet_catalog_swarm_badge)
+                    } else {
+                        stringResource(
+                            R.string.pet_catalog_slot_badge,
+                            uiState.targetSlotIndex + 1
+                        )
+                    },
                     color = colorResource(R.color.colors_5D46D7),
                     fontFamily = FontFamily(Font(R.font.inter_semibold)),
                     fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,

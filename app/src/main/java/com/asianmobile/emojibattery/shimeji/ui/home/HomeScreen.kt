@@ -1,24 +1,25 @@
 package com.asianmobile.emojibattery.shimeji.ui.home
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -27,6 +28,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -34,13 +38,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -56,13 +60,14 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
+import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
+import com.asianmobile.emojibattery.shimeji.data.model.PetDisplayMode
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
-import com.asianmobile.emojibattery.shimeji.ui.component.CutePetCard
+import com.asianmobile.emojibattery.shimeji.ui.catalog.PetCatalogTarget
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetIconAction
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetPrimaryButton
-import com.asianmobile.emojibattery.shimeji.ui.component.CutePetSectionHeader
-import com.asianmobile.emojibattery.shimeji.ui.component.CutePetStatusPill
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTitleFont
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -71,7 +76,7 @@ import com.intuit.ssp.R as SspR
 
 @Composable
 fun HomeScreen(
-    onNavigateToCatalog: (Int) -> Unit,
+    onNavigateToCatalog: (PetCatalogTarget, Int) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToPremium: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
@@ -100,6 +105,10 @@ fun HomeScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    LaunchedEffect(context) {
+        RewardedVideoAds.getInstance().loadRewardedVideo(context.applicationContext)
+    }
+
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
@@ -122,15 +131,30 @@ fun HomeScreen(
                         viewModel.onNotificationPermissionResult()
                     }
                 }
+                HomeEffect.ShowSwarmRewardedAd -> {
+                    val activity = context as? Activity
+                    if (activity == null) {
+                        viewModel.onSwarmRewardResult(rewardEarned = false)
+                    } else {
+                        RewardedVideoAds.getInstance().showRewardedAd(activity) { earned ->
+                            viewModel.onSwarmRewardResult(earned)
+                        }
+                    }
+                }
             }
         }
     }
 
     HomeScreenContent(
         uiState = uiState,
-        onPetButtonClicked = viewModel::onPetButtonClicked,
+        onGlobalToggle = viewModel::onPetButtonClicked,
+        onModeSelected = viewModel::selectMode,
+        onMixedPetVisibilityToggle = viewModel::toggleMixedPet,
+        onSwarmCountChanged = viewModel::updateSwarmCount,
+        onRemoveSwarmPet = viewModel::clearSwarmPet,
+        onUnlockSwarm = viewModel::requestSwarmUnlock,
         onDismissMessage = viewModel::clearMessage,
-        onNavigateToCatalog = { onNavigateToCatalog(0) },
+        onNavigateToCatalog = onNavigateToCatalog,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToPremium = onNavigateToPremium
     )
@@ -139,77 +163,91 @@ fun HomeScreen(
 @Composable
 private fun HomeScreenContent(
     uiState: HomeUiState,
-    onPetButtonClicked: () -> Unit,
+    onGlobalToggle: () -> Unit,
+    onModeSelected: (PetDisplayMode) -> Unit,
+    onMixedPetVisibilityToggle: (Int) -> Unit,
+    onSwarmCountChanged: (Int) -> Unit,
+    onRemoveSwarmPet: () -> Unit,
+    onUnlockSwarm: () -> Unit,
     onDismissMessage: () -> Unit,
-    onNavigateToCatalog: () -> Unit,
+    onNavigateToCatalog: (PetCatalogTarget, Int) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToPremium: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.colors_FFF9F4))
+            .background(colorResource(R.color.colors_F4F8FC))
             .statusBarsPadding()
-            .navigationBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = dimensionResource(SdpR.dimen._16sdp))
     ) {
-        HomeHeader(
-            onNavigateToSettings = onNavigateToSettings,
-            onNavigateToPremium = onNavigateToPremium
-        )
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-        Text(
-            text = stringResource(R.string.home_greeting),
-            color = colorResource(R.color.colors_2F2440),
-            fontFamily = CutePetTitleFont,
-            fontWeight = FontWeight.Bold,
-            fontSize = dimensionResource(SspR.dimen._22ssp).value.sp,
-            lineHeight = dimensionResource(SspR.dimen._27ssp).value.sp
-        )
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._5sdp)))
-        Text(
-            text = stringResource(R.string.home_pet_subtitle),
-            color = colorResource(R.color.colors_776D84),
-            fontFamily = FontFamily(Font(R.font.inter_regular)),
-            fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
-            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp
-        )
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._16sdp)))
-
-        PetRoomCard(uiState = uiState, onPetButtonClicked = onPetButtonClicked)
-
-        if (uiState.message == HomeMessage.PET_START_FAILED) {
-            Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
-            Text(
-                text = stringResource(R.string.home_pet_start_failed),
-                color = colorResource(R.color.colors_E45D6A),
-                fontFamily = FontFamily(Font(R.font.inter_medium)),
-                fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
-                    .background(colorResource(R.color.colors_FFE8EF))
-                    .padding(dimensionResource(SdpR.dimen._10sdp))
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = dimensionResource(SdpR.dimen._16sdp))
+        ) {
+            HomeHeader(
+                onNavigateToSettings = onNavigateToSettings,
+                onNavigateToPremium = onNavigateToPremium
             )
-            LaunchedEffect(uiState.message) {
-                kotlinx.coroutines.delay(MESSAGE_DURATION_MILLIS)
-                onDismissMessage()
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._14sdp)))
+            GlobalEnableCard(
+                uiState = uiState,
+                onToggle = onGlobalToggle
+            )
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._14sdp)))
+            ModeSelector(
+                selectedMode = uiState.displayMode,
+                onModeSelected = onModeSelected
+            )
+            uiState.message?.let { message ->
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._10sdp)))
+                HomeMessageCard(message)
+                LaunchedEffect(message) {
+                    kotlinx.coroutines.delay(MESSAGE_DURATION_MILLIS)
+                    onDismissMessage()
+                }
             }
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._16sdp)))
+            when (uiState.displayMode) {
+                PetDisplayMode.MIXED -> MixedModeContent(
+                    uiState = uiState,
+                    onVisibilityToggle = onMixedPetVisibilityToggle,
+                    onOpenPet = { slotIndex ->
+                        onNavigateToCatalog(PetCatalogTarget.MIXED, slotIndex)
+                    }
+                )
+                PetDisplayMode.SWARM -> SwarmModeContent(
+                    uiState = uiState,
+                    onUnlock = onUnlockSwarm,
+                    onPremium = onNavigateToPremium,
+                    onChoosePet = {
+                        onNavigateToCatalog(PetCatalogTarget.SWARM, 0)
+                    },
+                    onCountChanged = onSwarmCountChanged,
+                    onRemove = onRemoveSwarmPet
+                )
+            }
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._20sdp)))
         }
 
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._18sdp)))
-        CutePetSectionHeader(
-            title = stringResource(R.string.home_family_title),
-            action = stringResource(R.string.home_family_manage),
-            onAction = onNavigateToSettings
+        HomeBottomNavigation(
+            uiState = uiState,
+            onOpenPets = {
+                val target = if (uiState.displayMode == PetDisplayMode.SWARM) {
+                    PetCatalogTarget.SWARM
+                } else {
+                    PetCatalogTarget.MIXED
+                }
+                onNavigateToCatalog(target, 0)
+            },
+            onOpenSettings = onNavigateToSettings
         )
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._10sdp)))
-        PetFamilyRow(uiState)
-
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._18sdp)))
-        ExplorePetCard(onClick = onNavigateToCatalog)
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._20sdp)))
+        BannerAd(
+            modifier = Modifier.fillMaxWidth(),
+            adPosition = HOME_MODE_BANNER_POSITION
+        )
+        Spacer(Modifier.navigationBarsPadding())
     }
 }
 
@@ -221,29 +259,15 @@ private fun HomeHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._48sdp)),
+            .height(dimensionResource(SdpR.dimen._56sdp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(dimensionResource(SdpR.dimen._34sdp))
-                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._11sdp)))
-                .background(colorResource(R.color.colors_EDE4FF)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_notification_pet),
-                contentDescription = null,
-                tint = colorResource(R.color.colors_7B61FF),
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._23sdp))
-            )
-        }
-        Spacer(Modifier.size(dimensionResource(SdpR.dimen._8sdp)))
         Text(
             text = stringResource(R.string.home_brand_name),
-            color = colorResource(R.color.colors_2F2440),
+            color = colorResource(R.color.colors_12B890),
             fontFamily = CutePetTitleFont,
-            fontSize = dimensionResource(SspR.dimen._16ssp).value.sp,
+            fontWeight = FontWeight.Bold,
+            fontSize = dimensionResource(SspR.dimen._22ssp).value.sp,
             modifier = Modifier.weight(1f)
         )
         CutePetIconAction(
@@ -261,259 +285,671 @@ private fun HomeHeader(
 }
 
 @Composable
-private fun PetRoomCard(
+private fun GlobalEnableCard(
     uiState: HomeUiState,
-    onPetButtonClicked: () -> Unit
+    onToggle: () -> Unit
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._24sdp)))
-            .background(colorResource(R.color.colors_EDE4FF))
-            .padding(dimensionResource(SdpR.dimen._16sdp)),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp)))
+            .background(colorResource(R.color.colors_D8F4EE))
+            .border(
+                dimensionResource(SdpR.dimen._1sdp),
+                colorResource(R.color.colors_12B890),
+                RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp))
+            )
+            .clickable(enabled = uiState.actionsEnabled, onClick = onToggle)
+            .padding(
+                horizontal = dimensionResource(SdpR.dimen._16sdp),
+                vertical = dimensionResource(SdpR.dimen._12sdp)
+            ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        CutePetStatusPill(
+        Text(
             text = stringResource(
                 if (uiState.isPetRunning) {
-                    R.string.home_status_live
+                    R.string.home_mode_enabled
                 } else {
-                    R.string.home_status_resting
+                    R.string.home_mode_enable
                 }
             ),
-            active = uiState.isPetRunning
-        )
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
-        PetPreviewStack(uiState = uiState)
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
-        Text(
-            text = if (uiState.selectedPetNames.isEmpty()) {
-                stringResource(R.string.home_pet_default_name)
-            } else {
-                uiState.selectedPetNames.joinToString(separator = "  •  ")
-            },
             color = colorResource(R.color.colors_2F2440),
             fontFamily = FontFamily(Font(R.font.inter_semibold)),
-            fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
+            modifier = Modifier.weight(1f)
         )
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._3sdp)))
-        Text(
-            text = pluralStringResource(
-                R.plurals.home_pet_configured_count,
-                uiState.petCount,
-                uiState.petCount
-            ),
-            color = colorResource(R.color.colors_776D84),
-            fontFamily = FontFamily(Font(R.font.inter_regular)),
-            fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
-        )
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-        CutePetPrimaryButton(
-            text = stringResource(
-                when {
-                    uiState.isStartingPet -> R.string.home_pet_action_starting
-                    uiState.isPetRunning -> R.string.home_pet_action_stop
-                    !uiState.overlayGranted -> R.string.home_pet_action_allow_overlay
-                    else -> R.string.home_pet_action_start
-                }
-            ),
-            onClick = onPetButtonClicked,
+        Switch(
+            checked = uiState.isPetRunning,
+            onCheckedChange = { onToggle() },
             enabled = uiState.actionsEnabled,
-            isLoading = uiState.isStartingPet,
-            isDanger = uiState.isPetRunning,
-            modifier = Modifier.fillMaxWidth()
+            colors = SwitchDefaults.colors(
+                checkedTrackColor = colorResource(R.color.colors_12B890),
+                uncheckedTrackColor = colorResource(R.color.colors_9297A5)
+            )
         )
-        if (!uiState.overlayGranted ||
-            (uiState.notificationPermissionRequired && !uiState.notificationGranted)
+    }
+}
+
+@Composable
+private fun ModeSelector(
+    selectedMode: PetDisplayMode,
+    onModeSelected: (PetDisplayMode) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._20sdp)))
+            .background(colorResource(R.color.colors_FFFFFF))
+            .padding(dimensionResource(SdpR.dimen._4sdp))
+    ) {
+        ModeTab(
+            text = stringResource(R.string.home_mode_swarm),
+            selected = selectedMode == PetDisplayMode.SWARM,
+            onClick = { onModeSelected(PetDisplayMode.SWARM) },
+            modifier = Modifier.weight(1f)
+        )
+        ModeTab(
+            text = stringResource(R.string.home_mode_mixed),
+            selected = selectedMode == PetDisplayMode.MIXED,
+            onClick = { onModeSelected(PetDisplayMode.MIXED) },
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun ModeTab(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._17sdp)))
+            .background(
+                colorResource(
+                    if (selected) R.color.colors_D8F4EE else R.color.colors_FFFFFF
+                )
+            )
+            .clickable(onClick = onClick)
+            .padding(vertical = dimensionResource(SdpR.dimen._11sdp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = colorResource(
+                if (selected) R.color.colors_12B890 else R.color.colors_9297A5
+            ),
+            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun MixedModeContent(
+    uiState: HomeUiState,
+    onVisibilityToggle: (Int) -> Unit,
+    onOpenPet: (Int) -> Unit
+) {
+    ModeSectionHeading(
+        title = stringResource(R.string.home_mode_mixed_title),
+        description = stringResource(R.string.home_mode_mixed_description)
+    )
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
+    ) {
+        repeat(uiState.maxMixedPets) { slotIndex ->
+            val pet = uiState.mixedPets.getOrNull(slotIndex)
+            if (pet == null) {
+                AddMixedPetCard(
+                    onClick = { onOpenPet(slotIndex) },
+                    modifier = Modifier.weight(1f)
+                )
+            } else {
+                MixedPetCard(
+                    pet = pet,
+                    onVisibilityToggle = { onVisibilityToggle(slotIndex) },
+                    onClick = { onOpenPet(slotIndex) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MixedPetCard(
+    pet: HomeMixedPetUiState,
+    onVisibilityToggle: () -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._16sdp))
+    Box(
+        modifier = modifier
+            .aspectRatio(0.82f)
+            .alpha(if (pet.isEnabled) 1f else 0.55f)
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFFFFF))
+            .border(
+                dimensionResource(SdpR.dimen._1sdp),
+                colorResource(
+                    if (pet.isEnabled) R.color.colors_12B890 else R.color.colors_9297A5
+                ),
+                shape
+            )
+            .clickable(onClick = onClick)
+            .padding(dimensionResource(SdpR.dimen._7sdp))
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
+            PetPreview(
+                previewPath = pet.previewPath,
+                contentDescription = pet.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
             Text(
-                text = stringResource(
-                    if (!uiState.overlayGranted) {
-                        R.string.home_pet_overlay_required
+                text = pet.name,
+                color = colorResource(R.color.colors_2F2440),
+                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        IconButton(
+            onClick = onVisibilityToggle,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(dimensionResource(SdpR.dimen._28sdp))
+                .clip(CircleShape)
+                .background(colorResource(R.color.colors_FFFFFF))
+        ) {
+            Icon(
+                painter = painterResource(
+                    if (pet.isEnabled) {
+                        R.drawable.ic_visibility_on
                     } else {
-                        R.string.home_pet_notification_will_request
+                        R.drawable.ic_visibility_off
                     }
                 ),
-                color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
-                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
-                textAlign = TextAlign.Center
+                contentDescription = stringResource(
+                    if (pet.isEnabled) {
+                        R.string.home_mode_pet_visible
+                    } else {
+                        R.string.home_mode_pet_hidden
+                    },
+                    pet.name
+                ),
+                tint = colorResource(
+                    if (pet.isEnabled) R.color.colors_12B890 else R.color.colors_9297A5
+                ),
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._17sdp))
             )
         }
     }
 }
 
 @Composable
-private fun PetPreviewStack(uiState: HomeUiState) {
-    Row(
-        modifier = Modifier.height(dimensionResource(SdpR.dimen._90sdp)),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.Bottom
+private fun AddMixedPetCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._16sdp))
+    Column(
+        modifier = modifier
+            .aspectRatio(0.82f)
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFFFFF))
+            .border(
+                dimensionResource(SdpR.dimen._1sdp),
+                colorResource(R.color.colors_12B890),
+                shape
+            )
+            .clickable(onClick = onClick)
+            .padding(dimensionResource(SdpR.dimen._8sdp)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        repeat(uiState.petCount.coerceAtLeast(1)) { index ->
-            val preview = uiState.selectedPetPreviewPaths.getOrNull(index)
-            Box(
-                modifier = Modifier
-                    .offset(
-                        x = if (index == 0) {
-                            dimensionResource(SdpR.dimen._1sdp) * 0f
-                        } else {
-                            -dimensionResource(SdpR.dimen._10sdp)
-                        }
-                    )
-                    .size(
-                        if (index == 0) {
-                            dimensionResource(SdpR.dimen._84sdp)
-                        } else {
-                            dimensionResource(SdpR.dimen._72sdp)
-                        }
-                    )
-                    .clip(CircleShape)
-                    .background(
-                        colorResource(
-                            when (index % 3) {
-                                0 -> R.color.colors_FFF0D6
-                                1 -> R.color.colors_E7F7F1
-                                else -> R.color.colors_FFE8EF
-                            }
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (preview != null) {
-                    AsyncImage(
-                        model = preview,
-                        contentDescription = uiState.selectedPetNames.getOrNull(index),
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(dimensionResource(SdpR.dimen._6sdp))
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_notification_pet),
-                        contentDescription = null,
-                        tint = colorResource(R.color.pet_demo_fur),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(dimensionResource(SdpR.dimen._12sdp))
-                    )
-                }
-            }
-        }
+        Icon(
+            painter = painterResource(R.drawable.ic_plus),
+            contentDescription = null,
+            tint = colorResource(R.color.colors_12B890),
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._30sdp))
+        )
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._7sdp)))
+        Text(
+            text = stringResource(R.string.home_mode_add_pet),
+            color = colorResource(R.color.colors_12B890),
+            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
 @Composable
-private fun PetFamilyRow(uiState: HomeUiState) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
-    ) {
-        repeat(uiState.petCount.coerceAtLeast(1)) { index ->
-            CutePetCard(
-                modifier = Modifier.size(
-                    width = dimensionResource(SdpR.dimen._104sdp),
-                    height = dimensionResource(SdpR.dimen._112sdp)
-                )
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(dimensionResource(SdpR.dimen._52sdp))
-                        .align(Alignment.CenterHorizontally)
-                        .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._15sdp)))
-                        .background(colorResource(R.color.colors_F7F0FF)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    val preview = uiState.selectedPetPreviewPaths.getOrNull(index)
-                    if (preview != null) {
-                        AsyncImage(
-                            model = preview,
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(dimensionResource(SdpR.dimen._4sdp))
-                        )
-                    } else {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_notification_pet),
-                            contentDescription = null,
-                            tint = colorResource(R.color.pet_demo_fur),
-                            modifier = Modifier.padding(dimensionResource(SdpR.dimen._7sdp))
-                        )
-                    }
-                }
-                Spacer(Modifier.height(dimensionResource(SdpR.dimen._7sdp)))
-                Text(
-                    text = uiState.selectedPetNames.getOrNull(index)
-                        ?: stringResource(R.string.home_pet_default_name),
-                    color = colorResource(R.color.colors_2F2440),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                    fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
+private fun SwarmModeContent(
+    uiState: HomeUiState,
+    onUnlock: () -> Unit,
+    onPremium: () -> Unit,
+    onChoosePet: () -> Unit,
+    onCountChanged: (Int) -> Unit,
+    onRemove: () -> Unit
+) {
+    ModeSectionHeading(
+        title = stringResource(R.string.home_mode_swarm_title),
+        description = stringResource(R.string.home_mode_swarm_description)
+    )
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+    when {
+        !uiState.swarmUnlocked -> SwarmLockedCard(
+            onUnlock = onUnlock,
+            onPremium = onPremium
+        )
+        uiState.swarmPackName == null -> SwarmEmptyCard(onClick = onChoosePet)
+        else -> SwarmConfiguredCard(
+            name = uiState.swarmPackName,
+            previewPath = uiState.swarmPreviewPath,
+            count = uiState.swarmCount,
+            maxCount = uiState.maxSwarmPets,
+            onChoosePet = onChoosePet,
+            onCountChanged = onCountChanged,
+            onRemove = onRemove
+        )
     }
 }
 
 @Composable
-private fun ExplorePetCard(onClick: () -> Unit) {
-    Row(
+private fun ModeSectionHeading(title: String, description: String) {
+    Text(
+        text = title,
+        color = colorResource(R.color.colors_2F2440),
+        fontFamily = CutePetTitleFont,
+        fontWeight = FontWeight.Bold,
+        fontSize = dimensionResource(SspR.dimen._20ssp).value.sp
+    )
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._4sdp)))
+    Text(
+        text = description,
+        color = colorResource(R.color.colors_776D84),
+        fontFamily = FontFamily(Font(R.font.inter_regular)),
+        fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+        lineHeight = dimensionResource(SspR.dimen._13ssp).value.sp
+    )
+}
+
+@Composable
+private fun SwarmLockedCard(
+    onUnlock: () -> Unit,
+    onPremium: () -> Unit
+) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._20sdp)))
-            .background(colorResource(R.color.colors_FFF0D6))
+            .background(colorResource(R.color.colors_D8F4EE))
+            .padding(dimensionResource(SdpR.dimen._18sdp)),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_lock_fill),
+            contentDescription = null,
+            tint = colorResource(R.color.colors_12B890),
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._42sdp))
+        )
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
+        Text(
+            text = stringResource(R.string.home_mode_swarm_locked_title),
+            color = colorResource(R.color.colors_2F2440),
+            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontSize = dimensionResource(SspR.dimen._14ssp).value.sp
+        )
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._5sdp)))
+        Text(
+            text = stringResource(R.string.home_mode_swarm_locked_description),
+            color = colorResource(R.color.colors_776D84),
+            fontFamily = FontFamily(Font(R.font.inter_regular)),
+            fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._13sdp)))
+        CutePetPrimaryButton(
+            text = stringResource(R.string.home_mode_swarm_watch_reward),
+            onClick = onUnlock,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = stringResource(R.string.home_mode_swarm_premium_hint),
+            color = colorResource(R.color.colors_12B890),
+            fontFamily = FontFamily(Font(R.font.inter_medium)),
+            fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._8sdp)))
+                .clickable(onClick = onPremium)
+                .padding(dimensionResource(SdpR.dimen._8sdp))
+        )
+    }
+}
+
+@Composable
+private fun SwarmEmptyCard(onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._170sdp))
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._20sdp)))
+            .background(colorResource(R.color.colors_D8F4EE))
             .clickable(onClick = onClick)
-            .padding(dimensionResource(SdpR.dimen._14sdp)),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(dimensionResource(SdpR.dimen._18sdp)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Box(
             modifier = Modifier
-                .size(dimensionResource(SdpR.dimen._44sdp))
+                .size(dimensionResource(SdpR.dimen._54sdp))
                 .clip(CircleShape)
-                .background(colorResource(R.color.colors_FFB84D)),
+                .border(
+                    dimensionResource(SdpR.dimen._2sdp),
+                    colorResource(R.color.colors_FFFFFF),
+                    CircleShape
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_plus),
                 contentDescription = null,
                 tint = colorResource(R.color.colors_FFFFFF),
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._20sdp))
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._28sdp))
             )
         }
-        Spacer(Modifier.size(dimensionResource(SdpR.dimen._10sdp)))
-        Column(modifier = Modifier.weight(1f)) {
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._10sdp)))
+        Text(
+            text = stringResource(R.string.home_mode_swarm_empty_title),
+            color = colorResource(R.color.colors_2F2440),
+            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontSize = dimensionResource(SspR.dimen._13ssp).value.sp
+        )
+        Text(
+            text = stringResource(R.string.home_mode_swarm_empty_description),
+            color = colorResource(R.color.colors_776D84),
+            fontFamily = FontFamily(Font(R.font.inter_regular)),
+            fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun SwarmConfiguredCard(
+    name: String,
+    previewPath: String?,
+    count: Int,
+    maxCount: Int,
+    onChoosePet: () -> Unit,
+    onCountChanged: (Int) -> Unit,
+    onRemove: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._20sdp)))
+            .background(colorResource(R.color.colors_D8F4EE))
+            .padding(dimensionResource(SdpR.dimen._14sdp))
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            PetPreview(
+                previewPath = previewPath,
+                contentDescription = name,
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._92sdp))
+            )
+            Spacer(Modifier.size(dimensionResource(SdpR.dimen._12sdp)))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = name,
+                    color = colorResource(R.color.colors_2F2440),
+                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = stringResource(R.string.home_mode_swarm_change),
+                    color = colorResource(R.color.colors_12B890),
+                    fontFamily = FontFamily(Font(R.font.inter_medium)),
+                    fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
+                        .clickable(onClick = onChoosePet)
+                        .padding(vertical = dimensionResource(SdpR.dimen._5sdp))
+                )
+            }
+            IconButton(
+                onClick = onRemove,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(colorResource(R.color.colors_FFFFFF))
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_trash),
+                    contentDescription = stringResource(R.string.home_mode_swarm_remove),
+                    tint = colorResource(R.color.colors_E45D6A)
+                )
+            }
+        }
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._16sdp)))
+                .background(colorResource(R.color.colors_FFFFFF))
+                .padding(
+                    horizontal = dimensionResource(SdpR.dimen._8sdp),
+                    vertical = dimensionResource(SdpR.dimen._4sdp)
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CountButton(
+                iconRes = R.drawable.ic_remove,
+                contentDescription = stringResource(R.string.home_mode_swarm_decrease),
+                enabled = count > 1,
+                onClick = { onCountChanged(count - 1) }
+            )
             Text(
-                text = stringResource(R.string.home_explore_title),
-                color = colorResource(R.color.colors_2F2440),
+                text = stringResource(R.string.home_mode_swarm_count, count),
+                color = colorResource(R.color.colors_12B890),
                 fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                fontSize = dimensionResource(SspR.dimen._12ssp).value.sp
+                fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
             )
-            Text(
-                text = stringResource(R.string.home_explore_subtitle),
-                color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
-                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
-                lineHeight = dimensionResource(SspR.dimen._11ssp).value.sp
+            CountButton(
+                iconRes = R.drawable.ic_plus,
+                contentDescription = stringResource(R.string.home_mode_swarm_increase),
+                enabled = count < maxCount,
+                onClick = { onCountChanged(count + 1) }
             )
         }
+    }
+}
+
+@Composable
+private fun CountButton(
+    iconRes: Int,
+    contentDescription: String,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    IconButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.size(dimensionResource(SdpR.dimen._36sdp))
+    ) {
         Icon(
-            painter = painterResource(R.drawable.ic_chevron_right),
-            contentDescription = stringResource(R.string.pet_catalog_open),
-            tint = colorResource(R.color.colors_2F2440),
+            painter = painterResource(iconRes),
+            contentDescription = contentDescription,
+            tint = colorResource(
+                if (enabled) R.color.colors_2F2440 else R.color.colors_9297A5
+            ),
             modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
         )
+    }
+}
+
+@Composable
+private fun PetPreview(
+    previewPath: String?,
+    contentDescription: String?,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
+            .background(colorResource(R.color.colors_FFFFFF)),
+        contentAlignment = Alignment.Center
+    ) {
+        if (previewPath != null) {
+            AsyncImage(
+                model = previewPath,
+                contentDescription = contentDescription,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(dimensionResource(SdpR.dimen._5sdp))
+            )
+        } else {
+            Icon(
+                painter = painterResource(R.drawable.ic_notification_pet),
+                contentDescription = contentDescription,
+                tint = colorResource(R.color.pet_demo_fur),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(dimensionResource(SdpR.dimen._13sdp))
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeMessageCard(message: HomeMessage) {
+    val text = when (message) {
+        HomeMessage.PET_START_FAILED -> stringResource(R.string.home_pet_start_failed)
+        HomeMessage.KEEP_ONE_MIXED_PET_VISIBLE ->
+            stringResource(R.string.home_mode_keep_one_visible)
+        HomeMessage.SELECT_SWARM_PET ->
+            stringResource(R.string.home_mode_select_swarm_pet)
+        HomeMessage.SWARM_REWARD_NOT_AVAILABLE ->
+            stringResource(R.string.home_mode_reward_unavailable)
+    }
+    Text(
+        text = text,
+        color = colorResource(R.color.colors_E45D6A),
+        fontFamily = FontFamily(Font(R.font.inter_medium)),
+        fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
+            .background(colorResource(R.color.colors_FFE8EF))
+            .padding(dimensionResource(SdpR.dimen._10sdp))
+    )
+}
+
+@Composable
+private fun HomeBottomNavigation(
+    uiState: HomeUiState,
+    onOpenPets: () -> Unit,
+    onOpenSettings: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colorResource(R.color.colors_FFFFFF))
+            .padding(
+                horizontal = dimensionResource(SdpR.dimen._16sdp),
+                vertical = dimensionResource(SdpR.dimen._8sdp)
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
+    ) {
+        BottomNavigationItem(
+            iconRes = R.drawable.ic_notification_pet,
+            label = stringResource(R.string.home_mode_tab),
+            selected = true,
+            onClick = {},
+            modifier = Modifier.weight(1.25f)
+        )
+        BottomNavigationItem(
+            iconRes = R.drawable.ic_plus,
+            label = stringResource(R.string.home_mode_pets_tab),
+            selected = false,
+            onClick = onOpenPets,
+            modifier = Modifier.weight(1f)
+        )
+        BottomNavigationItem(
+            iconRes = R.drawable.ic_settings_outline,
+            label = stringResource(R.string.home_mode_settings_tab),
+            selected = false,
+            onClick = onOpenSettings,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun BottomNavigationItem(
+    iconRes: Int,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp)))
+            .background(
+                colorResource(
+                    if (selected) R.color.colors_12B890 else R.color.colors_FFFFFF
+                )
+            )
+            .clickable(onClick = onClick)
+            .padding(
+                horizontal = dimensionResource(SdpR.dimen._10sdp),
+                vertical = dimensionResource(SdpR.dimen._9sdp)
+            ),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = label,
+            tint = colorResource(
+                if (selected) R.color.colors_FFFFFF else R.color.colors_9297A5
+            ),
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._20sdp))
+        )
+        if (selected) {
+            Spacer(Modifier.size(dimensionResource(SdpR.dimen._7sdp)))
+            Text(
+                text = label,
+                color = colorResource(R.color.colors_FFFFFF),
+                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
+            )
+        }
     }
 }
 
@@ -523,16 +959,25 @@ private fun HomeScreenPreview() {
     HomeScreenContent(
         uiState = HomeUiState(
             overlayGranted = true,
-            selectedPetNames = listOf("Orange Cat", "Mochi"),
-            selectedPetPreviewPaths = listOf(null, null),
+            displayMode = PetDisplayMode.MIXED,
+            mixedPets = listOf(
+                HomeMixedPetUiState(0, "Nanami Kento", null, true),
+                HomeMixedPetUiState(1, "Pain", null, false)
+            ),
             petCount = 2
         ),
-        onPetButtonClicked = {},
+        onGlobalToggle = {},
+        onModeSelected = {},
+        onMixedPetVisibilityToggle = {},
+        onSwarmCountChanged = {},
+        onRemoveSwarmPet = {},
+        onUnlockSwarm = {},
         onDismissMessage = {},
-        onNavigateToCatalog = {},
+        onNavigateToCatalog = { _, _ -> },
         onNavigateToSettings = {},
         onNavigateToPremium = {}
     )
 }
 
-private const val MESSAGE_DURATION_MILLIS = 3_000L
+private const val MESSAGE_DURATION_MILLIS = 3_500L
+private const val HOME_MODE_BANNER_POSITION = "home_mode_bottom"

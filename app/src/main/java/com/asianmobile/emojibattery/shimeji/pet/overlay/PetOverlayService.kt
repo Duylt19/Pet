@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import com.asianmobile.emojibattery.shimeji.MainActivity
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogSnapshot
+import com.asianmobile.emojibattery.shimeji.data.model.PetDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
@@ -54,6 +55,7 @@ class PetOverlayService : Service() {
     private var overlayController: PetOverlayController? = null
     private var sessionPositionResetRevisions: List<Int>? = null
     private var activeSessionSignature: PetSessionSignature? = null
+    private var activeSessionMode: PetDisplayMode? = null
     private var isScreenReceiverRegistered = false
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -93,6 +95,10 @@ class PetOverlayService : Service() {
     private suspend fun startOverlay() {
         try {
             val preferences = petSettingsRepository.preferences.value
+            if (preferences.runtimePetCount == 0) {
+                stopSelf()
+                return
+            }
             sessionPositionResetRevisions = preferences.positionResetRevisions
             val catalog = ownerPetCatalogRepository.snapshot.value.let { current ->
                 if (!current.isLoading) {
@@ -110,8 +116,9 @@ class PetOverlayService : Service() {
                 }
             }
             activeSessionSignature = preferences.sessionSignature()
+            activeSessionMode = preferences.displayMode
             observeLiveSettings()
-            PetOverlayRuntime.updateRunning(true, preferences.petCount)
+            PetOverlayRuntime.updateRunning(true, preferences.runtimePetCount)
         } catch (error: CancellationException) {
             throw error
         } catch (error: RuntimeException) {
@@ -148,15 +155,23 @@ class PetOverlayService : Service() {
                     )
                     controller.updateInteractionSettings(preferences.petSlots)
                     controller.updateSpeechSettings(preferences.petSlots)
+                    controller.updateVisibilitySettings(preferences.petSlots)
                     controller.resetPositions(resetSlots)
                     sessionPositionResetRevisions = preferences.positionResetRevisions
+                    PetOverlayRuntime.updateRunning(true, preferences.runtimePetCount)
                 }
         }
     }
 
     private fun restartOverlay(preferences: PetPreferences) {
+        if (preferences.runtimePetCount == 0) {
+            stopSelf()
+            return
+        }
         try {
             val replacementPreferences = if (
+                activeSessionMode == PetDisplayMode.MIXED &&
+                preferences.displayMode == PetDisplayMode.MIXED &&
                 activeSessionSignature?.petCount == preferences.petCount
             ) {
                 preferences.copy(
@@ -179,7 +194,8 @@ class PetOverlayService : Service() {
             }
             sessionPositionResetRevisions = preferences.positionResetRevisions
             activeSessionSignature = preferences.sessionSignature()
-            PetOverlayRuntime.updateRunning(true, preferences.petCount)
+            activeSessionMode = preferences.displayMode
+            PetOverlayRuntime.updateRunning(true, preferences.runtimePetCount)
         } catch (error: RuntimeException) {
             Log.e(TAG, "Unable to update running pet session", error)
             overlayController?.stop()
@@ -192,9 +208,17 @@ class PetOverlayService : Service() {
         preferences: PetPreferences,
         catalog: OwnerPetCatalogSnapshot
     ): PetOverlayController {
-        val packs = List(preferences.petCount) { slotIndex ->
-            val requestedPack = petPackRepository.find(
+        val requestedPackKeys = when (preferences.displayMode) {
+            PetDisplayMode.MIXED -> List(preferences.petCount) { slotIndex ->
                 preferences.packKeyForSlot(slotIndex)
+            }
+            PetDisplayMode.SWARM -> List(preferences.swarm.count) {
+                preferences.swarm.packKey
+            }
+        }
+        val packs = requestedPackKeys.mapIndexed { slotIndex, packKey ->
+            val requestedPack = petPackRepository.find(
+                packKey
             ) ?: petPackRepository.selectedPackForSlot(slotIndex)
             OwnerPetSpeechAnchorPolicy.enrich(
                 pack = requestedPack,
@@ -226,7 +250,7 @@ class PetOverlayService : Service() {
         serviceScope.cancel()
         unregisterScreenStateReceiver()
         val resetRevisions = sessionPositionResetRevisions
-        if (resetRevisions != null) {
+        if (resetRevisions != null && activeSessionMode == PetDisplayMode.MIXED) {
             overlayController?.stop()?.let { positions ->
                 petSettingsRepository.updateLastPositions(positions, resetRevisions)
             }
@@ -236,6 +260,7 @@ class PetOverlayService : Service() {
         overlayController = null
         sessionPositionResetRevisions = null
         activeSessionSignature = null
+        activeSessionMode = null
         liveSettingsJob = null
         PetOverlayRuntime.updateRunning(false)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
@@ -245,14 +270,21 @@ class PetOverlayService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private data class PetSessionSignature(
+        val mode: PetDisplayMode,
         val petCount: Int,
-        val packKeys: List<String>
+        val packKeys: List<String>,
+        val swarmCount: Int
     )
 
     private fun PetPreferences.sessionSignature(): PetSessionSignature =
         PetSessionSignature(
+            mode = displayMode,
             petCount = petCount,
-            packKeys = selectedPackKeys.take(petCount)
+            packKeys = when (displayMode) {
+                PetDisplayMode.MIXED -> selectedPackKeys.take(petCount)
+                PetDisplayMode.SWARM -> listOf(swarm.packKey)
+            },
+            swarmCount = swarm.count
         )
 
     private fun promoteToForeground() {

@@ -8,6 +8,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
+import com.asianmobile.emojibattery.shimeji.data.model.PetDisplayMode
+import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
 import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
@@ -17,8 +20,8 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import java.io.File
+import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,33 +58,18 @@ class HomeViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            petPackRepository.selectedPacks.collect { selected ->
-                _uiState.update { current ->
-                    current.copy(
-                        selectedPetNames = selectedNames(selected, current.petCount),
-                        selectedPetPreviewPaths = selectedPreviewPaths(
-                            selected,
-                            current.petCount
-                        )
-                    )
-                }
+            petPackRepository.selectedPacks.collect {
+                refreshProfileState()
             }
         }
         viewModelScope.launch {
-            petSettingsRepository.preferences.collect { preferences ->
-                _uiState.update {
-                    it.copy(
-                        petCount = preferences.petCount,
-                        selectedPetNames = selectedNames(
-                            petPackRepository.selectedPacks.value,
-                            preferences.petCount
-                        ),
-                        selectedPetPreviewPaths = selectedPreviewPaths(
-                            petPackRepository.selectedPacks.value,
-                            preferences.petCount
-                        )
-                    )
-                }
+            petPackRepository.packs.collect {
+                refreshProfileState()
+            }
+        }
+        viewModelScope.launch {
+            petSettingsRepository.preferences.collect {
+                refreshProfileState()
             }
         }
     }
@@ -89,7 +77,10 @@ class HomeViewModel @Inject constructor(
     fun refreshPermissions() {
         val overlayGranted = PetOverlay.canDraw(context)
         _uiState.update {
-            it.copy(
+            profileState(
+                current = it,
+                preferences = petSettingsRepository.preferences.value
+            ).copy(
                 overlayGranted = overlayGranted,
                 notificationGranted = isNotificationGranted()
             )
@@ -102,6 +93,16 @@ class HomeViewModel @Inject constructor(
     fun onPetButtonClicked() {
         val state = _uiState.value
         if (state.isStartingPet) return
+        if (!state.hasRunnableSelection) {
+            when {
+                state.displayMode == PetDisplayMode.SWARM && !state.swarmUnlocked ->
+                    requestSwarmUnlock()
+                state.displayMode == PetDisplayMode.SWARM ->
+                    showMessage(HomeMessage.SELECT_SWARM_PET)
+                else -> showMessage(HomeMessage.KEEP_ONE_MIXED_PET_VISIBLE)
+            }
+            return
+        }
         when (
             HomePetPolicy.nextCommand(
                 overlayGranted = state.overlayGranted,
@@ -117,6 +118,56 @@ class HomeViewModel @Inject constructor(
             }
             HomePetCommand.START -> startPet()
             HomePetCommand.STOP -> PetOverlay.stop(context)
+        }
+    }
+
+    fun selectMode(mode: PetDisplayMode) {
+        if (_uiState.value.displayMode == mode) return
+        val canRunTarget = when (mode) {
+            PetDisplayMode.MIXED -> _uiState.value.mixedPets.any { it.isEnabled }
+            PetDisplayMode.SWARM ->
+                _uiState.value.swarmUnlocked && _uiState.value.swarmPackName != null
+        }
+        if (PetOverlayRuntime.isRunning.value && !canRunTarget) {
+            PetOverlay.stop(context)
+        }
+        petSettingsRepository.updateDisplayMode(mode)
+        _uiState.update { it.copy(displayMode = mode, message = null) }
+    }
+
+    fun toggleMixedPet(slotIndex: Int) {
+        val pet = _uiState.value.mixedPets.firstOrNull { it.slotIndex == slotIndex } ?: return
+        if (pet.isEnabled && _uiState.value.mixedPets.count { it.isEnabled } <= 1) {
+            showMessage(HomeMessage.KEEP_ONE_MIXED_PET_VISIBLE)
+            return
+        }
+        petSettingsRepository.updateSlotEnabled(slotIndex, !pet.isEnabled)
+    }
+
+    fun updateSwarmCount(count: Int) {
+        petSettingsRepository.updateSwarmCount(count)
+    }
+
+    fun clearSwarmPet() {
+        if (_uiState.value.displayMode == PetDisplayMode.SWARM &&
+            PetOverlayRuntime.isRunning.value
+        ) {
+            PetOverlay.stop(context)
+        }
+        petSettingsRepository.clearSwarmPack()
+    }
+
+    fun requestSwarmUnlock() {
+        if (_uiState.value.swarmUnlocked) return
+        emit(HomeEffect.ShowSwarmRewardedAd)
+    }
+
+    fun onSwarmRewardResult(rewardEarned: Boolean) {
+        if (rewardEarned) {
+            petSettingsRepository.unlockSwarmByReward()
+            _uiState.update { it.copy(swarmUnlocked = true, message = null) }
+        } else {
+            showMessage(HomeMessage.SWARM_REWARD_NOT_AVAILABLE)
         }
     }
 
@@ -160,48 +211,71 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun emit(effect: HomeEffect) {
-        viewModelScope.launch { _effects.send(effect) }
+    private fun refreshProfileState() {
+        _uiState.update { current ->
+            profileState(
+                current = current,
+                preferences = petSettingsRepository.preferences.value
+            )
+        }
     }
 
-    private fun readUiState() = HomeUiState(
-        overlayGranted = PetOverlay.canDraw(context),
-        notificationGranted = isNotificationGranted(),
-        notificationPermissionRequired = notificationPermissionRequired,
-        isPetRunning = PetOverlayRuntime.isRunning.value,
-        selectedPetNames = selectedNames(
-            petPackRepository.selectedPacks.value,
-            petSettingsRepository.preferences.value.petCount
+    private fun profileState(
+        current: HomeUiState,
+        preferences: PetPreferences
+    ): HomeUiState {
+        val selected = petPackRepository.selectedPacks.value
+        val swarmPack = preferences.swarm.packKey
+            .takeIf(String::isNotBlank)
+            ?.let(petPackRepository::find)
+        val isPremium = SharedPreferencesUtils.getIsPremium(context)
+        return current.copy(
+            displayMode = preferences.displayMode,
+            mixedPets = List(preferences.petCount) { slotIndex ->
+                val pack = selected.getOrNull(slotIndex)
+                    ?: selected.firstOrNull()
+                HomeMixedPetUiState(
+                    slotIndex = slotIndex,
+                    name = pack?.manifest?.name
+                        ?: context.getString(R.string.home_pet_default_name),
+                    previewPath = pack?.previewPath(),
+                    isEnabled = preferences.slot(slotIndex).isEnabled
+                )
+            },
+            petCount = preferences.petCount,
+            maxMixedPets = petSettingsRepository.performanceBudget.maxPets,
+            swarmUnlocked = isPremium || preferences.swarm.unlockedByReward,
+            isPremium = isPremium,
+            swarmPackName = swarmPack?.manifest?.name,
+            swarmPreviewPath = swarmPack?.previewPath(),
+            swarmCount = preferences.swarm.count,
+            maxSwarmPets = petSettingsRepository.performanceBudget.maxSwarmPets
+        )
+    }
+
+    private fun readUiState(): HomeUiState = profileState(
+        current = HomeUiState(
+            overlayGranted = PetOverlay.canDraw(context),
+            notificationGranted = isNotificationGranted(),
+            notificationPermissionRequired = notificationPermissionRequired,
+            isPetRunning = PetOverlayRuntime.isRunning.value
         ),
-        selectedPetPreviewPaths = selectedPreviewPaths(
-            petPackRepository.selectedPacks.value,
-            petSettingsRepository.preferences.value.petCount
-        ),
-        petCount = petSettingsRepository.preferences.value.petCount
+        preferences = petSettingsRepository.preferences.value
     )
-
-    private fun selectedNames(
-        selected: List<PetPack>,
-        count: Int
-    ): List<String> = List(count) { slotIndex ->
-        selected.getOrNull(slotIndex)?.manifest?.name
-            ?: selected.firstOrNull()?.manifest?.name
-            ?: context.getString(R.string.home_pet_default_name)
-    }
-
-    private fun selectedPreviewPaths(
-        selected: List<PetPack>,
-        count: Int
-    ): List<String?> = List(count) { slotIndex ->
-        selected.getOrNull(slotIndex)?.previewPath()
-            ?: selected.firstOrNull()?.previewPath()
-    }
 
     private fun PetPack.previewPath(): String? {
         val installed = source as? PetPackSource.Installed ?: return null
         val firstFrame = manifest.clips.values.firstOrNull()?.frames?.firstOrNull()
             ?: return null
         return File(installed.directoryPath, firstFrame.file).absolutePath
+    }
+
+    private fun showMessage(message: HomeMessage) {
+        _uiState.update { it.copy(message = message) }
+    }
+
+    private fun emit(effect: HomeEffect) {
+        viewModelScope.launch { _effects.send(effect) }
     }
 
     private fun isNotificationGranted(): Boolean =

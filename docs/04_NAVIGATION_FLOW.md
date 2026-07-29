@@ -9,9 +9,9 @@
 | `language_settings` | Language settings | Mở từ Settings |
 | `intro` | Intro pager | First-run |
 | `permission` | Permission | Request overlay/notification, có Continue/Skip |
-| `home` | Home | Cozy pet room + family preview + Start/Stop + Catalog/Settings/Premium |
-| `pet_catalog/{slotIndex}` | Pet Catalog | Lưới 1.026 owner pet từ GitHub raw/cache cho slot typed 0–2; search/category, download + SHA-256 + Set, secure file import |
-| `pet_detail/{slotIndex}/{packKey}` | Pet Detail | Preview metadata, xác nhận dùng pack và quay lại Catalog |
+| `home` | Home | Hai mode loại trừ nhau: Mixed và Pet Swarm; enable/disable overlay + Catalog/Settings/Premium |
+| `pet_catalog/{target}/{slotIndex}` | Pet Catalog | `target=MIXED/SWARM`; lưới owner pet từ GitHub raw/cache, download + SHA-256 + Set |
+| `pet_detail/{target}/{slotIndex}/{packKey}` | Pet Detail | Preview metadata, xác nhận pack cho đúng mode/slot và quay lại Catalog |
 | `settings` | Settings | My Pet Family roster + app/support hub |
 | `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
@@ -30,7 +30,10 @@ Permission ──continue/skip──> Home
 Home ──Start(no overlay)──> System Overlay Settings ──back──> Home
 Home ──Start(API 33+, notification missing)──> Notification permission ──result──> Start pet
 Home ──Start/Stop──> Pet overlay foreground service
-Home ──Meet a new friend──> Catalog(slot 0) ──search/category──> Download/verify/Set owner pet
+Home ──Mixed──> bật/tắt từng pet; tối thiểu một pet visible
+Home ──Swarm locked──> Rewarded completed ──persist unlock──> chọn một pet + count 1–12
+Home ──Swarm + Premium──> tự unlock, không hiển thị Rewarded
+Home ──Add/Change──> Catalog(target, slot) ──search/category──> Download/verify/Set
 Settings ──Pet card──> Customize Pet(slot) ──Change character──> Catalog(slot)
 Settings ──Add pet──> Catalog(slot trống) ──Set/Import──> kích hoạt slot
 Customize Pet ──Remove──> Settings (shift slot sau, giữ profile riêng)
@@ -46,7 +49,8 @@ Home ──Premium──> Premium(in-app)
 - Customize Pet pop về Settings. Pet Detail pop về Catalog; Catalog pop về màn đã mở
   nó. Xác nhận pack trong Detail cũng quay lại Catalog để user thấy selection mới. Add chỉ
   tăng `petCount` sau Set/Import thành công; Back khỏi Catalog không tạo pet.
-  `slotIndex` là typed Int và `packKey` luôn URI-encode trước navigation.
+  `target` parse an toàn về enum, `slotIndex` là typed Int và `packKey` luôn URI-encode
+  trước navigation.
 - Premium onboarding close/success đi tiếp Permission.
 - Premium splash-return close/success đi Home.
 - Language settings restart activity với `skip_splash=true` sau confirm.

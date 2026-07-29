@@ -1,6 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.pet.settings
 
 import com.asianmobile.emojibattery.shimeji.data.model.PetPositionFraction
+import com.asianmobile.emojibattery.shimeji.data.model.PetSlotPreferences
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -35,6 +36,34 @@ class PetSettingsPolicyTest {
         assertEquals(30, policy.targetFramesPerSecond(2, 30))
         assertEquals(24, policy.targetFramesPerSecond(3, 30))
         assertEquals(24, policy.targetFramesPerSecond(2, 24))
+    }
+
+    @Test
+    fun `swarm count respects device budget`() {
+        assertEquals(1, policy.sanitizeSwarmCount(0, maxPets = 12))
+        assertEquals(6, policy.sanitizeSwarmCount(12, maxPets = 6))
+        assertEquals(12, policy.sanitizeSwarmCount(99, maxPets = 12))
+    }
+
+    @Test
+    fun `larger swarms progressively reduce shared render rate`() {
+        assertEquals(24, policy.targetSwarmFramesPerSecond(3, 30))
+        assertEquals(20, policy.targetSwarmFramesPerSecond(4, 30))
+        assertEquals(16, policy.targetSwarmFramesPerSecond(7, 30))
+        assertEquals(16, policy.targetSwarmFramesPerSecond(12, 24))
+    }
+
+    @Test
+    fun `mixed profile always restores one visible active pet`() {
+        val hiddenSlots = List(3) { PetSlotPreferences(isEnabled = false) }
+
+        val restored = policy.ensureMixedPetVisible(hiddenSlots, petCount = 2)
+
+        assertEquals(listOf(true, false, false), restored.map { it.isEnabled })
+        assertEquals(
+            listOf(false, false, false),
+            policy.ensureMixedPetVisible(hiddenSlots, petCount = 0).map { it.isEnabled }
+        )
     }
 
     @Test

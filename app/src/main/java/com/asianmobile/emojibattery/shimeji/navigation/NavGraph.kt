@@ -17,6 +17,7 @@ import androidx.navigation.navArgument
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ui.home.HomeScreen
 import com.asianmobile.emojibattery.shimeji.ui.catalog.PetCatalogScreen
+import com.asianmobile.emojibattery.shimeji.ui.catalog.PetCatalogTarget
 import com.asianmobile.emojibattery.shimeji.ui.catalog.PetDetailScreen
 import com.asianmobile.emojibattery.shimeji.ui.home.settings.PetCustomizationScreen
 import com.asianmobile.emojibattery.shimeji.ui.home.settings.SettingsScreen
@@ -41,9 +42,15 @@ object Routes {
     const val SETTINGS = "settings"
     const val PREMIUM = "premium"
 
-    fun petCatalog(slotIndex: Int): String = "$PET_CATALOG/$slotIndex"
-    fun petDetail(slotIndex: Int, packKey: String): String =
-        "$PET_DETAIL/$slotIndex/${Uri.encode(packKey)}"
+    fun petCatalog(
+        target: PetCatalogTarget,
+        slotIndex: Int = 0
+    ): String = "$PET_CATALOG/${target.name}/$slotIndex"
+    fun petDetail(
+        target: PetCatalogTarget,
+        slotIndex: Int,
+        packKey: String
+    ): String = "$PET_DETAIL/${target.name}/$slotIndex/${Uri.encode(packKey)}"
     fun petCustomization(slotIndex: Int): String = "$PET_CUSTOMIZATION/$slotIndex"
 }
 
@@ -173,9 +180,9 @@ fun AppNavGraph(
 
             composable(Routes.HOME) {
                 HomeScreen(
-                    onNavigateToCatalog = { slotIndex ->
+                    onNavigateToCatalog = { target, slotIndex ->
                         navController.safeNavigate(
-                            Routes.petCatalog(slotIndex),
+                            Routes.petCatalog(target, slotIndex),
                             ignoreDebounce = true
                         )
                     },
@@ -189,15 +196,23 @@ fun AppNavGraph(
             }
 
             composable(
-                route = "${Routes.PET_CATALOG}/{slotIndex}",
-                arguments = listOf(navArgument("slotIndex") { type = NavType.IntType })
+                route = "${Routes.PET_CATALOG}/{target}/{slotIndex}",
+                arguments = listOf(
+                    navArgument("target") { type = NavType.StringType },
+                    navArgument("slotIndex") { type = NavType.IntType }
+                )
             ) { backStackEntry ->
                 val slotIndex = backStackEntry.arguments?.getInt("slotIndex") ?: 0
+                val target = backStackEntry.arguments?.getString("target")
+                    ?.let { encoded ->
+                        PetCatalogTarget.entries.firstOrNull { it.name == encoded }
+                    }
+                    ?: PetCatalogTarget.MIXED
                 PetCatalogScreen(
                     onBack = { navController.safePopBackStack(ignoreDebounce = true) },
                     onOpenPack = { packKey ->
                         navController.safeNavigate(
-                            Routes.petDetail(slotIndex, packKey),
+                            Routes.petDetail(target, slotIndex, packKey),
                             ignoreDebounce = true
                         )
                     }
@@ -205,8 +220,9 @@ fun AppNavGraph(
             }
 
             composable(
-                route = "${Routes.PET_DETAIL}/{slotIndex}/{packKey}",
+                route = "${Routes.PET_DETAIL}/{target}/{slotIndex}/{packKey}",
                 arguments = listOf(
+                    navArgument("target") { type = NavType.StringType },
                     navArgument("slotIndex") { type = NavType.IntType },
                     navArgument("packKey") { type = NavType.StringType }
                 )
@@ -235,7 +251,7 @@ fun AppNavGraph(
                     },
                     onAddPet = { slotIndex ->
                         navController.safeNavigate(
-                            Routes.petCatalog(slotIndex),
+                            Routes.petCatalog(PetCatalogTarget.MIXED, slotIndex),
                             ignoreDebounce = true
                         )
                     }
@@ -252,7 +268,7 @@ fun AppNavGraph(
                     },
                     onChangeCharacter = { slotIndex ->
                         navController.safeNavigate(
-                            Routes.petCatalog(slotIndex),
+                            Routes.petCatalog(PetCatalogTarget.MIXED, slotIndex),
                             ignoreDebounce = true
                         )
                     },

@@ -11,7 +11,7 @@
 | Premium/billing | `ui/premium`, billing infrastructure | Active |
 | Ads/remote config | module `:ads` | Active |
 | Pure pet engine | `pet/engine` | Active, JVM-tested; weighted behavior + multi-action routines |
-| Multi-pet overlay | `pet/overlay` | Active, 1–3 pack khác nhau theo slot + tối đa một speech window cho mỗi pet với shared clock/service |
+| Multi-pet overlay | `pet/overlay` | Active, Mixed 1–3 pack/visibility độc lập hoặc Swarm 1–12 bản sao cùng pack, shared clock/service |
 | Validated pet packs | `pet/pack`, `ui/catalog` | Active, schema v1 + secure import + preview/select |
 | Owner pet catalog | `OwnerPetCatalogRepository`, `data/remote`, `ui/catalog` | Active private GitHub raw source, 1.026 pets + cached metadata + authenticated thumbnail + verified on-demand ZIP Set |
 | Pet speech and dialogue | `pet/speech`, transient speech overlay | Active, localized/custom reactions + lifecycle độc lập theo pet |

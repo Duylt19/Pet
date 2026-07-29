@@ -141,6 +141,8 @@ fun PetDetailScreen(
             CutePetPrimaryButton(
                 text = if (uiState.selectedKey == pack.key) {
                     stringResource(R.string.pet_catalog_selected)
+                } else if (uiState.target == PetCatalogTarget.SWARM) {
+                    stringResource(R.string.pet_detail_select_for_swarm)
                 } else {
                     stringResource(
                         R.string.pet_detail_select_for_slot,

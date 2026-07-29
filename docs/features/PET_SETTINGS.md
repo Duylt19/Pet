@@ -4,14 +4,16 @@
 
 `PetSettingsRepository` expose một `StateFlow<PetPreferences>` trên DataStore. Settings
 và pack selection ghi qua repository; Home/catalog/service không truy cập key storage
-trực tiếp. `PetPreferences` materialize đúng ba `PetSlotPreferences`, còn `petCount` quyết
-định bao nhiêu slot active. Service observe toàn bộ profile active; mọi thay đổi từ
-Customize Pet được áp dụng ngay cho session đang chạy.
+trực tiếp. Hai mode `MIXED`/`SWARM` loại trừ nhau nhưng giữ state riêng. Service observe
+toàn bộ profile; đổi mode, visibility, count và pack đều cập nhật session đang chạy.
 
 | Setting | Giá trị hợp lệ | Runtime |
 |---|---|---|
 | Pack key / slot | đúng 3 installed/built-in key | missing/invalid fallback Orange Cat |
 | Count | 1–3; low-RAM 1–2 | một window/state machine mỗi pet |
+| Mixed visibility / slot | on/off; giữ tối thiểu một slot visible | hide/show đúng window và speech ngay |
+| Swarm pack | một installed/built-in key riêng | lặp cùng pack cho mọi instance |
+| Swarm count | 1–12; low-RAM tối đa 6 | rebuild controller ngay trong session |
 | Size / slot | 50–150%, bước 10% | 100% = 84dp trước `defaultScale`, clamp 48–144dp |
 | Speed / slot | 50–150%, bước 25% | locomotion/physics/expression scale từ profile đúng pet |
 | Sound | on/off | reserved; pack v1 chưa hỗ trợ audio |
@@ -50,6 +52,9 @@ các pet; add/remove dùng position list đã được repository materialize th
 
 ## Settings UX
 
+- Home dùng segmented control cho Mixed/Swarm. Icon mắt trên từng Mixed card thay dropdown
+  count và áp dụng ngay; global switch vẫn là quyền bật/tắt toàn bộ overlay.
+- Swarm free được unlock sau Rewarded thành công; Premium tự unlock. Unlock không tự Start.
 - Settings hub chỉ hiển thị roster + trạng thái tóm tắt và app/support.
 - Tap card mở `pet_customization/{slotIndex}`.
 - Size editor dùng slider 11 nấc `50–150%` kèm stepper `−/+`; giá trị optimistic trên UI
@@ -72,6 +77,8 @@ thay đổi đang chạy có hiệu lực từ tick kế tiếp.
 
 - Thiết bị thường: tối đa 3 pet, shared clock 30 FPS cho 1–2 pet và 24 FPS cho 3 pet.
 - Low-RAM device: tối đa 2 pet và shared clock 24 FPS.
+- Swarm: 1–3 pet theo FPS budget hiện tại, 4–6 pet tối đa 20 FPS, 7–12 pet tối đa
+  16 FPS; low-RAM clamp 6.
 - Bitmap visual/cache được chia sẻ theo pack key; mỗi slot có engine/visual/speech director
   và input flag từ profile riêng nhưng không decode, parse DataStore hoặc tạo
   coroutine/thread trong frame loop.

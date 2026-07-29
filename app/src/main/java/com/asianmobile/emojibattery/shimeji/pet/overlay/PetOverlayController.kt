@@ -11,6 +11,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import com.asianmobile.emojibattery.shimeji.data.model.PetPerformanceBudget
+import com.asianmobile.emojibattery.shimeji.data.model.PetDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.PetPositionFraction
 import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
 import com.asianmobile.emojibattery.shimeji.data.model.PetSlotPreferences
@@ -56,20 +57,35 @@ internal class PetOverlayController(
     private val appContext = context.applicationContext
     private val settingsPolicy = PetSettingsPolicy()
     private val sessionLayout = PetSessionLayout()
-    private val petCount = settingsPolicy.sanitizePetCount(
-        preferences.petCount,
-        performanceBudget.maxPets
-    )
+    private val isSwarm = preferences.displayMode == PetDisplayMode.SWARM
+    private val petCount = if (isSwarm) {
+        settingsPolicy.sanitizeSwarmCount(
+            preferences.swarm.count,
+            performanceBudget.maxSwarmPets
+        )
+    } else {
+        settingsPolicy.sanitizePetCount(
+            preferences.petCount,
+            performanceBudget.maxPets
+        )
+    }
     private val availableAssets = assets.also {
         require(it.isNotEmpty()) { "At least one pet asset is required" }
     }
     private val selectedAssets = List(petCount) { index ->
         availableAssets.getOrNull(index) ?: availableAssets.first()
     }
-    private val targetFrameNanos = NANOS_PER_SECOND / settingsPolicy.targetFramesPerSecond(
-        petCount,
-        performanceBudget.targetFramesPerSecond
-    )
+    private val targetFrameNanos = NANOS_PER_SECOND / if (isSwarm) {
+        settingsPolicy.targetSwarmFramesPerSecond(
+            petCount,
+            performanceBudget.targetFramesPerSecond
+        )
+    } else {
+        settingsPolicy.targetFramesPerSecond(
+            petCount,
+            performanceBudget.targetFramesPerSecond
+        )
+    }
     private val socialDirector = PetSocialDirector(
         sceneOffset = selectedAssets.fold(1) { hash, asset ->
             31 * hash + asset.pack.manifest.id.hashCode()
@@ -77,9 +93,9 @@ internal class PetOverlayController(
     )
     private val crowdResolver = PetCrowdResolver()
     private val speechSettings = selectedAssets.mapIndexed { index, _ ->
-        val slot = preferences.slot(index)
+        val slot = runtimeSlot(index)
         index to SpeechSettings(
-            enabled = slot.messagesEnabled,
+            enabled = !isSwarm && slot.messagesEnabled,
             customMessages = slot.customMessages
         )
     }.toMap().toMutableMap()
@@ -105,15 +121,18 @@ internal class PetOverlayController(
             if (elapsedNanos >= targetFrameNanos) {
                 lastTickNanos = frameTimeNanos
                 val elapsedMillis = elapsedNanos / NANOS_PER_MILLISECOND
-                socialDirector.update(
-                    pets = instances.map { instance ->
-                        PetSocialSnapshot(instance.id, instance.state)
-                    },
-                    elapsedMillis = elapsedMillis
-                ).forEach(::dispatchSocialDirective)
+                val visibleInstances = instances.filter(PetInstance::isVisible)
+                if (!isSwarm) {
+                    socialDirector.update(
+                        pets = visibleInstances.map { instance ->
+                            PetSocialSnapshot(instance.id, instance.state)
+                        },
+                        elapsedMillis = elapsedMillis
+                    ).forEach(::dispatchSocialDirective)
+                }
                 val event = PetEvent.Tick(elapsedMillis)
-                instances.toList().forEach { dispatch(it, event) }
-                resolveCrowdSpacing()
+                visibleInstances.forEach { dispatch(it, event) }
+                if (!isSwarm) resolveCrowdSpacing(visibleInstances)
             }
             choreographer.postFrameCallback(this)
         }
@@ -127,7 +146,7 @@ internal class PetOverlayController(
         try {
             selectedAssets.forEachIndexed { index, asset ->
                 val pack = asset.pack
-                val slotPreferences = preferences.slot(index)
+                val slotPreferences = runtimeSlot(index)
                 val petSizePixels = petSizePixels(pack, slotPreferences)
                 val size = PetSize(petSizePixels.toFloat(), petSizePixels.toFloat())
                 val bounds = currentPlaygroundBounds(size)
@@ -157,7 +176,14 @@ internal class PetOverlayController(
                 val view = PetOverlayView(appContext, asset.visual) { event ->
                     dispatch(instance, event)
                 }
-                    .apply { render(initialState) }
+                    .apply {
+                        render(initialState)
+                        visibility = if (slotPreferences.isEnabled) {
+                            View.VISIBLE
+                        } else {
+                            View.INVISIBLE
+                        }
+                    }
                 val params = createLayoutParams(initialState, index, slotPreferences)
                 instance = PetInstance(
                     id = index,
@@ -167,12 +193,15 @@ internal class PetOverlayController(
                     speechAttachment = speechAttachment(pack),
                     speedPercent = slotPreferences.speedPercent,
                     interactionEnabled = slotPreferences.interactionEnabled,
+                    isVisible = slotPreferences.isEnabled,
                     state = initialState
                 )
                 instances += instance
             }
             speechDirectors.keys.forEach { petId ->
-                instances.firstOrNull { it.id == petId }?.let(::addSpeechWindow)
+                instances
+                    .firstOrNull { it.id == petId && it.isVisible }
+                    ?.let(::addSpeechWindow)
             }
             instances.forEach { instance ->
                 windowManager.addView(instance.view, instance.params)
@@ -229,6 +258,7 @@ internal class PetOverlayController(
     }
 
     fun updateSizePercents(sizePercents: List<Int>) {
+        if (isSwarm) return
         instances.toList().forEach { instance ->
             val percent = sizePercents.getOrNull(instance.id) ?: return@forEach
             val pack = selectedAssets[instance.id].pack
@@ -241,6 +271,7 @@ internal class PetOverlayController(
     }
 
     fun updateSpeedPercents(speedPercents: List<Int>) {
+        if (isSwarm) return
         instances.forEach { instance ->
             val speedPercent = speedPercents.getOrNull(instance.id) ?: return@forEach
             if (instance.speedPercent == speedPercent) return@forEach
@@ -255,6 +286,7 @@ internal class PetOverlayController(
     }
 
     fun updateInteractionSettings(slotPreferences: List<PetSlotPreferences>) {
+        if (isSwarm) return
         instances.forEach { instance ->
             val interactionEnabled = slotPreferences
                 .getOrNull(instance.id)
@@ -274,6 +306,7 @@ internal class PetOverlayController(
     }
 
     fun updateSpeechSettings(slotPreferences: List<PetSlotPreferences>) {
+        if (isSwarm) return
         instances.forEach { instance ->
             val slot = slotPreferences.getOrNull(instance.id) ?: return@forEach
             val requested = SpeechSettings(
@@ -285,7 +318,7 @@ internal class PetOverlayController(
             speechDirectors.remove(instance.id)?.reset()
             removeSpeechWindow(instance.id)
             speechSettings[instance.id] = requested
-            if (requested.enabled) {
+            if (requested.enabled && instance.isVisible) {
                 speechDirectors[instance.id] = createSpeechDirector(
                     pack = selectedAssets[instance.id].pack,
                     index = instance.id,
@@ -294,6 +327,33 @@ internal class PetOverlayController(
                 addSpeechWindow(instance)
             }
         }
+    }
+
+    fun updateVisibilitySettings(slotPreferences: List<PetSlotPreferences>) {
+        if (isSwarm) return
+        instances.forEach { instance ->
+            val requestedVisible = slotPreferences
+                .getOrNull(instance.id)
+                ?.isEnabled
+                ?: return@forEach
+            if (instance.isVisible == requestedVisible) return@forEach
+            instance.isVisible = requestedVisible
+            instance.view.visibility = if (requestedVisible) View.VISIBLE else View.INVISIBLE
+            speechDirectors.remove(instance.id)?.reset()
+            removeSpeechWindow(instance.id)
+            if (requestedVisible) {
+                val speech = speechSettings[instance.id]
+                if (speech?.enabled == true) {
+                    speechDirectors[instance.id] = createSpeechDirector(
+                        pack = selectedAssets[instance.id].pack,
+                        index = instance.id,
+                        customMessages = speech.customMessages
+                    ).also(PetSpeechDirector::reset)
+                    addSpeechWindow(instance)
+                }
+            }
+        }
+        socialDirector.reset()
     }
 
     fun resetPositions(slotIndexes: List<Int>) {
@@ -328,7 +388,7 @@ internal class PetOverlayController(
     }
 
     private fun dispatch(instance: PetInstance, event: PetEvent) {
-        if (instance !in instances) return
+        if (instance !in instances || !instance.isVisible) return
         val previousState = instance.state
         val transition = instance.engine.reduce(previousState, event)
         render(instance, transition.state)
@@ -349,9 +409,11 @@ internal class PetOverlayController(
         dispatch(instance, event)
     }
 
-    private fun resolveCrowdSpacing() {
-        val resolvedStates = crowdResolver.resolve(instances.map(PetInstance::state))
-        instances.zip(resolvedStates).forEach { (instance, resolvedState) ->
+    private fun resolveCrowdSpacing(visibleInstances: List<PetInstance>) {
+        val resolvedStates = crowdResolver.resolve(
+            visibleInstances.map(PetInstance::state)
+        )
+        visibleInstances.zip(resolvedStates).forEach { (instance, resolvedState) ->
             if (instance.state != resolvedState) {
                 render(instance, resolvedState)
             }
@@ -658,6 +720,7 @@ internal class PetOverlayController(
         val speechAttachment: PetSpeechAttachment,
         var speedPercent: Int,
         var interactionEnabled: Boolean,
+        var isVisible: Boolean,
         var state: PetState
     )
 
@@ -687,5 +750,19 @@ internal class PetOverlayController(
         const val NANOS_PER_SECOND = 1_000_000_000L
         const val PET_BEHAVIOR_SEED_STEP = 1_103_515_245L
         const val TAG = "PetOverlayController"
+        const val SWARM_SIZE_PERCENT = 75
+    }
+
+    private fun runtimeSlot(index: Int): PetSlotPreferences = if (isSwarm) {
+        PetSlotPreferences(
+            packKey = preferences.swarm.packKey,
+            sizePercent = SWARM_SIZE_PERCENT,
+            speedPercent = 100,
+            messagesEnabled = false,
+            interactionEnabled = true,
+            isEnabled = true
+        )
+    } else {
+        preferences.slot(index)
     }
 }

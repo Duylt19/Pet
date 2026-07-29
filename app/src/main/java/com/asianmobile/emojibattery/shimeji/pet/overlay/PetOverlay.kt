@@ -47,6 +47,6 @@ object PetOverlayRuntime {
 
     internal fun updateRunning(running: Boolean, petCount: Int = 0) {
         _isRunning.value = running
-        _activePetCount.value = if (running) petCount.coerceAtLeast(1) else 0
+        _activePetCount.value = if (running) petCount.coerceAtLeast(0) else 0
     }
 }

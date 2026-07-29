@@ -14,6 +14,11 @@
 | `pet_selected_pack_keys` | String | Ba pack key độc lập theo slot, newline-delimited |
 | `pet_selected_pack_key` | String | Legacy/mirror slot 1 để migrate dữ liệu cũ |
 | `pet_count` | Int | Số instance, clamp theo device budget |
+| `pet_display_mode` | String enum | `MIXED` hoặc `SWARM`; hai mode loại trừ nhau |
+| `pet_slot_enabled` | JSON String | Ba trạng thái visible độc lập của Mixed |
+| `pet_swarm_pack_key` | String | Pack được nhân bản trong Swarm |
+| `pet_swarm_count` | Int | Số instance Swarm, 1–12 hoặc tối đa 6 trên low-RAM |
+| `pet_swarm_reward_unlocked` | Boolean | Rewarded unlock vĩnh viễn trên device |
 | `pet_slot_size_percents` | JSON String | Ba mức size độc lập 50–150%, bước 10% |
 | `pet_slot_speed_percents` | JSON String | Ba mức speed độc lập 50–150%, bước 25% |
 | `pet_size_percent`, `pet_speed_percent` | Int | Legacy global fallback cho migration |
@@ -29,9 +34,10 @@
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.
 
 `PetPreferences.petSlots` luôn materialize thành ba `PetSlotPreferences`. Mỗi record sở hữu
-`packKey`, size, speed, messages, custom messages và interaction; `petCount` chỉ quyết
-định bao nhiêu record đang active. Dữ liệu global cũ được duplicate làm fallback cho ba
-slot khi key mới chưa tồn tại, sau đó lần chỉnh đầu tiên persist ba record độc lập.
+`packKey`, size, speed, messages, custom messages, interaction và `isEnabled`; `petCount`
+quyết định số slot Mixed đã cấu hình, còn `isEnabled` quyết định slot nào thật sự xuất
+hiện. Mixed luôn giữ tối thiểu một pet visible; global Start/Stop là cách tắt toàn bộ.
+`PetSwarmPreferences` tách riêng pack/count/unlock và không ghi đè hồ sơ Mixed.
 
 Custom messages vẫn là dữ liệu nhỏ: tối đa 30 câu, 80 Unicode code point/câu.
 `PetMessageListPolicy` chuẩn hóa khoảng trắng, bỏ câu rỗng/trùng và cắt theo code point.
@@ -49,7 +55,10 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 
 ## Overlay runtime state
 
-`PetOverlayRuntime.isRunning` và `activePetCount` là process-local `StateFlow`, không phải persisted preference. Service dùng `START_NOT_STICKY` và không có boot receiver nên trạng thái running không được restore sau process death/reboot. `HomeUiState` kết hợp runtime state, persisted settings và permission snapshot.
+`PetOverlayRuntime.isRunning` và `activePetCount` là process-local `StateFlow`, không phải
+persisted preference. `activePetCount` là số slot Mixed visible hoặc swarm count theo mode
+hiện hành. Service dùng `START_NOT_STICKY` và không có boot receiver nên trạng thái running
+không được restore sau process death/reboot.
 
 ## Pet pack model
 

@@ -40,4 +40,34 @@ class PetPreferencesTest {
         assertEquals(150, preferences.slot(1).sizePercent)
         assertEquals(true, preferences.slot(1).messagesEnabled)
     }
+
+    @Test
+    fun `mixed mode only counts enabled configured pets`() {
+        val preferences = PetPreferences(
+            petSlots = listOf(
+                PetSlotPreferences(isEnabled = true),
+                PetSlotPreferences(isEnabled = false),
+                PetSlotPreferences(isEnabled = true)
+            ),
+            petCount = 3,
+            displayMode = PetDisplayMode.MIXED
+        )
+
+        assertEquals(2, preferences.enabledMixedPetCount)
+        assertEquals(2, preferences.runtimePetCount)
+    }
+
+    @Test
+    fun `swarm mode uses configured count only after selecting a pack`() {
+        val emptySwarm = PetPreferences(
+            displayMode = PetDisplayMode.SWARM,
+            swarm = PetSwarmPreferences(packKey = "", count = 8)
+        )
+        val configuredSwarm = emptySwarm.copy(
+            swarm = PetSwarmPreferences(packKey = "pack.cat@1", count = 8)
+        )
+
+        assertEquals(0, emptySwarm.runtimePetCount)
+        assertEquals(8, configuredSwarm.runtimePetCount)
+    }
 }

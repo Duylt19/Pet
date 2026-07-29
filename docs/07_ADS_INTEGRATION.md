@@ -12,6 +12,16 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - MainActivity quản lý App Open Ads theo lifecycle.
 - Premium dùng BillingClient và `StartPremiumIndexes` để biết entry source.
 
+## Pet Swarm Rewarded unlock
+
+- Home preload Rewarded khi screen vào composition.
+- User free chỉ unlock khi SDK trả reward callback thật; đóng quảng cáo sớm, load/show fail,
+  limit hoặc SDK chưa sẵn sàng đều không unlock.
+- Callback được consume đúng một lần. Sau dismiss/fail, SDK preload lượt kế tiếp.
+- Unlock được persist trên device bằng `pet_swarm_reward_unlocked`.
+- Premium được xem là unlocked ngay và không cần mở Rewarded.
+- Rewarded chỉ mở khóa mode; user vẫn chủ động chọn pet và bật global overlay.
+
 ## Rules
 
 - Ad load/show fail không được chặn navigation hoặc action chính.

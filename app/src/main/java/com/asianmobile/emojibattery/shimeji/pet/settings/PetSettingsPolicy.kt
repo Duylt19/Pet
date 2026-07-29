@@ -1,13 +1,32 @@
 package com.asianmobile.emojibattery.shimeji.pet.settings
 
-import com.asianmobile.emojibattery.shimeji.data.model.PetPositionFraction
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SELECTED_PACK_KEY
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_PET_SLOTS
+import com.asianmobile.emojibattery.shimeji.data.model.MAX_SWARM_PETS
+import com.asianmobile.emojibattery.shimeji.data.model.MIN_SWARM_PETS
+import com.asianmobile.emojibattery.shimeji.data.model.PetPositionFraction
+import com.asianmobile.emojibattery.shimeji.data.model.PetSlotPreferences
 import org.json.JSONArray
 
 class PetSettingsPolicy {
     fun sanitizePetCount(value: Int, maxPets: Int): Int =
         value.coerceIn(MIN_PET_COUNT, maxPets.coerceAtLeast(MIN_PET_COUNT))
+
+    fun sanitizeSwarmCount(value: Int, maxPets: Int = MAX_SWARM_PETS): Int =
+        value.coerceIn(MIN_SWARM_PETS, maxPets.coerceAtLeast(MIN_SWARM_PETS))
+
+    fun ensureMixedPetVisible(
+        slots: List<PetSlotPreferences>,
+        petCount: Int
+    ): List<PetSlotPreferences> {
+        val activeCount = petCount.coerceIn(0, slots.size)
+        if (activeCount == 0 || slots.take(activeCount).any(PetSlotPreferences::isEnabled)) {
+            return slots
+        }
+        return slots.toMutableList().apply {
+            this[0] = this[0].copy(isEnabled = true)
+        }
+    }
 
     fun sanitizeSizePercent(value: Int): Int =
         nearestStep(value, MIN_SIZE_PERCENT, MAX_SIZE_PERCENT, SIZE_STEP_PERCENT)
@@ -21,6 +40,15 @@ class PetSettingsPolicy {
         } else {
             budgetFramesPerSecond
         }
+
+    fun targetSwarmFramesPerSecond(
+        petCount: Int,
+        budgetFramesPerSecond: Int
+    ): Int = when {
+        petCount > 6 -> minOf(budgetFramesPerSecond, LARGE_SWARM_FRAMES_PER_SECOND)
+        petCount > 3 -> minOf(budgetFramesPerSecond, SMALL_SWARM_FRAMES_PER_SECOND)
+        else -> targetFramesPerSecond(petCount, budgetFramesPerSecond)
+    }
 
     fun shouldPersistPositions(
         sessionResetRevision: Int,
@@ -50,6 +78,8 @@ class PetSettingsPolicy {
         const val MAX_SPEED_PERCENT = 150
         const val SPEED_STEP_PERCENT = 25
         const val THREE_PET_FRAMES_PER_SECOND = 24
+        const val SMALL_SWARM_FRAMES_PER_SECOND = 20
+        const val LARGE_SWARM_FRAMES_PER_SECOND = 16
     }
 }
 

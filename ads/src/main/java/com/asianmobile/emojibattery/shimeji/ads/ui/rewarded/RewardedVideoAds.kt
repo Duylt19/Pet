@@ -21,7 +21,8 @@ import com.google.android.libraries.ads.mobile.sdk.rewarded.RewardedAdEventCallb
 
 class RewardedVideoAds {
     private var rewardedAd: RewardedAd? = null
-    private var adCloseListener: RewardedCloseListener? = null
+    private var resultListener: RewardedResultListener? = null
+    private var rewardEarned = false
     var isLoading = false
 
     private var _isShowing = false
@@ -81,26 +82,16 @@ class RewardedVideoAds {
 
     fun isReady() = rewardedAd != null
 
-    fun showRewardedAd(activity: Activity, listener: RewardedCloseListener) {
-        adCloseListener = listener
-//        if (isVipUser(activity)) {
-//            adCloseListener?.onAdClosed()
-//            return
-//        }
+    fun showRewardedAd(activity: Activity, listener: RewardedResultListener) {
+        if (_isShowing) return
+        resultListener = listener
+        rewardEarned = false
         if (!MobileAds.isInitialized) {
-            if (!activity.isDestroyed && !activity.isFinishing) {
-                activity.runOnUiThread {
-                    adCloseListener?.onAdClosed()
-                }
-            }
+            completeResult(activity, rewardEarned = false)
             return
         }
         if (Utils.checkLimitAd(activity)) {
-            if (!activity.isDestroyed && !activity.isFinishing) {
-                activity.runOnUiThread {
-                    adCloseListener?.onAdClosed()
-                }
-            }
+            completeResult(activity, rewardEarned = false)
             return
         }
         if (rewardedAd != null) {
@@ -121,23 +112,17 @@ class RewardedVideoAds {
                     Log.d(TAG, "Ad dismissed fullscreen content.")
                     rewardedAd = null
                     loadRewardedVideo(activity)
-                    if (!activity.isDestroyed && !activity.isFinishing) {
-                        activity.runOnUiThread {
-                            adCloseListener?.onAdClosed()
-                        }
-                    }
                     _isShowing = false
+                    completeResult(activity, rewardEarned)
                 }
 
                 override fun onAdFailedToShowFullScreenContent(fullScreenContentError: FullScreenContentError) {
                     // Called when ad fails to show.
                     Log.e(TAG, "Ad failed to show fullscreen content.")
                     rewardedAd = null
-                    if (!activity.isDestroyed && !activity.isFinishing) {
-                        activity.runOnUiThread {
-                            adCloseListener?.onAdClosed()
-                        }
-                    }
+                    _isShowing = false
+                    completeResult(activity, rewardEarned = false)
+                    loadRewardedVideo(activity)
                 }
 
                 override fun onAdImpression() {
@@ -157,20 +142,31 @@ class RewardedVideoAds {
             }
 
             rewardedAd?.setImmersiveMode(true)
+            _isShowing = true
             rewardedAd?.show(activity) { rewardItem ->
                 val rewardAmount = rewardItem.amount
                 val rewardType = rewardItem.type
+                rewardEarned = true
                 Log.d(TAG, "Earn $rewardType and $rewardAmount")
-//                adCloseListener?.onAdClosed()
             }
         } else {
             Log.d(TAG, "The rewarded ad wasn't ready yet.")
-            adCloseListener?.onAdClosed()
+            completeResult(activity, rewardEarned = false)
             loadRewardedVideo(activity)
         }
     }
 
-    fun interface RewardedCloseListener {
-        fun onAdClosed()
+    private fun completeResult(activity: Activity, rewardEarned: Boolean) {
+        val listener = resultListener ?: return
+        resultListener = null
+        if (!activity.isDestroyed && !activity.isFinishing) {
+            activity.runOnUiThread {
+                listener.onAdClosed(rewardEarned)
+            }
+        }
+    }
+
+    fun interface RewardedResultListener {
+        fun onAdClosed(rewardEarned: Boolean)
     }
 }

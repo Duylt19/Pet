@@ -35,7 +35,12 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   dòng quá rộng. Height tăng tới bốn dòng, sau đó ellipsis. Window bị remove đúng khi
   action rời cả `TALK` và `TALK_WALK`, drag/fling, Stop hoặc service destroy. Không có
   timer speech độc lập với engine. Hai pet cùng TALK có hai window/lifecycle độc lập.
-- 1–3 instance dùng chung đúng một `Choreographer.FrameCallback` trên main thread; 30 FPS mặc định, 24 FPS cho 3 pet hoặc low-RAM budget.
+- Mixed dùng 1–3 slot, mỗi slot có visibility riêng; instance hidden không tick, không
+  tham gia social/crowd và không giữ speech window. Visibility thay đổi trực tiếp, không
+  cần Stop/Start.
+- Swarm dùng 1–12 instance cùng pack (low-RAM tối đa 6), không tạo speech/social/crowd
+  session để giữ chi phí dự đoán được. 4–6 pet tối đa 20 FPS, 7–12 pet tối đa 16 FPS.
+- Mọi instance dùng chung đúng một `Choreographer.FrameCallback` trên main thread.
 - Frame loop chỉ reduce engine + invalidate/update layout; không decode bitmap, parse file hoặc tạo thread.
 - Mỗi slot resolve pack/visual/engine config riêng, gồm size, speed, touch flag và speech
   catalog/toggle; slot trùng pack dùng chung bitmap cache đã preload. Tất cả instance vẫn
@@ -48,7 +53,7 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Touch toggle đổi trực tiếp `FLAG_NOT_TOUCHABLE`. Messages và custom-message list thay
   speech director/window của đúng slot; bubble đang hiện được đóng để catalog mới có hiệu
   lực ở lần TALK kế tiếp. Reset revision đưa instance về default position ngay.
-- Pack key hoặc active pet count thay đổi làm service preload visual rồi rebuild controller
+- Mode, Swarm pack/count, Mixed pack key hoặc active slot count thay đổi làm service preload visual rồi rebuild controller
   ngay trong cùng foreground session. Character selection và Remove vì vậy không cần
   Stop/Start thủ công; character-only rebuild giữ normalized live positions của session.
 - Tap/drag/fling đều được chuyển thành `PetEvent`. Hệ tọa độ overlay chỉ fit status bar/display cutout một lần, không trừ navigation bar ở đáy; vì vậy đáy pet chạm đáy màn hình vật lý thay vì dừng phía trên thanh điều hướng.

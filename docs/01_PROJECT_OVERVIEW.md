@@ -10,7 +10,9 @@
 | UI | Jetpack Compose Material 3 |
 | Architecture | Single-Activity + MVVM + Hilt + Flow |
 
-Cute Pet có domain chính thức: một hoặc nhiều pet animation có thể hiển thị và tương tác trên các ứng dụng khác bằng Android overlay. Runtime hỗ trợ tối đa 3 pet theo performance budget của thiết bị và chỉ dùng asset do project/user sở hữu.
+Cute Pet có domain chính thức: một hoặc nhiều pet animation có thể hiển thị và tương tác
+trên các ứng dụng khác bằng Android overlay. Mixed hỗ trợ tối đa 3 pet khác nhau; Swarm
+hỗ trợ tối đa 12 bản sao cùng pet (6 trên low-RAM) theo performance budget.
 
 ## Kiến trúc kế thừa
 
@@ -25,7 +27,8 @@ Cute Pet có domain chính thức: một hoặc nhiều pet animation có thể 
 - Language onboarding + language settings.
 - Intro/onboarding pages.
 - Permission UX cho overlay special access và notification permission, có Skip.
-- Home điều khiển Start/Stop session 1–3 pet khác nhau và mở Catalog/Settings/Premium.
+- Home điều khiển hai mode loại trừ nhau: Mixed 1–3 pet với visibility riêng và Swarm
+  1–12 bản sao, cùng Start/Stop/Catalog/Settings/Premium.
 - Settings quản lý roster 1–3 pet; mỗi slot có màn Customize Pet riêng cho
   character/size/speed/position/interaction/speech. Language/share/rate/feedback/version
   nằm ở khu vực app-wide, không trộn với pet profile.

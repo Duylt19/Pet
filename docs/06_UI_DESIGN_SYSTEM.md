@@ -5,8 +5,8 @@ visual system Cute Pet; onboarding và Premium vẫn giữ UI hiện tại cho t
 
 ## Cute Pet product direction
 
-- Nền chính warm cream `#FFF9F4`, surface gần trắng và outline lavender nhạt.
-- Primary purple cho CTA, coral cho điểm nhấn, amber/mint/pink tint cho pet stage và status.
+- Home mode dùng nền xanh-trắng nhẹ, primary teal và segmented control rõ selection;
+  Catalog/Settings hiện vẫn dùng warm cream/purple của Cute Pet.
 - Pet thumbnail thật là visual chính; icon notification chỉ là fallback khi pack chưa có ảnh.
 - Corner radius lớn 16–24 sdp, card rõ hierarchy nhưng ít chrome và không dùng dark utility
   dashboard cho product screens.
@@ -24,6 +24,15 @@ Settings dùng cấu trúc pet-first:
   Interaction & speech, reset position và remove của đúng pet;
 - không hiển thị Sound khi pack schema v1 chưa có audio;
 - Add mở Catalog ở slot trống nhưng chỉ commit `petCount` sau Set/Import thành công.
+
+Home mode contract:
+
+- `Pet Swarm` và `Mixed Mode` là segmented control loại trừ nhau;
+- global switch điều khiển foreground overlay, không dùng để thay pet selection;
+- Mixed dùng icon mắt trực tiếp trên từng card để hiện/ẩn ngay khi overlay đang chạy;
+- không cho ẩn pet Mixed cuối cùng, vì global switch đã đảm nhiệm trường hợp không hiện pet;
+- Swarm locked hiển thị CTA Rewarded và Premium; Premium bypass Rewarded;
+- Swarm unlocked hiển thị một pack, stepper count và Change/Remove.
 
 Mỗi card phải cho user thấy nhanh character, size, speed và trạng thái tương tác; option
 pet không được lặp ở app-wide Settings hoặc ghi vào global state.

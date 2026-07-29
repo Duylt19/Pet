@@ -7,6 +7,7 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 data class PetCatalogUiState(
     val packs: List<PetPack> = emptyList(),
     val selectedKey: String = "",
+    val target: PetCatalogTarget = PetCatalogTarget.MIXED,
     val targetSlotIndex: Int = 0,
     val pets: List<OwnerPetCatalogEntry> = emptyList(),
     val visiblePets: List<OwnerPetCatalogEntry> = emptyList(),
@@ -20,6 +21,11 @@ data class PetCatalogUiState(
     val isInstalling: Boolean = false,
     val message: PetCatalogMessage? = null
 )
+
+enum class PetCatalogTarget {
+    MIXED,
+    SWARM
+}
 
 data class PetCatalogCategory(
     val name: String?,

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_PET_SLOTS
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogSnapshot
+import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
@@ -29,18 +30,17 @@ class PetCatalogViewModel @Inject constructor(
     private val ownerCatalogRepository: OwnerPetCatalogRepository,
     private val petSettingsRepository: PetSettingsRepository
 ) : ViewModel() {
+    private val target = savedStateHandle.get<String>("target")
+        ?.let { encoded -> PetCatalogTarget.entries.firstOrNull { it.name == encoded } }
+        ?: PetCatalogTarget.MIXED
     private val targetSlotIndex = (savedStateHandle.get<Int>("slotIndex") ?: 0)
         .coerceIn(0, MAX_PET_SLOTS - 1)
+    private val initialPreferences = petSettingsRepository.preferences.value
     private val _uiState = MutableStateFlow(
         PetCatalogUiState(
             packs = repository.packs.value,
-            selectedKey = if (
-                targetSlotIndex < petSettingsRepository.preferences.value.petCount
-            ) {
-                repository.selectedPackForSlot(targetSlotIndex).key
-            } else {
-                ""
-            },
+            selectedKey = selectedKey(initialPreferences, repository.selectedPacks.value),
+            target = target,
             targetSlotIndex = targetSlotIndex,
             localRootPath = ownerCatalogRepository.snapshot.value.localRootPath
         )
@@ -59,18 +59,16 @@ class PetCatalogViewModel @Inject constructor(
                     catalog = catalog,
                     packs = packs,
                     selected = selected,
-                    activePetCount = preferences.petCount
+                    preferences = preferences
                 )
             }.collect { sources ->
                 _uiState.update { current ->
                     current.copy(
                         packs = sources.packs,
-                        selectedKey = if (targetSlotIndex < sources.activePetCount) {
-                            sources.selected.getOrNull(targetSlotIndex)?.key
-                                ?: sources.selected.firstOrNull()?.key.orEmpty()
-                        } else {
-                            ""
-                        },
+                        selectedKey = selectedKey(
+                            sources.preferences,
+                            sources.selected
+                        ),
                         pets = sources.catalog.entries,
                         visiblePets = PetCatalogFilter.apply(
                             sources.catalog.entries,
@@ -93,11 +91,7 @@ class PetCatalogViewModel @Inject constructor(
             _uiState.update { it.copy(isInstalling = true, message = null) }
             when (val result = installer.install(uri)) {
                 is PetPackInstallResult.Installed -> {
-                    repository.refresh(
-                        preferredKey = result.pack.key,
-                        preferredSlotIndex = targetSlotIndex
-                    )
-                    activateTargetSlot()
+                    selectInstalledPack(result.pack.key)
                     _uiState.update {
                         it.copy(
                             isInstalling = false,
@@ -122,8 +116,15 @@ class PetCatalogViewModel @Inject constructor(
     }
 
     fun select(key: String): Boolean {
-        if (repository.select(key, targetSlotIndex)) {
-            activateTargetSlot()
+        val selected = when (target) {
+            PetCatalogTarget.MIXED -> repository.select(key, targetSlotIndex)
+            PetCatalogTarget.SWARM -> repository.find(key)?.let {
+                petSettingsRepository.updateSwarmPack(it.key)
+                true
+            } ?: false
+        }
+        if (selected) {
+            if (target == PetCatalogTarget.MIXED) activateTargetSlot()
             val name = repository.find(key)?.manifest?.name ?: return true
             _uiState.update { it.copy(message = PetCatalogMessage.Selected(name)) }
             return true
@@ -138,11 +139,7 @@ class PetCatalogViewModel @Inject constructor(
             _uiState.update { it.copy(preparingPetId = petId, message = null) }
             when (val result = ownerCatalogRepository.preparePack(petId)) {
                 is PetPackInstallResult.Installed -> {
-                    repository.refresh(
-                        preferredKey = result.pack.key,
-                        preferredSlotIndex = targetSlotIndex
-                    )
-                    activateTargetSlot()
+                    selectInstalledPack(result.pack.key)
                     _uiState.update {
                         it.copy(
                             preparingPetId = null,
@@ -204,16 +201,44 @@ class PetCatalogViewModel @Inject constructor(
     }
 
     private fun activateTargetSlot() {
+        if (target != PetCatalogTarget.MIXED) return
         val currentCount = petSettingsRepository.preferences.value.petCount
         if (targetSlotIndex == currentCount) {
             petSettingsRepository.updatePetCount(targetSlotIndex + 1)
         }
     }
 
+    private fun selectInstalledPack(key: String) {
+        when (target) {
+            PetCatalogTarget.MIXED -> repository.refresh(
+                preferredKey = key,
+                preferredSlotIndex = targetSlotIndex
+            )
+            PetCatalogTarget.SWARM -> {
+                repository.refresh()
+                petSettingsRepository.updateSwarmPack(key)
+            }
+        }
+        activateTargetSlot()
+    }
+
+    private fun selectedKey(
+        preferences: PetPreferences,
+        selected: List<PetPack>
+    ): String = when (target) {
+        PetCatalogTarget.MIXED -> if (targetSlotIndex < preferences.petCount) {
+            selected.getOrNull(targetSlotIndex)?.key
+                ?: selected.firstOrNull()?.key.orEmpty()
+        } else {
+            ""
+        }
+        PetCatalogTarget.SWARM -> preferences.swarm.packKey
+    }
+
     private data class CatalogSources(
         val catalog: OwnerPetCatalogSnapshot,
         val packs: List<PetPack>,
         val selected: List<PetPack>,
-        val activePetCount: Int
+        val preferences: PetPreferences
     )
 }
