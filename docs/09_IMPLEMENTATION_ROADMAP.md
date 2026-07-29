@@ -93,6 +93,9 @@ không reset action, combo, vị trí hoặc animation cursor.
 - [Done] Add a Swarm-only runtime profile: block TALK/TALK_WALK at engine level, remove
   social/crowd coordination entirely and favor short-delay wall, ceiling and aerial
   stunt stories with safe pack-aware degradation.
+- [Done] Reconcile live Swarm count changes incrementally: append/remove only the changed
+  overlay instances, preserve every surviving engine/window state and recalculate the
+  shared FPS budget without rebuilding the foreground session.
 
 Before release hardening, complete the clean-room parity items confirmed by the local competitor audit:
 

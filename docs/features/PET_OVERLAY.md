@@ -51,6 +51,11 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   deterministic tối đa ±2 step nên không đổi ngẫu nhiên sau mỗi rebuild. Optional movement
   area inset 0–30% theo từng cạnh được áp dụng vào `PetBounds`; khi bật, pet không dùng
   screen-edge overflow ngoài vùng đã chọn.
+- Thay đổi riêng Swarm count được reconcile incremental trong controller: tăng count chỉ
+  tạo engine/view cho các index mới, giảm count chỉ remove các index cuối. Pet đang tồn
+  tại giữ nguyên `PetState`, action, animation cursor, vị trí và window; visual đã preload
+  được dùng lại. Controller chỉ tính lại shared FPS budget, không stop/start service hay
+  reset cả đàn. Đổi mode, character hoặc runtime profile vẫn rebuild an toàn.
 - Mọi instance dùng chung đúng một `Choreographer.FrameCallback` trên main thread.
 - Frame loop chỉ reduce engine + invalidate/update layout; không decode bitmap, parse file hoặc tạo thread.
 - Mỗi slot resolve pack/visual/engine config riêng, gồm size, speed, touch flag và speech

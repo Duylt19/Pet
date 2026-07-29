@@ -23,7 +23,6 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.model.PetDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
-import com.asianmobile.emojibattery.shimeji.data.model.PetSwarmPreferences
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetBitmapCache
@@ -55,7 +54,7 @@ class PetOverlayService : Service() {
     private var liveSettingsJob: Job? = null
     private var overlayController: PetOverlayController? = null
     private var sessionPositionResetRevisions: List<Int>? = null
-    private var activeSessionSignature: PetSessionSignature? = null
+    private var activeSessionSignature: PetOverlaySessionSignature? = null
     private var activeSessionMode: PetDisplayMode? = null
     private var isScreenReceiverRegistered = false
     private val screenStateReceiver = object : BroadcastReceiver() {
@@ -116,7 +115,7 @@ class PetOverlayService : Service() {
                     controller.pauseRendering()
                 }
             }
-            activeSessionSignature = preferences.sessionSignature()
+            activeSessionSignature = preferences.overlaySessionSignature()
             activeSessionMode = preferences.displayMode
             observeLiveSettings()
             PetOverlayRuntime.updateRunning(true, preferences.runtimePetCount)
@@ -135,9 +134,34 @@ class PetOverlayService : Service() {
         liveSettingsJob = serviceScope.launch {
             petSettingsRepository.preferences
                 .collect { preferences ->
-                    if (activeSessionSignature != preferences.sessionSignature()) {
-                        restartOverlay(preferences)
-                        return@collect
+                    when (
+                        PetOverlaySessionPolicy.resolveUpdate(
+                            active = activeSessionSignature,
+                            preferences = preferences
+                        )
+                    ) {
+                        PetOverlaySessionUpdate.REBUILD -> {
+                            restartOverlay(preferences)
+                            return@collect
+                        }
+
+                        PetOverlaySessionUpdate.SWARM_COUNT -> {
+                            val controller = overlayController ?: return@collect
+                            try {
+                                controller.updateSwarmCount(preferences.swarm.count)
+                                activeSessionSignature = preferences.overlaySessionSignature()
+                                PetOverlayRuntime.updateRunning(
+                                    true,
+                                    preferences.runtimePetCount
+                                )
+                            } catch (error: RuntimeException) {
+                                Log.e(TAG, "Unable to resize running pet swarm", error)
+                                restartOverlay(preferences)
+                            }
+                            return@collect
+                        }
+
+                        PetOverlaySessionUpdate.NONE -> Unit
                     }
 
                     val controller = overlayController ?: return@collect
@@ -173,7 +197,7 @@ class PetOverlayService : Service() {
             val replacementPreferences = if (
                 activeSessionMode == PetDisplayMode.MIXED &&
                 preferences.displayMode == PetDisplayMode.MIXED &&
-                activeSessionSignature?.petCount == preferences.petCount
+                activeSessionSignature?.mixedPetCount == preferences.petCount
             ) {
                 preferences.copy(
                     lastPositions = overlayController?.currentPositions()
@@ -194,7 +218,7 @@ class PetOverlayService : Service() {
                 }
             }
             sessionPositionResetRevisions = preferences.positionResetRevisions
-            activeSessionSignature = preferences.sessionSignature()
+            activeSessionSignature = preferences.overlaySessionSignature()
             activeSessionMode = preferences.displayMode
             PetOverlayRuntime.updateRunning(true, preferences.runtimePetCount)
         } catch (error: RuntimeException) {
@@ -269,24 +293,6 @@ class PetOverlayService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
-
-    private data class PetSessionSignature(
-        val mode: PetDisplayMode,
-        val petCount: Int,
-        val packKeys: List<String>,
-        val swarm: PetSwarmPreferences?
-    )
-
-    private fun PetPreferences.sessionSignature(): PetSessionSignature =
-        PetSessionSignature(
-            mode = displayMode,
-            petCount = petCount,
-            packKeys = when (displayMode) {
-                PetDisplayMode.MIXED -> selectedPackKeys.take(petCount)
-                PetDisplayMode.SWARM -> listOf(swarm.packKey)
-            },
-            swarm = swarm.takeIf { displayMode == PetDisplayMode.SWARM }
-        )
 
     private fun promoteToForeground() {
         val foregroundServiceType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
