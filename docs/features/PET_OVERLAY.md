@@ -53,14 +53,15 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   Sau tối đa một story không leo, pack có đủ action sẽ ưu tiên wall/ceiling/aerial story;
   pack ít frame vẫn fallback sang zoomies/patrol/dash/explorer mà không giả action.
 - Swarm size/speed lấy từ base profile; khi randomization bật, mỗi instance nhận variation
-  deterministic tối đa ±2 step nên không đổi ngẫu nhiên sau mỗi rebuild. Optional movement
-  area inset 0–30% theo từng cạnh được áp dụng vào `PetBounds`; khi bật, pet không dùng
-  screen-edge overflow ngoài vùng đã chọn.
+  deterministic tối đa ±2 step nên cùng index không đổi variation giữa các lần update.
+  Size thay đổi dispatch `SizeChanged` để giữ surface/tâm hiện tại; speed chỉ thay engine
+  timeline/config rồi tiếp tục cùng `PetState`, action, combo và animation cursor ở tick
+  kế tiếp. Optional movement area inset 0–30% cập nhật `PetBounds` tại chỗ.
 - Thay đổi riêng Swarm count được reconcile incremental trong controller: tăng count chỉ
   tạo engine/view cho các index mới, giảm count chỉ remove các index cuối. Pet đang tồn
   tại giữ nguyên `PetState`, action, animation cursor, vị trí và window; visual đã preload
   được dùng lại. Controller chỉ tính lại shared FPS budget, không stop/start service hay
-  reset cả đàn. Đổi mode, Swarm character hoặc runtime profile vẫn rebuild an toàn.
+  reset cả đàn. Chỉ đổi mode hoặc Swarm character mới rebuild để thay asset an toàn.
 - Mỗi instance được thêm live lấy 12 vị trí ngẫu nhiên trong vùng movement đang áp dụng
   và chọn ứng viên xa các pet hiện có nhất. Vùng spawn loại phần screen-edge overflow nên
   pet mới luôn xuất hiện đầy đủ trên màn hình; khi movement constraint bật, vị trí random
@@ -78,9 +79,9 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
 - Touch toggle đổi trực tiếp `FLAG_NOT_TOUCHABLE`. Messages và custom-message list thay
   speech director/window của đúng slot; bubble đang hiện được đóng để catalog mới có hiệu
   lực ở lần TALK kế tiếp. Reset revision đưa instance về default position ngay.
-- Đổi mode hoặc Swarm pack/runtime profile làm service preload visual rồi rebuild
-  controller an toàn trong cùng foreground session. Swarm count và Mixed roster dùng
-  đường incremental riêng nên không Stop/Start service hoặc reset các pet còn tồn tại.
+- Đổi mode hoặc Swarm pack làm service preload visual rồi rebuild controller an toàn
+  trong cùng foreground session. Swarm count/size/speed/randomization/movement bounds và
+  Mixed roster dùng đường incremental riêng nên không Stop/Start service hoặc reset pet.
 - Tap/drag/fling đều được chuyển thành `PetEvent`. Hệ tọa độ overlay chỉ fit status bar/display cutout một lần, không trừ navigation bar ở đáy; vì vậy đáy pet chạm đáy màn hình vật lý thay vì dừng phía trên thanh điều hướng.
 - Playground cho phép cửa sổ pet tràn `1/3` chiều rộng qua mép trái/phải và `1/3` chiều rộng qua mép trên, còn mép dưới không tràn. `FLAG_LAYOUT_NO_LIMITS` là bắt buộc để WindowManager không clamp lại cửa sổ nhỏ; hit target vẫn chỉ bằng đúng kích thước pet.
 - Sprite pack dùng quy ước frame gốc quay sang trái. Renderer mirror ngang khi engine đi

@@ -44,6 +44,7 @@
 | Incremental Swarm roster | Done | Count +/- chỉ add/remove instance chênh lệch, giữ state/window của pet cũ và tính lại shared FPS thay vì rebuild cả đàn |
 | Random live Swarm spawn | Done | Pet thêm mới chọn ngẫu nhiên 1/12 ứng viên an toàn xa đàn hiện có; initial Start và pet cũ giữ nguyên |
 | Incremental Mixed roster | Done | Add/Remove/change character reconcile theo pack identity; pet còn lại giữ view/engine/state dù slot bị dịch index |
+| Live Swarm size/speed | Done | Size, speed, randomization và movement bounds cập nhật tại chỗ; giữ PetState/action/combo/position thay vì rebuild |
 | Đổi namespace/application ID | Done | `com.asianmobile.emojibattery.shimeji` |
 
 ## Nguyên tắc cập nhật

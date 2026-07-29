@@ -101,6 +101,9 @@ không reset action, combo, vị trí hoặc animation cursor.
 - [Done] Reconcile Mixed Add/Remove/character changes by pack identity: retain and reindex
   surviving instances, replace only changed assets and handle duplicate packs stably
   without rebuilding the foreground session.
+- [Done] Make Swarm size, speed, deterministic variation and movement bounds update live:
+  resize/rebind timelines in place while preserving every instance state, action, combo,
+  animation cursor and position.
 
 Before release hardening, complete the clean-room parity items confirmed by the local competitor audit:
 

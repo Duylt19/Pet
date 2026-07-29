@@ -163,17 +163,17 @@ class PetOverlayService : Service() {
                             }
                         }
 
-                        PetOverlaySessionUpdate.SWARM_COUNT -> {
+                        PetOverlaySessionUpdate.SWARM_RUNTIME -> {
                             val controller = overlayController ?: return@collect
                             try {
-                                controller.updateSwarmCount(preferences.swarm.count)
+                                controller.updateSwarmPreferences(preferences)
                                 activeSessionSignature = preferences.overlaySessionSignature()
                                 PetOverlayRuntime.updateRunning(
                                     true,
                                     preferences.runtimePetCount
                                 )
                             } catch (error: RuntimeException) {
-                                Log.e(TAG, "Unable to resize running pet swarm", error)
+                                Log.e(TAG, "Unable to update running pet swarm", error)
                                 restartOverlay(preferences)
                             }
                             return@collect

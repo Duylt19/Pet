@@ -18,7 +18,7 @@ class PetOverlaySessionPolicyTest {
     )
 
     @Test
-    fun `swarm count change updates instances without rebuilding session`() {
+    fun `swarm count change updates runtime without rebuilding session`() {
         val update = PetOverlaySessionPolicy.resolveUpdate(
             active = activeSwarm.overlaySessionSignature(),
             preferences = activeSwarm.copy(
@@ -26,7 +26,7 @@ class PetOverlaySessionPolicyTest {
             )
         )
 
-        assertEquals(PetOverlaySessionUpdate.SWARM_COUNT, update)
+        assertEquals(PetOverlaySessionUpdate.SWARM_RUNTIME, update)
     }
 
     @Test
@@ -40,7 +40,7 @@ class PetOverlaySessionPolicyTest {
     }
 
     @Test
-    fun `swarm character or runtime profile change still rebuilds safely`() {
+    fun `swarm character rebuilds while size and speed update live`() {
         val characterUpdate = PetOverlaySessionPolicy.resolveUpdate(
             active = activeSwarm.overlaySessionSignature(),
             preferences = activeSwarm.copy(
@@ -53,9 +53,23 @@ class PetOverlaySessionPolicyTest {
                 swarm = activeSwarm.swarm.copy(sizePercent = 100)
             )
         )
+        val speedUpdate = PetOverlaySessionPolicy.resolveUpdate(
+            active = activeSwarm.overlaySessionSignature(),
+            preferences = activeSwarm.copy(
+                swarm = activeSwarm.swarm.copy(speedPercent = 150)
+            )
+        )
+        val randomizationUpdate = PetOverlaySessionPolicy.resolveUpdate(
+            active = activeSwarm.overlaySessionSignature(),
+            preferences = activeSwarm.copy(
+                swarm = activeSwarm.swarm.copy(randomizeSizeAndSpeed = true)
+            )
+        )
 
         assertEquals(PetOverlaySessionUpdate.REBUILD, characterUpdate)
-        assertEquals(PetOverlaySessionUpdate.REBUILD, sizeUpdate)
+        assertEquals(PetOverlaySessionUpdate.SWARM_RUNTIME, sizeUpdate)
+        assertEquals(PetOverlaySessionUpdate.SWARM_RUNTIME, speedUpdate)
+        assertEquals(PetOverlaySessionUpdate.SWARM_RUNTIME, randomizationUpdate)
     }
 
     @Test

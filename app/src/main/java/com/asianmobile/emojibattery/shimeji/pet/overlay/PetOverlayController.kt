@@ -165,7 +165,34 @@ internal class PetOverlayController(
         choreographer.postFrameCallback(frameCallback)
     }
 
-    fun updateSwarmCount(requestedCount: Int) {
+    fun updateSwarmPreferences(updatedPreferences: PetPreferences) {
+        if (!isSwarm) return
+        preferences = updatedPreferences
+        reconcileSwarmCount(updatedPreferences.swarm.count)
+        instances.forEach { instance ->
+            val slot = runtimeSlot(instance.id)
+            val pack = selectedAssets[instance.id].pack
+            val sizePixels = petSizePixels(pack, slot)
+            val size = PetSize(sizePixels.toFloat(), sizePixels.toFloat())
+            val bounds = currentPlaygroundBounds(size)
+            if (instance.state.size != size) {
+                dispatch(instance, PetEvent.SizeChanged(size = size, bounds = bounds))
+            } else if (instance.state.bounds != bounds) {
+                dispatch(instance, PetEvent.BoundsChanged(bounds))
+            }
+            if (instance.speedPercent != slot.speedPercent) {
+                instance.engine = createEngine(
+                    pack = pack,
+                    index = instance.id,
+                    speedPercent = slot.speedPercent
+                )
+                instance.speedPercent = slot.speedPercent
+            }
+        }
+        targetFrameNanos = targetFrameNanos(instances.size)
+    }
+
+    private fun reconcileSwarmCount(requestedCount: Int) {
         if (!isSwarm) return
         val targetCount = settingsPolicy.sanitizeSwarmCount(
             requestedCount,
@@ -196,7 +223,6 @@ internal class PetOverlayController(
                 }
             }
         }
-        targetFrameNanos = targetFrameNanos(instances.size)
     }
 
     fun updateMixedRoster(

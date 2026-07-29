@@ -7,7 +7,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.PetSwarmPreferences
 internal enum class PetOverlaySessionUpdate {
     NONE,
     MIXED_ROSTER,
-    SWARM_COUNT,
+    SWARM_RUNTIME,
     REBUILD
 }
 
@@ -32,12 +32,8 @@ internal object PetOverlaySessionPolicy {
             return PetOverlaySessionUpdate.MIXED_ROSTER
         }
 
-        val activeSwarm = active.swarm ?: return PetOverlaySessionUpdate.REBUILD
-        val requestedSwarm = requested.swarm ?: return PetOverlaySessionUpdate.REBUILD
-        val differsOnlyByCount =
-            active.copy(swarm = activeSwarm.copy(count = requestedSwarm.count)) == requested
-        return if (differsOnlyByCount) {
-            PetOverlaySessionUpdate.SWARM_COUNT
+        return if (active.packKeys == requested.packKeys) {
+            PetOverlaySessionUpdate.SWARM_RUNTIME
         } else {
             PetOverlaySessionUpdate.REBUILD
         }
