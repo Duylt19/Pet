@@ -56,6 +56,10 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   tại giữ nguyên `PetState`, action, animation cursor, vị trí và window; visual đã preload
   được dùng lại. Controller chỉ tính lại shared FPS budget, không stop/start service hay
   reset cả đàn. Đổi mode, character hoặc runtime profile vẫn rebuild an toàn.
+- Mỗi instance được thêm live lấy 12 vị trí ngẫu nhiên trong vùng movement đang áp dụng
+  và chọn ứng viên xa các pet hiện có nhất. Vùng spawn loại phần screen-edge overflow nên
+  pet mới luôn xuất hiện đầy đủ trên màn hình; khi movement constraint bật, vị trí random
+  tuân thủ trực tiếp bốn inset. Initial Start vẫn dùng layout ổn định hiện tại.
 - Mọi instance dùng chung đúng một `Choreographer.FrameCallback` trên main thread.
 - Frame loop chỉ reduce engine + invalidate/update layout; không decode bitmap, parse file hoặc tạo thread.
 - Mỗi slot resolve pack/visual/engine config riêng, gồm size, speed, touch flag và speech

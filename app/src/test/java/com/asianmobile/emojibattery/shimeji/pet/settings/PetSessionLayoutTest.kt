@@ -5,6 +5,7 @@ import com.asianmobile.emojibattery.shimeji.pet.engine.PetBounds
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetSize
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetVector
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -63,5 +64,43 @@ class PetSessionLayoutTest {
 
         assertEquals(original.x, restored.x, 0.001f)
         assertEquals(original.y, restored.y, 0.001f)
+    }
+
+    @Test
+    fun `live pet spawn is random deterministic and inside safe bounds`() {
+        val first = layout.randomPosition(
+            bounds = bounds,
+            size = size,
+            seed = 42L,
+            occupiedPositions = emptyList()
+        )
+        val repeated = layout.randomPosition(
+            bounds = bounds,
+            size = size,
+            seed = 42L,
+            occupiedPositions = emptyList()
+        )
+
+        assertEquals(first, repeated)
+        assertEquals(first, bounds.clampTopLeft(first, size))
+    }
+
+    @Test
+    fun `live pet spawn favors a candidate away from occupied positions`() {
+        val first = layout.randomPosition(
+            bounds = bounds,
+            size = size,
+            seed = 84L,
+            occupiedPositions = emptyList()
+        )
+        val spread = layout.randomPosition(
+            bounds = bounds,
+            size = size,
+            seed = 84L,
+            occupiedPositions = listOf(first)
+        )
+
+        assertNotEquals(first, spread)
+        assertEquals(spread, bounds.clampTopLeft(spread, size))
     }
 }

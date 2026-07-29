@@ -96,6 +96,8 @@ không reset action, combo, vị trí hoặc animation cursor.
 - [Done] Reconcile live Swarm count changes incrementally: append/remove only the changed
   overlay instances, preserve every surviving engine/window state and recalculate the
   shared FPS budget without rebuilding the foreground session.
+- [Done] Randomize each live-added Swarm pet inside the safe movement area and choose the
+  best-spaced candidate, while leaving initial session layout and surviving pets untouched.
 
 Before release hardening, complete the clean-room parity items confirmed by the local competitor audit:
 

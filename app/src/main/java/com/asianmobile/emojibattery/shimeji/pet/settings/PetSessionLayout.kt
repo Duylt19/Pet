@@ -4,6 +4,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.PetPositionFraction
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetBounds
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetSize
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetVector
+import kotlin.random.Random
 
 class PetSessionLayout {
     fun resolvePositions(
@@ -25,6 +26,28 @@ class PetSessionLayout {
     ): PetVector =
         saved.getOrNull(index)?.let { restore(it, bounds, size) }
             ?: defaultPosition(index, bounds, size, marginPixels)
+
+    fun randomPosition(
+        bounds: PetBounds,
+        size: PetSize,
+        seed: Long,
+        occupiedPositions: List<PetVector>
+    ): PetVector {
+        val maximumX = (bounds.right - size.width).coerceAtLeast(bounds.left)
+        val maximumY = (bounds.bottom - size.height).coerceAtLeast(bounds.top)
+        val random = Random(seed)
+        val candidates = List(RANDOM_SPAWN_CANDIDATES) {
+            PetVector(
+                x = random.nextCoordinate(bounds.left, maximumX),
+                y = random.nextCoordinate(bounds.top, maximumY)
+            )
+        }
+        return candidates.maxBy { candidate ->
+            occupiedPositions.minOfOrNull { occupied ->
+                candidate.distanceSquaredTo(occupied)
+            } ?: Float.MAX_VALUE
+        }
+    }
 
     fun normalize(position: PetVector, bounds: PetBounds, size: PetSize): PetPositionFraction {
         val availableWidth = (bounds.right - bounds.left - size.width).coerceAtLeast(1f)
@@ -69,5 +92,15 @@ class PetSessionLayout {
     private companion object {
         const val HORIZONTAL_SPACING_FACTOR = 1.05f
         const val VERTICAL_SPACING_FACTOR = 0.45f
+        const val RANDOM_SPAWN_CANDIDATES = 12
     }
+}
+
+private fun Random.nextCoordinate(minimum: Float, maximum: Float): Float =
+    if (maximum <= minimum) minimum else minimum + nextFloat() * (maximum - minimum)
+
+private fun PetVector.distanceSquaredTo(other: PetVector): Float {
+    val deltaX = x - other.x
+    val deltaY = y - other.y
+    return deltaX * deltaX + deltaY * deltaY
 }

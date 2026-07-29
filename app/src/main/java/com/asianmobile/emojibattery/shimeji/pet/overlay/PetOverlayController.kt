@@ -179,7 +179,11 @@ internal class PetOverlayController(
             val sharedAsset = selectedAssets.first()
             while (instances.size < targetCount) {
                 val index = instances.size
-                val instance = createInstance(index, sharedAsset)
+                val instance = createInstance(
+                    index = index,
+                    asset = sharedAsset,
+                    randomSpawn = true
+                )
                 try {
                     windowManager.addView(instance.view, instance.params)
                     selectedAssets += sharedAsset
@@ -611,20 +615,30 @@ internal class PetOverlayController(
 
     private fun createInstance(
         index: Int,
-        asset: PetOverlayAsset
+        asset: PetOverlayAsset,
+        randomSpawn: Boolean = false
     ): PetInstance {
         val pack = asset.pack
         val slotPreferences = runtimeSlot(index)
         val petSizePixels = petSizePixels(pack, slotPreferences)
         val size = PetSize(petSizePixels.toFloat(), petSizePixels.toFloat())
         val bounds = currentPlaygroundBounds(size)
-        val position = sessionLayout.resolvePosition(
-            index = index,
-            bounds = bounds,
-            size = size,
-            saved = preferences.lastPositions,
-            marginPixels = appContext.dpToPixels(START_MARGIN_DP).toFloat()
-        )
+        val position = if (randomSpawn) {
+            sessionLayout.randomPosition(
+                bounds = currentSpawnBounds(size, bounds),
+                size = size,
+                seed = nextSpawnSeed(index, pack),
+                occupiedPositions = instances.map { instance -> instance.state.position }
+            )
+        } else {
+            sessionLayout.resolvePosition(
+                index = index,
+                bounds = bounds,
+                size = size,
+                saved = preferences.lastPositions,
+                marginPixels = appContext.dpToPixels(START_MARGIN_DP).toFloat()
+            )
+        }
         val engine = createEngine(
             pack = pack,
             index = index,
@@ -717,6 +731,25 @@ internal class PetOverlayController(
             baseBounds.expandedForScreenEdges(size)
         }
     }
+
+    private fun currentSpawnBounds(
+        size: PetSize,
+        movementBounds: PetBounds
+    ): PetBounds {
+        if (isSwarm && preferences.swarm.constrainMovementArea) return movementBounds
+        val overflow = size.width / SCREEN_EDGE_OVERFLOW_DIVISOR
+        return PetBounds(
+            left = movementBounds.left + overflow,
+            top = movementBounds.top + overflow,
+            right = movementBounds.right - overflow,
+            bottom = movementBounds.bottom
+        )
+    }
+
+    private fun nextSpawnSeed(index: Int, pack: PetPack): Long =
+        System.nanoTime() xor
+            pack.manifest.id.hashCode().toLong() xor
+            ((index + 1L) * PET_BEHAVIOR_SEED_STEP)
 
     private fun Context.dpToPixels(dp: Int): Int =
         (dp * resources.displayMetrics.density).roundToInt()
