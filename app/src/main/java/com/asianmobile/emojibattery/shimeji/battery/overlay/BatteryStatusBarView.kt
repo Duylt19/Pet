@@ -80,8 +80,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
         }
         percentageText = if (this.powerState.present) {
             context.getString(
-                if (this.powerState.isCharging) R.string.battery_overlay_charging_percentage
-                else R.string.battery_overlay_percentage,
+                R.string.battery_overlay_percentage,
                 this.powerState.level
             )
         } else {

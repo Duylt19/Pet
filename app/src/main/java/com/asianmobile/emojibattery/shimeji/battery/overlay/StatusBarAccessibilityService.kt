@@ -380,7 +380,9 @@ class StatusBarAccessibilityService : AccessibilityService() {
             airplaneMode = true,
             cellular = BatteryConnectivityState.DISABLED
         )
-        BatteryStatusComponent.RINGER -> deviceState.copy(ringer = BatteryRingerState.SILENT)
+        BatteryStatusComponent.RINGER -> deviceState.copy(
+            ringer = BatterySystemStatusPolicy.ringerForPreview(deviceState.ringer)
+        )
         BatteryStatusComponent.HOTSPOT -> deviceState.copy(
             hotspot = BatteryHotspotState.ENABLED
         )

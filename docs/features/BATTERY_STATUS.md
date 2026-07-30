@@ -191,11 +191,11 @@ Renderer chỉ animate asset đã chọn; một window duy nhất được add/u
 
 | Component | State được phân biệt | Cách hiển thị |
 |---|---|---|
-| Pin | unavailable, unknown, discharging, plugged-not-charging, charging, full | Phần trăm luôn lấy từ sticky `ACTION_BATTERY_CHANGED`; charge asset chỉ hiện khi charging/full |
+| Pin | unavailable, unknown, discharging, plugged-not-charging, charging, full | Phần trăm luôn lấy từ sticky `ACTION_BATTERY_CHANGED`; trạng thái sạc chỉ dùng charge asset, không chèn thêm `⚡` vào phần trăm |
 | Nguồn sạc | none, AC, USB, wireless, dock, unknown | Lưu trong `BatteryPowerState` để description và behavior không suy diễn từ một boolean |
 | Wi‑Fi | disabled, disconnected, limited/captive, validated | Icon off, warning hoặc connected riêng |
 | Cellular | disabled, disconnected, limited, validated | Chỉ render khi limited/validated; airplane luôn khóa cellular |
-| Chuông | normal, vibrate, silent | Normal không chiếm chỗ; vibrate và silent có icon riêng |
+| Chuông | normal, vibrate, silent | Normal không chiếm chỗ; vibrate và silent có icon riêng. Preview giữ mode đang hoạt động, chỉ dùng silent mẫu khi mode thực là normal |
 | Hotspot | unknown, disabled, disabling, enabling, enabled, failed | Ẩn khi unknown/disabled; pending, enabled và error có icon riêng |
 | Máy bay | on/off | Đọc `Settings.Global.AIRPLANE_MODE_ON`, icon chỉ hiện khi on |
 

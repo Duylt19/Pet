@@ -63,6 +63,22 @@ class BatterySystemStatusPolicyTest {
     }
 
     @Test
+    fun ringerPreview_preservesActiveMode_andOnlySamplesSilentForNormalMode() {
+        assertEquals(
+            BatteryRingerState.SILENT,
+            BatterySystemStatusPolicy.ringerForPreview(BatteryRingerState.NORMAL)
+        )
+        assertEquals(
+            BatteryRingerState.VIBRATE,
+            BatterySystemStatusPolicy.ringerForPreview(BatteryRingerState.VIBRATE)
+        )
+        assertEquals(
+            BatteryRingerState.SILENT,
+            BatterySystemStatusPolicy.ringerForPreview(BatteryRingerState.SILENT)
+        )
+    }
+
+    @Test
     fun hotspot_maps_all_broadcast_states() {
         assertEquals(BatteryHotspotState.DISABLING, BatterySystemStatusPolicy.hotspot(10))
         assertEquals(BatteryHotspotState.DISABLED, BatterySystemStatusPolicy.hotspot(11))

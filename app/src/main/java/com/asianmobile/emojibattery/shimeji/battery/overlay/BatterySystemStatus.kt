@@ -87,6 +87,12 @@ internal object BatterySystemStatusPolicy {
         else -> BatteryRingerState.NORMAL
     }
 
+    fun ringerForPreview(state: BatteryRingerState): BatteryRingerState = when (state) {
+        BatteryRingerState.NORMAL -> BatteryRingerState.SILENT
+        BatteryRingerState.VIBRATE,
+        BatteryRingerState.SILENT -> state
+    }
+
     fun hotspot(state: Int): BatteryHotspotState = when (state) {
         WIFI_AP_STATE_DISABLED -> BatteryHotspotState.DISABLED
         WIFI_AP_STATE_DISABLING -> BatteryHotspotState.DISABLING

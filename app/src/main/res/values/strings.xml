@@ -948,7 +948,6 @@
     <string name="battery_accessibility_service_description">Displays the battery capsule selected in Cute Pet. It does not read screen content or control other apps.</string>
     <string name="battery_overlay_description">Battery status, %1$d percent</string>
     <string name="battery_overlay_percentage">%1$d%%</string>
-    <string name="battery_overlay_charging_percentage">%1$d%% ⚡</string>
     <string name="battery_overlay_unavailable_short">--</string>
     <string name="battery_overlay_unavailable">Battery information unavailable</string>
     <string name="battery_overlay_detailed_description">Battery %1$d percent, %2$s</string>

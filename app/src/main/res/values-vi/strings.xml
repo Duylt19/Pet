@@ -773,7 +773,6 @@
     <string name="battery_accessibility_service_description">Hiển thị thanh pin đã chọn trong Cute Pet. Dịch vụ không đọc nội dung màn hình hoặc điều khiển ứng dụng khác.</string>
     <string name="battery_overlay_description">Trạng thái pin, %1$d phần trăm</string>
     <string name="battery_overlay_percentage">%1$d%%</string>
-    <string name="battery_overlay_charging_percentage">%1$d%% ⚡</string>
     <string name="battery_overlay_unavailable_short">--</string>
     <string name="battery_overlay_unavailable">Không có thông tin pin</string>
     <string name="battery_overlay_detailed_description">Pin %1$d phần trăm, %2$s</string>
