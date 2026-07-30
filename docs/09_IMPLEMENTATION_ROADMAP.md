@@ -202,3 +202,15 @@ without mutating the pinned source snapshot.
 The local catalog vertical slice was verified with all 1.026 records on Pixel 3 XL / API 31.
 Production now uses `RemoteOwnerPetCatalogRepository`; the same boundary preserves
 category/search filtering, on-demand Set, DataStore selection and sprite overlay behavior.
+
+## Planned follow-up — Battery Status Capsule — Not started
+
+Owner đã cung cấp 14 screenshot reference để research một thanh trạng thái pin trang trí.
+Kế hoạch hiện nằm tại
+[`plans/battery-status-capsule/README.md`](plans/battery-status-capsule/README.md).
+
+Feature được định nghĩa là một `TYPE_APPLICATION_OVERLAY` non-touchable nằm ngay dưới
+status bar hệ thống, không thay thế SystemUI và không dùng Accessibility/API ẩn. Plan chia
+thành domain/data, editor preview, shared overlay host, device-status components, secure
+asset catalog, monetization và release hardening. Không mục nào được xem là Done cho tới
+khi source/test/device verification của phase tương ứng hoàn tất.
