@@ -754,12 +754,12 @@
     <string name="battery_data_type">Loại dữ liệu</string>
     <string name="battery_charge_hint">Preview mô phỏng trạng thái đang sạc để bạn chọn biểu tượng. Overlay chỉ hiện biểu tượng này khi thiết bị thật sự đang sạc.</string>
     <string name="battery_charge_style">Kiểu sạc</string>
-    <string name="battery_date_hint">Điều chỉnh hiển thị ngày, định dạng, font, kích thước và màu sắc.</string>
+    <string name="battery_date_hint">Điều chỉnh hiển thị và định dạng ngày. Font, kích thước và màu áp dụng cho cả giờ lẫn ngày.</string>
     <string name="battery_date_show">Hiển thị ngày</string>
-    <string name="battery_date_size">Kích thước ngày</string>
-    <string name="battery_date_color">Màu ngày</string>
+    <string name="battery_date_size">Kích thước giờ và ngày</string>
+    <string name="battery_date_color">Màu giờ và ngày</string>
     <string name="battery_date_format">Định dạng ngày</string>
-    <string name="battery_date_font">Kiểu chữ ngày</string>
+    <string name="battery_date_font">Kiểu chữ giờ và ngày</string>
     <string name="battery_emotion_style">Kiểu cảm xúc</string>
     <string name="battery_slider_value">%1$s · %2$d dp</string>
     <string name="battery_apply">Áp dụng</string>

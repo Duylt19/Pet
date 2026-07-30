@@ -37,6 +37,12 @@ class BatteryPreviewLayoutTest {
                 "$focusedComponent should remain visible while it is edited",
                 layout.shows(focusedComponent)
             )
+            if (focusedComponent == BatteryStatusComponent.DATE) {
+                assertTrue(
+                    "Time should remain visible while date and time are edited",
+                    layout.shows(BatteryStatusComponent.TIME)
+                )
+            }
         }
     }
 

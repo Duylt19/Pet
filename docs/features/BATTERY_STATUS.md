@@ -189,6 +189,8 @@ Renderer chỉ animate asset đã chọn; một window duy nhất được add/u
 Trong editor, `focusedComponent` được truyền tới renderer thật. Component đang chỉnh sửa
 được đánh dấu required trong width policy để không bị ẩn do thiếu chỗ; Date vẫn tôn trọng
 `showDateTime`, nhưng khi đã bật thì thay đổi size, color, format và font cập nhật live.
+Các trường `dateTimeSizeDp`, `dateTimeColorArgb` và `dateTimeFont` là style dùng chung cho
+cả giờ và ngày; `showTime` điều khiển giờ, còn `showDateTime` chỉ điều khiển phần ngày.
 
 ### Ma trận trạng thái hệ thống
 

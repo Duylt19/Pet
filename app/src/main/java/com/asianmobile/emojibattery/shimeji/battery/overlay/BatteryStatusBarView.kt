@@ -19,7 +19,6 @@ import com.airbnb.lottie.LottieComposition
 import com.airbnb.lottie.LottieDrawable
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
-import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_TIME_SIZE_DP
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -169,9 +168,9 @@ class BatteryStatusBarView(context: Context) : View(context) {
                 timeText,
                 cursor,
                 centerY,
-                DEFAULT_BATTERY_TIME_SIZE_DP,
-                config.foregroundColorArgb,
-                Typeface.DEFAULT_BOLD,
+                config.dateTimeSizeDp,
+                config.dateTimeColorArgb,
+                dateTypeface(),
                 fromLeft
             ).afterGap(gap, fromLeft)
         }
@@ -320,11 +319,12 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         BatteryStatusComponent.TIME,
                         measuredTextWidth(
                             timeText,
-                            DEFAULT_BATTERY_TIME_SIZE_DP,
-                            Typeface.DEFAULT_BOLD
+                            config.dateTimeSizeDp,
+                            dateTypeface()
                         ),
                         gap,
-                        priority = 100
+                        priority = 100,
+                        required = focusedComponent == BatteryStatusComponent.DATE
                     )
                 )
             }

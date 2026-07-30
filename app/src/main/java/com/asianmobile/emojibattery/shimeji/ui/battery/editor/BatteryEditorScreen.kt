@@ -1716,8 +1716,10 @@ private fun BatteryPreview(
             if (layout.shows(BatteryStatusComponent.TIME)) {
                 Text(
                     text = stringResource(R.string.battery_preview_time),
-                    color = Color(config.foregroundColorArgb),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold))
+                    color = Color(config.dateTimeColorArgb),
+                    fontFamily = previewDateFont,
+                    fontSize = config.dateTimeSizeDp.sp,
+                    maxLines = 1
                 )
             }
             if (layout.shows(BatteryStatusComponent.DATE)) {
@@ -1853,8 +1855,9 @@ internal fun batteryPreviewLayout(
             add(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.TIME,
-                    width = config.barHeightDp * 1.25f + gap,
-                    priority = 100
+                    width = config.dateTimeSizeDp * 3.2f + gap,
+                    priority = 100,
+                    required = focusedComponent == BatteryStatusComponent.DATE
                 )
             )
         }
