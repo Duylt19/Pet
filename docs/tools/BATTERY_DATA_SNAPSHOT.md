@@ -14,9 +14,10 @@ Các tool này audit snapshot local `battery-apk-1.0.2`, tạo schema runtime de
 | Category active | 34 |
 | Free / Premium | 234 / 664 |
 | Thumbnail / battery / emoji runtime | 898 / 898 / 898 |
-| Runtime asset count | 2.734 |
-| Runtime bytes | 100.768.466 |
+| Runtime asset count | 2.760 |
 | Background / emotion | 20 / 20 |
+| Animation GIF / Lottie | 21 / 5 |
+| Charge vector / status vector / font | 12 / 12 / 6 |
 | Photo composite bị loại | 898, khoảng 60 MiB |
 | ID | Unique, 1–920 có gap hợp lệ |
 | Category reference | 100% hợp lệ |
@@ -55,7 +56,7 @@ filesystem path; chỉ có path runtime tương đối, byte size, SHA-256 và d
 python3 -m unittest tools.tests.test_battery_data_snapshot
 ```
 
-Test cover happy path, missing asset, duplicate theme ID và 20 background/20 emotion.
+Test cover happy path, missing asset, duplicate theme ID, background/emotion và animation.
 
 ## Đưa data vào debug app
 
@@ -63,8 +64,9 @@ Test cover happy path, missing asset, duplicate theme ID và 20 background/20 em
 
 `mergeDebugAssets`, `installDebug` và `assembleDebug` phụ thuộc
 `auditDebugBatterySnapshot` → `prepareDebugBatteryAssets`. Khi snapshot private tồn tại,
-Gradle tự generate catalog và đưa 898 thumbnail/battery/emoji cùng 20 background và 20
-emotion vào `build/generated/batteryCatalogAssets/debug`.
+Gradle tự generate catalog và đưa 898 thumbnail/battery/emoji, 20 background, 20 emotion
+và 26 animation vào `build/generated/batteryCatalogAssets/debug`. Status/charge vector và
+font được đưa vào `build/generated/batteryResources/debug`.
 
 Repository ưu tiên catalog app-specific external nếu có; nếu không, debug đọc trực tiếp
 `file:///android_asset/battery_catalog/...`. Vì vậy bản debug không còn cần ADB sync để
@@ -91,7 +93,8 @@ python3 tools/sync_battery_catalog_to_device.py --serial DEVICE_SERIAL
 /sdcard/Android/data/com.asianmobile.emojibattery.shimeji/files/battery_catalog
 ```
 
-Script sync `catalog.json`, `thumb`, `battery`, `emoji`, `background` và `emotion`. Sau
+Script sync `catalog.json`, `thumb`, `battery`, `emoji`, `background`, `emotion` và
+`animation`. Sau
 khi sync, force-stop/mở lại app hoặc bấm refresh catalog. App kiểm tra canonical
 containment, size và SHA-256 trước khi đánh dấu asset sẵn sàng.
 

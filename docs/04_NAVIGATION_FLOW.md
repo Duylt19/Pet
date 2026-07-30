@@ -16,7 +16,7 @@
 | `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
 | `swarm_customization` | Edit Pet Swarm | Character, count, base size/speed, random variation và vùng di chuyển |
 | `battery_catalog` | Battery Styles | Catalog local + category/favorite/Premium gate |
-| `battery_editor/{themeId}` | Customize Status Bar | Overview → Size/Appearance/Emoji/Battery editor nội bộ, Apply và Accessibility disclosure |
+| `battery_editor/{themeId}` | Customize Status Bar | Overview → Size/Appearance/Emoji/Battery hoặc Animation/Wi‑Fi/Data/Signal/Airplane/Hotspot/Ringer/Charge/Date editor nội bộ; Apply và Accessibility disclosure |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
 ## Flow

@@ -2,6 +2,7 @@ package com.asianmobile.emojibattery.shimeji.ui.battery.editor
 
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 
@@ -10,5 +11,6 @@ data class BatteryEditorUiState(
     val config: BatteryStatusConfig = BatteryStatusConfig(),
     val backgrounds: List<BatteryDecorationEntry> = emptyList(),
     val emotions: List<BatteryDecorationEntry> = emptyList(),
+    val animations: List<BatteryAnimationEntry> = emptyList(),
     val isThemeAvailable: Boolean = true
 )

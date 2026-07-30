@@ -38,9 +38,13 @@
 | `battery_status_enabled` | Boolean | User đã Apply battery overlay |
 | `battery_status_selected_theme_id` | Int | Theme ID; `0` là built-in |
 | `battery_status_display_mode` | String enum | Cover hoặc below-system-bar |
-| `battery_status_show_time`, `battery_status_show_percentage` | Boolean | Component visibility |
+| `battery_status_show_time`, `battery_status_show_percentage`, `battery_status_show_animation`, `battery_status_show_date_time` | Boolean | Component visibility |
 | `battery_status_*_dp` | Float | Bar/padding/emoji/icon/privacy-reserve geometry |
 | `battery_status_*_color` | Int ARGB | Renderer background/foreground |
+| `battery_status_animation_asset_name` | String | Một trong 21 GIF hoặc 5 Lottie đã audit |
+| `battery_status_data_type` | String enum | Nhãn 2G–9G do user chọn |
+| `battery_status_charge_icon_index` | Int | Charge vector 1–12 |
+| `battery_status_date_format`, `battery_status_date_time_font` | String enum | Định dạng và bundled font ngày |
 | `battery_status_background_decoration_id` | Int | Background asset ID; `0` dùng màu phẳng |
 | `battery_status_show_emotion` | Boolean | Hiện emotion trang trí |
 | `battery_status_emotion_decoration_id` | Int | Emotion asset ID |
@@ -117,10 +121,11 @@ không được restore sau process death/reboot.
 
 ## Battery catalog và config
 
-- `BatteryCatalogSnapshot` gồm category/theme, 20 background, 20 emotion, entitlement,
+- `BatteryCatalogSnapshot` gồm category/theme, 20 background, 20 emotion, 26 animation, entitlement,
   local/packaged asset path, distribution status và typed error; built-in theme ID `0`
   luôn có.
-- Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và PNG dimension.
+- Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và dimension cho
+  PNG/GIF/Lottie.
   Repository chặn path escape, size/hash mismatch và release catalog chưa `APPROVED`.
 - `BatteryStatusConfig` là persistent source of truth. `BatterySettingsPolicy` clamp
   geometry/color/favorite trước khi ghi và sau khi decode DataStore.

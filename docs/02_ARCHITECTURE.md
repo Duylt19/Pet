@@ -118,8 +118,9 @@ ui/feature/
 
 - `StatusBarAccessibilityService` chỉ sở hữu một `TYPE_ACCESSIBILITY_OVERLAY` full-width,
   non-touchable; không dùng window-content, gesture hoặc global-action API.
-- Service combine repository Flow, decode/cache bitmap ngoài main thread và render pin/time
-  thật mà không chạy frame clock liên tục.
+- Service combine repository Flow, decode/cache bitmap/GIF/Lottie ngoài main thread và
+  render pin/time/date/network/airplane/ringer/hotspot. Network dùng callback, GIF/Lottie
+  mới chạy frame khi user bật animation.
 - Accessibility cover là opt-in sau disclosure. Service ẩn trên keyguard, screen-off và
   landscape; không có boot receiver.
 - `COVER_SYSTEM_BAR` là lớp phủ best-effort theo OEM, không sửa SystemUI. Release vẫn cần

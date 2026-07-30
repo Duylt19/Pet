@@ -18,8 +18,13 @@ class BatterySettingsPolicyTest {
                 emotionDecorationId = -4,
                 barHeightDp = 90f,
                 horizontalPaddingDp = -1f,
+                leftPaddingDp = 60f,
+                rightPaddingDp = -10f,
                 emojiSizeDp = Float.NaN,
                 batterySizeDp = 2f,
+                wifiSizeDp = 99f,
+                chargeIconIndex = 20,
+                animationAssetName = "../bad.json",
                 privacyReserveDp = 200f,
                 favoriteThemeIds = setOf(-1, 0, 7)
             )
@@ -30,8 +35,13 @@ class BatterySettingsPolicyTest {
         assertEquals(0, sanitized.emotionDecorationId)
         assertEquals(48f, sanitized.barHeightDp)
         assertEquals(0f, sanitized.horizontalPaddingDp)
+        assertEquals(32f, sanitized.leftPaddingDp)
+        assertEquals(0f, sanitized.rightPaddingDp)
         assertEquals(24f, sanitized.emojiSizeDp)
         assertEquals(16f, sanitized.batterySizeDp)
+        assertEquals(32f, sanitized.wifiSizeDp)
+        assertEquals(12, sanitized.chargeIconIndex)
+        assertEquals("cute_1.json", sanitized.animationAssetName)
         assertEquals(128f, sanitized.privacyReserveDp)
         assertEquals(setOf(0, 7), sanitized.favoriteThemeIds)
     }

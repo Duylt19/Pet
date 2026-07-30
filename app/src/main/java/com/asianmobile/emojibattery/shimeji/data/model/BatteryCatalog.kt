@@ -39,11 +39,24 @@ enum class BatteryDecorationType {
     EMOTION
 }
 
+data class BatteryAnimationEntry(
+    val id: Int,
+    val name: String,
+    val assetPath: String,
+    val type: BatteryAnimationType
+)
+
+enum class BatteryAnimationType {
+    GIF,
+    LOTTIE
+}
+
 data class BatteryCatalogSnapshot(
     val categories: List<BatteryCatalogCategory> = listOf(BUILT_IN_BATTERY_CATEGORY),
     val themes: List<BatteryThemeEntry> = listOf(BUILT_IN_BATTERY_THEME),
     val backgrounds: List<BatteryDecorationEntry> = emptyList(),
     val emotions: List<BatteryDecorationEntry> = emptyList(),
+    val animations: List<BatteryAnimationEntry> = emptyList(),
     val catalogVersion: String? = null,
     val capturedAt: String? = null,
     val distributionStatus: BatteryCatalogDistributionStatus =

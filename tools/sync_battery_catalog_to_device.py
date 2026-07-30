@@ -17,6 +17,7 @@ REMOTE_DIRECTORIES = {
     "remote/emojis": "emoji",
     "bundled/assets/background_template": "background",
     "bundled/assets/cute_emotion": "emotion",
+    "bundled/assets/cute_animation": "animation",
 }
 
 

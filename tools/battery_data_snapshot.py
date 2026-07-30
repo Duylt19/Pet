@@ -139,6 +139,61 @@ def _audit_bundled_group(
     return records
 
 
+def _audit_animations(source_root: Path) -> list[dict[str, Any]]:
+    directory = source_root / "bundled/assets/cute_animation"
+    if not directory.is_dir():
+        return []
+    gif_paths = sorted(
+        directory.glob("*.gif"),
+        key=lambda path: int(path.stem),
+    )
+    lottie_paths = sorted(directory.glob("cute_*.json"))
+    if len(gif_paths) != 21 or len(lottie_paths) != 5:
+        raise BatterySnapshotError(
+            f"{directory} must contain 21 GIF and 5 Lottie JSON files"
+        )
+    records: list[dict[str, Any]] = []
+    for index, path in enumerate(gif_paths + lottie_paths, start=1):
+        try:
+            content = path.read_bytes()
+        except OSError as error:
+            raise BatterySnapshotError(f"Unable to read animation: {path}") from error
+        if path.suffix == ".gif":
+            if len(content) < 10 or content[:6] not in (b"GIF87a", b"GIF89a"):
+                raise BatterySnapshotError(f"{path} is not a valid GIF")
+            width = int.from_bytes(content[6:8], "little")
+            height = int.from_bytes(content[8:10], "little")
+            animation_type = "GIF"
+        else:
+            document = _load_json(path)
+            try:
+                width = int(document["w"])
+                height = int(document["h"])
+            except (KeyError, TypeError, ValueError) as error:
+                raise BatterySnapshotError(
+                    f"{path} is not a valid Lottie document"
+                ) from error
+            animation_type = "LOTTIE"
+        if width <= 0 or height <= 0 or width > 4096 or height > 4096:
+            raise BatterySnapshotError(f"{path} has unsafe animation dimensions")
+        records.append(
+            {
+                "id": index,
+                "name": path.name,
+                "type": animation_type,
+                "asset": AuditedAsset(
+                    source_path=path,
+                    runtime_path=f"animation/{path.name}",
+                    size_bytes=len(content),
+                    sha256=hashlib.sha256(content).hexdigest(),
+                    width=width,
+                    height=height,
+                ).to_catalog_value(),
+            }
+        )
+    return records
+
+
 def _normalized_category(record: dict[str, Any]) -> dict[str, Any]:
     try:
         category_id = int(record["id"])
@@ -256,12 +311,15 @@ def audit_snapshot(source_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             expected_count,
         ) in BUNDLED_ASSET_GROUPS.items()
     }
-    bundled_asset_count = sum(len(records) for records in bundled_groups.values())
+    animations = _audit_animations(source_root)
+    bundled_asset_count = (
+        sum(len(records) for records in bundled_groups.values()) + len(animations)
+    )
     bundled_asset_bytes = sum(
         record["asset"]["sizeBytes"]
         for records in bundled_groups.values()
         for record in records
-    )
+    ) + sum(record["asset"]["sizeBytes"] for record in animations)
     catalog = {
         "schemaVersion": SCHEMA_VERSION,
         "catalogVersion": f"battery-apk-1.0.2@{captured_at}",
@@ -276,6 +334,7 @@ def audit_snapshot(source_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         "categories": ordered_categories,
         "themes": ordered_themes,
         **bundled_groups,
+        "animations": animations,
     }
     report = {
         "schemaVersion": SCHEMA_VERSION,

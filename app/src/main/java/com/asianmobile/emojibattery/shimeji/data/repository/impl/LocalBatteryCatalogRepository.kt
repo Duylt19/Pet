@@ -9,6 +9,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogDistributionStatus
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
@@ -150,10 +151,21 @@ class LocalBatteryCatalogRepository @Inject constructor(
                 )
             }
         }
+        val animations = document.animations.mapNotNull { record ->
+            resolve(record.asset)?.let { path ->
+                BatteryAnimationEntry(
+                    id = record.id,
+                    name = record.name,
+                    assetPath = path,
+                    type = record.type
+                )
+            }
+        }
         if (requireComplete &&
             (themes.any { !it.assetsReady } ||
                 backgrounds.size != document.backgrounds.size ||
-                emotions.size != document.emotions.size)
+                emotions.size != document.emotions.size ||
+                animations.size != document.animations.size)
         ) {
             return false
         }
@@ -162,6 +174,7 @@ class LocalBatteryCatalogRepository @Inject constructor(
             themes = listOf(BUILT_IN_BATTERY_THEME) + themes,
             backgrounds = backgrounds,
             emotions = emotions,
+            animations = animations,
             catalogVersion = document.catalogVersion,
             capturedAt = document.capturedAt,
             distributionStatus = document.distributionStatus,
@@ -177,7 +190,9 @@ class LocalBatteryCatalogRepository @Inject constructor(
 
     private fun isCurrentSchema(document: BatteryCatalogDocument): Boolean =
         !BuildConfig.DEBUG ||
-            (document.backgrounds.isNotEmpty() && document.emotions.isNotEmpty())
+            (document.backgrounds.isNotEmpty() &&
+                document.emotions.isNotEmpty() &&
+                document.animations.isNotEmpty())
 
     private fun resolveFileAsset(
         root: File,

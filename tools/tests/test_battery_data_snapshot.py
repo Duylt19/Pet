@@ -123,6 +123,29 @@ class BatteryDataSnapshotTest(unittest.TestCase):
         self.assertEqual("emotion/emotion_01.png", catalog["emotions"][0]["asset"]["path"])
         self.assertEqual(43, report["runtimeAssetCount"])
 
+    def test_audit_includes_all_bundled_animations(self):
+        target = self.root / "bundled" / "assets" / "cute_animation"
+        target.mkdir(parents=True)
+        for index in range(1, 22):
+            (target / f"{index}.gif").write_bytes(
+                b"GIF89a" + (1).to_bytes(2, "little") + (1).to_bytes(2, "little")
+            )
+        for index in range(1, 6):
+            (target / f"cute_{index}.json").write_text(
+                json.dumps({"w": 100, "h": 100}),
+                encoding="utf-8",
+            )
+
+        catalog, report = audit_snapshot(self.root)
+
+        self.assertEqual(26, len(catalog["animations"]))
+        self.assertEqual("animation/1.gif", catalog["animations"][0]["asset"]["path"])
+        self.assertEqual(
+            "animation/cute_5.json",
+            catalog["animations"][-1]["asset"]["path"],
+        )
+        self.assertEqual(29, report["runtimeAssetCount"])
+
 
 if __name__ == "__main__":
     unittest.main()

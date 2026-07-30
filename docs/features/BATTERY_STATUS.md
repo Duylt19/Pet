@@ -6,12 +6,13 @@ Vertical slice hiện đã có trong source:
 
 - Home bottom navigation mở `BatteryCatalogScreen`.
 - Catalog local chuẩn hóa, search, category, Free/Premium, favorite và built-in fallback.
-- Editor dùng flow overview → editor con Size/Appearance/Emoji/Battery, có preview xuyên
-  suốt, Apply cố định, 20 nền và 20 emotion đã audit từ snapshot.
+- Editor dùng overview → editor con Size/Appearance/Emoji/Battery và 9 status component,
+  có preview xuyên suốt, Apply cố định, 20 nền, 20 emotion và 26 animation đã audit.
 - Apply lưu DataStore; nếu chưa bật service, app luôn hiện disclosure trước khi mở
   Accessibility Settings.
 - `StatusBarAccessibilityService` vẽ một `TYPE_ACCESSIBILITY_OVERLAY` full-width,
-  non-touchable ở cạnh trên, cập nhật pin/charging/time và dùng theme/nền/emotion đã chọn.
+  non-touchable ở cạnh trên; cập nhật pin, charging, time/date, network, airplane, ringer,
+  hotspot và dùng theme/nền/emotion/animation đã chọn.
 - Service ẩn khi màn hình khóa, màn hình tắt hoặc portrait không còn hiệu lực; không
   auto-start sau boot.
 
@@ -46,13 +47,14 @@ externalFilesDir/battery_catalog/
 ├── battery/<id>.png
 ├── emoji/<id>.png
 ├── background/template_color_<id>.png
-└── emotion/cute_emotion_<id>.png
+├── emotion/cute_emotion_<id>.png
+└── animation/<name>.gif|json
 ```
 
-Debug build tự chạy audit snapshot riêng, tạo catalog và đóng gói 898 theme cùng 20 nền,
-20 emotion vào `assets/battery_catalog/`. Nếu external catalog không có hoặc thuộc schema
-cũ, repository dùng bản packaged này. Vì vậy cài debug APK không còn phụ thuộc bước ADB
-thủ công. Release không đóng gói snapshot `REVIEW_REQUIRED`.
+Debug build tự audit và đóng gói 898 theme, 20 nền, 20 emotion, 21 GIF, 5 Lottie vào
+`assets/battery_catalog/`; 12 vector charge, status vector và 6 font được generate vào
+debug resources. External catalog thiếu/sai thì repository dùng packaged catalog. Release
+không đóng gói snapshot `REVIEW_REQUIRED`.
 
 Mỗi asset phải:
 
@@ -65,8 +67,7 @@ Catalog `REVIEW_REQUIRED` chỉ được load khi `BuildConfig.DEBUG`; release c
 `APPROVED`. Nếu catalog thiếu/sai/chưa duyệt, repository trả built-in fallback cùng error
 typed, không làm crash UI hoặc overlay đang chạy.
 
-Ảnh `photo` tổng hợp từ snapshot không thuộc runtime contract. Runtime chỉ dùng thumbnail,
-battery, emoji, background và emotion.
+Ảnh `photo` tổng hợp từ snapshot không thuộc runtime contract.
 
 ## Persistence
 
@@ -78,11 +79,15 @@ battery, emoji, background và emotion.
 | `selectedThemeId` | ID theme; `0` là built-in |
 | `displayMode` | `COVER_SYSTEM_BAR` hoặc `BELOW_SYSTEM_BAR` |
 | `showTime`, `showPercentage` | Thành phần hiển thị |
-| `barHeightDp`, `horizontalPaddingDp` | Hình học capsule |
-| `emojiSizeDp`, `batterySizeDp` | Kích thước asset |
+| `showAnimation`, `animationAssetName`, `animationSizeDp` | Hoạt ảnh GIF/Lottie |
+| `barHeightDp`, `leftPaddingDp`, `rightPaddingDp` | Hình học capsule |
+| `emojiSizeDp`, `batterySizeDp`, `percentSizeDp` | Kích thước asset/pin |
 | `backgroundColorArgb`, `foregroundColorArgb` | Màu renderer |
 | `backgroundDecorationId` | Nền đóng gói đã chọn; `0` là nền màu phẳng |
 | `showEmotion`, `emotionDecorationId` | Hiện/ẩn và chọn emotion trang trí |
+| `wifi/data/signal/airplane/hotspot/ringer/charge *SizeDp/*ColorArgb` | Tùy chỉnh độc lập từng status component |
+| `dataType`, `chargeIconIndex` | Nhãn mạng 2G–9G và một trong 12 icon sạc |
+| `showDateTime`, `dateFormat`, `dateTimeFont`, `dateTimeSizeDp`, `dateTimeColorArgb` | Ngày/giờ và 6 font bundled |
 | `privacyReserveDp` | Khoảng trống bên phải cho privacy/system indicators |
 | `favoriteThemeIds` | Favorite local theo theme ID |
 
@@ -110,19 +115,21 @@ không ship cover mode.
 
 ## Runtime
 
-Service combine config + catalog bằng Flow. Asset được decode ngoài main thread và cache
-theo khóa theme/nền/emotion; battery/time receiver chỉ invalidate view. Renderer không tạo
-clock liên tục. Một window duy nhất được add/update/remove theo state.
+Service combine config + catalog bằng Flow. Bitmap/GIF/Lottie được decode ngoài main
+thread và cache theo khóa asset. Battery/time/system receiver và
+`ConnectivityManager.NetworkCallback` cập nhật một immutable `BatteryDeviceState`.
+Renderer chỉ animate asset đã chọn; một window duy nhất được add/update/remove theo state.
 
 Giới hạn hiện tại:
 
 - Portrait only.
 - Không render trên keyguard/screen-off.
 - Cover behavior và notification-shade layering khác nhau theo OEM.
-- Time và battery thật; theme emoji/nền/emotion là trang trí. Các component Wi‑Fi, signal,
-  hotspot, airplane, ringer, date và per-icon editor trong screenshot vẫn thuộc phase sau.
-- Overview hiển thị rõ các component phase sau ở trạng thái disabled; app không tạo control
-  giả khi chưa có nguồn trạng thái platform tương ứng.
+- Wi‑Fi/cellular lấy từ active network capability. Signal là trạng thái kết nối coarse,
+  không đọc cường độ radio vì app không xin phone/location permission.
+- Hotspot theo broadcast best-effort của OEM; Android không có API public ổn định để app
+  thường truy vấn tethering hiện tại.
+- Nhãn data 2G–9G là style do user chọn, không tự suy luận generation của nhà mạng.
 - Không có boot receiver và không tự hướng user quay lại Settings nếu họ disable service.
 
 ## Test gate

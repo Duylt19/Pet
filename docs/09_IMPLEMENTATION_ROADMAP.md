@@ -211,14 +211,15 @@ Kế hoạch hiện nằm tại
 
 Vertical slice debug đã có normalized 898-theme local catalog, size/SHA-256 verification,
 generated APK assets không phụ thuộc ADB, built-in fallback, DataStore config,
-Catalog/Editor cho theme/màu/kích thước/20 nền/20 emotion, Home Battery entry và
-`TYPE_ACCESSIBILITY_OVERLAY` renderer cho time/battery/charging/decorative assets. Service
+Catalog/Editor cho theme/màu/kích thước/20 nền/20 emotion/26 animation, Home Battery entry
+và `TYPE_ACCESSIBILITY_OVERLAY` renderer cho time/date, battery/charging, network,
+airplane/ringer/hotspot và decorative assets. Service
 không sửa SystemUI, không đọc screen/node content và chỉ mở system settings sau disclosure.
-Editor hiện theo flow overview → Size/Appearance/Emoji/Battery page nội bộ, giữ chung một
-draft và chỉ Apply một lần; component platform chưa triển khai được ghi rõ disabled.
+Editor giữ chung một draft, mở từng component thành page ngắn theo flow screenshot và chỉ
+Apply một lần.
 
 Release vẫn bị chặn bởi asset provenance (`REVIEW_REQUIRED` bị code từ chối ngoài debug),
-Figma/UX polish, OEM/API device matrix và Play Accessibility declaration. Standard
-`TYPE_APPLICATION_OVERLAY` below-bar backend, full device components và remote owner
-catalog vẫn là các phase sau. Current contract:
+Figma/UX polish, OEM/API device matrix và Play Accessibility declaration. Signal strength
+chính xác, hotspot cross-OEM, standard `TYPE_APPLICATION_OVERLAY` below-bar backend và
+remote owner catalog vẫn là các phase sau. Current contract:
 [`features/BATTERY_STATUS.md`](features/BATTERY_STATUS.md).

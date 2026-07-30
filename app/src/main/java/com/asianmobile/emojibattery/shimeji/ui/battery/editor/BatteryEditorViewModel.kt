@@ -40,6 +40,7 @@ class BatteryEditorViewModel @Inject constructor(
                     ),
                     backgrounds = catalog.backgrounds,
                     emotions = catalog.emotions,
+                    animations = catalog.animations,
                     isThemeAvailable = theme?.assetsReady == true || themeId == BUILT_IN_BATTERY_THEME_ID
                 )
             }.collect { state -> _uiState.value = state }
@@ -58,6 +59,7 @@ class BatteryEditorViewModel @Inject constructor(
     fun setShowEmotion(value: Boolean) = update { copy(showEmotion = value) }
     fun setEmotionDecoration(value: Int) =
         update { copy(emotionDecorationId = value) }
+    fun setConfig(value: BatteryStatusConfig) = update { value }
 
     fun apply() {
         val state = _uiState.value

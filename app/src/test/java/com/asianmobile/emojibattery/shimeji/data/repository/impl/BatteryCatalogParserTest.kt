@@ -21,6 +21,7 @@ class BatteryCatalogParserTest {
         assertEquals("battery/7.png", document.themes.single().battery.path)
         assertEquals("background/template_color_01.png", document.backgrounds.single().asset.path)
         assertEquals("emotion/emotion_01.png", document.emotions.single().asset.path)
+        assertEquals("animation/cute_1.json", document.animations.single().asset.path)
     }
 
     @Test
@@ -34,6 +35,18 @@ class BatteryCatalogParserTest {
     fun parse_rejects_unknown_category() {
         assertThrows(BatteryCatalogParseException::class.java) {
             parser.parse(validCatalog().replace("\"categoryId\": 3", "\"categoryId\": 4"))
+        }
+    }
+
+    @Test
+    fun parse_rejects_animation_path_escape() {
+        assertThrows(BatteryCatalogParseException::class.java) {
+            parser.parse(
+                validCatalog().replace(
+                    "animation/cute_1.json",
+                    "animation/../cute_1.json"
+                )
+            )
         }
     }
 
@@ -103,6 +116,20 @@ class BatteryCatalogParserTest {
                 "path": "emotion/emotion_01.png",
                 "sizeBytes": 14,
                 "sha256": "${"e".repeat(64)}",
+                "width": 200,
+                "height": 200
+              }
+            }
+          ],
+          "animations": [
+            {
+              "id": 1,
+              "name": "cute_1.json",
+              "type": "LOTTIE",
+              "asset": {
+                "path": "animation/cute_1.json",
+                "sizeBytes": 15,
+                "sha256": "${"f".repeat(64)}",
                 "width": 200,
                 "height": 200
               }

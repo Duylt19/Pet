@@ -867,7 +867,7 @@
     <string name="battery_editor_percentage_on">Percentage visible</string>
     <string name="battery_editor_percentage_off">Percentage hidden</string>
     <string name="battery_editor_more_components">More status components</string>
-    <string name="battery_editor_more_components_hint">These reference-screen components need real device-state handling and will be enabled in later phases.</string>
+    <string name="battery_editor_more_components_hint">Customize every status component. The overlay updates each icon from the current device state.</string>
     <string name="battery_component_wifi">Wi-Fi</string>
     <string name="battery_component_signal">Signal</string>
     <string name="battery_component_data">Mobile data</string>
@@ -876,23 +876,47 @@
     <string name="battery_component_airplane">Airplane</string>
     <string name="battery_component_hotspot">Hotspot</string>
     <string name="battery_component_animation">Animation</string>
-    <string name="battery_component_coming_soon">Coming soon</string>
+    <string name="battery_component_charge">Charging</string>
+    <string name="battery_component_customize">Customize</string>
     <string name="battery_show_time">Show time</string>
     <string name="battery_show_percentage">Show battery percentage</string>
     <string name="battery_bar_height">Bar height</string>
     <string name="battery_emoji_size">Emoji size</string>
+    <string name="battery_left_padding">Left padding</string>
+    <string name="battery_right_padding">Right padding</string>
     <string name="battery_icon_size">Battery icon size</string>
+    <string name="battery_percentage_size">Percentage size</string>
+    <string name="battery_percentage_color">Percentage color</string>
     <string name="battery_background_color">Bar color</string>
     <string name="battery_background_style">Background style</string>
     <string name="battery_background_solid">Solid</string>
     <string name="battery_foreground_color">Text and icon color</string>
     <string name="battery_show_emotion">Show decorative emotion</string>
+    <string name="battery_status_component_hint">Adjust this component independently. Its visibility follows the current device state.</string>
+    <string name="battery_status_icon_size">Icon size</string>
+    <string name="battery_status_icon_color">Icon color</string>
+    <string name="battery_status_uses_device_state">The applied overlay uses the actual device state; current bar height is %1$d dp.</string>
+    <string name="battery_animation_hint">Choose one of the bundled animations and adjust how it appears in the status capsule.</string>
+    <string name="battery_animation_show">Show animation</string>
+    <string name="battery_animation_size">Animation size</string>
+    <string name="battery_animation_style">Animation style</string>
+    <string name="battery_data_hint">Choose the mobile generation label and customize its size and color.</string>
+    <string name="battery_data_type">Mobile data label</string>
+    <string name="battery_charge_hint">Choose one of the bundled charging icons. It appears only while the device is charging.</string>
+    <string name="battery_charge_style">Charging icon</string>
+    <string name="battery_date_hint">Control date visibility, format, typeface, size and color.</string>
+    <string name="battery_date_show">Show date</string>
+    <string name="battery_date_format">Date format</string>
+    <string name="battery_date_font">Date font</string>
     <string name="battery_emotion_style">Emotion style</string>
     <string name="battery_slider_value">%1$s · %2$d dp</string>
     <string name="battery_apply">Apply</string>
     <string name="battery_disable">Turn off battery bar</string>
     <string name="battery_preview_time" translatable="false">09:41</string>
     <string name="battery_preview_percentage" translatable="false">82%</string>
+    <string name="battery_preview_date" translatable="false">Thu 30</string>
+    <string name="battery_preview_signal" translatable="false">▂▄▆</string>
+    <string name="battery_preview_wifi" translatable="false">⌁</string>
     <string name="battery_accessibility_title">Allow the battery status bar?</string>
     <string name="battery_accessibility_disclosure">Cute Pet uses an Accessibility service only to draw your chosen, non-interactive battery capsule above other apps. The service does not read screen text, tap controls, type, scroll, or perform actions for you. Android may still show a standard warning because Accessibility access is powerful. You can turn it off at any time in Accessibility settings.</string>
     <string name="battery_open_accessibility_settings">Open Accessibility settings</string>

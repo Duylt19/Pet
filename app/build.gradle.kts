@@ -77,6 +77,9 @@ android {
         getByName("debug").assets.srcDir(
             layout.buildDirectory.dir("generated/batteryCatalogAssets/debug")
         )
+        getByName("debug").res.srcDir(
+            layout.buildDirectory.dir("generated/batteryResources/debug")
+        )
     }
 }
 
@@ -90,6 +93,9 @@ val batteryCatalogFile = batteryRuntimeDirectory.file("catalog.json")
 val batteryAuditFile = batteryRuntimeDirectory.file("audit.json")
 val generatedBatteryAssets = layout.buildDirectory.dir(
     "generated/batteryCatalogAssets/debug"
+)
+val generatedBatteryResources = layout.buildDirectory.dir(
+    "generated/batteryResources/debug"
 )
 
 val auditDebugBatterySnapshot by tasks.registering(Exec::class) {
@@ -136,10 +142,37 @@ val prepareDebugBatteryAssets by tasks.registering(Sync::class) {
     from(batterySnapshotDirectory.dir("bundled/assets/cute_emotion")) {
         into("battery_catalog/emotion")
     }
+    from(batterySnapshotDirectory.dir("bundled/assets/cute_animation")) {
+        into("battery_catalog/animation")
+    }
 }
 
 tasks.matching { it.name == "mergeDebugAssets" }.configureEach {
     dependsOn(prepareDebugBatteryAssets)
+}
+
+val prepareDebugBatteryResources by tasks.registering(Sync::class) {
+    group = "battery data"
+    description = "Packages reviewed Battery status vectors and fonts into debug resources."
+    onlyIf { batterySnapshotDirectory.asFile.isDirectory }
+    into(generatedBatteryResources)
+    from(batterySnapshotDirectory.dir("bundled/drawable")) {
+        include("*.xml")
+        into("drawable")
+    }
+    from(batterySnapshotDirectory.dir("bundled/font")) {
+        include("*.ttf")
+        into("font")
+    }
+}
+
+tasks.configureEach {
+    if (name.contains("Debug") &&
+        name != prepareDebugBatteryResources.name &&
+        name != auditDebugBatterySnapshot.name
+    ) {
+        dependsOn(prepareDebugBatteryResources)
+    }
 }
 
 kotlin {

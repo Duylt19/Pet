@@ -2,6 +2,7 @@ package com.asianmobile.emojibattery.shimeji.data.repository.impl
 
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogDistributionStatus
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import org.json.JSONArray
 import org.json.JSONException
@@ -32,6 +33,13 @@ data class BatteryDecorationRecord(
     val asset: BatteryCatalogAssetRecord
 )
 
+data class BatteryAnimationRecord(
+    val id: Int,
+    val name: String,
+    val type: BatteryAnimationType,
+    val asset: BatteryCatalogAssetRecord
+)
+
 data class BatteryCatalogDocument(
     val catalogVersion: String,
     val capturedAt: String,
@@ -39,7 +47,8 @@ data class BatteryCatalogDocument(
     val categories: List<BatteryCatalogCategory>,
     val themes: List<BatteryThemeRecord>,
     val backgrounds: List<BatteryDecorationRecord>,
-    val emotions: List<BatteryDecorationRecord>
+    val emotions: List<BatteryDecorationRecord>,
+    val animations: List<BatteryAnimationRecord>
 )
 
 class BatteryCatalogParser {
@@ -107,6 +116,7 @@ class BatteryCatalogParser {
         }
         val backgrounds = parseDecorations(root, "backgrounds", "background")
         val emotions = parseDecorations(root, "emotions", "emotion")
+        val animations = parseAnimations(root)
         validate(root, categories, themes)
         BatteryCatalogDocument(
             catalogVersion = catalogVersion,
@@ -115,7 +125,8 @@ class BatteryCatalogParser {
             categories = categories.sortedWith(compareBy({ it.priority }, { it.id })),
             themes = themes.sortedBy(BatteryThemeRecord::id),
             backgrounds = backgrounds,
-            emotions = emotions
+            emotions = emotions,
+            animations = animations
         )
     } catch (error: BatteryCatalogParseException) {
         throw error
@@ -149,6 +160,42 @@ class BatteryCatalogParser {
             throw BatteryCatalogParseException("Duplicate Battery decoration IDs in $key")
         }
         return records.sortedBy(BatteryDecorationRecord::id)
+    }
+
+    private fun parseAnimations(root: JSONObject): List<BatteryAnimationRecord> {
+        val records = root.optJSONArray("animations")?.mapObjects { item, index ->
+            val id = item.getInt("id")
+            val name = item.getString("name").trim()
+            val type = item.getString("type").let { value ->
+                BatteryAnimationType.entries.firstOrNull { it.name == value }
+                    ?: throw BatteryCatalogParseException(
+                        "Invalid Battery animation type at index $index"
+                    )
+            }
+            BatteryAnimationRecord(
+                id = id,
+                name = name,
+                type = type,
+                asset = item.getJSONObject("asset")
+                    .toAsset("animation/$name", index)
+            ).also {
+                val extensionMatches = when (type) {
+                    BatteryAnimationType.GIF -> name.endsWith(".gif")
+                    BatteryAnimationType.LOTTIE -> name.endsWith(".json")
+                }
+                if (id <= 0 || !ANIMATION_NAME.matches(name) || !extensionMatches) {
+                    throw BatteryCatalogParseException(
+                        "Invalid Battery animation at index $index"
+                    )
+                }
+            }
+        }.orEmpty()
+        if (records.map(BatteryAnimationRecord::id).distinct().size != records.size ||
+            records.map(BatteryAnimationRecord::name).distinct().size != records.size
+        ) {
+            throw BatteryCatalogParseException("Duplicate Battery animations")
+        }
+        return records.sortedBy(BatteryAnimationRecord::id)
     }
 
     private fun validate(
@@ -222,6 +269,7 @@ class BatteryCatalogParser {
         const val MAX_IMAGE_DIMENSION = 4096
         val SHA_256 = Regex("[0-9a-f]{64}")
         val SLUG = Regex("[a-z0-9]+(?:-[a-z0-9]+)*")
+        val ANIMATION_NAME = Regex("(?:cute_[1-5]\\.json|(?:[1-9]|1[0-9]|2[01])\\.gif)")
     }
 }
 
