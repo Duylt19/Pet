@@ -6,8 +6,8 @@ Vertical slice hiện đã có trong source:
 
 - Home bottom navigation mở `BatteryCatalogScreen`.
 - Catalog local chuẩn hóa, search, category, Free/Premium, favorite và built-in fallback.
-- Editor preview cho time, phần trăm, màu, chiều cao, kích thước emoji/battery, 20 nền và
-  20 emotion đã audit từ snapshot.
+- Editor dùng flow overview → editor con Size/Appearance/Emoji/Battery, có preview xuyên
+  suốt, Apply cố định, 20 nền và 20 emotion đã audit từ snapshot.
 - Apply lưu DataStore; nếu chưa bật service, app luôn hiện disclosure trước khi mở
   Accessibility Settings.
 - `StatusBarAccessibilityService` vẽ một `TYPE_ACCESSIBILITY_OVERLAY` full-width,
@@ -21,8 +21,9 @@ Accessibility declaration và UX validation trước khi bật catalog ngoài de
 ## Luồng người dùng
 
 ```text
-Home → Battery styles → chọn theme → Customize battery bar
-                                      ├─ preview + controls
+Home → Battery styles → chọn theme → Customize status bar
+                                      ├─ overview + preview
+                                      ├─ editor con → Done → overview
                                       └─ Apply
                                           ├─ service đã bật → persist + render
                                           └─ chưa bật → disclosure
@@ -120,6 +121,8 @@ Giới hạn hiện tại:
 - Cover behavior và notification-shade layering khác nhau theo OEM.
 - Time và battery thật; theme emoji/nền/emotion là trang trí. Các component Wi‑Fi, signal,
   hotspot, airplane, ringer, date và per-icon editor trong screenshot vẫn thuộc phase sau.
+- Overview hiển thị rõ các component phase sau ở trạng thái disabled; app không tạo control
+  giả khi chưa có nguồn trạng thái platform tương ứng.
 - Không có boot receiver và không tự hướng user quay lại Settings nếu họ disable service.
 
 ## Test gate

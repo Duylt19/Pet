@@ -17,7 +17,7 @@
 | Customize Pet | `pet_customization` |
 | Edit Pet Swarm | `swarm_customization` |
 | Battery styles | `battery_catalog` |
-| Customize battery bar | `battery_editor` |
+| Customize status bar, gồm các editor con nội bộ | `battery_editor` |
 | Settings | `settings` |
 | Premium | `premium` |
 

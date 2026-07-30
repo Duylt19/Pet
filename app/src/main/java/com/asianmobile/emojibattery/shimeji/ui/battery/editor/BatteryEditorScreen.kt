@@ -1,8 +1,12 @@
 package com.asianmobile.emojibattery.shimeji.ui.battery.editor
 
 import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,15 +25,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
@@ -41,9 +46,11 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -51,13 +58,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -66,14 +77,22 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_BAR_HEIGHT_DP
 import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_BAR_HEIGHT_DP
-import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTopBar
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
+
+private enum class BatteryEditorPage {
+    OVERVIEW,
+    SIZE,
+    APPEARANCE,
+    EMOJI,
+    BATTERY
+}
 
 @Composable
 fun BatteryEditorScreen(
@@ -84,6 +103,13 @@ fun BatteryEditorScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDisclosure by remember { mutableStateOf(false) }
+    var pageName by rememberSaveable {
+        mutableStateOf(BatteryEditorPage.OVERVIEW.name)
+    }
+    val page = BatteryEditorPage.entries.firstOrNull { it.name == pageName }
+        ?: BatteryEditorPage.OVERVIEW
+    val openPage: (BatteryEditorPage) -> Unit = { pageName = it.name }
+    val closePage = { pageName = BatteryEditorPage.OVERVIEW.name }
     var accessibilityEnabled by remember {
         mutableStateOf(BatteryAccessibility.isEnabled(context))
     }
@@ -93,7 +119,9 @@ fun BatteryEditorScreen(
         accessibilityEnabled = BatteryAccessibility.isEnabled(context)
         if (accessibilityEnabled) viewModel.apply()
     }
+
     TrackScreenView(ScreenName.BATTERY_EDITOR)
+    BackHandler(enabled = page != BatteryEditorPage.OVERVIEW, onBack = closePage)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -103,10 +131,14 @@ fun BatteryEditorScreen(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
+
     BatteryEditorContent(
         state = state,
+        page = page,
         accessibilityEnabled = accessibilityEnabled,
-        onBack = onBack,
+        onBack = if (page == BatteryEditorPage.OVERVIEW) onBack else closePage,
+        onDone = closePage,
+        onOpenPage = openPage,
         onShowTime = viewModel::setShowTime,
         onShowPercentage = viewModel::setShowPercentage,
         onBarHeight = viewModel::setBarHeight,
@@ -122,6 +154,7 @@ fun BatteryEditorScreen(
         },
         onDisable = viewModel::disable
     )
+
     if (showDisclosure) {
         AlertDialog(
             onDismissRequest = { showDisclosure = false },
@@ -151,8 +184,11 @@ fun BatteryEditorScreen(
 @Composable
 private fun BatteryEditorContent(
     state: BatteryEditorUiState,
+    page: BatteryEditorPage,
     accessibilityEnabled: Boolean,
     onBack: () -> Unit,
+    onDone: () -> Unit,
+    onOpenPage: (BatteryEditorPage) -> Unit,
     onShowTime: (Boolean) -> Unit,
     onShowPercentage: (Boolean) -> Unit,
     onBarHeight: (Float) -> Unit,
@@ -166,125 +202,552 @@ private fun BatteryEditorContent(
     onApply: () -> Unit,
     onDisable: () -> Unit
 ) {
+    val scrollState = remember(page) { ScrollState(initial = 0) }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(R.color.colors_FFF9F4))
             .navigationBarsPadding()
     ) {
-        CutePetTopBar(title = stringResource(R.string.battery_editor_title), onBack = onBack)
+        CutePetTopBar(
+            title = editorPageTitle(page),
+            onBack = onBack,
+            trailing = {
+                if (page != BatteryEditorPage.OVERVIEW) {
+                    TextButton(onClick = onDone) {
+                        Text(
+                            text = stringResource(R.string.common_done),
+                            color = colorResource(R.color.colors_12B890),
+                            fontFamily = FontFamily(Font(R.font.inter_semibold))
+                        )
+                    }
+                }
+            }
+        )
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(horizontal = dimensionResource(SdpR.dimen._16sdp))
         ) {
-            Text(
-                text = if (state.theme.isBuiltIn) {
-                    stringResource(R.string.battery_builtin_theme)
-                } else {
-                    state.theme.name
-                },
-                color = colorResource(R.color.colors_2F2440),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                fontSize = dimensionResource(SspR.dimen._15ssp).value.sp
-            )
-            Spacer(Modifier.height(dimensionResource(SdpR.dimen._10sdp)))
+            ThemeName(state)
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
             BatteryPreview(state)
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = colorResource(R.color.colors_FFFFFF)
-                ),
-                shape = RoundedCornerShape(dimensionResource(SdpR.dimen._16sdp))
+            when (page) {
+                BatteryEditorPage.OVERVIEW -> OverviewEditor(
+                    state = state,
+                    onOpenPage = onOpenPage,
+                    onShowTime = onShowTime,
+                    onShowPercentage = onShowPercentage
+                )
+                BatteryEditorPage.SIZE -> SizeEditor(
+                    state = state,
+                    onBarHeight = onBarHeight,
+                    onEmojiSize = onEmojiSize,
+                    onBatterySize = onBatterySize
+                )
+                BatteryEditorPage.APPEARANCE -> AppearanceEditor(
+                    state = state,
+                    onBackgroundColor = onBackgroundColor,
+                    onForegroundColor = onForegroundColor,
+                    onBackgroundDecoration = onBackgroundDecoration
+                )
+                BatteryEditorPage.EMOJI -> EmojiEditor(
+                    state = state,
+                    onShowEmotion = onShowEmotion,
+                    onEmotionDecoration = onEmotionDecoration
+                )
+                BatteryEditorPage.BATTERY -> BatteryComponentEditor(
+                    state = state,
+                    onShowPercentage = onShowPercentage,
+                    onBatterySize = onBatterySize
+                )
+            }
+            if (page == BatteryEditorPage.OVERVIEW) {
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+                AccessibilityState(accessibilityEnabled)
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._14sdp)))
+            } else {
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._24sdp)))
+            }
+        }
+        if (page == BatteryEditorPage.OVERVIEW) {
+            ApplyFooter(
+                enabled = state.isThemeAvailable,
+                isApplied = state.config.enabled,
+                onApply = onApply,
+                onDisable = onDisable
+            )
+        }
+    }
+}
+
+@Composable
+private fun editorPageTitle(page: BatteryEditorPage): String = when (page) {
+    BatteryEditorPage.OVERVIEW -> stringResource(R.string.battery_editor_title)
+    BatteryEditorPage.SIZE -> stringResource(R.string.battery_editor_size_title)
+    BatteryEditorPage.APPEARANCE -> stringResource(R.string.battery_editor_appearance_title)
+    BatteryEditorPage.EMOJI -> stringResource(R.string.battery_editor_emoji_title)
+    BatteryEditorPage.BATTERY -> stringResource(R.string.battery_editor_battery_title)
+}
+
+@Composable
+private fun ThemeName(state: BatteryEditorUiState) {
+    Text(
+        text = if (state.theme.isBuiltIn) {
+            stringResource(R.string.battery_builtin_theme)
+        } else {
+            state.theme.name
+        },
+        color = colorResource(R.color.colors_2F2440),
+        fontFamily = FontFamily(Font(R.font.inter_semibold)),
+        fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+@Composable
+private fun OverviewEditor(
+    state: BatteryEditorUiState,
+    onOpenPage: (BatteryEditorPage) -> Unit,
+    onShowTime: (Boolean) -> Unit,
+    onShowPercentage: (Boolean) -> Unit
+) {
+    Text(
+        text = stringResource(R.string.battery_editor_overview_hint),
+        color = colorResource(R.color.colors_776D84),
+        fontFamily = FontFamily(Font(R.font.inter_regular)),
+        fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
+    )
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._14sdp)))
+    EditorSectionTitle(stringResource(R.string.battery_editor_quick_controls))
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
+    EditorCard {
+        ToggleRow(
+            label = stringResource(R.string.battery_show_time),
+            checked = state.config.showTime,
+            onChecked = onShowTime
+        )
+        HorizontalDivider(color = colorResource(R.color.colors_E9DFEF))
+        ToggleRow(
+            label = stringResource(R.string.battery_show_percentage),
+            checked = state.config.showPercentage,
+            onChecked = onShowPercentage
+        )
+    }
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._16sdp)))
+    EditorSectionTitle(stringResource(R.string.battery_editor_customize))
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
+    EditorCard {
+        EditorNavigationRow(
+            iconRes = R.drawable.ic_pet_size,
+            title = stringResource(R.string.battery_editor_size_title),
+            summary = stringResource(
+                R.string.battery_editor_size_summary,
+                state.config.barHeightDp.toInt(),
+                state.config.emojiSizeDp.toInt(),
+                state.config.batterySizeDp.toInt()
+            ),
+            onClick = { onOpenPage(BatteryEditorPage.SIZE) }
+        )
+        EditorDivider()
+        EditorNavigationRow(
+            iconRes = R.drawable.ic_menu_settings,
+            title = stringResource(R.string.battery_editor_appearance_title),
+            summary = selectedBackgroundName(state),
+            onClick = { onOpenPage(BatteryEditorPage.APPEARANCE) }
+        )
+        EditorDivider()
+        EditorNavigationRow(
+            iconRes = R.drawable.ic_notification_pet,
+            title = stringResource(R.string.battery_editor_emoji_title),
+            summary = if (state.config.showEmotion) {
+                stringResource(R.string.battery_editor_component_on)
+            } else {
+                stringResource(R.string.battery_editor_component_off)
+            },
+            onClick = { onOpenPage(BatteryEditorPage.EMOJI) }
+        )
+        EditorDivider()
+        EditorNavigationRow(
+            iconRes = R.drawable.ic_battery_status,
+            title = stringResource(R.string.battery_editor_battery_title),
+            summary = if (state.config.showPercentage) {
+                stringResource(R.string.battery_editor_percentage_on)
+            } else {
+                stringResource(R.string.battery_editor_percentage_off)
+            },
+            onClick = { onOpenPage(BatteryEditorPage.BATTERY) }
+        )
+    }
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._16sdp)))
+    EditorSectionTitle(stringResource(R.string.battery_editor_more_components))
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._4sdp)))
+    Text(
+        text = stringResource(R.string.battery_editor_more_components_hint),
+        color = colorResource(R.color.colors_776D84),
+        fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
+    )
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
+    FutureComponentsGrid()
+}
+
+@Composable
+private fun selectedBackgroundName(state: BatteryEditorUiState): String {
+    if (state.config.backgroundDecorationId == 0) {
+        return stringResource(R.string.battery_background_solid)
+    }
+    return state.backgrounds
+        .firstOrNull { it.id == state.config.backgroundDecorationId }
+        ?.name
+        ?: stringResource(R.string.battery_background_style)
+}
+
+@Composable
+private fun SizeEditor(
+    state: BatteryEditorUiState,
+    onBarHeight: (Float) -> Unit,
+    onEmojiSize: (Float) -> Unit,
+    onBatterySize: (Float) -> Unit
+) {
+    EditorPageHint(stringResource(R.string.battery_editor_size_hint))
+    EditorCard {
+        EditorSlider(
+            label = stringResource(R.string.battery_bar_height),
+            value = state.config.barHeightDp,
+            range = MIN_BATTERY_BAR_HEIGHT_DP..MAX_BATTERY_BAR_HEIGHT_DP,
+            onValue = onBarHeight
+        )
+        EditorSlider(
+            label = stringResource(R.string.battery_emoji_size),
+            value = state.config.emojiSizeDp,
+            range = 12f..36f,
+            onValue = onEmojiSize
+        )
+        EditorSlider(
+            label = stringResource(R.string.battery_icon_size),
+            value = state.config.batterySizeDp,
+            range = 20f..48f,
+            onValue = onBatterySize
+        )
+    }
+}
+
+@Composable
+private fun AppearanceEditor(
+    state: BatteryEditorUiState,
+    onBackgroundColor: (Int) -> Unit,
+    onForegroundColor: (Int) -> Unit,
+    onBackgroundDecoration: (Int) -> Unit
+) {
+    EditorPageHint(stringResource(R.string.battery_editor_appearance_hint))
+    EditorCard {
+        ColorPalette(
+            label = stringResource(R.string.battery_background_color),
+            selected = state.config.backgroundColorArgb,
+            onColor = onBackgroundColor
+        )
+        DecorationPicker(
+            label = stringResource(R.string.battery_background_style),
+            decorations = state.backgrounds,
+            selectedId = state.config.backgroundDecorationId,
+            includeNone = true,
+            onSelect = onBackgroundDecoration
+        )
+        ColorPalette(
+            label = stringResource(R.string.battery_foreground_color),
+            selected = state.config.foregroundColorArgb,
+            onColor = onForegroundColor
+        )
+    }
+}
+
+@Composable
+private fun EmojiEditor(
+    state: BatteryEditorUiState,
+    onShowEmotion: (Boolean) -> Unit,
+    onEmotionDecoration: (Int) -> Unit
+) {
+    EditorPageHint(stringResource(R.string.battery_editor_emoji_hint))
+    EditorCard {
+        ToggleRow(
+            label = stringResource(R.string.battery_show_emotion),
+            checked = state.config.showEmotion,
+            onChecked = onShowEmotion
+        )
+        if (state.config.showEmotion) {
+            DecorationPicker(
+                label = stringResource(R.string.battery_emotion_style),
+                decorations = state.emotions,
+                selectedId = state.config.emotionDecorationId,
+                includeNone = false,
+                onSelect = onEmotionDecoration
+            )
+        }
+    }
+}
+
+@Composable
+private fun BatteryComponentEditor(
+    state: BatteryEditorUiState,
+    onShowPercentage: (Boolean) -> Unit,
+    onBatterySize: (Float) -> Unit
+) {
+    EditorPageHint(stringResource(R.string.battery_editor_battery_hint))
+    EditorCard {
+        ToggleRow(
+            label = stringResource(R.string.battery_show_percentage),
+            checked = state.config.showPercentage,
+            onChecked = onShowPercentage
+        )
+        EditorSlider(
+            label = stringResource(R.string.battery_icon_size),
+            value = state.config.batterySizeDp,
+            range = 20f..48f,
+            onValue = onBatterySize
+        )
+    }
+}
+
+@Composable
+private fun EditorPageHint(text: String) {
+    Text(
+        text = text,
+        color = colorResource(R.color.colors_776D84),
+        fontFamily = FontFamily(Font(R.font.inter_regular)),
+        fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+        modifier = Modifier.padding(bottom = dimensionResource(SdpR.dimen._10sdp))
+    )
+}
+
+@Composable
+private fun EditorSectionTitle(title: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(
+                    width = dimensionResource(SdpR.dimen._4sdp),
+                    height = dimensionResource(SdpR.dimen._20sdp)
+                )
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._3sdp)))
+                .background(colorResource(R.color.colors_12B890))
+        )
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._8sdp)))
+        Text(
+            text = title,
+            color = colorResource(R.color.colors_2F2440),
+            fontFamily = FontFamily(Font(R.font.inter_bold)),
+            fontWeight = FontWeight.Bold,
+            fontSize = dimensionResource(SspR.dimen._13ssp).value.sp
+        )
+    }
+}
+
+@Composable
+private fun EditorCard(content: @Composable () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = colorResource(R.color.colors_FFFFFF)),
+        shape = RoundedCornerShape(dimensionResource(SdpR.dimen._16sdp)),
+        border = BorderStroke(
+            dimensionResource(SdpR.dimen._1sdp),
+            colorResource(R.color.colors_E9DFEF)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(
+                horizontal = dimensionResource(SdpR.dimen._14sdp),
+                vertical = dimensionResource(SdpR.dimen._8sdp)
+            ),
+            content = { content() }
+        )
+    }
+}
+
+@Composable
+private fun EditorNavigationRow(
+    @DrawableRes iconRes: Int,
+    title: String,
+    summary: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
+            .clickable(onClick = onClick)
+            .padding(vertical = dimensionResource(SdpR.dimen._10sdp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(dimensionResource(SdpR.dimen._38sdp))
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
+                .background(colorResource(R.color.colors_E0F7F1)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                tint = colorResource(R.color.colors_12B890),
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._22sdp))
+            )
+        }
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._10sdp)))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                color = colorResource(R.color.colors_2F2440),
+                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
+            )
+            Text(
+                text = summary,
+                color = colorResource(R.color.colors_776D84),
+                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Icon(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = title,
+            tint = colorResource(R.color.colors_12B890),
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
+        )
+    }
+}
+
+@Composable
+private fun EditorDivider() {
+    HorizontalDivider(
+        color = colorResource(R.color.colors_E9DFEF),
+        modifier = Modifier.padding(start = dimensionResource(SdpR.dimen._48sdp))
+    )
+}
+
+@Composable
+private fun FutureComponentsGrid() {
+    val labels = listOf(
+        R.string.battery_component_wifi,
+        R.string.battery_component_signal,
+        R.string.battery_component_data,
+        R.string.battery_component_date,
+        R.string.battery_component_ringer,
+        R.string.battery_component_airplane,
+        R.string.battery_component_hotspot,
+        R.string.battery_component_animation
+    )
+    Column(
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
+    ) {
+        labels.chunked(2).forEach { rowLabels ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(
+                    dimensionResource(SdpR.dimen._8sdp)
+                )
             ) {
-                Column(Modifier.padding(dimensionResource(SdpR.dimen._14sdp))) {
-                    ToggleRow(
-                        label = stringResource(R.string.battery_show_time),
-                        checked = state.config.showTime,
-                        onChecked = onShowTime
-                    )
-                    ToggleRow(
-                        label = stringResource(R.string.battery_show_percentage),
-                        checked = state.config.showPercentage,
-                        onChecked = onShowPercentage
-                    )
-                    ColorPalette(
-                        label = stringResource(R.string.battery_background_color),
-                        selected = state.config.backgroundColorArgb,
-                        onColor = onBackgroundColor
-                    )
-                    DecorationPicker(
-                        label = stringResource(R.string.battery_background_style),
-                        decorations = state.backgrounds,
-                        selectedId = state.config.backgroundDecorationId,
-                        includeNone = true,
-                        onSelect = onBackgroundDecoration
-                    )
-                    ColorPalette(
-                        label = stringResource(R.string.battery_foreground_color),
-                        selected = state.config.foregroundColorArgb,
-                        onColor = onForegroundColor
-                    )
-                    ToggleRow(
-                        label = stringResource(R.string.battery_show_emotion),
-                        checked = state.config.showEmotion,
-                        onChecked = onShowEmotion
-                    )
-                    if (state.config.showEmotion) {
-                        DecorationPicker(
-                            label = stringResource(R.string.battery_emotion_style),
-                            decorations = state.emotions,
-                            selectedId = state.config.emotionDecorationId,
-                            includeNone = false,
-                            onSelect = onEmotionDecoration
-                        )
-                    }
-                    EditorSlider(
-                        label = stringResource(R.string.battery_bar_height),
-                        value = state.config.barHeightDp,
-                        range = MIN_BATTERY_BAR_HEIGHT_DP..MAX_BATTERY_BAR_HEIGHT_DP,
-                        onValue = onBarHeight
-                    )
-                    EditorSlider(
-                        label = stringResource(R.string.battery_emoji_size),
-                        value = state.config.emojiSizeDp,
-                        range = 12f..36f,
-                        onValue = onEmojiSize
-                    )
-                    EditorSlider(
-                        label = stringResource(R.string.battery_icon_size),
-                        value = state.config.batterySizeDp,
-                        range = 20f..48f,
-                        onValue = onBatterySize
+                rowLabels.forEach { label ->
+                    FutureComponentTile(
+                        label = stringResource(label),
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
-            Spacer(Modifier.height(dimensionResource(SdpR.dimen._10sdp)))
-            Text(
-                text = if (accessibilityEnabled) {
-                    stringResource(R.string.battery_accessibility_ready)
-                } else {
-                    stringResource(R.string.battery_accessibility_required)
-                },
-                color = colorResource(
-                    if (accessibilityEnabled) R.color.colors_12B890 else R.color.colors_776D84
-                ),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
-                fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
-            )
-            Spacer(Modifier.height(dimensionResource(SdpR.dimen._14sdp)))
         }
+    }
+}
+
+@Composable
+private fun FutureComponentTile(label: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .alpha(0.72f)
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
+            .background(colorResource(R.color.colors_FFFFFF))
+            .border(
+                BorderStroke(
+                    dimensionResource(SdpR.dimen._1sdp),
+                    colorResource(R.color.colors_E9DFEF)
+                ),
+                RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp))
+            )
+            .padding(dimensionResource(SdpR.dimen._10sdp)),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(dimensionResource(SdpR.dimen._28sdp))
+                .clip(CircleShape)
+                .background(colorResource(R.color.colors_E0F7F1)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label.take(1),
+                color = colorResource(R.color.colors_12B890),
+                fontFamily = FontFamily(Font(R.font.inter_bold))
+            )
+        }
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._5sdp)))
+        Text(
+            text = label,
+            color = colorResource(R.color.colors_2F2440),
+            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
+        )
+        Text(
+            text = stringResource(R.string.battery_component_coming_soon),
+            color = colorResource(R.color.colors_9297A5),
+            fontSize = dimensionResource(SspR.dimen._7ssp).value.sp
+        )
+    }
+}
+
+@Composable
+private fun AccessibilityState(accessibilityEnabled: Boolean) {
+    Text(
+        text = if (accessibilityEnabled) {
+            stringResource(R.string.battery_accessibility_ready)
+        } else {
+            stringResource(R.string.battery_accessibility_required)
+        },
+        color = colorResource(
+            if (accessibilityEnabled) R.color.colors_12B890 else R.color.colors_776D84
+        ),
+        fontFamily = FontFamily(Font(R.font.inter_regular)),
+        fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
+    )
+}
+
+@Composable
+private fun ApplyFooter(
+    enabled: Boolean,
+    isApplied: Boolean,
+    onApply: () -> Unit,
+    onDisable: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colorResource(R.color.colors_FFFFFF))
+            .padding(
+                horizontal = dimensionResource(SdpR.dimen._16sdp),
+                vertical = dimensionResource(SdpR.dimen._10sdp)
+            )
+    ) {
         Button(
             onClick = onApply,
-            enabled = state.isThemeAvailable,
+            enabled = enabled,
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorResource(R.color.colors_12B890)
             ),
             shape = RoundedCornerShape(dimensionResource(SdpR.dimen._20sdp)),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(SdpR.dimen._16sdp))
                 .height(dimensionResource(SdpR.dimen._48sdp))
         ) {
             Text(
@@ -293,12 +756,10 @@ private fun BatteryEditorContent(
                 fontFamily = FontFamily(Font(R.font.inter_semibold))
             )
         }
-        if (state.config.enabled) {
+        if (isApplied) {
             TextButton(
                 onClick = onDisable,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = dimensionResource(SdpR.dimen._16sdp))
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = stringResource(R.string.battery_disable),
@@ -395,11 +856,18 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
 @Composable
 private fun ToggleRow(label: String, checked: Boolean, onChecked: (Boolean) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = dimensionResource(SdpR.dimen._4sdp)),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = label, color = colorResource(R.color.colors_2F2440))
+        Text(
+            text = label,
+            color = colorResource(R.color.colors_2F2440),
+            fontFamily = FontFamily(Font(R.font.inter_medium)),
+            fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
+        )
         Switch(
             checked = checked,
             onCheckedChange = onChecked,
@@ -424,7 +892,10 @@ private fun EditorSlider(
 ) {
     Text(
         text = stringResource(R.string.battery_slider_value, label, value.toInt()),
-        color = colorResource(R.color.colors_776D84)
+        color = colorResource(R.color.colors_776D84),
+        fontFamily = FontFamily(Font(R.font.inter_medium)),
+        fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+        modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._8sdp))
     )
     Slider(
         value = value,
@@ -452,11 +923,17 @@ private fun ColorPalette(label: String, selected: Int, onColor: (Int) -> Unit) {
         R.color.colors_1D86F6,
         R.color.colors_111827
     )
-    Text(text = label, color = colorResource(R.color.colors_776D84))
+    Text(
+        text = label,
+        color = colorResource(R.color.colors_776D84),
+        fontFamily = FontFamily(Font(R.font.inter_medium)),
+        fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+        modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._8sdp))
+    )
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = dimensionResource(SdpR.dimen._6sdp)),
+            .padding(vertical = dimensionResource(SdpR.dimen._7sdp)),
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
     ) {
         items(colors) { colorRes ->
@@ -464,7 +941,7 @@ private fun ColorPalette(label: String, selected: Int, onColor: (Int) -> Unit) {
             val isSelected = selected == color.toArgb()
             Box(
                 modifier = Modifier
-                    .size(dimensionResource(SdpR.dimen._28sdp))
+                    .size(dimensionResource(SdpR.dimen._30sdp))
                     .clip(CircleShape)
                     .background(color)
                     .border(
@@ -476,6 +953,9 @@ private fun ColorPalette(label: String, selected: Int, onColor: (Int) -> Unit) {
                         ),
                         shape = CircleShape
                     )
+                    .semantics {
+                        contentDescription = label
+                    }
                     .clickable { onColor(color.toArgb()) }
             )
         }
@@ -491,11 +971,17 @@ private fun DecorationPicker(
     onSelect: (Int) -> Unit
 ) {
     if (decorations.isEmpty()) return
-    Text(text = label, color = colorResource(R.color.colors_776D84))
+    Text(
+        text = label,
+        color = colorResource(R.color.colors_776D84),
+        fontFamily = FontFamily(Font(R.font.inter_medium)),
+        fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+        modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._8sdp))
+    )
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = dimensionResource(SdpR.dimen._6sdp)),
+            .padding(vertical = dimensionResource(SdpR.dimen._7sdp)),
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
     ) {
         if (includeNone) {
@@ -521,7 +1007,7 @@ private fun DecorationPicker(
             ) {
                 AsyncImage(
                     model = decoration.assetPath,
-                    contentDescription = decoration.name,
+                    contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
@@ -539,8 +1025,8 @@ private fun DecorationOption(
 ) {
     Box(
         modifier = Modifier
-            .width(dimensionResource(SdpR.dimen._72sdp))
-            .height(dimensionResource(SdpR.dimen._42sdp))
+            .width(dimensionResource(SdpR.dimen._76sdp))
+            .height(dimensionResource(SdpR.dimen._44sdp))
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
             .background(colorResource(R.color.colors_FFFFFF))
             .border(
@@ -556,5 +1042,30 @@ private fun DecorationOption(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
         content = content
+    )
+}
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun BatteryEditorOverviewPreview() {
+    BatteryEditorContent(
+        state = BatteryEditorUiState(),
+        page = BatteryEditorPage.OVERVIEW,
+        accessibilityEnabled = true,
+        onBack = {},
+        onDone = {},
+        onOpenPage = {},
+        onShowTime = {},
+        onShowPercentage = {},
+        onBarHeight = {},
+        onEmojiSize = {},
+        onBatterySize = {},
+        onBackgroundColor = {},
+        onForegroundColor = {},
+        onBackgroundDecoration = {},
+        onShowEmotion = {},
+        onEmotionDecoration = {},
+        onApply = {},
+        onDisable = {}
     )
 }

@@ -69,9 +69,10 @@ Config round-trip deterministic; no Android View/service required; JVM tests pas
 
 ## Phase 2 — Catalog and editor UI with deterministic preview
 
-**Status: Partial.** Catalog/category/favorite/Premium gate, editor cho theme/màu/kích
-thước/background/emotion, navigation, Home entry và analytics đã có. Generic per-component
-editor cho trạng thái hệ thống, dirty-draft confirmation, Compose/golden/RTL tests chưa có.
+**Status: Partial.** Catalog/category/favorite/Premium gate, overview + editor con cho
+theme/màu/kích thước/background/emotion/battery, navigation, Home entry và analytics đã có.
+Generic editor cho trạng thái hệ thống, dirty-draft confirmation, Compose/golden/RTL tests
+chưa có.
 
 ### Scope
 

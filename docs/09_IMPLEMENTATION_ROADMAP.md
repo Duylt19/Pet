@@ -214,6 +214,8 @@ generated APK assets không phụ thuộc ADB, built-in fallback, DataStore conf
 Catalog/Editor cho theme/màu/kích thước/20 nền/20 emotion, Home Battery entry và
 `TYPE_ACCESSIBILITY_OVERLAY` renderer cho time/battery/charging/decorative assets. Service
 không sửa SystemUI, không đọc screen/node content và chỉ mở system settings sau disclosure.
+Editor hiện theo flow overview → Size/Appearance/Emoji/Battery page nội bộ, giữ chung một
+draft và chỉ Apply một lần; component platform chưa triển khai được ghi rõ disabled.
 
 Release vẫn bị chặn bởi asset provenance (`REVIEW_REQUIRED` bị code từ chối ngoài debug),
 Figma/UX polish, OEM/API device matrix và Play Accessibility declaration. Standard
