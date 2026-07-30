@@ -278,18 +278,37 @@ class StatusBarAccessibilityService : AccessibilityService() {
         renderJob?.cancel()
         renderJob = scope.launch {
             val decoded = withContext(Dispatchers.IO) {
+                val emojiPath = catalogRepository.materializeAsset(currentEmojiTheme?.emojiPath)
+                val batteryPath = catalogRepository.materializeAsset(
+                    currentBatteryTheme?.batteryPath
+                )
+                val backgroundPath = catalogRepository.materializeAsset(currentBackgroundPath)
+                val emotionPath = if (currentConfig.showEmotion) {
+                    catalogRepository.materializeAsset(currentEmotionPath)
+                } else {
+                    null
+                }
+                val animationPath = if (currentConfig.showAnimation) {
+                    catalogRepository.materializeAsset(currentAnimationPath)
+                } else {
+                    null
+                }
                 DecodedBatteryAssets(
-                    emoji = decode(currentEmojiTheme?.emojiPath),
-                    battery = decode(currentBatteryTheme?.batteryPath),
-                    background = decode(currentBackgroundPath),
-                    emotion = if (currentConfig.showEmotion) {
-                        decode(currentEmotionPath)
-                    } else {
-                        null
-                    },
-                    animation = if (currentConfig.showAnimation) {
-                        decodeAnimation(currentAnimationPath)
-                    } else null
+                    emoji = decode(emojiPath),
+                    battery = decode(batteryPath),
+                    background = decode(backgroundPath),
+                    emotion = decode(emotionPath),
+                    animation = decodeAnimation(animationPath),
+                    complete =
+                        (currentEmojiTheme?.emojiPath == null || emojiPath != null) &&
+                            (currentBatteryTheme?.batteryPath == null || batteryPath != null) &&
+                            (currentBackgroundPath == null || backgroundPath != null) &&
+                            (!currentConfig.showEmotion ||
+                                currentEmotionPath == null ||
+                                emotionPath != null) &&
+                            (!currentConfig.showAnimation ||
+                                currentAnimationPath == null ||
+                                animationPath != null)
                 )
             }
             val latestAssetKey = listOf(
@@ -301,6 +320,12 @@ class StatusBarAccessibilityService : AccessibilityService() {
             ).joinToString("|")
             if (assetKey != latestAssetKey) {
                 decoded.recycle()
+                return@launch
+            }
+            if (!decoded.complete) {
+                decoded.recycle()
+                loadedAssetKey = null
+                view.postDelayed(::render, ASSET_RETRY_DELAY_MS)
                 return@launch
             }
             emojiBitmap?.recycle()
@@ -498,6 +523,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
         const val WIFI_STATE_EXTRA = "wifi_state"
         const val WIFI_AP_STATE_DISABLED = 11
         const val WIFI_AP_STATE_ENABLED = 13
+        const val ASSET_RETRY_DELAY_MS = 5_000L
     }
 }
 
@@ -524,7 +550,8 @@ private data class DecodedBatteryAssets(
     val battery: Bitmap?,
     val background: Bitmap?,
     val emotion: Bitmap?,
-    val animation: BatteryAnimatedAsset?
+    val animation: BatteryAnimatedAsset?,
+    val complete: Boolean
 ) {
     fun recycle() {
         emoji?.recycle()

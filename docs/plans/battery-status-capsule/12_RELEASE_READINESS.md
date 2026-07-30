@@ -21,7 +21,7 @@ compile thành công để thay thế device test, license approval hoặc Play 
 | JVM regression | Automated | `./gradlew testDebugUnitTest` |
 | Whitespace/patch integrity | Automated | `git diff --check` |
 | Snapshot schema/hash/size/dimension | Automated debug tooling | `./gradlew auditDebugBatterySnapshot` |
-| Release rejects `REVIEW_REQUIRED` catalog | Implemented fail-closed | `LocalBatteryCatalogRepository` parser/source policy |
+| Release rejects `REVIEW_REQUIRED` catalog | Implemented fail-closed | `HybridBatteryCatalogRepository` parser/source policy |
 | Unapproved release runtime | Hard-disabled | `BuildConfig.BATTERY_STATUS_ENABLED=false` hides entry and blocks service window |
 | Narrow-width overlap prevention | JVM covered | `BatteryStatusLayoutPolicyTest` |
 | RTL leading/trailing mirror | JVM policy + Canvas implementation | `BatteryStatusPhysicalSides` |
@@ -32,7 +32,7 @@ compile thành công để thay thế device test, license approval hoặc Play 
 
 | Gate | Owner/evidence cần có | Trạng thái 2026-07-30 |
 |---|---|---|
-| Asset ownership/license | Inventory, license link/file, approver, approval date | Blocked — snapshot là `REVIEW_REQUIRED` |
+| Asset ownership/license | Inventory, license link/file, approver, approval date | Runtime catalog được owner yêu cầu publish với trạng thái `APPROVED`; hồ sơ nguồn/license vẫn cần lưu ngoài source |
 | OEM/API matrix | API 24/28/31/33/35/36 + Pixel/Samsung/Xiaomi/Oppo class | Blocked — ADB không khả dụng trong môi trường verify |
 | Cutout/privacy indicator | Video/screenshot per supported device | Pending |
 | Notification shade/status swipe | Touch-through recording per device | Pending |
@@ -40,7 +40,7 @@ compile thành công để thay thế device test, license approval hoặc Play 
 | CPU/memory/FPS | Perfetto/Memory Profiler report theo budget doc 08 | Pending |
 | Play Accessibility declaration | Approved disclosure, justification, demo video | Pending |
 | Privacy Policy/Data Safety | Owner/legal review | Pending |
-| Remote production catalog | Owner endpoint, TLS/host policy, ETag/TTL, kill switch | Not configured |
+| Remote production catalog | Owner endpoint, TLS/host policy, ETag/TTL, kill switch | Implemented — private GitHub server, Remote Config token, ETag/TTL/backoff và verified lazy asset cache |
 | Rewarded unlock | Reuses approved Rewarded unit; earned/unavailable/dismissed contract documented in docs/07 | Implemented; device ad-SDK validation pending |
 | Native/banner placement | Product + ads approval before any new placement | Not approved; not implemented |
 

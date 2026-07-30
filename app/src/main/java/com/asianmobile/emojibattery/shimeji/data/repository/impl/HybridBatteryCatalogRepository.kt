@@ -6,13 +6,16 @@ import android.util.Log
 import com.asianmobile.emojibattery.shimeji.BuildConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_CATEGORY
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogDistributionStatus
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogSnapshot
-import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogDistributionStatus
-import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
+import com.asianmobile.emojibattery.shimeji.data.remote.BatteryCatalogFetchResult
+import com.asianmobile.emojibattery.shimeji.data.remote.BatteryServerConfig
+import com.asianmobile.emojibattery.shimeji.data.remote.GithubBatteryCatalogClient
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -28,53 +31,135 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 @Singleton
-class LocalBatteryCatalogRepository @Inject constructor(
+class HybridBatteryCatalogRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val parser: BatteryCatalogParser
+    private val parser: BatteryCatalogParser,
+    private val remoteClient: GithubBatteryCatalogClient
 ) : BatteryCatalogRepository {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val refreshMutex = Mutex()
     private val _snapshot = MutableStateFlow(initialSnapshot())
     override val snapshot: StateFlow<BatteryCatalogSnapshot> = _snapshot.asStateFlow()
+
+    @Volatile
+    private var remoteAssetRecords: Map<String, BatteryCatalogAssetRecord> = emptyMap()
 
     init {
         scope.launch { refresh() }
     }
 
     override suspend fun refresh() = withContext(Dispatchers.IO) {
-        val root = localRoot()
-        var failure = if (root == null) {
-            BatteryCatalogError.LOCAL_STORAGE_UNAVAILABLE
-        } else {
-            BatteryCatalogError.LOCAL_CATALOG_MISSING
-        }
+        refreshMutex.withLock {
+            _snapshot.value = _snapshot.value.copy(isLoading = true, error = null)
+            val cached = remoteClient.readCachedCatalog()
+            val cachedDocument = cached?.json?.let(::parseAllowedRemote)
+            var cachedPublished = false
+            if (cachedDocument != null) {
+                cachedPublished = publishRemote(cachedDocument)
+            }
 
+            val metadata = cached?.metadata ?: remoteClient.readCatalogCacheMetadata()
+            if (remoteClient.shouldRefreshCatalog(metadata)) {
+                when (val result = remoteClient.fetchCatalog(metadata.etag)) {
+                    is BatteryCatalogFetchResult.Updated -> {
+                        val document = parseAllowedRemote(result.json)
+                        if (document != null && publishRemote(document)) {
+                            remoteClient.cacheCatalog(result.json, result.etag)
+                            return@withLock
+                        }
+                        if (!cachedPublished) {
+                            refreshLocalFallback(BatteryCatalogError.REMOTE_CATALOG_INVALID)
+                        }
+                        return@withLock
+                    }
+
+                    is BatteryCatalogFetchResult.NotModified -> {
+                        if (cachedPublished) {
+                            remoteClient.markCatalogNotModified(result.etag)
+                            return@withLock
+                        }
+                    }
+
+                    is BatteryCatalogFetchResult.RateLimited -> {
+                        remoteClient.deferCatalogRefresh(result.retryAtEpochMillis)
+                        if (cachedPublished) return@withLock
+                    }
+
+                    BatteryCatalogFetchResult.Failed -> if (cachedPublished) return@withLock
+                }
+            } else if (cachedPublished) {
+                return@withLock
+            }
+
+            refreshLocalFallback(BatteryCatalogError.REMOTE_CATALOG_UNAVAILABLE)
+        }
+    }
+
+    override fun findTheme(themeId: Int): BatteryThemeEntry? =
+        _snapshot.value.themes.firstOrNull { it.id == themeId }
+
+    override suspend fun materializeAsset(path: String?): String? = withContext(Dispatchers.IO) {
+        if (path == null) return@withContext null
+        val record = remoteAssetRecords[path] ?: return@withContext path
+        remoteClient.materializeAsset(
+            url = path,
+            relativePath = record.path,
+            expectedSizeBytes = record.sizeBytes,
+            expectedSha256 = record.sha256
+        )?.absolutePath
+    }
+
+    private fun parseAllowedRemote(json: String): BatteryCatalogDocument? = try {
+        parser.parse(json).takeIf(::isDistributionAllowed)
+    } catch (error: BatteryCatalogParseException) {
+        Log.w(TAG, "Remote Battery catalog is invalid", error)
+        null
+    }
+
+    private fun publishRemote(document: BatteryCatalogDocument): Boolean {
+        val records = mutableMapOf<String, BatteryCatalogAssetRecord>()
+        val published = publish(
+            document = document,
+            rootPath = BatteryServerConfig.CATALOG_URL,
+            requireComplete = true,
+            resolve = { record ->
+                BatteryServerConfig.resolveAsset(record.path).also { url ->
+                    records[url] = record
+                }
+            }
+        )
+        if (published) remoteAssetRecords = records
+        return published
+    }
+
+    private fun refreshLocalFallback(remoteFailure: BatteryCatalogError) {
+        remoteAssetRecords = emptyMap()
+        val root = localRoot()
         val catalogFile = root?.let { File(it, CATALOG_FILE) }
         if (catalogFile?.isFile == true) {
             try {
                 val document = parser.parse(catalogFile.readText(Charsets.UTF_8))
                 if (isDistributionAllowed(document) && isCurrentSchema(document)) {
-                    val published = publish(
-                        document = document,
-                        rootPath = root.absolutePath,
-                        requireComplete = BuildConfig.DEBUG,
-                        resolve = { record -> resolveFileAsset(root, record) }
-                    )
-                    if (published) return@withContext
-                }
-                failure = if (!isDistributionAllowed(document)) {
-                    BatteryCatalogError.DISTRIBUTION_NOT_APPROVED
-                } else {
-                    BatteryCatalogError.LOCAL_CATALOG_INVALID
+                    if (
+                        publish(
+                            document = document,
+                            rootPath = root.absolutePath,
+                            requireComplete = BuildConfig.DEBUG,
+                            resolve = { record -> resolveFileAsset(root, record) }
+                        )
+                    ) {
+                        return
+                    }
                 }
             } catch (error: BatteryCatalogParseException) {
-                Log.w(TAG, "External battery catalog is invalid", error)
-                failure = BatteryCatalogError.LOCAL_CATALOG_INVALID
+                Log.w(TAG, "External Battery catalog is invalid", error)
             } catch (error: IOException) {
-                Log.w(TAG, "External battery catalog cannot be read", error)
-                failure = BatteryCatalogError.LOCAL_CATALOG_INVALID
+                Log.w(TAG, "External Battery catalog cannot be read", error)
             }
         }
 
@@ -84,30 +169,28 @@ class LocalBatteryCatalogRepository @Inject constructor(
                     .bufferedReader(Charsets.UTF_8)
                     .use { it.readText() }
                 val document = parser.parse(json)
-                val published = publish(
-                    document = document,
-                    rootPath = PACKAGED_CATALOG_ROOT,
-                    requireComplete = true,
-                    resolve = ::resolvePackagedAsset
-                )
-                if (published) return@withContext
-                failure = BatteryCatalogError.LOCAL_CATALOG_INVALID
+                if (
+                    publish(
+                        document = document,
+                        rootPath = PACKAGED_CATALOG_ROOT,
+                        requireComplete = true,
+                        resolve = ::resolvePackagedAsset
+                    )
+                ) {
+                    return
+                }
             } catch (error: IOException) {
-                Log.i(TAG, "No packaged debug battery catalog is available")
+                Log.i(TAG, "No packaged debug Battery catalog is available")
             } catch (error: BatteryCatalogParseException) {
-                Log.w(TAG, "Packaged debug battery catalog is invalid", error)
-                failure = BatteryCatalogError.LOCAL_CATALOG_INVALID
+                Log.w(TAG, "Packaged debug Battery catalog is invalid", error)
             }
         }
 
         _snapshot.value = fallbackSnapshot(
             rootPath = root?.absolutePath.orEmpty(),
-            error = failure
+            error = remoteFailure
         )
     }
-
-    override fun findTheme(themeId: Int): BatteryThemeEntry? =
-        _snapshot.value.themes.firstOrNull { it.id == themeId }
 
     private fun publish(
         document: BatteryCatalogDocument,
@@ -161,11 +244,14 @@ class LocalBatteryCatalogRepository @Inject constructor(
                 )
             }
         }
-        if (requireComplete &&
-            (themes.any { !it.assetsReady } ||
-                backgrounds.size != document.backgrounds.size ||
-                emotions.size != document.emotions.size ||
-                animations.size != document.animations.size)
+        if (
+            requireComplete &&
+            (
+                themes.any { !it.assetsReady } ||
+                    backgrounds.size != document.backgrounds.size ||
+                    emotions.size != document.emotions.size ||
+                    animations.size != document.animations.size
+                )
         ) {
             return false
         }
@@ -190,9 +276,11 @@ class LocalBatteryCatalogRepository @Inject constructor(
 
     private fun isCurrentSchema(document: BatteryCatalogDocument): Boolean =
         !BuildConfig.DEBUG ||
-            (document.backgrounds.isNotEmpty() &&
-                document.emotions.isNotEmpty() &&
-                document.animations.isNotEmpty())
+            (
+                document.backgrounds.isNotEmpty() &&
+                    document.emotions.isNotEmpty() &&
+                    document.animations.isNotEmpty()
+                )
 
     private fun resolveFileAsset(
         root: File,
@@ -214,7 +302,8 @@ class LocalBatteryCatalogRepository @Inject constructor(
         return try {
             val validation = context.assets.open(assetPath, AssetManager.ACCESS_STREAMING)
                 .use { input -> input.calculateDigest() }
-            if (validation.sizeBytes == record.sizeBytes &&
+            if (
+                validation.sizeBytes == record.sizeBytes &&
                 validation.sha256 == record.sha256
             ) {
                 "$ANDROID_ASSET_URI_PREFIX$assetPath"
@@ -226,12 +315,11 @@ class LocalBatteryCatalogRepository @Inject constructor(
         }
     }
 
-    private fun File.sha256(): String {
-        return inputStream().buffered().use { input -> input.calculateDigest() }.sha256
-    }
+    private fun File.sha256(): String =
+        inputStream().buffered().use { input -> input.calculateDigest() }.sha256
 
     private fun InputStream.calculateDigest(): AssetValidation {
-        val messageDigest = MessageDigest.getInstance("SHA-256")
+        val messageDigest = MessageDigest.getInstance(SHA_256)
         val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
         var sizeBytes = 0L
         while (true) {
@@ -269,6 +357,7 @@ class LocalBatteryCatalogRepository @Inject constructor(
         const val PACKAGED_CATALOG_ROOT = "battery_catalog"
         const val PACKAGED_CATALOG_FILE = "$PACKAGED_CATALOG_ROOT/catalog.json"
         const val ANDROID_ASSET_URI_PREFIX = "file:///android_asset/"
+        const val SHA_256 = "SHA-256"
     }
 }
 

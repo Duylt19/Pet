@@ -73,6 +73,8 @@ enum class BatteryCatalogDistributionStatus {
 }
 
 enum class BatteryCatalogError {
+    REMOTE_CATALOG_UNAVAILABLE,
+    REMOTE_CATALOG_INVALID,
     LOCAL_CATALOG_MISSING,
     LOCAL_CATALOG_INVALID,
     LOCAL_STORAGE_UNAVAILABLE,

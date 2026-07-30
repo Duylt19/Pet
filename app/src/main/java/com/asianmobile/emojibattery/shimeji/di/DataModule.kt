@@ -9,7 +9,7 @@ import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepos
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.BatteryCatalogParser
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStoreBatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStorePetSettingsRepository
-import com.asianmobile.emojibattery.shimeji.data.repository.impl.LocalBatteryCatalogRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.impl.HybridBatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.OwnerPetCatalogParser
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.RemoteOwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.FilePetPackRepository
@@ -75,7 +75,7 @@ object DataModule {
     @Provides
     @Singleton
     fun provideBatteryCatalogRepository(
-        repository: LocalBatteryCatalogRepository
+        repository: HybridBatteryCatalogRepository
     ): BatteryCatalogRepository = repository
 
     @Provides

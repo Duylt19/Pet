@@ -123,12 +123,14 @@ không được restore sau process death/reboot.
 
 ## Battery catalog và config
 
-- `BatteryCatalogSnapshot` gồm category/theme, 20 background, 20 emotion, 26 animation, entitlement,
-  local/packaged asset path, distribution status và typed error; built-in theme ID `0`
-  luôn có.
+- `BatteryCatalogSnapshot` gồm category/theme, 20 background, 20 emotion, 26 animation,
+  entitlement, remote/cache/local asset path, distribution status và typed error;
+  built-in theme ID `0` luôn có.
 - Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và dimension cho
   PNG/GIF/Lottie.
-  Repository chặn path escape, size/hash mismatch và release catalog chưa `APPROVED`.
+  `HybridBatteryCatalogRepository` đọc cache trước, revalidate private GitHub catalog
+  theo TTL/ETag/backoff, materialize asset theo nhu cầu và chặn path escape,
+  size/hash mismatch hoặc release catalog chưa `APPROVED`.
 - `BatteryStatusConfig` là persistent source of truth. `BatterySettingsPolicy` clamp
   geometry/color/favorite/reward unlock trước khi ghi và sau khi decode DataStore.
 - Catalog theme là cặp mặc định. Khi mở editor từ một theme, `selectedThemeId`,

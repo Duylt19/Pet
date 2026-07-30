@@ -10,4 +10,6 @@ interface BatteryCatalogRepository {
     suspend fun refresh()
 
     fun findTheme(themeId: Int): BatteryThemeEntry?
+
+    suspend fun materializeAsset(path: String?): String?
 }

@@ -64,28 +64,34 @@ không được áp dụng. Built-in `Cute Mint` không phụ thuộc file ngoà
 ## Boundary dữ liệu
 
 `BatteryCatalogRepository` expose `BatteryCatalogSnapshot`; UI không đọc file trực tiếp.
-`LocalBatteryCatalogRepository` ưu tiên catalog được sync vào:
+`HybridBatteryCatalogRepository` ưu tiên private GitHub catalog:
 
 ```text
-externalFilesDir/battery_catalog/
-├── catalog.json
-├── thumb/<id>.png
-├── battery/<id>.png
-├── emoji/<id>.png
-├── background/template_color_<id>.png
-├── emotion/cute_emotion_<id>.png
-└── animation/<name>.gif|json
+raw.githubusercontent.com/.../master/
+├── json/batteries.json
+└── battery/
+    ├── thumb/<id>.png
+    ├── battery/<id>.png
+    ├── emoji/<id>.png
+    ├── background/template_color_<id>.png
+    ├── emotion/emotion_<id>.png
+    └── animation/<name>.gif|json
 ```
 
-Debug build tự audit và đóng gói 898 theme, 20 nền, 20 emotion, 21 GIF, 5 Lottie vào
-`assets/battery_catalog/`; 12 vector charge, status vector và 6 font được generate vào
-debug resources. External catalog thiếu/sai thì repository dùng packaged catalog. Release
-không đóng gói snapshot `REVIEW_REQUIRED`.
+Catalog JSON được cache app-private, revalidate theo TTL 24 giờ, ETag và rate-limit
+backoff giống Pet. Thumbnail/preview dùng URL GitHub qua Coil; asset renderer chỉ tải khi
+được chọn, verify size + SHA-256 rồi cache app-private. Token private repo dùng chung
+Firebase Remote Config key `github_token_pet_server`, không hardcode trong source.
+
+Khi remote/cache không dùng được, repository thử catalog ở
+`externalFilesDir/battery_catalog/`; Debug tiếp tục có packaged snapshot làm fallback.
+Release chỉ nhận remote/external catalog `APPROVED`, cuối cùng luôn còn built-in
+`Cute Mint`.
 
 Mỗi asset phải:
 
 1. Có relative path đúng loại và ID.
-2. Nằm canonical bên trong root catalog.
+2. URL thuộc đúng private GitHub server hoặc file nằm canonical trong local root.
 3. Khớp byte size.
 4. Khớp SHA-256.
 
