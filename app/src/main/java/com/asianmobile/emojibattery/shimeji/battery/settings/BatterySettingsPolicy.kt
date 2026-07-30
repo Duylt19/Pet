@@ -2,6 +2,7 @@ package com.asianmobile.emojibattery.shimeji.battery.settings
 
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BACKGROUND_COLOR
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_ANIMATION_ASSET
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_ANIMATION_SIZE_DP
@@ -20,6 +21,9 @@ import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_BAR_HEIGHT_DP
 
 class BatterySettingsPolicy {
     fun sanitize(config: BatteryStatusConfig): BatteryStatusConfig = config.copy(
+        // The shipped product deliberately supports the status-bar replacement flow only.
+        // Migrating legacy BELOW values prevents an Accessibility overlay from covering app UI.
+        displayMode = BatteryStatusDisplayMode.COVER_SYSTEM_BAR,
         selectedThemeId = config.selectedThemeId.coerceAtLeast(BUILT_IN_BATTERY_THEME_ID),
         backgroundDecorationId = config.backgroundDecorationId.coerceIn(0, 20),
         emotionDecorationId = config.emotionDecorationId.coerceIn(0, 20),

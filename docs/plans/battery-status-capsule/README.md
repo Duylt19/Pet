@@ -1,23 +1,23 @@
 # Battery Status Capsule — Plan Index
 
-> **REFERENCE PLAN — VERTICAL SLICE IMPLEMENTED, RELEASE PHASES PENDING**
+> **REFERENCE PLAN — PRODUCT IMPLEMENTATION COMPLETE, EXTERNAL RELEASE GATES PENDING**
 
 Current source contract và trạng thái thật:
 [`../../features/BATTERY_STATUS.md`](../../features/BATTERY_STATUS.md).
 
 Tài liệu này chuyển 14 screenshot tham chiếu thành một kế hoạch production-ready cho
 Cute Pet. Tên sản phẩm dùng trong spec là **Battery Status Capsule**: một thanh trang trí
-có thể nằm dưới status bar hoặc che trực quan status bar bằng Accessibility theo mode user
-chọn. Dù ở cover mode, app không sửa SystemUI thật.
+che trực quan status bar bằng Accessibility. Sau quyết định sản phẩm ngày 2026-07-30,
+source ship luồng cover-only; giá trị below-bar legacy được migrate. App không sửa
+SystemUI thật.
 
 ## Kết luận chính
 
 - `TYPE_APPLICATION_OVERLAY` chỉ nằm dưới status bar. Quan sát app reference yêu cầu
   Accessibility phù hợp với cơ chế `TYPE_ACCESSIBILITY_OVERLAY`, có layer cao hơn và có
   thể che trực quan status bar bằng một thanh custom.
-- Plan hỗ trợ backend abstraction cho `BELOW_SYSTEM_BAR` và `COVER_SYSTEM_BAR`.
-  Accessibility cover mode phải có disclosure, affirmative consent, Play declaration và
-  device proof; không đọc screen content hoặc tự động thao tác.
+- Accessibility cover mode có disclosure và affirmative consent; Play declaration và
+  device proof vẫn là release gate. Service không đọc screen content hoặc tự động thao tác.
 - Full-width opaque cover là high-risk vì có thể che privacy/system indicators. Production
   chỉ ship phần visual cover chứng minh không làm khuất camera/microphone indicator,
   notification hoặc system warning.
@@ -41,6 +41,8 @@ chọn. Dù ở cover mode, app không sửa SystemUI thật.
 8. [Test và release plan](08_TEST_RELEASE_PLAN.md)
 9. [Implementation phases](09_IMPLEMENTATION_PHASES.md)
 10. [Accessibility status-cover mode](10_ACCESSIBILITY_STATUS_COVER.md)
+11. [Reference flow redesign](11_REFERENCE_FLOW_REDESIGN.md)
+12. [Release readiness ledger](12_RELEASE_READINESS.md)
 
 ## Source hiện tại ảnh hưởng tới kế hoạch
 
@@ -53,9 +55,9 @@ chọn. Dù ở cover mode, app không sửa SystemUI thật.
 - App đã có overlay/notification permissions, Hilt, DataStore, ads/rewarded/premium,
   analytics và remote catalog pattern để tái sử dụng qua boundary phù hợp.
 
-## Điều kiện trước khi release completion
+## Điều kiện còn lại trước khi release completion
 
-- Owner chốt release scope: dưới status bar, Accessibility cover mode hoặc dual mode.
+- Release scope đã chốt: Accessibility cover-only.
 - Nếu ship cover mode, duyệt disclosure/consent, Play declaration và video review trước
   khi implementation được coi là release-ready.
 - Có asset do project sở hữu hoặc được cấp phép; không dùng asset trong screenshot.

@@ -1,0 +1,81 @@
+package com.asianmobile.emojibattery.shimeji.ui.battery.editor
+
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryDataType
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFont
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFormat
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusDisplayMode
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+
+class BatteryDraftCodecTest {
+    @Test
+    fun codec_roundTrips_complete_editor_draft() {
+        val config = BatteryStatusConfig(
+            enabled = true,
+            selectedThemeId = 42,
+            displayMode = BatteryStatusDisplayMode.BELOW_SYSTEM_BAR,
+            showTime = false,
+            showPercentage = false,
+            backgroundDecorationId = 9,
+            showEmotion = false,
+            emotionDecorationId = 8,
+            showAnimation = false,
+            animationAssetName = "18.gif",
+            barHeightDp = 47f,
+            horizontalPaddingDp = 4f,
+            leftPaddingDp = 5f,
+            rightPaddingDp = 6f,
+            percentSizeDp = 23f,
+            emojiSizeDp = 35f,
+            animationSizeDp = 34f,
+            batterySizeDp = 44f,
+            backgroundColorArgb = 0xFF112233.toInt(),
+            foregroundColorArgb = 0xFF445566.toInt(),
+            percentColorArgb = 0xFF778899.toInt(),
+            wifiSizeDp = 21f,
+            wifiColorArgb = 0xFF102030.toInt(),
+            dataType = BatteryDataType.G5,
+            dataSizeDp = 20f,
+            dataColorArgb = 0xFF203040.toInt(),
+            signalSizeDp = 22f,
+            signalColorArgb = 0xFF304050.toInt(),
+            airplaneSizeDp = 18f,
+            airplaneColorArgb = 0xFF405060.toInt(),
+            hotspotSizeDp = 17f,
+            hotspotColorArgb = 0xFF506070.toInt(),
+            ringerSizeDp = 16f,
+            ringerColorArgb = 0xFF607080.toInt(),
+            chargeSizeDp = 15f,
+            chargeIconIndex = 12,
+            chargeColorArgb = 0xFF708090.toInt(),
+            showDateTime = true,
+            dateTimeColorArgb = 0xFF8090A0.toInt(),
+            dateTimeSizeDp = 19f,
+            dateFormat = BatteryDateFormat.WEEKDAY_FULL,
+            dateTimeFont = BatteryDateFont.BEAU_RIVAGE,
+            privacyReserveDp = 88f,
+            favoriteThemeIds = setOf(1, 9, 42)
+        )
+
+        assertEquals(config, BatteryDraftCodec.decode(BatteryDraftCodec.encode(config)))
+    }
+
+    @Test
+    fun codec_returns_null_for_corrupt_or_unsupported_state() {
+        assertNull(BatteryDraftCodec.decode("not-json"))
+        assertNull(BatteryDraftCodec.decode("""{"schema":99}"""))
+    }
+
+    @Test
+    fun codec_uses_fallback_for_unknown_enum_from_older_state() {
+        val fallback = BatteryStatusConfig(dataType = BatteryDataType.G4)
+        val restored = BatteryDraftCodec.decode(
+            """{"schema":1,"dataType":"NOT_A_NETWORK"}""",
+            fallback
+        )
+
+        assertEquals(BatteryDataType.G4, restored?.dataType)
+    }
+}

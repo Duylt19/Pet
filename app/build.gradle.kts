@@ -25,7 +25,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("boolean", "BATTERY_STATUS_ENABLED", "true")
+        }
         release {
+            buildConfigField("boolean", "BATTERY_STATUS_ENABLED", "false")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

@@ -19,13 +19,14 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.BatteryManager
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import com.asianmobile.emojibattery.shimeji.BuildConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
-import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.airbnb.lottie.LottieCompositionFactory
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
@@ -197,7 +198,10 @@ class StatusBarAccessibilityService : AccessibilityService() {
 
     private fun updateOverlay() {
         val keyguardManager = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
-        if (!currentConfig.enabled ||
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+        if (!BuildConfig.BATTERY_STATUS_ENABLED ||
+            !currentConfig.enabled ||
+            !powerManager.isInteractive ||
             keyguardManager.isKeyguardLocked ||
             resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT
         ) {
@@ -333,11 +337,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            y = if (config.displayMode == BatteryStatusDisplayMode.BELOW_SYSTEM_BAR) {
-                statusHeight
-            } else {
-                0
-            }
+            y = 0
             title = getString(
                 com.asianmobile.emojibattery.shimeji.R.string.battery_accessibility_service_label
             )
@@ -381,6 +381,9 @@ class StatusBarAccessibilityService : AccessibilityService() {
             } catch (error: java.io.IOException) {
                 Log.w(TAG, "Unable to decode packaged battery asset", error)
                 null
+            } catch (error: RuntimeException) {
+                Log.w(TAG, "Packaged battery asset is invalid", error)
+                null
             }
         }
         return File(path).takeIf(File::isFile)?.let {
@@ -415,6 +418,9 @@ class StatusBarAccessibilityService : AccessibilityService() {
         } catch (error: java.io.IOException) {
             Log.w(TAG, "Unable to decode Battery animation", error)
             null
+        } catch (error: RuntimeException) {
+            Log.w(TAG, "Battery animation is invalid", error)
+            null
         }
     }
 
@@ -434,10 +440,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
         deviceState = deviceState.copy(
             wifiConnected = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true,
             cellularConnected =
-                capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true,
-            signalLevel = if (
                 capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true
-            ) 4 else 0
         )
         render()
     }

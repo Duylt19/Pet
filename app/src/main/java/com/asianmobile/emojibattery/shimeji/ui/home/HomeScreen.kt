@@ -60,6 +60,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.BuildConfig
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
@@ -956,13 +957,15 @@ private fun HomeBottomNavigation(
             onClick = onOpenPets,
             modifier = Modifier.weight(1f)
         )
-        BottomNavigationItem(
-            iconRes = R.drawable.ic_battery_status,
-            label = stringResource(R.string.home_mode_battery_tab),
-            selected = false,
-            onClick = onOpenBattery,
-            modifier = Modifier.weight(1f)
-        )
+        if (BuildConfig.BATTERY_STATUS_ENABLED) {
+            BottomNavigationItem(
+                iconRes = R.drawable.ic_battery_status,
+                label = stringResource(R.string.home_mode_battery_tab),
+                selected = false,
+                onClick = onOpenBattery,
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 

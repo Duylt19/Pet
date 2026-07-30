@@ -12,5 +12,6 @@ data class BatteryEditorUiState(
     val backgrounds: List<BatteryDecorationEntry> = emptyList(),
     val emotions: List<BatteryDecorationEntry> = emptyList(),
     val animations: List<BatteryAnimationEntry> = emptyList(),
-    val isThemeAvailable: Boolean = true
+    val isThemeAvailable: Boolean = true,
+    val hasUnsavedChanges: Boolean = false
 )

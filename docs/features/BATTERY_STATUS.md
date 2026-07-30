@@ -7,7 +7,8 @@ Vertical slice hiện đã có trong source:
 - Home bottom navigation mở `BatteryCatalogScreen`.
 - Catalog local chuẩn hóa, search, category, Free/Premium, favorite và built-in fallback.
 - Editor dùng overview → editor con Size/Appearance/Emoji/Battery và 9 status component,
-  có preview xuyên suốt, Apply cố định, 20 nền, 20 emotion và 26 animation đã audit.
+  có preview xuyên suốt, Apply cố định, cảnh báo bỏ draft, phục hồi draft sau process death,
+  20 nền, 20 emotion và 26 animation đã audit.
 - Apply lưu DataStore; nếu chưa bật service, app luôn hiện disclosure trước khi mở
   Accessibility Settings.
 - `StatusBarAccessibilityService` vẽ một `TYPE_ACCESSIBILITY_OVERLAY` full-width,
@@ -15,9 +16,14 @@ Vertical slice hiện đã có trong source:
   hotspot và dùng theme/nền/emotion/animation đã chọn.
 - Service ẩn khi màn hình khóa, màn hình tắt hoặc portrait không còn hiệu lực; không
   auto-start sau boot.
+- Preview và Canvas runtime dùng chung layout priority. Màn hình hẹp tự bỏ date,
+  emotion/animation trước khi bỏ status cốt lõi; nhóm leading/trailing được mirror đúng
+  trong RTL mà không lật ngược chữ hoặc bitmap.
 
 Đây chưa phải release-complete: cần asset ownership approval, device/OEM matrix, Play
 Accessibility declaration và UX validation trước khi bật catalog ngoài debug.
+`BuildConfig.BATTERY_STATUS_ENABLED=false` ở release là hard kill switch hiện tại: ẩn
+Battery entry và ngăn service attach window cho tới khi các gate được duyệt.
 
 ## Luồng người dùng
 
@@ -77,7 +83,7 @@ typed, không làm crash UI hoặc overlay đang chạy.
 |---|---|
 | `enabled` | User đã Apply và muốn render |
 | `selectedThemeId` | ID theme; `0` là built-in |
-| `displayMode` | `COVER_SYSTEM_BAR` hoặc `BELOW_SYSTEM_BAR` |
+| `displayMode` | Migration legacy; build hiện tại sanitize về `COVER_SYSTEM_BAR` |
 | `showTime`, `showPercentage` | Thành phần hiển thị |
 | `showAnimation`, `animationAssetName`, `animationSizeDp` | Hoạt ảnh GIF/Lottie |
 | `barHeightDp`, `leftPaddingDp`, `rightPaddingDp` | Hình học capsule |
@@ -92,7 +98,8 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `favoriteThemeIds` | Favorite local theo theme ID |
 
 `BatterySettingsPolicy` clamp toàn bộ geometry và loại favorite ID âm để dữ
-liệu DataStore lỗi không đi thẳng vào `WindowManager`.
+liệu DataStore lỗi không đi thẳng vào `WindowManager`. `BatteryDraftCodec` lưu bản nháp
+versioned trong `SavedStateHandle`; DataStore chỉ thay đổi khi user bấm Apply.
 
 ## Accessibility và privacy
 
@@ -123,6 +130,8 @@ Renderer chỉ animate asset đã chọn; một window duy nhất được add/u
 Giới hạn hiện tại:
 
 - Portrait only.
+- Product scope hiện tại là cover-only. `BELOW_SYSTEM_BAR` cũ được migrate về cover để
+  Accessibility window không vô tình che nội dung app.
 - Không render trên keyguard/screen-off.
 - Cover behavior và notification-shade layering khác nhau theo OEM.
 - Wi‑Fi/cellular lấy từ active network capability. Signal là trạng thái kết nối coarse,
@@ -144,6 +153,8 @@ Trước release phải kiểm tra tối thiểu:
 - TalkBack cùng tồn tại, large font, RTL và contrast.
 - Không chặn touch/status gestures; không leak window/receiver/bitmap.
 - Release build từ chối catalog `REVIEW_REQUIRED`.
+- JVM test layout narrow-width/required priority/RTL side mapping và draft JSON
+  corrupt/round-trip.
 
 Chi tiết research/phase gốc nằm tại
 [`../plans/battery-status-capsule/README.md`](../plans/battery-status-capsule/README.md).

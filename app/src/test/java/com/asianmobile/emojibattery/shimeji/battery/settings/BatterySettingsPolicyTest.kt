@@ -1,6 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.battery.settings
 
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BACKGROUND_COLOR
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BAR_HEIGHT_DP
 import org.junit.Assert.assertEquals
@@ -13,6 +14,7 @@ class BatterySettingsPolicyTest {
     fun sanitize_clamps_geometry_and_filters_favorites() {
         val sanitized = policy.sanitize(
             BatteryStatusConfig(
+                displayMode = BatteryStatusDisplayMode.BELOW_SYSTEM_BAR,
                 selectedThemeId = -4,
                 backgroundDecorationId = 99,
                 emotionDecorationId = -4,
@@ -31,6 +33,7 @@ class BatterySettingsPolicyTest {
         )
 
         assertEquals(0, sanitized.selectedThemeId)
+        assertEquals(BatteryStatusDisplayMode.COVER_SYSTEM_BAR, sanitized.displayMode)
         assertEquals(20, sanitized.backgroundDecorationId)
         assertEquals(0, sanitized.emotionDecorationId)
         assertEquals(48f, sanitized.barHeightDp)

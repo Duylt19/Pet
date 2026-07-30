@@ -2,6 +2,10 @@
 
 > **RELEASE PLAN — chưa hoàn tất device/policy matrix**
 
+Trạng thái evidence hiện tại được ghi tại
+[12_RELEASE_READINESS.md](12_RELEASE_READINESS.md); checklist bên dưới là gate chuẩn,
+không phải tuyên bố đã chạy trên thiết bị.
+
 ## Test pyramid
 
 ### Pure JVM

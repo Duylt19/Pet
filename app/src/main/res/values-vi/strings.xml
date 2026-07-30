@@ -698,6 +698,10 @@
     <string name="battery_editor_percentage_off">Đang ẩn phần trăm</string>
     <string name="battery_editor_more_components">Thành phần trạng thái khác</string>
     <string name="battery_editor_more_components_hint">Tùy chỉnh từng thành phần trạng thái. Overlay tự cập nhật biểu tượng theo trạng thái hiện tại của thiết bị.</string>
+    <string name="battery_discard_title">Bỏ các thay đổi thanh pin?</string>
+    <string name="battery_discard_message">Các thay đổi chưa áp dụng cho thanh pin sẽ bị mất.</string>
+    <string name="battery_discard_confirm">Bỏ thay đổi</string>
+    <string name="battery_discard_keep_editing">Tiếp tục chỉnh</string>
     <string name="battery_component_wifi">Wi-Fi</string>
     <string name="battery_component_signal">Tín hiệu</string>
     <string name="battery_component_data">Dữ liệu</string>

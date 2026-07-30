@@ -28,7 +28,6 @@ import java.util.Locale
 data class BatteryDeviceState(
     val wifiConnected: Boolean = false,
     val cellularConnected: Boolean = false,
-    val signalLevel: Int = 0,
     val airplaneMode: Boolean = false,
     val hotspotEnabled: Boolean = false,
     val ringerMuted: Boolean = false
@@ -45,6 +44,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
     private val destination = RectF()
     private val clipPath = Path()
     private val drawableCache = mutableMapOf<String, Drawable?>()
+    private val layoutPolicy = BatteryStatusLayoutPolicy()
     private var config = BatteryStatusConfig()
     private var deviceState = BatteryDeviceState()
     private var level = 100
@@ -55,6 +55,11 @@ class BatteryStatusBarView(context: Context) : View(context) {
     private var emotion: Bitmap? = null
     private var animation: BatteryAnimatedAsset? = null
     private var animationStartedAt = SystemClock.uptimeMillis()
+    private var timeText = ""
+    private var dateText = ""
+    private var percentageText = ""
+    private var cachedLayoutWidth = Float.NaN
+    private var cachedLayout: BatteryStatusLayoutResult? = null
     private val lottieDrawable = LottieDrawable().apply {
         repeatCount = LottieDrawable.INFINITE
         callback = this@BatteryStatusBarView
@@ -79,6 +84,18 @@ class BatteryStatusBarView(context: Context) : View(context) {
         this.battery = battery
         this.background = background
         this.emotion = emotion
+        timeText = DateFormat.getTimeInstance(DateFormat.SHORT).format(Date())
+        dateText = if (config.showDateTime) {
+            SimpleDateFormat(config.dateFormat.pattern, Locale.getDefault()).format(Date())
+        } else {
+            ""
+        }
+        percentageText = context.getString(
+            if (charging) R.string.battery_overlay_charging_percentage
+            else R.string.battery_overlay_percentage,
+            this.level
+        )
+        cachedLayout = null
         if (this.animation !== animation) {
             this.animation = animation
             animationStartedAt = SystemClock.uptimeMillis()
@@ -102,126 +119,371 @@ class BatteryStatusBarView(context: Context) : View(context) {
         val centerY = height / 2f
         val leftPadding = config.leftPaddingDp * density
         val rightPadding = config.rightPaddingDp * density
-        var left = leftPadding
         val gap = 4f * density
-        val maxLeft = backgroundRight * 0.53f
+        val availableWidth = backgroundRight - leftPadding - rightPadding
+        val layout = cachedLayout
+            ?.takeIf { cachedLayoutWidth == availableWidth }
+            ?: resolveLayout(
+                availableWidth = availableWidth,
+                gap = gap,
+                timeText = timeText,
+                dateText = dateText,
+                percentageText = percentageText
+            ).also {
+                cachedLayoutWidth = availableWidth
+                cachedLayout = it
+            }
 
-        if (config.showTime) {
-            left = drawTextFromLeft(
+        val isRtl = layoutDirection == LAYOUT_DIRECTION_RTL
+        val physicalSides = BatteryStatusPhysicalSides.resolve(isRtl)
+        drawLeadingGroup(
+            canvas = canvas,
+            anchor = if (isRtl) backgroundRight - rightPadding else leftPadding,
+            centerY = centerY,
+            fromLeft = physicalSides.leadingFromLeft,
+            gap = gap,
+            layout = layout,
+            timeText = timeText,
+            dateText = dateText
+        )
+        drawTrailingGroup(
+            canvas = canvas,
+            anchor = if (isRtl) leftPadding else backgroundRight - rightPadding,
+            centerY = centerY,
+            fromLeft = physicalSides.trailingFromLeft,
+            gap = gap,
+            layout = layout,
+            percentageText = percentageText
+        )
+    }
+
+    private fun drawLeadingGroup(
+        canvas: Canvas,
+        anchor: Float,
+        centerY: Float,
+        fromLeft: Boolean,
+        gap: Float,
+        layout: BatteryStatusLayoutResult,
+        timeText: String,
+        dateText: String
+    ) {
+        var cursor = anchor
+        if (layout.shows(BatteryStatusComponent.TIME)) {
+            cursor = drawText(
                 canvas,
-                DateFormat.getTimeInstance(DateFormat.SHORT).format(Date()),
-                left,
+                timeText,
+                cursor,
                 centerY,
                 config.barHeightDp * 0.42f,
                 config.foregroundColorArgb,
-                Typeface.DEFAULT_BOLD
-            ) + gap
+                Typeface.DEFAULT_BOLD,
+                fromLeft
+            ).afterGap(gap, fromLeft)
         }
-        if (config.showDateTime && left < maxLeft) {
-            val formatter = SimpleDateFormat(config.dateFormat.pattern, Locale.getDefault())
-            left = drawTextFromLeft(
+        if (layout.shows(BatteryStatusComponent.DATE)) {
+            cursor = drawText(
                 canvas,
-                formatter.format(Date()),
-                left,
+                dateText,
+                cursor,
                 centerY,
                 config.dateTimeSizeDp,
                 config.dateTimeColorArgb,
-                dateTypeface()
-            ) + gap
+                dateTypeface(),
+                fromLeft
+            ).afterGap(gap, fromLeft)
         }
-        if (deviceState.airplaneMode && left < maxLeft) {
-            left = drawStatusIcon(
-                canvas, "ic_air_plane", left, centerY,
-                config.airplaneSizeDp, config.airplaneColorArgb, fromLeft = true
-            ) + gap
+        if (layout.shows(BatteryStatusComponent.AIRPLANE)) {
+            cursor = drawStatusIcon(
+                canvas,
+                "ic_air_plane",
+                cursor,
+                centerY,
+                config.airplaneSizeDp,
+                config.airplaneColorArgb,
+                fromLeft
+            ).afterGap(gap, fromLeft)
         }
-        if (deviceState.ringerMuted && left < maxLeft) {
-            left = drawStatusIcon(
-                canvas, "ic_ringer0", left, centerY,
-                config.ringerSizeDp, config.ringerColorArgb, fromLeft = true
-            ) + gap
+        if (layout.shows(BatteryStatusComponent.RINGER)) {
+            cursor = drawStatusIcon(
+                canvas,
+                "ic_ringer0",
+                cursor,
+                centerY,
+                config.ringerSizeDp,
+                config.ringerColorArgb,
+                fromLeft
+            ).afterGap(gap, fromLeft)
         }
-        if (config.showAnimation && left < maxLeft) {
-            left = drawAnimation(canvas, left, centerY) + gap
+        if (layout.shows(BatteryStatusComponent.ANIMATION)) {
+            cursor = drawAnimation(canvas, cursor, centerY, fromLeft)
+                .afterGap(gap, fromLeft)
         }
-        emoji?.let {
-            val size = config.emojiSizeDp * density
-            destination.set(left, centerY - size / 2f, left + size, centerY + size / 2f)
-            canvas.drawBitmap(it, null, destination, paint)
-            left += size + gap
-        }
-        if (config.showEmotion && left < maxLeft) {
-            emotion?.let {
-                val size = config.emojiSizeDp * density
-                destination.set(left, centerY - size / 2f, left + size, centerY + size / 2f)
-                canvas.drawBitmap(it, null, destination, paint)
+        if (layout.shows(BatteryStatusComponent.THEME_EMOJI)) {
+            emoji?.let {
+                cursor = drawBitmap(canvas, it, cursor, centerY, config.emojiSizeDp, fromLeft)
+                    .afterGap(gap, fromLeft)
             }
         }
+        if (layout.shows(BatteryStatusComponent.EMOTION)) {
+            emotion?.let {
+                drawBitmap(canvas, it, cursor, centerY, config.emojiSizeDp, fromLeft)
+            }
+        }
+    }
 
-        var right = backgroundRight - rightPadding
-        if (charging) {
-            right = drawStatusIcon(
+    private fun drawTrailingGroup(
+        canvas: Canvas,
+        anchor: Float,
+        centerY: Float,
+        fromLeft: Boolean,
+        gap: Float,
+        layout: BatteryStatusLayoutResult,
+        percentageText: String
+    ) {
+        var cursor = anchor
+        if (layout.shows(BatteryStatusComponent.CHARGE)) {
+            cursor = drawStatusIcon(
                 canvas,
                 "charge_%02d".format(config.chargeIconIndex),
-                right,
+                cursor,
                 centerY,
                 config.chargeSizeDp,
                 config.chargeColorArgb,
-                fromLeft = false
-            ) - gap
+                fromLeft
+            ).afterGap(gap, fromLeft)
         }
-        battery?.let {
-            val size = config.batterySizeDp * density
-            destination.set(right - size, centerY - size / 2f, right, centerY + size / 2f)
-            canvas.drawBitmap(it, null, destination, paint)
-            right -= size + gap
-        } ?: run {
-            drawBuiltInBattery(canvas, right, centerY)
-            right -= config.batterySizeDp * density + gap
+        if (layout.shows(BatteryStatusComponent.BATTERY)) {
+            cursor = battery?.let {
+                drawBitmap(canvas, it, cursor, centerY, config.batterySizeDp, fromLeft)
+            } ?: drawBuiltInBattery(canvas, cursor, centerY, fromLeft)
+            cursor = cursor.afterGap(gap, fromLeft)
         }
-        if (config.showPercentage) {
-            right = drawTextFromRight(
+        if (layout.shows(BatteryStatusComponent.PERCENTAGE)) {
+            cursor = drawText(
                 canvas,
-                context.getString(
-                    if (charging) R.string.battery_overlay_charging_percentage
-                    else R.string.battery_overlay_percentage,
-                    level
-                ),
-                right,
+                percentageText,
+                cursor,
                 centerY,
                 config.percentSizeDp,
-                config.percentColorArgb
-            ) - gap
+                config.percentColorArgb,
+                Typeface.DEFAULT_BOLD,
+                fromLeft
+            ).afterGap(gap, fromLeft)
         }
-        right = drawStatusIcon(
-            canvas,
-            if (deviceState.wifiConnected) "ic_wifi" else "ic_wifi0",
-            right,
-            centerY,
-            config.wifiSizeDp,
-            config.wifiColorArgb,
-            fromLeft = false
-        ) - gap
-        if (deviceState.cellularConnected && !deviceState.airplaneMode) {
-            right = drawTextFromRight(
+        if (layout.shows(BatteryStatusComponent.WIFI)) {
+            cursor = drawStatusIcon(
+                canvas,
+                if (deviceState.wifiConnected) "ic_wifi" else "ic_wifi0",
+                cursor,
+                centerY,
+                config.wifiSizeDp,
+                config.wifiColorArgb,
+                fromLeft
+            ).afterGap(gap, fromLeft)
+        }
+        if (layout.shows(BatteryStatusComponent.CELLULAR)) {
+            cursor = drawText(
                 canvas,
                 config.dataType.label,
-                right,
+                cursor,
                 centerY,
                 config.dataSizeDp,
-                config.dataColorArgb
-            ) - gap
-            right = drawStatusIcon(
-                canvas, "ic_signal", right, centerY,
-                config.signalSizeDp, config.signalColorArgb, fromLeft = false
-            ) - gap
+                config.dataColorArgb,
+                Typeface.DEFAULT_BOLD,
+                fromLeft
+            ).afterGap(gap, fromLeft)
+            cursor = drawStatusIcon(
+                canvas,
+                "ic_signal",
+                cursor,
+                centerY,
+                config.signalSizeDp,
+                config.signalColorArgb,
+                fromLeft
+            ).afterGap(gap, fromLeft)
         }
-        if (deviceState.hotspotEnabled) {
+        if (layout.shows(BatteryStatusComponent.HOTSPOT)) {
             drawStatusIcon(
-                canvas, "ic_hostpot", right, centerY,
-                config.hotspotSizeDp, config.hotspotColorArgb, fromLeft = false
+                canvas,
+                "ic_hostpot",
+                cursor,
+                centerY,
+                config.hotspotSizeDp,
+                config.hotspotColorArgb,
+                fromLeft
             )
         }
+    }
+
+    private fun resolveLayout(
+        availableWidth: Float,
+        gap: Float,
+        timeText: String,
+        dateText: String,
+        percentageText: String
+    ): BatteryStatusLayoutResult {
+        val items = buildList {
+            if (config.showTime) {
+                add(
+                    layoutItem(
+                        BatteryStatusComponent.TIME,
+                        measuredTextWidth(
+                            timeText,
+                            config.barHeightDp * 0.42f,
+                            Typeface.DEFAULT_BOLD
+                        ),
+                        gap,
+                        priority = 100
+                    )
+                )
+            }
+            if (config.showDateTime) {
+                add(
+                    layoutItem(
+                        BatteryStatusComponent.DATE,
+                        measuredTextWidth(dateText, config.dateTimeSizeDp, dateTypeface()),
+                        gap,
+                        priority = 20
+                    )
+                )
+            }
+            if (deviceState.airplaneMode) {
+                add(
+                    layoutItem(
+                        BatteryStatusComponent.AIRPLANE,
+                        config.airplaneSizeDp * density,
+                        gap,
+                        priority = 65
+                    )
+                )
+            }
+            if (deviceState.ringerMuted) {
+                add(
+                    layoutItem(
+                        BatteryStatusComponent.RINGER,
+                        config.ringerSizeDp * density,
+                        gap,
+                        priority = 60
+                    )
+                )
+            }
+            if (config.showAnimation && animation != null) {
+                add(
+                    layoutItem(
+                        BatteryStatusComponent.ANIMATION,
+                        config.animationSizeDp * density,
+                        gap,
+                        priority = 40
+                    )
+                )
+            }
+            if (emoji != null) {
+                add(
+                    layoutItem(
+                        BatteryStatusComponent.THEME_EMOJI,
+                        config.emojiSizeDp * density,
+                        gap,
+                        priority = 80
+                    )
+                )
+            }
+            if (config.showEmotion && emotion != null) {
+                add(
+                    layoutItem(
+                        BatteryStatusComponent.EMOTION,
+                        config.emojiSizeDp * density,
+                        gap,
+                        priority = 30
+                    )
+                )
+            }
+            if (charging) {
+                add(
+                    layoutItem(
+                        BatteryStatusComponent.CHARGE,
+                        config.chargeSizeDp * density,
+                        gap,
+                        priority = 85
+                    )
+                )
+            }
+            add(
+                layoutItem(
+                    BatteryStatusComponent.BATTERY,
+                    config.batterySizeDp * density,
+                    gap,
+                    priority = 110,
+                    required = true
+                )
+            )
+            if (config.showPercentage) {
+                add(
+                    layoutItem(
+                        BatteryStatusComponent.PERCENTAGE,
+                        measuredTextWidth(
+                            percentageText,
+                            config.percentSizeDp,
+                            Typeface.DEFAULT_BOLD
+                        ),
+                        gap,
+                        priority = 95
+                    )
+                )
+            }
+            add(
+                layoutItem(
+                    BatteryStatusComponent.WIFI,
+                    config.wifiSizeDp * density,
+                    gap,
+                    priority = 90
+                )
+            )
+            if (deviceState.cellularConnected && !deviceState.airplaneMode) {
+                val cellularWidth = config.signalSizeDp * density +
+                    measuredTextWidth(
+                        config.dataType.label,
+                        config.dataSizeDp,
+                        Typeface.DEFAULT_BOLD
+                    ) + gap
+                add(
+                    layoutItem(
+                        BatteryStatusComponent.CELLULAR,
+                        cellularWidth,
+                        gap,
+                        priority = 70
+                    )
+                )
+            }
+            if (deviceState.hotspotEnabled) {
+                add(
+                    layoutItem(
+                        BatteryStatusComponent.HOTSPOT,
+                        config.hotspotSizeDp * density,
+                        gap,
+                        priority = 55
+                    )
+                )
+            }
+        }
+        return layoutPolicy.resolve(availableWidth, items)
+    }
+
+    private fun layoutItem(
+        component: BatteryStatusComponent,
+        contentWidth: Float,
+        gap: Float,
+        priority: Int,
+        required: Boolean = false
+    ) = BatteryStatusLayoutItem(
+        component = component,
+        width = contentWidth + gap,
+        priority = priority,
+        required = required
+    )
+
+    private fun measuredTextWidth(value: String, sizeDp: Float, typeface: Typeface): Float {
+        prepareText(sizeDp, config.foregroundColorArgb, typeface, Paint.Align.LEFT)
+        return paint.measureText(value)
     }
 
     private fun drawBackground(canvas: Canvas, backgroundRight: Float, radius: Float) {
@@ -243,15 +505,21 @@ class BatteryStatusBarView(context: Context) : View(context) {
         }
     }
 
-    private fun drawAnimation(canvas: Canvas, left: Float, centerY: Float): Float {
+    private fun drawAnimation(
+        canvas: Canvas,
+        anchor: Float,
+        centerY: Float,
+        fromLeft: Boolean
+    ): Float {
         val size = config.animationSizeDp * density
+        val left = if (fromLeft) anchor else anchor - size
         val rect = RectF(left, centerY - size / 2f, left + size, centerY + size / 2f)
         animation?.lottieComposition?.let {
             lottieDrawable.bounds = Rect(
                 rect.left.toInt(), rect.top.toInt(), rect.right.toInt(), rect.bottom.toInt()
             )
             lottieDrawable.draw(canvas)
-            return rect.right
+            return if (fromLeft) rect.right else rect.left
         }
         animation?.movie?.let { movie ->
             val duration = movie.duration().takeIf { it > 0 } ?: 1000
@@ -261,10 +529,43 @@ class BatteryStatusBarView(context: Context) : View(context) {
             canvas.scale(size / movie.width().coerceAtLeast(1), size / movie.height().coerceAtLeast(1))
             movie.draw(canvas, 0f, 0f)
             canvas.restoreToCount(save)
-            postInvalidateOnAnimation()
+            postInvalidateDelayed(GIF_FRAME_DELAY_MS)
         }
-        return rect.right
+        return if (fromLeft) rect.right else rect.left
     }
+
+    private fun drawBitmap(
+        canvas: Canvas,
+        bitmap: Bitmap,
+        anchor: Float,
+        centerY: Float,
+        sizeDp: Float,
+        fromLeft: Boolean
+    ): Float {
+        val size = sizeDp * density
+        val left = if (fromLeft) anchor else anchor - size
+        destination.set(left, centerY - size / 2f, left + size, centerY + size / 2f)
+        canvas.drawBitmap(bitmap, null, destination, paint)
+        return if (fromLeft) left + size else left
+    }
+
+    private fun drawText(
+        canvas: Canvas,
+        value: String,
+        anchor: Float,
+        centerY: Float,
+        sizeDp: Float,
+        color: Int,
+        typeface: Typeface,
+        fromLeft: Boolean
+    ): Float = if (fromLeft) {
+        drawTextFromLeft(canvas, value, anchor, centerY, sizeDp, color, typeface)
+    } else {
+        drawTextFromRight(canvas, value, anchor, centerY, sizeDp, color, typeface)
+    }
+
+    private fun Float.afterGap(gap: Float, fromLeft: Boolean): Float =
+        if (fromLeft) this + gap else this - gap
 
     private fun drawTextFromLeft(
         canvas: Canvas,
@@ -286,9 +587,10 @@ class BatteryStatusBarView(context: Context) : View(context) {
         right: Float,
         centerY: Float,
         sizeDp: Float,
-        color: Int
+        color: Int,
+        typeface: Typeface = Typeface.DEFAULT_BOLD
     ): Float {
-        prepareText(sizeDp, color, Typeface.DEFAULT_BOLD, Paint.Align.RIGHT)
+        prepareText(sizeDp, color, typeface, Paint.Align.RIGHT)
         canvas.drawText(value, right, textBaseline(centerY), paint)
         return right - paint.measureText(value)
     }
@@ -347,9 +649,15 @@ class BatteryStatusBarView(context: Context) : View(context) {
         else ResourcesCompat.getFont(context, id) ?: Typeface.DEFAULT_BOLD
     }
 
-    private fun drawBuiltInBattery(canvas: Canvas, right: Float, centerY: Float) {
+    private fun drawBuiltInBattery(
+        canvas: Canvas,
+        anchor: Float,
+        centerY: Float,
+        fromLeft: Boolean
+    ): Float {
         val widthPx = config.batterySizeDp * density
         val heightPx = widthPx * 0.48f
+        val right = if (fromLeft) anchor + widthPx else anchor
         val left = right - widthPx
         val top = centerY - heightPx / 2f
         paint.style = Paint.Style.STROKE
@@ -374,6 +682,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
             2f,
             paint
         )
+        return if (fromLeft) right else left
     }
 
     override fun onDetachedFromWindow() {
@@ -384,6 +693,16 @@ class BatteryStatusBarView(context: Context) : View(context) {
         battery = null
         background = null
         emotion = null
+        cachedLayout = null
         super.onDetachedFromWindow()
+    }
+
+    override fun onRtlPropertiesChanged(layoutDirection: Int) {
+        cachedLayout = null
+        super.onRtlPropertiesChanged(layoutDirection)
+    }
+
+    private companion object {
+        const val GIF_FRAME_DELAY_MS = 66L
     }
 }

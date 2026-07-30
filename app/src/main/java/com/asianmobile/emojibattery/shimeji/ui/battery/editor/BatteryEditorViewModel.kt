@@ -19,18 +19,27 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class BatteryEditorViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val catalogRepository: BatteryCatalogRepository,
     private val settingsRepository: BatterySettingsRepository
 ) : ViewModel() {
     private val themeId = savedStateHandle.get<Int>("themeId") ?: BUILT_IN_BATTERY_THEME_ID
-    private var hasLocalEdits = false
-    private val _uiState = MutableStateFlow(BatteryEditorUiState())
+    private val restoredDraft = BatteryDraftCodec.decode(savedStateHandle[KEY_DRAFT])
+    private var hasLocalEdits = savedStateHandle.get<Boolean>(KEY_DIRTY) == true &&
+        restoredDraft != null
+    private var latestStored = BatteryStatusConfig()
+    private val _uiState = MutableStateFlow(
+        BatteryEditorUiState(
+            config = restoredDraft ?: BatteryStatusConfig(),
+            hasUnsavedChanges = hasLocalEdits
+        )
+    )
     val uiState: StateFlow<BatteryEditorUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             combine(catalogRepository.snapshot, settingsRepository.config) { catalog, stored ->
+                latestStored = stored
                 val theme = catalog.themes.firstOrNull { it.id == themeId }
                 val draft = if (hasLocalEdits) _uiState.value.config else stored
                 BatteryEditorUiState(
@@ -41,7 +50,9 @@ class BatteryEditorViewModel @Inject constructor(
                     backgrounds = catalog.backgrounds,
                     emotions = catalog.emotions,
                     animations = catalog.animations,
-                    isThemeAvailable = theme?.assetsReady == true || themeId == BUILT_IN_BATTERY_THEME_ID
+                    isThemeAvailable =
+                        theme?.assetsReady == true || themeId == BUILT_IN_BATTERY_THEME_ID,
+                    hasUnsavedChanges = hasLocalEdits
                 )
             }.collect { state -> _uiState.value = state }
         }
@@ -67,16 +78,51 @@ class BatteryEditorViewModel @Inject constructor(
         settingsRepository.applyConfig(
             state.config.copy(enabled = true, selectedThemeId = state.theme.id)
         )
-        hasLocalEdits = false
+        clearDraft()
+        _uiState.update {
+            it.copy(
+                config = it.config.copy(enabled = true, selectedThemeId = state.theme.id),
+                hasUnsavedChanges = false
+            )
+        }
     }
 
     fun disable() {
-        hasLocalEdits = false
+        clearDraft()
         settingsRepository.setEnabled(false)
+        _uiState.update {
+            it.copy(config = it.config.copy(enabled = false), hasUnsavedChanges = false)
+        }
+    }
+
+    fun discardDraft() {
+        clearDraft()
+        _uiState.update { state ->
+            state.copy(
+                config = latestStored.copy(selectedThemeId = state.theme.id),
+                hasUnsavedChanges = false
+            )
+        }
     }
 
     private fun update(transform: BatteryStatusConfig.() -> BatteryStatusConfig) {
         hasLocalEdits = true
-        _uiState.update { it.copy(config = transform(it.config)) }
+        _uiState.update {
+            val config = transform(it.config)
+            savedStateHandle[KEY_DRAFT] = BatteryDraftCodec.encode(config)
+            savedStateHandle[KEY_DIRTY] = true
+            it.copy(config = config, hasUnsavedChanges = true)
+        }
+    }
+
+    private fun clearDraft() {
+        hasLocalEdits = false
+        savedStateHandle[KEY_DRAFT] = null
+        savedStateHandle[KEY_DIRTY] = false
+    }
+
+    private companion object {
+        const val KEY_DRAFT = "battery_editor_draft"
+        const val KEY_DIRTY = "battery_editor_dirty"
     }
 }

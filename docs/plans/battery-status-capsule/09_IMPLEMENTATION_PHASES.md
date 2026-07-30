@@ -1,17 +1,19 @@
 # 09 — Implementation Phases
 
-> **IMPLEMENTATION IN PROGRESS**
+> **PRODUCT IMPLEMENTATION COMPLETE — EXTERNAL RELEASE GATES PENDING**
 
-Source ngày 2026-07-30 đã hoàn thành vertical slice debug: normalized local catalog,
-generated debug assets, DataStore config, Catalog/Editor và Accessibility cover backend.
-Các phase bên dưới vẫn là release roadmap; trạng thái thực tế được ghi ở từng phase.
+Source ngày 2026-07-30 đã hoàn thành flow product cover-only: normalized local catalog,
+generated debug assets, DataStore config, Catalog/Editor, process-death draft, shared
+layout priority/RTL và Accessibility cover backend. Các phase bên dưới phân biệt rõ phần
+đã hoàn thành trong repository với gate cần owner/thiết bị/Play/server bên ngoài.
 
 Mỗi phase là một commit/PR độc lập, compile/test/docs pass trước phase sau. Không đánh dấu
 `IMPLEMENTATION_PROGRESS.md` Done cho đến khi device verification tương ứng hoàn tất.
 
 ## Phase 0 — Product decisions and asset provenance
 
-**Status: Partial.** Owner đã chọn Accessibility cover direction và Home Battery entry.
+**Status: Decision complete, external approval pending.** Owner đã chọn Accessibility
+cover-only và Home Battery entry.
 Raw snapshot vẫn `REVIEW_REQUIRED`; Figma/asset-license inventory và release policy approval
 chưa hoàn tất.
 
@@ -38,9 +40,8 @@ mode chưa được code nếu owner chưa duyệt policy/disclosure direction.
 
 ## Phase 1 — Domain, policies and local persistence
 
-**Status: Implemented for current vertical slice.** Model/repository/parser/DataStore,
-sanitization policy, Hilt và JVM tests đã có. Layout priority/RTL migration test nâng cao
-còn thuộc hardening.
+**Status: Implemented.** Model/repository/parser/DataStore, sanitization policy, Hilt,
+versioned draft codec, narrow-width layout priority và RTL physical-side JVM tests đã có.
 
 ### Scope
 
@@ -69,10 +70,10 @@ Config round-trip deterministic; no Android View/service required; JVM tests pas
 
 ## Phase 2 — Catalog and editor UI with deterministic preview
 
-**Status: Partial.** Catalog/category/favorite/Premium gate, overview + editor con cho
-theme/màu/kích thước/background/emotion/battery, navigation, Home entry và analytics đã có.
-Generic editor cho trạng thái hệ thống, dirty-draft confirmation, Compose/golden/RTL tests
-chưa có.
+**Status: Functionally implemented.** Catalog/category/favorite/Premium gate, overview,
+editor con cho toàn bộ component, shared deterministic preview, dirty confirmation,
+process-death restore, navigation, Home entry và analytics đã có. Golden/device
+accessibility/large-font validation còn là release hardening.
 
 ### Scope
 
@@ -100,8 +101,8 @@ User can configure every MVP field, process-death restore draft và Apply local 
 
 ## Phase 3 — Standard overlay host and basic runtime
 
-**Status: Superseded for current slice.** Owner ưu tiên Accessibility cover. Chưa migrate
-`PetOverlayService` hoặc triển khai standard `TYPE_APPLICATION_OVERLAY` below-bar backend.
+**Status: Not applicable to approved cover-only scope.** Legacy `BELOW_SYSTEM_BAR` được
+sanitize về cover; không mở thêm permission/FGS surface cho standard overlay.
 
 ### Scope
 
@@ -133,7 +134,7 @@ regression và Stop sạch.
 
 ## Phase 4 — Accessibility status-cover backend
 
-**Status: Implemented in debug, device/policy verification pending.** Service metadata,
+**Status: Implemented, device/policy verification pending.** Service metadata,
 disclosure, non-touchable window, battery/time renderer, keyguard/screen-off/landscape hide
 đã có. OEM matrix, notification-shade/privacy-indicator proof và Play release evidence chưa
 hoàn tất.
@@ -172,8 +173,10 @@ Nếu gate không đạt, phase bị loại khỏi release và below-bar mode v�
 
 ## Phase 5 — Full device-status components
 
-**Status: Partial.** Current runtime có time, percentage, charging, theme battery/emoji
-và background/emotion trang trí. Trạng thái thiết bị còn lại chưa triển khai.
+**Status: Functionally implemented, profiling pending.** Runtime có time/date, percentage,
+charging, theme battery/emoji, background/emotion/animation, connectivity transport,
+airplane, ringer và hotspot best-effort. Renderer fail-closed khi asset lỗi, dừng khi
+screen-off/keyguard/landscape và tự giảm component trên màn hình hẹp.
 
 ### Scope
 
@@ -226,6 +229,9 @@ Remote content fail không phá applied capsule; invalid pack không vào render
 
 ## Phase 7 — Premium, Rewarded and approved ads
 
+**Status: Premium route implemented; Rewarded/new ads blocked by owner decision.** Không
+tự thêm ad placement hoặc Rewarded semantics khi chưa có phê duyệt sản phẩm.
+
 ### Scope
 
 - Free/Rewarded/Premium entitlement.
@@ -250,6 +256,10 @@ Monetization không chặn free starter experience, không xuất hiện trong o
 phá Apply/navigation.
 
 ## Phase 8 — Release hardening
+
+**Status: Repository hardening implemented; physical/policy evidence pending.** Debug và
+release compile, JVM tests, asset audit và fail-closed release catalog đã có. ADB không
+khả dụng trong môi trường verify ngày 2026-07-30 nên không đánh dấu device matrix.
 
 ### Scope
 

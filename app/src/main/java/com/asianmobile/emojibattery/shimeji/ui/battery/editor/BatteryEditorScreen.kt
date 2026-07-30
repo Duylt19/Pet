@@ -1,6 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.ui.battery.editor
 
 import android.app.Activity
+import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,6 +13,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,11 +57,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -76,6 +80,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutItem
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutPolicy
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDataType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFont
@@ -115,6 +122,7 @@ fun BatteryEditorScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDisclosure by remember { mutableStateOf(false) }
+    var showDiscardConfirmation by rememberSaveable { mutableStateOf(false) }
     var pageName by rememberSaveable {
         mutableStateOf(BatteryEditorPage.OVERVIEW.name)
     }
@@ -122,6 +130,13 @@ fun BatteryEditorScreen(
         ?: BatteryEditorPage.OVERVIEW
     val openPage: (BatteryEditorPage) -> Unit = { pageName = it.name }
     val closePage = { pageName = BatteryEditorPage.OVERVIEW.name }
+    val requestBack = {
+        when {
+            page != BatteryEditorPage.OVERVIEW -> closePage()
+            state.hasUnsavedChanges -> showDiscardConfirmation = true
+            else -> onBack()
+        }
+    }
     var accessibilityEnabled by remember {
         mutableStateOf(BatteryAccessibility.isEnabled(context))
     }
@@ -133,7 +148,10 @@ fun BatteryEditorScreen(
     }
 
     TrackScreenView(ScreenName.BATTERY_EDITOR)
-    BackHandler(enabled = page != BatteryEditorPage.OVERVIEW, onBack = closePage)
+    BackHandler(
+        enabled = page != BatteryEditorPage.OVERVIEW || state.hasUnsavedChanges,
+        onBack = requestBack
+    )
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -148,7 +166,7 @@ fun BatteryEditorScreen(
         state = state,
         page = page,
         accessibilityEnabled = accessibilityEnabled,
-        onBack = if (page == BatteryEditorPage.OVERVIEW) onBack else closePage,
+        onBack = requestBack,
         onDone = closePage,
         onOpenPage = openPage,
         onShowTime = viewModel::setShowTime,
@@ -188,6 +206,30 @@ fun BatteryEditorScreen(
             dismissButton = {
                 TextButton(onClick = { showDisclosure = false }) {
                     Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showDiscardConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDiscardConfirmation = false },
+            title = { Text(stringResource(R.string.battery_discard_title)) },
+            text = { Text(stringResource(R.string.battery_discard_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDiscardConfirmation = false
+                        viewModel.discardDraft()
+                        onBack()
+                    }
+                ) {
+                    Text(stringResource(R.string.battery_discard_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardConfirmation = false }) {
+                    Text(stringResource(R.string.battery_discard_keep_editing))
                 }
             }
         )
@@ -747,12 +789,14 @@ private fun ChargeEditor(
 }
 
 @Composable
+@SuppressLint("DiscouragedApi")
 private fun ChargeStylePicker(
     selected: Int,
     color: Int,
     onSelected: (Int) -> Unit
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     Text(
         text = stringResource(R.string.battery_charge_style),
         color = colorResource(R.color.colors_776D84),
@@ -765,8 +809,8 @@ private fun ChargeStylePicker(
         modifier = Modifier.padding(vertical = dimensionResource(SdpR.dimen._7sdp))
     ) {
         items((1..12).toList()) { index ->
-            val resourceId = remember(index) {
-                context.resources.getIdentifier(
+            val resourceId = remember(index, resources) {
+                resources.getIdentifier(
                     "charge_%02d".format(index),
                     "drawable",
                     context.packageName
@@ -1029,15 +1073,51 @@ private fun EditorDivider() {
 @Composable
 private fun StatusComponentsGrid(onOpenPage: (BatteryEditorPage) -> Unit) {
     val components = listOf(
-        R.string.battery_component_animation to BatteryEditorPage.ANIMATION,
-        R.string.battery_component_wifi to BatteryEditorPage.WIFI,
-        R.string.battery_component_data to BatteryEditorPage.DATA,
-        R.string.battery_component_signal to BatteryEditorPage.SIGNAL,
-        R.string.battery_component_airplane to BatteryEditorPage.AIRPLANE,
-        R.string.battery_component_hotspot to BatteryEditorPage.HOTSPOT,
-        R.string.battery_component_ringer to BatteryEditorPage.RINGER,
-        R.string.battery_component_charge to BatteryEditorPage.CHARGE,
-        R.string.battery_component_date to BatteryEditorPage.DATE_TIME
+        StatusComponentDestination(
+            R.string.battery_component_animation,
+            BatteryEditorPage.ANIMATION,
+            "ic_notification_pet"
+        ),
+        StatusComponentDestination(
+            R.string.battery_component_wifi,
+            BatteryEditorPage.WIFI,
+            "ic_wifi"
+        ),
+        StatusComponentDestination(
+            R.string.battery_component_data,
+            BatteryEditorPage.DATA,
+            "ic_data"
+        ),
+        StatusComponentDestination(
+            R.string.battery_component_signal,
+            BatteryEditorPage.SIGNAL,
+            "ic_signal"
+        ),
+        StatusComponentDestination(
+            R.string.battery_component_airplane,
+            BatteryEditorPage.AIRPLANE,
+            "ic_air_plane"
+        ),
+        StatusComponentDestination(
+            R.string.battery_component_hotspot,
+            BatteryEditorPage.HOTSPOT,
+            "ic_hostpot"
+        ),
+        StatusComponentDestination(
+            R.string.battery_component_ringer,
+            BatteryEditorPage.RINGER,
+            "ic_ringer0"
+        ),
+        StatusComponentDestination(
+            R.string.battery_component_charge,
+            BatteryEditorPage.CHARGE,
+            "ic_charge"
+        ),
+        StatusComponentDestination(
+            R.string.battery_component_date,
+            BatteryEditorPage.DATE_TIME,
+            "ic_datetime"
+        )
     )
     Column(
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
@@ -1049,11 +1129,12 @@ private fun StatusComponentsGrid(onOpenPage: (BatteryEditorPage) -> Unit) {
                     dimensionResource(SdpR.dimen._8sdp)
                 )
             ) {
-                rowComponents.forEach { (label, page) ->
+                rowComponents.forEach { destination ->
                     StatusComponentTile(
-                        label = stringResource(label),
+                        label = stringResource(destination.label),
+                        iconName = destination.iconName,
                         modifier = Modifier.weight(1f),
-                        onClick = { onOpenPage(page) }
+                        onClick = { onOpenPage(destination.page) }
                     )
                 }
                 if (rowComponents.size == 1) Spacer(Modifier.weight(1f))
@@ -1063,11 +1144,18 @@ private fun StatusComponentsGrid(onOpenPage: (BatteryEditorPage) -> Unit) {
 }
 
 @Composable
+@SuppressLint("DiscouragedApi")
 private fun StatusComponentTile(
     label: String,
+    iconName: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val resources = LocalResources.current
+    val iconResource = remember(iconName, resources) {
+        resources.getIdentifier(iconName, "drawable", context.packageName)
+    }
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
@@ -1090,11 +1178,20 @@ private fun StatusComponentTile(
                 .background(colorResource(R.color.colors_E0F7F1)),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = label.take(1),
-                color = colorResource(R.color.colors_12B890),
-                fontFamily = FontFamily(Font(R.font.inter_bold))
-            )
+            if (iconResource != 0) {
+                Icon(
+                    painter = painterResource(iconResource),
+                    contentDescription = null,
+                    tint = colorResource(R.color.colors_12B890),
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._20sdp))
+                )
+            } else {
+                Text(
+                    text = label.take(1),
+                    color = colorResource(R.color.colors_12B890),
+                    fontFamily = FontFamily(Font(R.font.inter_bold))
+                )
+            }
         }
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._5sdp)))
         Text(
@@ -1110,6 +1207,12 @@ private fun StatusComponentTile(
         )
     }
 }
+
+private data class StatusComponentDestination(
+    val label: Int,
+    val page: BatteryEditorPage,
+    val iconName: String
+)
 
 @Composable
 private fun AccessibilityState(accessibilityEnabled: Boolean) {
@@ -1177,6 +1280,7 @@ private fun ApplyFooter(
 @Composable
 private fun BatteryPreview(state: BatteryEditorUiState) {
     val config = state.config
+    val previewDescription = stringResource(R.string.battery_overlay_description, 82)
     val backgroundPath = state.backgrounds
         .firstOrNull { it.id == config.backgroundDecorationId }
         ?.assetPath
@@ -1186,13 +1290,31 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
     val animationPath = state.animations
         .firstOrNull { it.name == config.animationAssetName }
         ?.assetPath
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .height(config.barHeightDp.dp)
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._20sdp)))
             .background(Color(config.backgroundColorArgb))
+            .semantics { contentDescription = previewDescription }
     ) {
+        val layout = remember(
+            config,
+            state.theme.emojiPath,
+            emotionPath,
+            animationPath,
+            maxWidth
+        ) {
+            batteryPreviewLayout(
+                config = config,
+                availableWidthDp = maxWidth.value -
+                    config.leftPaddingDp -
+                    config.rightPaddingDp,
+                hasEmoji = state.theme.emojiPath != null,
+                hasEmotion = emotionPath != null,
+                hasAnimation = animationPath != null
+            )
+        }
         backgroundPath?.let { path ->
             AsyncImage(
                 model = path,
@@ -1210,14 +1332,14 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (config.showTime) {
+            if (layout.shows(BatteryStatusComponent.TIME)) {
                 Text(
                     text = stringResource(R.string.battery_preview_time),
                     color = Color(config.foregroundColorArgb),
                     fontFamily = FontFamily(Font(R.font.inter_semibold))
                 )
             }
-            if (config.showDateTime) {
+            if (layout.shows(BatteryStatusComponent.DATE)) {
                 Text(
                     text = stringResource(R.string.battery_preview_date),
                     color = Color(config.dateTimeColorArgb),
@@ -1225,7 +1347,7 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
                     maxLines = 1
                 )
             }
-            if (config.showAnimation) {
+            if (layout.shows(BatteryStatusComponent.ANIMATION)) {
                 animationPath?.let { path ->
                     AsyncImage(
                         model = path,
@@ -1235,15 +1357,17 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
                     )
                 }
             }
-            state.theme.emojiPath?.let { path ->
-                AsyncImage(
-                    model = path,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(config.emojiSizeDp.dp)
-                )
+            if (layout.shows(BatteryStatusComponent.THEME_EMOJI)) {
+                state.theme.emojiPath?.let { path ->
+                    AsyncImage(
+                        model = path,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.size(config.emojiSizeDp.dp)
+                    )
+                }
             }
-            if (config.showEmotion) {
+            if (layout.shows(BatteryStatusComponent.EMOTION)) {
                 emotionPath?.let { path ->
                     AsyncImage(
                         model = path,
@@ -1254,23 +1378,27 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
                 }
             }
             Spacer(Modifier.weight(1f))
-            Text(
-                text = stringResource(R.string.battery_preview_signal),
-                color = Color(config.signalColorArgb),
-                fontSize = config.signalSizeDp.sp
-            )
-            Text(
-                text = config.dataType.label,
-                color = Color(config.dataColorArgb),
-                fontSize = config.dataSizeDp.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = stringResource(R.string.battery_preview_wifi),
-                color = Color(config.wifiColorArgb),
-                fontSize = config.wifiSizeDp.sp
-            )
-            if (config.showPercentage) {
+            if (layout.shows(BatteryStatusComponent.CELLULAR)) {
+                Text(
+                    text = stringResource(R.string.battery_preview_signal),
+                    color = Color(config.signalColorArgb),
+                    fontSize = config.signalSizeDp.sp
+                )
+                Text(
+                    text = config.dataType.label,
+                    color = Color(config.dataColorArgb),
+                    fontSize = config.dataSizeDp.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            if (layout.shows(BatteryStatusComponent.WIFI)) {
+                Text(
+                    text = stringResource(R.string.battery_preview_wifi),
+                    color = Color(config.wifiColorArgb),
+                    fontSize = config.wifiSizeDp.sp
+                )
+            }
+            if (layout.shows(BatteryStatusComponent.PERCENTAGE)) {
                 Text(
                     text = stringResource(R.string.battery_preview_percentage),
                     color = Color(config.percentColorArgb),
@@ -1278,25 +1406,116 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
                     fontSize = config.percentSizeDp.sp
                 )
             }
-            state.theme.batteryPath?.let { path ->
-                AsyncImage(
-                    model = path,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(config.batterySizeDp.dp)
-                )
-            } ?: Box(
-                modifier = Modifier
-                    .size(
-                        width = config.batterySizeDp.dp,
-                        height = (config.batterySizeDp * 0.48f).dp
+            if (layout.shows(BatteryStatusComponent.BATTERY)) {
+                state.theme.batteryPath?.let { path ->
+                    AsyncImage(
+                        model = path,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.size(config.batterySizeDp.dp)
                     )
-                    .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._3sdp)))
-                    .background(Color(config.foregroundColorArgb))
-            )
+                } ?: Box(
+                    modifier = Modifier
+                        .size(
+                            width = config.batterySizeDp.dp,
+                            height = (config.batterySizeDp * 0.48f).dp
+                        )
+                        .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._3sdp)))
+                        .background(Color(config.foregroundColorArgb))
+                )
+            }
         }
     }
 }
+
+private fun batteryPreviewLayout(
+    config: BatteryStatusConfig,
+    availableWidthDp: Float,
+    hasEmoji: Boolean,
+    hasEmotion: Boolean,
+    hasAnimation: Boolean
+) = BatteryStatusLayoutPolicy().resolve(
+    availableWidth = availableWidthDp,
+    items = buildList {
+        val gap = 4f
+        if (config.showTime) {
+            add(
+                BatteryStatusLayoutItem(
+                    BatteryStatusComponent.TIME,
+                    width = config.barHeightDp * 1.25f + gap,
+                    priority = 100
+                )
+            )
+        }
+        if (config.showDateTime) {
+            add(
+                BatteryStatusLayoutItem(
+                    BatteryStatusComponent.DATE,
+                    width = config.dateTimeSizeDp * 4.2f + gap,
+                    priority = 20
+                )
+            )
+        }
+        if (config.showAnimation && hasAnimation) {
+            add(
+                BatteryStatusLayoutItem(
+                    BatteryStatusComponent.ANIMATION,
+                    width = config.animationSizeDp + gap,
+                    priority = 40
+                )
+            )
+        }
+        if (hasEmoji) {
+            add(
+                BatteryStatusLayoutItem(
+                    BatteryStatusComponent.THEME_EMOJI,
+                    width = config.emojiSizeDp + gap,
+                    priority = 80
+                )
+            )
+        }
+        if (config.showEmotion && hasEmotion) {
+            add(
+                BatteryStatusLayoutItem(
+                    BatteryStatusComponent.EMOTION,
+                    width = config.emojiSizeDp + gap,
+                    priority = 30
+                )
+            )
+        }
+        add(
+            BatteryStatusLayoutItem(
+                BatteryStatusComponent.BATTERY,
+                width = config.batterySizeDp + gap,
+                priority = 110,
+                required = true
+            )
+        )
+        if (config.showPercentage) {
+            add(
+                BatteryStatusLayoutItem(
+                    BatteryStatusComponent.PERCENTAGE,
+                    width = config.percentSizeDp * 2.5f + gap,
+                    priority = 95
+                )
+            )
+        }
+        add(
+            BatteryStatusLayoutItem(
+                BatteryStatusComponent.WIFI,
+                width = config.wifiSizeDp * 1.4f + gap,
+                priority = 90
+            )
+        )
+        add(
+            BatteryStatusLayoutItem(
+                BatteryStatusComponent.CELLULAR,
+                width = config.signalSizeDp * 1.4f + config.dataSizeDp * 1.8f + gap * 2,
+                priority = 70
+            )
+        )
+    }
+)
 
 @Composable
 private fun ToggleRow(label: String, checked: Boolean, onChecked: (Boolean) -> Unit) {
@@ -1399,7 +1618,8 @@ private fun ColorPalette(label: String, selected: Int, onColor: (Int) -> Unit) {
                         shape = CircleShape
                     )
                     .semantics {
-                        contentDescription = label
+                        contentDescription = "$label #${color.toArgb().toUInt().toString(16)}"
+                        this.selected = isSelected
                     }
                     .clickable { onColor(color.toArgb()) }
             )
@@ -1483,7 +1703,10 @@ private fun DecorationOption(
                 ),
                 shape = RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp))
             )
-            .semantics { this.contentDescription = contentDescription }
+            .semantics {
+                this.contentDescription = contentDescription
+                this.selected = selected
+            }
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
         content = content
