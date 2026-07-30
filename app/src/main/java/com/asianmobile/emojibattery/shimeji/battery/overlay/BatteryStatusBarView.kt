@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Movie
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
@@ -42,7 +41,6 @@ class BatteryStatusBarView(context: Context) : View(context) {
     private val density = resources.displayMetrics.density
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val destination = RectF()
-    private val clipPath = Path()
     private val drawableCache = mutableMapOf<String, Drawable?>()
     private val layoutPolicy = BatteryStatusLayoutPolicy()
     private var config = BatteryStatusConfig()
@@ -111,16 +109,20 @@ class BatteryStatusBarView(context: Context) : View(context) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val radius = height / 2f
         val privacyReserve = config.privacyReserveDp * density
-        val backgroundRight = (width - privacyReserve).coerceAtLeast(height.toFloat())
-        drawBackground(canvas, backgroundRight, radius)
+        val horizontalBounds = resolveBatteryStatusHorizontalBounds(
+            widthPx = width.toFloat(),
+            minimumContentRightPx = height.toFloat(),
+            privacyReservePx = privacyReserve
+        )
+        val contentRight = horizontalBounds.contentRightPx
+        drawBackground(canvas, horizontalBounds.backgroundRightPx)
 
         val centerY = height / 2f
         val leftPadding = config.leftPaddingDp * density
         val rightPadding = config.rightPaddingDp * density
         val gap = 4f * density
-        val availableWidth = backgroundRight - leftPadding - rightPadding
+        val availableWidth = contentRight - leftPadding - rightPadding
         val layout = cachedLayout
             ?.takeIf { cachedLayoutWidth == availableWidth }
             ?: resolveLayout(
@@ -138,7 +140,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
         val physicalSides = BatteryStatusPhysicalSides.resolve(isRtl)
         drawLeadingGroup(
             canvas = canvas,
-            anchor = if (isRtl) backgroundRight - rightPadding else leftPadding,
+            anchor = if (isRtl) contentRight - rightPadding else leftPadding,
             centerY = centerY,
             fromLeft = physicalSides.leadingFromLeft,
             gap = gap,
@@ -148,7 +150,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
         )
         drawTrailingGroup(
             canvas = canvas,
-            anchor = if (isRtl) leftPadding else backgroundRight - rightPadding,
+            anchor = if (isRtl) leftPadding else contentRight - rightPadding,
             centerY = centerY,
             fromLeft = physicalSides.trailingFromLeft,
             gap = gap,
@@ -471,22 +473,12 @@ class BatteryStatusBarView(context: Context) : View(context) {
         return paint.measureText(value)
     }
 
-    private fun drawBackground(canvas: Canvas, backgroundRight: Float, radius: Float) {
+    private fun drawBackground(canvas: Canvas, backgroundRight: Float) {
         paint.color = config.backgroundColorArgb
-        canvas.drawRoundRect(0f, 0f, backgroundRight, height.toFloat(), radius, radius, paint)
+        canvas.drawRect(0f, 0f, backgroundRight, height.toFloat(), paint)
         background?.let { bitmap ->
-            val saveCount = canvas.save()
-            clipPath.reset()
-            clipPath.addRoundRect(
-                RectF(0f, 0f, backgroundRight, height.toFloat()),
-                radius,
-                radius,
-                Path.Direction.CW
-            )
-            canvas.clipPath(clipPath)
             destination.set(0f, 0f, backgroundRight, height.toFloat())
             canvas.drawBitmap(bitmap, null, destination, paint)
-            canvas.restoreToCount(saveCount)
         }
     }
 

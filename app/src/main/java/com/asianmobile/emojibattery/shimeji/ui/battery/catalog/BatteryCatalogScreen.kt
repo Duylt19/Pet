@@ -1,6 +1,8 @@
 package com.asianmobile.emojibattery.shimeji.ui.battery.catalog
 
 import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,6 +39,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,6 +64,7 @@ import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_CATEGORY_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
@@ -79,6 +85,21 @@ fun BatteryCatalogScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    var pendingAccessibilityThemeId by rememberSaveable { mutableStateOf<Int?>(null) }
+    var showAccessibilityDisclosure by rememberSaveable { mutableStateOf(false) }
+    val continueToEditorIfAllowed = {
+        val pendingThemeId = pendingAccessibilityThemeId
+        if (pendingThemeId != null && BatteryAccessibility.isEnabled(context)) {
+            pendingAccessibilityThemeId = null
+            showAccessibilityDisclosure = false
+            onOpenTheme(pendingThemeId)
+        }
+    }
+    val accessibilityLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        continueToEditorIfAllowed()
+    }
     val requiresRewardAd = !state.isPremium && state.themes.any { theme ->
         theme.assetsReady &&
             theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
@@ -93,7 +114,14 @@ fun BatteryCatalogScreen(
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                is BatteryCatalogEffect.OpenTheme -> onOpenTheme(effect.themeId)
+                is BatteryCatalogEffect.OpenTheme -> {
+                    if (BatteryAccessibility.isEnabled(context)) {
+                        onOpenTheme(effect.themeId)
+                    } else {
+                        pendingAccessibilityThemeId = effect.themeId
+                        showAccessibilityDisclosure = true
+                    }
+                }
                 BatteryCatalogEffect.ShowRewardedAd -> {
                     val activity = context as? Activity
                     if (activity == null) {
@@ -109,9 +137,12 @@ fun BatteryCatalogScreen(
             }
         }
     }
-    DisposableEffect(lifecycleOwner) {
+    DisposableEffect(lifecycleOwner, pendingAccessibilityThemeId) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshEntitlement()
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshEntitlement()
+                continueToEditorIfAllowed()
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
@@ -125,6 +156,28 @@ fun BatteryCatalogScreen(
         onTheme = viewModel::requestTheme,
         onRetry = viewModel::refresh
     )
+    if (showAccessibilityDisclosure) {
+        AlertDialog(
+            onDismissRequest = { showAccessibilityDisclosure = false },
+            title = { Text(stringResource(R.string.battery_accessibility_preview_title)) },
+            text = { Text(stringResource(R.string.battery_accessibility_preview_disclosure)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showAccessibilityDisclosure = false
+                        accessibilityLauncher.launch(BatteryAccessibility.settingsIntent())
+                    }
+                ) {
+                    Text(stringResource(R.string.battery_open_accessibility_settings))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAccessibilityDisclosure = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
     val pendingTheme = state.themes.firstOrNull { it.id == state.pendingUnlockThemeId }
     if (pendingTheme != null) {
         BatteryRewardUnlockDialog(

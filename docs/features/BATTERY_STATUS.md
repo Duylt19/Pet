@@ -14,11 +14,14 @@ Vertical slice hiện đã có trong source:
 - Editor dùng overview → editor con Size/Appearance/Emoji/Battery và 9 status component,
   preview draft trực tiếp trên Accessibility status bar, Apply cố định, cảnh báo bỏ
   draft, phục hồi draft sau process death, 20 nền, 20 emotion và 26 animation đã audit.
-- Apply lưu DataStore; nếu chưa bật service, app luôn hiện disclosure trước khi mở
-  Accessibility Settings.
+- Catalog kiểm tra Accessibility trước khi mở editor. Nếu service chưa bật, app hiện
+  disclosure rồi mở Accessibility Settings; chỉ khi quay lại và quyền đang bật mới vào
+  editor để live preview có hiệu lực ngay. Apply vẫn giữ guard tương tự cho deep route.
 - `StatusBarAccessibilityService` vẽ một `TYPE_ACCESSIBILITY_OVERLAY` full-width,
   non-touchable ở cạnh trên; cập nhật pin, charging, time/date, network, airplane, ringer,
   hotspot và dùng theme/nền/emotion/animation đã chọn.
+- Background màu/ảnh phủ đúng toàn bộ chiều ngang window và không bo góc. Khoảng
+  `privacyReserveDp` chỉ giới hạn trailing content, không cắt hoặc làm trong suốt nền.
 - Service ẩn khi màn hình khóa, màn hình tắt hoặc portrait không còn hiệu lực; không
   auto-start sau boot.
 - Pet và pin được renderer như một pair: cùng anchor ở cụm battery phía trailing, pin
@@ -39,16 +42,15 @@ Battery entry và ngăn service attach window cho tới khi các gate được d
 ## Luồng người dùng
 
 ```text
-Home → Battery styles → chọn theme (khởi tạo pet + pin cùng item)
-                                  → Customize status bar
+Home → Battery styles → chọn theme
+                          ├─ Accessibility chưa bật → disclosure → Settings
+                          │                              └─ bật → Customize status bar
+                          └─ Accessibility đã bật → Customize status bar
+                                      ├─ khởi tạo pet + pin cùng item
                                       ├─ đổi pet và pin độc lập theo category
                                       ├─ live preview trên status bar
                                       ├─ editor con → Done → overview
-                                      └─ Apply
-                                          ├─ service đã bật → persist + render
-                                          └─ chưa bật → disclosure
-                                              → Accessibility Settings
-                                              → quay lại → persist + render
+                                      └─ Apply → persist + render
 ```
 
 Premium theme chưa mở hiển thị dialog Rewarded/Premium. Theme thiếu hoặc sai checksum
@@ -133,6 +135,20 @@ Các guardrail bắt buộc:
 - Chừa khoảng phải cho system/privacy indicators.
 - Chỉ mở Settings sau disclosure chủ động; không tự bật service.
 - User có thể tắt service bất cứ lúc nào trong Android Settings.
+
+### Lưu ý khi deploy debug
+
+Quyền Accessibility thuộc `Settings.Secure`, app không thể tự cấp, backup hoặc phục hồi.
+Source không gọi `disableSelf()` và không ghi/xóa danh sách service đã bật.
+
+- Package update cùng `applicationId`, component name và signing key chỉ rebind service,
+  bình thường không mất quyền.
+- Uninstall/reinstall, clear app data, đổi application ID/signature hoặc force-stop package
+  có thể làm Android xóa service khỏi enabled list.
+- Android Studio có tùy chọn **Force stop running application before launching activity**.
+  Khi test feature này nên bỏ chọn tùy chọn đó; hoặc dùng `./gradlew installDebug` rồi mở
+  app từ launcher trên thiết bị. Không dùng `adb uninstall`, `pm clear` hoặc
+  `am force-stop` giữa các lần test nếu muốn giữ quyền.
 
 Play release cần khai báo `isAccessibilityTool=false`, video demo, disclosure trong app,
 Privacy Policy/Data Safety phù hợp và chứng minh chức năng cốt lõi. Nếu review không đạt,

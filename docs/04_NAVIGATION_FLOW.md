@@ -15,7 +15,7 @@
 | `settings` | Settings | My Pet Family roster + app/support hub |
 | `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
 | `swarm_customization` | Edit Pet Swarm | Character, count, base size/speed, random variation và vùng di chuyển |
-| `battery_catalog` | Battery Styles | Catalog local + category/favorite/Premium gate |
+| `battery_catalog` | Battery Styles | Catalog local + category/favorite/Premium gate; Accessibility gate trước editor |
 | `battery_editor/{themeId}` | Customize Status Bar | Theme route khởi tạo cặp pet+pin; overview cho phép đổi hai phần độc lập, live preview qua Accessibility; editor con, Rewarded/Premium, Apply và disclosure |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
@@ -47,10 +47,10 @@ Customize Pet ──Remove──> Settings (shift slot sau, giữ profile riêng
 Catalog ──already prepared pack──> Detail ──Use for Pet──> Catalog
 Home ──Settings──> Settings ──Language──> Language Settings
 Home ──Premium──> Premium(in-app)
-Home ──Battery tab──> Battery Styles ──theme──> Customize Battery Bar
+Home ──Battery tab──> Battery Styles ──theme──> Accessibility gate
+Accessibility gate ──enabled/return enabled──> Customize Battery Bar
   └─ theme ID khởi tạo cả pet + pin; editor có thể mix hai theme khác nhau
 Customize Battery Bar ──locked pet/pin──> Rewarded hoặc Premium ──return──> chọn component
-Customize Battery Bar ──Apply(service off)──> disclosure ──> System Accessibility Settings
 Customize Battery Bar ──Apply(service on)──> persist config + accessibility overlay
 ```
 
@@ -67,6 +67,9 @@ Customize Battery Bar ──Apply(service on)──> persist config + accessibil
 - Battery Editor pop về Battery Styles; Battery Styles pop về Home. Premium mở từ
   catalog hoặc picker component trong editor rồi quay lại đúng destination theo back stack;
   editor refresh entitlement và hoàn tất pending component selection khi resume.
+- Theme selection trong Battery Styles chỉ navigate sau khi Accessibility đang bật.
+  Pending theme ID dùng saveable state nên quay lại từ Settings/process recreation vẫn mở
+  đúng editor; cancel Settings giữ user ở catalog. Editor vẫn tự gate Apply cho deep route.
 - Catalog là boundary authoritative cho Mixed slot Rewarded dù được mở từ Home, Settings
   hay deep route. Chỉ slot kế tiếp được mở; đóng/fail ad không tăng capacity. Premium
   bypass gate và entitlement được refresh khi Catalog resume.

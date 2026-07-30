@@ -935,6 +935,8 @@
     <string name="battery_preview_signal" translatable="false">▂▄▆</string>
     <string name="battery_preview_wifi" translatable="false">⌁</string>
     <string name="battery_accessibility_title">Allow the battery status bar?</string>
+    <string name="battery_accessibility_preview_title">Turn on status bar preview</string>
+    <string name="battery_accessibility_preview_disclosure">Accessibility access must be enabled before editing so every pet, battery and component change can be previewed directly on the status bar. Cute Pet only draws this non-interactive overlay and does not read or control screen content.</string>
     <string name="battery_accessibility_disclosure">Cute Pet uses an Accessibility service only to draw your chosen, non-interactive battery capsule above other apps. The service does not read screen text, tap controls, type, scroll, or perform actions for you. Android may still show a standard warning because Accessibility access is powerful. You can turn it off at any time in Accessibility settings.</string>
     <string name="battery_open_accessibility_settings">Open Accessibility settings</string>
     <string name="battery_accessibility_required">Accessibility access is required to keep this bar visible above other apps.</string>

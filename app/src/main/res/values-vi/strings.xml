@@ -760,6 +760,8 @@
     <string name="battery_apply">Áp dụng</string>
     <string name="battery_disable">Tắt thanh pin</string>
     <string name="battery_accessibility_title">Cho phép hiển thị thanh trạng thái pin?</string>
+    <string name="battery_accessibility_preview_title">Bật xem trước thanh trạng thái</string>
+    <string name="battery_accessibility_preview_disclosure">Bạn cần bật quyền Hỗ trợ tiếp cận trước khi chỉnh sửa để mọi thay đổi về pet, pin và thành phần được xem trực tiếp trên thanh trạng thái. Cute Pet chỉ vẽ lớp phủ không tương tác này, không đọc hoặc điều khiển nội dung màn hình.</string>
     <string name="battery_accessibility_disclosure">Cute Pet chỉ dùng dịch vụ Hỗ trợ tiếp cận để vẽ thanh pin không tương tác mà bạn đã chọn lên trên ứng dụng khác. Dịch vụ không đọc chữ trên màn hình, chạm nút, nhập liệu, cuộn hay thực hiện thao tác thay bạn. Android vẫn có thể hiện cảnh báo tiêu chuẩn vì quyền Hỗ trợ tiếp cận rất mạnh. Bạn có thể tắt quyền bất cứ lúc nào trong phần cài đặt Hỗ trợ tiếp cận.</string>
     <string name="battery_open_accessibility_settings">Mở cài đặt Hỗ trợ tiếp cận</string>
     <string name="battery_accessibility_required">Cần bật Hỗ trợ tiếp cận để thanh này luôn hiển thị trên ứng dụng khác.</string>
