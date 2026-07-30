@@ -1,6 +1,6 @@
 # 08 — Test and Release Plan
 
-> **PLANNED — NOT IMPLEMENTED**
+> **RELEASE PLAN — chưa hoàn tất device/policy matrix**
 
 ## Test pyramid
 

@@ -48,12 +48,14 @@ Research records evidence and clean-room decisions; it is not a runtime specific
 ## Owner data tools
 
 - [Clone and audit an authorized pet data snapshot](tools/PET_DATA_SNAPSHOT.md)
+- [Audit and sync the local Battery snapshot](tools/BATTERY_DATA_SNAPSHOT.md)
 
-## Planned features
+## Planned and in-progress features
 
 Các tài liệu dưới `plans/` là đặc tả đã research nhưng chưa phải capability hiện hành:
 
-- [Battery Status Capsule plan](plans/battery-status-capsule/README.md): phân tích 14
+- [Battery Status Capsule current implementation](features/BATTERY_STATUS.md) và
+  [phase plan](plans/battery-status-capsule/README.md): phân tích 14
   screenshot, standard/accessibility overlay modes, giới hạn Android/Play policy,
   product/UX, architecture, data/asset schema, navigation/state, monetization, test matrix
   và roadmap nhiều phase.

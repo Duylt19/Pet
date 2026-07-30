@@ -1,6 +1,6 @@
 # 04 — Architecture and Runtime
 
-> **PLANNED — NOT IMPLEMENTED**
+> **REFERENCE TARGET — current vertical slice chỉ triển khai Accessibility backend**
 
 ## Target dependency flow
 

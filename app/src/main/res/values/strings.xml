@@ -836,4 +836,40 @@
     <string name="media_viewer_playback_error">Unable to play this media.</string>
     <string name="media_viewer_action_failed">This action could not be completed.</string>
     <string name="media_viewer_remove_device_description">This file will be permanently removed from your device.</string>
+    <!-- Battery status capsule -->
+    <string name="home_mode_battery_tab">Battery</string>
+    <string name="battery_catalog_title">Battery styles</string>
+    <string name="battery_catalog_subtitle">Choose a status capsule, then fine-tune its size and content.</string>
+    <string name="battery_catalog_all">All</string>
+    <string name="battery_search">Search battery styles</string>
+    <string name="battery_builtin_category">Starter</string>
+    <string name="battery_builtin_theme">Cute Mint</string>
+    <string name="battery_catalog_empty">No battery styles match this filter.</string>
+    <string name="battery_catalog_local_data_hint">Only the built-in style is available. For debug builds, sync the reviewed local battery catalog to this device.</string>
+    <string name="battery_retry">Tap to refresh</string>
+    <string name="battery_favorite_action">Add or remove favorite</string>
+    <string name="battery_premium_theme">Premium style</string>
+    <string name="battery_editor_title">Customize battery bar</string>
+    <string name="battery_show_time">Show time</string>
+    <string name="battery_show_percentage">Show battery percentage</string>
+    <string name="battery_bar_height">Bar height</string>
+    <string name="battery_emoji_size">Emoji size</string>
+    <string name="battery_icon_size">Battery icon size</string>
+    <string name="battery_background_color">Bar color</string>
+    <string name="battery_foreground_color">Text and icon color</string>
+    <string name="battery_slider_value">%1$s · %2$d dp</string>
+    <string name="battery_apply">Apply</string>
+    <string name="battery_disable">Turn off battery bar</string>
+    <string name="battery_preview_time" translatable="false">09:41</string>
+    <string name="battery_preview_percentage" translatable="false">82%</string>
+    <string name="battery_accessibility_title">Allow the battery status bar?</string>
+    <string name="battery_accessibility_disclosure">Cute Pet uses an Accessibility service only to draw your chosen, non-interactive battery capsule above other apps. The service does not read screen text, tap controls, type, scroll, or perform actions for you. Android may still show a standard warning because Accessibility access is powerful. You can turn it off at any time in Accessibility settings.</string>
+    <string name="battery_open_accessibility_settings">Open Accessibility settings</string>
+    <string name="battery_accessibility_required">Accessibility access is required to keep this bar visible above other apps.</string>
+    <string name="battery_accessibility_ready">Accessibility access is on. Changes will apply to the overlay.</string>
+    <string name="battery_accessibility_service_label">Cute Pet battery status</string>
+    <string name="battery_accessibility_service_description">Displays the battery capsule selected in Cute Pet. It does not read screen content or control other apps.</string>
+    <string name="battery_overlay_description">Battery status, %1$d percent</string>
+    <string name="battery_overlay_percentage">%1$d%%</string>
+    <string name="battery_overlay_charging_percentage">%1$d%% ⚡</string>
 </resources>

@@ -1,6 +1,6 @@
 # 10 — Accessibility Status-Cover Mode
 
-> **PLANNED — NOT IMPLEMENTED**
+> **IMPLEMENTED IN DEBUG — release device/policy verification pending**
 
 ## Kết luận sau khi đối chiếu reference
 

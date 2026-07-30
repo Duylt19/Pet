@@ -1,6 +1,9 @@
 # Battery Status Capsule — Plan Index
 
-> **PLANNED — NOT IMPLEMENTED**
+> **REFERENCE PLAN — VERTICAL SLICE IMPLEMENTED, RELEASE PHASES PENDING**
+
+Current source contract và trạng thái thật:
+[`../../features/BATTERY_STATUS.md`](../../features/BATTERY_STATUS.md).
 
 Tài liệu này chuyển 14 screenshot tham chiếu thành một kế hoạch production-ready cho
 Cute Pet. Tên sản phẩm dùng trong spec là **Battery Status Capsule**: một thanh trang trí
@@ -50,7 +53,7 @@ chọn. Dù ở cover mode, app không sửa SystemUI thật.
 - App đã có overlay/notification permissions, Hilt, DataStore, ads/rewarded/premium,
   analytics và remote catalog pattern để tái sử dụng qua boundary phù hợp.
 
-## Điều kiện trước khi code
+## Điều kiện trước khi release completion
 
 - Owner chốt release scope: dưới status bar, Accessibility cover mode hoặc dual mode.
 - Nếu ship cover mode, duyệt disclosure/consent, Play declaration và video review trước

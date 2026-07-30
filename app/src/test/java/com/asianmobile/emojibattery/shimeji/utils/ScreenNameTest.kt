@@ -32,6 +32,8 @@ class ScreenNameTest {
             "pet_detail",
             "pet_customization",
             "swarm_customization",
+            "battery_catalog",
+            "battery_editor",
             "premium",
             "settings"
         )

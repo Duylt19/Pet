@@ -35,6 +35,13 @@
 | `pet_last_positions` | String | Đúng 12 record nullable, tọa độ chuẩn hóa 0–1 theo slot |
 | `pet_position_reset_revisions` | JSON String | 12 reset revision độc lập |
 | `pet_position_reset_revision` | Int | Legacy global fallback cho migration |
+| `battery_status_enabled` | Boolean | User đã Apply battery overlay |
+| `battery_status_selected_theme_id` | Int | Theme ID; `0` là built-in |
+| `battery_status_display_mode` | String enum | Cover hoặc below-system-bar |
+| `battery_status_show_time`, `battery_status_show_percentage` | Boolean | Component visibility |
+| `battery_status_*_dp` | Float | Bar/padding/emoji/icon/privacy-reserve geometry |
+| `battery_status_*_color` | Int ARGB | Renderer background/foreground |
+| `battery_status_favorite_theme_ids` | String set | Favorite local |
 
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.
 
@@ -104,6 +111,17 @@ không được restore sau process death/reboot.
 - Catalog 1.026 item không dùng Room: metadata parse một lần vào memory, filter bằng pure
   policy; binary nằm ngoài APK và chỉ ZIP được chọn mới tải về. Cache JSON cuối hợp lệ dùng
   khi offline; ZIP cache vẫn phải qua secure installer trước khi trở thành installed pack.
+
+## Battery catalog và config
+
+- `BatteryCatalogSnapshot` gồm category/theme, entitlement, local asset path, distribution
+  status và typed error; built-in theme ID `0` luôn có.
+- Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và PNG dimension.
+  Repository chặn path escape, size/hash mismatch và release catalog chưa `APPROVED`.
+- `BatteryStatusConfig` là persistent source of truth. `BatterySettingsPolicy` clamp
+  geometry/color/favorite trước khi ghi và sau khi decode DataStore.
+- 898-theme raw snapshot nằm trong `private_data/`, không thuộc source/release artifact.
+  Xem [`tools/BATTERY_DATA_SNAPSHOT.md`](tools/BATTERY_DATA_SNAPSHOT.md).
 
 ## Không có database
 

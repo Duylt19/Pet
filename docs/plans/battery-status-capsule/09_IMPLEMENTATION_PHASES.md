@@ -1,11 +1,19 @@
 # 09 — Implementation Phases
 
-> **PLANNED — NOT IMPLEMENTED**
+> **IMPLEMENTATION IN PROGRESS**
+
+Source ngày 2026-07-30 đã hoàn thành vertical slice debug: normalized local catalog,
+DataStore config, Catalog/Editor cơ bản và Accessibility cover backend. Các phase bên dưới
+vẫn là release roadmap; trạng thái thực tế được ghi ở từng phase.
 
 Mỗi phase là một commit/PR độc lập, compile/test/docs pass trước phase sau. Không đánh dấu
 `IMPLEMENTATION_PROGRESS.md` Done cho đến khi device verification tương ứng hoàn tất.
 
 ## Phase 0 — Product decisions and asset provenance
+
+**Status: Partial.** Owner đã chọn Accessibility cover direction và Home Battery entry.
+Raw snapshot vẫn `REVIEW_REQUIRED`; Figma/asset-license inventory và release policy approval
+chưa hoàn tất.
 
 ### Scope
 
@@ -29,6 +37,10 @@ Không còn quyết định sản phẩm làm thay đổi architecture hoặc pe
 mode chưa được code nếu owner chưa duyệt policy/disclosure direction.
 
 ## Phase 1 — Domain, policies and local persistence
+
+**Status: Implemented for current vertical slice.** Model/repository/parser/DataStore,
+sanitization policy, Hilt và JVM tests đã có. Layout priority/RTL migration test nâng cao
+còn thuộc hardening.
 
 ### Scope
 
@@ -57,6 +69,10 @@ Config round-trip deterministic; no Android View/service required; JVM tests pas
 
 ## Phase 2 — Catalog and editor UI with deterministic preview
 
+**Status: Partial.** Catalog/category/favorite/Premium gate, basic editor, navigation,
+Home entry và analytics đã có. Generic per-component editor, dirty-draft confirmation,
+Compose/golden/RTL tests chưa có.
+
 ### Scope
 
 - Battery Catalog + Favorites + built-in theme states.
@@ -82,6 +98,9 @@ Config round-trip deterministic; no Android View/service required; JVM tests pas
 User can configure every MVP field, process-death restore draft và Apply local config.
 
 ## Phase 3 — Standard overlay host and basic runtime
+
+**Status: Superseded for current slice.** Owner ưu tiên Accessibility cover. Chưa migrate
+`PetOverlayService` hoặc triển khai standard `TYPE_APPLICATION_OVERLAY` below-bar backend.
 
 ### Scope
 
@@ -112,6 +131,11 @@ Capsule chạy ổn định qua app khác, dữ liệu pin/thời gian thật, k
 regression và Stop sạch.
 
 ## Phase 4 — Accessibility status-cover backend
+
+**Status: Implemented in debug, device/policy verification pending.** Service metadata,
+disclosure, non-touchable window, battery/time renderer, keyguard/screen-off/landscape hide
+đã có. OEM matrix, notification-shade/privacy-indicator proof và Play release evidence chưa
+hoàn tất.
 
 ### Entry gate
 
@@ -147,6 +171,9 @@ Nếu gate không đạt, phase bị loại khỏi release và below-bar mode v�
 
 ## Phase 5 — Full device-status components
 
+**Status: Not started.** Current runtime mới có time, percentage, charging và theme
+battery/emoji.
+
 ### Scope
 
 - Connectivity transport, airplane, ringer, date.
@@ -171,6 +198,10 @@ Mọi component trong MVP có real-data/decorative semantics đúng tài liệu 
 sensitive permission mới.
 
 ## Phase 6 — Remote catalog and secure asset packs
+
+**Status: Local tooling implemented; production source not started.** Snapshot tool audit
+size/hash/dimension và debug ADB sync đã có. Owner endpoint/download/cache/kill switch cần
+asset approval trước.
 
 ### Scope
 

@@ -1,6 +1,6 @@
 # 07 — Monetization, Analytics and Policy
 
-> **PLANNED — NOT IMPLEMENTED**
+> **REFERENCE TARGET — Premium theme gate/analytics cơ bản đã có; release policy pending**
 
 ## Entitlement
 

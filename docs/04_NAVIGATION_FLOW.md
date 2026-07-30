@@ -15,6 +15,8 @@
 | `settings` | Settings | My Pet Family roster + app/support hub |
 | `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
 | `swarm_customization` | Edit Pet Swarm | Character, count, base size/speed, random variation và vùng di chuyển |
+| `battery_catalog` | Battery Styles | Catalog local + category/favorite/Premium gate |
+| `battery_editor/{themeId}` | Customize Battery Bar | Preview, controls, Apply và Accessibility disclosure |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
 ## Flow
@@ -45,6 +47,9 @@ Customize Pet ──Remove──> Settings (shift slot sau, giữ profile riêng
 Catalog ──already prepared pack──> Detail ──Use for Pet──> Catalog
 Home ──Settings──> Settings ──Language──> Language Settings
 Home ──Premium──> Premium(in-app)
+Home ──Battery tab──> Battery Styles ──theme──> Customize Battery Bar
+Customize Battery Bar ──Apply(service off)──> disclosure ──> System Accessibility Settings
+Customize Battery Bar ──Apply(service on)──> persist config + accessibility overlay
 ```
 
 ## Back stack
@@ -57,6 +62,8 @@ Home ──Premium──> Premium(in-app)
   `target` parse an toàn về enum, `slotIndex` là typed Int và `packKey` luôn URI-encode
   trước navigation.
 - Edit Pet Swarm pop về Home; Catalog mở từ màn này pop về Edit Pet Swarm.
+- Battery Editor pop về Battery Styles; Battery Styles pop về Home. Premium theme mở
+  Premium in-app và quay lại catalog theo back stack.
 - Catalog là boundary authoritative cho Mixed slot Rewarded dù được mở từ Home, Settings
   hay deep route. Chỉ slot kế tiếp được mở; đóng/fail ad không tăng capacity. Premium
   bypass gate và entitlement được refresh khi Catalog resume.

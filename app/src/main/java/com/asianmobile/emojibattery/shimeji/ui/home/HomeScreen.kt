@@ -78,6 +78,7 @@ import com.intuit.ssp.R as SspR
 @Composable
 fun HomeScreen(
     onNavigateToCatalog: (PetCatalogTarget, Int) -> Unit,
+    onNavigateToBattery: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToPremium: () -> Unit,
     onNavigateToSwarmCustomization: () -> Unit,
@@ -159,6 +160,7 @@ fun HomeScreen(
         onUnlockSwarm = viewModel::requestSwarmUnlock,
         onDismissMessage = viewModel::clearMessage,
         onNavigateToCatalog = onNavigateToCatalog,
+        onNavigateToBattery = onNavigateToBattery,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToPremium = onNavigateToPremium,
         onNavigateToSwarmCustomization = onNavigateToSwarmCustomization
@@ -176,6 +178,7 @@ private fun HomeScreenContent(
     onUnlockSwarm: () -> Unit,
     onDismissMessage: () -> Unit,
     onNavigateToCatalog: (PetCatalogTarget, Int) -> Unit,
+    onNavigateToBattery: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToPremium: () -> Unit,
     onNavigateToSwarmCustomization: () -> Unit
@@ -239,7 +242,6 @@ private fun HomeScreenContent(
         }
 
         HomeBottomNavigation(
-            uiState = uiState,
             onOpenPets = {
                 val target = if (uiState.displayMode == PetDisplayMode.SWARM) {
                     PetCatalogTarget.SWARM
@@ -248,7 +250,7 @@ private fun HomeScreenContent(
                 }
                 onNavigateToCatalog(target, 0)
             },
-            onOpenSettings = onNavigateToSettings
+            onOpenBattery = onNavigateToBattery
         )
         BannerAd(
             modifier = Modifier.fillMaxWidth(),
@@ -926,9 +928,8 @@ private fun HomeMessageCard(message: HomeMessage) {
 
 @Composable
 private fun HomeBottomNavigation(
-    uiState: HomeUiState,
     onOpenPets: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenBattery: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -956,10 +957,10 @@ private fun HomeBottomNavigation(
             modifier = Modifier.weight(1f)
         )
         BottomNavigationItem(
-            iconRes = R.drawable.ic_settings_outline,
-            label = stringResource(R.string.home_mode_settings_tab),
+            iconRes = R.drawable.ic_battery_status,
+            label = stringResource(R.string.home_mode_battery_tab),
             selected = false,
-            onClick = onOpenSettings,
+            onClick = onOpenBattery,
             modifier = Modifier.weight(1f)
         )
     }
@@ -1030,6 +1031,7 @@ private fun HomeScreenPreview() {
         onUnlockSwarm = {},
         onDismissMessage = {},
         onNavigateToCatalog = { _, _ -> },
+        onNavigateToBattery = {},
         onNavigateToSettings = {},
         onNavigateToPremium = {},
         onNavigateToSwarmCustomization = {}

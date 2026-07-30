@@ -16,6 +16,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ui.home.HomeScreen
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogScreen
+import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorScreen
 import com.asianmobile.emojibattery.shimeji.ui.catalog.PetCatalogScreen
 import com.asianmobile.emojibattery.shimeji.ui.catalog.PetCatalogTarget
 import com.asianmobile.emojibattery.shimeji.ui.catalog.PetDetailScreen
@@ -42,6 +44,8 @@ object Routes {
     const val PET_CUSTOMIZATION = "pet_customization"
     const val SWARM_CUSTOMIZATION = "swarm_customization"
     const val SETTINGS = "settings"
+    const val BATTERY_CATALOG = "battery_catalog"
+    const val BATTERY_EDITOR = "battery_editor"
     const val PREMIUM = "premium"
 
     fun petCatalog(
@@ -54,6 +58,7 @@ object Routes {
         packKey: String
     ): String = "$PET_DETAIL/${target.name}/$slotIndex/${Uri.encode(packKey)}"
     fun petCustomization(slotIndex: Int): String = "$PET_CUSTOMIZATION/$slotIndex"
+    fun batteryEditor(themeId: Int): String = "$BATTERY_EDITOR/$themeId"
 }
 
 @Composable
@@ -188,6 +193,12 @@ fun AppNavGraph(
                             ignoreDebounce = true
                         )
                     },
+                    onNavigateToBattery = {
+                        navController.safeNavigate(
+                            Routes.BATTERY_CATALOG,
+                            ignoreDebounce = true
+                        )
+                    },
                     onNavigateToSettings = {
                         navigateFromHome(Routes.SETTINGS)
                     },
@@ -200,6 +211,33 @@ fun AppNavGraph(
                             ignoreDebounce = true
                         )
                     }
+                )
+            }
+
+            composable(Routes.BATTERY_CATALOG) {
+                BatteryCatalogScreen(
+                    onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                    onOpenTheme = { themeId ->
+                        navController.safeNavigate(
+                            Routes.batteryEditor(themeId),
+                            ignoreDebounce = true
+                        )
+                    },
+                    onNavigateToPremium = {
+                        navController.safeNavigate(
+                            "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
+                            ignoreDebounce = true
+                        )
+                    }
+                )
+            }
+
+            composable(
+                route = "${Routes.BATTERY_EDITOR}/{themeId}",
+                arguments = listOf(navArgument("themeId") { type = NavType.IntType })
+            ) {
+                BatteryEditorScreen(
+                    onBack = { navController.safePopBackStack(ignoreDebounce = true) }
                 )
             }
 

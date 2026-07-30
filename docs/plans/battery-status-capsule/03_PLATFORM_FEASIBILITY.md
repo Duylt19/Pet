@@ -1,6 +1,6 @@
 # 03 — Android Platform Feasibility
 
-> **PLANNED — NOT IMPLEMENTED**
+> **REFERENCE RESEARCH — Accessibility backend đã có ở debug; release gate vẫn áp dụng**
 
 ## Research sources
 

@@ -29,6 +29,8 @@ enum class ScreenName(val value: String) {
     PET_DETAIL("pet_detail"),
     PET_CUSTOMIZATION("pet_customization"),
     SWARM_CUSTOMIZATION("swarm_customization"),
+    BATTERY_CATALOG("battery_catalog"),
+    BATTERY_EDITOR("battery_editor"),
     PREMIUM("premium"),
     SETTINGS("settings")
 }

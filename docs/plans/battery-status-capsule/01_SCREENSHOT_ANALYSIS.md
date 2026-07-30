@@ -1,6 +1,7 @@
 # 01 — Screenshot Analysis
 
-> **PLANNED — NOT IMPLEMENTED**
+> **REFERENCE RESEARCH — xem current source tại
+> [`../../features/BATTERY_STATUS.md`](../../features/BATTERY_STATUS.md)**
 
 ## Phạm vi reference
 

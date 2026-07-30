@@ -21,6 +21,8 @@ settings và các quy ước kiến trúc hiện có.
   được validate an toàn.
 - Settings là pet roster + app/support; mỗi slot mở một hồ sơ Customize Pet riêng cho
   character, size, speed, touch, speech, custom messages và position.
+- Battery tab mở catalog/editor và một Accessibility status-cover overlay opt-in. Snapshot
+  898 theme chỉ dùng local debug tới khi asset provenance và Play/device gate được duyệt.
 - Product UI từ Home trở đi dùng cozy light design: pet room, discovery grid, friendly
   detail, My Pet Family và per-pet profile; onboarding/Premium giữ visual hiện tại.
 - Browser, search engine, clear browsing data, storage permission, download, media, Room và service cũ đã bị xóa.
@@ -57,6 +59,9 @@ app/src/main/java/com/asianmobile/emojibattery/shimeji/
 │   ├── engine/                 # Pure Kotlin state machine/timeline/geometry
 │   ├── overlay/                # FGS, WindowManager adapter, Canvas/sprite pet view
 │   └── pack/                   # Pack schema, secure installer, repository/cache
+├── battery/
+│   ├── overlay/                # Accessibility status-cover window/renderer
+│   └── settings/               # Battery config sanitization
 ├── ui/
 │   ├── component/
 │   ├── splash/
@@ -65,6 +70,7 @@ app/src/main/java/com/asianmobile/emojibattery/shimeji/
 │   ├── permission/
 │   ├── home/
 │   ├── catalog/
+│   ├── battery/
 │   ├── premium/
 │   ├── main/
 │   └── theme/

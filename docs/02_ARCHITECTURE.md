@@ -42,7 +42,11 @@ com.asianmobile.emojibattery.shimeji/
 │   ├── pack/                   # Schema/parser/validator/installer/repository/cache
 │   ├── settings/               # Pure policy cho budget/vị trí/session settings
 │   └── speech/                 # Pure speech catalog + per-pet pose-gated sessions
+├── battery/
+│   ├── overlay/                # Accessibility window, renderer và platform capability
+│   └── settings/               # Pure config sanitization policy
 ├── ui/
+│   ├── battery/                # Catalog + editor Screen/ViewModel/UiState
 │   ├── component/              # Shared stateless UI
 │   ├── splash/
 │   ├── language/
@@ -86,6 +90,10 @@ ui/feature/
 - Use case không bắt buộc cho CRUD một dòng; dùng khi logic phối hợp nhiều nguồn, có policy hoặc cần reuse/test riêng.
 - DataStore cho key-value nhỏ; Room chỉ thêm lại khi có requirement về dữ liệu quan hệ/offline.
 - Service/WorkManager chỉ dùng khi công việc phải sống ngoài lifecycle UI.
+- `BatteryCatalogRepository` đọc catalog chuẩn hóa từ app-specific external files, kiểm tra
+  canonical path/size/SHA-256 và luôn có built-in fallback. Snapshot chưa duyệt chỉ load
+  trong debug.
+- `BatterySettingsRepository` persist config nhỏ bằng DataStore.
 
 ## Pet engine boundary
 
@@ -105,6 +113,17 @@ ui/feature/
   30/24 FPS xuống 20 FPS khi có 4–6 pet và 16 FPS khi có 7–12 pet. Không thêm Room;
   `PetSlotPreferences` giữ selection/size/speed/touch/speech theo slot, còn last
   position/reset revision cũng được persist theo đúng slot trong DataStore.
+
+## Battery accessibility overlay boundary
+
+- `StatusBarAccessibilityService` chỉ sở hữu một `TYPE_ACCESSIBILITY_OVERLAY` full-width,
+  non-touchable; không dùng window-content, gesture hoặc global-action API.
+- Service combine repository Flow, decode/cache bitmap ngoài main thread và render pin/time
+  thật mà không chạy frame clock liên tục.
+- Accessibility cover là opt-in sau disclosure. Service ẩn trên keyguard, screen-off và
+  landscape; không có boot receiver.
+- `COVER_SYSTEM_BAR` là lớp phủ best-effort theo OEM, không sửa SystemUI. Release vẫn cần
+  Play policy/device-matrix gate.
 
 ## DI
 

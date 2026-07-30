@@ -16,7 +16,11 @@
 | Owner pet catalog | `OwnerPetCatalogRepository`, `data/remote`, `ui/catalog` | Active private GitHub raw source, 1.026 pets + cached metadata + authenticated thumbnail + verified on-demand ZIP Set |
 | Pet speech and dialogue | `pet/speech`, transient speech overlay | Active, localized/custom reactions + lifecycle độc lập theo pet |
 | Pet settings persistence | `PetSettingsRepository`, DataStore | Active, `PetSlotPreferences` độc lập cho selection/size/speed/message list/interaction và position/reset guard theo slot |
+| Battery status capsule | `BatteryCatalogRepository`, `ui/battery`, `battery/overlay` | Debug vertical slice active; Accessibility cover + local audited catalog, release còn policy/license/device gate |
 
-Không có browser core, search/clear-browsing, broad storage access, tabs, bookmarks/history, download manager, file/media manager hoặc database. Background component duy nhất là `PetOverlayService` do user chủ động start, `START_NOT_STICKY` và không có boot receiver.
+Không có browser core, search/clear-browsing, broad storage access, tabs, bookmarks/history,
+download manager, file/media manager hoặc database. `PetOverlayService` do user chủ động
+start, dùng `START_NOT_STICKY`; `StatusBarAccessibilityService` chỉ chạy sau khi user tự bật
+trong system settings. Cả hai đều không có boot receiver.
 
-Chi tiết: [PET_OVERLAY.md](PET_OVERLAY.md), [PET_BEHAVIOR_V2.md](PET_BEHAVIOR_V2.md), [PET_SPEECH.md](PET_SPEECH.md), [PET_PACKS.md](PET_PACKS.md), [PET_SETTINGS.md](PET_SETTINGS.md), [OWNER_PET_CATALOG.md](OWNER_PET_CATALOG.md). Không tái sử dụng spec Private Browser cũ.
+Chi tiết: [PET_OVERLAY.md](PET_OVERLAY.md), [PET_BEHAVIOR_V2.md](PET_BEHAVIOR_V2.md), [PET_SPEECH.md](PET_SPEECH.md), [PET_PACKS.md](PET_PACKS.md), [PET_SETTINGS.md](PET_SETTINGS.md), [OWNER_PET_CATALOG.md](OWNER_PET_CATALOG.md), [BATTERY_STATUS.md](BATTERY_STATUS.md). Không tái sử dụng spec Private Browser cũ.

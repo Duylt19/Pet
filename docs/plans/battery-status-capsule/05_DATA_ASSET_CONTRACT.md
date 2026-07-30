@@ -1,6 +1,6 @@
 # 05 — Data, Catalog and Asset Contract
 
-> **PLANNED — NOT IMPLEMENTED**
+> **REFERENCE TARGET — normalized local schema v1 đã triển khai; remote packs chưa có**
 
 ## Data ownership
 

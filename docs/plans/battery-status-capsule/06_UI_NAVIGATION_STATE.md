@@ -1,6 +1,6 @@
 # 06 — UI, Navigation and State Contract
 
-> **PLANNED — NOT IMPLEMENTED**
+> **REFERENCE TARGET — Catalog/Editor cơ bản đã triển khai; full editor còn pending**
 
 ## Routes
 

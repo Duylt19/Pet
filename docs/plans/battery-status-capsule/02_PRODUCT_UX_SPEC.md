@@ -1,6 +1,7 @@
 # 02 — Product and UX Specification
 
-> **PLANNED — NOT IMPLEMENTED**
+> **REFERENCE PLAN — vertical slice partial; xem
+> [`../../features/BATTERY_STATUS.md`](../../features/BATTERY_STATUS.md)**
 
 ## Product statement
 

@@ -12,7 +12,9 @@
 
 Cute Pet có domain chính thức: một hoặc nhiều pet animation có thể hiển thị và tương tác
 trên các ứng dụng khác bằng Android overlay. Mixed hỗ trợ tối đa 12 pet khác nhau; Swarm
-hỗ trợ tối đa 12 bản sao cùng pet (6 trên low-RAM) theo performance budget.
+hỗ trợ tối đa 12 bản sao cùng pet (6 trên low-RAM) theo performance budget. App cũng có
+Battery Status Capsule vertical slice: catalog/editor và Accessibility overlay opt-in;
+release capability này còn bị chặn bởi asset/policy/device verification.
 
 ## Kiến trúc kế thừa
 
@@ -33,6 +35,8 @@ hỗ trợ tối đa 12 bản sao cùng pet (6 trên low-RAM) theo performance b
   character/size/speed/position/interaction/speech. Language/share/rate/feedback/version
   nằm ở khu vực app-wide, không trộn với pet profile.
 - Premium/billing, ads, analytics, remote config, theme và reusable components.
+- Battery catalog/editor debug với built-in fallback, DataStore config và Accessibility
+  status-cover disclosure.
 
 ## Những gì đã bị xóa
 

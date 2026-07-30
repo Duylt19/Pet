@@ -16,6 +16,8 @@
 | Pet detail | `pet_detail` |
 | Customize Pet | `pet_customization` |
 | Edit Pet Swarm | `swarm_customization` |
+| Battery styles | `battery_catalog` |
+| Customize battery bar | `battery_editor` |
 | Settings | `settings` |
 | Premium | `premium` |
 
