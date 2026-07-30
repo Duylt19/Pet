@@ -3,12 +3,12 @@ package com.asianmobile.emojibattery.shimeji.battery.settings
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BACKGROUND_COLOR
-import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BAR_HEIGHT_DP
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class BatterySettingsPolicyTest {
-    private val policy = BatterySettingsPolicy()
+    private val barHeightRange = resolveBatteryStatusBarHeightRange(48f)
+    private val policy = BatterySettingsPolicy(barHeightRange)
 
     @Test
     fun sanitize_clamps_geometry_and_filters_favorites() {
@@ -41,7 +41,7 @@ class BatterySettingsPolicyTest {
         assertEquals(BatteryStatusDisplayMode.COVER_SYSTEM_BAR, sanitized.displayMode)
         assertEquals(20, sanitized.backgroundDecorationId)
         assertEquals(0, sanitized.emotionDecorationId)
-        assertEquals(48f, sanitized.barHeightDp)
+        assertEquals(72f, sanitized.barHeightDp)
         assertEquals(0f, sanitized.horizontalPaddingDp)
         assertEquals(32f, sanitized.leftPaddingDp)
         assertEquals(0f, sanitized.rightPaddingDp)
@@ -64,7 +64,7 @@ class BatterySettingsPolicyTest {
             )
         )
 
-        assertEquals(DEFAULT_BATTERY_BAR_HEIGHT_DP, sanitized.barHeightDp)
+        assertEquals(48f, sanitized.barHeightDp)
         assertEquals(DEFAULT_BATTERY_BACKGROUND_COLOR, sanitized.backgroundColorArgb)
     }
 }

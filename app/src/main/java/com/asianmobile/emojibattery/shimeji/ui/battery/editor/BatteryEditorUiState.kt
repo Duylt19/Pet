@@ -1,7 +1,10 @@
 package com.asianmobile.emojibattery.shimeji.ui.battery.editor
 
+import com.asianmobile.emojibattery.shimeji.battery.settings.BatteryStatusBarHeightRange
+import com.asianmobile.emojibattery.shimeji.battery.settings.resolveBatteryStatusBarHeightRange
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BAR_HEIGHT_DP
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
@@ -12,6 +15,8 @@ data class BatteryEditorUiState(
     val themes: List<BatteryThemeEntry> = listOf(BUILT_IN_BATTERY_THEME),
     val categories: List<BatteryCatalogCategory> = emptyList(),
     val config: BatteryStatusConfig = BatteryStatusConfig(),
+    val barHeightRange: BatteryStatusBarHeightRange =
+        resolveBatteryStatusBarHeightRange(DEFAULT_BATTERY_BAR_HEIGHT_DP),
     val backgrounds: List<BatteryDecorationEntry> = emptyList(),
     val emotions: List<BatteryDecorationEntry> = emptyList(),
     val animations: List<BatteryAnimationEntry> = emptyList(),

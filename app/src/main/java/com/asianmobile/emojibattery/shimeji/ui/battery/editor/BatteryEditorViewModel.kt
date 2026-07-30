@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryEditorPreviewSession
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
+import com.asianmobile.emojibattery.shimeji.battery.settings.resolveBatteryStatusBarHeightRange
+import com.asianmobile.emojibattery.shimeji.battery.settings.systemStatusBarHeightDp
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
@@ -41,17 +43,29 @@ class BatteryEditorViewModel @Inject constructor(
         ?: UUID.randomUUID().toString().also { savedStateHandle[KEY_PREVIEW_OWNER] = it }
     private val accessPolicy = BatteryThemeAccessPolicy()
     private val selectionPolicy = BatteryThemeSelectionPolicy()
+    private val barHeightRange = resolveBatteryStatusBarHeightRange(
+        context.systemStatusBarHeightDp()
+    )
     private val restoredDraft = BatteryDraftCodec.decode(savedStateHandle[KEY_DRAFT])
+        ?.let { draft ->
+            draft.copy(
+                barHeightDp = draft.barHeightDp.coerceIn(
+                    barHeightRange.minimumDp,
+                    barHeightRange.maximumDp
+                )
+            )
+        }
     private var hasLocalEdits = savedStateHandle.get<Boolean>(KEY_DIRTY) == true &&
         restoredDraft != null
     private var hasInitializedSelection = restoredDraft != null ||
         savedStateHandle.get<Boolean>(KEY_SELECTION_INITIALIZED) == true
-    private var latestStored = BatteryStatusConfig()
+    private var latestStored = BatteryStatusConfig(barHeightDp = barHeightRange.defaultDp)
     private var previewActive = false
     private var focusedComponent: BatteryStatusComponent? = null
     private val _uiState = MutableStateFlow(
         BatteryEditorUiState(
-            config = restoredDraft ?: BatteryStatusConfig(),
+            config = restoredDraft ?: BatteryStatusConfig(barHeightDp = barHeightRange.defaultDp),
+            barHeightRange = barHeightRange,
             hasUnsavedChanges = hasLocalEdits
         )
     )

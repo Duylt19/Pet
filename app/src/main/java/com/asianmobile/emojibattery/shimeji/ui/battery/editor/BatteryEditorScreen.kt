@@ -96,8 +96,6 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFormat
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
-import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_BAR_HEIGHT_DP
-import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_BAR_HEIGHT_DP
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTopBar
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
@@ -782,7 +780,7 @@ private fun SizeEditor(
         EditorSlider(
             label = stringResource(R.string.battery_bar_height),
             value = state.config.barHeightDp,
-            range = MIN_BATTERY_BAR_HEIGHT_DP..MAX_BATTERY_BAR_HEIGHT_DP,
+            range = state.barHeightRange.minimumDp..state.barHeightRange.maximumDp,
             onValue = onBarHeight
         )
         EditorSlider(

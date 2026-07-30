@@ -23,9 +23,10 @@ Vertical slice hiện đã có trong source:
 - Background màu/ảnh và cả hai nhóm content phủ/dùng đúng toàn bộ chiều ngang window,
   không bo góc. Khoảng `privacyReserveDp` được giữ lại chỉ để tương thích dữ liệu cũ và
   không còn tác động lên renderer.
-- `barHeightDp` điều khiển trực tiếp chiều cao window overlay, kể cả khi thấp hơn chiều
-  cao status bar mặc định của OEM. Cỡ chữ thời gian giữ cố định ở 16dp và không thay đổi
-  theo slider chiều cao.
+- Mặc định `barHeightDp` được lấy từ status-bar inset thật của thiết bị và nằm chính giữa
+  slider. Range đối xứng thông thường là 50%–150% chiều cao hệ thống, nên user có thể
+  giảm hoặc tăng bar thay vì bị giới hạn tối đa bằng status bar OEM. Cỡ chữ thời gian
+  giữ cố định ở 16dp và không thay đổi theo slider chiều cao.
 - Service ẩn khi màn hình khóa, màn hình tắt hoặc portrait không còn hiệu lực; không
   auto-start sau boot.
 - Pet và pin được renderer như một pair: cùng anchor ở cụm battery phía trailing, pin
@@ -107,7 +108,7 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `displayMode` | Migration legacy; build hiện tại sanitize về `COVER_SYSTEM_BAR` |
 | `showTime`, `showPercentage` | Thành phần hiển thị |
 | `showAnimation`, `animationAssetName`, `animationSizeDp` | Hoạt ảnh GIF/Lottie |
-| `barHeightDp`, `leftPaddingDp`, `rightPaddingDp` | Chiều cao window và padding content full-width |
+| `barHeightDp`, `leftPaddingDp`, `rightPaddingDp` | Chiều cao window động theo status bar thiết bị và padding content full-width |
 | `emojiSizeDp`, `batterySizeDp`, `percentSizeDp` | Kích thước asset/pin |
 | `backgroundColorArgb`, `foregroundColorArgb` | Màu renderer |
 | `backgroundDecorationId` | Nền đóng gói đã chọn; `0` là nền màu phẳng |

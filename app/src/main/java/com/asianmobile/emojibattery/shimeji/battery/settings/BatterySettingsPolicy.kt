@@ -16,10 +16,11 @@ import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_PERCENT_S
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_PRIVACY_RESERVE_DP
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_STATUS_ICON_COLOR
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_STATUS_ICON_SIZE_DP
-import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_BAR_HEIGHT_DP
-import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_BAR_HEIGHT_DP
 
-class BatterySettingsPolicy {
+class BatterySettingsPolicy(
+    private val barHeightRange: BatteryStatusBarHeightRange =
+        resolveBatteryStatusBarHeightRange(DEFAULT_BATTERY_BAR_HEIGHT_DP)
+) {
     fun sanitize(config: BatteryStatusConfig): BatteryStatusConfig = config.copy(
         // The shipped product deliberately supports the status-bar replacement flow only.
         // Migrating legacy BELOW values prevents an Accessibility overlay from covering app UI.
@@ -34,8 +35,8 @@ class BatterySettingsPolicy {
         animationAssetName = config.animationAssetName
             .takeIf(ANIMATION_FILE_NAME::matches)
             ?: DEFAULT_BATTERY_ANIMATION_ASSET,
-        barHeightDp = config.barHeightDp.validOr(DEFAULT_BATTERY_BAR_HEIGHT_DP)
-            .coerceIn(MIN_BATTERY_BAR_HEIGHT_DP, MAX_BATTERY_BAR_HEIGHT_DP),
+        barHeightDp = config.barHeightDp.validOr(barHeightRange.defaultDp)
+            .coerceIn(barHeightRange.minimumDp, barHeightRange.maximumDp),
         horizontalPaddingDp = config.horizontalPaddingDp
             .validOr(DEFAULT_BATTERY_HORIZONTAL_PADDING_DP)
             .coerceIn(0f, 24f),

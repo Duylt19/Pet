@@ -85,8 +85,9 @@ enum class BatteryDateFont(
     BEAU_RIVAGE("Beau Rivage", "beau_rivage_normal")
 }
 
-const val MIN_BATTERY_BAR_HEIGHT_DP = 24f
-const val MAX_BATTERY_BAR_HEIGHT_DP = 48f
+const val MIN_BATTERY_BAR_HEIGHT_DP = 8f
+const val MAX_BATTERY_BAR_HEIGHT_DP = 128f
+// Runtime defaults to the device status-bar inset; this value is the no-inset fallback.
 const val DEFAULT_BATTERY_BAR_HEIGHT_DP = 34f
 const val DEFAULT_BATTERY_HORIZONTAL_PADDING_DP = 12f
 const val DEFAULT_BATTERY_SIDE_PADDING_DP = 16f

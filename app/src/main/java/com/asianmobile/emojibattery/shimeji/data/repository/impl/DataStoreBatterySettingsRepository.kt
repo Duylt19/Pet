@@ -10,6 +10,8 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.asianmobile.emojibattery.shimeji.battery.settings.BatterySettingsPolicy
+import com.asianmobile.emojibattery.shimeji.battery.settings.resolveBatteryStatusBarHeightRange
+import com.asianmobile.emojibattery.shimeji.battery.settings.systemStatusBarHeightDp
 import com.asianmobile.emojibattery.shimeji.data.local.dataStore
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDataType
@@ -19,7 +21,6 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BACKGROUND_COLOR
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BACKGROUND_ID
-import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BAR_HEIGHT_DP
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_EMOJI_SIZE_DP
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_FOREGROUND_COLOR
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_HORIZONTAL_PADDING_DP
@@ -46,7 +47,10 @@ class DataStoreBatterySettingsRepository @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) : BatterySettingsRepository {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val policy = BatterySettingsPolicy()
+    private val barHeightRange = resolveBatteryStatusBarHeightRange(
+        context.systemStatusBarHeightDp()
+    )
+    private val policy = BatterySettingsPolicy(barHeightRange)
 
     override val config: StateFlow<BatteryStatusConfig> = context.dataStore.data
         .catch { error ->
@@ -56,7 +60,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         .stateIn(
             scope = scope,
             started = SharingStarted.Eagerly,
-            initialValue = BatteryStatusConfig()
+            initialValue = BatteryStatusConfig(barHeightDp = barHeightRange.defaultDp)
         )
 
     override fun applyConfig(config: BatteryStatusConfig) {
@@ -165,7 +169,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                 showAnimation = preferences[SHOW_ANIMATION] ?: defaults.showAnimation,
                 animationAssetName = preferences[ANIMATION_ASSET_NAME]
                     ?: defaults.animationAssetName,
-                barHeightDp = preferences[BAR_HEIGHT_DP] ?: DEFAULT_BATTERY_BAR_HEIGHT_DP,
+                barHeightDp = preferences[BAR_HEIGHT_DP] ?: barHeightRange.defaultDp,
                 horizontalPaddingDp = preferences[HORIZONTAL_PADDING_DP]
                     ?: DEFAULT_BATTERY_HORIZONTAL_PADDING_DP,
                 leftPaddingDp = preferences[LEFT_PADDING_DP]
