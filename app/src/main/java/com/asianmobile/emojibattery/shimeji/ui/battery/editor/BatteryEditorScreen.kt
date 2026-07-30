@@ -35,6 +35,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
@@ -81,6 +82,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
@@ -246,11 +250,36 @@ fun BatteryEditorScreen(
             onWatchReward = viewModel::requestRewardUnlock,
             onPremium = onNavigateToPremium
         )
-    } else if (state.message == BatteryEditorMessage.THEME_UNAVAILABLE) {
+    } else if (
+        state.message == BatteryEditorMessage.THEME_UNAVAILABLE ||
+        state.message == BatteryEditorMessage.ASSET_DOWNLOAD_FAILED
+    ) {
+        val assetDownloadFailed =
+            state.message == BatteryEditorMessage.ASSET_DOWNLOAD_FAILED
         AlertDialog(
             onDismissRequest = viewModel::clearMessage,
-            title = { Text(stringResource(R.string.battery_theme_unavailable_title)) },
-            text = { Text(stringResource(R.string.battery_theme_unavailable_message)) },
+            title = {
+                Text(
+                    stringResource(
+                        if (assetDownloadFailed) {
+                            R.string.battery_asset_download_failed_title
+                        } else {
+                            R.string.battery_theme_unavailable_title
+                        }
+                    )
+                )
+            },
+            text = {
+                Text(
+                    stringResource(
+                        if (assetDownloadFailed) {
+                            R.string.battery_asset_download_failed_message
+                        } else {
+                            R.string.battery_theme_unavailable_message
+                        }
+                    )
+                )
+            },
             confirmButton = {
                 TextButton(onClick = viewModel::clearMessage) {
                     Text(stringResource(R.string.common_done))
@@ -442,7 +471,7 @@ private fun BatteryEditorContent(
         }
         if (page == BatteryEditorPage.OVERVIEW) {
             ApplyFooter(
-                enabled = state.isThemeAvailable,
+                enabled = state.isThemeAvailable && state.assetSelectionInProgress == null,
                 isApplied = state.config.enabled,
                 onApply = onApply,
                 onDisable = onDisable
@@ -629,6 +658,9 @@ private fun ThemeComponentPicker(
                 component = component,
                 selected = theme.id == selectedThemeId,
                 locked = locked,
+                loading = state.assetSelectionInProgress ==
+                    BatteryEditorThemeSelection(theme.id, component),
+                enabled = state.assetSelectionInProgress == null,
                 onClick = { onSelectTheme(theme, component) }
             )
         }
@@ -669,6 +701,8 @@ private fun ThemeComponentOption(
     component: BatteryThemeComponent,
     selected: Boolean,
     locked: Boolean,
+    loading: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit
 ) {
     val assetPath = when (component) {
@@ -689,7 +723,7 @@ private fun ThemeComponentOption(
                 ),
                 shape = RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp))
             )
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(dimensionResource(SdpR.dimen._5sdp)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -700,24 +734,26 @@ private fun ThemeComponentOption(
             contentAlignment = Alignment.Center
         ) {
             if (assetPath != null) {
-                AsyncImage(
+                SubcomposeAsyncImage(
                     model = assetPath,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.size(dimensionResource(SdpR.dimen._48sdp))
-                )
+                ) {
+                    if (painter.state is AsyncImagePainter.State.Success) {
+                        SubcomposeAsyncImageContent()
+                    } else {
+                        ThemeComponentThumbnailFallback(theme, component)
+                    }
+                }
             } else {
-                Icon(
-                    painter = painterResource(
-                        if (component == BatteryThemeComponent.BATTERY) {
-                            R.drawable.ic_battery_status
-                        } else {
-                            R.drawable.ic_notification_pet
-                        }
-                    ),
-                    contentDescription = null,
-                    tint = colorResource(R.color.colors_12B890),
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._32sdp))
+                ThemeComponentThumbnailFallback(theme, component)
+            }
+            if (loading) {
+                CircularProgressIndicator(
+                    color = colorResource(R.color.colors_12B890),
+                    strokeWidth = dimensionResource(SdpR.dimen._1sdp),
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
                 )
             }
         }
@@ -730,30 +766,61 @@ private fun ThemeComponentOption(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (locked) {
-                Icon(
-                    imageVector = Icons.Outlined.Lock,
-                    contentDescription = null,
-                    tint = colorResource(R.color.colors_FFFFFF),
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._12sdp))
+            if (loading) {
+                Text(
+                    text = stringResource(R.string.battery_asset_loading),
+                    color = colorResource(R.color.colors_FFFFFF),
+                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontSize = dimensionResource(SspR.dimen._7ssp).value.sp
                 )
-                Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
+            } else {
+                if (locked) {
+                    Icon(
+                        imageVector = Icons.Outlined.Lock,
+                        contentDescription = null,
+                        tint = colorResource(R.color.colors_FFFFFF),
+                        modifier = Modifier.size(dimensionResource(SdpR.dimen._12sdp))
+                    )
+                    Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
+                }
+                Text(
+                    text = stringResource(
+                        when {
+                            locked -> R.string.battery_component_unlock
+                            selected -> R.string.battery_component_selected
+                            else -> R.string.battery_component_select
+                        }
+                    ),
+                    color = colorResource(R.color.colors_FFFFFF),
+                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontSize = dimensionResource(SspR.dimen._7ssp).value.sp,
+                    maxLines = 1
+                )
             }
-            Text(
-                text = stringResource(
-                    when {
-                        locked -> R.string.battery_component_unlock
-                        selected -> R.string.battery_component_selected
-                        else -> R.string.battery_component_select
-                    }
-                ),
-                color = colorResource(R.color.colors_FFFFFF),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                fontSize = dimensionResource(SspR.dimen._7ssp).value.sp,
-                maxLines = 1
-            )
         }
     }
+}
+
+@Composable
+private fun ThemeComponentThumbnailFallback(
+    theme: BatteryThemeEntry,
+    component: BatteryThemeComponent
+) {
+    @DrawableRes val fallbackIcon = if (component == BatteryThemeComponent.BATTERY) {
+        R.drawable.ic_battery_status
+    } else {
+        R.drawable.ic_notification_pet
+    }
+    val fallbackPainter = painterResource(fallbackIcon)
+    AsyncImage(
+        model = theme.thumbnailPath,
+        contentDescription = null,
+        placeholder = fallbackPainter,
+        error = fallbackPainter,
+        fallback = fallbackPainter,
+        contentScale = ContentScale.Fit,
+        modifier = Modifier.size(dimensionResource(SdpR.dimen._42sdp))
+    )
 }
 
 @Composable

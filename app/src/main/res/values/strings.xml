@@ -857,6 +857,9 @@
     <string name="battery_reward_not_earned">Please finish the rewarded video to unlock this style.</string>
     <string name="battery_theme_unavailable_title">Style unavailable</string>
     <string name="battery_theme_unavailable_message">This battery style is missing required assets. Refresh the catalog and try again.</string>
+    <string name="battery_asset_loading">Loading…</string>
+    <string name="battery_asset_download_failed_title">Couldn’t load this item</string>
+    <string name="battery_asset_download_failed_message">Connect to the internet and try again. Your previous pet or battery remains selected.</string>
     <string name="battery_editor_title">Customize status bar</string>
     <string name="battery_editor_pet_picker">Pet</string>
     <string name="battery_editor_battery_picker">Battery</string>

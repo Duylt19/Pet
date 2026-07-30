@@ -62,6 +62,7 @@ class BatteryEditorViewModel @Inject constructor(
     private var latestStored = BatteryStatusConfig(barHeightDp = barHeightRange.defaultDp)
     private var previewActive = false
     private var focusedComponent: BatteryStatusComponent? = null
+    private var assetSelectionRequestId = 0L
     private val _uiState = MutableStateFlow(
         BatteryEditorUiState(
             config = restoredDraft ?: BatteryStatusConfig(barHeightDp = barHeightRange.defaultDp),
@@ -156,7 +157,7 @@ class BatteryEditorViewModel @Inject constructor(
                 _uiState.value.config.rewardUnlockedThemeIds
             )
         ) {
-            BatteryThemeAccess.OPEN -> selectTheme(theme.id, component)
+            BatteryThemeAccess.OPEN -> prepareAndSelectTheme(theme, component)
             BatteryThemeAccess.REWARD_OR_PREMIUM -> _uiState.update {
                 it.copy(
                     pendingSelection = BatteryEditorThemeSelection(theme.id, component),
@@ -214,20 +215,17 @@ class BatteryEditorViewModel @Inject constructor(
             return
         }
         settingsRepository.unlockThemeByReward(theme.id)
-        update {
-            selectionPolicy.selectComponent(
-                config = copy(rewardUnlockedThemeIds = rewardUnlockedThemeIds + theme.id),
-                themeId = theme.id,
-                component = pending.component
-            )
-        }
         _uiState.update {
             it.copy(
+                config = it.config.copy(
+                    rewardUnlockedThemeIds = it.config.rewardUnlockedThemeIds + theme.id
+                ),
                 pendingSelection = null,
                 isRewardInProgress = false,
                 message = null
             )
         }
+        prepareAndSelectTheme(theme, pending.component)
     }
 
     fun refreshEntitlement() {
@@ -238,7 +236,6 @@ class BatteryEditorViewModel @Inject constructor(
         if (premium && pending != null) {
             val theme = state.themes.firstOrNull { it.id == pending.themeId }
             if (theme?.assetsReady == true) {
-                selectTheme(theme.id, pending.component)
                 _uiState.update {
                     it.copy(
                         pendingSelection = null,
@@ -246,6 +243,7 @@ class BatteryEditorViewModel @Inject constructor(
                         message = null
                     )
                 }
+                prepareAndSelectTheme(theme, pending.component)
             }
         }
     }
@@ -256,7 +254,7 @@ class BatteryEditorViewModel @Inject constructor(
 
     fun apply() {
         val state = _uiState.value
-        if (!state.isThemeAvailable) return
+        if (!state.isThemeAvailable || state.assetSelectionInProgress != null) return
         settingsRepository.applyConfig(state.config.copy(enabled = true))
         clearDraft()
         _uiState.update {
@@ -302,8 +300,42 @@ class BatteryEditorViewModel @Inject constructor(
         publishPreview(_uiState.value.config)
     }
 
-    private fun selectTheme(themeId: Int, component: BatteryThemeComponent) {
-        update { selectionPolicy.selectComponent(this, themeId, component) }
+    private fun prepareAndSelectTheme(
+        theme: BatteryThemeEntry,
+        component: BatteryThemeComponent
+    ) {
+        val currentId = when (component) {
+            BatteryThemeComponent.EMOJI -> _uiState.value.config.selectedEmojiThemeId
+            BatteryThemeComponent.BATTERY -> _uiState.value.config.selectedBatteryThemeId
+        }
+        if (currentId == theme.id) return
+
+        val selection = BatteryEditorThemeSelection(theme.id, component)
+        val requestId = ++assetSelectionRequestId
+        _uiState.update {
+            it.copy(assetSelectionInProgress = selection, message = null)
+        }
+        viewModelScope.launch {
+            val materializedPath = if (theme.isBuiltIn) {
+                BUILT_IN_ASSET_MARKER
+            } else {
+                catalogRepository.materializeAsset(selectionPolicy.assetPath(theme, component))
+            }
+            if (requestId != assetSelectionRequestId) return@launch
+            if (selectionPolicy.isMaterialized(theme, materializedPath)) {
+                update { selectionPolicy.selectComponent(this, theme.id, component) }
+                _uiState.update {
+                    it.copy(assetSelectionInProgress = null, message = null)
+                }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        assetSelectionInProgress = null,
+                        message = BatteryEditorMessage.ASSET_DOWNLOAD_FAILED
+                    )
+                }
+            }
+        }
     }
 
     private fun selectedAssetsReady(
@@ -335,5 +367,6 @@ class BatteryEditorViewModel @Inject constructor(
         const val KEY_DIRTY = "battery_editor_dirty"
         const val KEY_PREVIEW_OWNER = "battery_editor_preview_owner"
         const val KEY_SELECTION_INITIALIZED = "battery_editor_selection_initialized"
+        const val BUILT_IN_ASSET_MARKER = "built-in"
     }
 }

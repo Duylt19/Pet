@@ -83,6 +83,13 @@ backoff giống Pet. Thumbnail/preview dùng URL GitHub qua Coil; asset renderer
 được chọn, verify size + SHA-256 rồi cache app-private. Token private repo dùng chung
 Firebase Remote Config key `github_token_pet_server`, không hardcode trong source.
 
+Trong Customize, card Pet/Pin ưu tiên ảnh component và dùng catalog thumbnail làm fallback
+khi ảnh đang tải hoặc lỗi; nếu cả hai không dùng được thì hiện vector mặc định. Một lần
+chọn remote chỉ được ghi vào draft sau khi đúng asset component đã materialize và verify
+thành công. Trong lúc tải card hiện `Loading…`, khóa các lựa chọn khác và nút Apply. Nếu
+thiết bị offline mà asset chưa có trong verified cache, lựa chọn cũ được giữ nguyên và UI
+hiện lỗi có thể thử lại; không có trạng thái `Selected` giả.
+
 Khi remote/cache không dùng được, repository thử catalog ở
 `externalFilesDir/battery_catalog/`; Debug tiếp tục có packaged snapshot làm fallback.
 Release chỉ nhận remote/external catalog `APPROVED`, cuối cùng luôn còn built-in

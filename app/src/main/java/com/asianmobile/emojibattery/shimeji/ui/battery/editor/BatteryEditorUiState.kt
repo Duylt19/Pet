@@ -24,6 +24,7 @@ data class BatteryEditorUiState(
     val hasUnsavedChanges: Boolean = false,
     val isPremium: Boolean = false,
     val pendingSelection: BatteryEditorThemeSelection? = null,
+    val assetSelectionInProgress: BatteryEditorThemeSelection? = null,
     val isRewardInProgress: Boolean = false,
     val message: BatteryEditorMessage? = null
 )
@@ -40,7 +41,8 @@ enum class BatteryThemeComponent {
 
 enum class BatteryEditorMessage {
     REWARD_NOT_EARNED,
-    THEME_UNAVAILABLE
+    THEME_UNAVAILABLE,
+    ASSET_DOWNLOAD_FAILED
 }
 
 sealed interface BatteryEditorEffect {

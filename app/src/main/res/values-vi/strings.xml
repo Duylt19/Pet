@@ -687,6 +687,9 @@
     <string name="battery_reward_not_earned">Hãy xem hết video có thưởng để mở khóa mẫu này.</string>
     <string name="battery_theme_unavailable_title">Không thể dùng mẫu này</string>
     <string name="battery_theme_unavailable_message">Mẫu pin đang thiếu dữ liệu cần thiết. Hãy làm mới danh mục rồi thử lại.</string>
+    <string name="battery_asset_loading">Đang tải…</string>
+    <string name="battery_asset_download_failed_title">Không thể tải mục này</string>
+    <string name="battery_asset_download_failed_message">Hãy kết nối mạng rồi thử lại. Pet hoặc pin trước đó vẫn được giữ nguyên.</string>
     <string name="battery_editor_title">Tùy chỉnh thanh trạng thái</string>
     <string name="battery_editor_pet_picker">Emoji</string>
     <string name="battery_editor_battery_picker">Pin</string>
