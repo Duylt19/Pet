@@ -479,7 +479,7 @@
     <string name="common_done">Done</string>
     <string name="home_mode_keep_one_visible">Keep at least one Mixed Mode pet visible. Use the main switch to stop all pets.</string>
     <string name="home_mode_select_swarm_pet">Choose a pet before starting Pet Swarm.</string>
-    <string name="home_mode_reward_unavailable">The rewarded video is not ready. Please try again in a moment.</string>
+    <string name="home_mode_reward_not_earned">Please finish the rewarded video to continue.</string>
     <string name="home_mode_tab">Mode</string>
     <string name="home_mode_pets_tab">Pets</string>
     <string name="home_mode_settings_tab">Settings</string>

@@ -232,9 +232,9 @@ class PetCatalogViewModel @Inject constructor(
         emit(PetCatalogEffect.ShowMixedSlotRewardedAd)
     }
 
-    fun onMixedSlotRewardResult(rewardEarned: Boolean) {
-        if (!rewardEarned) {
-            _uiState.update { it.copy(message = PetCatalogMessage.RewardUnavailable) }
+    fun onMixedSlotRewardResult(canContinue: Boolean) {
+        if (!canContinue) {
+            _uiState.update { it.copy(message = PetCatalogMessage.RewardNotEarned) }
             return
         }
         val preferences = petSettingsRepository.preferences.value

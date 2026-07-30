@@ -202,7 +202,7 @@
     <string name="common_done">Xong</string>
     <string name="home_mode_keep_one_visible">Hãy giữ ít nhất một pet của chế độ hỗn hợp. Dùng công tắc chính để dừng toàn bộ pet.</string>
     <string name="home_mode_select_swarm_pet">Hãy chọn pet trước khi bắt đầu chế độ bầy pet.</string>
-    <string name="home_mode_reward_unavailable">Video có thưởng chưa sẵn sàng. Vui lòng thử lại sau giây lát.</string>
+    <string name="home_mode_reward_not_earned">Hãy xem hết video có thưởng để tiếp tục.</string>
     <string name="home_mode_tab">Chế độ</string>
     <string name="home_mode_pets_tab">Pet</string>
     <string name="home_mode_settings_tab">Cài đặt</string>

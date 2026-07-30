@@ -42,7 +42,7 @@ enum class HomeMessage {
     PET_START_FAILED,
     KEEP_ONE_MIXED_PET_VISIBLE,
     SELECT_SWARM_PET,
-    SWARM_REWARD_NOT_AVAILABLE
+    SWARM_REWARD_NOT_EARNED
 }
 
 sealed interface HomeEffect {

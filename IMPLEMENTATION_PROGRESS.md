@@ -47,7 +47,7 @@
 | Live Swarm size/speed | Done | Size, speed, randomization và movement bounds cập nhật tại chỗ; giữ PetState/action/combo/position thay vì rebuild |
 | Swarm zero-inset edge parity | Done | Left/Right/Top 0% giữ screen-edge overflow theo size pet; bật movement constraint không còn tạo lề canvas lớn ở hai bên |
 | Swarm spacing remap + jump rate | Done | Spacing co/giãn remap vị trí tương đối hai chiều không reset; wall jump 90% và wall-to-wall stories chiếm tối thiểu 25% raw weight |
-| Mixed 12-slot Rewarded capacity | Done | Slot 1–3 miễn phí; slot 4–12 mở tuần tự bằng earned Rewarded, persist theo device, Premium bypass và Catalog chặn Set/Import trước unlock |
+| Mixed 12-slot Rewarded capacity | Done | Slot 1–3 miễn phí; slot 4–12 mở tuần tự bằng Rewarded khi ad có sẵn, unavailable tiếp tục flow, persist theo device, Premium bypass và Catalog chặn Set/Import trước unlock |
 | Đổi namespace/application ID | Done | `com.asianmobile.emojibattery.shimeji` |
 
 ## Nguyên tắc cập nhật

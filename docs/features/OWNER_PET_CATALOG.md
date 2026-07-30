@@ -56,7 +56,8 @@ chỉ để tải lại cùng tài nguyên.
 - `Set` tải đúng một ZIP, verify integrity, normalize/install và chọn đúng slot.
 - Add flow chỉ tăng `petCount` sau khi Set/Import thành công; Back không tạo pet.
 - Với Mixed, Catalog cho slot 1–3 đi thẳng; slot 4–12 chỉ cho Set/Import sau khi đúng
-  slot kế tiếp nhận earned Rewarded callback. Premium bypass gate.
+  slot kế tiếp nhận earned Rewarded callback, hoặc ngay khi Rewarded unavailable.
+  Premium bypass gate.
 - Pack đã cài tiếp tục mở detail/select không cần download lại.
 - Catalog/ZIP lỗi không thay renderer hoặc selection đang chạy.
 

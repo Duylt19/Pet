@@ -33,7 +33,7 @@ Home ──Start(API 33+, notification missing)──> Notification permission �
 Home ──Start/Stop──> Pet overlay foreground service
 Home ──Mixed──> bật/tắt từng pet; tối thiểu một pet visible
 Home ──Mixed slot 1–3──> Catalog(target=MIXED, slot) ──Set/Import──> kích hoạt slot
-Home ──Mixed slot 4–12──> Catalog reward gate ──Rewarded earned──> Set/Import
+Home ──Mixed slot 4–12──> Catalog reward gate ──Rewarded earned/unavailable──> Set/Import
 Home ──Mixed slot 4–12 + Premium──> Catalog, bỏ qua Rewarded
 Home ──Swarm locked──> Rewarded completed ──persist unlock──> chọn một pet + count 1–12
 Home ──Swarm + Premium──> tự unlock, không hiển thị Rewarded

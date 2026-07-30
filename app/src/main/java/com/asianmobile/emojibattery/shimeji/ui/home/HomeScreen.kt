@@ -62,6 +62,7 @@ import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
+import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.data.model.PetDisplayMode
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
@@ -135,10 +136,12 @@ fun HomeScreen(
                 HomeEffect.ShowSwarmRewardedAd -> {
                     val activity = context as? Activity
                     if (activity == null) {
-                        viewModel.onSwarmRewardResult(rewardEarned = false)
+                        viewModel.onSwarmRewardResult(
+                            RewardedAdResult.UNAVAILABLE.shouldContinueFlow
+                        )
                     } else {
-                        RewardedVideoAds.getInstance().showRewardedAd(activity) { earned ->
-                            viewModel.onSwarmRewardResult(earned)
+                        RewardedVideoAds.getInstance().showRewardedAd(activity) { result ->
+                            viewModel.onSwarmRewardResult(result.shouldContinueFlow)
                         }
                     }
                 }
@@ -905,8 +908,8 @@ private fun HomeMessageCard(message: HomeMessage) {
             stringResource(R.string.home_mode_keep_one_visible)
         HomeMessage.SELECT_SWARM_PET ->
             stringResource(R.string.home_mode_select_swarm_pet)
-        HomeMessage.SWARM_REWARD_NOT_AVAILABLE ->
-            stringResource(R.string.home_mode_reward_unavailable)
+        HomeMessage.SWARM_REWARD_NOT_EARNED ->
+            stringResource(R.string.home_mode_reward_not_earned)
     }
     Text(
         text = text,

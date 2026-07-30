@@ -64,6 +64,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogError
@@ -113,10 +114,12 @@ fun PetCatalogScreen(
                 PetCatalogEffect.ShowMixedSlotRewardedAd -> {
                     val activity = context as? Activity
                     if (activity == null) {
-                        viewModel.onMixedSlotRewardResult(rewardEarned = false)
+                        viewModel.onMixedSlotRewardResult(
+                            RewardedAdResult.UNAVAILABLE.shouldContinueFlow
+                        )
                     } else {
-                        RewardedVideoAds.getInstance().showRewardedAd(activity) { earned ->
-                            viewModel.onMixedSlotRewardResult(earned)
+                        RewardedVideoAds.getInstance().showRewardedAd(activity) { result ->
+                            viewModel.onMixedSlotRewardResult(result.shouldContinueFlow)
                         }
                     }
                 }
@@ -716,8 +719,8 @@ private fun catalogMessageText(message: PetCatalogMessage): String = when (messa
         message.reason
     )
     is PetCatalogMessage.Failed -> stringResource(R.string.pet_catalog_prepare_failed)
-    PetCatalogMessage.RewardUnavailable ->
-        stringResource(R.string.home_mode_reward_unavailable)
+    PetCatalogMessage.RewardNotEarned ->
+        stringResource(R.string.home_mode_reward_not_earned)
     PetCatalogMessage.PreviousSlotRequired ->
         stringResource(R.string.pet_catalog_mixed_slot_previous_required)
 }

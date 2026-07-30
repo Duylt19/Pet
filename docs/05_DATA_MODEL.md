@@ -42,9 +42,10 @@ Language được mirror sang SharedPreferences `language_cache` để có thể
 `packKey`, size, speed, messages, custom messages, interaction và `isEnabled`; `petCount`
 quyết định số slot Mixed đã cấu hình, còn `isEnabled` quyết định slot nào thật sự xuất
 hiện. Mixed luôn giữ tối thiểu một pet visible; global Start/Stop là cách tắt toàn bộ.
-Ba slot đầu miễn phí. Slot 4–12 mở tuần tự sau earned Rewarded callback, còn Premium bypass
-toàn bộ gate. Capacity đã mở được persist độc lập với roster nên remove pet không làm user
-phải xem lại quảng cáo của slot đó.
+Ba slot đầu miễn phí. Slot 4–12 mở tuần tự sau earned Rewarded callback khi quảng cáo có
+sẵn; nếu Rewarded unavailable thì flow tiếp tục để lỗi quảng cáo không chặn tính năng.
+Premium bypass toàn bộ gate. Capacity đã mở được persist độc lập với roster nên remove pet
+không làm user phải xem lại quảng cáo của slot đó.
 `PetSwarmPreferences` tách riêng pack/count/unlock, size/speed và movement area nên không
 ghi đè hồ sơ Mixed. Random variation dùng pack key + instance index làm seed ổn định;
 không persist một record riêng cho từng bản sao.

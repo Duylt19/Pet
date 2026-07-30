@@ -57,9 +57,10 @@ các pet; add/remove dùng position list đã được repository materialize th
 
 - Home dùng segmented control cho Mixed/Swarm. Icon mắt trên từng Mixed card thay dropdown
   count và áp dụng ngay; global switch vẫn là quyền bật/tắt toàn bộ overlay.
-- Mixed có 12 slot liên tục: slot 1–3 miễn phí, slot 4–12 mở tuần tự sau earned Rewarded;
-  Premium bypass gate. Catalog chặn Set/Import khi slot đích chưa mở, còn capacity đã mở
-  không bị mất khi user remove pet.
+- Mixed có 12 slot liên tục: slot 1–3 miễn phí, slot 4–12 mở tuần tự sau earned Rewarded
+  khi ad hiển thị được; unavailable tiếp tục flow, dismiss sớm dừng lại. Premium bypass
+  gate. Catalog chặn Set/Import khi slot đích chưa mở, còn capacity đã mở không bị mất khi
+  user remove pet.
 - Swarm free được unlock sau Rewarded thành công; Premium tự unlock. Unlock không tự Start.
 - Tap Swarm đã cấu hình mở màn Edit riêng. Count, size, speed, random variation và bốn
   movement insets được persist độc lập với Mixed và áp dụng ngay cho session đang chạy.

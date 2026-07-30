@@ -87,11 +87,11 @@ class RewardedVideoAds {
         resultListener = listener
         rewardEarned = false
         if (!MobileAds.isInitialized) {
-            completeResult(activity, rewardEarned = false)
+            completeResult(activity, RewardedAdResult.UNAVAILABLE)
             return
         }
         if (Utils.checkLimitAd(activity)) {
-            completeResult(activity, rewardEarned = false)
+            completeResult(activity, RewardedAdResult.UNAVAILABLE)
             return
         }
         if (rewardedAd != null) {
@@ -113,7 +113,14 @@ class RewardedVideoAds {
                     rewardedAd = null
                     loadRewardedVideo(activity)
                     _isShowing = false
-                    completeResult(activity, rewardEarned)
+                    completeResult(
+                        activity,
+                        if (rewardEarned) {
+                            RewardedAdResult.EARNED
+                        } else {
+                            RewardedAdResult.DISMISSED
+                        }
+                    )
                 }
 
                 override fun onAdFailedToShowFullScreenContent(fullScreenContentError: FullScreenContentError) {
@@ -121,7 +128,7 @@ class RewardedVideoAds {
                     Log.e(TAG, "Ad failed to show fullscreen content.")
                     rewardedAd = null
                     _isShowing = false
-                    completeResult(activity, rewardEarned = false)
+                    completeResult(activity, RewardedAdResult.UNAVAILABLE)
                     loadRewardedVideo(activity)
                 }
 
@@ -151,22 +158,31 @@ class RewardedVideoAds {
             }
         } else {
             Log.d(TAG, "The rewarded ad wasn't ready yet.")
-            completeResult(activity, rewardEarned = false)
+            completeResult(activity, RewardedAdResult.UNAVAILABLE)
             loadRewardedVideo(activity)
         }
     }
 
-    private fun completeResult(activity: Activity, rewardEarned: Boolean) {
+    private fun completeResult(activity: Activity, result: RewardedAdResult) {
         val listener = resultListener ?: return
         resultListener = null
         if (!activity.isDestroyed && !activity.isFinishing) {
             activity.runOnUiThread {
-                listener.onAdClosed(rewardEarned)
+                listener.onAdClosed(result)
             }
         }
     }
 
     fun interface RewardedResultListener {
-        fun onAdClosed(rewardEarned: Boolean)
+        fun onAdClosed(result: RewardedAdResult)
     }
+}
+
+enum class RewardedAdResult {
+    EARNED,
+    DISMISSED,
+    UNAVAILABLE;
+
+    val shouldContinueFlow: Boolean
+        get() = this != DISMISSED
 }

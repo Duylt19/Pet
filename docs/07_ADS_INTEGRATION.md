@@ -15,8 +15,9 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 ## Pet Swarm Rewarded unlock
 
 - Home preload Rewarded khi screen vào composition.
-- User free chỉ unlock khi SDK trả reward callback thật; đóng quảng cáo sớm, load/show fail,
-  limit hoặc SDK chưa sẵn sàng đều không unlock.
+- Khi Rewarded hiển thị được, user free chỉ unlock sau reward callback thật; đóng quảng cáo
+  sớm không unlock. Nếu SDK/ad inventory không sẵn sàng, limit hoặc show fail thì flow tiếp
+  tục ngay để lỗi quảng cáo không chặn tính năng.
 - Callback được consume đúng một lần. Sau dismiss/fail, SDK preload lượt kế tiếp.
 - Unlock được persist trên device bằng `pet_swarm_reward_unlocked`.
 - Premium được xem là unlocked ngay và không cần mở Rewarded.
@@ -24,19 +25,23 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 
 ## Mixed slot Rewarded unlock
 
-- Slot 1–3 miễn phí. Slot 4–12 mở tuần tự, mỗi slot cần đúng một earned Rewarded callback.
+- Slot 1–3 miễn phí. Slot 4–12 mở tuần tự; mỗi slot cần earned callback nếu Rewarded có
+  thể hiển thị, còn unavailable tiếp tục ngay.
 - Catalog là enforcement boundary dùng chung cho entry từ Home, Settings và deep route;
   khi chưa mở, `Set`, import và chuẩn bị pack đều bị chặn.
 - Capacity được persist bằng `pet_mixed_reward_unlocked_slot_count`, mặc định 3 và clamp
   trong khoảng 3–12. Xóa pet không thu hồi capacity đã mở.
-- Đóng quảng cáo sớm, load/show fail, SDK không sẵn sàng hoặc callback không earned đều
-  không mở slot; user cũng không thể bỏ qua slot trước để mở slot sau.
+- Đóng quảng cáo sớm trước callback không mở slot. Nếu SDK/ad inventory không sẵn sàng,
+  limit hoặc show fail thì mở slot và tiếp tục flow ngay; user vẫn không thể bỏ qua slot
+  trước để mở slot sau.
 - Premium bypass toàn bộ gate. Catalog kiểm tra lại entitlement ở `ON_RESUME` để áp dụng
   ngay sau khi user mua Premium.
 
 ## Rules
 
-- Ad load/show fail không được chặn navigation hoặc action chính.
+- Rewarded trả ba trạng thái `EARNED`, `DISMISSED`, `UNAVAILABLE`: `EARNED` và
+  `UNAVAILABLE` tiếp tục flow, riêng `DISMISSED` dừng để không thưởng khi user đóng
+  quảng cáo sớm.
 - Tránh chồng App Open Ads với interstitial/premium/full-screen flow.
 - Không thêm placement mới nếu chưa có product/UX decision.
 - Screen code phải là constant trong ads config, không hardcode rải rác.

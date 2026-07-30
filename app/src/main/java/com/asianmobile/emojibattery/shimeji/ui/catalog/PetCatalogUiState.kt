@@ -40,7 +40,7 @@ sealed interface PetCatalogMessage {
     data class Selected(val name: String) : PetCatalogMessage
     data class Rejected(val reason: String) : PetCatalogMessage
     data class Failed(val reason: String) : PetCatalogMessage
-    data object RewardUnavailable : PetCatalogMessage
+    data object RewardNotEarned : PetCatalogMessage
     data object PreviousSlotRequired : PetCatalogMessage
 }
 

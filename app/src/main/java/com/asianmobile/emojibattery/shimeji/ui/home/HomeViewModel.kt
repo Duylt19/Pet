@@ -162,12 +162,12 @@ class HomeViewModel @Inject constructor(
         emit(HomeEffect.ShowSwarmRewardedAd)
     }
 
-    fun onSwarmRewardResult(rewardEarned: Boolean) {
-        if (rewardEarned) {
+    fun onSwarmRewardResult(canContinue: Boolean) {
+        if (canContinue) {
             petSettingsRepository.unlockSwarmByReward()
             _uiState.update { it.copy(swarmUnlocked = true, message = null) }
         } else {
-            showMessage(HomeMessage.SWARM_REWARD_NOT_AVAILABLE)
+            showMessage(HomeMessage.SWARM_REWARD_NOT_EARNED)
         }
     }
 

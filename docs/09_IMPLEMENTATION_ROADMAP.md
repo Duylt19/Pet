@@ -108,8 +108,8 @@ không reset action, combo, vị trí hoặc animation cursor.
 - [Done] Remap Swarm positions proportionally when movement spacing contracts or expands,
   and raise wall-jump plus wall-to-wall scheduling in the playful runtime profile.
 - [Done] Expand Mixed to 12 contiguous slots with a 3-column Home grid, first three slots
-  free, sequential earned-Rewarded unlock for slots 4–12, persisted capacity, Catalog
-  enforcement and Premium bypass.
+  free, sequential Rewarded unlock for slots 4–12 with unavailable fallback, persisted
+  capacity, Catalog enforcement and Premium bypass.
 
 Before release hardening, complete the clean-room parity items confirmed by the local competitor audit:
 
