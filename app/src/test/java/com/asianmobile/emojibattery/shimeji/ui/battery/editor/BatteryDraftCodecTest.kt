@@ -56,7 +56,8 @@ class BatteryDraftCodecTest {
             dateFormat = BatteryDateFormat.WEEKDAY_FULL,
             dateTimeFont = BatteryDateFont.BEAU_RIVAGE,
             privacyReserveDp = 88f,
-            favoriteThemeIds = setOf(1, 9, 42)
+            favoriteThemeIds = setOf(1, 9, 42),
+            rewardUnlockedThemeIds = setOf(4, 8, 42)
         )
 
         assertEquals(config, BatteryDraftCodec.decode(BatteryDraftCodec.encode(config)))

@@ -75,7 +75,9 @@ class BatterySettingsPolicy {
         ringerColorArgb = config.ringerColorArgb.statusColor(),
         chargeColorArgb = config.chargeColorArgb.statusColor(),
         dateTimeColorArgb = config.dateTimeColorArgb.statusColor(),
-        favoriteThemeIds = config.favoriteThemeIds.filterTo(mutableSetOf()) { it >= 0 }
+        favoriteThemeIds = config.favoriteThemeIds.filterTo(mutableSetOf()) { it >= 0 },
+        rewardUnlockedThemeIds = config.rewardUnlockedThemeIds
+            .filterTo(mutableSetOf()) { it > BUILT_IN_BATTERY_THEME_ID }
     )
 
     private fun sanitizeColor(color: Int, fallback: Int): Int =

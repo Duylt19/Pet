@@ -679,6 +679,14 @@
     <string name="battery_retry">Chạm để tải lại</string>
     <string name="battery_favorite_action">Thêm hoặc xóa yêu thích</string>
     <string name="battery_premium_theme">Mẫu Premium</string>
+    <string name="battery_reward_unlock_title">Mở khóa %1$s</string>
+    <string name="battery_reward_unlock_message">Xem một video có thưởng để mở khóa vĩnh viễn mẫu pin này trên thiết bị, hoặc nâng cấp Premium để mở khóa tất cả mẫu.</string>
+    <string name="battery_reward_watch">Xem video để mở khóa</string>
+    <string name="battery_reward_loading">Đang mở video…</string>
+    <string name="battery_reward_get_premium">Nâng cấp Premium</string>
+    <string name="battery_reward_not_earned">Hãy xem hết video có thưởng để mở khóa mẫu này.</string>
+    <string name="battery_theme_unavailable_title">Không thể dùng mẫu này</string>
+    <string name="battery_theme_unavailable_message">Mẫu pin đang thiếu dữ liệu cần thiết. Hãy làm mới danh mục rồi thử lại.</string>
     <string name="battery_editor_title">Tùy chỉnh thanh trạng thái</string>
     <string name="battery_editor_overview_hint">Xem trước, mở từng mục để chỉnh rồi áp dụng tất cả thay đổi cùng lúc.</string>
     <string name="battery_editor_quick_controls">Điều khiển nhanh</string>

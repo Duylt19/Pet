@@ -44,7 +44,8 @@ data class BatteryStatusConfig(
     val dateFormat: BatteryDateFormat = BatteryDateFormat.WEEKDAY_MONTH_DAY,
     val dateTimeFont: BatteryDateFont = BatteryDateFont.BALOO_2,
     val privacyReserveDp: Float = DEFAULT_BATTERY_PRIVACY_RESERVE_DP,
-    val favoriteThemeIds: Set<Int> = emptySet()
+    val favoriteThemeIds: Set<Int> = emptySet(),
+    val rewardUnlockedThemeIds: Set<Int> = emptySet()
 )
 
 enum class BatteryStatusDisplayMode {

@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.ui.battery.catalog
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,17 +27,21 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -52,6 +57,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
+import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_CATEGORY_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
@@ -70,8 +77,38 @@ fun BatteryCatalogScreen(
     viewModel: BatteryCatalogViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val requiresRewardAd = !state.isPremium && state.themes.any { theme ->
+        theme.assetsReady &&
+            theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
+            theme.id !in state.rewardUnlockedThemeIds
+    }
     TrackScreenView(ScreenName.BATTERY_CATALOG)
+    LaunchedEffect(context, requiresRewardAd) {
+        if (requiresRewardAd) {
+            RewardedVideoAds.getInstance().loadRewardedVideo(context.applicationContext)
+        }
+    }
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is BatteryCatalogEffect.OpenTheme -> onOpenTheme(effect.themeId)
+                BatteryCatalogEffect.ShowRewardedAd -> {
+                    val activity = context as? Activity
+                    if (activity == null) {
+                        viewModel.onRewardResult(
+                            RewardedAdResult.UNAVAILABLE.shouldContinueFlow
+                        )
+                    } else {
+                        RewardedVideoAds.getInstance().showRewardedAd(activity) { result ->
+                            viewModel.onRewardResult(result.shouldContinueFlow)
+                        }
+                    }
+                }
+            }
+        }
+    }
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshEntitlement()
@@ -85,11 +122,31 @@ fun BatteryCatalogScreen(
         onCategory = viewModel::selectCategory,
         onSearch = viewModel::updateSearchQuery,
         onFavorite = viewModel::toggleFavorite,
-        onTheme = { theme ->
-            if (viewModel.canOpen(theme)) onOpenTheme(theme.id) else onNavigateToPremium()
-        },
+        onTheme = viewModel::requestTheme,
         onRetry = viewModel::refresh
     )
+    val pendingTheme = state.themes.firstOrNull { it.id == state.pendingUnlockThemeId }
+    if (pendingTheme != null) {
+        BatteryRewardUnlockDialog(
+            themeName = pendingTheme.name,
+            isLoading = state.isRewardInProgress,
+            rewardNotEarned = state.message == BatteryCatalogMessage.REWARD_NOT_EARNED,
+            onDismiss = viewModel::dismissUnlockDialog,
+            onWatchReward = viewModel::requestRewardUnlock,
+            onPremium = onNavigateToPremium
+        )
+    } else if (state.message == BatteryCatalogMessage.THEME_UNAVAILABLE) {
+        AlertDialog(
+            onDismissRequest = viewModel::clearMessage,
+            title = { Text(stringResource(R.string.battery_theme_unavailable_title)) },
+            text = { Text(stringResource(R.string.battery_theme_unavailable_message)) },
+            confirmButton = {
+                TextButton(onClick = viewModel::clearMessage) {
+                    Text(stringResource(R.string.common_done))
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -194,7 +251,8 @@ private fun BatteryCatalogContent(
                         theme = theme,
                         favorite = theme.id in state.favoriteThemeIds,
                         locked = theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
-                            !state.isPremium,
+                            !state.isPremium &&
+                            theme.id !in state.rewardUnlockedThemeIds,
                         onFavorite = { onFavorite(theme.id) },
                         onClick = { onTheme(theme) }
                     )
@@ -202,6 +260,69 @@ private fun BatteryCatalogContent(
             }
         }
     }
+}
+
+@Composable
+private fun BatteryRewardUnlockDialog(
+    themeName: String,
+    isLoading: Boolean,
+    rewardNotEarned: Boolean,
+    onDismiss: () -> Unit,
+    onWatchReward: () -> Unit,
+    onPremium: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = {
+            if (!isLoading) onDismiss()
+        },
+        title = {
+            Text(stringResource(R.string.battery_reward_unlock_title, themeName))
+        },
+        text = {
+            Column {
+                Text(stringResource(R.string.battery_reward_unlock_message))
+                if (rewardNotEarned) {
+                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
+                    Text(
+                        text = stringResource(R.string.battery_reward_not_earned),
+                        color = colorResource(R.color.colors_E45D6A)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onWatchReward,
+                enabled = !isLoading
+            ) {
+                Text(
+                    stringResource(
+                        if (isLoading) {
+                            R.string.battery_reward_loading
+                        } else {
+                            R.string.battery_reward_watch
+                        }
+                    )
+                )
+            }
+        },
+        dismissButton = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextButton(
+                    onClick = onPremium,
+                    enabled = !isLoading
+                ) {
+                    Text(stringResource(R.string.battery_reward_get_premium))
+                }
+                TextButton(
+                    onClick = onDismiss,
+                    enabled = !isLoading
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        }
+    )
 }
 
 @Composable

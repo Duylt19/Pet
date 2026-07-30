@@ -64,6 +64,10 @@ object BatteryDraftCodec {
             "favoriteThemeIds",
             JSONArray().apply { config.favoriteThemeIds.sorted().forEach(::put) }
         )
+        .put(
+            "rewardUnlockedThemeIds",
+            JSONArray().apply { config.rewardUnlockedThemeIds.sorted().forEach(::put) }
+        )
         .toString()
 
     fun decode(
@@ -160,6 +164,10 @@ object BatteryDraftCodec {
                 favoriteThemeIds = json.intSet(
                     "favoriteThemeIds",
                     fallback.favoriteThemeIds
+                ),
+                rewardUnlockedThemeIds = json.intSet(
+                    "rewardUnlockedThemeIds",
+                    fallback.rewardUnlockedThemeIds
                 )
             )
         }.getOrNull()

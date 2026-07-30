@@ -6,6 +6,8 @@ Vertical slice hiện đã có trong source:
 
 - Home bottom navigation mở `BatteryCatalogScreen`.
 - Catalog local chuẩn hóa, search, category, Free/Premium, favorite và built-in fallback.
+- Theme Premium hỗ trợ dialog Rewarded/Premium: earned reward mở khóa vĩnh viễn đúng
+  theme ID trên thiết bị rồi tự mở editor; Premium bypass toàn bộ theme gate.
 - Editor dùng overview → editor con Size/Appearance/Emoji/Battery và 9 status component,
   có preview xuyên suốt, Apply cố định, cảnh báo bỏ draft, phục hồi draft sau process death,
   20 nền, 20 emotion và 26 animation đã audit.
@@ -96,6 +98,7 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `showDateTime`, `dateFormat`, `dateTimeFont`, `dateTimeSizeDp`, `dateTimeColorArgb` | Ngày/giờ và 6 font bundled |
 | `privacyReserveDp` | Khoảng trống bên phải cho privacy/system indicators |
 | `favoriteThemeIds` | Favorite local theo theme ID |
+| `rewardUnlockedThemeIds` | Theme Premium đã mở khóa bằng Rewarded trên thiết bị |
 
 `BatterySettingsPolicy` clamp toàn bộ geometry và loại favorite ID âm để dữ
 liệu DataStore lỗi không đi thẳng vào `WindowManager`. `BatteryDraftCodec` lưu bản nháp

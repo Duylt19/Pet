@@ -28,7 +28,8 @@ class BatterySettingsPolicyTest {
                 chargeIconIndex = 20,
                 animationAssetName = "../bad.json",
                 privacyReserveDp = 200f,
-                favoriteThemeIds = setOf(-1, 0, 7)
+                favoriteThemeIds = setOf(-1, 0, 7),
+                rewardUnlockedThemeIds = setOf(-1, 0, 8)
             )
         )
 
@@ -47,6 +48,7 @@ class BatterySettingsPolicyTest {
         assertEquals("cute_1.json", sanitized.animationAssetName)
         assertEquals(128f, sanitized.privacyReserveDp)
         assertEquals(setOf(0, 7), sanitized.favoriteThemeIds)
+        assertEquals(setOf(8), sanitized.rewardUnlockedThemeIds)
     }
 
     @Test

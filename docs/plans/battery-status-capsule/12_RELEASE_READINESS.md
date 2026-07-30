@@ -41,7 +41,8 @@ compile thành công để thay thế device test, license approval hoặc Play 
 | Play Accessibility declaration | Approved disclosure, justification, demo video | Pending |
 | Privacy Policy/Data Safety | Owner/legal review | Pending |
 | Remote production catalog | Owner endpoint, TLS/host policy, ETag/TTL, kill switch | Not configured |
-| Rewarded/new ad placement | Product + ads approval, unavailable behavior | Not approved |
+| Rewarded unlock | Reuses approved Rewarded unit; earned/unavailable/dismissed contract documented in docs/07 | Implemented; device ad-SDK validation pending |
+| Native/banner placement | Product + ads approval before any new placement | Not approved; not implemented |
 
 ## Release decision
 

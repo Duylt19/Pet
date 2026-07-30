@@ -229,8 +229,9 @@ Remote content fail không phá applied capsule; invalid pack không vào render
 
 ## Phase 7 — Premium, Rewarded and approved ads
 
-**Status: Premium route implemented; Rewarded/new ads blocked by owner decision.** Không
-tự thêm ad placement hoặc Rewarded semantics khi chưa có phê duyệt sản phẩm.
+**Status: Premium + per-theme Rewarded implemented; new display ads still unapproved.**
+Dialog unlock, exactly-once callback, persistent theme ID, Premium bypass/return flow và
+unavailable fallback đã có. Không tự thêm banner/native placement.
 
 ### Scope
 

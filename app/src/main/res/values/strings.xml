@@ -849,6 +849,14 @@
     <string name="battery_retry">Tap to refresh</string>
     <string name="battery_favorite_action">Add or remove favorite</string>
     <string name="battery_premium_theme">Premium style</string>
+    <string name="battery_reward_unlock_title">Unlock %1$s</string>
+    <string name="battery_reward_unlock_message">Watch one rewarded video to unlock this battery style permanently on this device, or upgrade to Premium to unlock every style.</string>
+    <string name="battery_reward_watch">Watch video to unlock</string>
+    <string name="battery_reward_loading">Opening video…</string>
+    <string name="battery_reward_get_premium">Get Premium</string>
+    <string name="battery_reward_not_earned">Please finish the rewarded video to unlock this style.</string>
+    <string name="battery_theme_unavailable_title">Style unavailable</string>
+    <string name="battery_theme_unavailable_message">This battery style is missing required assets. Refresh the catalog and try again.</string>
     <string name="battery_editor_title">Customize status bar</string>
     <string name="battery_editor_overview_hint">Review the preview, open one section at a time, then apply all changes together.</string>
     <string name="battery_editor_quick_controls">Quick controls</string>

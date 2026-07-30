@@ -37,6 +37,21 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Premium bypass toàn bộ gate. Catalog kiểm tra lại entitlement ở `ON_RESUME` để áp dụng
   ngay sau khi user mua Premium.
 
+## Battery style Rewarded unlock
+
+- Theme `FREE`, theme đã reward-unlock và toàn bộ theme của user Premium mở trực tiếp.
+- Chạm theme `PREMIUM` chưa mở sẽ hiện dialog có ba action: xem Rewarded, nâng cấp
+  Premium hoặc hủy; không tự điều hướng thẳng sang paywall.
+- Rewarded chỉ được preload khi free user còn ít nhất một theme Premium chưa mở; Premium
+  không tạo ad request. `EARNED` persist đúng theme ID vào
+  `battery_status_reward_unlocked_theme_ids` rồi tự mở editor; `DISMISSED` giữ dialog và
+  yêu cầu xem hết video.
+- `UNAVAILABLE` tiếp tục/unlock theo fallback Rewarded chung hiện tại để lỗi SDK/inventory
+  không tạo dead-end.
+- Callback chỉ được consume khi đúng dialog đang pending và đang chờ reward; callback lặp
+  không thể unlock hoặc navigate lần hai.
+- Premium bypass Rewarded. Khi quay lại Catalog sau mua Premium, pending theme tự mở.
+
 ## Rules
 
 - Rewarded trả ba trạng thái `EARNED`, `DISMISSED`, `UNAVAILABLE`: `EARNED` và
@@ -44,6 +59,8 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   quảng cáo sớm.
 - Tránh chồng App Open Ads với interstitial/premium/full-screen flow.
 - Không thêm placement mới nếu chưa có product/UX decision.
+- Battery Rewarded là unlock trigger đã được owner duyệt; không thêm banner/native vào
+  Catalog hoặc editor trong thay đổi này.
 - Screen code phải là constant trong ads config, không hardcode rải rác.
 - Premium user/ad-free policy phải được kiểm tra ở integration boundary chung.
 - Khi xóa screen, xóa placement/config không còn consumer.

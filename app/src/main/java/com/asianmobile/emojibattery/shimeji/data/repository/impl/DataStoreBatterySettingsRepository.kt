@@ -62,6 +62,8 @@ class DataStoreBatterySettingsRepository @Inject constructor(
     override fun applyConfig(config: BatteryStatusConfig) {
         val sanitized = policy.sanitize(config)
         edit { preferences ->
+            val rewardUnlockedThemeIds =
+                decodeRewardUnlockedIds(preferences) + sanitized.rewardUnlockedThemeIds
             preferences[ENABLED] = sanitized.enabled
             preferences[SELECTED_THEME_ID] = sanitized.selectedThemeId
             preferences[DISPLAY_MODE] = sanitized.displayMode.name
@@ -107,6 +109,8 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             preferences[PRIVACY_RESERVE_DP] = sanitized.privacyReserveDp
             preferences[FAVORITE_THEME_IDS] =
                 sanitized.favoriteThemeIds.map(Int::toString).toSet()
+            preferences[REWARD_UNLOCKED_THEME_IDS] =
+                rewardUnlockedThemeIds.map(Int::toString).toSet()
         }
     }
 
@@ -120,6 +124,15 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             val current = decodeFavoriteIds(preferences).toMutableSet()
             if (!current.add(themeId)) current.remove(themeId)
             preferences[FAVORITE_THEME_IDS] = current.map(Int::toString).toSet()
+        }
+    }
+
+    override fun unlockThemeByReward(themeId: Int) {
+        if (themeId <= BUILT_IN_BATTERY_THEME_ID) return
+        edit { preferences ->
+            val current = decodeRewardUnlockedIds(preferences).toMutableSet()
+            current += themeId
+            preferences[REWARD_UNLOCKED_THEME_IDS] = current.map(Int::toString).toSet()
         }
     }
 
@@ -197,7 +210,8 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                     ?: defaults.dateTimeFont,
                 privacyReserveDp = preferences[PRIVACY_RESERVE_DP]
                     ?: DEFAULT_BATTERY_PRIVACY_RESERVE_DP,
-                favoriteThemeIds = decodeFavoriteIds(preferences)
+                favoriteThemeIds = decodeFavoriteIds(preferences),
+                rewardUnlockedThemeIds = decodeRewardUnlockedIds(preferences)
             )
         )
     }
@@ -207,6 +221,12 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             .orEmpty()
             .mapNotNull(String::toIntOrNull)
             .filterTo(mutableSetOf()) { it >= 0 }
+
+    private fun decodeRewardUnlockedIds(preferences: Preferences): Set<Int> =
+        preferences[REWARD_UNLOCKED_THEME_IDS]
+            .orEmpty()
+            .mapNotNull(String::toIntOrNull)
+            .filterTo(mutableSetOf()) { it > BUILT_IN_BATTERY_THEME_ID }
 
     private fun edit(block: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
         scope.launch {
@@ -262,5 +282,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         val DATE_TIME_FONT = stringPreferencesKey("battery_status_date_time_font")
         val PRIVACY_RESERVE_DP = floatPreferencesKey("battery_status_privacy_reserve_dp")
         val FAVORITE_THEME_IDS = stringSetPreferencesKey("battery_status_favorite_theme_ids")
+        val REWARD_UNLOCKED_THEME_IDS =
+            stringSetPreferencesKey("battery_status_reward_unlocked_theme_ids")
     }
 }

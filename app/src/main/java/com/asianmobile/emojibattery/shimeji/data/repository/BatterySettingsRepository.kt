@@ -11,4 +11,6 @@ interface BatterySettingsRepository {
     fun setEnabled(enabled: Boolean)
 
     fun toggleFavorite(themeId: Int)
+
+    fun unlockThemeByReward(themeId: Int)
 }

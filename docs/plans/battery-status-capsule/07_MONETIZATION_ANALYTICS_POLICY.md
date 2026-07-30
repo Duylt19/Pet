@@ -1,6 +1,6 @@
 # 07 — Monetization, Analytics and Policy
 
-> **REFERENCE TARGET — Premium theme gate/analytics cơ bản đã có; release policy pending**
+> **CURRENT CONTRACT — Premium + per-theme Rewarded gate đã triển khai**
 
 ## Entitlement
 
@@ -20,17 +20,18 @@ enum class AssetEntitlement {
 - Nếu pack bị server remove, installed asset đã licensed/owned không tự xóa giữa session;
   catalog có thể đánh dấu unavailable cho selection mới.
 
-## Rewarded behavior đề xuất
+## Rewarded behavior hiện tại
 
 Tái sử dụng `RewardedAdResult`:
 
 - `EARNED`: persist unlock và tiếp tục.
 - `DISMISSED`: không unlock.
 - `UNAVAILABLE`: theo precedent hiện tại của app, tiếp tục/unlock để lỗi inventory không
-  chặn UX. Owner có thể đổi policy này trước implementation, nhưng phải áp dụng nhất quán
-  và có unit test.
+  chặn UX.
 
 Callback consume đúng một lần; preload lại sau dismiss/fail. Premium không gọi Rewarded.
+Unlock persist theo stable theme ID; click Premium theme chưa mở luôn qua dialog có
+Rewarded/Premium/Cancel.
 
 ## Ads placement proposal
 

@@ -128,7 +128,11 @@ không được restore sau process death/reboot.
   PNG/GIF/Lottie.
   Repository chặn path escape, size/hash mismatch và release catalog chưa `APPROVED`.
 - `BatteryStatusConfig` là persistent source of truth. `BatterySettingsPolicy` clamp
-  geometry/color/favorite trước khi ghi và sau khi decode DataStore.
+  geometry/color/favorite/reward unlock trước khi ghi và sau khi decode DataStore.
+- `battery_status_reward_unlocked_theme_ids` là tập ID theme Premium đã được mở khóa bằng
+  Rewarded trên thiết bị. ID `0`/âm bị loại; Premium subscription bypass gate nhưng không
+  sửa/xóa tập unlock này. Tập unlock là monotonic: `applyConfig` luôn merge với dữ liệu
+  hiện có để một editor draft cũ hoặc hai DataStore edit gần nhau không thể thu hồi reward.
 - 898-theme raw snapshot nằm trong `private_data/`, không thuộc source/release artifact.
   Debug build audit và copy snapshot vào generated assets; release không đóng gói catalog
   `REVIEW_REQUIRED`. Xem
