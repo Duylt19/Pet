@@ -38,6 +38,8 @@ class BatteryEditorViewModel @Inject constructor(
                     config = draft.copy(
                         selectedThemeId = theme?.id ?: BUILT_IN_BATTERY_THEME_ID
                     ),
+                    backgrounds = catalog.backgrounds,
+                    emotions = catalog.emotions,
                     isThemeAvailable = theme?.assetsReady == true || themeId == BUILT_IN_BATTERY_THEME_ID
                 )
             }.collect { state -> _uiState.value = state }
@@ -51,6 +53,11 @@ class BatteryEditorViewModel @Inject constructor(
     fun setBatterySize(value: Float) = update { copy(batterySizeDp = value) }
     fun setBackgroundColor(value: Int) = update { copy(backgroundColorArgb = value) }
     fun setForegroundColor(value: Int) = update { copy(foregroundColorArgb = value) }
+    fun setBackgroundDecoration(value: Int) =
+        update { copy(backgroundDecorationId = value) }
+    fun setShowEmotion(value: Boolean) = update { copy(showEmotion = value) }
+    fun setEmotionDecoration(value: Int) =
+        update { copy(emotionDecorationId = value) }
 
     fun apply() {
         val state = _uiState.value

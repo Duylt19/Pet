@@ -26,12 +26,20 @@ data class BatteryThemeRecord(
     val emoji: BatteryCatalogAssetRecord
 )
 
+data class BatteryDecorationRecord(
+    val id: Int,
+    val name: String,
+    val asset: BatteryCatalogAssetRecord
+)
+
 data class BatteryCatalogDocument(
     val catalogVersion: String,
     val capturedAt: String,
     val distributionStatus: BatteryCatalogDistributionStatus,
     val categories: List<BatteryCatalogCategory>,
-    val themes: List<BatteryThemeRecord>
+    val themes: List<BatteryThemeRecord>,
+    val backgrounds: List<BatteryDecorationRecord>,
+    val emotions: List<BatteryDecorationRecord>
 )
 
 class BatteryCatalogParser {
@@ -97,18 +105,50 @@ class BatteryCatalogParser {
                 }
             }
         }
+        val backgrounds = parseDecorations(root, "backgrounds", "background")
+        val emotions = parseDecorations(root, "emotions", "emotion")
         validate(root, categories, themes)
         BatteryCatalogDocument(
             catalogVersion = catalogVersion,
             capturedAt = capturedAt,
             distributionStatus = distributionStatus,
             categories = categories.sortedWith(compareBy({ it.priority }, { it.id })),
-            themes = themes.sortedBy(BatteryThemeRecord::id)
+            themes = themes.sortedBy(BatteryThemeRecord::id),
+            backgrounds = backgrounds,
+            emotions = emotions
         )
     } catch (error: BatteryCatalogParseException) {
         throw error
     } catch (error: JSONException) {
         throw BatteryCatalogParseException("Malformed Battery catalog", error)
+    }
+
+    private fun parseDecorations(
+        root: JSONObject,
+        key: String,
+        runtimeDirectory: String
+    ): List<BatteryDecorationRecord> {
+        val array = root.optJSONArray(key) ?: return emptyList()
+        val records = array.mapObjects { item, index ->
+            val id = item.getInt("id")
+            val name = item.getString("name").trim()
+            BatteryDecorationRecord(
+                id = id,
+                name = name,
+                asset = item.getJSONObject("asset")
+                    .toAsset("$runtimeDirectory/$name.png", index)
+            ).also {
+                if (id <= 0 || name.isBlank()) {
+                    throw BatteryCatalogParseException(
+                        "Invalid Battery decoration in $key at index $index"
+                    )
+                }
+            }
+        }
+        if (records.map(BatteryDecorationRecord::id).distinct().size != records.size) {
+            throw BatteryCatalogParseException("Duplicate Battery decoration IDs in $key")
+        }
+        return records.sortedBy(BatteryDecorationRecord::id)
     }
 
     private fun validate(

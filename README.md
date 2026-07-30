@@ -21,8 +21,9 @@ settings và các quy ước kiến trúc hiện có.
   được validate an toàn.
 - Settings là pet roster + app/support; mỗi slot mở một hồ sơ Customize Pet riêng cho
   character, size, speed, touch, speech, custom messages và position.
-- Battery tab mở catalog/editor và một Accessibility status-cover overlay opt-in. Snapshot
-  898 theme chỉ dùng local debug tới khi asset provenance và Play/device gate được duyệt.
+- Battery tab mở catalog/editor và một Accessibility status-cover overlay opt-in. Debug
+  build tự audit/đóng gói snapshot local gồm 898 theme, 20 nền và 20 emotion; release chỉ
+  có built-in fallback tới khi asset provenance và Play/device gate được duyệt.
 - Product UI từ Home trở đi dùng cozy light design: pet room, discovery grid, friendly
   detail, My Pet Family và per-pet profile; onboarding/Premium giữ visual hiện tại.
 - Browser, search engine, clear browsing data, storage permission, download, media, Room và service cũ đã bị xóa.

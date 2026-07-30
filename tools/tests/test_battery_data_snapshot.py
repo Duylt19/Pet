@@ -102,6 +102,27 @@ class BatteryDataSnapshotTest(unittest.TestCase):
         with self.assertRaises(BatterySnapshotError):
             audit_snapshot(self.root)
 
+    def test_audit_includes_bundled_backgrounds_and_emotions(self):
+        for directory, prefix in (
+            ("background_template", "template_color"),
+            ("cute_emotion", "emotion"),
+        ):
+            target = self.root / "bundled" / "assets" / directory
+            target.mkdir(parents=True)
+            for index in range(1, 21):
+                (target / f"{prefix}_{index:02d}.png").write_bytes(PNG_1X1)
+
+        catalog, report = audit_snapshot(self.root)
+
+        self.assertEqual(20, len(catalog["backgrounds"]))
+        self.assertEqual(
+            "background/template_color_17.png",
+            catalog["backgrounds"][16]["asset"]["path"],
+        )
+        self.assertEqual(20, len(catalog["emotions"]))
+        self.assertEqual("emotion/emotion_01.png", catalog["emotions"][0]["asset"]["path"])
+        self.assertEqual(43, report["runtimeAssetCount"])
+
 
 if __name__ == "__main__":
     unittest.main()

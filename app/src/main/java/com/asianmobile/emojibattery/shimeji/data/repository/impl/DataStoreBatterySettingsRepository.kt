@@ -15,11 +15,13 @@ import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BACKGROUND_COLOR
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BACKGROUND_ID
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BAR_HEIGHT_DP
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_EMOJI_SIZE_DP
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_FOREGROUND_COLOR
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_HORIZONTAL_PADDING_DP
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_ICON_SIZE_DP
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_EMOTION_ID
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_PRIVACY_RESERVE_DP
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -62,6 +64,9 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             preferences[DISPLAY_MODE] = sanitized.displayMode.name
             preferences[SHOW_TIME] = sanitized.showTime
             preferences[SHOW_PERCENTAGE] = sanitized.showPercentage
+            preferences[BACKGROUND_DECORATION_ID] = sanitized.backgroundDecorationId
+            preferences[SHOW_EMOTION] = sanitized.showEmotion
+            preferences[EMOTION_DECORATION_ID] = sanitized.emotionDecorationId
             preferences[BAR_HEIGHT_DP] = sanitized.barHeightDp
             preferences[HORIZONTAL_PADDING_DP] = sanitized.horizontalPaddingDp
             preferences[EMOJI_SIZE_DP] = sanitized.emojiSizeDp
@@ -100,6 +105,11 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                     ?: BatteryStatusDisplayMode.COVER_SYSTEM_BAR,
                 showTime = preferences[SHOW_TIME] ?: true,
                 showPercentage = preferences[SHOW_PERCENTAGE] ?: true,
+                backgroundDecorationId = preferences[BACKGROUND_DECORATION_ID]
+                    ?: DEFAULT_BATTERY_BACKGROUND_ID,
+                showEmotion = preferences[SHOW_EMOTION] ?: true,
+                emotionDecorationId = preferences[EMOTION_DECORATION_ID]
+                    ?: DEFAULT_BATTERY_EMOTION_ID,
                 barHeightDp = preferences[BAR_HEIGHT_DP] ?: DEFAULT_BATTERY_BAR_HEIGHT_DP,
                 horizontalPaddingDp = preferences[HORIZONTAL_PADDING_DP]
                     ?: DEFAULT_BATTERY_HORIZONTAL_PADDING_DP,
@@ -134,6 +144,11 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         val DISPLAY_MODE = stringPreferencesKey("battery_status_display_mode")
         val SHOW_TIME = booleanPreferencesKey("battery_status_show_time")
         val SHOW_PERCENTAGE = booleanPreferencesKey("battery_status_show_percentage")
+        val BACKGROUND_DECORATION_ID =
+            intPreferencesKey("battery_status_background_decoration_id")
+        val SHOW_EMOTION = booleanPreferencesKey("battery_status_show_emotion")
+        val EMOTION_DECORATION_ID =
+            intPreferencesKey("battery_status_emotion_decoration_id")
         val BAR_HEIGHT_DP = floatPreferencesKey("battery_status_bar_height_dp")
         val HORIZONTAL_PADDING_DP = floatPreferencesKey("battery_status_horizontal_padding_dp")
         val EMOJI_SIZE_DP = floatPreferencesKey("battery_status_emoji_size_dp")

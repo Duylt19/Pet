@@ -46,9 +46,13 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private var observeJob: Job? = null
     private var currentConfig = BatteryStatusConfig()
     private var currentTheme: BatteryThemeEntry? = null
-    private var loadedThemeId: Int? = null
+    private var currentBackgroundPath: String? = null
+    private var currentEmotionPath: String? = null
+    private var loadedAssetKey: String? = null
     private var emojiBitmap: Bitmap? = null
     private var batteryBitmap: Bitmap? = null
+    private var backgroundBitmap: Bitmap? = null
+    private var emotionBitmap: Bitmap? = null
     private var level = 100
     private var charging = false
     private var receiverRegistered = false
@@ -86,10 +90,21 @@ class StatusBarAccessibilityService : AccessibilityService() {
         observeJob?.cancel()
         observeJob = scope.launch {
             combine(settingsRepository.config, catalogRepository.snapshot) { config, catalog ->
-                config to catalog.themes.firstOrNull { it.id == config.selectedThemeId }
-            }.collect { (config, theme) ->
-                currentConfig = config
-                currentTheme = theme
+                BatteryOverlaySources(
+                    config = config,
+                    theme = catalog.themes.firstOrNull { it.id == config.selectedThemeId },
+                    backgroundPath = catalog.backgrounds
+                        .firstOrNull { it.id == config.backgroundDecorationId }
+                        ?.assetPath,
+                    emotionPath = catalog.emotions
+                        .firstOrNull { it.id == config.emotionDecorationId }
+                        ?.assetPath
+                )
+            }.collect { sources ->
+                currentConfig = sources.config
+                currentTheme = sources.theme
+                currentBackgroundPath = sources.backgroundPath
+                currentEmotionPath = sources.emotionPath
                 updateOverlay()
             }
         }
@@ -118,8 +133,12 @@ class StatusBarAccessibilityService : AccessibilityService() {
         scope.cancel()
         emojiBitmap?.recycle()
         batteryBitmap?.recycle()
+        backgroundBitmap?.recycle()
+        emotionBitmap?.recycle()
         emojiBitmap = null
         batteryBitmap = null
+        backgroundBitmap = null
+        emotionBitmap = null
         super.onDestroy()
     }
 
@@ -162,26 +181,64 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private fun render() {
         val view = overlayView ?: return
         val theme = currentTheme
-        if (loadedThemeId == theme?.id) {
-            view.render(currentConfig, level, charging, emojiBitmap, batteryBitmap)
+        val assetKey = listOf(
+            theme?.id,
+            currentBackgroundPath,
+            if (currentConfig.showEmotion) currentEmotionPath else null
+        ).joinToString("|")
+        if (loadedAssetKey == assetKey) {
+            view.render(
+                currentConfig,
+                level,
+                charging,
+                emojiBitmap,
+                batteryBitmap,
+                backgroundBitmap,
+                emotionBitmap
+            )
             return
         }
         renderJob?.cancel()
         renderJob = scope.launch {
-            val (emoji, battery) = withContext(Dispatchers.IO) {
-                decode(theme?.emojiPath) to decode(theme?.batteryPath)
+            val decoded = withContext(Dispatchers.IO) {
+                DecodedBatteryAssets(
+                    emoji = decode(theme?.emojiPath),
+                    battery = decode(theme?.batteryPath),
+                    background = decode(currentBackgroundPath),
+                    emotion = if (currentConfig.showEmotion) {
+                        decode(currentEmotionPath)
+                    } else {
+                        null
+                    }
+                )
             }
-            if (theme?.id != currentTheme?.id) {
-                emoji?.recycle()
-                battery?.recycle()
+            val latestAssetKey = listOf(
+                currentTheme?.id,
+                currentBackgroundPath,
+                if (currentConfig.showEmotion) currentEmotionPath else null
+            ).joinToString("|")
+            if (assetKey != latestAssetKey) {
+                decoded.recycle()
                 return@launch
             }
             emojiBitmap?.recycle()
             batteryBitmap?.recycle()
-            emojiBitmap = emoji
-            batteryBitmap = battery
-            loadedThemeId = theme?.id
-            view.render(currentConfig, level, charging, emojiBitmap, batteryBitmap)
+            backgroundBitmap?.recycle()
+            emotionBitmap?.recycle()
+            emojiBitmap = decoded.emoji
+            batteryBitmap = decoded.battery
+            backgroundBitmap = decoded.background
+            emotionBitmap = decoded.emotion
+            loadedAssetKey = assetKey
+            view.render(
+                currentConfig,
+                level,
+                charging,
+                emojiBitmap,
+                batteryBitmap,
+                backgroundBitmap,
+                emotionBitmap
+            )
         }
     }
 
@@ -249,10 +306,45 @@ class StatusBarAccessibilityService : AccessibilityService() {
         sticky?.let { systemReceiver.onReceive(this, it) }
     }
 
-    private fun decode(path: String?): Bitmap? =
-        path?.let(::File)?.takeIf(File::isFile)?.let { BitmapFactory.decodeFile(it.absolutePath) }
+    private fun decode(path: String?): Bitmap? {
+        if (path == null) return null
+        if (path.startsWith(ANDROID_ASSET_URI_PREFIX)) {
+            val assetPath = path.removePrefix(ANDROID_ASSET_URI_PREFIX)
+            return try {
+                assets.open(assetPath).use(BitmapFactory::decodeStream)
+            } catch (error: java.io.IOException) {
+                Log.w(TAG, "Unable to decode packaged battery asset", error)
+                null
+            }
+        }
+        return File(path).takeIf(File::isFile)?.let {
+            BitmapFactory.decodeFile(it.absolutePath)
+        }
+    }
 
     private companion object {
         const val TAG = "BatteryStatusService"
+        const val ANDROID_ASSET_URI_PREFIX = "file:///android_asset/"
+    }
+}
+
+private data class BatteryOverlaySources(
+    val config: BatteryStatusConfig,
+    val theme: BatteryThemeEntry?,
+    val backgroundPath: String?,
+    val emotionPath: String?
+)
+
+private data class DecodedBatteryAssets(
+    val emoji: Bitmap?,
+    val battery: Bitmap?,
+    val background: Bitmap?,
+    val emotion: Bitmap?
+) {
+    fun recycle() {
+        emoji?.recycle()
+        battery?.recycle()
+        background?.recycle()
+        emotion?.recycle()
     }
 }

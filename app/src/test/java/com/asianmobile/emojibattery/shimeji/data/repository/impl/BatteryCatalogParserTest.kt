@@ -19,6 +19,8 @@ class BatteryCatalogParserTest {
         assertEquals(7, document.themes.single().id)
         assertEquals(BatteryThemeEntitlement.FREE, document.themes.single().entitlement)
         assertEquals("battery/7.png", document.themes.single().battery.path)
+        assertEquals("background/template_color_01.png", document.backgrounds.single().asset.path)
+        assertEquals("emotion/emotion_01.png", document.emotions.single().asset.path)
     }
 
     @Test
@@ -77,6 +79,32 @@ class BatteryCatalogParserTest {
                   "width": 200,
                   "height": 200
                 }
+              }
+            }
+          ],
+          "backgrounds": [
+            {
+              "id": 1,
+              "name": "template_color_01",
+              "asset": {
+                "path": "background/template_color_01.png",
+                "sizeBytes": 13,
+                "sha256": "${"d".repeat(64)}",
+                "width": 1080,
+                "height": 120
+              }
+            }
+          ],
+          "emotions": [
+            {
+              "id": 1,
+              "name": "emotion_01",
+              "asset": {
+                "path": "emotion/emotion_01.png",
+                "sizeBytes": 14,
+                "sha256": "${"e".repeat(64)}",
+                "width": 200,
+                "height": 200
               }
             }
           ]

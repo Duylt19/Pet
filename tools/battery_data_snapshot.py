@@ -25,6 +25,10 @@ EXPECTED_ASSET_KINDS = {
     "battery": ("remote/batteries", "battery"),
     "emoji": ("remote/emojis", "emoji"),
 }
+BUNDLED_ASSET_GROUPS = {
+    "backgrounds": ("bundled/assets/background_template", "background", 20),
+    "emotions": ("bundled/assets/cute_emotion", "emotion", 20),
+}
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
 
@@ -98,6 +102,41 @@ def _audit_asset(
         width=width,
         height=height,
     )
+
+
+def _audit_bundled_group(
+    source_root: Path,
+    source_directory: str,
+    runtime_directory: str,
+    expected_count: int,
+) -> list[dict[str, Any]]:
+    directory = source_root / source_directory
+    if not directory.is_dir():
+        return []
+    paths = sorted(directory.glob("*.png"))
+    if len(paths) != expected_count:
+        raise BatterySnapshotError(
+            f"{directory} must contain exactly {expected_count} PNG files"
+        )
+    records: list[dict[str, Any]] = []
+    for index, path in enumerate(paths, start=1):
+        content = path.read_bytes()
+        width, height = _png_dimensions(path, content)
+        records.append(
+            {
+                "id": index,
+                "name": path.stem,
+                "asset": AuditedAsset(
+                    source_path=path,
+                    runtime_path=f"{runtime_directory}/{path.name}",
+                    size_bytes=len(content),
+                    sha256=hashlib.sha256(content).hexdigest(),
+                    width=width,
+                    height=height,
+                ).to_catalog_value(),
+            }
+        )
+    return records
 
 
 def _normalized_category(record: dict[str, Any]) -> dict[str, Any]:
@@ -204,6 +243,25 @@ def audit_snapshot(source_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
 
     ordered_categories = sorted(categories, key=lambda item: (item["priority"], item["id"]))
     ordered_themes = sorted(themes, key=lambda item: item["id"])
+    bundled_groups = {
+        name: _audit_bundled_group(
+            source_root,
+            source_directory,
+            runtime_directory,
+            expected_count,
+        )
+        for name, (
+            source_directory,
+            runtime_directory,
+            expected_count,
+        ) in BUNDLED_ASSET_GROUPS.items()
+    }
+    bundled_asset_count = sum(len(records) for records in bundled_groups.values())
+    bundled_asset_bytes = sum(
+        record["asset"]["sizeBytes"]
+        for records in bundled_groups.values()
+        for record in records
+    )
     catalog = {
         "schemaVersion": SCHEMA_VERSION,
         "catalogVersion": f"battery-apk-1.0.2@{captured_at}",
@@ -217,6 +275,7 @@ def audit_snapshot(source_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         "themeCount": len(ordered_themes),
         "categories": ordered_categories,
         "themes": ordered_themes,
+        **bundled_groups,
     }
     report = {
         "schemaVersion": SCHEMA_VERSION,
@@ -225,8 +284,12 @@ def audit_snapshot(source_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         "themeCount": len(ordered_themes),
         "freeCount": sum(theme["entitlement"] == "FREE" for theme in ordered_themes),
         "premiumCount": sum(theme["entitlement"] == "PREMIUM" for theme in ordered_themes),
-        "runtimeAssetCount": len(ordered_themes) * len(EXPECTED_ASSET_KINDS),
-        "runtimeAssetBytes": sum(byte_counts.values()),
+        "runtimeAssetCount": (
+            len(ordered_themes) * len(EXPECTED_ASSET_KINDS) + bundled_asset_count
+        ),
+        "runtimeAssetBytes": sum(byte_counts.values()) + bundled_asset_bytes,
+        "bundledAssetCount": bundled_asset_count,
+        "bundledAssetBytes": bundled_asset_bytes,
         "assetBytesByKind": dict(sorted(byte_counts.items())),
         "dimensionsByKind": {
             kind: dict(sorted(counts.items()))

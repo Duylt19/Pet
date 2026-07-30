@@ -845,7 +845,7 @@
     <string name="battery_builtin_category">Starter</string>
     <string name="battery_builtin_theme">Cute Mint</string>
     <string name="battery_catalog_empty">No battery styles match this filter.</string>
-    <string name="battery_catalog_local_data_hint">Only the built-in style is available. For debug builds, sync the reviewed local battery catalog to this device.</string>
+    <string name="battery_catalog_local_data_hint">The complete battery catalog is not available in this build.</string>
     <string name="battery_retry">Tap to refresh</string>
     <string name="battery_favorite_action">Add or remove favorite</string>
     <string name="battery_premium_theme">Premium style</string>
@@ -856,7 +856,11 @@
     <string name="battery_emoji_size">Emoji size</string>
     <string name="battery_icon_size">Battery icon size</string>
     <string name="battery_background_color">Bar color</string>
+    <string name="battery_background_style">Background style</string>
+    <string name="battery_background_solid">Solid</string>
     <string name="battery_foreground_color">Text and icon color</string>
+    <string name="battery_show_emotion">Show decorative emotion</string>
+    <string name="battery_emotion_style">Emotion style</string>
     <string name="battery_slider_value">%1$s · %2$d dp</string>
     <string name="battery_apply">Apply</string>
     <string name="battery_disable">Turn off battery bar</string>

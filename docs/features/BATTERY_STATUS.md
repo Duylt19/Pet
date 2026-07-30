@@ -6,11 +6,12 @@ Vertical slice hiện đã có trong source:
 
 - Home bottom navigation mở `BatteryCatalogScreen`.
 - Catalog local chuẩn hóa, search, category, Free/Premium, favorite và built-in fallback.
-- Editor preview cho time, phần trăm, chiều cao, kích thước emoji và battery.
+- Editor preview cho time, phần trăm, màu, chiều cao, kích thước emoji/battery, 20 nền và
+  20 emotion đã audit từ snapshot.
 - Apply lưu DataStore; nếu chưa bật service, app luôn hiện disclosure trước khi mở
   Accessibility Settings.
 - `StatusBarAccessibilityService` vẽ một `TYPE_ACCESSIBILITY_OVERLAY` full-width,
-  non-touchable ở cạnh trên, cập nhật pin/charging/time và dùng asset theme đã chọn.
+  non-touchable ở cạnh trên, cập nhật pin/charging/time và dùng theme/nền/emotion đã chọn.
 - Service ẩn khi màn hình khóa, màn hình tắt hoặc portrait không còn hiệu lực; không
   auto-start sau boot.
 
@@ -35,15 +36,22 @@ không được áp dụng. Built-in `Cute Mint` không phụ thuộc file ngoà
 ## Boundary dữ liệu
 
 `BatteryCatalogRepository` expose `BatteryCatalogSnapshot`; UI không đọc file trực tiếp.
-`LocalBatteryCatalogRepository` đọc:
+`LocalBatteryCatalogRepository` ưu tiên catalog được sync vào:
 
 ```text
 externalFilesDir/battery_catalog/
 ├── catalog.json
 ├── thumb/<id>.png
 ├── battery/<id>.png
-└── emoji/<id>.png
+├── emoji/<id>.png
+├── background/template_color_<id>.png
+└── emotion/cute_emotion_<id>.png
 ```
+
+Debug build tự chạy audit snapshot riêng, tạo catalog và đóng gói 898 theme cùng 20 nền,
+20 emotion vào `assets/battery_catalog/`. Nếu external catalog không có hoặc thuộc schema
+cũ, repository dùng bản packaged này. Vì vậy cài debug APK không còn phụ thuộc bước ADB
+thủ công. Release không đóng gói snapshot `REVIEW_REQUIRED`.
 
 Mỗi asset phải:
 
@@ -57,7 +65,7 @@ Catalog `REVIEW_REQUIRED` chỉ được load khi `BuildConfig.DEBUG`; release c
 typed, không làm crash UI hoặc overlay đang chạy.
 
 Ảnh `photo` tổng hợp từ snapshot không thuộc runtime contract. Runtime chỉ dùng thumbnail,
-battery và emoji để tránh thêm khoảng 60 MiB dữ liệu không cần thiết.
+battery, emoji, background và emotion.
 
 ## Persistence
 
@@ -72,6 +80,8 @@ battery và emoji để tránh thêm khoảng 60 MiB dữ liệu không cần th
 | `barHeightDp`, `horizontalPaddingDp` | Hình học capsule |
 | `emojiSizeDp`, `batterySizeDp` | Kích thước asset |
 | `backgroundColorArgb`, `foregroundColorArgb` | Màu renderer |
+| `backgroundDecorationId` | Nền đóng gói đã chọn; `0` là nền màu phẳng |
+| `showEmotion`, `emotionDecorationId` | Hiện/ẩn và chọn emotion trang trí |
 | `privacyReserveDp` | Khoảng trống bên phải cho privacy/system indicators |
 | `favoriteThemeIds` | Favorite local theo theme ID |
 
@@ -100,16 +110,16 @@ không ship cover mode.
 ## Runtime
 
 Service combine config + catalog bằng Flow. Asset được decode ngoài main thread và cache
-theo theme; battery/time receiver chỉ invalidate view. Renderer không tạo clock liên tục.
-Một window duy nhất được add/update/remove theo state.
+theo khóa theme/nền/emotion; battery/time receiver chỉ invalidate view. Renderer không tạo
+clock liên tục. Một window duy nhất được add/update/remove theo state.
 
 Giới hạn hiện tại:
 
 - Portrait only.
 - Không render trên keyguard/screen-off.
 - Cover behavior và notification-shade layering khác nhau theo OEM.
-- Time và battery thật; icon/emoji là trang trí. Các component Wi‑Fi, signal, hotspot,
-  airplane, ringer, date và per-icon editor trong screenshot vẫn thuộc phase sau.
+- Time và battery thật; theme emoji/nền/emotion là trang trí. Các component Wi‑Fi, signal,
+  hotspot, airplane, ringer, date và per-icon editor trong screenshot vẫn thuộc phase sau.
 - Không có boot receiver và không tự hướng user quay lại Settings nếu họ disable service.
 
 ## Test gate

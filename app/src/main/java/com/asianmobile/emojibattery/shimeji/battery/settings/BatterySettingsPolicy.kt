@@ -15,6 +15,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_BAR_HEIGHT_DP
 class BatterySettingsPolicy {
     fun sanitize(config: BatteryStatusConfig): BatteryStatusConfig = config.copy(
         selectedThemeId = config.selectedThemeId.coerceAtLeast(BUILT_IN_BATTERY_THEME_ID),
+        backgroundDecorationId = config.backgroundDecorationId.coerceIn(0, 20),
+        emotionDecorationId = config.emotionDecorationId.coerceIn(0, 20),
         barHeightDp = config.barHeightDp.validOr(DEFAULT_BATTERY_BAR_HEIGHT_DP)
             .coerceIn(MIN_BATTERY_BAR_HEIGHT_DP, MAX_BATTERY_BAR_HEIGHT_DP),
         horizontalPaddingDp = config.horizontalPaddingDp

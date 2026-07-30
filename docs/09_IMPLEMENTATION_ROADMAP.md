@@ -210,9 +210,10 @@ Kế hoạch hiện nằm tại
 [`plans/battery-status-capsule/README.md`](plans/battery-status-capsule/README.md).
 
 Vertical slice debug đã có normalized 898-theme local catalog, size/SHA-256 verification,
-built-in fallback, DataStore config, Catalog/Editor UI, Home Battery entry và
-`TYPE_ACCESSIBILITY_OVERLAY` renderer cho time/battery/charging/theme asset. Service không
-sửa SystemUI, không đọc screen/node content và chỉ mở system settings sau disclosure.
+generated APK assets không phụ thuộc ADB, built-in fallback, DataStore config,
+Catalog/Editor cho theme/màu/kích thước/20 nền/20 emotion, Home Battery entry và
+`TYPE_ACCESSIBILITY_OVERLAY` renderer cho time/battery/charging/decorative assets. Service
+không sửa SystemUI, không đọc screen/node content và chỉ mở system settings sau disclosure.
 
 Release vẫn bị chặn bởi asset provenance (`REVIEW_REQUIRED` bị code từ chối ngoài debug),
 Figma/UX polish, OEM/API device matrix và Play Accessibility declaration. Standard

@@ -3,8 +3,8 @@
 > **IMPLEMENTATION IN PROGRESS**
 
 Source ngày 2026-07-30 đã hoàn thành vertical slice debug: normalized local catalog,
-DataStore config, Catalog/Editor cơ bản và Accessibility cover backend. Các phase bên dưới
-vẫn là release roadmap; trạng thái thực tế được ghi ở từng phase.
+generated debug assets, DataStore config, Catalog/Editor và Accessibility cover backend.
+Các phase bên dưới vẫn là release roadmap; trạng thái thực tế được ghi ở từng phase.
 
 Mỗi phase là một commit/PR độc lập, compile/test/docs pass trước phase sau. Không đánh dấu
 `IMPLEMENTATION_PROGRESS.md` Done cho đến khi device verification tương ứng hoàn tất.
@@ -69,9 +69,9 @@ Config round-trip deterministic; no Android View/service required; JVM tests pas
 
 ## Phase 2 — Catalog and editor UI with deterministic preview
 
-**Status: Partial.** Catalog/category/favorite/Premium gate, basic editor, navigation,
-Home entry và analytics đã có. Generic per-component editor, dirty-draft confirmation,
-Compose/golden/RTL tests chưa có.
+**Status: Partial.** Catalog/category/favorite/Premium gate, editor cho theme/màu/kích
+thước/background/emotion, navigation, Home entry và analytics đã có. Generic per-component
+editor cho trạng thái hệ thống, dirty-draft confirmation, Compose/golden/RTL tests chưa có.
 
 ### Scope
 
@@ -171,15 +171,15 @@ Nếu gate không đạt, phase bị loại khỏi release và below-bar mode v�
 
 ## Phase 5 — Full device-status components
 
-**Status: Not started.** Current runtime mới có time, percentage, charging và theme
-battery/emoji.
+**Status: Partial.** Current runtime có time, percentage, charging, theme battery/emoji
+và background/emotion trang trí. Trạng thái thiết bị còn lại chưa triển khai.
 
 ### Scope
 
 - Connectivity transport, airplane, ringer, date.
 - Wi‑Fi/signal connected-state styles.
 - Decorative animation assets.
-- Emotion/emoji.
+- Emotion/emoji animation theo trạng thái.
 - Data label manual semantics.
 - API 36 hotspot callback + honest fallback.
 - Shared frame clock cho animation assets.
@@ -200,8 +200,8 @@ sensitive permission mới.
 ## Phase 6 — Remote catalog and secure asset packs
 
 **Status: Local tooling implemented; production source not started.** Snapshot tool audit
-size/hash/dimension và debug ADB sync đã có. Owner endpoint/download/cache/kill switch cần
-asset approval trước.
+size/hash/dimension, generated debug APK assets và optional ADB sync đã có. Owner
+endpoint/download/cache/kill switch cần asset approval trước.
 
 ### Scope
 

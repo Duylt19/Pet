@@ -27,9 +27,23 @@ data class BatteryThemeEntry(
         get() = id == BUILT_IN_BATTERY_THEME_ID
 }
 
+data class BatteryDecorationEntry(
+    val id: Int,
+    val name: String,
+    val assetPath: String,
+    val type: BatteryDecorationType
+)
+
+enum class BatteryDecorationType {
+    BACKGROUND,
+    EMOTION
+}
+
 data class BatteryCatalogSnapshot(
     val categories: List<BatteryCatalogCategory> = listOf(BUILT_IN_BATTERY_CATEGORY),
     val themes: List<BatteryThemeEntry> = listOf(BUILT_IN_BATTERY_THEME),
+    val backgrounds: List<BatteryDecorationEntry> = emptyList(),
+    val emotions: List<BatteryDecorationEntry> = emptyList(),
     val catalogVersion: String? = null,
     val capturedAt: String? = null,
     val distributionStatus: BatteryCatalogDistributionStatus =

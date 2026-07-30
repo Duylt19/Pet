@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RectF
 import android.view.View
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
@@ -14,24 +15,31 @@ class BatteryStatusBarView(context: Context) : View(context) {
     private val density = resources.displayMetrics.density
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val destination = RectF()
+    private val clipPath = Path()
     private var config = BatteryStatusConfig()
     private var level = 100
     private var charging = false
     private var emoji: Bitmap? = null
     private var battery: Bitmap? = null
+    private var background: Bitmap? = null
+    private var emotion: Bitmap? = null
 
     fun render(
         config: BatteryStatusConfig,
         level: Int,
         charging: Boolean,
         emoji: Bitmap?,
-        battery: Bitmap?
+        battery: Bitmap?,
+        background: Bitmap?,
+        emotion: Bitmap?
     ) {
         this.config = config
         this.level = level.coerceIn(0, 100)
         this.charging = charging
         this.emoji = emoji
         this.battery = battery
+        this.background = background
+        this.emotion = emotion
         contentDescription = context.getString(
             com.asianmobile.emojibattery.shimeji.R.string.battery_overlay_description,
             this.level
@@ -46,6 +54,20 @@ class BatteryStatusBarView(context: Context) : View(context) {
         val backgroundRight = (width - privacyReserve).coerceAtLeast(height.toFloat())
         paint.color = config.backgroundColorArgb
         canvas.drawRoundRect(0f, 0f, backgroundRight, height.toFloat(), radius, radius, paint)
+        background?.let { bitmap ->
+            val saveCount = canvas.save()
+            clipPath.reset()
+            clipPath.addRoundRect(
+                RectF(0f, 0f, backgroundRight, height.toFloat()),
+                radius,
+                radius,
+                Path.Direction.CW
+            )
+            canvas.clipPath(clipPath)
+            destination.set(0f, 0f, backgroundRight, height.toFloat())
+            canvas.drawBitmap(bitmap, null, destination, paint)
+            canvas.restoreToCount(saveCount)
+        }
 
         val centerY = height / 2f
         val padding = config.horizontalPaddingDp * density
@@ -64,6 +86,14 @@ class BatteryStatusBarView(context: Context) : View(context) {
             val size = config.emojiSizeDp * density
             destination.set(left, centerY - size / 2f, left + size, centerY + size / 2f)
             canvas.drawBitmap(it, null, destination, paint)
+            left += size + 4f * density
+        }
+        if (config.showEmotion) {
+            emotion?.let {
+                val size = config.emojiSizeDp * density
+                destination.set(left, centerY - size / 2f, left + size, centerY + size / 2f)
+                canvas.drawBitmap(it, null, destination, paint)
+            }
         }
 
         var right = backgroundRight - padding
@@ -119,5 +149,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
         super.onDetachedFromWindow()
         emoji = null
         battery = null
+        background = null
+        emotion = null
     }
 }

@@ -2,9 +2,9 @@
 
 ## Mục tiêu
 
-Các tool này audit snapshot local `battery-apk-1.0.2`, tạo schema runtime deterministic và
-sync vào app debug. Raw snapshot nằm dưới `private_data/`, bị Git ignore và không được copy
-vào Android source tree.
+Các tool này audit snapshot local `battery-apk-1.0.2`, tạo schema runtime deterministic,
+đóng gói generated assets cho debug và vẫn hỗ trợ sync thủ công. Raw snapshot nằm dưới
+`private_data/`, bị Git ignore và không được copy vào Android source tree.
 
 ## Kết quả audit ngày 2026-07-30
 
@@ -14,8 +14,9 @@ vào Android source tree.
 | Category active | 34 |
 | Free / Premium | 234 / 664 |
 | Thumbnail / battery / emoji runtime | 898 / 898 / 898 |
-| Runtime asset count | 2.694 |
-| Runtime bytes | 100.011.765 |
+| Runtime asset count | 2.734 |
+| Runtime bytes | 100.768.466 |
+| Background / emotion | 20 / 20 |
 | Photo composite bị loại | 898, khoảng 60 MiB |
 | ID | Unique, 1–920 có gap hợp lệ |
 | Category reference | 100% hợp lệ |
@@ -54,9 +55,23 @@ filesystem path; chỉ có path runtime tương đối, byte size, SHA-256 và d
 python3 -m unittest tools.tests.test_battery_data_snapshot
 ```
 
-Test cover happy path, missing asset và duplicate theme ID.
+Test cover happy path, missing asset, duplicate theme ID và 20 background/20 emotion.
 
-## Sync vào debug device
+## Đưa data vào debug app
+
+### Tự động khi build
+
+`mergeDebugAssets`, `installDebug` và `assembleDebug` phụ thuộc
+`auditDebugBatterySnapshot` → `prepareDebugBatteryAssets`. Khi snapshot private tồn tại,
+Gradle tự generate catalog và đưa 898 thumbnail/battery/emoji cùng 20 background và 20
+emotion vào `build/generated/batteryCatalogAssets/debug`.
+
+Repository ưu tiên catalog app-specific external nếu có; nếu không, debug đọc trực tiếp
+`file:///android_asset/battery_catalog/...`. Vì vậy bản debug không còn cần ADB sync để
+hiện catalog. Release không khai báo generated asset source và vẫn từ chối
+`REVIEW_REQUIRED`.
+
+### Sync thủ công
 
 App debug phải được cài trước. Sau khi generate:
 
@@ -76,9 +91,9 @@ python3 tools/sync_battery_catalog_to_device.py --serial DEVICE_SERIAL
 /sdcard/Android/data/com.asianmobile.emojibattery.shimeji/files/battery_catalog
 ```
 
-Script chỉ sync `catalog.json`, `thumb`, `battery`, `emoji`. Sau khi sync, force-stop/mở
-lại app hoặc bấm refresh catalog. App kiểm tra canonical containment, size và SHA-256 trước
-khi đánh dấu theme `assetsReady`.
+Script sync `catalog.json`, `thumb`, `battery`, `emoji`, `background` và `emotion`. Sau
+khi sync, force-stop/mở lại app hoặc bấm refresh catalog. App kiểm tra canonical
+containment, size và SHA-256 trước khi đánh dấu asset sẵn sàng.
 
 ## Quy tắc promotion
 

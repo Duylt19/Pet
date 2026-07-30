@@ -41,6 +41,9 @@
 | `battery_status_show_time`, `battery_status_show_percentage` | Boolean | Component visibility |
 | `battery_status_*_dp` | Float | Bar/padding/emoji/icon/privacy-reserve geometry |
 | `battery_status_*_color` | Int ARGB | Renderer background/foreground |
+| `battery_status_background_decoration_id` | Int | Background asset ID; `0` dùng màu phẳng |
+| `battery_status_show_emotion` | Boolean | Hiện emotion trang trí |
+| `battery_status_emotion_decoration_id` | Int | Emotion asset ID |
 | `battery_status_favorite_theme_ids` | String set | Favorite local |
 
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.
@@ -114,14 +117,17 @@ không được restore sau process death/reboot.
 
 ## Battery catalog và config
 
-- `BatteryCatalogSnapshot` gồm category/theme, entitlement, local asset path, distribution
-  status và typed error; built-in theme ID `0` luôn có.
+- `BatteryCatalogSnapshot` gồm category/theme, 20 background, 20 emotion, entitlement,
+  local/packaged asset path, distribution status và typed error; built-in theme ID `0`
+  luôn có.
 - Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và PNG dimension.
   Repository chặn path escape, size/hash mismatch và release catalog chưa `APPROVED`.
 - `BatteryStatusConfig` là persistent source of truth. `BatterySettingsPolicy` clamp
   geometry/color/favorite trước khi ghi và sau khi decode DataStore.
 - 898-theme raw snapshot nằm trong `private_data/`, không thuộc source/release artifact.
-  Xem [`tools/BATTERY_DATA_SNAPSHOT.md`](tools/BATTERY_DATA_SNAPSHOT.md).
+  Debug build audit và copy snapshot vào generated assets; release không đóng gói catalog
+  `REVIEW_REQUIRED`. Xem
+  [`tools/BATTERY_DATA_SNAPSHOT.md`](tools/BATTERY_DATA_SNAPSHOT.md).
 
 ## Không có database
 

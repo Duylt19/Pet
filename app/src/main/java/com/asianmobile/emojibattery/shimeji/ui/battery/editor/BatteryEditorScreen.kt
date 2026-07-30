@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +18,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
@@ -27,6 +31,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -47,6 +52,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.sp
@@ -61,12 +68,12 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_BAR_HEIGHT_DP
 import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_BAR_HEIGHT_DP
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTopBar
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
-import java.io.File
 
 @Composable
 fun BatteryEditorScreen(
@@ -107,6 +114,9 @@ fun BatteryEditorScreen(
         onBatterySize = viewModel::setBatterySize,
         onBackgroundColor = viewModel::setBackgroundColor,
         onForegroundColor = viewModel::setForegroundColor,
+        onBackgroundDecoration = viewModel::setBackgroundDecoration,
+        onShowEmotion = viewModel::setShowEmotion,
+        onEmotionDecoration = viewModel::setEmotionDecoration,
         onApply = {
             if (accessibilityEnabled) viewModel.apply() else showDisclosure = true
         },
@@ -150,6 +160,9 @@ private fun BatteryEditorContent(
     onBatterySize: (Float) -> Unit,
     onBackgroundColor: (Int) -> Unit,
     onForegroundColor: (Int) -> Unit,
+    onBackgroundDecoration: (Int) -> Unit,
+    onShowEmotion: (Boolean) -> Unit,
+    onEmotionDecoration: (Int) -> Unit,
     onApply: () -> Unit,
     onDisable: () -> Unit
 ) {
@@ -201,11 +214,32 @@ private fun BatteryEditorContent(
                         selected = state.config.backgroundColorArgb,
                         onColor = onBackgroundColor
                     )
+                    DecorationPicker(
+                        label = stringResource(R.string.battery_background_style),
+                        decorations = state.backgrounds,
+                        selectedId = state.config.backgroundDecorationId,
+                        includeNone = true,
+                        onSelect = onBackgroundDecoration
+                    )
                     ColorPalette(
                         label = stringResource(R.string.battery_foreground_color),
                         selected = state.config.foregroundColorArgb,
                         onColor = onForegroundColor
                     )
+                    ToggleRow(
+                        label = stringResource(R.string.battery_show_emotion),
+                        checked = state.config.showEmotion,
+                        onChecked = onShowEmotion
+                    )
+                    if (state.config.showEmotion) {
+                        DecorationPicker(
+                            label = stringResource(R.string.battery_emotion_style),
+                            decorations = state.emotions,
+                            selectedId = state.config.emotionDecorationId,
+                            includeNone = false,
+                            onSelect = onEmotionDecoration
+                        )
+                    }
                     EditorSlider(
                         label = stringResource(R.string.battery_bar_height),
                         value = state.config.barHeightDp,
@@ -278,54 +312,83 @@ private fun BatteryEditorContent(
 @Composable
 private fun BatteryPreview(state: BatteryEditorUiState) {
     val config = state.config
-    Row(
+    val backgroundPath = state.backgrounds
+        .firstOrNull { it.id == config.backgroundDecorationId }
+        ?.assetPath
+    val emotionPath = state.emotions
+        .firstOrNull { it.id == config.emotionDecorationId }
+        ?.assetPath
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(config.barHeightDp.dp)
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._20sdp)))
             .background(Color(config.backgroundColorArgb))
-            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        if (config.showTime) {
-            Text(
-                text = stringResource(R.string.battery_preview_time),
-                color = Color(config.foregroundColorArgb),
-                fontFamily = FontFamily(Font(R.font.inter_semibold))
-            )
-        }
-        state.theme.emojiPath?.let { path ->
+        backgroundPath?.let { path ->
             AsyncImage(
-                model = File(path),
+                model = path,
                 contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(config.emojiSizeDp.dp)
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier.fillMaxSize()
             )
         }
-        Spacer(Modifier.weight(1f))
-        if (config.showPercentage) {
-            Text(
-                text = stringResource(R.string.battery_preview_percentage),
-                color = Color(config.foregroundColorArgb),
-                fontFamily = FontFamily(Font(R.font.inter_semibold))
-            )
-        }
-        state.theme.batteryPath?.let { path ->
-            AsyncImage(
-                model = File(path),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(config.batterySizeDp.dp)
-            )
-        } ?: Box(
+        Row(
             modifier = Modifier
-                .size(
-                    width = config.batterySizeDp.dp,
-                    height = (config.batterySizeDp * 0.48f).dp
+                .fillMaxSize()
+                .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (config.showTime) {
+                Text(
+                    text = stringResource(R.string.battery_preview_time),
+                    color = Color(config.foregroundColorArgb),
+                    fontFamily = FontFamily(Font(R.font.inter_semibold))
                 )
-                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._3sdp)))
-                .background(Color(config.foregroundColorArgb))
-        )
+            }
+            state.theme.emojiPath?.let { path ->
+                AsyncImage(
+                    model = path,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(config.emojiSizeDp.dp)
+                )
+            }
+            if (config.showEmotion) {
+                emotionPath?.let { path ->
+                    AsyncImage(
+                        model = path,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.size(config.emojiSizeDp.dp)
+                    )
+                }
+            }
+            Spacer(Modifier.weight(1f))
+            if (config.showPercentage) {
+                Text(
+                    text = stringResource(R.string.battery_preview_percentage),
+                    color = Color(config.foregroundColorArgb),
+                    fontFamily = FontFamily(Font(R.font.inter_semibold))
+                )
+            }
+            state.theme.batteryPath?.let { path ->
+                AsyncImage(
+                    model = path,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(config.batterySizeDp.dp)
+                )
+            } ?: Box(
+                modifier = Modifier
+                    .size(
+                        width = config.batterySizeDp.dp,
+                        height = (config.batterySizeDp * 0.48f).dp
+                    )
+                    .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._3sdp)))
+                    .background(Color(config.foregroundColorArgb))
+            )
+        }
     }
 }
 
@@ -341,7 +404,12 @@ private fun ToggleRow(label: String, checked: Boolean, onChecked: (Boolean) -> U
             checked = checked,
             onCheckedChange = onChecked,
             colors = SwitchDefaults.colors(
-                checkedTrackColor = colorResource(R.color.colors_12B890)
+                checkedThumbColor = colorResource(R.color.colors_FFFFFF),
+                checkedTrackColor = colorResource(R.color.colors_12B890),
+                checkedBorderColor = colorResource(R.color.colors_12B890),
+                uncheckedThumbColor = colorResource(R.color.colors_FFFFFF),
+                uncheckedTrackColor = colorResource(R.color.colors_E0F7F1),
+                uncheckedBorderColor = colorResource(R.color.colors_C8C8C9)
             )
         )
     }
@@ -358,7 +426,18 @@ private fun EditorSlider(
         text = stringResource(R.string.battery_slider_value, label, value.toInt()),
         color = colorResource(R.color.colors_776D84)
     )
-    Slider(value = value, onValueChange = onValue, valueRange = range)
+    Slider(
+        value = value,
+        onValueChange = onValue,
+        valueRange = range,
+        colors = SliderDefaults.colors(
+            thumbColor = colorResource(R.color.colors_12B890),
+            activeTrackColor = colorResource(R.color.colors_12B890),
+            inactiveTrackColor = colorResource(R.color.colors_E0F7F1),
+            activeTickColor = Color.Transparent,
+            inactiveTickColor = Color.Transparent
+        )
+    )
 }
 
 @Composable
@@ -374,13 +453,13 @@ private fun ColorPalette(label: String, selected: Int, onColor: (Int) -> Unit) {
         R.color.colors_111827
     )
     Text(text = label, color = colorResource(R.color.colors_776D84))
-    Row(
+    LazyRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = dimensionResource(SdpR.dimen._6sdp)),
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
     ) {
-        colors.forEach { colorRes ->
+        items(colors) { colorRes ->
             val color = colorResource(colorRes)
             val isSelected = selected == color.toArgb()
             Box(
@@ -401,4 +480,81 @@ private fun ColorPalette(label: String, selected: Int, onColor: (Int) -> Unit) {
             )
         }
     }
+}
+
+@Composable
+private fun DecorationPicker(
+    label: String,
+    decorations: List<BatteryDecorationEntry>,
+    selectedId: Int,
+    includeNone: Boolean,
+    onSelect: (Int) -> Unit
+) {
+    if (decorations.isEmpty()) return
+    Text(text = label, color = colorResource(R.color.colors_776D84))
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = dimensionResource(SdpR.dimen._6sdp)),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
+    ) {
+        if (includeNone) {
+            item {
+                DecorationOption(
+                    selected = selectedId == 0,
+                    contentDescription = stringResource(R.string.battery_background_solid),
+                    onClick = { onSelect(0) }
+                ) {
+                    Text(
+                        text = stringResource(R.string.battery_background_solid),
+                        color = colorResource(R.color.colors_776D84),
+                        fontSize = dimensionResource(SspR.dimen._7ssp).value.sp
+                    )
+                }
+            }
+        }
+        items(decorations, key = BatteryDecorationEntry::id) { decoration ->
+            DecorationOption(
+                selected = selectedId == decoration.id,
+                contentDescription = decoration.name,
+                onClick = { onSelect(decoration.id) }
+            ) {
+                AsyncImage(
+                    model = decoration.assetPath,
+                    contentDescription = decoration.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DecorationOption(
+    selected: Boolean,
+    contentDescription: String,
+    onClick: () -> Unit,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .width(dimensionResource(SdpR.dimen._72sdp))
+            .height(dimensionResource(SdpR.dimen._42sdp))
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
+            .background(colorResource(R.color.colors_FFFFFF))
+            .border(
+                width = dimensionResource(
+                    if (selected) SdpR.dimen._3sdp else SdpR.dimen._1sdp
+                ),
+                color = colorResource(
+                    if (selected) R.color.colors_12B890 else R.color.colors_C8C8C9
+                ),
+                shape = RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp))
+            )
+            .semantics { this.contentDescription = contentDescription }
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+        content = content
+    )
 }

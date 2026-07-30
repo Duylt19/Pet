@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.Sync
 
 plugins {
     alias(libs.plugins.android.application)
@@ -70,6 +72,74 @@ android {
         checkReleaseBuilds = false
         disable += "NullSafeMutableLiveData"
     }
+
+    sourceSets {
+        getByName("debug").assets.srcDir(
+            layout.buildDirectory.dir("generated/batteryCatalogAssets/debug")
+        )
+    }
+}
+
+val batterySnapshotDirectory = rootProject.layout.projectDirectory.dir(
+    "private_data/battery-apk-1.0.2/battery-data"
+)
+val batteryRuntimeDirectory = rootProject.layout.projectDirectory.dir(
+    "private_data/battery-apk-1.0.2/battery-runtime"
+)
+val batteryCatalogFile = batteryRuntimeDirectory.file("catalog.json")
+val batteryAuditFile = batteryRuntimeDirectory.file("audit.json")
+val generatedBatteryAssets = layout.buildDirectory.dir(
+    "generated/batteryCatalogAssets/debug"
+)
+
+val auditDebugBatterySnapshot by tasks.registering(Exec::class) {
+    group = "battery data"
+    description = "Audits the private Battery snapshot and creates the debug catalog."
+    inputs.dir(batterySnapshotDirectory)
+    inputs.file(rootProject.layout.projectDirectory.file("tools/battery_data_snapshot.py"))
+    outputs.files(batteryCatalogFile, batteryAuditFile)
+    onlyIf { batterySnapshotDirectory.asFile.isDirectory }
+    commandLine(
+        "python3",
+        rootProject.layout.projectDirectory.file("tools/battery_data_snapshot.py").asFile,
+        batterySnapshotDirectory.asFile,
+        "--catalog",
+        batteryCatalogFile.asFile,
+        "--report",
+        batteryAuditFile.asFile
+    )
+}
+
+val prepareDebugBatteryAssets by tasks.registering(Sync::class) {
+    group = "battery data"
+    description = "Packages the audited Battery catalog into debug APK assets."
+    dependsOn(auditDebugBatterySnapshot)
+    onlyIf {
+        batterySnapshotDirectory.asFile.isDirectory && batteryCatalogFile.asFile.isFile
+    }
+    into(generatedBatteryAssets)
+    from(batteryCatalogFile) {
+        into("battery_catalog")
+    }
+    from(batterySnapshotDirectory.dir("remote/thumbnails")) {
+        into("battery_catalog/thumb")
+    }
+    from(batterySnapshotDirectory.dir("remote/batteries")) {
+        into("battery_catalog/battery")
+    }
+    from(batterySnapshotDirectory.dir("remote/emojis")) {
+        into("battery_catalog/emoji")
+    }
+    from(batterySnapshotDirectory.dir("bundled/assets/background_template")) {
+        into("battery_catalog/background")
+    }
+    from(batterySnapshotDirectory.dir("bundled/assets/cute_emotion")) {
+        into("battery_catalog/emotion")
+    }
+}
+
+tasks.matching { it.name == "mergeDebugAssets" }.configureEach {
+    dependsOn(prepareDebugBatteryAssets)
 }
 
 kotlin {

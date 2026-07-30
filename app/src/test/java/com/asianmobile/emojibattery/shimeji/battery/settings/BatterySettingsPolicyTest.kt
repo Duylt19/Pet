@@ -14,6 +14,8 @@ class BatterySettingsPolicyTest {
         val sanitized = policy.sanitize(
             BatteryStatusConfig(
                 selectedThemeId = -4,
+                backgroundDecorationId = 99,
+                emotionDecorationId = -4,
                 barHeightDp = 90f,
                 horizontalPaddingDp = -1f,
                 emojiSizeDp = Float.NaN,
@@ -24,6 +26,8 @@ class BatterySettingsPolicyTest {
         )
 
         assertEquals(0, sanitized.selectedThemeId)
+        assertEquals(20, sanitized.backgroundDecorationId)
+        assertEquals(0, sanitized.emotionDecorationId)
         assertEquals(48f, sanitized.barHeightDp)
         assertEquals(0f, sanitized.horizontalPaddingDp)
         assertEquals(24f, sanitized.emojiSizeDp)
