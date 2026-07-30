@@ -69,6 +69,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -109,6 +110,9 @@ import com.intuit.ssp.R as SspR
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.delay
+
+private const val ITEM_LOADING_INDICATOR_DELAY_MS = 180L
 
 internal enum class BatteryEditorPage {
     OVERVIEW,
@@ -471,7 +475,8 @@ private fun BatteryEditorContent(
         }
         if (page == BatteryEditorPage.OVERVIEW) {
             ApplyFooter(
-                enabled = state.isThemeAvailable && state.assetSelectionInProgress == null,
+                enabled = state.isThemeAvailable,
+                selectionInProgress = state.assetSelectionInProgress != null,
                 isApplied = state.config.enabled,
                 onApply = onApply,
                 onDisable = onDisable
@@ -630,6 +635,7 @@ private fun ThemeComponentPicker(
             ThemeCategoryChip(
                 label = stringResource(R.string.battery_catalog_all),
                 selected = selectedCategoryId == null,
+                enabled = state.assetSelectionInProgress == null,
                 onClick = { selectedCategoryId = null }
             )
         }
@@ -641,6 +647,7 @@ private fun ThemeComponentPicker(
                     category.name
                 },
                 selected = selectedCategoryId == category.id,
+                enabled = state.assetSelectionInProgress == null,
                 onClick = { selectedCategoryId = category.id }
             )
         }
@@ -671,6 +678,7 @@ private fun ThemeComponentPicker(
 private fun ThemeCategoryChip(
     label: String,
     selected: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit
 ) {
     Text(
@@ -687,7 +695,7 @@ private fun ThemeCategoryChip(
                     if (selected) R.color.colors_12B890 else R.color.colors_FFFFFF
                 )
             )
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(
                 horizontal = dimensionResource(SdpR.dimen._11sdp),
                 vertical = dimensionResource(SdpR.dimen._7sdp)
@@ -709,71 +717,73 @@ private fun ThemeComponentOption(
         BatteryThemeComponent.EMOJI -> theme.emojiPath
         BatteryThemeComponent.BATTERY -> theme.batteryPath
     }
-    Column(
+    val loadingLabel = stringResource(R.string.battery_asset_loading)
+    var showLoadingOverlay by remember(theme.id, component) { mutableStateOf(false) }
+    LaunchedEffect(loading) {
+        if (loading) {
+            delay(ITEM_LOADING_INDICATOR_DELAY_MS)
+            showLoadingOverlay = true
+        } else {
+            showLoadingOverlay = false
+        }
+    }
+    Box(
         modifier = Modifier
             .width(dimensionResource(SdpR.dimen._86sdp))
-            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
-            .background(colorResource(R.color.colors_FFFFFF))
-            .border(
-                width = dimensionResource(
-                    if (selected) SdpR.dimen._2sdp else SdpR.dimen._1sdp
-                ),
-                color = colorResource(
-                    if (selected) R.color.colors_12B890 else R.color.colors_C8C8C9
-                ),
-                shape = RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp))
-            )
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(dimensionResource(SdpR.dimen._5sdp)),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .semantics {
+                if (loading) stateDescription = loadingLabel
+            }
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._58sdp)),
-            contentAlignment = Alignment.Center
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
+                .background(colorResource(R.color.colors_FFFFFF))
+                .border(
+                    width = dimensionResource(
+                        if (selected) SdpR.dimen._2sdp else SdpR.dimen._1sdp
+                    ),
+                    color = colorResource(
+                        if (selected) R.color.colors_12B890 else R.color.colors_C8C8C9
+                    ),
+                    shape = RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp))
+                )
+                .clickable(enabled = enabled, onClick = onClick)
+                .padding(dimensionResource(SdpR.dimen._5sdp)),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (assetPath != null) {
-                SubcomposeAsyncImage(
-                    model = assetPath,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._48sdp))
-                ) {
-                    if (painter.state is AsyncImagePainter.State.Success) {
-                        SubcomposeAsyncImageContent()
-                    } else {
-                        ThemeComponentThumbnailFallback(theme, component)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(dimensionResource(SdpR.dimen._58sdp)),
+                contentAlignment = Alignment.Center
+            ) {
+                if (assetPath != null) {
+                    SubcomposeAsyncImage(
+                        model = assetPath,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.size(dimensionResource(SdpR.dimen._48sdp))
+                    ) {
+                        if (painter.state is AsyncImagePainter.State.Success) {
+                            SubcomposeAsyncImageContent()
+                        } else {
+                            ThemeComponentThumbnailFallback(theme, component)
+                        }
                     }
+                } else {
+                    ThemeComponentThumbnailFallback(theme, component)
                 }
-            } else {
-                ThemeComponentThumbnailFallback(theme, component)
             }
-            if (loading) {
-                CircularProgressIndicator(
-                    color = colorResource(R.color.colors_12B890),
-                    strokeWidth = dimensionResource(SdpR.dimen._1sdp),
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
-                )
-            }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
-                .background(colorResource(R.color.colors_12B890))
-                .padding(vertical = dimensionResource(SdpR.dimen._4sdp)),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (loading) {
-                Text(
-                    text = stringResource(R.string.battery_asset_loading),
-                    color = colorResource(R.color.colors_FFFFFF),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                    fontSize = dimensionResource(SspR.dimen._7ssp).value.sp
-                )
-            } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
+                    .background(colorResource(R.color.colors_12B890))
+                    .padding(vertical = dimensionResource(SdpR.dimen._4sdp)),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 if (locked) {
                     Icon(
                         imageVector = Icons.Outlined.Lock,
@@ -792,6 +802,30 @@ private fun ThemeComponentOption(
                         }
                     ),
                     color = colorResource(R.color.colors_FFFFFF),
+                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontSize = dimensionResource(SspR.dimen._7ssp).value.sp,
+                    maxLines = 1
+                )
+            }
+        }
+        if (showLoadingOverlay) {
+            Column(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
+                    .background(colorResource(R.color.colors_FFFFFF).copy(alpha = 0.88f)),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    color = colorResource(R.color.colors_12B890),
+                    strokeWidth = dimensionResource(SdpR.dimen._2sdp),
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._20sdp))
+                )
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._4sdp)))
+                Text(
+                    text = loadingLabel,
+                    color = colorResource(R.color.colors_12B890),
                     fontFamily = FontFamily(Font(R.font.inter_semibold)),
                     fontSize = dimensionResource(SspR.dimen._7ssp).value.sp,
                     maxLines = 1
@@ -1556,10 +1590,18 @@ private fun AccessibilityState(accessibilityEnabled: Boolean) {
 @Composable
 private fun ApplyFooter(
     enabled: Boolean,
+    selectionInProgress: Boolean,
     isApplied: Boolean,
     onApply: () -> Unit,
     onDisable: () -> Unit
 ) {
+    val applyState = BatteryEditorLoadingPolicy.applyState(
+        themeAvailable = enabled,
+        selectionInProgress = selectionInProgress
+    )
+    val activeContainerColor = colorResource(R.color.colors_12B890)
+    val activeContentColor = colorResource(R.color.colors_FFFFFF)
+    val unavailableContainerColor = colorResource(R.color.colors_C8C8C9)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -1571,9 +1613,16 @@ private fun ApplyFooter(
     ) {
         Button(
             onClick = onApply,
-            enabled = enabled,
+            enabled = applyState.enabled,
             colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(R.color.colors_12B890)
+                containerColor = activeContainerColor,
+                contentColor = activeContentColor,
+                disabledContainerColor = if (applyState.keepActiveAppearance) {
+                    activeContainerColor
+                } else {
+                    unavailableContainerColor
+                },
+                disabledContentColor = activeContentColor
             ),
             shape = RoundedCornerShape(dimensionResource(SdpR.dimen._20sdp)),
             modifier = Modifier
@@ -1582,7 +1631,6 @@ private fun ApplyFooter(
         ) {
             Text(
                 text = stringResource(R.string.battery_apply),
-                color = colorResource(R.color.colors_FFFFFF),
                 fontFamily = FontFamily(Font(R.font.inter_semibold))
             )
         }

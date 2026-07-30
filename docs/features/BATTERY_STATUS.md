@@ -86,9 +86,11 @@ Firebase Remote Config key `github_token_pet_server`, không hardcode trong sour
 Trong Customize, card Pet/Pin ưu tiên ảnh component và dùng catalog thumbnail làm fallback
 khi ảnh đang tải hoặc lỗi; nếu cả hai không dùng được thì hiện vector mặc định. Một lần
 chọn remote chỉ được ghi vào draft sau khi đúng asset component đã materialize và verify
-thành công. Trong lúc tải card hiện `Loading…`, khóa các lựa chọn khác và nút Apply. Nếu
-thiết bị offline mà asset chưa có trong verified cache, lựa chọn cũ được giữ nguyên và UI
-hiện lỗi có thể thử lại; không có trạng thái `Selected` giả.
+thành công. Trong lúc tải, đúng card đang chọn nhận overlay `Loading…`; indicator có một
+delay ngắn để thao tác lấy từ cache không chớp. Các lựa chọn và hành động Apply tạm khóa,
+nhưng Apply giữ nguyên màu/nội dung và không mang loading state. Nếu thiết bị offline mà
+asset chưa có trong verified cache, lựa chọn cũ được giữ nguyên và UI hiện lỗi có thể thử
+lại; không có trạng thái `Selected` giả.
 
 Khi remote/cache không dùng được, repository thử catalog ở
 `externalFilesDir/battery_catalog/`; Debug tiếp tục có packaged snapshot làm fallback.
