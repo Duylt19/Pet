@@ -209,8 +209,10 @@ Owner đã cung cấp 14 screenshot reference để research một thanh trạng
 Kế hoạch hiện nằm tại
 [`plans/battery-status-capsule/README.md`](plans/battery-status-capsule/README.md).
 
-Feature được định nghĩa là một `TYPE_APPLICATION_OVERLAY` non-touchable nằm ngay dưới
-status bar hệ thống, không thay thế SystemUI và không dùng Accessibility/API ẩn. Plan chia
-thành domain/data, editor preview, shared overlay host, device-status components, secure
-asset catalog, monetization và release hardening. Không mục nào được xem là Done cho tới
-khi source/test/device verification của phase tương ứng hoàn tất.
+Plan hiện có hai runtime backend: `TYPE_APPLICATION_OVERLAY` nằm dưới status bar và
+`TYPE_ACCESSIBILITY_OVERLAY` có thể che trực quan status bar khi user chủ động bật
+Accessibility. Cover mode không sửa SystemUI, không đọc screen/node content và có policy,
+disclosure, consent cùng Play review gate riêng. Plan chia thành domain/data, editor
+preview, runtime backends, device-status components, secure asset catalog, monetization
+và release hardening. Không mục nào được xem là Done cho tới khi source/test/device
+verification của phase tương ứng hoàn tất.

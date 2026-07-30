@@ -83,8 +83,8 @@ Theo `ScreenName` trong UI/navigation spec.
 | `status_theme_unlock_result` | theme_id, result |
 | `status_editor_open` | source, theme_id |
 | `status_component_open` | component_type |
-| `status_config_apply` | enabled_component_count, source_theme, capsule_height_bucket |
-| `status_overlay_start_result` | result, permission_state |
+| `status_config_apply` | enabled_component_count, source_theme, capsule_height_bucket, display_mode |
+| `status_overlay_start_result` | result, capability_state, display_mode |
 | `status_overlay_stop` | source |
 | `status_asset_download_result` | asset_kind, result, size_bucket |
 | `status_catalog_refresh_result` | source, result, cache_age_bucket |
@@ -119,7 +119,7 @@ gộp tất cả thành drop-off.
 
 ## Overlay disclosure
 
-Trước lần Start đầu:
+Trước lần Start `BELOW_SYSTEM_BAR` đầu:
 
 - giải thích capsule nằm trên app khác nhưng dưới status bar thật;
 - minh họa vị trí;
@@ -131,20 +131,48 @@ Trước lần Start đầu:
 Existing Permission screen có thể thêm một capability section; không request lại nếu overlay
 đã granted.
 
+## Accessibility disclosure and Play declaration
+
+`COVER_SYSTEM_BAR` dùng AccessibilityService nên có disclosure/consent tách biệt ngay trước
+khi mở Accessibility Settings:
+
+- nói rõ service chỉ đặt thanh trang trí lên status region;
+- nói rõ không đọc nội dung màn hình, không thao tác thay user, không thu thập/chia sẻ
+  accessibility data;
+- nêu cách tắt và hậu quả: cover mode dừng;
+- nút đồng ý/từ chối rõ, không pre-check, không gộp vào Terms/Privacy;
+- Privacy Policy/Data Safety và Play listing mô tả cùng một use case.
+
+Cute Pet không phải accessibility tool:
+
+- `isAccessibilityTool=false`;
+- phải hoàn thành Accessibility declaration và review video;
+- justification phải nêu `TYPE_APPLICATION_OVERLAY` nằm dưới status bar nên không đáp ứng
+  lựa chọn visual cover do user chủ động yêu cầu;
+- không dùng node retrieval, gesture dispatch, global action, package tracking hoặc
+  automation;
+- không che camera/microphone privacy indicator, system warning hoặc notification controls;
+- full-width opaque parity bị xem là high-risk cho tới khi có policy/device evidence;
+- remote kill switch có thể ẩn cover mode nếu review thất bại.
+
+Chi tiết:
+[Accessibility status-cover mode](10_ACCESSIBILITY_STATUS_COVER.md).
+
 ## Foreground-service Play declaration
 
-Khi migrate shared host:
+Khi migrate shared host cho pet/below-bar mode:
 
 - manifest `PROPERTY_SPECIAL_USE_FGS_SUBTYPE` mô tả cả animated pets và user-configured
-  battery status capsule;
+  below-system-bar battery status capsule;
 - Play Console description nêu user tự Start, visual luôn perceptible và Stop được;
 - demo video: grant overlay → Apply capsule → chuyển app → capsule hiện → Stop notification;
 - mô tả impact nếu service bị gián đoạn;
 - Data Safety/Privacy rà lại `ACCESS_NETWORK_STATE` và remote asset downloads.
 
+Cover mode do AccessibilityService sở hữu không được lấy làm lý do giữ một FGS riêng.
 Google Play yêu cầu FGS feature có lợi ích core, user initiated/perceptible, stop được và
-không thể defer mà vẫn đáp ứng trải nghiệm. Release gate phải kiểm tra policy hiện hành,
-không dựa duy nhất vào tài liệu kế hoạch này.
+không thể defer mà vẫn đáp ứng trải nghiệm. Cả FGS và Accessibility release gate phải kiểm
+tra policy hiện hành, không dựa duy nhất vào tài liệu kế hoạch này.
 
 ## Content policy
 

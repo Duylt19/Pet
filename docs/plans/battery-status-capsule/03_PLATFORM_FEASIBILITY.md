@@ -7,6 +7,11 @@
 Nguồn ưu tiên là Android/Google Play documentation hiện hành:
 
 - [`TYPE_APPLICATION_OVERLAY`](https://developer.android.com/reference/android/view/WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY)
+- [`TYPE_ACCESSIBILITY_OVERLAY`](https://developer.android.com/reference/android/view/WindowManager.LayoutParams#TYPE_ACCESSIBILITY_OVERLAY)
+- [`AccessibilityService`](https://developer.android.com/reference/android/accessibilityservice/AccessibilityService)
+- [AOSP window layer policy](https://android.googlesource.com/platform/frameworks/base/+/android16-release/services/core/java/com/android/server/policy/WindowManagerPolicy.java)
+- [Google Play AccessibilityService policy](https://support.google.com/googleplay/android-developer/answer/10964491)
+- [Prominent disclosure and consent](https://support.google.com/googleplay/android-developer/answer/11150561)
 - [Foreground service types — special use](https://developer.android.com/develop/background-work/services/fgs/service-types#special-use)
 - [Declare foreground services](https://developer.android.com/develop/background-work/services/fgs/declare)
 - [Battery level and charging state](https://developer.android.com/training/monitoring-device-state/battery-monitoring)
@@ -17,12 +22,12 @@ Nguồn ưu tiên là Android/Google Play documentation hiện hành:
 - [Google Play Device and Network Abuse](https://support.google.com/googleplay/android-developer/answer/16273414)
 - [Play Console foreground-service declaration](https://support.google.com/googleplay/android-developer/answer/16965181)
 
-## Overlay feasibility
+## Standard overlay feasibility
 
 `TYPE_APPLICATION_OVERLAY` hiển thị trên application windows nhưng dưới critical system
 windows như status bar/IME. Do đó:
 
-- capsule không thể thay thế status bar hệ thống;
+- capsule không thể che status bar bằng window type này;
 - API 26+ dùng `TYPE_APPLICATION_OVERLAY`; API 24–25 dùng legacy `TYPE_PHONE` theo helper
   overlay hiện tại và vẫn yêu cầu special access;
 - window đặt tại top inset hoặc ngay dưới system status bar;
@@ -41,8 +46,30 @@ quy tắc obscuring opacity đối với touch pass-through. Runtime phải:
 - test combined opacity khi pet window đi qua capsule;
 - không tạo full-screen transparent overlay.
 
-Nếu OEM vẫn chặn touch phía sau, feature phải giảm height/opacity hoặc cung cấp quick Stop;
-không dùng accessibility overlay để né giới hạn.
+Nếu OEM vẫn chặn touch phía sau, below-bar backend phải giảm height/opacity hoặc cung cấp
+quick Stop. Accessibility backend là một product mode độc lập có disclosure/policy riêng,
+không phải workaround âm thầm cho touch restriction.
+
+## Accessibility overlay feasibility
+
+`TYPE_ACCESSIBILITY_OVERLAY` chỉ được tạo bởi một enabled `AccessibilityService`. Trong
+AOSP Android 16, type này ở layer 31, cao hơn status bar layer 15 và notification shade
+layer 17. Vì vậy nó có thể che trực quan status bar và render capsule thay thế về mặt hình
+ảnh. Đây không phải SDK guarantee về exact layer trên mọi OEM/version.
+
+Giới hạn:
+
+- SystemUI thật không bị sửa hoặc tắt;
+- accessibility overlay phải có lifecycle/service riêng;
+- non-touchable top window để gesture tới SystemUI;
+- có thể nằm trên notification shade nên cần best-effort pause/hide + OEM test;
+- full-width opaque bar có thể che privacy/system indicators và là Play-policy risk cao;
+- hide trên keyguard/lock screen trong MVP;
+- service disable/revoke phải remove window ngay;
+- không dùng screen/node retrieval hoặc automation.
+
+Chi tiết implementation/policy:
+[Accessibility status-cover mode](10_ACCESSIBILITY_STATUS_COVER.md).
 
 ## Device data capability matrix
 
@@ -65,7 +92,7 @@ không dùng accessibility overlay để né giới hạn.
 
 ## Permission policy
 
-MVP chỉ thêm normal permission `ACCESS_NETWORK_STATE`; repository đã có:
+Below-bar MVP chỉ thêm normal permission `ACCESS_NETWORK_STATE`; repository đã có:
 
 - `SYSTEM_ALERT_WINDOW`;
 - `FOREGROUND_SERVICE`;
@@ -79,8 +106,12 @@ Không thêm:
 - `NEARBY_WIFI_DEVICES`;
 - `READ_PHONE_STATE`;
 - notification listener;
-- accessibility service;
 - usage access.
+
+Cover mode thêm một service được bảo vệ bởi `BIND_ACCESSIBILITY_SERVICE`; đây không phải
+runtime permission thông thường. User phải bật thủ công trong Accessibility Settings sau
+prominent disclosure và affirmative consent. Service khai báo `isAccessibilityTool=false`
+và `canRetrieveWindowContent=false`.
 
 Nếu phase sau muốn exact signal/network generation, đó là một product/privacy decision
 riêng với permission UX và Play review; không lén thêm vào implementation cơ bản.
@@ -111,8 +142,11 @@ bao phủ cả pet lẫn battery capsule.
 
 ## Known limitations cần hiển thị trung thực
 
-- Native system status bar vẫn hiện.
-- Capsule có thể bị system/OEM reposition hoặc ẩn.
+- Below-bar mode: native system status bar vẫn hiện.
+- Cover mode: native status bar bị che trực quan nhưng vẫn tồn tại/hoạt động phía dưới.
+- Cover mode không được ship nếu che camera/microphone privacy indicator, notification hoặc
+  system safety UI trên supported device matrix.
+- Capsule có thể bị system/OEM reposition, ẩn hoặc render khác layer dự kiến.
 - Exact cellular/Wi‑Fi bars không bảo đảm nếu không xin sensitive permission.
 - Hotspot real state chỉ có contract public đầy đủ từ API 36; device cũ dùng manual option.
 - Lock screen, desktop/windowed mode, picture-in-picture và fullscreen game cần device

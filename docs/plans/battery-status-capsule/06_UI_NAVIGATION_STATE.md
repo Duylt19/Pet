@@ -75,6 +75,8 @@ data class BatteryCatalogUiState(
     val unlockedIds: Set<String> = emptySet(),
     val selectedThemeKey: String? = null,
     val isCapsuleRunning: Boolean = false,
+    val displayMode: CapsuleDisplayMode = CapsuleDisplayMode.BELOW_SYSTEM_BAR,
+    val runtimeCapability: CapsuleRuntimeCapability = CapsuleRuntimeCapability.READY,
     val isPremium: Boolean = false,
     val error: CatalogError? = null
 )
@@ -90,6 +92,8 @@ data class BatteryCatalogUiState(
 - `onSettings`;
 - effect `ShowRewarded(themeKey)`;
 - effect `OpenOverlayPermission`;
+- effect `ShowAccessibilityDisclosure`;
+- effect `OpenAccessibilitySettings`;
 - effect `RequestNotificationPermission`;
 - effect `NavigateToEditor(themeKey)`.
 
@@ -123,6 +127,15 @@ Sticky Apply CTA
 Preview nằm dưới app bar, không giả status bar hệ thống. CTA không che item cuối; content
 bottom padding gồm CTA + navigation bar + optional ad (nếu sau này được duyệt).
 
+Editor có display mode selector:
+
+- `Dưới thanh hệ thống`: giải thích cần quyền Display over other apps;
+- `Che thanh hệ thống`: giải thích dùng Accessibility để đặt capsule trên status bar;
+- chọn cover mode không mở Settings ngay; chỉ Apply mới chạy disclosure/consent flow;
+- trạng thái service disabled hiển thị CTA `Bật lại` và option `Dùng chế độ bên dưới`;
+- preview cover mode có frame minh họa native status bar bị che, nhưng luôn gắn label
+  `Bản xem trước`, không giả system permission/UI.
+
 ### UiState
 
 ```kotlin
@@ -134,6 +147,8 @@ data class StatusCapsuleEditorUiState(
     val isApplying: Boolean = false,
     val isDirty: Boolean = false,
     val validationErrors: List<EditorValidationError> = emptyList(),
+    val runtimeCapability: CapsuleRuntimeCapability = CapsuleRuntimeCapability.READY,
+    val pendingPermissionFlow: PendingCapsulePermission? = null,
     val applyError: ApplyError? = null
 )
 ```

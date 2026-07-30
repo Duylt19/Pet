@@ -4,15 +4,16 @@
 
 ## Product statement
 
-Battery Status Capsule cho phép user tạo một thanh thông tin nhỏ, dễ thương và luôn nhìn
-thấy ngay dưới status bar hệ thống khi dùng app khác. Capsule ưu tiên pin, charging và
-thời gian; các module còn lại là tùy chọn.
+Battery Status Capsule cho phép user tạo một thanh thông tin nhỏ, dễ thương khi dùng app
+khác. User có thể chọn đặt capsule dưới status bar hoặc dùng Accessibility status-cover
+mode để che trực quan vùng status bar. Capsule ưu tiên pin, charging và thời gian; các
+module còn lại là tùy chọn.
 
 ## Terminology bắt buộc
 
 - Dùng `Battery Status Capsule`, `Battery bar` hoặc bản dịch tự nhiên `Thanh trạng thái pin`.
-- Không gọi là `Replace system status bar`, `System status bar theme` hoặc tuyên bố app
-  sửa icon hệ thống.
+- Có thể gọi UI là `Che thanh trạng thái`/`Status-cover mode`, nhưng không tuyên bố app
+  sửa hoặc thay thế SystemUI thật.
 - `Data label` là label trang trí; không gọi 6G–9G là mạng thật.
 - `Animation` là asset trang trí, không được mô tả như dữ liệu hoạt động của thiết bị.
 
@@ -21,8 +22,8 @@ thời gian; các module còn lại là tùy chọn.
 1. User xem theme theo category, favorite hoặc unlock một theme.
 2. User mở editor, thay nền, màu, kích thước, emoji và battery style.
 3. User bật/tắt từng status component và xem preview ngay.
-4. User bấm Apply; app lưu configuration, xin overlay/notification permission nếu cần và
-   start/update capsule.
+4. User chọn display mode, bấm Apply; app lưu configuration, chạy đúng disclosure/special
+   access flow và start/update capsule.
 5. User quay lại editor; applied configuration được khôi phục chính xác.
 6. User stop capsule từ Home hoặc ongoing notification mà không stop pet ngoài ý muốn.
 7. Premium user dùng asset premium không cần Rewarded.
@@ -40,9 +41,10 @@ Full Editor
   ├─ edit common settings inline
   ├─ open Component Editor → Done → update parent draft
   └─ Apply
-       ├─ no overlay access → system overlay settings → resume → apply
-       ├─ API 33+ notification missing → request → apply
-       └─ permissions ready → persist + start/update shared overlay host
+       ├─ below-bar + no overlay access → overlay settings → resume → apply
+       ├─ cover-bar + Accessibility off → disclosure/consent → accessibility settings
+       ├─ FGS path + API 33+ notification missing → request → apply
+       └─ capability ready → persist + start/update selected runtime backend
 ```
 
 ## Draft/apply semantics
@@ -60,9 +62,11 @@ Full Editor
 
 - `Apply` lần đầu có thể bật capsule sau permission flow.
 - Battery Catalog/Home hiển thị switch riêng cho capsule.
-- Pet và capsule là hai feature flag độc lập dù dùng chung service host.
-- Notification có action `Stop all overlays`; nếu notification framework hỗ trợ nhiều
+- Pet và capsule là hai feature flag độc lập; chỉ below-bar backend dùng chung FGS host.
+- FGS notification có action `Stop all foreground overlays`; nếu framework hỗ trợ nhiều
   action rõ ràng, thêm `Stop pets` và `Stop battery bar`.
+- Cover-only mode có Stop trong Home/Catalog/Accessibility service settings; không tạo FGS
+  chỉ để có notification.
 - Không auto-start sau boot trong MVP.
 
 ## Default configuration
@@ -70,6 +74,7 @@ Full Editor
 ```text
 height: 32dp
 left/right margin: 12dp
+display mode: BELOW_SYSTEM_BAR until owner approves cover-mode release
 background: built-in sky capsule
 icon/text tint: automatic contrast
 left group: time + one emoji
@@ -97,14 +102,28 @@ capsule enabled: false until explicit Apply/Start
 | Animation | Off | Decorative asset, chạy bằng bounded low-FPS clock |
 | Emotion | Off | Decorative, always-on khi enabled |
 
+## Display mode behavior
+
+| Mode | Label | Behavior |
+|---|---|---|
+| `BELOW_SYSTEM_BAR` | Dưới thanh hệ thống | Application overlay ở top safe inset |
+| `COVER_SYSTEM_BAR` | Che thanh hệ thống | Accessibility overlay trên status region |
+
+- Cover mode là visual replacement; native status bar vẫn tồn tại phía dưới.
+- Chuyển mode là explicit Apply, không tự đổi khi quyền mất.
+- Accessibility bị tắt: dừng cover backend, giữ config và hiển thị CTA bật lại/chuyển mode.
+- Lock screen/landscape hide mặc định trong MVP cover mode.
+
 ## Empty/error/offline states
 
 - Catalog cache empty + offline: built-in starter themes vẫn hiện.
 - Remote asset download fail: giữ selection/runtime hiện tại, cho Retry.
 - Asset invalid/hash mismatch: reject, không apply.
-- Overlay revoked: shared service remove capsule ngay; config vẫn được lưu.
-- Notification denied API 33+: vẫn có thể start FGS theo platform behavior nhưng UI phải
-  giải thích notification có thể chỉ xuất hiện trong task manager.
+- Overlay revoked: below-bar backend remove capsule ngay; config vẫn được lưu.
+- Accessibility disabled: cover backend remove capsule ngay; config/mode vẫn được lưu và
+  UI hiển thị `Needs accessibility`.
+- Notification denied API 33+ trên FGS path: vẫn có thể start theo platform behavior nhưng
+  UI phải giải thích notification có thể chỉ xuất hiện trong task manager.
 - Missing device signal API: dùng connected/disconnected fallback, không hiển thị dữ liệu giả.
 
 ## Accessibility/localization
@@ -120,8 +139,9 @@ capsule enabled: false until explicit Apply/Start
 
 ## Explicit non-goals MVP
 
-- Không che/thay system status bar.
-- Không dùng Accessibility Service.
+- Không chỉnh sửa SystemUI hoặc native status icons.
+- Không dùng Accessibility để đọc node/content, theo dõi app usage, automation, gesture
+  dispatch hoặc global actions.
 - Không dùng hidden/privileged telephony, tethering hoặc SystemUI API.
 - Không boot auto-start.
 - Không cho remote pack chứa code, font, SVG/XML hoặc Lottie JSON chưa kiểm soát.

@@ -28,6 +28,10 @@ chép. Cute Pet sẽ giữ cozy visual system hiện tại và chỉ học cấu
 - Theme card có bốn trạng thái: free, rewarded locked, premium locked, selected.
 - Grid/horizontal list phải có padding cuối để card không bị cắt vô nghĩa.
 - Native/banners chỉ là placement đề xuất; không đưa ads vào overlay hoặc che CTA.
+- Status bar thật trong screenshot catalog/editor không chứng minh behavior sau khi Apply.
+  Việc reference yêu cầu Accessibility là evidence mạnh hơn cho runtime overlay che vùng
+  status bar khi user rời app; xem
+  [Accessibility status-cover mode](10_ACCESSIBILITY_STATUS_COVER.md).
 
 ## Screen 2–4 — Full editor
 
@@ -153,6 +157,19 @@ Battery Catalog
             ├─ emotion
             └─ mobile data label
 ```
+
+## Runtime hypothesis sau khi biết permission flow
+
+Reference nhiều khả năng không sửa SystemUI mà:
+
+1. chạy một `AccessibilityService`;
+2. add `TYPE_ACCESSIBILITY_OVERLAY` trong top status region;
+3. render clock, pin, connectivity và asset custom lên trên status bar thật;
+4. để touch/swipe đi xuyên qua bằng non-touchable flags.
+
+Kết quả nhìn như “thay status bar”, nhưng status bar hệ thống vẫn hoạt động bên dưới. Đây
+là hypothesis có cơ sở từ permission + Android layer policy, không phải reverse-engineering
+source của app reference.
 
 ## Visual direction cho Cute Pet
 

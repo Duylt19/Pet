@@ -9,7 +9,8 @@ Mỗi phase là một commit/PR độc lập, compile/test/docs pass trước ph
 
 ### Scope
 
-- Owner duyệt `Battery Status Capsule` và vị trí dưới system status bar.
+- Owner duyệt `Battery Status Capsule` và release scope:
+  `BELOW_SYSTEM_BAR`, `COVER_SYSTEM_BAR` hoặc dual mode.
 - Duyệt Home bottom-nav change.
 - Chốt MVP components, landscape behavior và ad placement.
 - Chuẩn bị một built-in theme, battery icon set, emoji và background do project sở hữu.
@@ -19,18 +20,20 @@ Mỗi phase là một commit/PR độc lập, compile/test/docs pass trước ph
 
 - Approved wireframe/Figma.
 - Asset manifest/checksum.
-- Final strings/terminology.
+- Final strings/terminology và Accessibility disclosure draft nếu ship cover mode.
 - Decision log cho Rewarded unavailable policy.
 
 ### Definition of done
 
-Không còn quyết định sản phẩm làm thay đổi architecture hoặc permission surface.
+Không còn quyết định sản phẩm làm thay đổi architecture hoặc permission surface. Cover
+mode chưa được code nếu owner chưa duyệt policy/disclosure direction.
 
 ## Phase 1 — Domain, policies and local persistence
 
 ### Scope
 
 - Models `StatusCapsuleConfig`, catalog, device state.
+- `CapsuleDisplayMode`, runtime capability và backend selection policy.
 - Pure sanitization/layout/entitlement/draft policies.
 - Dedicated settings repository + DataStore.
 - Built-in local catalog parser.
@@ -78,13 +81,14 @@ Config round-trip deterministic; no Android View/service required; JVM tests pas
 
 User can configure every MVP field, process-death restore draft và Apply local config.
 
-## Phase 3 — Shared overlay host and basic runtime
+## Phase 3 — Standard overlay host and basic runtime
 
 ### Scope
 
 - Migrate `PetOverlayService` lifecycle thành `OverlayHostService`.
 - Giữ pet behavior/regression.
-- Add `StatusCapsuleController` one-window renderer.
+- Add `ApplicationOverlayCapsuleController` one-window renderer.
+- Add `StatusCapsuleRuntimeCoordinator` và `ApplicationOverlayCapsuleBackend`.
 - Implement time, battery percentage/icon and charging state.
 - Permission/notification pending Apply flow.
 - Independent Pet/Capsule Start/Stop + dynamic notification.
@@ -107,7 +111,41 @@ User can configure every MVP field, process-death restore draft và Apply local 
 Capsule chạy ổn định qua app khác, dữ liệu pin/thời gian thật, không block touch, pet không
 regression và Stop sạch.
 
-## Phase 4 — Full device-status components
+## Phase 4 — Accessibility status-cover backend
+
+### Entry gate
+
+- Owner chọn ship cover/dual mode.
+- Disclosure/consent copy và Privacy impact được duyệt.
+- Play policy justification được review nội bộ.
+
+### Scope
+
+- `StatusBarAccessibilityService`.
+- Minimal service metadata: no node retrieval/automation, `isAccessibilityTool=false`.
+- `AccessibilityCapsuleBackend` dùng renderer/layout chung.
+- Enable/decline/disable flow và runtime capability.
+- Top/cutout positioning, non-touchable swipe-through.
+- Keyguard/landscape hide, notification shade best-effort behavior.
+- Backend switch invariant: exactly one capsule window.
+
+### Tests
+
+- API/OEM layer proof trên device matrix.
+- Status swipe, notification shade, keyguard và secure dialogs.
+- Camera/microphone privacy indicator và system warning remain visible.
+- Service enable/disable/unbind/process restart.
+- No accessibility content/data/gesture APIs.
+
+### Definition of done
+
+Cover mode che trực quan phần được phép của status bar trên supported device matrix, không
+chặn system gesture/privacy indicator, không đọc accessibility content và release evidence
+sẵn sàng cho Play declaration.
+
+Nếu gate không đạt, phase bị loại khỏi release và below-bar mode vẫn hoạt động.
+
+## Phase 5 — Full device-status components
 
 ### Scope
 
@@ -132,7 +170,7 @@ regression và Stop sạch.
 Mọi component trong MVP có real-data/decorative semantics đúng tài liệu và không cần
 sensitive permission mới.
 
-## Phase 5 — Remote catalog and secure asset packs
+## Phase 6 — Remote catalog and secure asset packs
 
 ### Scope
 
@@ -154,7 +192,7 @@ sensitive permission mới.
 
 Remote content fail không phá applied capsule; invalid pack không vào renderer.
 
-## Phase 6 — Premium, Rewarded and approved ads
+## Phase 7 — Premium, Rewarded and approved ads
 
 ### Scope
 
@@ -179,7 +217,7 @@ Remote content fail không phá applied capsule; invalid pack không vào render
 Monetization không chặn free starter experience, không xuất hiện trong overlay và không
 phá Apply/navigation.
 
-## Phase 7 — Release hardening
+## Phase 8 — Release hardening
 
 ### Scope
 
@@ -187,6 +225,7 @@ phá Apply/navigation.
 - Accessibility/localization.
 - Performance/battery profiling.
 - Play FGS/overlay disclosure, Data Safety và asset licensing.
+- Accessibility declaration/video/policy approval nếu cover mode enabled.
 - ProGuard/release build.
 - Staged rollout/kill switch/monitoring.
 
@@ -216,7 +255,10 @@ Phase 5
 Phase 6
   ↓
 Phase 7
+  ↓
+Phase 8
 ```
 
-Phase 5 có thể bắt đầu server tooling sau Phase 1 schema lock, nhưng app integration không
-merge trước Phase 3 runtime fallback ổn định.
+Phase 4 là optional release branch nếu chỉ ship below-bar mode. Phase 6 có thể bắt đầu
+server tooling sau Phase 1 schema lock, nhưng app integration không merge trước Phase 3
+runtime fallback ổn định.

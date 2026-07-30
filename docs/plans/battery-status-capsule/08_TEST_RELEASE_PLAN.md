@@ -20,6 +20,8 @@
 - Archive traversal/type/size/pixel/animation validation.
 - Rewarded result exactly-once policy.
 - Shared service active-feature state machine.
+- Runtime backend selection/switch/exactly-one-active invariant.
+- Accessibility capability and consent state machine.
 
 ### Repository/integration
 
@@ -40,11 +42,19 @@
 - RTL.
 - Screen reader semantics and selected state.
 - Permission return resumes pending Apply once.
+- Accessibility decline/enable/disable return flow không loop hoặc auto-fallback.
 
 ### Instrumentation/device
 
 - Add/update/remove one non-touchable capsule window.
 - Verify app below vẫn nhận touch trên Android 12+.
+- `TYPE_ACCESSIBILITY_OVERLAY` visually covers status bar trên device matrix.
+- Status bar swipe-down vẫn hoạt động trong cover mode.
+- Notification shade/keyguard/system dialog behavior và best-effort hide.
+- Camera/microphone privacy indicator, screen recording/casting và notification warning
+  không bị capsule che trên từng OEM/API được support.
+- Accessibility enable, disable, service interrupt/unbind và app process restart.
+- Switch below-bar ↔ cover-bar không tạo duplicate window.
 - Real battery level/charging plug/unplug.
 - Minute/timezone/locale change.
 - Wi‑Fi ↔ cellular ↔ offline.
@@ -53,6 +63,7 @@
 - Rotation, cutout, fullscreen, split-screen, desktop/windowed mode.
 - Screen off/on no catch-up.
 - Overlay permission revoke.
+- Accessibility revoked/disabled.
 - Notification denied API 33+.
 - Process kill, force-stop and app update.
 - Pet-only, capsule-only, both, stop-one, stop-all.
@@ -139,12 +150,14 @@ ship, không nới budget âm thầm.
 
 - Owner approves product name/position/visual and asset licenses.
 - Play FGS declaration/video updated.
+- Accessibility declaration, disclosure/consent, Privacy Policy và review video approved
+  nếu ship cover mode.
 - Manifest disclosure text reviewed.
 - Privacy/Data Safety reviewed.
 - Ads placement/remote config approved.
 - Localization complete for supported locales.
 - Accessibility pass.
-- OEM/cutout/touch-through matrix recorded.
+- OEM/cutout/layering/touch-through matrix recorded cho từng display mode.
 - Battery/performance profile recorded.
 - Server catalog integrity report archived.
 - Rollout has kill switch for remote catalog and capsule runtime.

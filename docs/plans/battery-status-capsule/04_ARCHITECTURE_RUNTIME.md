@@ -15,12 +15,17 @@ DataStore / app-private catalog cache / owner-controlled remote source
 
 Applied StatusCapsuleConfig
   ↓ StateFlow
-OverlayHostService
-  ├─ PetOverlayController
-  └─ StatusCapsuleController
-       ├─ DeviceStatusRepository
-       ├─ StatusCapsuleRenderer/View
-       └─ OverlayFrameClock (only when animation requires it)
+StatusCapsuleRuntimeCoordinator
+  ├─ BelowSystemBarBackend → OverlayHostService
+  │    ├─ PetOverlayController
+  │    └─ ApplicationOverlayCapsuleController
+  └─ CoverSystemBarBackend → StatusBarAccessibilityService
+       └─ AccessibilityOverlayCapsuleController
+
+Shared by both capsule backends
+  ├─ DeviceStatusRepository
+  ├─ StatusCapsuleRenderer/View
+  └─ OverlayFrameClock (only when animation requires it)
 ```
 
 UI không truy cập DataStore, `WindowManager`, `BatteryManager` hoặc service trực tiếp.
@@ -50,7 +55,11 @@ com.asianmobile.emojibattery.shimeji/
 ├── battery/
 │   ├── catalog/              # parser, validator, installer/cache
 │   └── overlay/
-│       ├── StatusCapsuleController.kt
+│       ├── StatusCapsuleRuntimeCoordinator.kt
+│       ├── StatusCapsuleWindowBackend.kt
+│       ├── ApplicationOverlayCapsuleBackend.kt
+│       ├── AccessibilityCapsuleBackend.kt
+│       ├── StatusBarAccessibilityService.kt
 │       ├── StatusCapsuleLayoutPolicy.kt
 │       ├── StatusCapsuleRenderer.kt
 │       └── StatusCapsuleView.kt
@@ -63,7 +72,27 @@ com.asianmobile.emojibattery.shimeji/
 
 Business feature vẫn nằm trong `:app`; không đưa battery logic vào `:ads`.
 
-## Shared overlay host decision
+## Runtime backend decision
+
+```kotlin
+interface StatusCapsuleWindowBackend {
+    val capability: StateFlow<CapsuleBackendCapability>
+    fun start(config: StatusCapsuleConfig)
+    fun update(config: StatusCapsuleConfig)
+    fun stop()
+}
+```
+
+`StatusCapsuleRuntimeCoordinator` chọn đúng một backend theo `CapsuleDisplayMode`:
+
+- `BELOW_SYSTEM_BAR` → application overlay trong shared foreground host;
+- `COVER_SYSTEM_BAR` → accessibility overlay trong `StatusBarAccessibilityService`.
+
+Không được add `TYPE_ACCESSIBILITY_OVERLAY` từ `OverlayHostService`: window privilege và
+lifecycle thuộc AccessibilityService. Hai backend dùng chung renderer/layout/data nhưng
+không dùng chung WindowManager owner.
+
+## Shared foreground overlay host
 
 ### Vì sao không tạo `StatusCapsuleService` riêng
 
@@ -74,8 +103,8 @@ Business feature vẫn nằm trong `:app`; không đưa battery logic vào `:ads
 
 ### Migration target
 
-`PetOverlayService` được tổng quát hóa thành `OverlayHostService` với controller độc lập.
-Migration phải giữ:
+`PetOverlayService` được tổng quát hóa thành `OverlayHostService` với controller độc lập
+cho pet và `BELOW_SYSTEM_BAR`. Migration phải giữ:
 
 - `START_NOT_STICKY`;
 - `exported=false`;
@@ -89,7 +118,7 @@ Migration phải giữ:
 Không rewrite pet engine/controller trong cùng phase nếu không cần. Service host chỉ thay
 ownership/lifecycle boundary.
 
-## Overlay feature lifecycle
+## Foreground overlay feature lifecycle
 
 ```kotlin
 interface OverlayFeatureController {
@@ -110,26 +139,50 @@ Host nhận explicit action:
 - `STOP_STATUS_CAPSULE`;
 - `STOP_ALL`.
 
-Service tiếp tục chạy khi ít nhất một feature active. Stop capsule không remove pet
-window; Stop pet không remove capsule. `OverlayHostRuntime` expose:
+Service tiếp tục chạy khi ít nhất một foreground-overlay feature active. Accessibility
+cover mode không giữ host này sống nếu không có pet. Stop capsule không remove pet window;
+Stop pet không remove capsule backend đang thuộc AccessibilityService. Runtime expose:
 
 ```text
 isServiceRunning
 arePetsRunning
 activePetCount
 isStatusCapsuleRunning
+statusCapsuleDisplayMode
+statusCapsuleCapability
 ```
+
+## Accessibility service lifecycle
+
+`StatusBarAccessibilityService`:
+
+- được Android bind sau khi user bật trong Accessibility Settings;
+- khai báo `BIND_ACCESSIBILITY_SERVICE`, `isAccessibilityTool=false`,
+  `canRetrieveWindowContent=false`;
+- không inspect node/window content, không dispatch gesture/global action;
+- chỉ add/update/remove top-bounded `TYPE_ACCESSIBILITY_OVERLAY`;
+- collect applied config khi `COVER_SYSTEM_BAR` được chọn;
+- remove window trong `onInterrupt()`, `onUnbind()` và khi config disabled;
+- báo capability `NEEDS_ACCESSIBILITY` khi service không enabled;
+- hide trên keyguard và landscape trong MVP.
+
+Service không tự bật được và app không được giả lập permission dialog. Full contract nằm
+trong [Accessibility status-cover mode](10_ACCESSIBILITY_STATUS_COVER.md).
 
 ## Notification contract
 
-- Title/content thay đổi theo active set: Pets, Battery bar, hoặc cả hai.
+- Title/content thay đổi theo active foreground set: Pets, below-bar Battery bar, hoặc cả hai.
 - Ongoing, low importance, no badge.
 - Content intent về Home/Battery Catalog.
 - Action tối thiểu `Stop all`.
 - Nếu notification layout/action budget cho phép: `Stop pets`, `Stop battery bar`.
 - Không đưa quảng cáo, upsell hoặc sensitive device state vào notification.
 
-## Status capsule window
+Accessibility cover mode không cần giữ một FGS chỉ để sở hữu accessibility window. App
+vẫn phải có control Stop rõ trong Home/Catalog và service description; notification riêng
+chỉ thêm nếu có product/policy reason, không tạo duplicate ongoing notification mặc định.
+
+## Below-system-bar window
 
 Một window dùng type helper chung với pet:
 
@@ -156,6 +209,24 @@ Window có:
 4. Khi top inset bằng 0 (fullscreen), clamp vào cutout safe inset nếu có.
 5. Landscape MVP: hide mặc định hoặc dùng compact layout sau owner decision.
 6. Multi-window/desktop: chỉ render khi usable width đạt minimum.
+
+## Cover-system-bar window
+
+Window do `StatusBarAccessibilityService` tạo:
+
+- API 24+: `TYPE_ACCESSIBILITY_OVERLAY`;
+- `FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCHABLE | FLAG_NOT_TOUCH_MODAL`;
+- gravity top/start;
+- visual bounds bằng status region, không phải full screen;
+- Y bắt đầu từ display top/cutout policy để che trực quan native status bar;
+- width theo display bounds, xử lý cutout bằng safe content padding thay vì đẩy toàn
+  capsule xuống dưới status bar;
+- hide mặc định ở keyguard/landscape;
+- best-effort pause/hide khi notification shade/system panel mở;
+- secure system overlay và OEM behavior luôn được ưu tiên hơn visual parity.
+
+Coordinator phải stop window backend cũ trước khi start backend mới để không có hai capsule
+chồng nhau.
 
 ## Renderer choice
 
@@ -236,6 +307,8 @@ Không remove/add window cho mỗi slider change trong editor vì slider chỉ s
 ## Failure and cleanup
 
 - Overlay permission revoke: stop/remove mọi overlay window và reset runtime state.
+- Accessibility disable/unbind: remove accessibility window, emit `NEEDS_ACCESSIBILITY`,
+  giữ applied config và không tự đổi display mode.
 - Invalid config: sanitize về built-in default; không crash.
 - Missing asset: fallback per-component hoặc full built-in theme.
 - Add/update window error: remove capsule window; pet controller vẫn sống nếu healthy.

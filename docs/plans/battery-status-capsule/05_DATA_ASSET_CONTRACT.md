@@ -14,7 +14,7 @@
 | Catalog JSON/metadata | Catalog repository | App-private files |
 | Downloaded packs | Catalog installer | App-private immutable version dir |
 | Device status | Device repository | Memory only |
-| Runtime running state | `OverlayHostRuntime` | Process-local Flow |
+| Runtime running state | `StatusCapsuleRuntimeCoordinator` | Process-local Flow |
 
 Không dùng Room cho static catalog MVP. Chỉ thêm database khi có search/history/offline
 query đủ lớn và product requirement rõ.
@@ -27,6 +27,7 @@ Persist model dùng stable key/string, không dùng Android resource ID:
 data class StatusCapsuleConfig(
     val schemaVersion: Int = 1,
     val enabled: Boolean = false,
+    val displayMode: CapsuleDisplayMode = CapsuleDisplayMode.BELOW_SYSTEM_BAR,
     val themeKey: String = "builtin.sky@1",
     val geometry: CapsuleGeometry = CapsuleGeometry(),
     val appearance: CapsuleAppearance = CapsuleAppearance(),
@@ -44,6 +45,11 @@ data class StatusCapsuleConfig(
     val charging: IndicatorComponentConfig = IndicatorComponentConfig(),
     val emotion: AssetComponentConfig = AssetComponentConfig()
 )
+
+enum class CapsuleDisplayMode {
+    BELOW_SYSTEM_BAR,
+    COVER_SYSTEM_BAR
+}
 ```
 
 ### Value bounds
@@ -60,6 +66,7 @@ data class StatusCapsuleConfig(
 | Time/date text | 10–22sp-equivalent |
 | Color | Opaque/safe ARGB string, parser validated |
 | Module list | Fixed known enum only; unknown ignored |
+| Display mode | Stable known enum; unknown fallback `BELOW_SYSTEM_BAR` |
 
 Repository sanitizes NaN/out-of-range/unknown enum/invalid color and materializes missing
 fields từ default khi schema cũ được đọc.

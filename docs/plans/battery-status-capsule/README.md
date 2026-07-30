@@ -4,15 +4,22 @@
 
 Tài liệu này chuyển 14 screenshot tham chiếu thành một kế hoạch production-ready cho
 Cute Pet. Tên sản phẩm dùng trong spec là **Battery Status Capsule**: một thanh trang trí
-nhỏ nằm ngay dưới status bar hệ thống, không giả vờ thay thế status bar thật.
+có thể nằm dưới status bar hoặc che trực quan status bar bằng Accessibility theo mode user
+chọn. Dù ở cover mode, app không sửa SystemUI thật.
 
 ## Kết luận chính
 
-- Android app thông thường chỉ tạo được `TYPE_APPLICATION_OVERLAY` nằm dưới các system
-  window quan trọng như status bar. Feature không dùng Accessibility, API ẩn hoặc quyền
-  hệ thống để che/thay status bar.
-- Capsule là một overlay non-touchable, user chủ động bật/tắt, dùng chung foreground
-  service host với pet để tránh hai notification/service chạy song song.
+- `TYPE_APPLICATION_OVERLAY` chỉ nằm dưới status bar. Quan sát app reference yêu cầu
+  Accessibility phù hợp với cơ chế `TYPE_ACCESSIBILITY_OVERLAY`, có layer cao hơn và có
+  thể che trực quan status bar bằng một thanh custom.
+- Plan hỗ trợ backend abstraction cho `BELOW_SYSTEM_BAR` và `COVER_SYSTEM_BAR`.
+  Accessibility cover mode phải có disclosure, affirmative consent, Play declaration và
+  device proof; không đọc screen content hoặc tự động thao tác.
+- Full-width opaque cover là high-risk vì có thể che privacy/system indicators. Production
+  chỉ ship phần visual cover chứng minh không làm khuất camera/microphone indicator,
+  notification hoặc system warning.
+- Capsule luôn non-touchable và user chủ động bật/tắt. Pet/application-overlay fallback
+  dùng foreground host; accessibility window thuộc lifecycle của AccessibilityService.
 - Pin, charging, thời gian, ngày, airplane mode, ringer mode và loại kết nối có thể phản
   ánh dữ liệu thật bằng public API. Một số thành phần trong ảnh chỉ là trang trí hoặc
   không có API ổn định trên toàn bộ min SDK 24; chúng phải có fallback trung thực.
@@ -30,21 +37,24 @@ nhỏ nằm ngay dưới status bar hệ thống, không giả vờ thay thế s
 7. [Monetization, analytics và policy](07_MONETIZATION_ANALYTICS_POLICY.md)
 8. [Test và release plan](08_TEST_RELEASE_PLAN.md)
 9. [Implementation phases](09_IMPLEMENTATION_PHASES.md)
+10. [Accessibility status-cover mode](10_ACCESSIBILITY_STATUS_COVER.md)
 
 ## Source hiện tại ảnh hưởng tới kế hoạch
 
 - `HomeScreen` đã có bottom navigation ba item và Settings đã có lối riêng ở header.
   Battery sẽ thay item Settings ở bottom navigation; Settings vẫn mở từ header.
 - `PetOverlayService` đang là `specialUse` FGS, `START_NOT_STICKY`, có notification Stop,
-  screen-off suspension và live DataStore updates. Phase runtime phải tổng quát hóa thành
-  một overlay host, không tạo thêm FGS độc lập.
+  screen-off suspension và live DataStore updates. Phase runtime tổng quát hóa host này
+  cho pet/below-bar backend; cover backend thuộc AccessibilityService và không tạo FGS
+  độc lập.
 - App đã có overlay/notification permissions, Hilt, DataStore, ads/rewarded/premium,
   analytics và remote catalog pattern để tái sử dụng qua boundary phù hợp.
 
 ## Điều kiện trước khi code
 
-- Owner duyệt tên/position thực tế của capsule và chấp nhận việc system status bar vẫn
-  tồn tại phía trên.
+- Owner chốt release scope: dưới status bar, Accessibility cover mode hoặc dual mode.
+- Nếu ship cover mode, duyệt disclosure/consent, Play declaration và video review trước
+  khi implementation được coi là release-ready.
 - Có asset do project sở hữu hoặc được cấp phép; không dùng asset trong screenshot.
 - Chốt placement ads mới và entitlement asset với owner trước phase monetization.
 - Có device matrix ít nhất API 24/28/31/33/35/36, gồm cutout và gesture/3-button navigation.

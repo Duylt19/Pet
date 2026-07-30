@@ -54,8 +54,9 @@ Research records evidence and clean-room decisions; it is not a runtime specific
 Các tài liệu dưới `plans/` là đặc tả đã research nhưng chưa phải capability hiện hành:
 
 - [Battery Status Capsule plan](plans/battery-status-capsule/README.md): phân tích 14
-  screenshot, giới hạn Android/Play policy, product/UX, architecture, data/asset schema,
-  navigation/state, monetization, test matrix và roadmap nhiều phase.
+  screenshot, standard/accessibility overlay modes, giới hạn Android/Play policy,
+  product/UX, architecture, data/asset schema, navigation/state, monetization, test matrix
+  và roadmap nhiều phase.
 
 ## Quy tắc duy trì
 
