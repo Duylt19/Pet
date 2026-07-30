@@ -6,16 +6,11 @@ internal data class BatteryStatusHorizontalBounds(
 )
 
 internal fun resolveBatteryStatusHorizontalBounds(
-    widthPx: Float,
-    minimumContentRightPx: Float,
-    privacyReservePx: Float
+    widthPx: Float
 ): BatteryStatusHorizontalBounds {
     val safeWidth = widthPx.coerceAtLeast(0f)
-    val minimumContentRight = minimumContentRightPx.coerceIn(0f, safeWidth)
-    val contentRight = (safeWidth - privacyReservePx.coerceAtLeast(0f))
-        .coerceIn(minimumContentRight, safeWidth)
     return BatteryStatusHorizontalBounds(
         backgroundRightPx = safeWidth,
-        contentRightPx = contentRight
+        contentRightPx = safeWidth
     )
 }

@@ -5,26 +5,18 @@ import org.junit.Test
 
 class BatteryStatusHorizontalBoundsTest {
     @Test
-    fun backgroundRemainsFullWidth_whileContentReservesSystemArea() {
-        val bounds = resolveBatteryStatusHorizontalBounds(
-            widthPx = 1000f,
-            minimumContentRightPx = 100f,
-            privacyReservePx = 72f
-        )
+    fun backgroundAndContent_useFullOverlayWidth() {
+        val bounds = resolveBatteryStatusHorizontalBounds(widthPx = 1000f)
 
         assertEquals(1000f, bounds.backgroundRightPx)
-        assertEquals(928f, bounds.contentRightPx)
+        assertEquals(1000f, bounds.contentRightPx)
     }
 
     @Test
-    fun excessiveReserve_neverProducesInvalidContentBounds() {
-        val bounds = resolveBatteryStatusHorizontalBounds(
-            widthPx = 320f,
-            minimumContentRightPx = 48f,
-            privacyReservePx = 500f
-        )
+    fun negativeWidth_isClampedToZero() {
+        val bounds = resolveBatteryStatusHorizontalBounds(widthPx = -1f)
 
-        assertEquals(320f, bounds.backgroundRightPx)
-        assertEquals(48f, bounds.contentRightPx)
+        assertEquals(0f, bounds.backgroundRightPx)
+        assertEquals(0f, bounds.contentRightPx)
     }
 }

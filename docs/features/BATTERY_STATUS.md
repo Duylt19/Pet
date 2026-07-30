@@ -20,8 +20,12 @@ Vertical slice hiện đã có trong source:
 - `StatusBarAccessibilityService` vẽ một `TYPE_ACCESSIBILITY_OVERLAY` full-width,
   non-touchable ở cạnh trên; cập nhật pin, charging, time/date, network, airplane, ringer,
   hotspot và dùng theme/nền/emotion/animation đã chọn.
-- Background màu/ảnh phủ đúng toàn bộ chiều ngang window và không bo góc. Khoảng
-  `privacyReserveDp` chỉ giới hạn trailing content, không cắt hoặc làm trong suốt nền.
+- Background màu/ảnh và cả hai nhóm content phủ/dùng đúng toàn bộ chiều ngang window,
+  không bo góc. Khoảng `privacyReserveDp` được giữ lại chỉ để tương thích dữ liệu cũ và
+  không còn tác động lên renderer.
+- `barHeightDp` điều khiển trực tiếp chiều cao window overlay, kể cả khi thấp hơn chiều
+  cao status bar mặc định của OEM. Cỡ chữ thời gian giữ cố định ở 16dp và không thay đổi
+  theo slider chiều cao.
 - Service ẩn khi màn hình khóa, màn hình tắt hoặc portrait không còn hiệu lực; không
   auto-start sau boot.
 - Pet và pin được renderer như một pair: cùng anchor ở cụm battery phía trailing, pin
@@ -103,7 +107,7 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `displayMode` | Migration legacy; build hiện tại sanitize về `COVER_SYSTEM_BAR` |
 | `showTime`, `showPercentage` | Thành phần hiển thị |
 | `showAnimation`, `animationAssetName`, `animationSizeDp` | Hoạt ảnh GIF/Lottie |
-| `barHeightDp`, `leftPaddingDp`, `rightPaddingDp` | Hình học capsule |
+| `barHeightDp`, `leftPaddingDp`, `rightPaddingDp` | Chiều cao window và padding content full-width |
 | `emojiSizeDp`, `batterySizeDp`, `percentSizeDp` | Kích thước asset/pin |
 | `backgroundColorArgb`, `foregroundColorArgb` | Màu renderer |
 | `backgroundDecorationId` | Nền đóng gói đã chọn; `0` là nền màu phẳng |
@@ -111,7 +115,7 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `wifi/data/signal/airplane/hotspot/ringer/charge *SizeDp/*ColorArgb` | Tùy chỉnh độc lập từng status component |
 | `dataType`, `chargeIconIndex` | Nhãn mạng 2G–9G và một trong 12 icon sạc |
 | `showDateTime`, `dateFormat`, `dateTimeFont`, `dateTimeSizeDp`, `dateTimeColorArgb` | Ngày/giờ và 6 font bundled |
-| `privacyReserveDp` | Khoảng trống bên phải cho privacy/system indicators |
+| `privacyReserveDp` | Field tương thích dữ liệu cũ; renderer full-width hiện tại bỏ qua |
 | `favoriteThemeIds` | Favorite local theo theme ID |
 | `rewardUnlockedThemeIds` | Theme Premium đã mở khóa bằng Rewarded trên thiết bị |
 
@@ -132,7 +136,8 @@ Các guardrail bắt buộc:
 - Không gọi global action, gesture dispatch, click, type hoặc scroll.
 - `onAccessibilityEvent` bỏ qua event; metadata không đăng ký event type.
 - Window `FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE`, không chặn thao tác.
-- Chừa khoảng phải cho system/privacy indicators.
+- Content dùng toàn bộ chiều ngang overlay; `rightPaddingDp` là khoảng cách mép phải do
+  user kiểm soát.
 - Chỉ mở Settings sau disclosure chủ động; không tự bật service.
 - User có thể tắt service bất cứ lúc nào trong Android Settings.
 

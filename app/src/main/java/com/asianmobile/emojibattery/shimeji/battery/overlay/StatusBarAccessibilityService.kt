@@ -42,6 +42,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class StatusBarAccessibilityService : AccessibilityService() {
@@ -359,8 +360,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
 
     private fun createLayoutParams(config: BatteryStatusConfig): WindowManager.LayoutParams {
         val density = resources.displayMetrics.density
-        val statusHeight = statusBarHeight()
-        val barHeight = (config.barHeightDp * density).toInt().coerceAtLeast(statusHeight)
+        val barHeight = resolveBatteryStatusBarHeightPx(config.barHeightDp, density)
         return WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             barHeight,
@@ -377,11 +377,6 @@ class StatusBarAccessibilityService : AccessibilityService() {
                 com.asianmobile.emojibattery.shimeji.R.string.battery_accessibility_service_label
             )
         }
-    }
-
-    private fun statusBarHeight(): Int {
-        val identifier = resources.getIdentifier("status_bar_height", "dimen", "android")
-        return if (identifier != 0) resources.getDimensionPixelSize(identifier) else 0
     }
 
     private fun registerSystemReceiver() {
@@ -504,6 +499,14 @@ class StatusBarAccessibilityService : AccessibilityService() {
         const val WIFI_AP_STATE_DISABLED = 11
         const val WIFI_AP_STATE_ENABLED = 13
     }
+}
+
+internal fun resolveBatteryStatusBarHeightPx(
+    barHeightDp: Float,
+    density: Float
+): Int {
+    if (!barHeightDp.isFinite() || !density.isFinite() || density <= 0f) return 1
+    return (barHeightDp * density).roundToInt().coerceAtLeast(1)
 }
 
 private data class BatteryOverlaySources(

@@ -19,6 +19,7 @@ import com.airbnb.lottie.LottieComposition
 import com.airbnb.lottie.LottieDrawable
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_TIME_SIZE_DP
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -109,11 +110,8 @@ class BatteryStatusBarView(context: Context) : View(context) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val privacyReserve = config.privacyReserveDp * density
         val horizontalBounds = resolveBatteryStatusHorizontalBounds(
-            widthPx = width.toFloat(),
-            minimumContentRightPx = height.toFloat(),
-            privacyReservePx = privacyReserve
+            widthPx = width.toFloat()
         )
         val contentRight = horizontalBounds.contentRightPx
         drawBackground(canvas, horizontalBounds.backgroundRightPx)
@@ -176,7 +174,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                 timeText,
                 cursor,
                 centerY,
-                config.barHeightDp * 0.42f,
+                DEFAULT_BATTERY_TIME_SIZE_DP,
                 config.foregroundColorArgb,
                 Typeface.DEFAULT_BOLD,
                 fromLeft
@@ -323,7 +321,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         BatteryStatusComponent.TIME,
                         measuredTextWidth(
                             timeText,
-                            config.barHeightDp * 0.42f,
+                            DEFAULT_BATTERY_TIME_SIZE_DP,
                             Typeface.DEFAULT_BOLD
                         ),
                         gap,
