@@ -17,6 +17,8 @@ import android.media.AudioManager
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Build
 import android.os.PowerManager
@@ -70,25 +72,29 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private var emotionBitmap: Bitmap? = null
     private var animatedAsset: BatteryAnimatedAsset? = null
     private var deviceState = BatteryDeviceState()
-    private var level = 100
-    private var charging = false
+    private var powerState = BatteryPowerState()
     private var receiverRegistered = false
     private var networkCallbackRegistered = false
+    private val networkCapabilities = mutableMapOf<Network, NetworkCapabilities>()
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
-        override fun onAvailable(network: Network) {
-            scope.launch { refreshConnectivity() }
-        }
+        override fun onAvailable(network: Network) = Unit
 
         override fun onLost(network: Network) {
-            scope.launch { refreshConnectivity() }
+            scope.launch {
+                networkCapabilities.remove(network)
+                publishConnectivity()
+            }
         }
 
         override fun onCapabilitiesChanged(
             network: Network,
-            networkCapabilities: NetworkCapabilities
+            capabilities: NetworkCapabilities
         ) {
-            scope.launch { refreshConnectivity() }
+            scope.launch {
+                networkCapabilities[network] = capabilities
+                publishConnectivity()
+            }
         }
     }
 
@@ -98,13 +104,18 @@ class StatusBarAccessibilityService : AccessibilityService() {
                 Intent.ACTION_BATTERY_CHANGED -> {
                     val rawLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 100)
                     val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100).coerceAtLeast(1)
-                    level = (rawLevel * 100 / scale).coerceIn(0, 100)
-                    charging = intent.getIntExtra(
-                        BatteryManager.EXTRA_STATUS,
-                        BatteryManager.BATTERY_STATUS_UNKNOWN
-                    ) in setOf(
-                        BatteryManager.BATTERY_STATUS_CHARGING,
-                        BatteryManager.BATTERY_STATUS_FULL
+                    powerState = BatteryPowerState(
+                        level = (rawLevel * 100 / scale).coerceIn(0, 100),
+                        chargeState = BatterySystemStatusPolicy.charge(
+                            intent.getIntExtra(
+                                BatteryManager.EXTRA_STATUS,
+                                BatteryManager.BATTERY_STATUS_UNKNOWN
+                            )
+                        ),
+                        plugType = BatterySystemStatusPolicy.plug(
+                            intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
+                        ),
+                        present = intent.getBooleanExtra(BatteryManager.EXTRA_PRESENT, true)
                     )
                 }
                 Intent.ACTION_SCREEN_OFF,
@@ -115,10 +126,11 @@ class StatusBarAccessibilityService : AccessibilityService() {
                 }
                 Intent.ACTION_AIRPLANE_MODE_CHANGED,
                 AudioManager.RINGER_MODE_CHANGED_ACTION -> refreshDeviceState()
+                WifiManager.WIFI_STATE_CHANGED_ACTION -> publishConnectivity()
                 WIFI_AP_STATE_CHANGED -> {
                     val state = intent.getIntExtra(WIFI_STATE_EXTRA, WIFI_AP_STATE_DISABLED)
                     deviceState = deviceState.copy(
-                        hotspotEnabled = state == WIFI_AP_STATE_ENABLED
+                        hotspot = BatterySystemStatusPolicy.hotspot(state)
                     )
                 }
             }
@@ -265,8 +277,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
             view.render(
                 currentConfig,
                 previewDeviceState(),
-                level,
-                previewCharging(),
+                previewPowerState(),
                 emojiBitmap,
                 batteryBitmap,
                 backgroundBitmap,
@@ -341,8 +352,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
             view.render(
                 currentConfig,
                 previewDeviceState(),
-                level,
-                previewCharging(),
+                previewPowerState(),
                 emojiBitmap,
                 batteryBitmap,
                 backgroundBitmap,
@@ -368,20 +378,31 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private fun previewDeviceState(): BatteryDeviceState = when (currentPreviewFocus) {
         BatteryStatusComponent.AIRPLANE -> deviceState.copy(
             airplaneMode = true,
-            cellularConnected = false
+            cellular = BatteryConnectivityState.DISABLED
         )
-        BatteryStatusComponent.RINGER -> deviceState.copy(ringerMuted = true)
-        BatteryStatusComponent.HOTSPOT -> deviceState.copy(hotspotEnabled = true)
+        BatteryStatusComponent.RINGER -> deviceState.copy(ringer = BatteryRingerState.SILENT)
+        BatteryStatusComponent.HOTSPOT -> deviceState.copy(
+            hotspot = BatteryHotspotState.ENABLED
+        )
         BatteryStatusComponent.CELLULAR -> deviceState.copy(
-            cellularConnected = true,
+            cellular = BatteryConnectivityState.CONNECTED,
             airplaneMode = false
         )
-        BatteryStatusComponent.WIFI -> deviceState.copy(wifiConnected = true)
+        BatteryStatusComponent.WIFI -> deviceState.copy(
+            wifi = BatteryConnectivityState.CONNECTED
+        )
         else -> deviceState
     }
 
-    private fun previewCharging(): Boolean =
-        charging || currentPreviewFocus == BatteryStatusComponent.CHARGE
+    private fun previewPowerState(): BatteryPowerState =
+        if (currentPreviewFocus == BatteryStatusComponent.CHARGE && !powerState.isCharging) {
+            powerState.copy(
+                chargeState = BatteryChargeState.CHARGING,
+                plugType = BatteryPlugType.AC
+            )
+        } else {
+            powerState
+        }
 
     private fun createLayoutParams(config: BatteryStatusConfig): WindowManager.LayoutParams {
         val density = resources.displayMetrics.density
@@ -415,6 +436,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
             addAction(Intent.ACTION_USER_PRESENT)
             addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED)
             addAction(AudioManager.RINGER_MODE_CHANGED_ACTION)
+            addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
             addAction(WIFI_AP_STATE_CHANGED)
         }
         val sticky = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -482,20 +504,61 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private fun registerNetworkCallback() {
         if (networkCallbackRegistered) return
         try {
-            connectivityManager().registerDefaultNetworkCallback(networkCallback)
+            val request = NetworkRequest.Builder().build()
+            connectivityManager().registerNetworkCallback(request, networkCallback)
             networkCallbackRegistered = true
+            refreshConnectivitySnapshot()
         } catch (error: RuntimeException) {
             Log.w(TAG, "Unable to register network callback", error)
         }
     }
 
-    private fun refreshConnectivity() {
+    private fun refreshConnectivitySnapshot() {
         val manager = connectivityManager()
-        val capabilities = manager.activeNetwork?.let(manager::getNetworkCapabilities)
+        try {
+            networkCapabilities.clear()
+            manager.allNetworks.forEach { network ->
+                manager.getNetworkCapabilities(network)?.let { capabilities ->
+                    networkCapabilities[network] = capabilities
+                }
+            }
+        } catch (error: RuntimeException) {
+            Log.w(TAG, "Unable to read initial network state", error)
+        }
+        publishConnectivity()
+    }
+
+    private fun publishConnectivity() {
+        val observations = networkCapabilities.values.map { capabilities ->
+            BatteryNetworkObservation(
+                isWifi = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI),
+                isCellular = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR),
+                hasInternetCapability = capabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_INTERNET
+                ),
+                isValidated = capabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_VALIDATED
+                ),
+                isCaptivePortal = capabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL
+                )
+            )
+        }
+        val wifiEnabled = try {
+            wifiManager().isWifiEnabled
+        } catch (error: RuntimeException) {
+            Log.w(TAG, "Unable to read Wi-Fi state", error)
+            true
+        }
         deviceState = deviceState.copy(
-            wifiConnected = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true,
-            cellularConnected =
-                capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true
+            wifi = BatterySystemStatusPolicy.connectivity(
+                enabled = wifiEnabled,
+                observations = observations.filter(BatteryNetworkObservation::isWifi)
+            ),
+            cellular = BatterySystemStatusPolicy.connectivity(
+                enabled = !deviceState.airplaneMode,
+                observations = observations.filter(BatteryNetworkObservation::isCellular)
+            )
         )
         render()
     }
@@ -508,13 +571,16 @@ class StatusBarAccessibilityService : AccessibilityService() {
                 Settings.Global.AIRPLANE_MODE_ON,
                 0
             ) == 1,
-            ringerMuted = audioManager.ringerMode != AudioManager.RINGER_MODE_NORMAL
+            ringer = BatterySystemStatusPolicy.ringer(audioManager.ringerMode)
         )
-        refreshConnectivity()
+        publishConnectivity()
     }
 
     private fun connectivityManager(): ConnectivityManager =
         getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    private fun wifiManager(): WifiManager =
+        applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
 
     private companion object {
         const val TAG = "BatteryStatusService"
@@ -522,7 +588,6 @@ class StatusBarAccessibilityService : AccessibilityService() {
         const val WIFI_AP_STATE_CHANGED = "android.net.wifi.WIFI_AP_STATE_CHANGED"
         const val WIFI_STATE_EXTRA = "wifi_state"
         const val WIFI_AP_STATE_DISABLED = 11
-        const val WIFI_AP_STATE_ENABLED = 13
         const val ASSET_RETRY_DELAY_MS = 5_000L
     }
 }

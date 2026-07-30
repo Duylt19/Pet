@@ -774,4 +774,26 @@
     <string name="battery_overlay_description">Trạng thái pin, %1$d phần trăm</string>
     <string name="battery_overlay_percentage">%1$d%%</string>
     <string name="battery_overlay_charging_percentage">%1$d%% ⚡</string>
+    <string name="battery_overlay_unavailable_short">--</string>
+    <string name="battery_overlay_unavailable">Không có thông tin pin</string>
+    <string name="battery_overlay_detailed_description">Pin %1$d phần trăm, %2$s</string>
+    <string name="battery_overlay_state_charging">đang sạc</string>
+    <string name="battery_overlay_state_full">đã sạc đầy</string>
+    <string name="battery_overlay_state_not_charging">đã cắm nguồn nhưng không sạc</string>
+    <string name="battery_overlay_state_discharging">đang dùng pin</string>
+    <string name="battery_overlay_state_unknown">không xác định được trạng thái sạc</string>
+    <string name="battery_overlay_power_ac">nguồn điện AC</string>
+    <string name="battery_overlay_power_usb">nguồn điện USB</string>
+    <string name="battery_overlay_power_wireless">sạc không dây</string>
+    <string name="battery_overlay_power_dock">nguồn điện từ dock</string>
+    <string name="battery_overlay_wifi_connected">Wi‑Fi đã kết nối</string>
+    <string name="battery_overlay_wifi_limited">Wi‑Fi bị giới hạn kết nối</string>
+    <string name="battery_overlay_wifi_disabled">Wi‑Fi đang tắt</string>
+    <string name="battery_overlay_wifi_disconnected">Wi‑Fi chưa kết nối</string>
+    <string name="battery_overlay_cellular_connected">dữ liệu di động đã kết nối</string>
+    <string name="battery_overlay_cellular_limited">dữ liệu di động bị giới hạn kết nối</string>
+    <string name="battery_overlay_airplane_enabled">đang bật chế độ máy bay</string>
+    <string name="battery_overlay_ringer_vibrate">đang bật chế độ rung</string>
+    <string name="battery_overlay_ringer_silent">đang bật chế độ im lặng</string>
+    <string name="battery_overlay_hotspot_enabled">điểm phát sóng đang bật</string>
 </resources>

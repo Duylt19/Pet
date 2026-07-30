@@ -179,9 +179,26 @@ Service combine applied config + editor preview session + catalog bằng Flow. P
 session process-local chỉ tồn tại khi editor visible, ép `enabled=true` cho preview và
 không ghi DataStore. Khi editor đóng, service lập tức quay về applied config. Hai bitmap
 pet/pin được resolve độc lập, decode ngoài main thread và cache theo khóa asset.
-Battery/time/system receiver và
-`ConnectivityManager.NetworkCallback` cập nhật một immutable `BatteryDeviceState`.
+Battery/time/system receiver và một `ConnectivityManager.NetworkCallback` theo dõi các
+network đủ điều kiện, cache `NetworkCapabilities` theo từng `Network`, rồi
+cập nhật immutable `BatteryDeviceState`. Cách này không phụ thuộc duy nhất vào default
+network: khi Wi‑Fi là default app vẫn có thể nhận đúng cellular network còn tồn tại.
 Renderer chỉ animate asset đã chọn; một window duy nhất được add/update/remove theo state.
+
+### Ma trận trạng thái hệ thống
+
+| Component | State được phân biệt | Cách hiển thị |
+|---|---|---|
+| Pin | unavailable, unknown, discharging, plugged-not-charging, charging, full | Phần trăm luôn lấy từ sticky `ACTION_BATTERY_CHANGED`; charge asset chỉ hiện khi charging/full |
+| Nguồn sạc | none, AC, USB, wireless, dock, unknown | Lưu trong `BatteryPowerState` để description và behavior không suy diễn từ một boolean |
+| Wi‑Fi | disabled, disconnected, limited/captive, validated | Icon off, warning hoặc connected riêng |
+| Cellular | disabled, disconnected, limited, validated | Chỉ render khi limited/validated; airplane luôn khóa cellular |
+| Chuông | normal, vibrate, silent | Normal không chiếm chỗ; vibrate và silent có icon riêng |
+| Hotspot | unknown, disabled, disabling, enabling, enabled, failed | Ẩn khi unknown/disabled; pending, enabled và error có icon riêng |
+| Máy bay | on/off | Đọc `Settings.Global.AIRPLANE_MODE_ON`, icon chỉ hiện khi on |
+
+`contentDescription` của overlay ghép mức pin, trạng thái sạc, Wi‑Fi, cellular,
+airplane, ringer và hotspot đang hoạt động thay vì chỉ đọc phần trăm pin.
 
 Giới hạn hiện tại:
 
@@ -190,10 +207,13 @@ Giới hạn hiện tại:
   Accessibility window không vô tình che nội dung app.
 - Không render trên keyguard/screen-off.
 - Cover behavior và notification-shade layering khác nhau theo OEM.
-- Wi‑Fi/cellular lấy từ active network capability. Signal là trạng thái kết nối coarse,
-  không đọc cường độ radio vì app không xin phone/location permission.
+- Wi‑Fi/cellular lấy từ tất cả network callback đủ điều kiện. `VALIDATED` nghĩa Android
+  đã xác thực Internet; connected nhưng captive/unvalidated được hiển thị limited. Signal vẫn là
+  trạng thái kết nối coarse, không đọc cường độ radio vì app không xin phone/location
+  permission.
 - Hotspot theo broadcast best-effort của OEM; Android không có API public ổn định để app
-  thường truy vấn tethering hiện tại.
+  thường truy vấn tethering hiện tại. Trước broadcast đầu tiên trạng thái là `UNKNOWN`
+  và không hiển thị icon để tránh báo sai.
 - Nhãn data 2G–9G là style do user chọn, không tự suy luận generation của nhà mạng.
 - Không có boot receiver và không tự hướng user quay lại Settings nếu họ disable service.
 

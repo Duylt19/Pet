@@ -25,14 +25,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-data class BatteryDeviceState(
-    val wifiConnected: Boolean = false,
-    val cellularConnected: Boolean = false,
-    val airplaneMode: Boolean = false,
-    val hotspotEnabled: Boolean = false,
-    val ringerMuted: Boolean = false
-)
-
 data class BatteryAnimatedAsset(
     val movie: Movie? = null,
     val lottieComposition: LottieComposition? = null
@@ -46,8 +38,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
     private val layoutPolicy = BatteryStatusLayoutPolicy()
     private var config = BatteryStatusConfig()
     private var deviceState = BatteryDeviceState()
-    private var level = 100
-    private var charging = false
+    private var powerState = BatteryPowerState()
     private var emoji: Bitmap? = null
     private var battery: Bitmap? = null
     private var background: Bitmap? = null
@@ -67,8 +58,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
     fun render(
         config: BatteryStatusConfig,
         deviceState: BatteryDeviceState,
-        level: Int,
-        charging: Boolean,
+        powerState: BatteryPowerState,
         emoji: Bitmap?,
         battery: Bitmap?,
         background: Bitmap?,
@@ -77,8 +67,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
     ) {
         this.config = config
         this.deviceState = deviceState
-        this.level = level.coerceIn(0, 100)
-        this.charging = charging
+        this.powerState = powerState.copy(level = powerState.level.coerceIn(0, 100))
         this.emoji = emoji
         this.battery = battery
         this.background = background
@@ -89,11 +78,15 @@ class BatteryStatusBarView(context: Context) : View(context) {
         } else {
             ""
         }
-        percentageText = context.getString(
-            if (charging) R.string.battery_overlay_charging_percentage
-            else R.string.battery_overlay_percentage,
-            this.level
-        )
+        percentageText = if (this.powerState.present) {
+            context.getString(
+                if (this.powerState.isCharging) R.string.battery_overlay_charging_percentage
+                else R.string.battery_overlay_percentage,
+                this.powerState.level
+            )
+        } else {
+            context.getString(R.string.battery_overlay_unavailable_short)
+        }
         cachedLayout = null
         if (this.animation !== animation) {
             this.animation = animation
@@ -104,7 +97,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                 lottieDrawable.playAnimation()
             }
         }
-        contentDescription = context.getString(R.string.battery_overlay_description, this.level)
+        contentDescription = buildStatusDescription()
         invalidate()
     }
 
@@ -204,15 +197,17 @@ class BatteryStatusBarView(context: Context) : View(context) {
             ).afterGap(gap, fromLeft)
         }
         if (layout.shows(BatteryStatusComponent.RINGER)) {
-            cursor = drawStatusIcon(
-                canvas,
-                "ic_ringer0",
-                cursor,
-                centerY,
-                config.ringerSizeDp,
-                config.ringerColorArgb,
-                fromLeft
-            ).afterGap(gap, fromLeft)
+            BatterySystemStatusPolicy.ringerIcon(deviceState.ringer)?.let { icon ->
+                cursor = drawStatusIcon(
+                    canvas,
+                    icon,
+                    cursor,
+                    centerY,
+                    config.ringerSizeDp,
+                    config.ringerColorArgb,
+                    fromLeft
+                ).afterGap(gap, fromLeft)
+            }
         }
         if (layout.shows(BatteryStatusComponent.ANIMATION)) {
             cursor = drawAnimation(canvas, cursor, centerY, fromLeft)
@@ -265,7 +260,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
         if (layout.shows(BatteryStatusComponent.WIFI)) {
             cursor = drawStatusIcon(
                 canvas,
-                if (deviceState.wifiConnected) "ic_wifi" else "ic_wifi0",
+                BatterySystemStatusPolicy.wifiIcon(deviceState.wifi),
                 cursor,
                 centerY,
                 config.wifiSizeDp,
@@ -286,7 +281,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
             ).afterGap(gap, fromLeft)
             cursor = drawStatusIcon(
                 canvas,
-                "ic_signal",
+                BatterySystemStatusPolicy.cellularIcon(deviceState.cellular),
                 cursor,
                 centerY,
                 config.signalSizeDp,
@@ -295,15 +290,17 @@ class BatteryStatusBarView(context: Context) : View(context) {
             ).afterGap(gap, fromLeft)
         }
         if (layout.shows(BatteryStatusComponent.HOTSPOT)) {
-            drawStatusIcon(
-                canvas,
-                "ic_hostpot",
-                cursor,
-                centerY,
-                config.hotspotSizeDp,
-                config.hotspotColorArgb,
-                fromLeft
-            )
+            BatterySystemStatusPolicy.hotspotIcon(deviceState.hotspot)?.let { icon ->
+                drawStatusIcon(
+                    canvas,
+                    icon,
+                    cursor,
+                    centerY,
+                    config.hotspotSizeDp,
+                    config.hotspotColorArgb,
+                    fromLeft
+                )
+            }
         }
     }
 
@@ -349,7 +346,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                     )
                 )
             }
-            if (deviceState.ringerMuted) {
+            if (BatterySystemStatusPolicy.ringerIcon(deviceState.ringer) != null) {
                 add(
                     layoutItem(
                         BatteryStatusComponent.RINGER,
@@ -379,7 +376,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                     )
                 )
             }
-            if (charging) {
+            if (powerState.isCharging) {
                 add(
                     layoutItem(
                         BatteryStatusComponent.CHARGE,
@@ -423,7 +420,13 @@ class BatteryStatusBarView(context: Context) : View(context) {
                     priority = 90
                 )
             )
-            if (deviceState.cellularConnected && !deviceState.airplaneMode) {
+            if (
+                deviceState.cellular in setOf(
+                    BatteryConnectivityState.CONNECTED,
+                    BatteryConnectivityState.LIMITED
+                ) &&
+                !deviceState.airplaneMode
+            ) {
                 val cellularWidth = config.signalSizeDp * density +
                     measuredTextWidth(
                         config.dataType.label,
@@ -439,7 +442,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                     )
                 )
             }
-            if (deviceState.hotspotEnabled) {
+            if (BatterySystemStatusPolicy.hotspotIcon(deviceState.hotspot) != null) {
                 add(
                     layoutItem(
                         BatteryStatusComponent.HOTSPOT,
@@ -705,7 +708,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
             centerY + 3f * density,
             paint
         )
-        val fillRight = left + (widthPx - 7f * density) * level / 100f
+        val fillRight = left + (widthPx - 7f * density) * powerState.level / 100f
         canvas.drawRoundRect(
             left + 3f * density,
             top + 3f * density,
@@ -716,6 +719,84 @@ class BatteryStatusBarView(context: Context) : View(context) {
             paint
         )
         return if (fromLeft) right else left
+    }
+
+    private fun buildStatusDescription(): String {
+        if (!powerState.present) {
+            return context.getString(R.string.battery_overlay_unavailable)
+        }
+        val states = buildList {
+            add(
+                context.getString(
+                    when (powerState.chargeState) {
+                        BatteryChargeState.CHARGING ->
+                            R.string.battery_overlay_state_charging
+                        BatteryChargeState.FULL ->
+                            R.string.battery_overlay_state_full
+                        BatteryChargeState.NOT_CHARGING ->
+                            R.string.battery_overlay_state_not_charging
+                        BatteryChargeState.DISCHARGING ->
+                            R.string.battery_overlay_state_discharging
+                        BatteryChargeState.UNKNOWN ->
+                            R.string.battery_overlay_state_unknown
+                    }
+                )
+            )
+            val powerSource = when (powerState.plugType) {
+                BatteryPlugType.AC -> R.string.battery_overlay_power_ac
+                BatteryPlugType.USB -> R.string.battery_overlay_power_usb
+                BatteryPlugType.WIRELESS -> R.string.battery_overlay_power_wireless
+                BatteryPlugType.DOCK -> R.string.battery_overlay_power_dock
+                BatteryPlugType.NONE,
+                BatteryPlugType.UNKNOWN -> null
+            }
+            powerSource?.let { add(context.getString(it)) }
+            add(
+                context.getString(
+                    when (deviceState.wifi) {
+                        BatteryConnectivityState.CONNECTED ->
+                            R.string.battery_overlay_wifi_connected
+                        BatteryConnectivityState.LIMITED ->
+                            R.string.battery_overlay_wifi_limited
+                        BatteryConnectivityState.DISABLED ->
+                            R.string.battery_overlay_wifi_disabled
+                        BatteryConnectivityState.DISCONNECTED ->
+                            R.string.battery_overlay_wifi_disconnected
+                    }
+                )
+            )
+            if (deviceState.airplaneMode) {
+                add(context.getString(R.string.battery_overlay_airplane_enabled))
+            } else if (
+                deviceState.cellular == BatteryConnectivityState.CONNECTED ||
+                deviceState.cellular == BatteryConnectivityState.LIMITED
+            ) {
+                add(
+                    context.getString(
+                        if (deviceState.cellular == BatteryConnectivityState.CONNECTED) {
+                            R.string.battery_overlay_cellular_connected
+                        } else {
+                            R.string.battery_overlay_cellular_limited
+                        }
+                    )
+                )
+            }
+            when (deviceState.ringer) {
+                BatteryRingerState.VIBRATE ->
+                    add(context.getString(R.string.battery_overlay_ringer_vibrate))
+                BatteryRingerState.SILENT ->
+                    add(context.getString(R.string.battery_overlay_ringer_silent))
+                BatteryRingerState.NORMAL -> Unit
+            }
+            if (deviceState.hotspot == BatteryHotspotState.ENABLED) {
+                add(context.getString(R.string.battery_overlay_hotspot_enabled))
+            }
+        }
+        return context.getString(
+            R.string.battery_overlay_detailed_description,
+            powerState.level,
+            states.joinToString(separator = ", ")
+        )
     }
 
     override fun onDetachedFromWindow() {

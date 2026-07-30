@@ -949,4 +949,26 @@
     <string name="battery_overlay_description">Battery status, %1$d percent</string>
     <string name="battery_overlay_percentage">%1$d%%</string>
     <string name="battery_overlay_charging_percentage">%1$d%% ⚡</string>
+    <string name="battery_overlay_unavailable_short">--</string>
+    <string name="battery_overlay_unavailable">Battery information unavailable</string>
+    <string name="battery_overlay_detailed_description">Battery %1$d percent, %2$s</string>
+    <string name="battery_overlay_state_charging">charging</string>
+    <string name="battery_overlay_state_full">fully charged</string>
+    <string name="battery_overlay_state_not_charging">plugged in, not charging</string>
+    <string name="battery_overlay_state_discharging">discharging</string>
+    <string name="battery_overlay_state_unknown">charge state unknown</string>
+    <string name="battery_overlay_power_ac">AC power</string>
+    <string name="battery_overlay_power_usb">USB power</string>
+    <string name="battery_overlay_power_wireless">wireless charging</string>
+    <string name="battery_overlay_power_dock">dock power</string>
+    <string name="battery_overlay_wifi_connected">Wi-Fi connected</string>
+    <string name="battery_overlay_wifi_limited">Wi-Fi has limited connectivity</string>
+    <string name="battery_overlay_wifi_disabled">Wi-Fi off</string>
+    <string name="battery_overlay_wifi_disconnected">Wi-Fi disconnected</string>
+    <string name="battery_overlay_cellular_connected">mobile data connected</string>
+    <string name="battery_overlay_cellular_limited">mobile data has limited connectivity</string>
+    <string name="battery_overlay_airplane_enabled">airplane mode on</string>
+    <string name="battery_overlay_ringer_vibrate">vibrate mode</string>
+    <string name="battery_overlay_ringer_silent">silent mode</string>
+    <string name="battery_overlay_hotspot_enabled">hotspot on</string>
 </resources>
