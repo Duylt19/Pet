@@ -1226,13 +1226,13 @@ private fun DateTimeEditor(
             onChecked = { onConfig(config.copy(showDateTime = it)) }
         )
         EditorSlider(
-            label = stringResource(R.string.battery_status_icon_size),
+            label = stringResource(R.string.battery_date_size),
             value = config.dateTimeSizeDp,
             range = 8f..32f,
             onValue = { onConfig(config.copy(dateTimeSizeDp = it)) }
         )
         ColorPalette(
-            label = stringResource(R.string.battery_status_icon_color),
+            label = stringResource(R.string.battery_date_color),
             selected = config.dateTimeColorArgb,
             onColor = { onConfig(config.copy(dateTimeColorArgb = it)) }
         )

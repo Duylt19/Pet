@@ -926,6 +926,8 @@
     <string name="battery_charge_style">Charging icon</string>
     <string name="battery_date_hint">Control date visibility, format, typeface, size and color.</string>
     <string name="battery_date_show">Show date</string>
+    <string name="battery_date_size">Date size</string>
+    <string name="battery_date_color">Date color</string>
     <string name="battery_date_format">Date format</string>
     <string name="battery_date_font">Date font</string>
     <string name="battery_emotion_style">Emotion style</string>

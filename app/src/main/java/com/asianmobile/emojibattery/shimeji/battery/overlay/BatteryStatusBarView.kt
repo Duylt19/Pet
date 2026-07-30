@@ -38,6 +38,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
     private val layoutPolicy = BatteryStatusLayoutPolicy()
     private var config = BatteryStatusConfig()
     private var deviceState = BatteryDeviceState()
+    private var focusedComponent: BatteryStatusComponent? = null
     private var powerState = BatteryPowerState()
     private var emoji: Bitmap? = null
     private var battery: Bitmap? = null
@@ -58,6 +59,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
     fun render(
         config: BatteryStatusConfig,
         deviceState: BatteryDeviceState,
+        focusedComponent: BatteryStatusComponent?,
         powerState: BatteryPowerState,
         emoji: Bitmap?,
         battery: Bitmap?,
@@ -67,6 +69,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
     ) {
         this.config = config
         this.deviceState = deviceState
+        this.focusedComponent = focusedComponent
         this.powerState = powerState.copy(level = powerState.level.coerceIn(0, 100))
         this.emoji = emoji
         this.battery = battery
@@ -331,7 +334,8 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         BatteryStatusComponent.DATE,
                         measuredTextWidth(dateText, config.dateTimeSizeDp, dateTypeface()),
                         gap,
-                        priority = 20
+                        priority = 20,
+                        required = focusedComponent == BatteryStatusComponent.DATE
                     )
                 )
             }
@@ -341,7 +345,8 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         BatteryStatusComponent.AIRPLANE,
                         config.airplaneSizeDp * density,
                         gap,
-                        priority = 65
+                        priority = 65,
+                        required = focusedComponent == BatteryStatusComponent.AIRPLANE
                     )
                 )
             }
@@ -351,7 +356,8 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         BatteryStatusComponent.RINGER,
                         config.ringerSizeDp * density,
                         gap,
-                        priority = 60
+                        priority = 60,
+                        required = focusedComponent == BatteryStatusComponent.RINGER
                     )
                 )
             }
@@ -361,7 +367,8 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         BatteryStatusComponent.ANIMATION,
                         config.animationSizeDp * density,
                         gap,
-                        priority = 40
+                        priority = 40,
+                        required = focusedComponent == BatteryStatusComponent.ANIMATION
                     )
                 )
             }
@@ -381,7 +388,8 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         BatteryStatusComponent.CHARGE,
                         config.chargeSizeDp * density,
                         gap,
-                        priority = 85
+                        priority = 85,
+                        required = focusedComponent == BatteryStatusComponent.CHARGE
                     )
                 )
             }
@@ -416,7 +424,8 @@ class BatteryStatusBarView(context: Context) : View(context) {
                     BatteryStatusComponent.WIFI,
                     config.wifiSizeDp * density,
                     gap,
-                    priority = 90
+                    priority = 90,
+                    required = focusedComponent == BatteryStatusComponent.WIFI
                 )
             )
             if (
@@ -437,7 +446,8 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         BatteryStatusComponent.CELLULAR,
                         cellularWidth,
                         gap,
-                        priority = 70
+                        priority = 70,
+                        required = focusedComponent == BatteryStatusComponent.CELLULAR
                     )
                 )
             }
@@ -447,7 +457,8 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         BatteryStatusComponent.HOTSPOT,
                         config.hotspotSizeDp * density,
                         gap,
-                        priority = 55
+                        priority = 55,
+                        required = focusedComponent == BatteryStatusComponent.HOTSPOT
                     )
                 )
             }

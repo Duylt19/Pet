@@ -186,6 +186,9 @@ network đủ điều kiện, cache `NetworkCapabilities` theo từng `Network`,
 cập nhật immutable `BatteryDeviceState`. Cách này không phụ thuộc duy nhất vào default
 network: khi Wi‑Fi là default app vẫn có thể nhận đúng cellular network còn tồn tại.
 Renderer chỉ animate asset đã chọn; một window duy nhất được add/update/remove theo state.
+Trong editor, `focusedComponent` được truyền tới renderer thật. Component đang chỉnh sửa
+được đánh dấu required trong width policy để không bị ẩn do thiếu chỗ; Date vẫn tôn trọng
+`showDateTime`, nhưng khi đã bật thì thay đổi size, color, format và font cập nhật live.
 
 ### Ma trận trạng thái hệ thống
 

@@ -277,6 +277,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
             view.render(
                 currentConfig,
                 previewDeviceState(),
+                currentPreviewFocus,
                 previewPowerState(),
                 emojiBitmap,
                 batteryBitmap,
@@ -352,6 +353,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
             view.render(
                 currentConfig,
                 previewDeviceState(),
+                currentPreviewFocus,
                 previewPowerState(),
                 emojiBitmap,
                 batteryBitmap,
