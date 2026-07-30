@@ -68,4 +68,21 @@ class BatteryPreviewLayoutTest {
 
         assertFalse(layout.shows(BatteryStatusComponent.DATE))
     }
+
+    @Test
+    fun themedEmoji_isPartOfBatteryPair_notLeadingStatusGroup() {
+        val layout = batteryPreviewLayout(
+            config = BatteryStatusConfig(
+                batterySizeDp = 20f,
+                emojiSizeDp = 36f
+            ),
+            availableWidthDp = 320f,
+            hasEmoji = true,
+            hasEmotion = false,
+            hasAnimation = false
+        )
+
+        assertTrue(layout.shows(BatteryStatusComponent.BATTERY))
+        assertFalse(layout.shows(BatteryStatusComponent.THEME_EMOJI))
+    }
 }

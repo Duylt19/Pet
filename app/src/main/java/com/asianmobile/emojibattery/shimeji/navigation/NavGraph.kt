@@ -237,7 +237,13 @@ fun AppNavGraph(
                 arguments = listOf(navArgument("themeId") { type = NavType.IntType })
             ) {
                 BatteryEditorScreen(
-                    onBack = { navController.safePopBackStack(ignoreDebounce = true) }
+                    onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                    onNavigateToPremium = {
+                        navController.safeNavigate(
+                            "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
+                            ignoreDebounce = true
+                        )
+                    }
                 )
             }
 

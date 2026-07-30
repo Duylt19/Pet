@@ -25,6 +25,10 @@ class BatterySettingsPolicy {
         // Migrating legacy BELOW values prevents an Accessibility overlay from covering app UI.
         displayMode = BatteryStatusDisplayMode.COVER_SYSTEM_BAR,
         selectedThemeId = config.selectedThemeId.coerceAtLeast(BUILT_IN_BATTERY_THEME_ID),
+        selectedBatteryThemeId = config.selectedBatteryThemeId
+            .coerceAtLeast(BUILT_IN_BATTERY_THEME_ID),
+        selectedEmojiThemeId = config.selectedEmojiThemeId
+            .coerceAtLeast(BUILT_IN_BATTERY_THEME_ID),
         backgroundDecorationId = config.backgroundDecorationId.coerceIn(0, 20),
         emotionDecorationId = config.emotionDecorationId.coerceIn(0, 20),
         animationAssetName = config.animationAssetName

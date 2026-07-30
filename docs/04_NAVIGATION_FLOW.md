@@ -16,7 +16,7 @@
 | `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
 | `swarm_customization` | Edit Pet Swarm | Character, count, base size/speed, random variation và vùng di chuyển |
 | `battery_catalog` | Battery Styles | Catalog local + category/favorite/Premium gate |
-| `battery_editor/{themeId}` | Customize Status Bar | Overview → Size/Appearance/Emoji/Battery hoặc Animation/Wi‑Fi/Data/Signal/Airplane/Hotspot/Ringer/Charge/Date editor nội bộ; Apply và Accessibility disclosure |
+| `battery_editor/{themeId}` | Customize Status Bar | Theme route khởi tạo cặp pet+pin; overview cho phép đổi hai phần độc lập, live preview qua Accessibility; editor con, Rewarded/Premium, Apply và disclosure |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
 ## Flow
@@ -48,6 +48,8 @@ Catalog ──already prepared pack──> Detail ──Use for Pet──> Catal
 Home ──Settings──> Settings ──Language──> Language Settings
 Home ──Premium──> Premium(in-app)
 Home ──Battery tab──> Battery Styles ──theme──> Customize Battery Bar
+  └─ theme ID khởi tạo cả pet + pin; editor có thể mix hai theme khác nhau
+Customize Battery Bar ──locked pet/pin──> Rewarded hoặc Premium ──return──> chọn component
 Customize Battery Bar ──Apply(service off)──> disclosure ──> System Accessibility Settings
 Customize Battery Bar ──Apply(service on)──> persist config + accessibility overlay
 ```
@@ -62,8 +64,9 @@ Customize Battery Bar ──Apply(service on)──> persist config + accessibil
   `target` parse an toàn về enum, `slotIndex` là typed Int và `packKey` luôn URI-encode
   trước navigation.
 - Edit Pet Swarm pop về Home; Catalog mở từ màn này pop về Edit Pet Swarm.
-- Battery Editor pop về Battery Styles; Battery Styles pop về Home. Premium theme mở
-  Premium in-app và quay lại catalog theo back stack.
+- Battery Editor pop về Battery Styles; Battery Styles pop về Home. Premium mở từ
+  catalog hoặc picker component trong editor rồi quay lại đúng destination theo back stack;
+  editor refresh entitlement và hoàn tất pending component selection khi resume.
 - Catalog là boundary authoritative cho Mixed slot Rewarded dù được mở từ Home, Settings
   hay deep route. Chỉ slot kế tiếp được mở; đóng/fail ad không tăng capacity. Premium
   bypass gate và entitlement được refresh khi Catalog resume.

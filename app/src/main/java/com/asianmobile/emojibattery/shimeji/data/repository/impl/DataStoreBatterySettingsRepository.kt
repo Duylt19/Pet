@@ -66,6 +66,8 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                 decodeRewardUnlockedIds(preferences) + sanitized.rewardUnlockedThemeIds
             preferences[ENABLED] = sanitized.enabled
             preferences[SELECTED_THEME_ID] = sanitized.selectedThemeId
+            preferences[SELECTED_BATTERY_THEME_ID] = sanitized.selectedBatteryThemeId
+            preferences[SELECTED_EMOJI_THEME_ID] = sanitized.selectedEmojiThemeId
             preferences[DISPLAY_MODE] = sanitized.displayMode.name
             preferences[SHOW_TIME] = sanitized.showTime
             preferences[SHOW_PERCENTAGE] = sanitized.showPercentage
@@ -138,11 +140,16 @@ class DataStoreBatterySettingsRepository @Inject constructor(
 
     private fun decode(preferences: Preferences): BatteryStatusConfig {
         val defaults = BatteryStatusConfig()
+        val selectedThemeId = preferences[SELECTED_THEME_ID]
+            ?: BUILT_IN_BATTERY_THEME_ID
         return policy.sanitize(
             BatteryStatusConfig(
                 enabled = preferences[ENABLED] ?: false,
-                selectedThemeId = preferences[SELECTED_THEME_ID]
-                    ?: BUILT_IN_BATTERY_THEME_ID,
+                selectedThemeId = selectedThemeId,
+                selectedBatteryThemeId = preferences[SELECTED_BATTERY_THEME_ID]
+                    ?: selectedThemeId,
+                selectedEmojiThemeId = preferences[SELECTED_EMOJI_THEME_ID]
+                    ?: selectedThemeId,
                 displayMode = preferences[DISPLAY_MODE]
                     ?.let { value ->
                         BatteryStatusDisplayMode.entries.firstOrNull { it.name == value }
@@ -237,6 +244,10 @@ class DataStoreBatterySettingsRepository @Inject constructor(
     private companion object {
         val ENABLED = booleanPreferencesKey("battery_status_enabled")
         val SELECTED_THEME_ID = intPreferencesKey("battery_status_selected_theme_id")
+        val SELECTED_BATTERY_THEME_ID =
+            intPreferencesKey("battery_status_selected_battery_theme_id")
+        val SELECTED_EMOJI_THEME_ID =
+            intPreferencesKey("battery_status_selected_emoji_theme_id")
         val DISPLAY_MODE = stringPreferencesKey("battery_status_display_mode")
         val SHOW_TIME = booleanPreferencesKey("battery_status_show_time")
         val SHOW_PERCENTAGE = booleanPreferencesKey("battery_status_show_percentage")

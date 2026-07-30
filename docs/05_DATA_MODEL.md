@@ -36,7 +36,9 @@
 | `pet_position_reset_revisions` | JSON String | 12 reset revision độc lập |
 | `pet_position_reset_revision` | Int | Legacy global fallback cho migration |
 | `battery_status_enabled` | Boolean | User đã Apply battery overlay |
-| `battery_status_selected_theme_id` | Int | Theme ID; `0` là built-in |
+| `battery_status_selected_theme_id` | Int | Style gốc/legacy theme ID; `0` là built-in |
+| `battery_status_selected_battery_theme_id` | Int | Theme ID cung cấp asset pin |
+| `battery_status_selected_emoji_theme_id` | Int | Theme ID cung cấp asset pet/emoji |
 | `battery_status_display_mode` | String enum | Cover hoặc below-system-bar |
 | `battery_status_show_time`, `battery_status_show_percentage`, `battery_status_show_animation`, `battery_status_show_date_time` | Boolean | Component visibility |
 | `battery_status_*_dp` | Float | Bar/padding/emoji/icon/privacy-reserve geometry |
@@ -129,6 +131,15 @@ không được restore sau process death/reboot.
   Repository chặn path escape, size/hash mismatch và release catalog chưa `APPROVED`.
 - `BatteryStatusConfig` là persistent source of truth. `BatterySettingsPolicy` clamp
   geometry/color/favorite/reward unlock trước khi ghi và sau khi decode DataStore.
+- Catalog theme là cặp mặc định. Khi mở editor từ một theme, `selectedThemeId`,
+  `selectedBatteryThemeId` và `selectedEmojiThemeId` cùng nhận ID đó. Sau đó hai component
+  ID được chỉnh độc lập; runtime vẽ pet chồng lên pin tại cùng trailing anchor.
+- Migration không cần DataStore transaction riêng: nếu hai key component chưa tồn tại,
+  repository dùng `battery_status_selected_theme_id` cho cả hai. Draft schema 1 cũng được
+  decode theo quy tắc này; schema 2 persist rõ hai ID.
+- `BatteryEditorPreviewSession` là state process-local, không persistent. Nó chỉ bridge
+  draft đang edit sang Accessibility service; owner token ngăn editor cũ ghi/clear preview
+  của editor mới.
 - `battery_status_reward_unlocked_theme_ids` là tập ID theme Premium đã được mở khóa bằng
   Rewarded trên thiết bị. ID `0`/âm bị loại; Premium subscription bypass gate nhưng không
   sửa/xóa tập unlock này. Tập unlock là monotonic: `applyConfig` luôn merge với dữ liệu

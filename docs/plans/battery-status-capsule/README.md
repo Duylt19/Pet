@@ -26,6 +26,10 @@ SystemUI thật.
 - Pin, charging, thời gian, ngày, airplane mode, ringer mode và loại kết nối có thể phản
   ánh dữ liệu thật bằng public API. Một số thành phần trong ảnh chỉ là trang trí hoặc
   không có API ổn định trên toàn bộ min SDK 24; chúng phải có fallback trung thực.
+- Một catalog theme là cặp mặc định gồm pet/emoji + pin. Chọn theme khởi tạo cả hai ID;
+  editor có thể chọn lại từng phần độc lập. Renderer đặt hai asset cùng trailing anchor,
+  vẽ pin trước và pet chồng lên trên. Draft preview chỉ xuất hiện trên Accessibility
+  status bar, không tạo capsule giả trong nội dung editor.
 - Tài sản trong screenshot chỉ là reference về capability/layout. Không copy logo,
   character, icon pack, background hoặc quảng cáo của app khác.
 

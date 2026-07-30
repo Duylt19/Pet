@@ -218,12 +218,6 @@ class BatteryStatusBarView(context: Context) : View(context) {
             cursor = drawAnimation(canvas, cursor, centerY, fromLeft)
                 .afterGap(gap, fromLeft)
         }
-        if (layout.shows(BatteryStatusComponent.THEME_EMOJI)) {
-            emoji?.let {
-                cursor = drawBitmap(canvas, it, cursor, centerY, config.emojiSizeDp, fromLeft)
-                    .afterGap(gap, fromLeft)
-            }
-        }
         if (layout.shows(BatteryStatusComponent.EMOTION)) {
             emotion?.let {
                 drawBitmap(canvas, it, cursor, centerY, config.emojiSizeDp, fromLeft)
@@ -253,9 +247,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
             ).afterGap(gap, fromLeft)
         }
         if (layout.shows(BatteryStatusComponent.BATTERY)) {
-            cursor = battery?.let {
-                drawBitmap(canvas, it, cursor, centerY, config.batterySizeDp, fromLeft)
-            } ?: drawBuiltInBattery(canvas, cursor, centerY, fromLeft)
+            cursor = drawBatteryPair(canvas, cursor, centerY, fromLeft)
             cursor = cursor.afterGap(gap, fromLeft)
         }
         if (layout.shows(BatteryStatusComponent.PERCENTAGE)) {
@@ -377,16 +369,6 @@ class BatteryStatusBarView(context: Context) : View(context) {
                     )
                 )
             }
-            if (emoji != null) {
-                add(
-                    layoutItem(
-                        BatteryStatusComponent.THEME_EMOJI,
-                        config.emojiSizeDp * density,
-                        gap,
-                        priority = 80
-                    )
-                )
-            }
             if (config.showEmotion && emotion != null) {
                 add(
                     layoutItem(
@@ -410,7 +392,10 @@ class BatteryStatusBarView(context: Context) : View(context) {
             add(
                 layoutItem(
                     BatteryStatusComponent.BATTERY,
-                    config.batterySizeDp * density,
+                    maxOf(
+                        config.batterySizeDp,
+                        if (emoji != null) config.emojiSizeDp else 0f
+                    ) * density,
                     gap,
                     priority = 110,
                     required = true
@@ -547,6 +532,64 @@ class BatteryStatusBarView(context: Context) : View(context) {
         destination.set(left, centerY - size / 2f, left + size, centerY + size / 2f)
         canvas.drawBitmap(bitmap, null, destination, paint)
         return if (fromLeft) left + size else left
+    }
+
+    private fun drawBatteryPair(
+        canvas: Canvas,
+        anchor: Float,
+        centerY: Float,
+        fromLeft: Boolean
+    ): Float {
+        val pairSize = maxOf(
+            config.batterySizeDp,
+            if (emoji != null) config.emojiSizeDp else 0f
+        ) * density
+        val pairLeft = if (fromLeft) anchor else anchor - pairSize
+        val pairCenterX = pairLeft + pairSize / 2f
+        battery?.let { bitmap ->
+            drawBitmapCentered(
+                canvas = canvas,
+                bitmap = bitmap,
+                centerX = pairCenterX,
+                centerY = centerY,
+                sizeDp = config.batterySizeDp
+            )
+        } ?: run {
+            val batteryWidth = config.batterySizeDp * density
+            drawBuiltInBattery(
+                canvas = canvas,
+                anchor = pairCenterX - batteryWidth / 2f,
+                centerY = centerY,
+                fromLeft = true
+            )
+        }
+        emoji?.let { bitmap ->
+            drawBitmapCentered(
+                canvas = canvas,
+                bitmap = bitmap,
+                centerX = pairCenterX,
+                centerY = centerY,
+                sizeDp = config.emojiSizeDp
+            )
+        }
+        return if (fromLeft) pairLeft + pairSize else pairLeft
+    }
+
+    private fun drawBitmapCentered(
+        canvas: Canvas,
+        bitmap: Bitmap,
+        centerX: Float,
+        centerY: Float,
+        sizeDp: Float
+    ) {
+        val size = sizeDp * density
+        destination.set(
+            centerX - size / 2f,
+            centerY - size / 2f,
+            centerX + size / 2f,
+            centerY + size / 2f
+        )
+        canvas.drawBitmap(bitmap, null, destination, paint)
     }
 
     private fun drawText(

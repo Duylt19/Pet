@@ -43,8 +43,11 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,18 +82,24 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
+import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutItem
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutPolicy
+import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_CATEGORY_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDataType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFont
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFormat
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_BAR_HEIGHT_DP
 import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_BAR_HEIGHT_DP
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTopBar
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -119,6 +128,7 @@ internal enum class BatteryEditorPage {
 @Composable
 fun BatteryEditorScreen(
     onBack: () -> Unit,
+    onNavigateToPremium: () -> Unit,
     viewModel: BatteryEditorViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -149,16 +159,52 @@ fun BatteryEditorScreen(
         accessibilityEnabled = BatteryAccessibility.isEnabled(context)
         if (accessibilityEnabled) viewModel.apply()
     }
+    val requiresRewardAd = !state.isPremium && state.themes.any { theme ->
+        theme.assetsReady &&
+            theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
+            theme.id !in state.config.rewardUnlockedThemeIds
+    }
 
     TrackScreenView(ScreenName.BATTERY_EDITOR)
+    LaunchedEffect(context, requiresRewardAd) {
+        if (requiresRewardAd) {
+            RewardedVideoAds.getInstance().loadRewardedVideo(context.applicationContext)
+        }
+    }
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                BatteryEditorEffect.ShowRewardedAd -> {
+                    val activity = context as? Activity
+                    if (activity == null) {
+                        viewModel.onRewardResult(
+                            RewardedAdResult.UNAVAILABLE.shouldContinueFlow
+                        )
+                    } else {
+                        RewardedVideoAds.getInstance().showRewardedAd(activity) { result ->
+                            viewModel.onRewardResult(result.shouldContinueFlow)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    LaunchedEffect(page) {
+        viewModel.setPreviewComponent(page.previewComponent())
+    }
     BackHandler(
         enabled = page != BatteryEditorPage.OVERVIEW || state.hasUnsavedChanges,
         onBack = requestBack
     )
+    DisposableEffect(viewModel) {
+        viewModel.startPreview()
+        onDispose { viewModel.stopPreview() }
+    }
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 accessibilityEnabled = BatteryAccessibility.isEnabled(context)
+                viewModel.refreshEntitlement()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -182,12 +228,38 @@ fun BatteryEditorScreen(
         onBackgroundDecoration = viewModel::setBackgroundDecoration,
         onShowEmotion = viewModel::setShowEmotion,
         onEmotionDecoration = viewModel::setEmotionDecoration,
+        onSelectTheme = viewModel::requestTheme,
         onConfig = viewModel::setConfig,
         onApply = {
             if (accessibilityEnabled) viewModel.apply() else showDisclosure = true
         },
         onDisable = viewModel::disable
     )
+
+    val pendingTheme = state.themes.firstOrNull {
+        it.id == state.pendingSelection?.themeId
+    }
+    if (pendingTheme != null) {
+        BatteryRewardUnlockDialog(
+            themeName = pendingTheme.name,
+            isLoading = state.isRewardInProgress,
+            rewardNotEarned = state.message == BatteryEditorMessage.REWARD_NOT_EARNED,
+            onDismiss = viewModel::dismissUnlockDialog,
+            onWatchReward = viewModel::requestRewardUnlock,
+            onPremium = onNavigateToPremium
+        )
+    } else if (state.message == BatteryEditorMessage.THEME_UNAVAILABLE) {
+        AlertDialog(
+            onDismissRequest = viewModel::clearMessage,
+            title = { Text(stringResource(R.string.battery_theme_unavailable_title)) },
+            text = { Text(stringResource(R.string.battery_theme_unavailable_message)) },
+            confirmButton = {
+                TextButton(onClick = viewModel::clearMessage) {
+                    Text(stringResource(R.string.common_done))
+                }
+            }
+        )
+    }
 
     if (showDisclosure) {
         AlertDialog(
@@ -257,6 +329,7 @@ private fun BatteryEditorContent(
     onBackgroundDecoration: (Int) -> Unit,
     onShowEmotion: (Boolean) -> Unit,
     onEmotionDecoration: (Int) -> Unit,
+    onSelectTheme: (BatteryThemeEntry, BatteryThemeComponent) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
     onApply: () -> Unit,
     onDisable: () -> Unit
@@ -289,16 +362,13 @@ private fun BatteryEditorContent(
                 .verticalScroll(scrollState)
                 .padding(horizontal = dimensionResource(SdpR.dimen._16sdp))
         ) {
-            ThemeName(state)
-            Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
-            BatteryPreview(state, page)
-            Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
             when (page) {
                 BatteryEditorPage.OVERVIEW -> OverviewEditor(
                     state = state,
                     onOpenPage = onOpenPage,
                     onShowTime = onShowTime,
-                    onShowPercentage = onShowPercentage
+                    onShowPercentage = onShowPercentage,
+                    onSelectTheme = onSelectTheme
                 )
                 BatteryEditorPage.SIZE -> SizeEditor(
                     state = state,
@@ -402,28 +472,29 @@ private fun editorPageTitle(page: BatteryEditorPage): String = when (page) {
 }
 
 @Composable
-private fun ThemeName(state: BatteryEditorUiState) {
-    Text(
-        text = if (state.theme.isBuiltIn) {
-            stringResource(R.string.battery_builtin_theme)
-        } else {
-            state.theme.name
-        },
-        color = colorResource(R.color.colors_2F2440),
-        fontFamily = FontFamily(Font(R.font.inter_semibold)),
-        fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
-    )
-}
-
-@Composable
 private fun OverviewEditor(
     state: BatteryEditorUiState,
     onOpenPage: (BatteryEditorPage) -> Unit,
     onShowTime: (Boolean) -> Unit,
-    onShowPercentage: (Boolean) -> Unit
+    onShowPercentage: (Boolean) -> Unit,
+    onSelectTheme: (BatteryThemeEntry, BatteryThemeComponent) -> Unit
 ) {
+    ThemeComponentPicker(
+        title = stringResource(R.string.battery_editor_pet_picker),
+        component = BatteryThemeComponent.EMOJI,
+        state = state,
+        selectedThemeId = state.config.selectedEmojiThemeId,
+        onSelectTheme = onSelectTheme
+    )
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._16sdp)))
+    ThemeComponentPicker(
+        title = stringResource(R.string.battery_editor_battery_picker),
+        component = BatteryThemeComponent.BATTERY,
+        state = state,
+        selectedThemeId = state.config.selectedBatteryThemeId,
+        onSelectTheme = onSelectTheme
+    )
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._16sdp)))
     Text(
         text = stringResource(R.string.battery_editor_overview_hint),
         color = colorResource(R.color.colors_776D84),
@@ -501,6 +572,190 @@ private fun OverviewEditor(
     )
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
     StatusComponentsGrid(onOpenPage)
+}
+
+@Composable
+private fun ThemeComponentPicker(
+    title: String,
+    component: BatteryThemeComponent,
+    state: BatteryEditorUiState,
+    selectedThemeId: Int,
+    onSelectTheme: (BatteryThemeEntry, BatteryThemeComponent) -> Unit
+) {
+    val initialCategoryId = state.themes
+        .firstOrNull { it.id == selectedThemeId }
+        ?.categoryId
+    var selectedCategoryId by rememberSaveable(component.name) {
+        mutableStateOf<Int?>(null)
+    }
+    LaunchedEffect(initialCategoryId) {
+        if (initialCategoryId != null) selectedCategoryId = initialCategoryId
+    }
+    val visibleThemes = state.themes.filter { theme ->
+        selectedCategoryId == null || theme.categoryId == selectedCategoryId
+    }
+    EditorSectionTitle(title)
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._7sdp))
+    ) {
+        item {
+            ThemeCategoryChip(
+                label = stringResource(R.string.battery_catalog_all),
+                selected = selectedCategoryId == null,
+                onClick = { selectedCategoryId = null }
+            )
+        }
+        items(state.categories, key = { it.id }) { category ->
+            ThemeCategoryChip(
+                label = if (category.id == BUILT_IN_BATTERY_CATEGORY_ID) {
+                    stringResource(R.string.battery_builtin_category)
+                } else {
+                    category.name
+                },
+                selected = selectedCategoryId == category.id,
+                onClick = { selectedCategoryId = category.id }
+            )
+        }
+    }
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
+    ) {
+        items(visibleThemes, key = { it.id }) { theme ->
+            val locked = theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
+                !state.isPremium &&
+                theme.id !in state.config.rewardUnlockedThemeIds
+            ThemeComponentOption(
+                theme = theme,
+                component = component,
+                selected = theme.id == selectedThemeId,
+                locked = locked,
+                onClick = { onSelectTheme(theme, component) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThemeCategoryChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Text(
+        text = label,
+        color = colorResource(
+            if (selected) R.color.colors_FFFFFF else R.color.colors_776D84
+        ),
+        fontFamily = FontFamily(Font(R.font.inter_semibold)),
+        fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+        modifier = Modifier
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
+            .background(
+                colorResource(
+                    if (selected) R.color.colors_12B890 else R.color.colors_FFFFFF
+                )
+            )
+            .clickable(onClick = onClick)
+            .padding(
+                horizontal = dimensionResource(SdpR.dimen._11sdp),
+                vertical = dimensionResource(SdpR.dimen._7sdp)
+            )
+    )
+}
+
+@Composable
+private fun ThemeComponentOption(
+    theme: BatteryThemeEntry,
+    component: BatteryThemeComponent,
+    selected: Boolean,
+    locked: Boolean,
+    onClick: () -> Unit
+) {
+    val assetPath = when (component) {
+        BatteryThemeComponent.EMOJI -> theme.emojiPath
+        BatteryThemeComponent.BATTERY -> theme.batteryPath
+    }
+    Column(
+        modifier = Modifier
+            .width(dimensionResource(SdpR.dimen._86sdp))
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
+            .background(colorResource(R.color.colors_FFFFFF))
+            .border(
+                width = dimensionResource(
+                    if (selected) SdpR.dimen._2sdp else SdpR.dimen._1sdp
+                ),
+                color = colorResource(
+                    if (selected) R.color.colors_12B890 else R.color.colors_C8C8C9
+                ),
+                shape = RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp))
+            )
+            .clickable(onClick = onClick)
+            .padding(dimensionResource(SdpR.dimen._5sdp)),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._58sdp)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (assetPath != null) {
+                AsyncImage(
+                    model = assetPath,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._48sdp))
+                )
+            } else {
+                Icon(
+                    painter = painterResource(
+                        if (component == BatteryThemeComponent.BATTERY) {
+                            R.drawable.ic_battery_status
+                        } else {
+                            R.drawable.ic_notification_pet
+                        }
+                    ),
+                    contentDescription = null,
+                    tint = colorResource(R.color.colors_12B890),
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._32sdp))
+                )
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
+                .background(colorResource(R.color.colors_12B890))
+                .padding(vertical = dimensionResource(SdpR.dimen._4sdp)),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (locked) {
+                Icon(
+                    imageVector = Icons.Outlined.Lock,
+                    contentDescription = null,
+                    tint = colorResource(R.color.colors_FFFFFF),
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._12sdp))
+                )
+                Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
+            }
+            Text(
+                text = stringResource(
+                    when {
+                        locked -> R.string.battery_component_unlock
+                        selected -> R.string.battery_component_selected
+                        else -> R.string.battery_component_select
+                    }
+                ),
+                color = colorResource(R.color.colors_FFFFFF),
+                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontSize = dimensionResource(SspR.dimen._7ssp).value.sp,
+                maxLines = 1
+            )
+        }
+    }
 }
 
 @Composable
@@ -1530,15 +1785,6 @@ internal fun batteryPreviewLayout(
                 )
             )
         }
-        if (hasEmoji) {
-            add(
-                BatteryStatusLayoutItem(
-                    BatteryStatusComponent.THEME_EMOJI,
-                    width = config.emojiSizeDp + gap,
-                    priority = 80
-                )
-            )
-        }
         if (config.showEmotion && hasEmotion) {
             add(
                 BatteryStatusLayoutItem(
@@ -1561,7 +1807,10 @@ internal fun batteryPreviewLayout(
         add(
             BatteryStatusLayoutItem(
                 BatteryStatusComponent.BATTERY,
-                width = config.batterySizeDp + gap,
+                width = maxOf(
+                    config.batterySizeDp,
+                    if (hasEmoji) config.emojiSizeDp else 0f
+                ) + gap,
                 priority = 110,
                 required = true
             )
@@ -1879,6 +2128,7 @@ private fun BatteryEditorOverviewPreview() {
         onBackgroundDecoration = {},
         onShowEmotion = {},
         onEmotionDecoration = {},
+        onSelectTheme = { _, _ -> },
         onConfig = {},
         onApply = {},
         onDisable = {}

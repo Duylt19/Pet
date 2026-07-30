@@ -19,6 +19,8 @@ object BatteryDraftCodec {
         .put(KEY_SCHEMA, SCHEMA_VERSION)
         .put("enabled", config.enabled)
         .put("selectedThemeId", config.selectedThemeId)
+        .put("selectedBatteryThemeId", config.selectedBatteryThemeId)
+        .put("selectedEmojiThemeId", config.selectedEmojiThemeId)
         .put("displayMode", config.displayMode.name)
         .put("showTime", config.showTime)
         .put("showPercentage", config.showPercentage)
@@ -78,9 +80,18 @@ object BatteryDraftCodec {
         return runCatching {
             val json = JSONObject(value)
             if (json.optInt(KEY_SCHEMA, 0) !in 1..SCHEMA_VERSION) return@runCatching null
+            val selectedThemeId = json.int("selectedThemeId", fallback.selectedThemeId)
             fallback.copy(
                 enabled = json.boolean("enabled", fallback.enabled),
-                selectedThemeId = json.int("selectedThemeId", fallback.selectedThemeId),
+                selectedThemeId = selectedThemeId,
+                selectedBatteryThemeId = json.int(
+                    "selectedBatteryThemeId",
+                    selectedThemeId
+                ),
+                selectedEmojiThemeId = json.int(
+                    "selectedEmojiThemeId",
+                    selectedThemeId
+                ),
                 displayMode = json.enum(
                     "displayMode",
                     fallback.displayMode,
@@ -204,5 +215,5 @@ object BatteryDraftCodec {
     }
 
     private const val KEY_SCHEMA = "schema"
-    private const val SCHEMA_VERSION = 1
+    private const val SCHEMA_VERSION = 2
 }

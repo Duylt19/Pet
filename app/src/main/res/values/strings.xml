@@ -858,7 +858,12 @@
     <string name="battery_theme_unavailable_title">Style unavailable</string>
     <string name="battery_theme_unavailable_message">This battery style is missing required assets. Refresh the catalog and try again.</string>
     <string name="battery_editor_title">Customize status bar</string>
-    <string name="battery_editor_overview_hint">Review the preview, open one section at a time, then apply all changes together.</string>
+    <string name="battery_editor_pet_picker">Pet</string>
+    <string name="battery_editor_battery_picker">Battery</string>
+    <string name="battery_component_select">Select</string>
+    <string name="battery_component_selected">Selected</string>
+    <string name="battery_component_unlock">Unlock</string>
+    <string name="battery_editor_overview_hint">Mix a pet and battery style, customize the remaining components, then apply all changes together.</string>
     <string name="battery_editor_quick_controls">Quick controls</string>
     <string name="battery_editor_customize">Customize</string>
     <string name="battery_editor_size_title">Size</string>

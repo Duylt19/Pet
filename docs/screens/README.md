@@ -14,7 +14,7 @@
 | `pet_customization/{slotIndex}` | `ui/home/settings/PetCustomizationScreen` | Hồ sơ cute-pet độc lập: character, size, speed, touch, speech, custom messages, position và remove |
 | `swarm_customization` | `ui/home/swarm/SwarmCustomizationScreen` | Edit Swarm riêng: character, count, size/speed, random variation và movement insets |
 | `battery_catalog` | `ui/battery/catalog/BatteryCatalogScreen` | Search/category/theme/favorite/Premium state từ normalized local catalog, built-in fallback |
-| `battery_editor/{themeId}` | `ui/battery/editor/BatteryEditorScreen` | Overview + editor cho appearance/decorations và toàn bộ status component dùng chung draft; Apply cố định và disclosure trước Accessibility Settings |
+| `battery_editor/{themeId}` | `ui/battery/editor/BatteryEditorScreen` | Theme khởi tạo cặp pet+pin; picker category đổi hai asset độc lập, Rewarded/Premium theo component, live preview trên status bar; editor component dùng chung draft, Apply cố định và disclosure |
 | `premium/{startByIndex}` | `ui/premium/PremiumScreen` | Subscription UI, close behavior theo entry source |
 
 ## Visual scope hiện tại

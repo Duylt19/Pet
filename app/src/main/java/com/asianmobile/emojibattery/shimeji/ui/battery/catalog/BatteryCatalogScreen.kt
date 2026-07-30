@@ -263,7 +263,7 @@ private fun BatteryCatalogContent(
 }
 
 @Composable
-private fun BatteryRewardUnlockDialog(
+internal fun BatteryRewardUnlockDialog(
     themeName: String,
     isLoading: Boolean,
     rewardNotEarned: Boolean,

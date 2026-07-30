@@ -47,6 +47,7 @@ import kotlinx.coroutines.withContext
 class StatusBarAccessibilityService : AccessibilityService() {
     @Inject lateinit var catalogRepository: BatteryCatalogRepository
     @Inject lateinit var settingsRepository: BatterySettingsRepository
+    @Inject lateinit var editorPreviewSession: BatteryEditorPreviewSession
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private lateinit var windowManager: WindowManager
@@ -55,7 +56,9 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private var renderJob: Job? = null
     private var observeJob: Job? = null
     private var currentConfig = BatteryStatusConfig()
-    private var currentTheme: BatteryThemeEntry? = null
+    private var currentBatteryTheme: BatteryThemeEntry? = null
+    private var currentEmojiTheme: BatteryThemeEntry? = null
+    private var currentPreviewFocus: BatteryStatusComponent? = null
     private var currentBackgroundPath: String? = null
     private var currentEmotionPath: String? = null
     private var currentAnimationPath: String? = null
@@ -130,10 +133,20 @@ class StatusBarAccessibilityService : AccessibilityService() {
         refreshDeviceState()
         observeJob?.cancel()
         observeJob = scope.launch {
-            combine(settingsRepository.config, catalogRepository.snapshot) { config, catalog ->
+            combine(
+                settingsRepository.config,
+                catalogRepository.snapshot,
+                editorPreviewSession.preview
+            ) { storedConfig, catalog, preview ->
+                val config = preview?.config ?: storedConfig
                 BatteryOverlaySources(
                     config = config,
-                    theme = catalog.themes.firstOrNull { it.id == config.selectedThemeId },
+                    batteryTheme = catalog.themes.firstOrNull {
+                        it.id == config.selectedBatteryThemeId
+                    },
+                    emojiTheme = catalog.themes.firstOrNull {
+                        it.id == config.selectedEmojiThemeId
+                    },
                     backgroundPath = catalog.backgrounds
                         .firstOrNull { it.id == config.backgroundDecorationId }
                         ?.assetPath,
@@ -142,11 +155,14 @@ class StatusBarAccessibilityService : AccessibilityService() {
                         ?.assetPath,
                     animationPath = catalog.animations
                         .firstOrNull { it.name == config.animationAssetName }
-                        ?.assetPath
+                        ?.assetPath,
+                    previewFocus = preview?.focusedComponent
                 )
             }.collect { sources ->
                 currentConfig = sources.config
-                currentTheme = sources.theme
+                currentBatteryTheme = sources.batteryTheme
+                currentEmojiTheme = sources.emojiTheme
+                currentPreviewFocus = sources.previewFocus
                 currentBackgroundPath = sources.backgroundPath
                 currentEmotionPath = sources.emotionPath
                 currentAnimationPath = sources.animationPath
@@ -237,9 +253,9 @@ class StatusBarAccessibilityService : AccessibilityService() {
 
     private fun render() {
         val view = overlayView ?: return
-        val theme = currentTheme
         val assetKey = listOf(
-            theme?.id,
+            currentBatteryTheme?.id,
+            currentEmojiTheme?.id,
             currentBackgroundPath,
             if (currentConfig.showEmotion) currentEmotionPath else null,
             if (currentConfig.showAnimation) currentAnimationPath else null
@@ -247,9 +263,9 @@ class StatusBarAccessibilityService : AccessibilityService() {
         if (loadedAssetKey == assetKey) {
             view.render(
                 currentConfig,
-                deviceState,
+                previewDeviceState(),
                 level,
-                charging,
+                previewCharging(),
                 emojiBitmap,
                 batteryBitmap,
                 backgroundBitmap,
@@ -262,8 +278,8 @@ class StatusBarAccessibilityService : AccessibilityService() {
         renderJob = scope.launch {
             val decoded = withContext(Dispatchers.IO) {
                 DecodedBatteryAssets(
-                    emoji = decode(theme?.emojiPath),
-                    battery = decode(theme?.batteryPath),
+                    emoji = decode(currentEmojiTheme?.emojiPath),
+                    battery = decode(currentBatteryTheme?.batteryPath),
                     background = decode(currentBackgroundPath),
                     emotion = if (currentConfig.showEmotion) {
                         decode(currentEmotionPath)
@@ -276,7 +292,8 @@ class StatusBarAccessibilityService : AccessibilityService() {
                 )
             }
             val latestAssetKey = listOf(
-                currentTheme?.id,
+                currentBatteryTheme?.id,
+                currentEmojiTheme?.id,
                 currentBackgroundPath,
                 if (currentConfig.showEmotion) currentEmotionPath else null,
                 if (currentConfig.showAnimation) currentAnimationPath else null
@@ -297,9 +314,9 @@ class StatusBarAccessibilityService : AccessibilityService() {
             loadedAssetKey = assetKey
             view.render(
                 currentConfig,
-                deviceState,
+                previewDeviceState(),
                 level,
-                charging,
+                previewCharging(),
                 emojiBitmap,
                 batteryBitmap,
                 backgroundBitmap,
@@ -321,6 +338,24 @@ class StatusBarAccessibilityService : AccessibilityService() {
         overlayView = null
         layoutParams = null
     }
+
+    private fun previewDeviceState(): BatteryDeviceState = when (currentPreviewFocus) {
+        BatteryStatusComponent.AIRPLANE -> deviceState.copy(
+            airplaneMode = true,
+            cellularConnected = false
+        )
+        BatteryStatusComponent.RINGER -> deviceState.copy(ringerMuted = true)
+        BatteryStatusComponent.HOTSPOT -> deviceState.copy(hotspotEnabled = true)
+        BatteryStatusComponent.CELLULAR -> deviceState.copy(
+            cellularConnected = true,
+            airplaneMode = false
+        )
+        BatteryStatusComponent.WIFI -> deviceState.copy(wifiConnected = true)
+        else -> deviceState
+    }
+
+    private fun previewCharging(): Boolean =
+        charging || currentPreviewFocus == BatteryStatusComponent.CHARGE
 
     private fun createLayoutParams(config: BatteryStatusConfig): WindowManager.LayoutParams {
         val density = resources.displayMetrics.density
@@ -473,10 +508,12 @@ class StatusBarAccessibilityService : AccessibilityService() {
 
 private data class BatteryOverlaySources(
     val config: BatteryStatusConfig,
-    val theme: BatteryThemeEntry?,
+    val batteryTheme: BatteryThemeEntry?,
+    val emojiTheme: BatteryThemeEntry?,
     val backgroundPath: String?,
     val emotionPath: String?,
-    val animationPath: String?
+    val animationPath: String?,
+    val previewFocus: BatteryStatusComponent?
 )
 
 private data class DecodedBatteryAssets(

@@ -688,7 +688,12 @@
     <string name="battery_theme_unavailable_title">Không thể dùng mẫu này</string>
     <string name="battery_theme_unavailable_message">Mẫu pin đang thiếu dữ liệu cần thiết. Hãy làm mới danh mục rồi thử lại.</string>
     <string name="battery_editor_title">Tùy chỉnh thanh trạng thái</string>
-    <string name="battery_editor_overview_hint">Xem trước, mở từng mục để chỉnh rồi áp dụng tất cả thay đổi cùng lúc.</string>
+    <string name="battery_editor_pet_picker">Emoji</string>
+    <string name="battery_editor_battery_picker">Pin</string>
+    <string name="battery_component_select">Chọn</string>
+    <string name="battery_component_selected">Đã chọn</string>
+    <string name="battery_component_unlock">Mở khóa</string>
+    <string name="battery_editor_overview_hint">Kết hợp pet và pin, tùy chỉnh các thành phần còn lại rồi áp dụng tất cả thay đổi.</string>
     <string name="battery_editor_quick_controls">Điều khiển nhanh</string>
     <string name="battery_editor_customize">Tùy chỉnh</string>
     <string name="battery_editor_size_title">Kích thước</string>

@@ -15,6 +15,8 @@ class BatteryDraftCodecTest {
         val config = BatteryStatusConfig(
             enabled = true,
             selectedThemeId = 42,
+            selectedBatteryThemeId = 27,
+            selectedEmojiThemeId = 35,
             displayMode = BatteryStatusDisplayMode.BELOW_SYSTEM_BAR,
             showTime = false,
             showPercentage = false,
@@ -78,5 +80,15 @@ class BatteryDraftCodecTest {
         )
 
         assertEquals(BatteryDataType.G4, restored?.dataType)
+    }
+
+    @Test
+    fun codec_migrates_legacy_theme_to_both_components() {
+        val restored = BatteryDraftCodec.decode(
+            """{"schema":1,"selectedThemeId":42}"""
+        )
+
+        assertEquals(42, restored?.selectedBatteryThemeId)
+        assertEquals(42, restored?.selectedEmojiThemeId)
     }
 }

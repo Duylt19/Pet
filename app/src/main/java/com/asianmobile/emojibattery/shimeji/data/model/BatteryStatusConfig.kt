@@ -3,6 +3,8 @@ package com.asianmobile.emojibattery.shimeji.data.model
 data class BatteryStatusConfig(
     val enabled: Boolean = false,
     val selectedThemeId: Int = BUILT_IN_BATTERY_THEME_ID,
+    val selectedBatteryThemeId: Int = selectedThemeId,
+    val selectedEmojiThemeId: Int = selectedThemeId,
     val displayMode: BatteryStatusDisplayMode = BatteryStatusDisplayMode.COVER_SYSTEM_BAR,
     val showTime: Boolean = true,
     val showPercentage: Boolean = true,

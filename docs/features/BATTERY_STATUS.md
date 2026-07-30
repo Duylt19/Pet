@@ -8,9 +8,12 @@ Vertical slice hiện đã có trong source:
 - Catalog local chuẩn hóa, search, category, Free/Premium, favorite và built-in fallback.
 - Theme Premium hỗ trợ dialog Rewarded/Premium: earned reward mở khóa vĩnh viễn đúng
   theme ID trên thiết bị rồi tự mở editor; Premium bypass toàn bộ theme gate.
+- Chọn một theme trong catalog khởi tạo đúng cặp pet + pin của theme đó. Editor có hai
+  picker category độc lập để mix pet của theme A với pin của theme B; entitlement
+  Rewarded/Premium được kiểm tra cho từng lựa chọn.
 - Editor dùng overview → editor con Size/Appearance/Emoji/Battery và 9 status component,
-  có preview xuyên suốt, Apply cố định, cảnh báo bỏ draft, phục hồi draft sau process death,
-  20 nền, 20 emotion và 26 animation đã audit.
+  preview draft trực tiếp trên Accessibility status bar, Apply cố định, cảnh báo bỏ
+  draft, phục hồi draft sau process death, 20 nền, 20 emotion và 26 animation đã audit.
 - Apply lưu DataStore; nếu chưa bật service, app luôn hiện disclosure trước khi mở
   Accessibility Settings.
 - `StatusBarAccessibilityService` vẽ một `TYPE_ACCESSIBILITY_OVERLAY` full-width,
@@ -18,11 +21,13 @@ Vertical slice hiện đã có trong source:
   hotspot và dùng theme/nền/emotion/animation đã chọn.
 - Service ẩn khi màn hình khóa, màn hình tắt hoặc portrait không còn hiệu lực; không
   auto-start sau boot.
-- Preview và Canvas runtime dùng chung layout priority. Màn hình hẹp tự bỏ date,
+- Pet và pin được renderer như một pair: cùng anchor ở cụm battery phía trailing, pin
+  vẽ trước và pet vẽ chồng lên trên theo hai kích thước độc lập. Màn hình hẹp tự bỏ date,
   emotion/animation trước khi bỏ status cốt lõi; nhóm leading/trailing được mirror đúng
   trong RTL mà không lật ngược chữ hoặc bitmap.
 - Khi mở editor của component phụ thuộc trạng thái thiết bị, preview dùng sample state có
-  chủ đích để luôn hiện đúng Airplane/Hotspot/Ringer/Charging đang chỉnh. Component focus
+  chủ đích để luôn hiện đúng Airplane/Hotspot/Ringer/Charging đang chỉnh trên status bar.
+  Component focus
   được giữ qua width policy; Wi-Fi/Signal/Charge dùng đúng vector, còn Date cập nhật ngay
   format, bundled font, size và color từ draft.
 
@@ -34,8 +39,10 @@ Battery entry và ngăn service attach window cho tới khi các gate được d
 ## Luồng người dùng
 
 ```text
-Home → Battery styles → chọn theme → Customize status bar
-                                      ├─ overview + preview
+Home → Battery styles → chọn theme (khởi tạo pet + pin cùng item)
+                                  → Customize status bar
+                                      ├─ đổi pet và pin độc lập theo category
+                                      ├─ live preview trên status bar
                                       ├─ editor con → Done → overview
                                       └─ Apply
                                           ├─ service đã bật → persist + render
@@ -88,7 +95,9 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | Field | Ý nghĩa |
 |---|---|
 | `enabled` | User đã Apply và muốn render |
-| `selectedThemeId` | ID theme; `0` là built-in |
+| `selectedThemeId` | ID style gốc đã mở editor; giữ để migration/analytics |
+| `selectedBatteryThemeId` | Theme cung cấp asset pin; fallback từ `selectedThemeId` |
+| `selectedEmojiThemeId` | Theme cung cấp asset pet/emoji; fallback từ `selectedThemeId` |
 | `displayMode` | Migration legacy; build hiện tại sanitize về `COVER_SYSTEM_BAR` |
 | `showTime`, `showPercentage` | Thành phần hiển thị |
 | `showAnimation`, `animationAssetName`, `animationSizeDp` | Hoạt ảnh GIF/Lottie |
@@ -104,9 +113,11 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `favoriteThemeIds` | Favorite local theo theme ID |
 | `rewardUnlockedThemeIds` | Theme Premium đã mở khóa bằng Rewarded trên thiết bị |
 
-`BatterySettingsPolicy` clamp toàn bộ geometry và loại favorite ID âm để dữ
-liệu DataStore lỗi không đi thẳng vào `WindowManager`. `BatteryDraftCodec` lưu bản nháp
-versioned trong `SavedStateHandle`; DataStore chỉ thay đổi khi user bấm Apply.
+`BatterySettingsPolicy` clamp toàn bộ geometry và loại ID âm để dữ liệu DataStore lỗi
+không đi thẳng vào `WindowManager`. DataStore cũ chưa có hai component ID sẽ migrate cả
+hai từ `selectedThemeId`. `BatteryDraftCodec` schema 2 lưu bản nháp versioned trong
+`SavedStateHandle` và vẫn decode schema 1 theo cùng quy tắc; DataStore chỉ thay đổi khi
+user bấm Apply.
 
 ## Accessibility và privacy
 
@@ -129,8 +140,11 @@ không ship cover mode.
 
 ## Runtime
 
-Service combine config + catalog bằng Flow. Bitmap/GIF/Lottie được decode ngoài main
-thread và cache theo khóa asset. Battery/time/system receiver và
+Service combine applied config + editor preview session + catalog bằng Flow. Preview
+session process-local chỉ tồn tại khi editor visible, ép `enabled=true` cho preview và
+không ghi DataStore. Khi editor đóng, service lập tức quay về applied config. Hai bitmap
+pet/pin được resolve độc lập, decode ngoài main thread và cache theo khóa asset.
+Battery/time/system receiver và
 `ConnectivityManager.NetworkCallback` cập nhật một immutable `BatteryDeviceState`.
 Renderer chỉ animate asset đã chọn; một window duy nhất được add/update/remove theo state.
 
