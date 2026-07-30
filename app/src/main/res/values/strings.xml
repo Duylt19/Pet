@@ -904,7 +904,7 @@
     <string name="battery_background_solid">Solid</string>
     <string name="battery_foreground_color">Text and icon color</string>
     <string name="battery_show_emotion">Show decorative emotion</string>
-    <string name="battery_status_component_hint">Adjust this component independently. Its visibility follows the current device state.</string>
+    <string name="battery_status_component_hint">The preview keeps this component visible while you edit it. The applied overlay follows the actual device state.</string>
     <string name="battery_status_icon_size">Icon size</string>
     <string name="battery_status_icon_color">Icon color</string>
     <string name="battery_status_uses_device_state">The applied overlay uses the actual device state; current bar height is %1$d dp.</string>
@@ -914,7 +914,7 @@
     <string name="battery_animation_style">Animation style</string>
     <string name="battery_data_hint">Choose the mobile generation label and customize its size and color.</string>
     <string name="battery_data_type">Mobile data label</string>
-    <string name="battery_charge_hint">Choose one of the bundled charging icons. It appears only while the device is charging.</string>
+    <string name="battery_charge_hint">The preview simulates charging while you choose an icon. The applied overlay shows it only while the device is charging.</string>
     <string name="battery_charge_style">Charging icon</string>
     <string name="battery_date_hint">Control date visibility, format, typeface, size and color.</string>
     <string name="battery_date_show">Show date</string>

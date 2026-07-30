@@ -734,7 +734,7 @@
     <string name="battery_background_solid">Màu trơn</string>
     <string name="battery_foreground_color">Màu chữ và biểu tượng</string>
     <string name="battery_show_emotion">Hiện cảm xúc trang trí</string>
-    <string name="battery_status_component_hint">Điều chỉnh riêng thành phần này. Việc hiển thị bám theo trạng thái hiện tại của thiết bị.</string>
+    <string name="battery_status_component_hint">Preview luôn hiện thành phần đang chỉnh. Overlay sau khi áp dụng sẽ hiển thị theo trạng thái thật của thiết bị.</string>
     <string name="battery_status_icon_size">Kích thước biểu tượng</string>
     <string name="battery_status_icon_color">Màu biểu tượng</string>
     <string name="battery_status_uses_device_state">Overlay sau khi áp dụng dùng trạng thái thiết bị thật; chiều cao thanh hiện là %1$d dp.</string>
@@ -744,7 +744,7 @@
     <string name="battery_animation_style">Kiểu hoạt ảnh</string>
     <string name="battery_data_hint">Chọn nhãn thế hệ mạng di động, kích thước và màu sắc.</string>
     <string name="battery_data_type">Loại dữ liệu</string>
-    <string name="battery_charge_hint">Chọn một trong các biểu tượng sạc đã tích hợp. Biểu tượng chỉ hiện khi thiết bị đang sạc.</string>
+    <string name="battery_charge_hint">Preview mô phỏng trạng thái đang sạc để bạn chọn biểu tượng. Overlay chỉ hiện biểu tượng này khi thiết bị thật sự đang sạc.</string>
     <string name="battery_charge_style">Kiểu sạc</string>
     <string name="battery_date_hint">Điều chỉnh hiển thị ngày, định dạng, font, kích thước và màu sắc.</string>
     <string name="battery_date_show">Hiển thị ngày</string>

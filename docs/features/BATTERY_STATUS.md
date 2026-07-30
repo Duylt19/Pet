@@ -21,6 +21,10 @@ Vertical slice hiện đã có trong source:
 - Preview và Canvas runtime dùng chung layout priority. Màn hình hẹp tự bỏ date,
   emotion/animation trước khi bỏ status cốt lõi; nhóm leading/trailing được mirror đúng
   trong RTL mà không lật ngược chữ hoặc bitmap.
+- Khi mở editor của component phụ thuộc trạng thái thiết bị, preview dùng sample state có
+  chủ đích để luôn hiện đúng Airplane/Hotspot/Ringer/Charging đang chỉnh. Component focus
+  được giữ qua width policy; Wi-Fi/Signal/Charge dùng đúng vector, còn Date cập nhật ngay
+  format, bundled font, size và color từ draft.
 
 Đây chưa phải release-complete: cần asset ownership approval, device/OEM matrix, Play
 Accessibility declaration và UX validation trước khi bật catalog ngoài debug.
@@ -40,7 +44,7 @@ Home → Battery styles → chọn theme → Customize status bar
                                               → quay lại → persist + render
 ```
 
-Premium theme chuyển sang Premium khi entitlement chưa có. Theme thiếu hoặc sai checksum
+Premium theme chưa mở hiển thị dialog Rewarded/Premium. Theme thiếu hoặc sai checksum
 không được áp dụng. Built-in `Cute Mint` không phụ thuộc file ngoài và luôn khả dụng.
 
 ## Boundary dữ liệu

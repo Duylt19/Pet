@@ -95,8 +95,11 @@ import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-private enum class BatteryEditorPage {
+internal enum class BatteryEditorPage {
     OVERVIEW,
     SIZE,
     APPEARANCE,
@@ -288,7 +291,7 @@ private fun BatteryEditorContent(
         ) {
             ThemeName(state)
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
-            BatteryPreview(state)
+            BatteryPreview(state, page)
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
             when (page) {
                 BatteryEditorPage.OVERVIEW -> OverviewEditor(
@@ -1278,9 +1281,13 @@ private fun ApplyFooter(
 }
 
 @Composable
-private fun BatteryPreview(state: BatteryEditorUiState) {
+private fun BatteryPreview(
+    state: BatteryEditorUiState,
+    page: BatteryEditorPage
+) {
     val config = state.config
     val previewDescription = stringResource(R.string.battery_overlay_description, 82)
+    val focusedComponent = page.previewComponent()
     val backgroundPath = state.backgrounds
         .firstOrNull { it.id == config.backgroundDecorationId }
         ?.assetPath
@@ -1290,6 +1297,10 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
     val animationPath = state.animations
         .firstOrNull { it.name == config.animationAssetName }
         ?.assetPath
+    val previewDate = remember(config.dateFormat) {
+        SimpleDateFormat(config.dateFormat.pattern, Locale.getDefault()).format(Date())
+    }
+    val previewDateFont = previewDateFontFamily(config.dateTimeFont)
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
@@ -1303,7 +1314,8 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
             state.theme.emojiPath,
             emotionPath,
             animationPath,
-            maxWidth
+            maxWidth,
+            focusedComponent
         ) {
             batteryPreviewLayout(
                 config = config,
@@ -1312,7 +1324,8 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
                     config.rightPaddingDp,
                 hasEmoji = state.theme.emojiPath != null,
                 hasEmotion = emotionPath != null,
-                hasAnimation = animationPath != null
+                hasAnimation = animationPath != null,
+                focusedComponent = focusedComponent
             )
         }
         backgroundPath?.let { path ->
@@ -1341,10 +1354,25 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
             }
             if (layout.shows(BatteryStatusComponent.DATE)) {
                 Text(
-                    text = stringResource(R.string.battery_preview_date),
+                    text = previewDate,
                     color = Color(config.dateTimeColorArgb),
+                    fontFamily = previewDateFont,
                     fontSize = config.dateTimeSizeDp.sp,
                     maxLines = 1
+                )
+            }
+            if (layout.shows(BatteryStatusComponent.AIRPLANE)) {
+                PreviewStatusIcon(
+                    iconName = "ic_air_plane",
+                    sizeDp = config.airplaneSizeDp,
+                    colorArgb = config.airplaneColorArgb
+                )
+            }
+            if (layout.shows(BatteryStatusComponent.RINGER)) {
+                PreviewStatusIcon(
+                    iconName = "ic_ringer0",
+                    sizeDp = config.ringerSizeDp,
+                    colorArgb = config.ringerColorArgb
                 )
             }
             if (layout.shows(BatteryStatusComponent.ANIMATION)) {
@@ -1378,32 +1406,11 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
                 }
             }
             Spacer(Modifier.weight(1f))
-            if (layout.shows(BatteryStatusComponent.CELLULAR)) {
-                Text(
-                    text = stringResource(R.string.battery_preview_signal),
-                    color = Color(config.signalColorArgb),
-                    fontSize = config.signalSizeDp.sp
-                )
-                Text(
-                    text = config.dataType.label,
-                    color = Color(config.dataColorArgb),
-                    fontSize = config.dataSizeDp.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            if (layout.shows(BatteryStatusComponent.WIFI)) {
-                Text(
-                    text = stringResource(R.string.battery_preview_wifi),
-                    color = Color(config.wifiColorArgb),
-                    fontSize = config.wifiSizeDp.sp
-                )
-            }
-            if (layout.shows(BatteryStatusComponent.PERCENTAGE)) {
-                Text(
-                    text = stringResource(R.string.battery_preview_percentage),
-                    color = Color(config.percentColorArgb),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                    fontSize = config.percentSizeDp.sp
+            if (layout.shows(BatteryStatusComponent.CHARGE)) {
+                PreviewStatusIcon(
+                    iconName = "charge_%02d".format(config.chargeIconIndex),
+                    sizeDp = config.chargeSizeDp,
+                    colorArgb = config.chargeColorArgb
                 )
             }
             if (layout.shows(BatteryStatusComponent.BATTERY)) {
@@ -1422,18 +1429,54 @@ private fun BatteryPreview(state: BatteryEditorUiState) {
                         )
                         .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._3sdp)))
                         .background(Color(config.foregroundColorArgb))
+                    )
+            }
+            if (layout.shows(BatteryStatusComponent.PERCENTAGE)) {
+                Text(
+                    text = stringResource(R.string.battery_preview_percentage),
+                    color = Color(config.percentColorArgb),
+                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontSize = config.percentSizeDp.sp
+                )
+            }
+            if (layout.shows(BatteryStatusComponent.WIFI)) {
+                PreviewStatusIcon(
+                    iconName = "ic_wifi",
+                    sizeDp = config.wifiSizeDp,
+                    colorArgb = config.wifiColorArgb
+                )
+            }
+            if (layout.shows(BatteryStatusComponent.CELLULAR)) {
+                Text(
+                    text = config.dataType.label,
+                    color = Color(config.dataColorArgb),
+                    fontSize = config.dataSizeDp.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                PreviewStatusIcon(
+                    iconName = "ic_signal",
+                    sizeDp = config.signalSizeDp,
+                    colorArgb = config.signalColorArgb
+                )
+            }
+            if (layout.shows(BatteryStatusComponent.HOTSPOT)) {
+                PreviewStatusIcon(
+                    iconName = "ic_hostpot",
+                    sizeDp = config.hotspotSizeDp,
+                    colorArgb = config.hotspotColorArgb
                 )
             }
         }
     }
 }
 
-private fun batteryPreviewLayout(
+internal fun batteryPreviewLayout(
     config: BatteryStatusConfig,
     availableWidthDp: Float,
     hasEmoji: Boolean,
     hasEmotion: Boolean,
-    hasAnimation: Boolean
+    hasAnimation: Boolean,
+    focusedComponent: BatteryStatusComponent? = null
 ) = BatteryStatusLayoutPolicy().resolve(
     availableWidth = availableWidthDp,
     items = buildList {
@@ -1452,7 +1495,28 @@ private fun batteryPreviewLayout(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.DATE,
                     width = config.dateTimeSizeDp * 4.2f + gap,
-                    priority = 20
+                    priority = 20,
+                    required = focusedComponent == BatteryStatusComponent.DATE
+                )
+            )
+        }
+        if (focusedComponent == BatteryStatusComponent.AIRPLANE) {
+            add(
+                BatteryStatusLayoutItem(
+                    BatteryStatusComponent.AIRPLANE,
+                    width = config.airplaneSizeDp + gap,
+                    priority = 65,
+                    required = true
+                )
+            )
+        }
+        if (focusedComponent == BatteryStatusComponent.RINGER) {
+            add(
+                BatteryStatusLayoutItem(
+                    BatteryStatusComponent.RINGER,
+                    width = config.ringerSizeDp + gap,
+                    priority = 60,
+                    required = true
                 )
             )
         }
@@ -1461,7 +1525,8 @@ private fun batteryPreviewLayout(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.ANIMATION,
                     width = config.animationSizeDp + gap,
-                    priority = 40
+                    priority = 40,
+                    required = focusedComponent == BatteryStatusComponent.ANIMATION
                 )
             )
         }
@@ -1480,6 +1545,16 @@ private fun batteryPreviewLayout(
                     BatteryStatusComponent.EMOTION,
                     width = config.emojiSizeDp + gap,
                     priority = 30
+                )
+            )
+        }
+        if (focusedComponent == BatteryStatusComponent.CHARGE) {
+            add(
+                BatteryStatusLayoutItem(
+                    BatteryStatusComponent.CHARGE,
+                    width = config.chargeSizeDp + gap,
+                    priority = 85,
+                    required = true
                 )
             )
         }
@@ -1504,18 +1579,89 @@ private fun batteryPreviewLayout(
             BatteryStatusLayoutItem(
                 BatteryStatusComponent.WIFI,
                 width = config.wifiSizeDp * 1.4f + gap,
-                priority = 90
+                priority = 90,
+                required = focusedComponent == BatteryStatusComponent.WIFI
             )
         )
-        add(
-            BatteryStatusLayoutItem(
-                BatteryStatusComponent.CELLULAR,
-                width = config.signalSizeDp * 1.4f + config.dataSizeDp * 1.8f + gap * 2,
-                priority = 70
+        if (focusedComponent != BatteryStatusComponent.AIRPLANE) {
+            add(
+                BatteryStatusLayoutItem(
+                    BatteryStatusComponent.CELLULAR,
+                    width = config.signalSizeDp * 1.4f +
+                        config.dataSizeDp * 1.8f +
+                        gap * 2,
+                    priority = 70,
+                    required = focusedComponent == BatteryStatusComponent.CELLULAR
+                )
             )
-        )
+        }
+        if (focusedComponent == BatteryStatusComponent.HOTSPOT) {
+            add(
+                BatteryStatusLayoutItem(
+                    BatteryStatusComponent.HOTSPOT,
+                    width = config.hotspotSizeDp + gap,
+                    priority = 55,
+                    required = true
+                )
+            )
+        }
     }
 )
+
+private fun BatteryEditorPage.previewComponent(): BatteryStatusComponent? = when (this) {
+    BatteryEditorPage.ANIMATION -> BatteryStatusComponent.ANIMATION
+    BatteryEditorPage.WIFI -> BatteryStatusComponent.WIFI
+    BatteryEditorPage.DATA,
+    BatteryEditorPage.SIGNAL -> BatteryStatusComponent.CELLULAR
+    BatteryEditorPage.AIRPLANE -> BatteryStatusComponent.AIRPLANE
+    BatteryEditorPage.HOTSPOT -> BatteryStatusComponent.HOTSPOT
+    BatteryEditorPage.RINGER -> BatteryStatusComponent.RINGER
+    BatteryEditorPage.CHARGE -> BatteryStatusComponent.CHARGE
+    BatteryEditorPage.DATE_TIME -> BatteryStatusComponent.DATE
+    else -> null
+}
+
+@Composable
+@SuppressLint("DiscouragedApi")
+private fun PreviewStatusIcon(
+    iconName: String,
+    sizeDp: Float,
+    colorArgb: Int
+) {
+    val context = LocalContext.current
+    val resources = LocalResources.current
+    val iconResource = remember(iconName, resources) {
+        resources.getIdentifier(iconName, "drawable", context.packageName)
+    }
+    if (iconResource != 0) {
+        Icon(
+            painter = painterResource(iconResource),
+            contentDescription = null,
+            tint = Color(colorArgb),
+            modifier = Modifier.size(sizeDp.dp)
+        )
+    } else {
+        Box(
+            modifier = Modifier
+                .size(sizeDp.dp)
+                .clip(CircleShape)
+                .background(Color(colorArgb))
+        )
+    }
+}
+
+@Composable
+@SuppressLint("DiscouragedApi")
+private fun previewDateFontFamily(font: BatteryDateFont): FontFamily {
+    val context = LocalContext.current
+    val resources = LocalResources.current
+    val fontResource = remember(font, resources) {
+        resources.getIdentifier(font.resourceName, "font", context.packageName)
+    }
+    return remember(fontResource) {
+        if (fontResource == 0) FontFamily.Default else FontFamily(Font(fontResource))
+    }
+}
 
 @Composable
 private fun ToggleRow(label: String, checked: Boolean, onChecked: (Boolean) -> Unit) {
