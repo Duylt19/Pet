@@ -48,6 +48,11 @@ internal fun PetPackManifest.toEngineSupportedActions(): Set<PetAction> = buildS
     }
 }
 
+internal fun PetPackManifest.usesDerivedCeilingVisual(): Boolean =
+    id.startsWith(OWNER_SHIMEJI_PACK_PREFIX) &&
+        PetAction.CLIMB_CEILING !in clips &&
+        clips.keys.hasCompactLegacyActionProfile()
+
 internal fun <T> Map<PetAction, List<T>>.normalizedRuntimeVisualFrames(
     packId: String
 ): Map<PetAction, List<T>> {
@@ -60,6 +65,10 @@ internal fun <T> Map<PetAction, List<T>>.normalizedRuntimeVisualFrames(
                 putIfAbsent(PetAction.FLUNG, dragged)
                 get(PetAction.BOUNCE)?.let { bounce ->
                     putIfAbsent(PetAction.CREEP, bounce)
+                    putIfAbsent(PetAction.CLIMB_CEILING, bounce)
+                    bounce.lastOrNull()?.let { frame ->
+                        putIfAbsent(PetAction.HOLD_CEILING, listOf(frame))
+                    }
                     putIfAbsent(PetAction.FLOOR_PLAY, bounce)
                     bounce.lastOrNull()?.let { frame ->
                         putIfAbsent(PetAction.SPRAWL, listOf(frame))
@@ -129,6 +138,15 @@ private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip
             ?: clips[PetAction.BOUNCE]
                 ?.takeIf { compactLegacyProfile }
                 ?.compactCreep()
+        PetAction.CLIMB_CEILING -> clips[PetAction.CLIMB_CEILING]
+            ?: clips[PetAction.BOUNCE]
+                ?.takeIf { compactLegacyProfile }
+                ?.compactCeilingClimb()
+        PetAction.HOLD_CEILING -> clips[PetAction.CLIMB_CEILING]
+            ?.stationaryFrameAction(PetAction.HOLD_CEILING, OWNER_HOLD_CEILING_FRAME_INDEX)
+            ?: clips[PetAction.BOUNCE]
+                ?.takeIf { compactLegacyProfile }
+                ?.stationaryFrameAction(PetAction.HOLD_CEILING, COMPACT_HOLD_FRAME_INDEX)
         PetAction.TRIP -> clips[PetAction.TRIP]
             ?: clips[PetAction.DRAGGED]
                 ?.takeIf { compactLegacyProfile }
@@ -168,9 +186,6 @@ private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip
             }
         PetAction.HOLD_WALL -> clips[PetAction.CLIMB_WALL]
             ?.stationaryFrameAction(PetAction.HOLD_WALL, OWNER_HOLD_WALL_FRAME_INDEX)
-        PetAction.HOLD_CEILING -> clips[PetAction.CLIMB_CEILING]
-            ?.stationaryFrameAction(PetAction.HOLD_CEILING, OWNER_HOLD_CEILING_FRAME_INDEX)
-
         else -> clips[action]
     }
     return normalized?.let { clip ->
@@ -205,6 +220,15 @@ private fun PetPackClip.compactCreep(): PetPackClip = PetPackClip(
     loops = true,
     nextAction = null,
     frames = frames.map { frame -> frame.copy(velocity = PetVector(x = CREEP_VELOCITY)) }
+)
+
+private fun PetPackClip.compactCeilingClimb(): PetPackClip = PetPackClip(
+    action = PetAction.CLIMB_CEILING,
+    loops = true,
+    nextAction = null,
+    frames = frames.map { frame ->
+        frame.copy(velocity = PetVector(x = CLIMB_VELOCITY))
+    }
 )
 
 private fun PetPackClip.compactTrip(bounce: PetPackClip): PetPackClip = PetPackClip(
@@ -405,6 +429,7 @@ private const val JUMP_VERTICAL_VELOCITY = -80f
 private const val TALK_WALK_VELOCITY = 24f
 private const val OWNER_HOLD_WALL_FRAME_INDEX = 3
 private const val OWNER_HOLD_CEILING_FRAME_INDEX = 2
+private const val COMPACT_HOLD_FRAME_INDEX = 1
 private const val COMPACT_POSE_FRAME_COUNT = 2
 private val OWNER_IDLE_DURATIONS = listOf(900L)
 private val OWNER_BOUNCE_DURATIONS = listOf(220L, 280L)
@@ -443,6 +468,8 @@ private val COMPACT_LEGACY_DERIVED_ACTIONS = setOf(
     PetAction.JUMP,
     PetAction.FLUNG,
     PetAction.CREEP,
+    PetAction.CLIMB_CEILING,
+    PetAction.HOLD_CEILING,
     PetAction.TRIP,
     PetAction.SIT,
     PetAction.LOOK_UP,

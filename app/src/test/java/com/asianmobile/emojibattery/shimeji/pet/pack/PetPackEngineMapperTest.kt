@@ -222,6 +222,8 @@ class PetPackEngineMapperTest {
                 PetAction.JUMP,
                 PetAction.FLUNG,
                 PetAction.CREEP,
+                PetAction.CLIMB_CEILING,
+                PetAction.HOLD_CEILING,
                 PetAction.TRIP,
                 PetAction.SIT,
                 PetAction.LOOK_UP,
@@ -242,6 +244,13 @@ class PetPackEngineMapperTest {
         assertTrue(clips.getValue(PetAction.CREEP).frames.all {
             it.velocity == PetVector(x = 16f)
         })
+        assertTrue(clips.getValue(PetAction.CLIMB_CEILING).frames.all {
+            it.velocity == PetVector(x = 36f)
+        })
+        assertTrue(clips.getValue(PetAction.HOLD_CEILING).frames.all {
+            it.velocity == PetVector.Zero
+        })
+        assertTrue(compact.usesDerivedCeilingVisual())
     }
 
     @Test
@@ -263,6 +272,11 @@ class PetPackEngineMapperTest {
         assertEquals(listOf("air-a"), normalized.getValue(PetAction.JUMP))
         assertEquals(listOf("air-a", "air-b", "air-c"), normalized.getValue(PetAction.FLUNG))
         assertEquals(listOf("lie-a", "lie-b"), normalized.getValue(PetAction.CREEP))
+        assertEquals(
+            listOf("lie-a", "lie-b"),
+            normalized.getValue(PetAction.CLIMB_CEILING)
+        )
+        assertEquals(listOf("lie-b"), normalized.getValue(PetAction.HOLD_CEILING))
         assertEquals(listOf("lie-b"), normalized.getValue(PetAction.SPRAWL))
         assertEquals(listOf("look-a", "look-b"), normalized.getValue(PetAction.LOOK_UP))
         assertEquals(listOf("emote-a", "emote-b"), normalized.getValue(PetAction.EMOTE))

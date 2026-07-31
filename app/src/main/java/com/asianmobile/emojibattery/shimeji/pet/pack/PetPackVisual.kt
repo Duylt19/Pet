@@ -17,7 +17,8 @@ sealed interface PetPackVisual {
     data class Sprite(
         val frames: Map<PetAction, List<PetSpriteFrame>>,
         val canvas: PetPackCanvas,
-        val anchor: PetPackAnchor
+        val anchor: PetPackAnchor,
+        val usesDerivedCeilingVisual: Boolean
     ) : PetPackVisual
 }
 
@@ -65,7 +66,8 @@ class PetBitmapCache @Inject constructor(
             PetPackVisual.Sprite(
                 frames = frames,
                 canvas = pack.manifest.canvas,
-                anchor = pack.manifest.anchor
+                anchor = pack.manifest.anchor,
+                usesDerivedCeilingVisual = pack.manifest.usesDerivedCeilingVisual()
             )
         }.getOrDefault(PetPackVisual.CodeNative)
     }

@@ -142,6 +142,11 @@ internal class PetOverlayView(
         visual: PetPackVisual.Sprite
     ) {
         val saveCount = canvas.save()
+        if (visual.usesDerivedCeilingVisual &&
+            state.action in DERIVED_CEILING_ACTIONS
+        ) {
+            canvas.rotate(180f, width / 2f, height / 2f)
+        }
         applySpriteMotion(canvas, width, height, state)
         if (state.direction.requiresMirror(PetDirection.LEFT)) {
             canvas.scale(-1f, 1f, width / 2f, height / 2f)
@@ -450,5 +455,9 @@ internal class PetOverlayView(
 
     private companion object {
         const val MILLIS_PER_SECOND = 1_000
+        val DERIVED_CEILING_ACTIONS = setOf(
+            PetAction.CLIMB_CEILING,
+            PetAction.HOLD_CEILING
+        )
     }
 }

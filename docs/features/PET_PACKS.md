@@ -57,11 +57,12 @@ sàn để giả bám tường/trần.
 Owner pack compact 24-frame như supplement WC 2026 không có frame jump 22 và nhiều
 pose của contract 46-frame. Mapper nhận diện profile này bằng tập action thực có, rồi
 tạo alias runtime từ chính sprite trong pack: drag cho `JUMP`/`FLUNG`, bounce nằm cho
-`CREEP`/`FLOOR_PLAY`/`SPRAWL`/`TRIP`, và hai sequence Special cho
-`SIT`/`LOOK_UP`/`TAPPED`/`EMOTE`. Alias chỉ thay timeline, velocity và semantic action;
-không sinh ảnh giả, không sửa manifest trên disk và áp dụng cả với pack revision 7 đã
-cài. Vì vậy các pet compact tham gia được combo bay, nhảy và recovery thay vì chỉ đi tới
-biên rồi lặp leo tường.
+`CREEP`/`CLIMB_CEILING`/`HOLD_CEILING`/`FLOOR_PLAY`/`SPRAWL`/`TRIP`, và hai sequence
+Special cho `SIT`/`LOOK_UP`/`TAPPED`/`EMOTE`. Alias chỉ thay timeline, velocity và
+semantic action; không sinh ảnh giả, không sửa manifest trên disk và áp dụng cả với pack
+revision 7 đã cài. Vì vậy các pet compact tham gia được combo bay, nhảy và recovery thay
+vì chỉ đi tới biên rồi lặp leo tường. Renderer xoay riêng pose ceiling dẫn xuất 180 độ;
+pack có frame ceiling gốc vẫn render nguyên trạng.
 
 Khi pet đổi từ `CLIMB_WALL` sang `CLIMB_DOWN`, engine giữ hướng sprite nhìn vào tường
 trong suốt đoạn đi xuống. Hướng chỉ quay vào viewport sau khi rời wall action để

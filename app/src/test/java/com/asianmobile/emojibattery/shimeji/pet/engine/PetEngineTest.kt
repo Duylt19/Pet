@@ -263,6 +263,30 @@ class PetEngineTest {
     }
 
     @Test
+    fun `pet flung into top edge attaches to the ceiling when capability is supported`() {
+        val engine = engine(maxTickMillis = 1_000)
+        val initial = engine.initialState(
+            bounds = bounds,
+            size = size,
+            position = PetVector(40f, 10f)
+        )
+        val flung = engine.reduce(
+            initial,
+            PetEvent.Fling(PetVector(x = 0f, y = -500f))
+        ).state
+
+        val attached = engine.reduce(flung, PetEvent.Tick(elapsedMillis = 100))
+
+        assertEquals(0f, attached.state.position.y, FLOAT_TOLERANCE)
+        assertEquals(PetAction.CLIMB_CEILING, attached.state.action)
+        assertTrue(
+            attached.effects.contains(
+                PetEffect.ActionChanged(PetAction.FLUNG, PetAction.CLIMB_CEILING)
+            )
+        )
+    }
+
+    @Test
     fun `release below fling threshold starts falling`() {
         val engine = engine(flingStopSpeed = 24f)
         val dragged = engine.reduce(
