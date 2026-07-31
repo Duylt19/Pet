@@ -90,9 +90,13 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryConnectivityState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryHotspotState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryRingerState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutItem
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutPolicy
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatterySystemStatusPolicy
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_CATEGORY_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDataType
@@ -101,6 +105,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFormat
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
+import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_STYLE_INDEX
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTopBar
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
@@ -113,6 +118,30 @@ import java.util.Locale
 import kotlinx.coroutines.delay
 
 private const val ITEM_LOADING_INDICATOR_DELAY_MS = 180L
+private val WIFI_ICON_STYLES = (1..MAX_BATTERY_STATUS_ICON_STYLE_INDEX).map { style ->
+    listOf(
+        BatterySystemStatusPolicy.wifiIcon(BatteryConnectivityState.CONNECTED, style)
+    )
+}
+private val SIGNAL_ICON_STYLES = (1..MAX_BATTERY_STATUS_ICON_STYLE_INDEX).map { style ->
+    listOf(
+        BatterySystemStatusPolicy.cellularIcon(BatteryConnectivityState.CONNECTED, style)
+    )
+}
+private val AIRPLANE_ICON_STYLES = (1..MAX_BATTERY_STATUS_ICON_STYLE_INDEX).map { style ->
+    listOf(BatterySystemStatusPolicy.airplaneIcon(style))
+}
+private val HOTSPOT_ICON_STYLES = (1..MAX_BATTERY_STATUS_ICON_STYLE_INDEX).map { style ->
+    listOfNotNull(
+        BatterySystemStatusPolicy.hotspotIcon(BatteryHotspotState.ENABLED, style)
+    )
+}
+private val RINGER_ICON_STYLES = (1..MAX_BATTERY_STATUS_ICON_STYLE_INDEX).map { style ->
+    listOfNotNull(
+        BatterySystemStatusPolicy.ringerIcon(BatteryRingerState.VIBRATE, style),
+        BatterySystemStatusPolicy.ringerIcon(BatteryRingerState.SILENT, style)
+    )
+}
 
 internal enum class BatteryEditorPage {
     OVERVIEW,
@@ -430,37 +459,52 @@ private fun BatteryEditorContent(
                     state.config,
                     state.config.wifiSizeDp,
                     state.config.wifiColorArgb,
+                    state.config.wifiIconStyleIndex,
+                    WIFI_ICON_STYLES,
                     { onConfig(state.config.copy(wifiSizeDp = it)) },
-                    { onConfig(state.config.copy(wifiColorArgb = it)) }
+                    { onConfig(state.config.copy(wifiColorArgb = it)) },
+                    { onConfig(state.config.copy(wifiIconStyleIndex = it)) }
                 )
                 BatteryEditorPage.DATA -> DataEditor(state.config, onConfig)
                 BatteryEditorPage.SIGNAL -> StatusComponentEditor(
                     state.config,
                     state.config.signalSizeDp,
                     state.config.signalColorArgb,
+                    state.config.signalIconStyleIndex,
+                    SIGNAL_ICON_STYLES,
                     { onConfig(state.config.copy(signalSizeDp = it)) },
-                    { onConfig(state.config.copy(signalColorArgb = it)) }
+                    { onConfig(state.config.copy(signalColorArgb = it)) },
+                    { onConfig(state.config.copy(signalIconStyleIndex = it)) }
                 )
                 BatteryEditorPage.AIRPLANE -> StatusComponentEditor(
                     state.config,
                     state.config.airplaneSizeDp,
                     state.config.airplaneColorArgb,
+                    state.config.airplaneIconStyleIndex,
+                    AIRPLANE_ICON_STYLES,
                     { onConfig(state.config.copy(airplaneSizeDp = it)) },
-                    { onConfig(state.config.copy(airplaneColorArgb = it)) }
+                    { onConfig(state.config.copy(airplaneColorArgb = it)) },
+                    { onConfig(state.config.copy(airplaneIconStyleIndex = it)) }
                 )
                 BatteryEditorPage.HOTSPOT -> StatusComponentEditor(
                     state.config,
                     state.config.hotspotSizeDp,
                     state.config.hotspotColorArgb,
+                    state.config.hotspotIconStyleIndex,
+                    HOTSPOT_ICON_STYLES,
                     { onConfig(state.config.copy(hotspotSizeDp = it)) },
-                    { onConfig(state.config.copy(hotspotColorArgb = it)) }
+                    { onConfig(state.config.copy(hotspotColorArgb = it)) },
+                    { onConfig(state.config.copy(hotspotIconStyleIndex = it)) }
                 )
                 BatteryEditorPage.RINGER -> StatusComponentEditor(
                     state.config,
                     state.config.ringerSizeDp,
                     state.config.ringerColorArgb,
+                    state.config.ringerIconStyleIndex,
+                    RINGER_ICON_STYLES,
                     { onConfig(state.config.copy(ringerSizeDp = it)) },
-                    { onConfig(state.config.copy(ringerColorArgb = it)) }
+                    { onConfig(state.config.copy(ringerColorArgb = it)) },
+                    { onConfig(state.config.copy(ringerIconStyleIndex = it)) }
                 )
                 BatteryEditorPage.CHARGE -> ChargeEditor(state.config, onConfig)
                 BatteryEditorPage.DATE_TIME -> DateTimeEditor(state.config, onConfig)
@@ -1004,11 +1048,20 @@ private fun StatusComponentEditor(
     config: BatteryStatusConfig,
     size: Float,
     color: Int,
+    selectedStyleIndex: Int,
+    iconStyles: List<List<String>>,
     onSize: (Float) -> Unit,
-    onColor: (Int) -> Unit
+    onColor: (Int) -> Unit,
+    onStyle: (Int) -> Unit
 ) {
     EditorPageHint(stringResource(R.string.battery_status_component_hint))
     EditorCard {
+        StatusIconStylePicker(
+            selected = selectedStyleIndex,
+            color = color,
+            iconStyles = iconStyles,
+            onSelected = onStyle
+        )
         EditorSlider(
             label = stringResource(R.string.battery_status_icon_size),
             value = size,
@@ -1152,10 +1205,30 @@ private fun ChargeStylePicker(
     color: Int,
     onSelected: (Int) -> Unit
 ) {
+    StatusIconStylePicker(
+        selected = selected,
+        color = color,
+        iconStyles = (1..12).map { index ->
+            listOf("charge_%02d".format(index))
+        },
+        label = stringResource(R.string.battery_charge_style),
+        onSelected = onSelected
+    )
+}
+
+@Composable
+@SuppressLint("DiscouragedApi")
+private fun StatusIconStylePicker(
+    selected: Int,
+    color: Int,
+    iconStyles: List<List<String>>,
+    label: String? = null,
+    onSelected: (Int) -> Unit
+) {
     val context = LocalContext.current
     val resources = LocalResources.current
     Text(
-        text = stringResource(R.string.battery_charge_style),
+        text = label ?: stringResource(R.string.battery_status_icon_style),
         color = colorResource(R.color.colors_776D84),
         fontFamily = FontFamily(Font(R.font.inter_medium)),
         fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
@@ -1165,13 +1238,16 @@ private fun ChargeStylePicker(
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp)),
         modifier = Modifier.padding(vertical = dimensionResource(SdpR.dimen._7sdp))
     ) {
-        items((1..12).toList()) { index ->
-            val resourceId = remember(index, resources) {
-                resources.getIdentifier(
-                    "charge_%02d".format(index),
-                    "drawable",
-                    context.packageName
-                )
+        items(iconStyles.indices.toList()) { stylePosition ->
+            val styleIndex = stylePosition + 1
+            val resourceIds = remember(iconStyles, stylePosition, resources) {
+                iconStyles[stylePosition].map { resourceName ->
+                    resources.getIdentifier(
+                        resourceName,
+                        "drawable",
+                        context.packageName
+                    )
+                }
             }
             Box(
                 modifier = Modifier
@@ -1180,14 +1256,14 @@ private fun ChargeStylePicker(
                     .background(colorResource(R.color.colors_FFFFFF))
                     .border(
                         width = dimensionResource(
-                            if (selected == index) {
+                            if (selected == styleIndex) {
                                 SdpR.dimen._3sdp
                             } else {
                                 SdpR.dimen._1sdp
                             }
                         ),
                         color = colorResource(
-                            if (selected == index) {
+                            if (selected == styleIndex) {
                                 R.color.colors_12B890
                             } else {
                                 R.color.colors_E9DFEF
@@ -1195,18 +1271,35 @@ private fun ChargeStylePicker(
                         ),
                         shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
                     )
-                    .clickable { onSelected(index) },
+                    .clickable { onSelected(styleIndex) },
                 contentAlignment = Alignment.Center
             ) {
-                if (resourceId != 0) {
-                    Icon(
-                        painter = painterResource(resourceId),
-                        contentDescription = index.toString(),
-                        tint = Color(color),
-                        modifier = Modifier.size(dimensionResource(SdpR.dimen._28sdp))
-                    )
+                if (resourceIds.any { it != 0 }) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(
+                            dimensionResource(SdpR.dimen._2sdp)
+                        ),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        resourceIds.filter { it != 0 }.forEach { resourceId ->
+                            Icon(
+                                painter = painterResource(resourceId),
+                                contentDescription = styleIndex.toString(),
+                                tint = Color(color),
+                                modifier = Modifier.size(
+                                    dimensionResource(
+                                        if (resourceIds.size > 1) {
+                                            SdpR.dimen._20sdp
+                                        } else {
+                                            SdpR.dimen._28sdp
+                                        }
+                                    )
+                                )
+                            )
+                        }
+                    }
                 } else {
-                    Text(index.toString(), color = Color(color))
+                    Text(styleIndex.toString(), color = Color(color))
                 }
             }
         }
@@ -1438,7 +1531,7 @@ private fun StatusComponentsGrid(onOpenPage: (BatteryEditorPage) -> Unit) {
         StatusComponentDestination(
             R.string.battery_component_wifi,
             BatteryEditorPage.WIFI,
-            "ic_wifi"
+            "ic_status_wifi_solid"
         ),
         StatusComponentDestination(
             R.string.battery_component_data,
@@ -1448,22 +1541,22 @@ private fun StatusComponentsGrid(onOpenPage: (BatteryEditorPage) -> Unit) {
         StatusComponentDestination(
             R.string.battery_component_signal,
             BatteryEditorPage.SIGNAL,
-            "ic_signal"
+            "ic_status_signal_rounded"
         ),
         StatusComponentDestination(
             R.string.battery_component_airplane,
             BatteryEditorPage.AIRPLANE,
-            "ic_air_plane"
+            "ic_status_airplane_classic"
         ),
         StatusComponentDestination(
             R.string.battery_component_hotspot,
             BatteryEditorPage.HOTSPOT,
-            "ic_hostpot"
+            "ic_status_hotspot_orbit"
         ),
         StatusComponentDestination(
             R.string.battery_component_ringer,
             BatteryEditorPage.RINGER,
-            "ic_ringer0"
+            "ic_status_silent_bell_outline"
         ),
         StatusComponentDestination(
             R.string.battery_component_charge,
@@ -1733,14 +1826,21 @@ private fun BatteryPreview(
             }
             if (layout.shows(BatteryStatusComponent.AIRPLANE)) {
                 PreviewStatusIcon(
-                    iconName = "ic_air_plane",
+                    iconName = BatterySystemStatusPolicy.airplaneIcon(
+                        config.airplaneIconStyleIndex
+                    ),
                     sizeDp = config.airplaneSizeDp,
                     colorArgb = config.airplaneColorArgb
                 )
             }
             if (layout.shows(BatteryStatusComponent.RINGER)) {
                 PreviewStatusIcon(
-                    iconName = "ic_ringer0",
+                    iconName = requireNotNull(
+                        BatterySystemStatusPolicy.ringerIcon(
+                            BatteryRingerState.SILENT,
+                            config.ringerIconStyleIndex
+                        )
+                    ),
                     sizeDp = config.ringerSizeDp,
                     colorArgb = config.ringerColorArgb
                 )
@@ -1811,7 +1911,10 @@ private fun BatteryPreview(
             }
             if (layout.shows(BatteryStatusComponent.WIFI)) {
                 PreviewStatusIcon(
-                    iconName = "ic_wifi",
+                    iconName = BatterySystemStatusPolicy.wifiIcon(
+                        BatteryConnectivityState.CONNECTED,
+                        config.wifiIconStyleIndex
+                    ),
                     sizeDp = config.wifiSizeDp,
                     colorArgb = config.wifiColorArgb
                 )
@@ -1824,14 +1927,22 @@ private fun BatteryPreview(
                     fontWeight = FontWeight.Bold
                 )
                 PreviewStatusIcon(
-                    iconName = "ic_signal",
+                    iconName = BatterySystemStatusPolicy.cellularIcon(
+                        BatteryConnectivityState.CONNECTED,
+                        config.signalIconStyleIndex
+                    ),
                     sizeDp = config.signalSizeDp,
                     colorArgb = config.signalColorArgb
                 )
             }
             if (layout.shows(BatteryStatusComponent.HOTSPOT)) {
                 PreviewStatusIcon(
-                    iconName = "ic_hostpot",
+                    iconName = requireNotNull(
+                        BatterySystemStatusPolicy.hotspotIcon(
+                            BatteryHotspotState.ENABLED,
+                            config.hotspotIconStyleIndex
+                        )
+                    ),
                     sizeDp = config.hotspotSizeDp,
                     colorArgb = config.hotspotColorArgb
                 )

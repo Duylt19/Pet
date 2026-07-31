@@ -42,17 +42,22 @@ object BatteryDraftCodec {
         .put("percentColorArgb", config.percentColorArgb)
         .put("wifiSizeDp", config.wifiSizeDp.toDouble())
         .put("wifiColorArgb", config.wifiColorArgb)
+        .put("wifiIconStyleIndex", config.wifiIconStyleIndex)
         .put("dataType", config.dataType.name)
         .put("dataSizeDp", config.dataSizeDp.toDouble())
         .put("dataColorArgb", config.dataColorArgb)
         .put("signalSizeDp", config.signalSizeDp.toDouble())
         .put("signalColorArgb", config.signalColorArgb)
+        .put("signalIconStyleIndex", config.signalIconStyleIndex)
         .put("airplaneSizeDp", config.airplaneSizeDp.toDouble())
         .put("airplaneColorArgb", config.airplaneColorArgb)
+        .put("airplaneIconStyleIndex", config.airplaneIconStyleIndex)
         .put("hotspotSizeDp", config.hotspotSizeDp.toDouble())
         .put("hotspotColorArgb", config.hotspotColorArgb)
+        .put("hotspotIconStyleIndex", config.hotspotIconStyleIndex)
         .put("ringerSizeDp", config.ringerSizeDp.toDouble())
         .put("ringerColorArgb", config.ringerColorArgb)
+        .put("ringerIconStyleIndex", config.ringerIconStyleIndex)
         .put("chargeSizeDp", config.chargeSizeDp.toDouble())
         .put("chargeIconIndex", config.chargeIconIndex)
         .put("chargeColorArgb", config.chargeColorArgb)
@@ -135,20 +140,40 @@ object BatteryDraftCodec {
                 percentColorArgb = json.int("percentColorArgb", fallback.percentColorArgb),
                 wifiSizeDp = json.float("wifiSizeDp", fallback.wifiSizeDp),
                 wifiColorArgb = json.int("wifiColorArgb", fallback.wifiColorArgb),
+                wifiIconStyleIndex = json.int(
+                    "wifiIconStyleIndex",
+                    fallback.wifiIconStyleIndex
+                ),
                 dataType = json.enum("dataType", fallback.dataType, BatteryDataType.entries),
                 dataSizeDp = json.float("dataSizeDp", fallback.dataSizeDp),
                 dataColorArgb = json.int("dataColorArgb", fallback.dataColorArgb),
                 signalSizeDp = json.float("signalSizeDp", fallback.signalSizeDp),
                 signalColorArgb = json.int("signalColorArgb", fallback.signalColorArgb),
+                signalIconStyleIndex = json.int(
+                    "signalIconStyleIndex",
+                    fallback.signalIconStyleIndex
+                ),
                 airplaneSizeDp = json.float("airplaneSizeDp", fallback.airplaneSizeDp),
                 airplaneColorArgb = json.int(
                     "airplaneColorArgb",
                     fallback.airplaneColorArgb
                 ),
+                airplaneIconStyleIndex = json.int(
+                    "airplaneIconStyleIndex",
+                    fallback.airplaneIconStyleIndex
+                ),
                 hotspotSizeDp = json.float("hotspotSizeDp", fallback.hotspotSizeDp),
                 hotspotColorArgb = json.int("hotspotColorArgb", fallback.hotspotColorArgb),
+                hotspotIconStyleIndex = json.int(
+                    "hotspotIconStyleIndex",
+                    fallback.hotspotIconStyleIndex
+                ),
                 ringerSizeDp = json.float("ringerSizeDp", fallback.ringerSizeDp),
                 ringerColorArgb = json.int("ringerColorArgb", fallback.ringerColorArgb),
+                ringerIconStyleIndex = json.int(
+                    "ringerIconStyleIndex",
+                    fallback.ringerIconStyleIndex
+                ),
                 chargeSizeDp = json.float("chargeSizeDp", fallback.chargeSizeDp),
                 chargeIconIndex = json.int("chargeIconIndex", fallback.chargeIconIndex),
                 chargeColorArgb = json.int("chargeColorArgb", fallback.chargeColorArgb),
@@ -215,5 +240,5 @@ object BatteryDraftCodec {
     }
 
     private const val KEY_SCHEMA = "schema"
-    private const val SCHEMA_VERSION = 2
+    private const val SCHEMA_VERSION = 3
 }

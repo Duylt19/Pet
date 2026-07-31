@@ -16,6 +16,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_PERCENT_S
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_PRIVACY_RESERVE_DP
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_STATUS_ICON_COLOR
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_STATUS_ICON_SIZE_DP
+import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_STYLE_INDEX
+import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_STATUS_ICON_STYLE_INDEX
 
 class BatterySettingsPolicy(
     private val barHeightRange: BatteryStatusBarHeightRange =
@@ -60,6 +62,11 @@ class BatterySettingsPolicy(
         ringerSizeDp = config.ringerSizeDp.statusSize(),
         chargeSizeDp = config.chargeSizeDp.statusSize(),
         dateTimeSizeDp = config.dateTimeSizeDp.statusSize(),
+        wifiIconStyleIndex = config.wifiIconStyleIndex.statusIconStyle(),
+        signalIconStyleIndex = config.signalIconStyleIndex.statusIconStyle(),
+        airplaneIconStyleIndex = config.airplaneIconStyleIndex.statusIconStyle(),
+        hotspotIconStyleIndex = config.hotspotIconStyleIndex.statusIconStyle(),
+        ringerIconStyleIndex = config.ringerIconStyleIndex.statusIconStyle(),
         chargeIconIndex = config.chargeIconIndex.coerceIn(1, 12),
         privacyReserveDp = config.privacyReserveDp.validOr(DEFAULT_BATTERY_PRIVACY_RESERVE_DP)
             .coerceIn(48f, 128f),
@@ -96,6 +103,12 @@ class BatterySettingsPolicy(
 
     private fun Int.statusColor(): Int =
         sanitizeColor(this, DEFAULT_BATTERY_STATUS_ICON_COLOR)
+
+    private fun Int.statusIconStyle(): Int =
+        coerceIn(
+            MIN_BATTERY_STATUS_ICON_STYLE_INDEX,
+            MAX_BATTERY_STATUS_ICON_STYLE_INDEX
+        )
 
     private companion object {
         val ANIMATION_FILE_NAME = Regex("(?:cute_[1-5]\\.json|(?:[1-9]|1[0-9]|2[01])\\.gif)")

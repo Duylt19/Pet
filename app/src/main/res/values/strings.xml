@@ -913,6 +913,7 @@
     <string name="battery_foreground_color">Text and icon color</string>
     <string name="battery_show_emotion">Show decorative emotion</string>
     <string name="battery_status_component_hint">The preview keeps this component visible while you edit it. The applied overlay follows the actual device state.</string>
+    <string name="battery_status_icon_style">Icon style</string>
     <string name="battery_status_icon_size">Icon size</string>
     <string name="battery_status_icon_color">Icon color</string>
     <string name="battery_status_uses_device_state">The applied overlay uses the actual device state; current bar height is %1$d dp.</string>

@@ -119,7 +119,7 @@ class BatterySystemStatusPolicyTest {
             BatterySystemStatusPolicy.wifiIcon(BatteryConnectivityState.LIMITED)
         )
         assertEquals(
-            "ic_wifi",
+            "ic_status_wifi_solid",
             BatterySystemStatusPolicy.wifiIcon(BatteryConnectivityState.CONNECTED)
         )
         assertEquals(
@@ -131,7 +131,7 @@ class BatterySystemStatusPolicyTest {
             BatterySystemStatusPolicy.cellularIcon(BatteryConnectivityState.LIMITED)
         )
         assertEquals(
-            "ic_signal",
+            "ic_status_signal_rounded",
             BatterySystemStatusPolicy.cellularIcon(BatteryConnectivityState.CONNECTED)
         )
         assertNull(BatterySystemStatusPolicy.ringerIcon(BatteryRingerState.NORMAL))
@@ -153,8 +153,89 @@ class BatterySystemStatusPolicyTest {
             BatterySystemStatusPolicy.hotspotIcon(BatteryHotspotState.FAILED)
         )
         assertEquals(
-            "ic_hostpot",
+            "ic_status_hotspot_orbit",
             BatterySystemStatusPolicy.hotspotIcon(BatteryHotspotState.ENABLED)
+        )
+    }
+
+    @Test
+    fun icon_policy_maps_every_selectable_style_and_falls_back_safely() {
+        assertEquals(
+            listOf(
+                "ic_status_wifi_solid",
+                "ic_status_wifi_waves",
+                "ic_status_wifi_outline",
+                "ic_status_wifi_compact"
+            ),
+            (1..4).map {
+                BatterySystemStatusPolicy.wifiIcon(BatteryConnectivityState.CONNECTED, it)
+            }
+        )
+        assertEquals(
+            listOf(
+                "ic_status_signal_rounded",
+                "ic_status_signal_steps",
+                "ic_status_signal_outline",
+                "ic_status_signal_dots"
+            ),
+            (1..4).map {
+                BatterySystemStatusPolicy.cellularIcon(BatteryConnectivityState.CONNECTED, it)
+            }
+        )
+        assertEquals(
+            listOf(
+                "ic_status_airplane_classic",
+                "ic_status_airplane_round",
+                "ic_status_airplane_takeoff",
+                "ic_status_airplane_paper"
+            ),
+            (1..4).map(BatterySystemStatusPolicy::airplaneIcon)
+        )
+        assertEquals(
+            listOf(
+                "ic_status_hotspot_orbit",
+                "ic_status_hotspot_ring",
+                "ic_status_hotspot_compact",
+                "ic_status_hotspot_tower"
+            ),
+            (1..4).map {
+                BatterySystemStatusPolicy.hotspotIcon(BatteryHotspotState.ENABLED, it)
+            }
+        )
+        assertEquals(
+            listOf(
+                "ic_status_vibrate",
+                "ic_status_vibrate_bell",
+                "ic_status_vibrate_phone_solid",
+                "ic_status_vibrate_wave"
+            ),
+            (1..4).map {
+                BatterySystemStatusPolicy.ringerIcon(BatteryRingerState.VIBRATE, it)
+            }
+        )
+        assertEquals(
+            listOf(
+                "ic_status_ringer_silent",
+                "ic_status_silent_bell_outline",
+                "ic_status_silent_bell_solid",
+                "ic_status_silent_phone"
+            ),
+            (1..4).map {
+                BatterySystemStatusPolicy.ringerIcon(BatteryRingerState.SILENT, it)
+            }
+        )
+
+        assertEquals(
+            "ic_status_wifi_solid",
+            BatterySystemStatusPolicy.wifiIcon(BatteryConnectivityState.CONNECTED, 99)
+        )
+        assertEquals(
+            "ic_status_airplane_classic",
+            BatterySystemStatusPolicy.airplaneIcon(-1)
+        )
+        assertEquals(
+            "ic_status_wifi_off",
+            BatterySystemStatusPolicy.wifiIcon(BatteryConnectivityState.DISABLED, 4)
         )
     }
 

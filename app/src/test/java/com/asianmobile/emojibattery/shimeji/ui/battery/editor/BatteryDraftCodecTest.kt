@@ -38,17 +38,22 @@ class BatteryDraftCodecTest {
             percentColorArgb = 0xFF778899.toInt(),
             wifiSizeDp = 21f,
             wifiColorArgb = 0xFF102030.toInt(),
+            wifiIconStyleIndex = 2,
             dataType = BatteryDataType.G5,
             dataSizeDp = 20f,
             dataColorArgb = 0xFF203040.toInt(),
             signalSizeDp = 22f,
             signalColorArgb = 0xFF304050.toInt(),
+            signalIconStyleIndex = 3,
             airplaneSizeDp = 18f,
             airplaneColorArgb = 0xFF405060.toInt(),
+            airplaneIconStyleIndex = 4,
             hotspotSizeDp = 17f,
             hotspotColorArgb = 0xFF506070.toInt(),
+            hotspotIconStyleIndex = 2,
             ringerSizeDp = 16f,
             ringerColorArgb = 0xFF607080.toInt(),
+            ringerIconStyleIndex = 3,
             chargeSizeDp = 15f,
             chargeIconIndex = 12,
             chargeColorArgb = 0xFF708090.toInt(),
@@ -73,13 +78,17 @@ class BatteryDraftCodecTest {
 
     @Test
     fun codec_uses_fallback_for_unknown_enum_from_older_state() {
-        val fallback = BatteryStatusConfig(dataType = BatteryDataType.G4)
+        val fallback = BatteryStatusConfig(
+            dataType = BatteryDataType.G4,
+            wifiIconStyleIndex = 4
+        )
         val restored = BatteryDraftCodec.decode(
             """{"schema":1,"dataType":"NOT_A_NETWORK"}""",
             fallback
         )
 
         assertEquals(BatteryDataType.G4, restored?.dataType)
+        assertEquals(4, restored?.wifiIconStyleIndex)
     }
 
     @Test

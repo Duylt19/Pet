@@ -119,34 +119,88 @@ internal object BatterySystemStatusPolicy {
         else -> BatteryPlugType.UNKNOWN
     }
 
-    fun wifiIcon(state: BatteryConnectivityState): String = when (state) {
-        BatteryConnectivityState.CONNECTED -> "ic_wifi"
+    fun wifiIcon(
+        state: BatteryConnectivityState,
+        styleIndex: Int = 1
+    ): String = when (state) {
+        BatteryConnectivityState.CONNECTED -> WIFI_ICONS.style(styleIndex)
         BatteryConnectivityState.LIMITED -> "ic_status_wifi_limited"
         BatteryConnectivityState.DISCONNECTED,
         BatteryConnectivityState.DISABLED -> "ic_status_wifi_off"
     }
 
-    fun cellularIcon(state: BatteryConnectivityState): String = when (state) {
-        BatteryConnectivityState.CONNECTED -> "ic_signal"
+    fun cellularIcon(
+        state: BatteryConnectivityState,
+        styleIndex: Int = 1
+    ): String = when (state) {
+        BatteryConnectivityState.CONNECTED -> SIGNAL_ICONS.style(styleIndex)
         BatteryConnectivityState.LIMITED -> "ic_status_signal_limited"
         BatteryConnectivityState.DISCONNECTED,
         BatteryConnectivityState.DISABLED -> "ic_status_signal_off"
     }
 
-    fun ringerIcon(state: BatteryRingerState): String? = when (state) {
+    fun airplaneIcon(styleIndex: Int): String = AIRPLANE_ICONS.style(styleIndex)
+
+    fun ringerIcon(
+        state: BatteryRingerState,
+        styleIndex: Int = 1
+    ): String? = when (state) {
         BatteryRingerState.NORMAL -> null
-        BatteryRingerState.VIBRATE -> "ic_status_vibrate"
-        BatteryRingerState.SILENT -> "ic_status_ringer_silent"
+        BatteryRingerState.VIBRATE -> RINGER_VIBRATE_ICONS.style(styleIndex)
+        BatteryRingerState.SILENT -> RINGER_SILENT_ICONS.style(styleIndex)
     }
 
-    fun hotspotIcon(state: BatteryHotspotState): String? = when (state) {
-        BatteryHotspotState.ENABLED -> "ic_hostpot"
+    fun hotspotIcon(
+        state: BatteryHotspotState,
+        styleIndex: Int = 1
+    ): String? = when (state) {
+        BatteryHotspotState.ENABLED -> HOTSPOT_ICONS.style(styleIndex)
         BatteryHotspotState.ENABLING,
         BatteryHotspotState.DISABLING -> "ic_status_hotspot_pending"
         BatteryHotspotState.FAILED -> "ic_status_hotspot_error"
         BatteryHotspotState.UNKNOWN,
         BatteryHotspotState.DISABLED -> null
     }
+
+    private fun List<String>.style(index: Int): String =
+        getOrElse(index - 1) { first() }
+
+    private val WIFI_ICONS = listOf(
+        "ic_status_wifi_solid",
+        "ic_status_wifi_waves",
+        "ic_status_wifi_outline",
+        "ic_status_wifi_compact"
+    )
+    private val SIGNAL_ICONS = listOf(
+        "ic_status_signal_rounded",
+        "ic_status_signal_steps",
+        "ic_status_signal_outline",
+        "ic_status_signal_dots"
+    )
+    private val AIRPLANE_ICONS = listOf(
+        "ic_status_airplane_classic",
+        "ic_status_airplane_round",
+        "ic_status_airplane_takeoff",
+        "ic_status_airplane_paper"
+    )
+    private val HOTSPOT_ICONS = listOf(
+        "ic_status_hotspot_orbit",
+        "ic_status_hotspot_ring",
+        "ic_status_hotspot_compact",
+        "ic_status_hotspot_tower"
+    )
+    private val RINGER_VIBRATE_ICONS = listOf(
+        "ic_status_vibrate",
+        "ic_status_vibrate_bell",
+        "ic_status_vibrate_phone_solid",
+        "ic_status_vibrate_wave"
+    )
+    private val RINGER_SILENT_ICONS = listOf(
+        "ic_status_ringer_silent",
+        "ic_status_silent_bell_outline",
+        "ic_status_silent_bell_solid",
+        "ic_status_silent_phone"
+    )
 
     private const val RINGER_MODE_SILENT = 0
     private const val RINGER_MODE_VIBRATE = 1

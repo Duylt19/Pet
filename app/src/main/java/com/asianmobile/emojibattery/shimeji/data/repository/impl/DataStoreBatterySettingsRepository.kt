@@ -93,17 +93,22 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             preferences[PERCENT_COLOR] = sanitized.percentColorArgb
             preferences[WIFI_SIZE_DP] = sanitized.wifiSizeDp
             preferences[WIFI_COLOR] = sanitized.wifiColorArgb
+            preferences[WIFI_ICON_STYLE_INDEX] = sanitized.wifiIconStyleIndex
             preferences[DATA_TYPE] = sanitized.dataType.name
             preferences[DATA_SIZE_DP] = sanitized.dataSizeDp
             preferences[DATA_COLOR] = sanitized.dataColorArgb
             preferences[SIGNAL_SIZE_DP] = sanitized.signalSizeDp
             preferences[SIGNAL_COLOR] = sanitized.signalColorArgb
+            preferences[SIGNAL_ICON_STYLE_INDEX] = sanitized.signalIconStyleIndex
             preferences[AIRPLANE_SIZE_DP] = sanitized.airplaneSizeDp
             preferences[AIRPLANE_COLOR] = sanitized.airplaneColorArgb
+            preferences[AIRPLANE_ICON_STYLE_INDEX] = sanitized.airplaneIconStyleIndex
             preferences[HOTSPOT_SIZE_DP] = sanitized.hotspotSizeDp
             preferences[HOTSPOT_COLOR] = sanitized.hotspotColorArgb
+            preferences[HOTSPOT_ICON_STYLE_INDEX] = sanitized.hotspotIconStyleIndex
             preferences[RINGER_SIZE_DP] = sanitized.ringerSizeDp
             preferences[RINGER_COLOR] = sanitized.ringerColorArgb
+            preferences[RINGER_ICON_STYLE_INDEX] = sanitized.ringerIconStyleIndex
             preferences[CHARGE_SIZE_DP] = sanitized.chargeSizeDp
             preferences[CHARGE_ICON_INDEX] = sanitized.chargeIconIndex
             preferences[CHARGE_COLOR] = sanitized.chargeColorArgb
@@ -191,6 +196,8 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                 percentColorArgb = preferences[PERCENT_COLOR] ?: defaults.percentColorArgb,
                 wifiSizeDp = preferences[WIFI_SIZE_DP] ?: defaults.wifiSizeDp,
                 wifiColorArgb = preferences[WIFI_COLOR] ?: defaults.wifiColorArgb,
+                wifiIconStyleIndex = preferences[WIFI_ICON_STYLE_INDEX]
+                    ?: defaults.wifiIconStyleIndex,
                 dataType = preferences[DATA_TYPE]
                     ?.let { name -> BatteryDataType.entries.firstOrNull { it.name == name } }
                     ?: defaults.dataType,
@@ -198,13 +205,21 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                 dataColorArgb = preferences[DATA_COLOR] ?: defaults.dataColorArgb,
                 signalSizeDp = preferences[SIGNAL_SIZE_DP] ?: defaults.signalSizeDp,
                 signalColorArgb = preferences[SIGNAL_COLOR] ?: defaults.signalColorArgb,
+                signalIconStyleIndex = preferences[SIGNAL_ICON_STYLE_INDEX]
+                    ?: defaults.signalIconStyleIndex,
                 airplaneSizeDp = preferences[AIRPLANE_SIZE_DP] ?: defaults.airplaneSizeDp,
                 airplaneColorArgb = preferences[AIRPLANE_COLOR]
                     ?: defaults.airplaneColorArgb,
+                airplaneIconStyleIndex = preferences[AIRPLANE_ICON_STYLE_INDEX]
+                    ?: defaults.airplaneIconStyleIndex,
                 hotspotSizeDp = preferences[HOTSPOT_SIZE_DP] ?: defaults.hotspotSizeDp,
                 hotspotColorArgb = preferences[HOTSPOT_COLOR] ?: defaults.hotspotColorArgb,
+                hotspotIconStyleIndex = preferences[HOTSPOT_ICON_STYLE_INDEX]
+                    ?: defaults.hotspotIconStyleIndex,
                 ringerSizeDp = preferences[RINGER_SIZE_DP] ?: defaults.ringerSizeDp,
                 ringerColorArgb = preferences[RINGER_COLOR] ?: defaults.ringerColorArgb,
+                ringerIconStyleIndex = preferences[RINGER_ICON_STYLE_INDEX]
+                    ?: defaults.ringerIconStyleIndex,
                 chargeSizeDp = preferences[CHARGE_SIZE_DP] ?: defaults.chargeSizeDp,
                 chargeIconIndex = preferences[CHARGE_ICON_INDEX]
                     ?: defaults.chargeIconIndex,
@@ -276,17 +291,27 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         val PERCENT_COLOR = intPreferencesKey("battery_status_percent_color")
         val WIFI_SIZE_DP = floatPreferencesKey("battery_status_wifi_size_dp")
         val WIFI_COLOR = intPreferencesKey("battery_status_wifi_color")
+        val WIFI_ICON_STYLE_INDEX =
+            intPreferencesKey("battery_status_wifi_icon_style_index")
         val DATA_TYPE = stringPreferencesKey("battery_status_data_type")
         val DATA_SIZE_DP = floatPreferencesKey("battery_status_data_size_dp")
         val DATA_COLOR = intPreferencesKey("battery_status_data_color")
         val SIGNAL_SIZE_DP = floatPreferencesKey("battery_status_signal_size_dp")
         val SIGNAL_COLOR = intPreferencesKey("battery_status_signal_color")
+        val SIGNAL_ICON_STYLE_INDEX =
+            intPreferencesKey("battery_status_signal_icon_style_index")
         val AIRPLANE_SIZE_DP = floatPreferencesKey("battery_status_airplane_size_dp")
         val AIRPLANE_COLOR = intPreferencesKey("battery_status_airplane_color")
+        val AIRPLANE_ICON_STYLE_INDEX =
+            intPreferencesKey("battery_status_airplane_icon_style_index")
         val HOTSPOT_SIZE_DP = floatPreferencesKey("battery_status_hotspot_size_dp")
         val HOTSPOT_COLOR = intPreferencesKey("battery_status_hotspot_color")
+        val HOTSPOT_ICON_STYLE_INDEX =
+            intPreferencesKey("battery_status_hotspot_icon_style_index")
         val RINGER_SIZE_DP = floatPreferencesKey("battery_status_ringer_size_dp")
         val RINGER_COLOR = intPreferencesKey("battery_status_ringer_color")
+        val RINGER_ICON_STYLE_INDEX =
+            intPreferencesKey("battery_status_ringer_icon_style_index")
         val CHARGE_SIZE_DP = floatPreferencesKey("battery_status_charge_size_dp")
         val CHARGE_ICON_INDEX = intPreferencesKey("battery_status_charge_icon_index")
         val CHARGE_COLOR = intPreferencesKey("battery_status_charge_color")

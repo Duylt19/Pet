@@ -191,6 +191,10 @@ Trong editor, `focusedComponent` được truyền tới renderer thật. Compon
 `showDateTime`, nhưng khi đã bật thì thay đổi size, color, format và font cập nhật live.
 Các trường `dateTimeSizeDp`, `dateTimeColorArgb` và `dateTimeFont` là style dùng chung cho
 cả giờ và ngày; `showTime` điều khiển giờ, còn `showDateTime` chỉ điều khiển phần ngày.
+Wi‑Fi, signal, airplane, hotspot và ringer có picker 4 family icon độc lập, cập nhật live
+qua editor preview session và được persist khi Apply. Ringer lưu một family nhưng map đúng
+hai biến thể vibrate/silent. Trạng thái lỗi/off/limited tiếp tục dùng vector cảnh báo riêng
+để style tùy chọn không làm sai thông tin thiết bị.
 
 ### Ma trận trạng thái hệ thống
 

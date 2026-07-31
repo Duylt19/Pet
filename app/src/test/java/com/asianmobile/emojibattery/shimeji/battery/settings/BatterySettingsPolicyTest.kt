@@ -27,6 +27,11 @@ class BatterySettingsPolicyTest {
                 emojiSizeDp = Float.NaN,
                 batterySizeDp = 2f,
                 wifiSizeDp = 99f,
+                wifiIconStyleIndex = -4,
+                signalIconStyleIndex = 7,
+                airplaneIconStyleIndex = 0,
+                hotspotIconStyleIndex = 99,
+                ringerIconStyleIndex = -1,
                 chargeIconIndex = 20,
                 animationAssetName = "../bad.json",
                 privacyReserveDp = 200f,
@@ -48,6 +53,11 @@ class BatterySettingsPolicyTest {
         assertEquals(24f, sanitized.emojiSizeDp)
         assertEquals(16f, sanitized.batterySizeDp)
         assertEquals(32f, sanitized.wifiSizeDp)
+        assertEquals(1, sanitized.wifiIconStyleIndex)
+        assertEquals(4, sanitized.signalIconStyleIndex)
+        assertEquals(1, sanitized.airplaneIconStyleIndex)
+        assertEquals(4, sanitized.hotspotIconStyleIndex)
+        assertEquals(1, sanitized.ringerIconStyleIndex)
         assertEquals(12, sanitized.chargeIconIndex)
         assertEquals("cute_1.json", sanitized.animationAssetName)
         assertEquals(128f, sanitized.privacyReserveDp)

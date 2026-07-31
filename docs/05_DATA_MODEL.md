@@ -46,6 +46,7 @@
 | `battery_status_animation_asset_name` | String | Một trong 21 GIF hoặc 5 Lottie đã audit |
 | `battery_status_data_type` | String enum | Nhãn 2G–9G do user chọn |
 | `battery_status_charge_icon_index` | Int | Charge vector 1–12 |
+| `battery_status_{wifi,signal,airplane,hotspot,ringer}_icon_style_index` | Int | Family icon 1–4 của từng status component |
 | `battery_status_date_format`, `battery_status_date_time_font` | String enum | Định dạng và bundled font ngày |
 | `battery_status_background_decoration_id` | Int | Background asset ID; `0` dùng màu phẳng |
 | `battery_status_show_emotion` | Boolean | Hiện emotion trang trí |
@@ -133,12 +134,16 @@ không được restore sau process death/reboot.
   size/hash mismatch hoặc release catalog chưa `APPROVED`.
 - `BatteryStatusConfig` là persistent source of truth. `BatterySettingsPolicy` clamp
   geometry/color/favorite/reward unlock trước khi ghi và sau khi decode DataStore.
+- Wi‑Fi, signal, airplane, hotspot và ringer mỗi nhóm persist `iconStyleIndex` độc lập
+  trong khoảng 1–4. Runtime vẫn lấy trạng thái thật từ Android; style chỉ chọn family
+  drawable. Wi‑Fi/signal off hoặc limited và hotspot pending/error ưu tiên icon trạng thái
+  chuyên biệt để không làm sai nghĩa hệ thống.
 - Catalog theme là cặp mặc định. Khi mở editor từ một theme, `selectedThemeId`,
   `selectedBatteryThemeId` và `selectedEmojiThemeId` cùng nhận ID đó. Sau đó hai component
   ID được chỉnh độc lập; runtime vẽ pet chồng lên pin tại cùng trailing anchor.
 - Migration không cần DataStore transaction riêng: nếu hai key component chưa tồn tại,
   repository dùng `battery_status_selected_theme_id` cho cả hai. Draft schema 1 cũng được
-  decode theo quy tắc này; schema 2 persist rõ hai ID.
+  decode theo quy tắc này; schema 2 persist rõ hai ID và schema 3 thêm các status icon style.
 - `BatteryEditorPreviewSession` là state process-local, không persistent. Nó chỉ bridge
   draft đang edit sang Accessibility service; owner token ngăn editor cũ ghi/clear preview
   của editor mới.

@@ -743,6 +743,7 @@
     <string name="battery_foreground_color">Màu chữ và biểu tượng</string>
     <string name="battery_show_emotion">Hiện cảm xúc trang trí</string>
     <string name="battery_status_component_hint">Preview luôn hiện thành phần đang chỉnh. Overlay sau khi áp dụng sẽ hiển thị theo trạng thái thật của thiết bị.</string>
+    <string name="battery_status_icon_style">Kiểu biểu tượng</string>
     <string name="battery_status_icon_size">Kích thước biểu tượng</string>
     <string name="battery_status_icon_color">Màu biểu tượng</string>
     <string name="battery_status_uses_device_state">Overlay sau khi áp dụng dùng trạng thái thiết bị thật; chiều cao thanh hiện là %1$d dp.</string>

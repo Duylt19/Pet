@@ -189,7 +189,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
         if (layout.shows(BatteryStatusComponent.AIRPLANE)) {
             cursor = drawStatusIcon(
                 canvas,
-                "ic_air_plane",
+                BatterySystemStatusPolicy.airplaneIcon(config.airplaneIconStyleIndex),
                 cursor,
                 centerY,
                 config.airplaneSizeDp,
@@ -198,7 +198,10 @@ class BatteryStatusBarView(context: Context) : View(context) {
             ).afterGap(gap, fromLeft)
         }
         if (layout.shows(BatteryStatusComponent.RINGER)) {
-            BatterySystemStatusPolicy.ringerIcon(deviceState.ringer)?.let { icon ->
+            BatterySystemStatusPolicy.ringerIcon(
+                deviceState.ringer,
+                config.ringerIconStyleIndex
+            )?.let { icon ->
                 cursor = drawStatusIcon(
                     canvas,
                     icon,
@@ -261,7 +264,10 @@ class BatteryStatusBarView(context: Context) : View(context) {
         if (layout.shows(BatteryStatusComponent.WIFI)) {
             cursor = drawStatusIcon(
                 canvas,
-                BatterySystemStatusPolicy.wifiIcon(deviceState.wifi),
+                BatterySystemStatusPolicy.wifiIcon(
+                    deviceState.wifi,
+                    config.wifiIconStyleIndex
+                ),
                 cursor,
                 centerY,
                 config.wifiSizeDp,
@@ -282,7 +288,10 @@ class BatteryStatusBarView(context: Context) : View(context) {
             ).afterGap(gap, fromLeft)
             cursor = drawStatusIcon(
                 canvas,
-                BatterySystemStatusPolicy.cellularIcon(deviceState.cellular),
+                BatterySystemStatusPolicy.cellularIcon(
+                    deviceState.cellular,
+                    config.signalIconStyleIndex
+                ),
                 cursor,
                 centerY,
                 config.signalSizeDp,
@@ -291,7 +300,10 @@ class BatteryStatusBarView(context: Context) : View(context) {
             ).afterGap(gap, fromLeft)
         }
         if (layout.shows(BatteryStatusComponent.HOTSPOT)) {
-            BatterySystemStatusPolicy.hotspotIcon(deviceState.hotspot)?.let { icon ->
+            BatterySystemStatusPolicy.hotspotIcon(
+                deviceState.hotspot,
+                config.hotspotIconStyleIndex
+            )?.let { icon ->
                 drawStatusIcon(
                     canvas,
                     icon,
@@ -350,7 +362,12 @@ class BatteryStatusBarView(context: Context) : View(context) {
                     )
                 )
             }
-            if (BatterySystemStatusPolicy.ringerIcon(deviceState.ringer) != null) {
+            if (
+                BatterySystemStatusPolicy.ringerIcon(
+                    deviceState.ringer,
+                    config.ringerIconStyleIndex
+                ) != null
+            ) {
                 add(
                     layoutItem(
                         BatteryStatusComponent.RINGER,
@@ -451,7 +468,12 @@ class BatteryStatusBarView(context: Context) : View(context) {
                     )
                 )
             }
-            if (BatterySystemStatusPolicy.hotspotIcon(deviceState.hotspot) != null) {
+            if (
+                BatterySystemStatusPolicy.hotspotIcon(
+                    deviceState.hotspot,
+                    config.hotspotIconStyleIndex
+                ) != null
+            ) {
                 add(
                     layoutItem(
                         BatteryStatusComponent.HOTSPOT,
