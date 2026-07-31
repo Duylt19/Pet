@@ -411,6 +411,14 @@ private fun CurrentStyleCard(
     style: BatteryCurrentStyle,
     onClick: () -> Unit
 ) {
+    val displayName = if (
+        style.batteryTheme != null &&
+        style.batteryTheme.id == style.emojiTheme?.id
+    ) {
+        batteryThemeDisplayName(style.batteryTheme.name)
+    } else {
+        stringResource(R.string.battery_current_custom_mix)
+    }
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
@@ -429,8 +437,9 @@ private fun CurrentStyleCard(
                 .fillMaxWidth()
                 .height(dimensionResource(SdpR.dimen._105sdp))
         )
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._4sdp)))
         Text(
-            text = stringResource(R.string.battery_current_style),
+            text = displayName,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             color = colorResource(R.color.colors_2F2440),
@@ -459,22 +468,10 @@ private fun CurrentStylePreview(
                 modifier = Modifier.fillMaxSize()
             )
         }
-        if (config.showTime) {
-            Text(
-                text = stringResource(R.string.battery_preview_time),
-                color = Color(config.dateTimeColorArgb),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = dimensionResource(SdpR.dimen._6sdp))
-            )
-        }
         Box(
             modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .fillMaxWidth(0.68f)
-                .fillMaxHeight()
+                .fillMaxSize()
+                .padding(horizontal = dimensionResource(SdpR.dimen._4sdp))
         ) {
             val batteryTheme = style.batteryTheme
             val emojiTheme = style.emojiTheme
@@ -485,8 +482,8 @@ private fun CurrentStylePreview(
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .fillMaxWidth(0.78f)
-                        .fillMaxHeight(0.62f)
+                        .fillMaxWidth(0.88f)
+                        .fillMaxHeight(0.78f)
                 )
             }
             emojiTheme?.emojiPath?.let { path ->
@@ -496,21 +493,26 @@ private fun CurrentStylePreview(
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
-                        .fillMaxWidth(0.48f)
-                        .fillMaxHeight(0.72f)
-                )
-            }
-            if (config.showPercentage) {
-                Text(
-                    text = stringResource(R.string.battery_preview_percentage),
-                    color = Color(config.percentColorArgb),
-                    fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = dimensionResource(SdpR.dimen._3sdp))
+                        .fillMaxWidth(0.56f)
+                        .fillMaxHeight(0.66f)
                 )
             }
         }
+        Text(
+            text = stringResource(R.string.battery_current_style),
+            color = colorResource(R.color.colors_FFFFFF),
+            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontSize = dimensionResource(SspR.dimen._7ssp).value.sp,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(dimensionResource(SdpR.dimen._5sdp))
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
+                .background(colorResource(R.color.colors_12B890))
+                .padding(
+                    horizontal = dimensionResource(SdpR.dimen._6sdp),
+                    vertical = dimensionResource(SdpR.dimen._3sdp)
+                )
+        )
     }
 }
 
@@ -525,7 +527,7 @@ private fun ThemeCard(
     val displayName = if (theme.isBuiltIn) {
         stringResource(R.string.battery_builtin_theme)
     } else {
-        theme.name
+        batteryThemeDisplayName(theme.name)
     }
     Column(
         modifier = Modifier
@@ -571,26 +573,33 @@ private fun ThemeCard(
                     )
                 )
             }
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = displayName,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = colorResource(R.color.colors_2F2440),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
-                modifier = Modifier.weight(1f)
-            )
             if (locked) {
-                Icon(
-                    imageVector = Icons.Outlined.Lock,
-                    contentDescription = stringResource(R.string.battery_premium_theme),
-                    tint = colorResource(R.color.colors_FE9D00),
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._16sdp))
-                )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(dimensionResource(SdpR.dimen._28sdp))
+                        .clip(CircleShape)
+                        .background(colorResource(R.color.colors_FFFFFF))
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Lock,
+                        contentDescription = stringResource(R.string.battery_premium_theme),
+                        tint = colorResource(R.color.colors_FE9D00),
+                        modifier = Modifier.size(dimensionResource(SdpR.dimen._16sdp))
+                    )
+                }
             }
         }
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._4sdp)))
+        Text(
+            text = displayName,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = colorResource(R.color.colors_2F2440),
+            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
+        )
     }
 }
 

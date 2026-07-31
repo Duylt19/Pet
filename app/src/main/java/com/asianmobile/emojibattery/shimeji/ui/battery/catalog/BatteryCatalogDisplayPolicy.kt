@@ -39,9 +39,37 @@ class BatteryCatalogDisplayPolicy {
     ): List<BatteryThemeEntry> {
         val normalized = query.trim()
         return themes.filter { theme ->
+            val matchesSearch = normalized.isEmpty() ||
+                theme.name.contains(normalized, ignoreCase = true) ||
+                batteryThemeDisplayName(theme.name).contains(normalized, ignoreCase = true)
             !theme.isBuiltIn &&
                 (categoryId == null || theme.categoryId == categoryId) &&
-                (normalized.isEmpty() || theme.name.contains(normalized, ignoreCase = true))
+                matchesSearch
         }
     }
 }
+
+internal fun batteryThemeDisplayName(rawName: String): String {
+    val normalized = rawName
+        .replace(BATTERY_CAMEL_CASE_BOUNDARY, " ")
+        .replace(BATTERY_NAME_SEPARATORS, " ")
+        .trim()
+        .replace(BATTERY_NAME_WHITESPACE, " ")
+    return normalized
+        .split(' ')
+        .filter(String::isNotBlank)
+        .joinToString(" ") { word ->
+            if (word.length > 1 && word.all { character ->
+                    !character.isLetter() || character.isUpperCase()
+                }
+            ) {
+                word
+            } else {
+                word.lowercase().replaceFirstChar(Char::uppercase)
+            }
+        }
+}
+
+private val BATTERY_CAMEL_CASE_BOUNDARY = Regex("(?<=[\\p{Ll}\\d])(?=\\p{Lu})")
+private val BATTERY_NAME_SEPARATORS = Regex("[_-]+")
+private val BATTERY_NAME_WHITESPACE = Regex("\\s+")

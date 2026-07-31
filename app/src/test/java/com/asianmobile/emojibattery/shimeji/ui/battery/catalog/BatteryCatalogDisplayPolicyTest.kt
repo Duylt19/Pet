@@ -85,6 +85,19 @@ class BatteryCatalogDisplayPolicyTest {
         )
     }
 
+    @Test
+    fun displayName_normalizesServerSeparatorsCasingAndCamelCase() {
+        assertEquals(
+            "Battery Icon Anime 01",
+            batteryThemeDisplayName("BatteryIcon_Anime_01")
+        )
+        assertEquals(
+            "Battery Cartoon 03",
+            batteryThemeDisplayName("battery_cartoon_03")
+        )
+        assertEquals("WC 2026", batteryThemeDisplayName("WC_2026"))
+    }
+
     private fun theme(id: Int, name: String) = BatteryThemeEntry(
         id = id,
         name = name,
