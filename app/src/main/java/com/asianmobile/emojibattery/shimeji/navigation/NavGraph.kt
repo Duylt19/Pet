@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,7 +19,9 @@ import androidx.navigation.navArgument
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ui.home.HomeScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogScreen
+import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorPage
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorScreen
+import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorViewModel
 import com.asianmobile.emojibattery.shimeji.ui.catalog.PetCatalogScreen
 import com.asianmobile.emojibattery.shimeji.ui.catalog.PetCatalogTarget
 import com.asianmobile.emojibattery.shimeji.ui.catalog.PetDetailScreen
@@ -46,6 +50,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val BATTERY_CATALOG = "battery_catalog"
     const val BATTERY_EDITOR = "battery_editor"
+    const val BATTERY_EDITOR_COMPONENT = "battery_editor_component"
     const val PREMIUM = "premium"
 
     fun petCatalog(
@@ -59,6 +64,8 @@ object Routes {
     ): String = "$PET_DETAIL/${target.name}/$slotIndex/${Uri.encode(packKey)}"
     fun petCustomization(slotIndex: Int): String = "$PET_CUSTOMIZATION/$slotIndex"
     fun batteryEditor(themeId: Int): String = "$BATTERY_EDITOR/$themeId"
+    fun batteryEditorComponent(themeId: Int, page: String): String =
+        "$BATTERY_EDITOR_COMPONENT/$themeId/$page"
 }
 
 @Composable
@@ -235,15 +242,52 @@ fun AppNavGraph(
             composable(
                 route = "${Routes.BATTERY_EDITOR}/{themeId}",
                 arguments = listOf(navArgument("themeId") { type = NavType.IntType })
-            ) {
+            ) { backStackEntry ->
+                val themeId = backStackEntry.arguments?.getInt("themeId") ?: 0
                 BatteryEditorScreen(
+                    page = BatteryEditorPage.OVERVIEW,
                     onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                    onOpenPage = { page ->
+                        navController.safeNavigate(
+                            Routes.batteryEditorComponent(themeId, page.name),
+                            ignoreDebounce = true
+                        )
+                    },
                     onNavigateToPremium = {
                         navController.safeNavigate(
                             "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
                             ignoreDebounce = true
                         )
                     }
+                )
+            }
+
+            composable(
+                route = "${Routes.BATTERY_EDITOR_COMPONENT}/{themeId}/{page}",
+                arguments = listOf(
+                    navArgument("themeId") { type = NavType.IntType },
+                    navArgument("page") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val page = BatteryEditorPage.fromRoute(
+                    backStackEntry.arguments?.getString("page")
+                ) ?: BatteryEditorPage.SIZE
+                val overviewEntry = remember(backStackEntry) {
+                    requireNotNull(navController.previousBackStackEntry) {
+                        "Battery component editor must be opened from the battery overview"
+                    }
+                }
+                val editorViewModel = hiltViewModel<BatteryEditorViewModel>(overviewEntry)
+                BatteryEditorScreen(
+                    page = page,
+                    onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                    onNavigateToPremium = {
+                        navController.safeNavigate(
+                            "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
+                            ignoreDebounce = true
+                        )
+                    },
+                    viewModel = editorViewModel
                 )
             }
 

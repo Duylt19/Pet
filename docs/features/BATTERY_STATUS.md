@@ -17,9 +17,11 @@ Vertical slice hiện đã có trong source:
 - Chọn một theme trong catalog khởi tạo đúng cặp pet + pin của theme đó. Editor có hai
   picker category độc lập để mix pet của theme A với pin của theme B; entitlement
   Rewarded/Premium được kiểm tra cho từng lựa chọn.
-- Editor dùng overview → editor con Size/Appearance/Emoji/Battery và 9 status component,
-  preview draft trực tiếp trên Accessibility status bar, Apply cố định, cảnh báo bỏ
-  draft, phục hồi draft sau process death, 20 nền, 20 emotion và 26 animation đã audit.
+- Editor dùng overview → destination riêng cho Size/Appearance/Emoji/Battery và 9 status
+  component. Các destination dùng chung ViewModel/draft với overview, nên Done/Back phục
+  hồi đúng scroll offset, không reload picker và có analytics screen riêng. Preview draft
+  trực tiếp trên Accessibility status bar, Apply cố định, cảnh báo bỏ draft, phục hồi
+  draft sau process death, 20 nền, 20 emotion và 26 animation đã audit.
 - Catalog kiểm tra Accessibility trước khi mở editor. Nếu service chưa bật, app hiện
   disclosure rồi mở Accessibility Settings; chỉ khi quay lại và quyền đang bật mới vào
   editor để live preview có hiệu lực ngay. Apply vẫn giữ guard tương tự cho deep route.
@@ -62,7 +64,7 @@ Home → Battery styles → chọn theme
                                       ├─ khởi tạo pet + pin cùng item
                                       ├─ đổi pet và pin độc lập theo category
                                       ├─ live preview trên status bar
-                                      ├─ editor con → Done → overview
+                                      ├─ destination editor con → Done/Back → overview giữ scroll
                                       └─ Apply → persist + render
 ```
 

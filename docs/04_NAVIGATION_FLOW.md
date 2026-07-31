@@ -16,7 +16,8 @@
 | `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
 | `swarm_customization` | Edit Pet Swarm | Character, count, base size/speed, random variation và vùng di chuyển |
 | `battery_catalog` | Battery Styles | Catalog local + category/favorite/Premium gate; Accessibility gate trước editor |
-| `battery_editor/{themeId}` | Customize Status Bar | Theme route khởi tạo cặp pet+pin; overview cho phép đổi hai phần độc lập, live preview qua Accessibility; editor con, Rewarded/Premium, Apply và disclosure |
+| `battery_editor/{themeId}` | Customize Status Bar | Overview khởi tạo cặp pet+pin, cho phép đổi hai phần độc lập, giữ draft và live preview qua Accessibility |
+| `battery_editor_component/{themeId}/{page}` | Battery component editor | Destination riêng cho Size/Appearance/Emoji/Battery và từng status component; dùng chung ViewModel/draft với overview |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
 ## Flow
@@ -51,6 +52,7 @@ Home ──Battery tab──> Battery Styles ──theme──> Accessibility ga
 Accessibility gate ──enabled/return enabled──> Customize Battery Bar
   └─ theme ID khởi tạo cả pet + pin; editor có thể mix hai theme khác nhau
 Customize Battery Bar ──locked pet/pin──> Rewarded hoặc Premium ──return──> chọn component
+Customize Battery Bar ──component option──> Component Editor ──Done/Back──> đúng scroll offset của overview
 Customize Battery Bar ──Apply(service on)──> persist config + accessibility overlay
 ```
 
@@ -67,6 +69,9 @@ Customize Battery Bar ──Apply(service on)──> persist config + accessibil
 - Battery Editor pop về Battery Styles; Battery Styles pop về Home. Premium mở từ
   catalog hoặc picker component trong editor rồi quay lại đúng destination theo back stack;
   editor refresh entitlement và hoàn tất pending component selection khi resume.
+- Mỗi Battery component editor là một destination nằm trên overview. Nó dùng ViewModel của
+  overview để giữ nguyên draft/live preview; Back hoặc Done chỉ pop destination con, vì vậy
+  overview phục hồi đúng scroll offset và không khởi tạo lại catalog/picker.
 - Theme selection trong Battery Styles chỉ navigate sau khi Accessibility đang bật.
   Pending theme ID dùng saveable state nên quay lại từ Settings/process recreation vẫn mở
   đúng editor; cancel Settings giữ user ở catalog. Editor vẫn tự gate Apply cho deep route.

@@ -17,7 +17,20 @@
 | Customize Pet | `pet_customization` |
 | Edit Pet Swarm | `swarm_customization` |
 | Battery styles | `battery_catalog` |
-| Customize status bar, gồm các editor con nội bộ | `battery_editor` |
+| Customize status bar overview | `battery_editor` |
+| Battery size editor | `battery_size_editor` |
+| Battery appearance editor | `battery_appearance_editor` |
+| Battery emoji editor | `battery_emoji_editor` |
+| Battery icon editor | `battery_icon_editor` |
+| Battery animation editor | `battery_animation_editor` |
+| Battery Wi-Fi editor | `battery_wifi_editor` |
+| Battery mobile data editor | `battery_data_editor` |
+| Battery signal editor | `battery_signal_editor` |
+| Battery airplane editor | `battery_airplane_editor` |
+| Battery hotspot editor | `battery_hotspot_editor` |
+| Battery ringer editor | `battery_ringer_editor` |
+| Battery charge editor | `battery_charge_editor` |
+| Battery date/time editor | `battery_date_time_editor` |
 | Settings | `settings` |
 | Premium | `premium` |
 

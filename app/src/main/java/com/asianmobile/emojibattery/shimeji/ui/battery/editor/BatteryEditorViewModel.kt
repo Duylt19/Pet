@@ -23,6 +23,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,6 +64,8 @@ class BatteryEditorViewModel @Inject constructor(
         savedStateHandle.get<Boolean>(KEY_SELECTION_INITIALIZED) == true
     private var latestStored = BatteryStatusConfig(barHeightDp = barHeightRange.defaultDp)
     private var previewActive = false
+    private var previewClientCount = 0
+    private var previewStopJob: Job? = null
     private var focusedComponent: BatteryStatusComponent? = null
     private var assetSelectionRequestId = 0L
     private val _uiState = MutableStateFlow(
@@ -142,14 +146,27 @@ class BatteryEditorViewModel @Inject constructor(
     fun setConfig(value: BatteryStatusConfig) = update { value }
 
     fun startPreview() {
-        previewActive = true
-        previewSession.start(previewOwnerId, _uiState.value.config)
+        previewClientCount += 1
+        previewStopJob?.cancel()
+        previewStopJob = null
+        if (!previewActive) {
+            previewActive = true
+            previewSession.start(previewOwnerId, _uiState.value.config)
+        }
         publishPreview(_uiState.value.config)
     }
 
     fun stopPreview() {
-        previewActive = false
-        previewSession.stop(previewOwnerId)
+        previewClientCount = (previewClientCount - 1).coerceAtLeast(0)
+        if (previewClientCount > 0) return
+        previewStopJob?.cancel()
+        previewStopJob = viewModelScope.launch {
+            delay(PREVIEW_ROUTE_HANDOFF_DELAY_MS)
+            if (previewClientCount == 0) {
+                previewActive = false
+                previewSession.stop(previewOwnerId)
+            }
+        }
     }
 
     fun setPreviewComponent(component: BatteryStatusComponent?) {
@@ -275,7 +292,7 @@ class BatteryEditorViewModel @Inject constructor(
 
     fun disable() {
         clearDraft()
-        stopPreview()
+        stopPreviewImmediately()
         settingsRepository.setEnabled(false)
         _uiState.update {
             it.copy(config = it.config.copy(enabled = false), hasUnsavedChanges = false)
@@ -370,7 +387,21 @@ class BatteryEditorViewModel @Inject constructor(
         savedStateHandle[KEY_DIRTY] = false
     }
 
+    override fun onCleared() {
+        previewStopJob?.cancel()
+        previewSession.stop(previewOwnerId)
+        super.onCleared()
+    }
+
+    private fun stopPreviewImmediately() {
+        previewStopJob?.cancel()
+        previewStopJob = null
+        previewActive = false
+        previewSession.stop(previewOwnerId)
+    }
+
     private companion object {
+        const val PREVIEW_ROUTE_HANDOFF_DELAY_MS = 200L
         const val KEY_DRAFT = "battery_editor_draft"
         const val KEY_DIRTY = "battery_editor_dirty"
         const val KEY_PREVIEW_OWNER = "battery_editor_preview_owner"

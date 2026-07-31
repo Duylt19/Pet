@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,6 +29,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -157,12 +157,21 @@ internal enum class BatteryEditorPage {
     HOTSPOT,
     RINGER,
     CHARGE,
-    DATE_TIME
+    DATE_TIME;
+
+    companion object {
+        fun fromRoute(value: String?): BatteryEditorPage? =
+            entries.firstOrNull { page ->
+                page != OVERVIEW && page.name == value
+            }
+    }
 }
 
 @Composable
-fun BatteryEditorScreen(
+internal fun BatteryEditorScreen(
+    page: BatteryEditorPage = BatteryEditorPage.OVERVIEW,
     onBack: () -> Unit,
+    onOpenPage: (BatteryEditorPage) -> Unit = {},
     onNavigateToPremium: () -> Unit,
     viewModel: BatteryEditorViewModel = hiltViewModel()
 ) {
@@ -171,18 +180,11 @@ fun BatteryEditorScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDisclosure by remember { mutableStateOf(false) }
     var showDiscardConfirmation by rememberSaveable { mutableStateOf(false) }
-    var pageName by rememberSaveable {
-        mutableStateOf(BatteryEditorPage.OVERVIEW.name)
-    }
-    val page = BatteryEditorPage.entries.firstOrNull { it.name == pageName }
-        ?: BatteryEditorPage.OVERVIEW
-    val openPage: (BatteryEditorPage) -> Unit = { pageName = it.name }
-    val closePage = { pageName = BatteryEditorPage.OVERVIEW.name }
     val requestBack = {
-        when {
-            page != BatteryEditorPage.OVERVIEW -> closePage()
-            state.hasUnsavedChanges -> showDiscardConfirmation = true
-            else -> onBack()
+        if (page == BatteryEditorPage.OVERVIEW && state.hasUnsavedChanges) {
+            showDiscardConfirmation = true
+        } else {
+            onBack()
         }
     }
     var accessibilityEnabled by remember {
@@ -200,7 +202,7 @@ fun BatteryEditorScreen(
             theme.id !in state.config.rewardUnlockedThemeIds
     }
 
-    TrackScreenView(ScreenName.BATTERY_EDITOR)
+    TrackScreenView(page.analyticsScreen())
     LaunchedEffect(context, requiresRewardAd) {
         if (requiresRewardAd) {
             RewardedVideoAds.getInstance().loadRewardedVideo(context.applicationContext)
@@ -228,7 +230,7 @@ fun BatteryEditorScreen(
         viewModel.setPreviewComponent(page.previewComponent())
     }
     BackHandler(
-        enabled = page != BatteryEditorPage.OVERVIEW || state.hasUnsavedChanges,
+        enabled = page == BatteryEditorPage.OVERVIEW && state.hasUnsavedChanges,
         onBack = requestBack
     )
     DisposableEffect(viewModel) {
@@ -251,8 +253,8 @@ fun BatteryEditorScreen(
         page = page,
         accessibilityEnabled = accessibilityEnabled,
         onBack = requestBack,
-        onDone = closePage,
-        onOpenPage = openPage,
+        onDone = onBack,
+        onOpenPage = onOpenPage,
         onShowTime = viewModel::setShowTime,
         onShowPercentage = viewModel::setShowPercentage,
         onBarHeight = viewModel::setBarHeight,
@@ -394,7 +396,7 @@ private fun BatteryEditorContent(
     onApply: () -> Unit,
     onDisable: () -> Unit
 ) {
-    val scrollState = remember(page) { ScrollState(initial = 0) }
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -2095,6 +2097,23 @@ private fun BatteryEditorPage.previewComponent(): BatteryStatusComponent? = when
     BatteryEditorPage.CHARGE -> BatteryStatusComponent.CHARGE
     BatteryEditorPage.DATE_TIME -> BatteryStatusComponent.DATE
     else -> null
+}
+
+private fun BatteryEditorPage.analyticsScreen(): ScreenName = when (this) {
+    BatteryEditorPage.OVERVIEW -> ScreenName.BATTERY_EDITOR
+    BatteryEditorPage.SIZE -> ScreenName.BATTERY_SIZE_EDITOR
+    BatteryEditorPage.APPEARANCE -> ScreenName.BATTERY_APPEARANCE_EDITOR
+    BatteryEditorPage.EMOJI -> ScreenName.BATTERY_EMOJI_EDITOR
+    BatteryEditorPage.BATTERY -> ScreenName.BATTERY_ICON_EDITOR
+    BatteryEditorPage.ANIMATION -> ScreenName.BATTERY_ANIMATION_EDITOR
+    BatteryEditorPage.WIFI -> ScreenName.BATTERY_WIFI_EDITOR
+    BatteryEditorPage.DATA -> ScreenName.BATTERY_DATA_EDITOR
+    BatteryEditorPage.SIGNAL -> ScreenName.BATTERY_SIGNAL_EDITOR
+    BatteryEditorPage.AIRPLANE -> ScreenName.BATTERY_AIRPLANE_EDITOR
+    BatteryEditorPage.HOTSPOT -> ScreenName.BATTERY_HOTSPOT_EDITOR
+    BatteryEditorPage.RINGER -> ScreenName.BATTERY_RINGER_EDITOR
+    BatteryEditorPage.CHARGE -> ScreenName.BATTERY_CHARGE_EDITOR
+    BatteryEditorPage.DATE_TIME -> ScreenName.BATTERY_DATE_TIME_EDITOR
 }
 
 @Composable
