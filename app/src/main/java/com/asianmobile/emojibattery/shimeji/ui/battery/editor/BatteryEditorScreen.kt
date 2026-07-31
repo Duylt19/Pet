@@ -7,6 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -814,11 +815,11 @@ private fun ThemeComponentOption(
                         if (painter.state is AsyncImagePainter.State.Success) {
                             SubcomposeAsyncImageContent()
                         } else {
-                            ThemeComponentThumbnailFallback(theme, component)
+                            ThemeComponentPlaceholder(component)
                         }
                     }
                 } else {
-                    ThemeComponentThumbnailFallback(theme, component)
+                    ThemeComponentPlaceholder(component)
                 }
             }
             Row(
@@ -882,24 +883,16 @@ private fun ThemeComponentOption(
 }
 
 @Composable
-private fun ThemeComponentThumbnailFallback(
-    theme: BatteryThemeEntry,
-    component: BatteryThemeComponent
-) {
+private fun ThemeComponentPlaceholder(component: BatteryThemeComponent) {
     @DrawableRes val fallbackIcon = if (component == BatteryThemeComponent.BATTERY) {
         R.drawable.ic_battery_status
     } else {
         R.drawable.ic_notification_pet
     }
-    val fallbackPainter = painterResource(fallbackIcon)
-    AsyncImage(
-        model = theme.thumbnailPath,
+    Image(
+        painter = painterResource(fallbackIcon),
         contentDescription = null,
-        placeholder = fallbackPainter,
-        error = fallbackPainter,
-        fallback = fallbackPainter,
-        contentScale = ContentScale.Fit,
-        modifier = Modifier.size(dimensionResource(SdpR.dimen._42sdp))
+        modifier = Modifier.size(dimensionResource(SdpR.dimen._32sdp))
     )
 }
 
