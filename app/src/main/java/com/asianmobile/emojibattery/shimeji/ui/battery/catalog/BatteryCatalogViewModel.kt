@@ -28,6 +28,7 @@ class BatteryCatalogViewModel @Inject constructor(
     private val settingsRepository: BatterySettingsRepository
 ) : ViewModel() {
     private val accessPolicy = BatteryThemeAccessPolicy()
+    private val displayPolicy = BatteryCatalogDisplayPolicy()
     private val _uiState = MutableStateFlow(BatteryCatalogUiState())
     val uiState: StateFlow<BatteryCatalogUiState> = _uiState.asStateFlow()
     private val _effects = Channel<BatteryCatalogEffect>(Channel.BUFFERED)
@@ -47,7 +48,11 @@ class BatteryCatalogViewModel @Inject constructor(
         _uiState.update { current ->
             current.copy(
                 selectedCategoryId = categoryId,
-                visibleThemes = filter(current.themes, categoryId, current.searchQuery)
+                visibleThemes = displayPolicy.filterThemes(
+                    current.themes,
+                    categoryId,
+                    current.searchQuery
+                )
             )
         }
     }
@@ -56,12 +61,21 @@ class BatteryCatalogViewModel @Inject constructor(
         _uiState.update { current ->
             current.copy(
                 searchQuery = query,
-                visibleThemes = filter(current.themes, current.selectedCategoryId, query)
+                visibleThemes = displayPolicy.filterThemes(
+                    current.themes,
+                    current.selectedCategoryId,
+                    query
+                )
             )
         }
     }
 
     fun toggleFavorite(themeId: Int) = settingsRepository.toggleFavorite(themeId)
+
+    fun requestCurrentStyle() {
+        if (_uiState.value.currentStyle == null) return
+        emit(BatteryCatalogEffect.OpenTheme(CURRENT_BATTERY_STYLE_ID))
+    }
 
     fun refresh() {
         refreshEntitlement()
@@ -186,32 +200,21 @@ class BatteryCatalogViewModel @Inject constructor(
         config: BatteryStatusConfig
     ): BatteryCatalogUiState = current.copy(
         themes = catalog.themes,
-        visibleThemes = filter(
+        visibleThemes = displayPolicy.filterThemes(
             catalog.themes,
             current.selectedCategoryId,
             current.searchQuery
         ),
-        categories = catalog.categories,
+        categories = displayPolicy.filterCategories(catalog.categories),
         favoriteThemeIds = config.favoriteThemeIds,
         rewardUnlockedThemeIds = config.rewardUnlockedThemeIds,
         isPremium = SharedPreferencesUtils.getIsPremium(context),
+        currentStyle = displayPolicy.currentStyle(catalog, config),
         pendingUnlockThemeId = current.pendingUnlockThemeId
             ?.takeIf { id -> catalog.themes.any { it.id == id } },
         isLoading = catalog.isLoading,
         error = catalog.error
     )
-
-    private fun filter(
-        themes: List<BatteryThemeEntry>,
-        categoryId: Int?,
-        query: String
-    ): List<BatteryThemeEntry> {
-        val normalized = query.trim()
-        return themes.filter { theme ->
-            (categoryId == null || theme.categoryId == categoryId) &&
-                (normalized.isEmpty() || theme.name.contains(normalized, ignoreCase = true))
-        }
-    }
 
     private fun emit(effect: BatteryCatalogEffect) {
         viewModelScope.launch { _effects.send(effect) }

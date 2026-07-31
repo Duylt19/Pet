@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -66,7 +68,6 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogError
-import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_CATEGORY_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTopBar
@@ -153,6 +154,7 @@ fun BatteryCatalogScreen(
         onCategory = viewModel::selectCategory,
         onSearch = viewModel::updateSearchQuery,
         onFavorite = viewModel::toggleFavorite,
+        onCurrentStyle = viewModel::requestCurrentStyle,
         onTheme = viewModel::requestTheme,
         onRetry = viewModel::refresh
     )
@@ -209,6 +211,7 @@ private fun BatteryCatalogContent(
     onCategory: (Int?) -> Unit,
     onSearch: (String) -> Unit,
     onFavorite: (Int) -> Unit,
+    onCurrentStyle: () -> Unit,
     onTheme: (BatteryThemeEntry) -> Unit,
     onRetry: () -> Unit
 ) {
@@ -258,11 +261,7 @@ private fun BatteryCatalogContent(
             items(state.categories.size) { index ->
                 val category = state.categories[index]
                 CategoryChip(
-                    label = if (category.id == BUILT_IN_BATTERY_CATEGORY_ID) {
-                        stringResource(R.string.battery_builtin_category)
-                    } else {
-                        category.name
-                    },
+                    label = category.name,
                     selected = state.selectedCategoryId == category.id,
                     onClick = { onCategory(category.id) }
                 )
@@ -288,7 +287,8 @@ private fun BatteryCatalogContent(
             state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = colorResource(R.color.colors_12B890))
             }
-            state.visibleThemes.isEmpty() -> EmptyCatalog(state.error, onRetry)
+            state.visibleThemes.isEmpty() && !state.showCurrentStyle ->
+                EmptyCatalog(state.error, onRetry)
             else -> LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(
@@ -299,6 +299,14 @@ private fun BatteryCatalogContent(
                 horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._10sdp)),
                 verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._10sdp))
             ) {
+                if (state.showCurrentStyle) {
+                    item(key = "current_battery_style") {
+                        CurrentStyleCard(
+                            style = requireNotNull(state.currentStyle),
+                            onClick = onCurrentStyle
+                        )
+                    }
+                }
                 items(state.visibleThemes, key = BatteryThemeEntry::id) { theme ->
                     ThemeCard(
                         theme = theme,
@@ -396,6 +404,114 @@ private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit) 
                 vertical = dimensionResource(SdpR.dimen._8sdp)
             )
     )
+}
+
+@Composable
+private fun CurrentStyleCard(
+    style: BatteryCurrentStyle,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
+            .background(colorResource(R.color.colors_FFFFFF))
+            .border(
+                width = dimensionResource(SdpR.dimen._1sdp),
+                color = colorResource(R.color.colors_12B890),
+                shape = RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp))
+            )
+            .clickable(onClick = onClick)
+            .padding(dimensionResource(SdpR.dimen._8sdp))
+    ) {
+        CurrentStylePreview(
+            style = style,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._105sdp))
+        )
+        Text(
+            text = stringResource(R.string.battery_current_style),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = colorResource(R.color.colors_2F2440),
+            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
+        )
+    }
+}
+
+@Composable
+private fun CurrentStylePreview(
+    style: BatteryCurrentStyle,
+    modifier: Modifier = Modifier
+) {
+    val config = style.config
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
+            .background(Color(config.backgroundColorArgb))
+    ) {
+        style.backgroundPath?.let { path ->
+            AsyncImage(
+                model = path,
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        if (config.showTime) {
+            Text(
+                text = stringResource(R.string.battery_preview_time),
+                color = Color(config.dateTimeColorArgb),
+                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = dimensionResource(SdpR.dimen._6sdp))
+            )
+        }
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxWidth(0.68f)
+                .fillMaxHeight()
+        ) {
+            val batteryTheme = style.batteryTheme
+            val emojiTheme = style.emojiTheme
+            batteryTheme?.batteryPath?.let { path ->
+                AsyncImage(
+                    model = path,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth(0.78f)
+                        .fillMaxHeight(0.62f)
+                )
+            }
+            emojiTheme?.emojiPath?.let { path ->
+                AsyncImage(
+                    model = path,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth(0.48f)
+                        .fillMaxHeight(0.72f)
+                )
+            }
+            if (config.showPercentage) {
+                Text(
+                    text = stringResource(R.string.battery_preview_percentage),
+                    color = Color(config.percentColorArgb),
+                    fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = dimensionResource(SdpR.dimen._3sdp))
+                )
+            }
+        }
+    }
 }
 
 @Composable

@@ -6,6 +6,11 @@ Vertical slice hiện đã có trong source:
 
 - Home bottom navigation mở `BatteryCatalogScreen`.
 - Catalog local chuẩn hóa, search, category, Free/Premium, favorite và built-in fallback.
+- Card đầu tiên là `Current`, chỉ xuất hiện trong tab All sau lần Apply đầu tiên. Card này
+  preview cặp pet + pin cùng background hiện đang persist và mở editor
+  bằng nguyên config hiện tại. Lần đầu chưa từng Apply Battery sẽ không có card này; sau
+  lần Apply đầu tiên, `hasApplied` giữ card Current kể cả khi user tạm Turn off. Built-in
+  ID `0` chỉ còn là runtime fallback, không còn là catalog item.
 - Theme Premium hỗ trợ dialog Rewarded/Premium: earned reward mở khóa vĩnh viễn đúng
   theme ID trên thiết bị rồi tự mở editor; Premium bypass toàn bộ theme gate.
 - Chọn một theme trong catalog khởi tạo đúng cặp pet + pin của theme đó. Editor có hai
@@ -61,7 +66,8 @@ Home → Battery styles → chọn theme
 ```
 
 Premium theme chưa mở hiển thị dialog Rewarded/Premium. Theme thiếu hoặc sai checksum
-không được áp dụng. Built-in `Cute Mint` không phụ thuộc file ngoài và luôn khả dụng.
+không được áp dụng. Built-in `Cute Mint` không phụ thuộc file ngoài, luôn khả dụng như
+runtime fallback nhưng không được render thành catalog card.
 
 ## Boundary dữ liệu
 

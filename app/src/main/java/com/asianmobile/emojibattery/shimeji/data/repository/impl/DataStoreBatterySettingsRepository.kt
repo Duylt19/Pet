@@ -64,11 +64,12 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         )
 
     override fun applyConfig(config: BatteryStatusConfig) {
-        val sanitized = policy.sanitize(config)
+        val sanitized = policy.sanitize(config).copy(hasApplied = true)
         edit { preferences ->
             val rewardUnlockedThemeIds =
                 decodeRewardUnlockedIds(preferences) + sanitized.rewardUnlockedThemeIds
             preferences[ENABLED] = sanitized.enabled
+            preferences[HAS_APPLIED] = sanitized.hasApplied
             preferences[SELECTED_THEME_ID] = sanitized.selectedThemeId
             preferences[SELECTED_BATTERY_THEME_ID] = sanitized.selectedBatteryThemeId
             preferences[SELECTED_EMOJI_THEME_ID] = sanitized.selectedEmojiThemeId
@@ -149,11 +150,13 @@ class DataStoreBatterySettingsRepository @Inject constructor(
 
     private fun decode(preferences: Preferences): BatteryStatusConfig {
         val defaults = BatteryStatusConfig()
+        val enabled = preferences[ENABLED] ?: false
         val selectedThemeId = preferences[SELECTED_THEME_ID]
             ?: BUILT_IN_BATTERY_THEME_ID
         return policy.sanitize(
             BatteryStatusConfig(
-                enabled = preferences[ENABLED] ?: false,
+                enabled = enabled,
+                hasApplied = resolveBatteryHasApplied(preferences[HAS_APPLIED], enabled),
                 selectedThemeId = selectedThemeId,
                 selectedBatteryThemeId = preferences[SELECTED_BATTERY_THEME_ID]
                     ?: selectedThemeId,
@@ -262,6 +265,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
 
     private companion object {
         val ENABLED = booleanPreferencesKey("battery_status_enabled")
+        val HAS_APPLIED = booleanPreferencesKey("battery_status_has_applied")
         val SELECTED_THEME_ID = intPreferencesKey("battery_status_selected_theme_id")
         val SELECTED_BATTERY_THEME_ID =
             intPreferencesKey("battery_status_selected_battery_theme_id")
@@ -326,3 +330,8 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             stringSetPreferencesKey("battery_status_reward_unlocked_theme_ids")
     }
 }
+
+internal fun resolveBatteryHasApplied(
+    storedHasApplied: Boolean?,
+    enabled: Boolean
+): Boolean = storedHasApplied ?: enabled

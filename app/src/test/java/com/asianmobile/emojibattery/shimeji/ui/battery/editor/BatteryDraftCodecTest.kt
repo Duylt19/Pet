@@ -14,6 +14,7 @@ class BatteryDraftCodecTest {
     fun codec_roundTrips_complete_editor_draft() {
         val config = BatteryStatusConfig(
             enabled = true,
+            hasApplied = true,
             selectedThemeId = 42,
             selectedBatteryThemeId = 27,
             selectedEmojiThemeId = 35,
@@ -79,6 +80,7 @@ class BatteryDraftCodecTest {
     @Test
     fun codec_uses_fallback_for_unknown_enum_from_older_state() {
         val fallback = BatteryStatusConfig(
+            hasApplied = true,
             dataType = BatteryDataType.G4,
             wifiIconStyleIndex = 4
         )
@@ -89,6 +91,7 @@ class BatteryDraftCodecTest {
 
         assertEquals(BatteryDataType.G4, restored?.dataType)
         assertEquals(4, restored?.wifiIconStyleIndex)
+        assertEquals(true, restored?.hasApplied)
     }
 
     @Test

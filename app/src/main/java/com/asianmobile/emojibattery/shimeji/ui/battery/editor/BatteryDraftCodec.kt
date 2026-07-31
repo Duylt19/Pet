@@ -18,6 +18,7 @@ object BatteryDraftCodec {
     fun encode(config: BatteryStatusConfig): String = JSONObject()
         .put(KEY_SCHEMA, SCHEMA_VERSION)
         .put("enabled", config.enabled)
+        .put("hasApplied", config.hasApplied)
         .put("selectedThemeId", config.selectedThemeId)
         .put("selectedBatteryThemeId", config.selectedBatteryThemeId)
         .put("selectedEmojiThemeId", config.selectedEmojiThemeId)
@@ -88,6 +89,7 @@ object BatteryDraftCodec {
             val selectedThemeId = json.int("selectedThemeId", fallback.selectedThemeId)
             fallback.copy(
                 enabled = json.boolean("enabled", fallback.enabled),
+                hasApplied = json.boolean("hasApplied", fallback.hasApplied),
                 selectedThemeId = selectedThemeId,
                 selectedBatteryThemeId = json.int(
                     "selectedBatteryThemeId",
@@ -240,5 +242,5 @@ object BatteryDraftCodec {
     }
 
     private const val KEY_SCHEMA = "schema"
-    private const val SCHEMA_VERSION = 3
+    private const val SCHEMA_VERSION = 4
 }

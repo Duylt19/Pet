@@ -17,6 +17,7 @@ import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogReposi
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryThemeAccess
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryThemeAccessPolicy
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.CURRENT_BATTERY_STYLE_ID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.UUID
@@ -78,12 +79,19 @@ class BatteryEditorViewModel @Inject constructor(
         viewModelScope.launch {
             combine(catalogRepository.snapshot, settingsRepository.config) { catalog, stored ->
                 latestStored = stored
-                val theme = catalog.themes.firstOrNull { it.id == themeId }
+                val isCurrentStyle = themeId == CURRENT_BATTERY_STYLE_ID
+                val theme = if (isCurrentStyle) {
+                    catalog.themes.firstOrNull { it.id == stored.selectedThemeId }
+                } else {
+                    catalog.themes.firstOrNull { it.id == themeId }
+                }
                 val selectedStyleId = theme?.id ?: BUILT_IN_BATTERY_THEME_ID
                 val canInitializeSelection =
-                    theme != null || themeId == BUILT_IN_BATTERY_THEME_ID
+                    !isCurrentStyle &&
+                        (theme != null || themeId == BUILT_IN_BATTERY_THEME_ID)
                 val draft = when {
                     hasLocalEdits -> _uiState.value.config
+                    isCurrentStyle -> stored
                     !hasInitializedSelection && canInitializeSelection ->
                         selectionPolicy.initializeStyle(stored, selectedStyleId)
                             .also { initialDraft ->
@@ -255,11 +263,11 @@ class BatteryEditorViewModel @Inject constructor(
     fun apply() {
         val state = _uiState.value
         if (!state.isThemeAvailable || state.assetSelectionInProgress != null) return
-        settingsRepository.applyConfig(state.config.copy(enabled = true))
+        settingsRepository.applyConfig(state.config.copy(enabled = true, hasApplied = true))
         clearDraft()
         _uiState.update {
             it.copy(
-                config = it.config.copy(enabled = true),
+                config = it.config.copy(enabled = true, hasApplied = true),
                 hasUnsavedChanges = false
             )
         }

@@ -36,6 +36,7 @@
 | `pet_position_reset_revisions` | JSON String | 12 reset revision độc lập |
 | `pet_position_reset_revision` | Int | Legacy global fallback cho migration |
 | `battery_status_enabled` | Boolean | User đã Apply battery overlay |
+| `battery_status_has_applied` | Boolean | Đã từng Apply; điều khiển card Current độc lập với trạng thái bật/tắt |
 | `battery_status_selected_theme_id` | Int | Style gốc/legacy theme ID; `0` là built-in |
 | `battery_status_selected_battery_theme_id` | Int | Theme ID cung cấp asset pin |
 | `battery_status_selected_emoji_theme_id` | Int | Theme ID cung cấp asset pet/emoji |
@@ -144,7 +145,8 @@ không được restore sau process death/reboot.
   ID được chỉnh độc lập; runtime vẽ pet chồng lên pin tại cùng trailing anchor.
 - Migration không cần DataStore transaction riêng: nếu hai key component chưa tồn tại,
   repository dùng `battery_status_selected_theme_id` cho cả hai. Draft schema 1 cũng được
-  decode theo quy tắc này; schema 2 persist rõ hai ID và schema 3 thêm các status icon style.
+  decode theo quy tắc này; schema 2 persist rõ hai ID, schema 3 thêm các status icon style
+  và schema 4 giữ trạng thái `hasApplied` trong editor draft.
 - `BatteryEditorPreviewSession` là state process-local, không persistent. Nó chỉ bridge
   draft đang edit sang Accessibility service; owner token ngăn editor cũ ghi/clear preview
   của editor mới.

@@ -674,6 +674,7 @@
     <string name="battery_search">Tìm kiểu thanh pin</string>
     <string name="battery_builtin_category">Khởi đầu</string>
     <string name="battery_builtin_theme">Xanh bạc hà</string>
+    <string name="battery_current_style">Đang dùng</string>
     <string name="battery_catalog_empty">Không có mẫu pin phù hợp với bộ lọc.</string>
     <string name="battery_catalog_local_data_hint">Không thể kết nối máy chủ Battery. Nhấn để thử lại.</string>
     <string name="battery_retry">Chạm để tải lại</string>

@@ -844,6 +844,7 @@
     <string name="battery_search">Search battery styles</string>
     <string name="battery_builtin_category">Starter</string>
     <string name="battery_builtin_theme">Cute Mint</string>
+    <string name="battery_current_style">Current</string>
     <string name="battery_catalog_empty">No battery styles match this filter.</string>
     <string name="battery_catalog_local_data_hint">The Battery server is unavailable. Tap to retry.</string>
     <string name="battery_retry">Tap to refresh</string>

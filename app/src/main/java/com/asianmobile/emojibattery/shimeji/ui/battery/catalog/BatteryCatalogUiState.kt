@@ -2,6 +2,7 @@ package com.asianmobile.emojibattery.shimeji.ui.battery.catalog
 
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogError
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 
 data class BatteryCatalogUiState(
@@ -15,10 +16,23 @@ data class BatteryCatalogUiState(
     val isPremium: Boolean = false,
     val pendingUnlockThemeId: Int? = null,
     val isRewardInProgress: Boolean = false,
+    val currentStyle: BatteryCurrentStyle? = null,
     val message: BatteryCatalogMessage? = null,
     val isLoading: Boolean = true,
     val error: BatteryCatalogError? = null
+) {
+    val showCurrentStyle: Boolean
+        get() = currentStyle != null && selectedCategoryId == null && searchQuery.isBlank()
+}
+
+data class BatteryCurrentStyle(
+    val config: BatteryStatusConfig,
+    val batteryTheme: BatteryThemeEntry?,
+    val emojiTheme: BatteryThemeEntry?,
+    val backgroundPath: String?
 )
+
+const val CURRENT_BATTERY_STYLE_ID = -1
 
 enum class BatteryCatalogMessage {
     REWARD_NOT_EARNED,

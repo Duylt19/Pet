@@ -2,6 +2,7 @@ package com.asianmobile.emojibattery.shimeji.data.model
 
 data class BatteryStatusConfig(
     val enabled: Boolean = false,
+    val hasApplied: Boolean = false,
     val selectedThemeId: Int = BUILT_IN_BATTERY_THEME_ID,
     val selectedBatteryThemeId: Int = selectedThemeId,
     val selectedEmojiThemeId: Int = selectedThemeId,
