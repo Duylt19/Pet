@@ -65,8 +65,8 @@ internal fun <T> Map<PetAction, List<T>>.normalizedRuntimeVisualFrames(
                 putIfAbsent(PetAction.FLUNG, dragged)
                 get(PetAction.BOUNCE)?.let { bounce ->
                     putIfAbsent(PetAction.CREEP, bounce)
-                    putIfAbsent(PetAction.CLIMB_CEILING, bounce)
                     bounce.lastOrNull()?.let { frame ->
+                        putIfAbsent(PetAction.CLIMB_CEILING, listOf(frame))
                         putIfAbsent(PetAction.HOLD_CEILING, listOf(frame))
                     }
                     putIfAbsent(PetAction.FLOOR_PLAY, bounce)
@@ -226,7 +226,7 @@ private fun PetPackClip.compactCeilingClimb(): PetPackClip = PetPackClip(
     action = PetAction.CLIMB_CEILING,
     loops = true,
     nextAction = null,
-    frames = frames.map { frame ->
+    frames = frames.takeLast(1).map { frame ->
         frame.copy(velocity = PetVector(x = CLIMB_VELOCITY))
     }
 )

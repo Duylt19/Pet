@@ -247,6 +247,7 @@ class PetPackEngineMapperTest {
         assertTrue(clips.getValue(PetAction.CLIMB_CEILING).frames.all {
             it.velocity == PetVector(x = 36f)
         })
+        assertEquals(1, clips.getValue(PetAction.CLIMB_CEILING).frames.size)
         assertTrue(clips.getValue(PetAction.HOLD_CEILING).frames.all {
             it.velocity == PetVector.Zero
         })
@@ -273,7 +274,7 @@ class PetPackEngineMapperTest {
         assertEquals(listOf("air-a", "air-b", "air-c"), normalized.getValue(PetAction.FLUNG))
         assertEquals(listOf("lie-a", "lie-b"), normalized.getValue(PetAction.CREEP))
         assertEquals(
-            listOf("lie-a", "lie-b"),
+            listOf("lie-b"),
             normalized.getValue(PetAction.CLIMB_CEILING)
         )
         assertEquals(listOf("lie-b"), normalized.getValue(PetAction.HOLD_CEILING))
