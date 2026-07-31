@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -41,6 +42,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -63,10 +65,16 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
@@ -75,6 +83,8 @@ import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
+
+private const val ANDROID_ASSET_URI_PREFIX = "file:///android_asset/"
 
 @Composable
 fun BatteryCatalogScreen(
@@ -468,35 +478,49 @@ private fun CurrentStylePreview(
                 modifier = Modifier.fillMaxSize()
             )
         }
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = dimensionResource(SdpR.dimen._4sdp))
+                .padding(
+                    start = dimensionResource(SdpR.dimen._6sdp),
+                    top = dimensionResource(SdpR.dimen._18sdp),
+                    end = dimensionResource(SdpR.dimen._5sdp),
+                    bottom = dimensionResource(SdpR.dimen._5sdp)
+                ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val batteryTheme = style.batteryTheme
-            val emojiTheme = style.emojiTheme
-            batteryTheme?.batteryPath?.let { path ->
-                AsyncImage(
-                    model = path,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth(0.88f)
-                        .fillMaxHeight(0.78f)
+            if (config.showTime) {
+                Text(
+                    text = stringResource(R.string.battery_preview_time),
+                    color = Color(config.foregroundColorArgb),
+                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontSize = dimensionResource(SspR.dimen._7ssp).value.sp,
+                    maxLines = 1
                 )
             }
-            emojiTheme?.emojiPath?.let { path ->
-                AsyncImage(
-                    model = path,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .fillMaxWidth(0.56f)
-                        .fillMaxHeight(0.66f)
+            if (config.showAnimation && style.animation != null) {
+                Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
+                CurrentAnimationPreview(
+                    animation = style.animation,
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
                 )
             }
+            if (config.showEmotion && style.emotionPath != null) {
+                Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
+                AsyncImage(
+                    model = style.emotionPath,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
+                )
+            }
+            Spacer(Modifier.weight(1f))
+            CurrentBatteryPair(
+                style = style,
+                modifier = Modifier
+                    .width(dimensionResource(SdpR.dimen._58sdp))
+                    .fillMaxHeight()
+            )
         }
         Text(
             text = stringResource(R.string.battery_current_style),
@@ -514,6 +538,70 @@ private fun CurrentStylePreview(
                 )
         )
     }
+}
+
+@Composable
+private fun CurrentBatteryPair(
+    style: BatteryCurrentStyle,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        style.batteryTheme?.batteryPath?.let { path ->
+            AsyncImage(
+                model = path,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.64f)
+            )
+        }
+        style.emojiTheme?.emojiPath?.let { path ->
+            AsyncImage(
+                model = path,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = dimensionResource(SdpR.dimen._8sdp))
+                    .fillMaxWidth(0.62f)
+                    .fillMaxHeight(0.74f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun CurrentAnimationPreview(
+    animation: BatteryAnimationEntry,
+    modifier: Modifier = Modifier
+) {
+    if (animation.type == BatteryAnimationType.LOTTIE) {
+        val spec = remember(animation.assetPath) {
+            animation.assetPath.toLottieCompositionSpec()
+        }
+        val composition by rememberLottieComposition(spec)
+        LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+            modifier = modifier
+        )
+    } else {
+        AsyncImage(
+            model = animation.assetPath,
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = modifier
+        )
+    }
+}
+
+private fun String.toLottieCompositionSpec(): LottieCompositionSpec = when {
+    startsWith(ANDROID_ASSET_URI_PREFIX) ->
+        LottieCompositionSpec.Asset(removePrefix(ANDROID_ASSET_URI_PREFIX))
+    startsWith("https://") || startsWith("http://") -> LottieCompositionSpec.Url(this)
+    else -> LottieCompositionSpec.File(this)
 }
 
 @Composable

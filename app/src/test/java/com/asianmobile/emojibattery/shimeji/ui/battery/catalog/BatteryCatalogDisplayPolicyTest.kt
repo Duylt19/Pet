@@ -2,8 +2,12 @@ package com.asianmobile.emojibattery.shimeji.ui.battery.catalog
 
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_CATEGORY
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogSnapshot
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
@@ -16,8 +20,22 @@ class BatteryCatalogDisplayPolicyTest {
     private val policy = BatteryCatalogDisplayPolicy()
     private val batteryTheme = theme(11, "Battery")
     private val emojiTheme = theme(12, "Emoji")
+    private val emotion = BatteryDecorationEntry(
+        id = 7,
+        name = "emotion_7",
+        assetPath = "emotion/7.png",
+        type = BatteryDecorationType.EMOTION
+    )
+    private val animation = BatteryAnimationEntry(
+        id = 8,
+        name = "cute_8.json",
+        assetPath = "animation/cute_8.json",
+        type = BatteryAnimationType.LOTTIE
+    )
     private val catalog = BatteryCatalogSnapshot(
         themes = listOf(BUILT_IN_BATTERY_THEME, batteryTheme, emojiTheme),
+        emotions = listOf(emotion),
+        animations = listOf(animation),
         isLoading = false
     )
 
@@ -47,12 +65,16 @@ class BatteryCatalogDisplayPolicyTest {
                 enabled = false,
                 hasApplied = true,
                 selectedBatteryThemeId = batteryTheme.id,
-                selectedEmojiThemeId = emojiTheme.id
+                selectedEmojiThemeId = emojiTheme.id,
+                emotionDecorationId = emotion.id,
+                animationAssetName = animation.name
             )
         )
 
         assertSame(batteryTheme, current?.batteryTheme)
         assertSame(emojiTheme, current?.emojiTheme)
+        assertEquals(emotion.assetPath, current?.emotionPath)
+        assertEquals(animation, current?.animation)
         assertEquals(
             true,
             BatteryCatalogUiState(currentStyle = current).showCurrentStyle
@@ -71,6 +93,23 @@ class BatteryCatalogDisplayPolicyTest {
                 searchQuery = "battery"
             ).showCurrentStyle
         )
+    }
+
+    @Test
+    fun disabledDecorations_areNotIncludedInCurrentPreview() {
+        val current = policy.currentStyle(
+            catalog,
+            BatteryStatusConfig(
+                hasApplied = true,
+                emotionDecorationId = emotion.id,
+                animationAssetName = animation.name,
+                showEmotion = false,
+                showAnimation = false
+            )
+        )
+
+        assertNull(current?.emotionPath)
+        assertNull(current?.animation)
     }
 
     @Test

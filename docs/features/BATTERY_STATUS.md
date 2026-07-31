@@ -7,11 +7,13 @@ Vertical slice hiện đã có trong source:
 - Home bottom navigation mở `BatteryCatalogScreen`.
 - Catalog local chuẩn hóa, search, category, Free/Premium, favorite và built-in fallback.
 - Card đầu tiên là `Current`, chỉ xuất hiện trong tab All sau lần Apply đầu tiên. Card này
-  preview toàn vùng ảnh bằng cặp pet chồng lên pin cùng background hiện đang persist, dùng
-  badge Current thay cho giờ/phần trăm thu nhỏ và mở editor
-  bằng nguyên config hiện tại. Lần đầu chưa từng Apply Battery sẽ không có card này; sau
-  lần Apply đầu tiên, `hasApplied` giữ card Current kể cả khi user tạm Turn off. Built-in
-  ID `0` chỉ còn là runtime fallback, không còn là catalog item.
+  là status bar thu nhỏ trên đúng background đang persist: giờ nằm ở leading, animation
+  và emotion đang bật nằm kế tiếp, còn pet chồng lên pin ở trailing. Asset trang trí hiện
+  tại được materialize/cache trước khi preview để Lottie/GIF không phụ thuộc trực tiếp vào
+  URL GitHub riêng tư. Badge Current và tên style/mix vẫn tách khỏi content preview, card
+  mở editor bằng nguyên config hiện tại. Lần đầu chưa từng Apply Battery sẽ không có card
+  này; sau lần Apply đầu tiên, `hasApplied` giữ card Current kể cả khi user tạm Turn off.
+  Built-in ID `0` chỉ còn là runtime fallback, không còn là catalog item.
 - Theme Premium hỗ trợ dialog Rewarded/Premium: earned reward mở khóa vĩnh viễn đúng
   theme ID trên thiết bị rồi tự mở editor; Premium bypass toàn bộ theme gate.
 - Chọn một theme trong catalog khởi tạo đúng cặp pet + pin của theme đó. Editor có hai

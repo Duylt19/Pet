@@ -28,7 +28,21 @@ class BatteryCatalogDisplayPolicy {
             },
             backgroundPath = catalog.backgrounds.firstOrNull {
                 it.id == config.backgroundDecorationId
-            }?.assetPath
+            }?.assetPath,
+            emotionPath = if (config.showEmotion) {
+                catalog.emotions.firstOrNull {
+                    it.id == config.emotionDecorationId
+                }?.assetPath
+            } else {
+                null
+            },
+            animation = if (config.showAnimation) {
+                catalog.animations.firstOrNull {
+                    it.name == config.animationAssetName
+                }
+            } else {
+                null
+            }
         )
     }
 

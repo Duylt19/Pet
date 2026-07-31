@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.ui.battery.catalog
 
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
@@ -29,7 +30,9 @@ data class BatteryCurrentStyle(
     val config: BatteryStatusConfig,
     val batteryTheme: BatteryThemeEntry?,
     val emojiTheme: BatteryThemeEntry?,
-    val backgroundPath: String?
+    val backgroundPath: String?,
+    val emotionPath: String?,
+    val animation: BatteryAnimationEntry?
 )
 
 const val CURRENT_BATTERY_STYLE_ID = -1
