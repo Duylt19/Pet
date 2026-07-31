@@ -178,7 +178,12 @@ class PetPackEngineMapperTest {
                 ),
                 PetAction.CLIMB_WALL to clip(
                     PetAction.CLIMB_WALL,
-                    listOf("shime14.png", "shime12.png", "shime13.png"),
+                    listOf(
+                        "shime14.png",
+                        "shime12.png",
+                        "shime13.png",
+                        "shime13.png"
+                    ),
                     loops = true
                 ),
                 PetAction.CLIMB_DOWN to clip(
@@ -247,7 +252,10 @@ class PetPackEngineMapperTest {
         assertTrue(clips.getValue(PetAction.CLIMB_CEILING).frames.all {
             it.velocity == PetVector(x = 36f)
         })
-        assertEquals(1, clips.getValue(PetAction.CLIMB_CEILING).frames.size)
+        assertEquals(
+            compact.clips.getValue(PetAction.CLIMB_WALL).frames.size,
+            clips.getValue(PetAction.CLIMB_CEILING).frames.size
+        )
         assertTrue(clips.getValue(PetAction.HOLD_CEILING).frames.all {
             it.velocity == PetVector.Zero
         })
@@ -261,7 +269,7 @@ class PetPackEngineMapperTest {
             PetAction.WALK to listOf("walk"),
             PetAction.FALL to listOf("fall"),
             PetAction.BOUNCE to listOf("lie-a", "lie-b"),
-            PetAction.CLIMB_WALL to listOf("wall-a", "wall-b"),
+            PetAction.CLIMB_WALL to listOf("wall-a", "wall-b", "wall-c", "wall-grip"),
             PetAction.CLIMB_DOWN to listOf("down-a", "down-b"),
             PetAction.DRAGGED to listOf("air-a", "air-b", "air-c"),
             PetAction.SPECIAL to listOf("stand", "sit", "look-a", "look-b"),
@@ -274,10 +282,10 @@ class PetPackEngineMapperTest {
         assertEquals(listOf("air-a", "air-b", "air-c"), normalized.getValue(PetAction.FLUNG))
         assertEquals(listOf("lie-a", "lie-b"), normalized.getValue(PetAction.CREEP))
         assertEquals(
-            listOf("lie-b"),
+            listOf("wall-a", "wall-b", "wall-c", "wall-grip"),
             normalized.getValue(PetAction.CLIMB_CEILING)
         )
-        assertEquals(listOf("lie-b"), normalized.getValue(PetAction.HOLD_CEILING))
+        assertEquals(listOf("wall-grip"), normalized.getValue(PetAction.HOLD_CEILING))
         assertEquals(listOf("lie-b"), normalized.getValue(PetAction.SPRAWL))
         assertEquals(listOf("look-a", "look-b"), normalized.getValue(PetAction.LOOK_UP))
         assertEquals(listOf("emote-a", "emote-b"), normalized.getValue(PetAction.EMOTE))

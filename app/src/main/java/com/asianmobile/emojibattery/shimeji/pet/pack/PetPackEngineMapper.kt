@@ -65,16 +65,19 @@ internal fun <T> Map<PetAction, List<T>>.normalizedRuntimeVisualFrames(
                 putIfAbsent(PetAction.FLUNG, dragged)
                 get(PetAction.BOUNCE)?.let { bounce ->
                     putIfAbsent(PetAction.CREEP, bounce)
-                    bounce.lastOrNull()?.let { frame ->
-                        putIfAbsent(PetAction.CLIMB_CEILING, listOf(frame))
-                        putIfAbsent(PetAction.HOLD_CEILING, listOf(frame))
-                    }
                     putIfAbsent(PetAction.FLOOR_PLAY, bounce)
                     bounce.lastOrNull()?.let { frame ->
                         putIfAbsent(PetAction.SPRAWL, listOf(frame))
                     }
                     putIfAbsent(PetAction.TRIP, dragged.take(2) + bounce)
                 }
+            }
+            get(PetAction.CLIMB_WALL)?.let { wall ->
+                putIfAbsent(PetAction.CLIMB_CEILING, wall)
+                (wall.getOrNull(OWNER_HOLD_WALL_FRAME_INDEX) ?: wall.lastOrNull())
+                    ?.let { frame ->
+                        putIfAbsent(PetAction.HOLD_CEILING, listOf(frame))
+                    }
             }
             get(PetAction.SPECIAL)?.let { special ->
                 putIfAbsent(PetAction.SIT, special.drop(1).take(1).ifEmpty { special.take(1) })
@@ -98,7 +101,7 @@ internal fun <T> Map<PetAction, List<T>>.normalizedRuntimeVisualFrames(
         }
         get(PetAction.CLIMB_CEILING)
             ?.getOrNull(OWNER_HOLD_CEILING_FRAME_INDEX)
-            ?.let { frame -> put(PetAction.HOLD_CEILING, listOf(frame)) }
+            ?.let { frame -> putIfAbsent(PetAction.HOLD_CEILING, listOf(frame)) }
     }
 }
 
@@ -139,14 +142,14 @@ private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip
                 ?.takeIf { compactLegacyProfile }
                 ?.compactCreep()
         PetAction.CLIMB_CEILING -> clips[PetAction.CLIMB_CEILING]
-            ?: clips[PetAction.BOUNCE]
+            ?: clips[PetAction.CLIMB_WALL]
                 ?.takeIf { compactLegacyProfile }
                 ?.compactCeilingClimb()
         PetAction.HOLD_CEILING -> clips[PetAction.CLIMB_CEILING]
             ?.stationaryFrameAction(PetAction.HOLD_CEILING, OWNER_HOLD_CEILING_FRAME_INDEX)
-            ?: clips[PetAction.BOUNCE]
+            ?: clips[PetAction.CLIMB_WALL]
                 ?.takeIf { compactLegacyProfile }
-                ?.stationaryFrameAction(PetAction.HOLD_CEILING, COMPACT_HOLD_FRAME_INDEX)
+                ?.compactCeilingHold()
         PetAction.TRIP -> clips[PetAction.TRIP]
             ?: clips[PetAction.DRAGGED]
                 ?.takeIf { compactLegacyProfile }
@@ -226,10 +229,21 @@ private fun PetPackClip.compactCeilingClimb(): PetPackClip = PetPackClip(
     action = PetAction.CLIMB_CEILING,
     loops = true,
     nextAction = null,
-    frames = frames.takeLast(1).map { frame ->
+    frames = frames.map { frame ->
         frame.copy(velocity = PetVector(x = CLIMB_VELOCITY))
     }
 )
+
+private fun PetPackClip.compactCeilingHold(): PetPackClip? =
+    (frames.getOrNull(OWNER_HOLD_WALL_FRAME_INDEX) ?: frames.lastOrNull())
+        ?.let { frame ->
+            PetPackClip(
+                action = PetAction.HOLD_CEILING,
+                loops = true,
+                nextAction = null,
+                frames = listOf(frame.copy(velocity = PetVector.Zero))
+            )
+        }
 
 private fun PetPackClip.compactTrip(bounce: PetPackClip): PetPackClip = PetPackClip(
     action = PetAction.TRIP,
@@ -429,7 +443,6 @@ private const val JUMP_VERTICAL_VELOCITY = -80f
 private const val TALK_WALK_VELOCITY = 24f
 private const val OWNER_HOLD_WALL_FRAME_INDEX = 3
 private const val OWNER_HOLD_CEILING_FRAME_INDEX = 2
-private const val COMPACT_HOLD_FRAME_INDEX = 1
 private const val COMPACT_POSE_FRAME_COUNT = 2
 private val OWNER_IDLE_DURATIONS = listOf(900L)
 private val OWNER_BOUNCE_DURATIONS = listOf(220L, 280L)
