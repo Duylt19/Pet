@@ -6,9 +6,9 @@ import org.junit.Test
 
 class PetSpriteTransformPolicyTest {
     @Test
-    fun `derived ceiling mirrors in screen space before canvas rotation`() {
+    fun `derived ceiling inverts regular mirror for rotated native facing`() {
         assertEquals(
-            PetSpriteTransformPolicy.DERIVED_CEILING_MIRRORED,
+            PetSpriteTransformPolicy.DERIVED_CEILING,
             spriteTransformPolicy(
                 usesDerivedCeilingVisual = true,
                 action = PetAction.CLIMB_CEILING,
@@ -18,9 +18,9 @@ class PetSpriteTransformPolicyTest {
     }
 
     @Test
-    fun `derived ceiling without mirror keeps the same top contact edge`() {
+    fun `derived ceiling applies screen space mirror for opposite direction`() {
         assertEquals(
-            PetSpriteTransformPolicy.DERIVED_CEILING,
+            PetSpriteTransformPolicy.DERIVED_CEILING_MIRRORED,
             spriteTransformPolicy(
                 usesDerivedCeilingVisual = true,
                 action = PetAction.HOLD_CEILING,

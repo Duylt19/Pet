@@ -489,10 +489,11 @@ internal fun spriteTransformPolicy(
 ): PetSpriteTransformPolicy {
     val isDerivedCeiling = usesDerivedCeilingVisual &&
         (action == PetAction.CLIMB_CEILING || action == PetAction.HOLD_CEILING)
+    val resolvedMirror = if (isDerivedCeiling) !shouldMirror else shouldMirror
     return when {
-        isDerivedCeiling && shouldMirror -> PetSpriteTransformPolicy.DERIVED_CEILING_MIRRORED
+        isDerivedCeiling && resolvedMirror -> PetSpriteTransformPolicy.DERIVED_CEILING_MIRRORED
         isDerivedCeiling -> PetSpriteTransformPolicy.DERIVED_CEILING
-        shouldMirror -> PetSpriteTransformPolicy.REGULAR_MIRRORED
+        resolvedMirror -> PetSpriteTransformPolicy.REGULAR_MIRRORED
         else -> PetSpriteTransformPolicy.REGULAR
     }
 }
