@@ -20,6 +20,7 @@ data class PetCatalogUiState(
     val preparingPetId: Int? = null,
     val localRootPath: String = "",
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
     val catalogError: OwnerPetCatalogError? = null,
     val isInstalling: Boolean = false,
     val message: PetCatalogMessage? = null

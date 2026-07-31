@@ -35,7 +35,8 @@ sang request khác.
 `RemoteOwnerPetCatalogRepository`:
 
 1. đọc và parse cache app-private trước để Catalog hiển thị ngay;
-2. chỉ revalidate GitHub tối đa một lần trong 24 giờ trên mỗi device;
+2. tự revalidate GitHub tối đa một lần trong 24 giờ trên mỗi device; nút refresh trong
+   Catalog cho phép user chủ động bỏ qua TTL nhưng vẫn tôn trọng thời gian chờ khi bị rate-limit;
 3. lưu `ETag` và gửi `If-None-Match`; response `304` chỉ cập nhật thời điểm validation,
    không tải lại JSON;
 4. lưu `Retry-After`/`X-RateLimit-Reset` khi GitHub trả `403`/`429` và không request lại
@@ -54,8 +55,11 @@ chỉ để tải lại cùng tài nguyên.
 ## UI behavior
 
 - Screen hiển thị toàn bộ 1.062 record và 269 category từ remote hoặc cached catalog.
-- Search khớp name, category hoặc creator không phân biệt hoa thường.
-- Category rail có `All`, sau đó sort theo số pet và tên.
+- Search chuẩn hóa hoa thường/dấu, khớp từng token trong name/category/creator và alias tự
+  nhiên; `WC 2026` tìm được bằng `world cup`, `football`, `soccer` hoặc `bóng đá`.
+- Category rail có `All`, tiếp theo là category nổi bật `WC 2026`, rồi các category còn lại
+  sort theo số pet và tên.
+- Top bar có refresh thủ công để QA/user lấy catalog mới ngay mà không phải xóa app data.
 - `Set` tải đúng một ZIP, verify integrity, normalize/install và chọn đúng slot.
 - Add flow chỉ tăng `petCount` sau khi Set/Import thành công; Back không tạo pet.
 - Với Mixed, Catalog cho slot 1–3 đi thẳng; slot 4–12 chỉ cho Set/Import sau khi đúng

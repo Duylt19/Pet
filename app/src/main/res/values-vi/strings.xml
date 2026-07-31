@@ -213,6 +213,7 @@
     <string name="pet_catalog_mixed_slot_watch_reward">Xem video để mở khóa</string>
     <string name="pet_catalog_mixed_slot_premium_hint">Premium tự động mở khóa toàn bộ 12 slot Mixed.</string>
     <string name="pet_catalog_mixed_slot_previous_required">Hãy thêm slot pet trước đó trước khi mở khóa slot này.</string>
+    <string name="pet_catalog_refresh">Làm mới danh sách pet</string>
     <string name="pet_detail_unlock_slot_first">Hãy mở khóa slot pet này trước</string>
     <string name="pet_detail_select_for_slot">Dùng cho Pet %1$d</string>
     <string name="pet_detail_select_for_swarm">Dùng cho Bầy đàn Pet</string>

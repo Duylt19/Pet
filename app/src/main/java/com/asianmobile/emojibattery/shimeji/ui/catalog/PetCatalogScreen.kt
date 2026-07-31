@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -171,6 +172,11 @@ private fun PetCatalogContent(
             onBack = onBack,
             trailing = {
                 if (!uiState.requiresMixedSlotReward) {
+                    RefreshButton(
+                        isRefreshing = uiState.isRefreshing,
+                        onRefresh = onRetry
+                    )
+                    Spacer(Modifier.size(dimensionResource(SdpR.dimen._4sdp)))
                     ImportButton(
                         isInstalling = uiState.isInstalling,
                         onImport = onImport
@@ -302,6 +308,27 @@ private fun MixedSlotRewardGate(
                 .clickable(onClick = onPremium)
                 .padding(dimensionResource(SdpR.dimen._10sdp))
         )
+    }
+}
+
+@Composable
+private fun RefreshButton(isRefreshing: Boolean, onRefresh: () -> Unit) {
+    IconButton(
+        onClick = onRefresh,
+        enabled = !isRefreshing
+    ) {
+        if (isRefreshing) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._16sdp)),
+                strokeWidth = dimensionResource(SdpR.dimen._2sdp),
+                color = colorResource(R.color.colors_7B61FF)
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.Refresh,
+                contentDescription = stringResource(R.string.pet_catalog_refresh)
+            )
+        }
     }
 }
 

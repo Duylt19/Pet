@@ -41,6 +41,12 @@ class GithubPetCatalogClient @Inject constructor(
             retryAfterEpochMillis = metadata.retryAfterEpochMillis
         )
 
+    fun canForceRefreshCatalog(metadata: PetCatalogCacheMetadata): Boolean =
+        PetCatalogRefreshPolicy.canForceRefresh(
+            nowEpochMillis = System.currentTimeMillis(),
+            retryAfterEpochMillis = metadata.retryAfterEpochMillis
+        )
+
     fun fetchCatalog(etag: String?): PetCatalogFetchResult = runCatching {
         val connection = openConnection(PetServerConfig.CATALOG_URL)
         try {

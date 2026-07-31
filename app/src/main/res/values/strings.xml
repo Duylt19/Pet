@@ -509,6 +509,7 @@
     <string name="pet_detail_select_for_swarm">Use for Pet Swarm</string>
     <string name="pet_catalog_search_hint">Search pets, categories, or creators</string>
     <string name="pet_catalog_clear_search">Clear pet search</string>
+    <string name="pet_catalog_refresh">Refresh pet catalog</string>
     <string name="pet_catalog_all_category">All (%1$d)</string>
     <string name="pet_catalog_category_with_count">%1$s (%2$d)</string>
     <plurals name="pet_catalog_result_count">

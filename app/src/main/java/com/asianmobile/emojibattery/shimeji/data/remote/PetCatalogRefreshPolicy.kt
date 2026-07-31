@@ -17,6 +17,11 @@ internal object PetCatalogRefreshPolicy {
         return nowEpochMillis - lastValidatedAtEpochMillis >= REFRESH_INTERVAL_MILLIS
     }
 
+    fun canForceRefresh(
+        nowEpochMillis: Long,
+        retryAfterEpochMillis: Long
+    ): Boolean = nowEpochMillis >= retryAfterEpochMillis
+
     fun rateLimitRetryAt(
         nowEpochMillis: Long,
         retryAfterSeconds: String?,

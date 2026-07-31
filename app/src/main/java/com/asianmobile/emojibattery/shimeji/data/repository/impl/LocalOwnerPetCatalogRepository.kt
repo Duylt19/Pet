@@ -36,7 +36,7 @@ class LocalOwnerPetCatalogRepository @Inject constructor(
         scope.launch { refresh() }
     }
 
-    override suspend fun refresh() = withContext(Dispatchers.IO) {
+    override suspend fun refresh(force: Boolean) = withContext(Dispatchers.IO) {
         val root = localRoot()
         if (root == null) {
             _snapshot.value = OwnerPetCatalogSnapshot(

@@ -207,9 +207,14 @@ class PetCatalogViewModel @Inject constructor(
     }
 
     fun refreshCatalog() {
+        if (_uiState.value.isRefreshing) return
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, catalogError = null) }
-            ownerCatalogRepository.refresh()
+            _uiState.update { it.copy(isRefreshing = true, catalogError = null) }
+            try {
+                ownerCatalogRepository.refresh(force = true)
+            } finally {
+                _uiState.update { it.copy(isRefreshing = false) }
+            }
         }
     }
 

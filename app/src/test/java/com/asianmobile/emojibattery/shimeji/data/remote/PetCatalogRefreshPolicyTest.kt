@@ -7,6 +7,22 @@ import org.junit.Test
 
 class PetCatalogRefreshPolicyTest {
     @Test
+    fun `force refresh bypasses freshness but respects rate limit delay`() {
+        assertTrue(
+            PetCatalogRefreshPolicy.canForceRefresh(
+                nowEpochMillis = 10_000L,
+                retryAfterEpochMillis = 0L
+            )
+        )
+        assertFalse(
+            PetCatalogRefreshPolicy.canForceRefresh(
+                nowEpochMillis = 10_000L,
+                retryAfterEpochMillis = 10_001L
+            )
+        )
+    }
+
+    @Test
     fun `catalog without a successful validation refreshes immediately`() {
         assertTrue(
             PetCatalogRefreshPolicy.shouldRefresh(

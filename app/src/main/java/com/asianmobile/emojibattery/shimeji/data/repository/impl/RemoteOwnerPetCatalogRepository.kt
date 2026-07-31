@@ -38,7 +38,7 @@ class RemoteOwnerPetCatalogRepository @Inject constructor(
         scope.launch { refresh() }
     }
 
-    override suspend fun refresh() = withContext(Dispatchers.IO) {
+    override suspend fun refresh(force: Boolean) = withContext(Dispatchers.IO) {
         refreshMutex.withLock {
             _snapshot.value = _snapshot.value.copy(isLoading = true, error = null)
 
@@ -50,7 +50,12 @@ class RemoteOwnerPetCatalogRepository @Inject constructor(
             if (cachedDocument != null) {
                 _snapshot.value = cachedDocument.toSnapshot()
             }
-            if (!client.shouldRefreshCatalog(metadata)) {
+            val shouldFetch = if (force) {
+                client.canForceRefreshCatalog(metadata)
+            } else {
+                client.shouldRefreshCatalog(metadata)
+            }
+            if (!shouldFetch) {
                 if (cachedDocument == null) {
                     _snapshot.value = errorSnapshot(
                         OwnerPetCatalogError.REMOTE_CATALOG_UNAVAILABLE
