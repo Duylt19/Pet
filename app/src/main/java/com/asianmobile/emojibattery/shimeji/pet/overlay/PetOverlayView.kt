@@ -471,9 +471,10 @@ internal class PetOverlayView(
 
     private companion object {
         const val MILLIS_PER_SECOND = 1_000
-        const val DERIVED_CEILING_ROTATION_DEGREES = -90f
     }
 }
+
+internal const val DERIVED_CEILING_ROTATION_DEGREES = 90f
 
 internal enum class PetSpriteTransformPolicy {
     REGULAR,

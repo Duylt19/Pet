@@ -62,8 +62,9 @@ tạo alias runtime từ chính sprite trong pack: drag cho `JUMP`/`FLUNG`, boun
 `SIT`/`LOOK_UP`/`TAPPED`/`EMOTE`. Alias chỉ thay timeline, velocity và semantic action;
 không sinh ảnh giả, không sửa manifest trên disk và áp dụng cả với pack revision 7 đã
 cài. Vì vậy các pet compact tham gia được combo bay, nhảy và recovery thay vì chỉ đi tới
-biên rồi lặp leo tường. Renderer xoay riêng chuỗi wall-climb dẫn xuất `-90°` để cạnh bám
-tường trở thành cạnh bám trần. Khi đổi hướng, mirror được ghép trong screen space sau
+biên rồi lặp leo tường. Frame 12–14 có tay/mặt ở cạnh trái và lưng ở cạnh phải; renderer
+xoay chuỗi wall-climb dẫn xuất `+90°` theo hệ tọa độ Android để cạnh tay trái trở thành
+cạnh bám trần. Khi đổi hướng, mirror được ghép trong screen space sau
 phép xoay về mặt hình học, nên cả hai hướng vẫn giữ cùng cạnh tiếp xúc phía trên; pack có
 frame ceiling gốc vẫn render nguyên trạng. Vì phép xoay wall pose đổi native facing trên
 trục ngang, derived ceiling đảo điều kiện mirror so với WALK để đầu pet luôn cùng hướng
