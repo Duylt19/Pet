@@ -54,6 +54,19 @@ alias semantic chỉ cho owner pack: `EMOTE` từ clip `wink` frame 15/17, `FLOO
 và `HOLD_CEILING` từ frame bám trần 23. Nhờ vậy combo không còn dùng pose chơi chân trên
 sàn để giả bám tường/trần.
 
+Owner pack compact 24-frame như supplement WC 2026 không có frame jump 22 và nhiều
+pose của contract 46-frame. Mapper nhận diện profile này bằng tập action thực có, rồi
+tạo alias runtime từ chính sprite trong pack: drag cho `JUMP`/`FLUNG`, bounce nằm cho
+`CREEP`/`FLOOR_PLAY`/`SPRAWL`/`TRIP`, và hai sequence Special cho
+`SIT`/`LOOK_UP`/`TAPPED`/`EMOTE`. Alias chỉ thay timeline, velocity và semantic action;
+không sinh ảnh giả, không sửa manifest trên disk và áp dụng cả với pack revision 7 đã
+cài. Vì vậy các pet compact tham gia được combo bay, nhảy và recovery thay vì chỉ đi tới
+biên rồi lặp leo tường.
+
+Khi pet đổi từ `CLIMB_WALL` sang `CLIMB_DOWN`, engine giữ hướng sprite nhìn vào tường
+trong suốt đoạn đi xuống. Hướng chỉ quay vào viewport sau khi rời wall action để
+fall/walk; điều này tránh mirror frame leo thành tư thế quay lưng vào tường.
+
 Wink/bounce/trip/jump/tapped có nhịp đọc được; Special dùng sequence một chiều
 `420/480/560/680/860 ms` và playback `PLAY_ONCE`, sau đó chuyển sang beat recovery riêng
 thay vì giữ vô hạn endpoint không ổn định. `SPECIAL_2` loại các frame lặp ngược theo file

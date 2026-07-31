@@ -552,13 +552,17 @@ class PetEngine(
         if (transitionState.action == resolvedAction && !restartAnimation) {
             return PetTransition(transitionState)
         }
-        val directedState = if (resolvedAction.isSpeechAction &&
-            !transitionState.action.isSpeechAction &&
-            transitionState.activeComboId !in SOCIAL_SPEECH_COMBOS
-        ) {
-            transitionState.faceViewportCenter()
-        } else {
-            transitionState
+        val directedState = when {
+            transitionState.action == PetAction.CLIMB_DOWN &&
+                resolvedAction != PetAction.CLIMB_DOWN -> transitionState.faceViewportCenter()
+
+            resolvedAction.isSpeechAction &&
+                !transitionState.action.isSpeechAction &&
+                transitionState.activeComboId !in SOCIAL_SPEECH_COMBOS -> {
+                transitionState.faceViewportCenter()
+            }
+
+            else -> transitionState
         }
         return PetTransition(
             state = directedState.copy(
@@ -1045,7 +1049,11 @@ class PetEngine(
             }
             else -> preferredAction(PetAction.FALL, PetAction.WALK)
         }
-        val exiting = chance.state.faceViewportCenter()
+        val exiting = if (nextAction == PetAction.CLIMB_DOWN) {
+            chance.state
+        } else {
+            chance.state.faceViewportCenter()
+        }
         val changed = changeAction(exiting.cancelRoutine(), nextAction)
         return changed.copy(effects = effects + changed.effects)
     }

@@ -37,6 +37,9 @@ internal fun PetPackManifest.toEngineSupportedActions(): Set<PetAction> = buildS
         add(PetAction.TALK_WALK)
     }
     if (id.startsWith(OWNER_SHIMEJI_PACK_PREFIX)) {
+        if (clips.keys.hasCompactLegacyActionProfile()) {
+            addAll(COMPACT_LEGACY_DERIVED_ACTIONS)
+        }
         if (PetAction.WINK in clips) add(PetAction.EMOTE)
         if (PetAction.DANGLE in clips) add(PetAction.FLOOR_PLAY)
         if (PetAction.CREEP in clips) add(PetAction.SPRAWL)
@@ -51,6 +54,28 @@ internal fun <T> Map<PetAction, List<T>>.normalizedRuntimeVisualFrames(
     if (!packId.startsWith(OWNER_SHIMEJI_PACK_PREFIX)) return this
     return buildMap {
         putAll(this@normalizedRuntimeVisualFrames)
+        if (keys.hasCompactLegacyActionProfile()) {
+            get(PetAction.DRAGGED)?.let { dragged ->
+                putIfAbsent(PetAction.JUMP, dragged.take(1))
+                putIfAbsent(PetAction.FLUNG, dragged)
+                get(PetAction.BOUNCE)?.let { bounce ->
+                    putIfAbsent(PetAction.CREEP, bounce)
+                    putIfAbsent(PetAction.FLOOR_PLAY, bounce)
+                    bounce.lastOrNull()?.let { frame ->
+                        putIfAbsent(PetAction.SPRAWL, listOf(frame))
+                    }
+                    putIfAbsent(PetAction.TRIP, dragged.take(2) + bounce)
+                }
+            }
+            get(PetAction.SPECIAL)?.let { special ->
+                putIfAbsent(PetAction.SIT, special.drop(1).take(1).ifEmpty { special.take(1) })
+                putIfAbsent(PetAction.LOOK_UP, special.takeLast(2))
+            }
+            get(PetAction.SPECIAL_2)?.distinct()?.let { special ->
+                putIfAbsent(PetAction.TAPPED, special.take(2))
+                putIfAbsent(PetAction.EMOTE, special.takeLast(2))
+            }
+        }
         get(PetAction.WALK)?.firstOrNull()?.let { frame ->
             put(PetAction.IDLE, listOf(frame))
         }
@@ -69,6 +94,8 @@ internal fun <T> Map<PetAction, List<T>>.normalizedRuntimeVisualFrames(
 }
 
 private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip? {
+    val compactLegacyProfile = id.startsWith(OWNER_SHIMEJI_PACK_PREFIX) &&
+        clips.keys.hasCompactLegacyActionProfile()
     val normalized = when (action) {
         PetAction.TALK -> clips[PetAction.TALK]?.let { clip ->
             clip.copy(frames = clip.frames.take(1))
@@ -90,9 +117,44 @@ private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip
                     )
                 }
 
+        PetAction.JUMP -> clips[PetAction.JUMP]
+            ?: clips[PetAction.DRAGGED]
+                ?.takeIf { compactLegacyProfile }
+                ?.compactJump()
+        PetAction.FLUNG -> clips[PetAction.FLUNG]
+            ?: clips[PetAction.DRAGGED]
+                ?.takeIf { compactLegacyProfile }
+                ?.compactFlung()
+        PetAction.CREEP -> clips[PetAction.CREEP]
+            ?: clips[PetAction.BOUNCE]
+                ?.takeIf { compactLegacyProfile }
+                ?.compactCreep()
+        PetAction.TRIP -> clips[PetAction.TRIP]
+            ?: clips[PetAction.DRAGGED]
+                ?.takeIf { compactLegacyProfile }
+                ?.compactTrip(clips.getValue(PetAction.BOUNCE))
+        PetAction.SIT -> clips[PetAction.SIT]
+            ?: clips[PetAction.SPECIAL]
+                ?.takeIf { compactLegacyProfile }
+                ?.compactPose(PetAction.SIT, takeLast = false)
+        PetAction.LOOK_UP -> clips[PetAction.LOOK_UP]
+            ?: clips[PetAction.SPECIAL]
+                ?.takeIf { compactLegacyProfile }
+                ?.compactPose(PetAction.LOOK_UP)
+        PetAction.TAPPED -> clips[PetAction.TAPPED]
+            ?: clips[PetAction.SPECIAL_2]
+                ?.takeIf { compactLegacyProfile }
+                ?.compactPose(PetAction.TAPPED, takeLast = false)
         PetAction.EMOTE -> clips[PetAction.WINK]?.derivedAction(PetAction.EMOTE)
+            ?: clips[PetAction.SPECIAL_2]
+                ?.takeIf { compactLegacyProfile }
+                ?.compactPose(PetAction.EMOTE)
         PetAction.FLOOR_PLAY -> clips[PetAction.DANGLE]?.derivedAction(PetAction.FLOOR_PLAY)
-        PetAction.SPRAWL -> clips[PetAction.CREEP]
+            ?: clips[PetAction.BOUNCE]
+                ?.takeIf { compactLegacyProfile }
+                ?.compactFloorPlay()
+        PetAction.SPRAWL -> (clips[PetAction.CREEP]
+            ?: clips[PetAction.BOUNCE]?.takeIf { compactLegacyProfile })
             ?.frames
             ?.lastOrNull()
             ?.copy(velocity = PetVector.Zero)
@@ -121,6 +183,64 @@ private fun PetPackManifest.normalizedSourceClip(action: PetAction): PetPackClip
 }
 
 private fun PetPackClip.derivedAction(action: PetAction): PetPackClip = copy(action = action)
+
+private fun PetPackClip.compactJump(): PetPackClip = PetPackClip(
+    action = PetAction.JUMP,
+    loops = false,
+    nextAction = PetAction.FALL,
+    frames = frames.take(1).map { frame ->
+        frame.copy(velocity = PetVector(JUMP_HORIZONTAL_VELOCITY, JUMP_VERTICAL_VELOCITY))
+    }
+)
+
+private fun PetPackClip.compactFlung(): PetPackClip = PetPackClip(
+    action = PetAction.FLUNG,
+    loops = true,
+    nextAction = null,
+    frames = frames.map { frame -> frame.copy(velocity = PetVector.Zero) }
+)
+
+private fun PetPackClip.compactCreep(): PetPackClip = PetPackClip(
+    action = PetAction.CREEP,
+    loops = true,
+    nextAction = null,
+    frames = frames.map { frame -> frame.copy(velocity = PetVector(x = CREEP_VELOCITY)) }
+)
+
+private fun PetPackClip.compactTrip(bounce: PetPackClip): PetPackClip = PetPackClip(
+    action = PetAction.TRIP,
+    loops = false,
+    nextAction = PetAction.WALK,
+    frames = (frames.take(2) + bounce.frames).map { frame ->
+        frame.copy(velocity = PetVector.Zero)
+    }
+)
+
+private fun PetPackClip.compactPose(
+    action: PetAction,
+    takeLast: Boolean = true
+): PetPackClip {
+    val distinctFrames = frames.distinctBy(PetPackFrame::file)
+    val selectedFrames = if (takeLast) {
+        distinctFrames.takeLast(COMPACT_POSE_FRAME_COUNT)
+    } else {
+        distinctFrames.drop(1).take(COMPACT_POSE_FRAME_COUNT)
+            .ifEmpty { distinctFrames.take(COMPACT_POSE_FRAME_COUNT) }
+    }
+    return PetPackClip(
+        action = action,
+        loops = false,
+        nextAction = PetAction.WALK,
+        frames = selectedFrames.map { frame -> frame.copy(velocity = PetVector.Zero) }
+    )
+}
+
+private fun PetPackClip.compactFloorPlay(): PetPackClip = PetPackClip(
+    action = PetAction.FLOOR_PLAY,
+    loops = true,
+    nextAction = null,
+    frames = frames.map { frame -> frame.copy(velocity = PetVector.Zero) }
+)
 
 private fun PetPackClip.stationaryFrameAction(
     action: PetAction,
@@ -285,6 +405,7 @@ private const val JUMP_VERTICAL_VELOCITY = -80f
 private const val TALK_WALK_VELOCITY = 24f
 private const val OWNER_HOLD_WALL_FRAME_INDEX = 3
 private const val OWNER_HOLD_CEILING_FRAME_INDEX = 2
+private const val COMPACT_POSE_FRAME_COUNT = 2
 private val OWNER_IDLE_DURATIONS = listOf(900L)
 private val OWNER_BOUNCE_DURATIONS = listOf(220L, 280L)
 private val OWNER_WINK_DURATIONS = listOf(350L, 550L)
@@ -309,3 +430,27 @@ private val ONE_SHOT_FALLBACK_ACTIONS = setOf(
     PetAction.SPECIAL_2,
     PetAction.TAPPED
 )
+private val COMPACT_LEGACY_REQUIRED_ACTIONS = setOf(
+    PetAction.DRAGGED,
+    PetAction.FALL,
+    PetAction.BOUNCE,
+    PetAction.CLIMB_WALL,
+    PetAction.CLIMB_DOWN,
+    PetAction.SPECIAL,
+    PetAction.SPECIAL_2
+)
+private val COMPACT_LEGACY_DERIVED_ACTIONS = setOf(
+    PetAction.JUMP,
+    PetAction.FLUNG,
+    PetAction.CREEP,
+    PetAction.TRIP,
+    PetAction.SIT,
+    PetAction.LOOK_UP,
+    PetAction.TAPPED,
+    PetAction.EMOTE,
+    PetAction.FLOOR_PLAY,
+    PetAction.SPRAWL
+)
+
+private fun Set<PetAction>.hasCompactLegacyActionProfile(): Boolean =
+    PetAction.JUMP !in this && containsAll(COMPACT_LEGACY_REQUIRED_ACTIONS)

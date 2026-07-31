@@ -166,6 +166,109 @@ class PetPackEngineMapperTest {
     }
 
     @Test
+    fun `compact owner pack derives playful actions from its real available frames`() {
+        val base = manifest()
+        val compact = base.copy(
+            id = "owner.shimeji.2001",
+            clips = base.clips + mapOf(
+                PetAction.FALL to clip(PetAction.FALL, listOf("shime4.png")),
+                PetAction.BOUNCE to clip(
+                    PetAction.BOUNCE,
+                    listOf("shime18.png", "shime19.png")
+                ),
+                PetAction.CLIMB_WALL to clip(
+                    PetAction.CLIMB_WALL,
+                    listOf("shime14.png", "shime12.png", "shime13.png"),
+                    loops = true
+                ),
+                PetAction.CLIMB_DOWN to clip(
+                    PetAction.CLIMB_DOWN,
+                    listOf("shime14.png", "shime13.png", "shime12.png"),
+                    loops = true
+                ),
+                PetAction.DRAGGED to clip(
+                    PetAction.DRAGGED,
+                    listOf("shime7.png", "shime5.png", "shime6.png", "shime8.png"),
+                    loops = true
+                ),
+                PetAction.SPECIAL to clip(
+                    PetAction.SPECIAL,
+                    listOf(
+                        "shime1.png",
+                        "shime38.png",
+                        "shime39.png",
+                        "shime40.png",
+                        "shime41.png"
+                    )
+                ),
+                PetAction.SPECIAL_2 to clip(
+                    PetAction.SPECIAL_2,
+                    listOf(
+                        "shime42.png",
+                        "shime43.png",
+                        "shime44.png",
+                        "shime45.png",
+                        "shime46.png"
+                    )
+                )
+            )
+        )
+
+        val supported = compact.toEngineSupportedActions()
+        val clips = compact.toEngineClips()
+
+        assertTrue(supported.containsAll(
+            setOf(
+                PetAction.JUMP,
+                PetAction.FLUNG,
+                PetAction.CREEP,
+                PetAction.TRIP,
+                PetAction.SIT,
+                PetAction.LOOK_UP,
+                PetAction.TAPPED,
+                PetAction.EMOTE,
+                PetAction.FLOOR_PLAY,
+                PetAction.SPRAWL
+            )
+        ))
+        assertEquals(
+            PetVector(110f, -80f),
+            clips.getValue(PetAction.JUMP).frames.single().velocity
+        )
+        assertEquals(PetAction.FALL, clips.getValue(PetAction.JUMP).nextAction)
+        assertTrue(clips.getValue(PetAction.FLUNG).frames.all {
+            it.velocity == PetVector.Zero
+        })
+        assertTrue(clips.getValue(PetAction.CREEP).frames.all {
+            it.velocity == PetVector(x = 16f)
+        })
+    }
+
+    @Test
+    fun `compact owner pack renders derived action frames without reinstalling`() {
+        val frames = mapOf(
+            PetAction.IDLE to listOf("idle"),
+            PetAction.WALK to listOf("walk"),
+            PetAction.FALL to listOf("fall"),
+            PetAction.BOUNCE to listOf("lie-a", "lie-b"),
+            PetAction.CLIMB_WALL to listOf("wall-a", "wall-b"),
+            PetAction.CLIMB_DOWN to listOf("down-a", "down-b"),
+            PetAction.DRAGGED to listOf("air-a", "air-b", "air-c"),
+            PetAction.SPECIAL to listOf("stand", "sit", "look-a", "look-b"),
+            PetAction.SPECIAL_2 to listOf("tap-a", "tap-b", "emote-a", "emote-b")
+        )
+
+        val normalized = frames.normalizedRuntimeVisualFrames("owner.shimeji.2001")
+
+        assertEquals(listOf("air-a"), normalized.getValue(PetAction.JUMP))
+        assertEquals(listOf("air-a", "air-b", "air-c"), normalized.getValue(PetAction.FLUNG))
+        assertEquals(listOf("lie-a", "lie-b"), normalized.getValue(PetAction.CREEP))
+        assertEquals(listOf("lie-b"), normalized.getValue(PetAction.SPRAWL))
+        assertEquals(listOf("look-a", "look-b"), normalized.getValue(PetAction.LOOK_UP))
+        assertEquals(listOf("emote-a", "emote-b"), normalized.getValue(PetAction.EMOTE))
+    }
+
+    @Test
     fun `legacy manifest receives safe runtime fall and climb fallback clips`() {
         val clips = manifest().toEngineClips()
 

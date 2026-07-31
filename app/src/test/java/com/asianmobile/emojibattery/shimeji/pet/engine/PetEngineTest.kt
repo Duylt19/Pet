@@ -1019,7 +1019,7 @@ class PetEngineTest {
     }
 
     @Test
-    fun `wall climber can reverse into a controlled descent`() {
+    fun `wall climber keeps facing the wall during a controlled descent`() {
         val engine = PetEngine(
             PetEngineConfig(
                 behaviorProfile = behaviorProfile(
@@ -1040,7 +1040,28 @@ class PetEngineTest {
         val descending = engine.reduce(climbing, PetEvent.Tick(100))
 
         assertEquals(PetAction.CLIMB_DOWN, descending.state.action)
-        assertEquals(PetDirection.LEFT, descending.state.direction)
+        assertEquals(PetDirection.RIGHT, descending.state.direction)
+    }
+
+    @Test
+    fun `wall descender faces into viewport after leaving the wall`() {
+        val engine = PetEngine(
+            PetEngineConfig(
+                behaviorProfile = behaviorProfile(wallDurationMillis = 100L..100L)
+            )
+        )
+        val descending = engine.initialState(
+            PetBounds(0f, 0f, 1_000f, 1_000f),
+            size,
+            position = PetVector(980f, 500f),
+            action = PetAction.CLIMB_DOWN,
+            direction = PetDirection.RIGHT
+        )
+
+        val dropped = engine.reduce(descending, PetEvent.Tick(100))
+
+        assertEquals(PetAction.FALL, dropped.state.action)
+        assertEquals(PetDirection.LEFT, dropped.state.direction)
     }
 
     @Test
