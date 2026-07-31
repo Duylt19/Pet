@@ -134,9 +134,10 @@ Before release hardening, complete the clean-room parity items confirmed by the 
   `IeOffsetX=0/IeOffsetY=-64` carried-window geometry, mirror the box with pet direction,
   keep it synchronized with pet movement and discard text when its owner leaves TALK.
 - [Done] Add per-pet TALK holding anchors: audit frame 34 server-side, persist metadata
-  for 631 supported pets in owner revision 7, keep default placement for 395 unsupported
-  pets, enrich previously installed owner revisions from catalog at Start, mirror with
-  direction and render the sprite above the speech box.
+  for 631 supported pets in owner revision 7, keep default placement for 443 unsupported
+  pets (including 48 static WC 2026 packs without TALK), enrich previously installed owner
+  revisions from catalog at Start, mirror with direction and render the sprite above the
+  speech box.
 - [Done] Redesign Pet Speech V3.10 choreography: gate every message behind the actual
   TALK frame, add one deliberate 9–11 second speech beat only to speaking combos, keep
   physical combos silent and render a sharp rectangular carried box without a tail.
@@ -171,6 +172,8 @@ Before release hardening, complete the clean-room parity items confirmed by the 
 - [Done] Import the 1.026-pack owner snapshot into the private GitHub static server with
   versioned catalog, relative raw paths, byte sizes and SHA-256; fetch/cache metadata,
   authenticate thumbnails and download/verify only the selected ZIP.
+- [Done] Add 48 reviewed WC 2026 static pets as a provenance-tracked supplement with
+  collision-free server IDs, normalized Shimeji movement frames and no synthetic TALK.
 
 - Map entitlement free/premium lên catalog/slot/animation; billing failure không phá pet đang chạy.
 - Chỉ thêm ads placement khi có screen code/policy được owner duyệt; không đặt ad trong overlay.

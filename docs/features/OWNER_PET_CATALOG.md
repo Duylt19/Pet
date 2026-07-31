@@ -12,11 +12,13 @@ Server-Emoji-Battery-Shimeji-Pet-AM/
 └── thumb/<petId>.png
 ```
 
-`json/pets.json` schema v1 chứa `catalogVersion`, source commit, 268 category và 1.026
-record. Mỗi record giữ identity/name/category/author cùng relative path, byte size và SHA-256
-của thumbnail/ZIP. Optional `speechAnchor` giữ tọa độ góc khuyết chuẩn hóa cho 631 pet
-được detector xác nhận; 395 pet còn lại không có field này. `speech-anchors.json` lưu thêm
-pixel nguồn/kích thước để audit, còn app chỉ đọc field gọn trong `pets.json`.
+`json/pets.json` schema v1 chứa `catalogVersion`, source provenance, 269 category và 1.074
+record. Trong đó có 1.026 pack hoạt ảnh gốc và supplement 48 pet tĩnh `WC 2026` được map
+sang server ID `2000..2047` để không đụng ID nguồn hiện hữu. Mỗi record giữ
+identity/name/category/author cùng relative path, byte size và SHA-256 của thumbnail/ZIP.
+Optional `speechAnchor` giữ tọa độ góc khuyết chuẩn hóa cho 631 pet được detector xác nhận;
+443 pet còn lại không có field này. `speech-anchors.json` lưu thêm pixel nguồn/kích thước
+để audit, còn app chỉ đọc field gọn trong `pets.json`.
 
 App dùng raw base URL:
 
@@ -44,13 +46,13 @@ sang request khác.
 8. stream download với giới hạn 20 MiB, kiểm tra declared size + SHA-256;
 9. chỉ đưa ZIP hợp lệ qua `LegacyShimejiPackInstaller`.
 
-Thumbnail được Coil tải lazy và dùng disk cache. Catalog không preload 1.026 thumbnail/ZIP.
+Thumbnail được Coil tải lazy và dùng disk cache. Catalog không preload 1.074 thumbnail/ZIP.
 URL thumbnail ổn định nên memory/disk cache được tái sử dụng trên cùng device; không thêm Glide
 chỉ để tải lại cùng tài nguyên.
 
 ## UI behavior
 
-- Screen hiển thị toàn bộ 1.026 record và 268 category từ remote hoặc cached catalog.
+- Screen hiển thị toàn bộ 1.074 record và 269 category từ remote hoặc cached catalog.
 - Search khớp name, category hoặc creator không phân biệt hoa thường.
 - Category rail có `All`, sau đó sort theo số pet và tên.
 - `Set` tải đúng một ZIP, verify integrity, normalize/install và chọn đúng slot.
@@ -78,6 +80,12 @@ PNG của pack `136`. Installer copy optional server anchor vào manifest; khôn
 bitmap. Pinned source ZIP không bị mutate. Installed revision cũ vẫn đọc được và nhận
 canonical anchor theo pet ID trong memory khi overlay Start, không cần download/`Set` lại.
 
+Supplement WC 2026 được server chuẩn hóa trước thành canvas 128×128, căn giữa/chạm đáy và
+chứa các frame contract cần cho di chuyển, leo, rơi, kéo và nhảy. Các frame dùng chung ảnh
+tĩnh trong suốt; frame 34–36 bị loại bỏ nên installer không tạo TALK/TALK_WALK hoặc
+speech anchor giả. App dùng cùng download, SHA-256, installer và runtime path như mọi owner
+pack khác; không nhúng thêm ảnh bóng đá vào APK.
+
 ## Source snapshot và server import
 
 Owner-authorized source snapshot vẫn nằm ngoài app Git dưới `private_data/`. Server pipeline
@@ -88,11 +96,12 @@ Server validator đối chiếu:
 
 - schema/catalog version;
 - unique ID và metadata bắt buộc;
-- đúng 1.026 record, 2.052 asset;
+- đúng 1.074 record, 2.148 asset, trong đó supplement WC 2026 có đúng 48 record;
 - path theo ID;
 - category counts;
 - file existence, byte size và SHA-256.
 - per-pet speech anchor khớp lại detector và audit JSON.
+- supplement ID/provenance, mapping ID, canvas/frame contract và không có TALK giả.
 
 Local device sync tool vẫn tồn tại để audit/debug snapshot độc lập, nhưng không còn là data
 source production.

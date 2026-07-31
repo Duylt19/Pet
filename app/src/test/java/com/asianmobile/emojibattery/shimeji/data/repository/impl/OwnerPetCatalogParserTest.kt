@@ -87,6 +87,49 @@ class OwnerPetCatalogParserTest {
     }
 
     @Test
+    fun `parseDocument accepts football supplement records from the server catalog`() {
+        val document = parser.parseDocument(
+            """
+            {
+              "schemaVersion": 1,
+              "catalogVersion": "2026-07-31-football-1",
+              "source": {
+                "commit": "ed39a3d61e1a733b3f21cf6575650a17f359127f",
+                "supplements": [{"id":"wc-2026","petCount":48}]
+              },
+              "petCount": 1,
+              "categories": [{"name":"WC 2026","petCount":1}],
+              "pets": [
+                {
+                  "id": 2004,
+                  "name": "Argentina",
+                  "category": "WC 2026",
+                  "author": null,
+                  "archive": {
+                    "path": "data/2004.zip",
+                    "sizeBytes": 1234,
+                    "sha256": "${"a".repeat(64)}"
+                  },
+                  "thumbnail": {
+                    "path": "thumb/2004.png",
+                    "sizeBytes": 321,
+                    "sha256": "${"b".repeat(64)}"
+                  }
+                }
+              ]
+            }
+            """.trimIndent()
+        )
+
+        val footballPet = document.records.single()
+        assertEquals("2026-07-31-football-1", document.catalogVersion)
+        assertEquals(2004, footballPet.id)
+        assertEquals("Argentina", footballPet.name)
+        assertEquals("WC 2026", footballPet.category)
+        assertEquals(null, footballPet.speechAnchor)
+    }
+
+    @Test
     fun `parseDocument keeps JSON null author absent`() {
         val document = parser.parseDocument(
             """

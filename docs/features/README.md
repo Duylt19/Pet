@@ -13,7 +13,7 @@
 | Pure pet engine | `pet/engine` | Active, JVM-tested; weighted behavior + multi-action routines |
 | Multi-pet overlay | `pet/overlay` | Active, Mixed 1–12 pack/visibility độc lập hoặc Swarm 1–12 bản sao cùng pack, shared clock/service |
 | Validated pet packs | `pet/pack`, `ui/catalog` | Active, schema v1 + secure import + preview/select |
-| Owner pet catalog | `OwnerPetCatalogRepository`, `data/remote`, `ui/catalog` | Active private GitHub raw source, 1.026 pets + cached metadata + authenticated thumbnail + verified on-demand ZIP Set |
+| Owner pet catalog | `OwnerPetCatalogRepository`, `data/remote`, `ui/catalog` | Active private GitHub raw source, 1.074 pets including 48 WC 2026 packs + cached metadata + authenticated thumbnail + verified on-demand ZIP Set |
 | Pet speech and dialogue | `pet/speech`, transient speech overlay | Active, localized/custom reactions + lifecycle độc lập theo pet |
 | Pet settings persistence | `PetSettingsRepository`, DataStore | Active, `PetSlotPreferences` độc lập cho selection/size/speed/message list/interaction và position/reset guard theo slot |
 | Battery status capsule | `BatteryCatalogRepository`, `ui/battery`, `battery/overlay` | Debug vertical slice active; Accessibility cover + local audited catalog, release còn policy/license/device gate |

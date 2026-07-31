@@ -32,9 +32,9 @@
 | Standing/rest balance V3.16 | Done | Owner IDLE renders a zero-velocity standing pose; autonomous SIT stays in 4/17 stories and social SIT is reduced from 11 to 2 roles |
 | Frame-semantic choreography V3.17 | Done | 1,026-pack frame audit drives emote/floor-play/sprawl/surface-hold aliases, one-shot skills with recovery, energy-aware transitions and silent physical stunts |
 | Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
-| Owner pet data snapshot | Done | 1,026 packs + thumbnails and 180 custom assets cloned at a pinned commit with CRC/SHA-256 inventory |
-| Local owner pet catalog | Done | 1,026 pets, 268 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |
-| Private GitHub pet server | Done | 1.026 JSON records + 2.052 ZIP/PNG assets, size/SHA-256 validation, Remote Config token, cache-first catalog with 24h TTL/ETag/rate-limit backoff, and on-demand verified download |
+| Owner pet data snapshot | Done | 1,026 animated packs plus 48 reviewed WC 2026 static pets and 180 custom assets, with pinned provenance and CRC/SHA-256 inventory |
+| Local owner pet catalog | Done | 1,074 pets, 269 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |
+| Private GitHub pet server | Done | 1.074 JSON records + 2.148 ZIP/PNG assets, size/SHA-256 validation, WC 2026 supplement provenance, Remote Config token, cache-first catalog with 24h TTL/ETag/rate-limit backoff, and on-demand verified download |
 | Different pet per slot + Settings refactor | Done | 1–12 slot selections, per-pack overlay instances, slot-aware Catalog/Detail, grouped Settings and reset-position guard |
 | Per-pet customization + Settings redesign | Done | Pet-first roster, commit-on-selection Add flow, independent size/speed/touch/speech/messages/position per slot, remove/shift migration và app-only Settings section |
 | Cute Pet product UI refresh | Done | Home pet room, Catalog discovery grid, friendly Detail, My Pet Family Settings và per-pet Customize dùng chung cozy light design; onboarding/Premium giữ nguyên |

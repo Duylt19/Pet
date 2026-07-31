@@ -112,14 +112,15 @@ không được restore sau process death/reboot.
   `403`/`429` giữ catalog cũ và chặn retry đến `Retry-After`/`X-RateLimit-Reset` (tối đa 24 giờ).
 - Raw ZIP chỉ được normalize khi user bấm `Set`; normalization hiện tạo immutable
   revision `owner.shimeji.<id>@7`, thêm `TALK` từ frame 34–36 khi đủ dữ liệu và copy
-  optional `speechAnchor` đã audit từ server vào manifest. Server đánh dấu 631/1.026 pet
-  có điểm khuyết tin cậy; 395 pet không có metadata giữ attachment mặc định `(0.5, 0.5)`.
+  optional `speechAnchor` đã audit từ server vào manifest. Server đánh dấu 631/1.074 pet
+  có điểm khuyết tin cậy; 443 pet không có metadata giữ attachment mặc định `(0.5, 0.5)`.
+  Trong số unsupported có 48 pet tĩnh WC 2026 cố ý không khai báo TALK.
   Runtime không dò pixel hoặc tự đoán attachment. Khi Start, owner pack revision cũ được
   enrich trong memory bằng catalog cache theo pet ID; vì vậy không cần download hoặc `Set`
   lại. Catalog authoritative cũng loại anchor heuristic cũ khỏi pet unsupported. Khi map
   vào engine, raw TALK bốn frame được tách tương thích thành TALK đứng yên một frame và
   TALK_WALK bốn frame; manifest app-private không bị mutate.
-- Catalog 1.026 item không dùng Room: metadata parse một lần vào memory, filter bằng pure
+- Catalog 1.074 item không dùng Room: metadata parse một lần vào memory, filter bằng pure
   policy; binary nằm ngoài APK và chỉ ZIP được chọn mới tải về. Cache JSON cuối hợp lệ dùng
   khi offline; ZIP cache vẫn phải qua secure installer trước khi trở thành installed pack.
 
