@@ -1027,20 +1027,25 @@ class PetEngine(
         }
         val chance = draw(scheduled, 0 until PERCENT_MAX, WALL_EXIT_SALT)
         val canJump = PetAction.JUMP in supportedActions
-        val jumpThreshold = config.behaviorProfile.wallJumpChancePercent
-        val descendThreshold = jumpThreshold + config.behaviorProfile.wallDescendChancePercent
+        val canDescend = PetAction.CLIMB_DOWN in supportedActions
+        val jumpThreshold = if (canJump) {
+            config.behaviorProfile.wallJumpChancePercent
+        } else {
+            0
+        }
+        val descendThreshold = jumpThreshold + if (canDescend) {
+            config.behaviorProfile.wallDescendChancePercent
+        } else {
+            0
+        }
         val nextAction = when {
-            canJump && chance.value < jumpThreshold -> PetAction.JUMP
-            PetAction.CLIMB_DOWN in supportedActions && chance.value < descendThreshold -> {
+            chance.value < jumpThreshold -> PetAction.JUMP
+            chance.value < descendThreshold -> {
                 PetAction.CLIMB_DOWN
             }
             else -> preferredAction(PetAction.FALL, PetAction.WALK)
         }
-        val exiting = if (nextAction == PetAction.JUMP) {
-            chance.state.copy(direction = chance.state.direction.opposite())
-        } else {
-            chance.state
-        }
+        val exiting = chance.state.faceViewportCenter()
         val changed = changeAction(exiting.cancelRoutine(), nextAction)
         return changed.copy(effects = effects + changed.effects)
     }

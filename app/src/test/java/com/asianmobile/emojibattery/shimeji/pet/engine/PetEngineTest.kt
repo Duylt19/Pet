@@ -1033,12 +1033,41 @@ class PetEngineTest {
             PetBounds(0f, 0f, 1_000f, 1_000f),
             size,
             position = PetVector(980f, 500f),
-            action = PetAction.CLIMB_WALL
+            action = PetAction.CLIMB_WALL,
+            direction = PetDirection.RIGHT
         )
 
         val descending = engine.reduce(climbing, PetEvent.Tick(100))
 
         assertEquals(PetAction.CLIMB_DOWN, descending.state.action)
+        assertEquals(PetDirection.LEFT, descending.state.direction)
+    }
+
+    @Test
+    fun `wall climber without jump frames falls facing into viewport`() {
+        val supportedWithoutJump = DemoPetAnimation.clips().keys - PetAction.JUMP
+        val engine = PetEngine(
+            PetEngineConfig(
+                supportedActions = supportedWithoutJump,
+                behaviorProfile = behaviorProfile(
+                    wallDurationMillis = 100L..100L,
+                    wallJumpChancePercent = 100,
+                    wallDescendChancePercent = 0
+                )
+            )
+        )
+        val climbing = engine.initialState(
+            PetBounds(0f, 0f, 1_000f, 1_000f),
+            size,
+            position = PetVector(980f, 500f),
+            action = PetAction.CLIMB_WALL,
+            direction = PetDirection.RIGHT
+        )
+
+        val falling = engine.reduce(climbing, PetEvent.Tick(100))
+
+        assertEquals(PetAction.FALL, falling.state.action)
+        assertEquals(PetDirection.LEFT, falling.state.direction)
     }
 
     @Test

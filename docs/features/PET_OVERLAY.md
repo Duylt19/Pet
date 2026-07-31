@@ -121,7 +121,10 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   các routine có anticipation/action/recovery như `sit → floor-play → idle`,
   `run → trip → sprawl` và `look → special → idle → emote`. Wall/ceiling collision có
   thể vào pose hold đúng surface trước bước nhảy tiếp theo; pet tới mép trần có thể leo
-  xuống thay vì luôn rơi. Pack v1 cũ chỉ tham gia action thật sự khai báo và vẫn fallback
+  xuống thay vì luôn rơi. Xác suất của action thiếu không bị dồn nhầm sang `CLIMB_DOWN`;
+  mọi exit khỏi wall climb tự động quay pet vào tâm viewport, kể cả pack có frame leo nhưng
+  thiếu frame nhảy. Sau khi leo xuống/rơi và chạm sàn pet không đi ngược lại mép cũ để mắc
+  trong vòng lặp leo ngắn. Pack v1 cũ chỉ tham gia action thật sự khai báo và vẫn fallback
   walk/idle an toàn.
 - Story beat biểu diễn dùng playback `PLAY_ONCE`: Special chạy trọn một lượt gần 3 giây,
   rồi combo chuyển sang beat idle/look/emote recovery 3–6 giây. Không giữ frame cuối vì
