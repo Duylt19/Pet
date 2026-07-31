@@ -63,7 +63,9 @@ tạo alias runtime từ chính sprite trong pack: drag cho `JUMP`/`FLUNG`, boun
 không sinh ảnh giả, không sửa manifest trên disk và áp dụng cả với pack revision 7 đã
 cài. Vì vậy các pet compact tham gia được combo bay, nhảy và recovery thay vì chỉ đi tới
 biên rồi lặp leo tường. Renderer xoay riêng chuỗi wall-climb dẫn xuất `-90°` để cạnh bám
-tường trở thành cạnh bám trần; pack có frame ceiling gốc vẫn render nguyên trạng.
+tường trở thành cạnh bám trần. Khi đổi hướng, mirror được ghép trong screen space sau
+phép xoay về mặt hình học, nên cả hai hướng vẫn giữ cùng cạnh tiếp xúc phía trên; pack có
+frame ceiling gốc vẫn render nguyên trạng.
 
 Khi pet đổi từ `CLIMB_WALL` sang `CLIMB_DOWN`, engine giữ hướng sprite nhìn vào tường
 trong suốt đoạn đi xuống. Hướng chỉ quay vào viewport sau khi rời wall action để

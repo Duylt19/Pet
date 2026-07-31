@@ -142,14 +142,30 @@ internal class PetOverlayView(
         visual: PetPackVisual.Sprite
     ) {
         val saveCount = canvas.save()
-        if (visual.usesDerivedCeilingVisual &&
-            state.action in DERIVED_CEILING_ACTIONS
-        ) {
-            canvas.rotate(DERIVED_CEILING_ROTATION_DEGREES, width / 2f, height / 2f)
-        }
-        applySpriteMotion(canvas, width, height, state)
-        if (state.direction.requiresMirror(PetDirection.LEFT)) {
-            canvas.scale(-1f, 1f, width / 2f, height / 2f)
+        when (spriteTransformPolicy(
+            usesDerivedCeilingVisual = visual.usesDerivedCeilingVisual,
+            action = state.action,
+            shouldMirror = state.direction.requiresMirror(PetDirection.LEFT)
+        )) {
+            PetSpriteTransformPolicy.DERIVED_CEILING_MIRRORED -> {
+                canvas.scale(-1f, 1f, width / 2f, height / 2f)
+                canvas.rotate(DERIVED_CEILING_ROTATION_DEGREES, width / 2f, height / 2f)
+                applySpriteMotion(canvas, width, height, state)
+            }
+
+            PetSpriteTransformPolicy.DERIVED_CEILING -> {
+                canvas.rotate(DERIVED_CEILING_ROTATION_DEGREES, width / 2f, height / 2f)
+                applySpriteMotion(canvas, width, height, state)
+            }
+
+            PetSpriteTransformPolicy.REGULAR_MIRRORED -> {
+                applySpriteMotion(canvas, width, height, state)
+                canvas.scale(-1f, 1f, width / 2f, height / 2f)
+            }
+
+            PetSpriteTransformPolicy.REGULAR -> {
+                applySpriteMotion(canvas, width, height, state)
+            }
         }
         drawSprite(canvas, width, height, state, visual)
         canvas.restoreToCount(saveCount)
@@ -456,9 +472,27 @@ internal class PetOverlayView(
     private companion object {
         const val MILLIS_PER_SECOND = 1_000
         const val DERIVED_CEILING_ROTATION_DEGREES = -90f
-        val DERIVED_CEILING_ACTIONS = setOf(
-            PetAction.CLIMB_CEILING,
-            PetAction.HOLD_CEILING
-        )
+    }
+}
+
+internal enum class PetSpriteTransformPolicy {
+    REGULAR,
+    REGULAR_MIRRORED,
+    DERIVED_CEILING,
+    DERIVED_CEILING_MIRRORED
+}
+
+internal fun spriteTransformPolicy(
+    usesDerivedCeilingVisual: Boolean,
+    action: PetAction,
+    shouldMirror: Boolean
+): PetSpriteTransformPolicy {
+    val isDerivedCeiling = usesDerivedCeilingVisual &&
+        (action == PetAction.CLIMB_CEILING || action == PetAction.HOLD_CEILING)
+    return when {
+        isDerivedCeiling && shouldMirror -> PetSpriteTransformPolicy.DERIVED_CEILING_MIRRORED
+        isDerivedCeiling -> PetSpriteTransformPolicy.DERIVED_CEILING
+        shouldMirror -> PetSpriteTransformPolicy.REGULAR_MIRRORED
+        else -> PetSpriteTransformPolicy.REGULAR
     }
 }
