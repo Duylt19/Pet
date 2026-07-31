@@ -81,4 +81,53 @@ class LegacyShimejiFrameSelectorTest {
         assertEquals(listOf(1, 40), leviSequence)
         assertEquals(null, noSpecialSequence)
     }
+
+    @Test
+    fun `original WC 2026 frame contract enables real movement and special actions`() {
+        val wcFrames = (
+            (1..9).toSet() +
+                (11..14).toSet() +
+                setOf(18, 19) +
+                (38..46).toSet()
+            )
+
+        assertEquals(24, wcFrames.size)
+        assertEquals(
+            true,
+            LegacyShimejiFrameContract.isAvailable(
+                LegacyShimejiFrameContract.dragged,
+                wcFrames
+            )
+        )
+        assertEquals(
+            true,
+            LegacyShimejiFrameContract.isAvailable(
+                LegacyShimejiFrameContract.wallClimb,
+                wcFrames
+            )
+        )
+        assertEquals(
+            LegacyShimejiFrameContract.special,
+            LegacyShimejiFrameContract.availableSpecialSequence(
+                LegacyShimejiFrameContract.special,
+                LegacyShimejiFrameContract.specialFrameRange,
+                wcFrames
+            )
+        )
+        assertEquals(
+            LegacyShimejiFrameContract.special2,
+            LegacyShimejiFrameContract.availableSpecialSequence(
+                LegacyShimejiFrameContract.special2,
+                LegacyShimejiFrameContract.special2FrameRange,
+                wcFrames
+            )
+        )
+        assertEquals(
+            false,
+            LegacyShimejiFrameContract.isAvailable(
+                LegacyShimejiFrameContract.talk,
+                wcFrames
+            )
+        )
+    }
 }

@@ -116,8 +116,8 @@ Mỗi pet bật message dùng một `TYPE_APPLICATION_OVERLAY` phụ. Window đ�
 - không tạo full-screen window và không chặn app bên dưới;
 - server pipeline dò cạnh alpha đứng ổn định của vùng khuyết và hàng mà bàn tay bắt đầu
   nhô sang trái trên frame 34. Detector chỉ đánh dấu pet có đủ 34/35/36 và góc lõm thuộc
-  vùng hình học tin cậy: 631 pet có metadata riêng, 443 pet không hỗ trợ; nhóm unsupported
-  gồm 48 pet tĩnh WC 2026 không có TALK frame;
+  vùng hình học tin cậy: 631 pet có metadata riêng, 431 pet không hỗ trợ; nhóm unsupported
+  gồm 36 pack WC 2026 dùng contract 24 frame gốc không có TALK;
 - tọa độ góc lõm được chuẩn hóa 0–1 trong optional `pets[].speechAnchor`, copy vào owner
   pack revision 7, transform qua canvas/anchor của renderer và mirror theo direction;
 - app không dò alpha ở runtime. Khi Start, service chờ catalog cache tối đa hai giây rồi

@@ -92,26 +92,26 @@ class OwnerPetCatalogParserTest {
             """
             {
               "schemaVersion": 1,
-              "catalogVersion": "2026-07-31-football-1",
+              "catalogVersion": "2026-07-31-football-2",
               "source": {
                 "commit": "ed39a3d61e1a733b3f21cf6575650a17f359127f",
-                "supplements": [{"id":"wc-2026","petCount":48}]
+                "supplements": [{"id":"wc-2026","petCount":36}]
               },
               "petCount": 1,
               "categories": [{"name":"WC 2026","petCount":1}],
               "pets": [
                 {
-                  "id": 2004,
+                  "id": 2002,
                   "name": "Argentina",
                   "category": "WC 2026",
                   "author": null,
                   "archive": {
-                    "path": "data/2004.zip",
+                    "path": "data/2002.zip",
                     "sizeBytes": 1234,
                     "sha256": "${"a".repeat(64)}"
                   },
                   "thumbnail": {
-                    "path": "thumb/2004.png",
+                    "path": "thumb/2002.png",
                     "sizeBytes": 321,
                     "sha256": "${"b".repeat(64)}"
                   }
@@ -122,8 +122,8 @@ class OwnerPetCatalogParserTest {
         )
 
         val footballPet = document.records.single()
-        assertEquals("2026-07-31-football-1", document.catalogVersion)
-        assertEquals(2004, footballPet.id)
+        assertEquals("2026-07-31-football-2", document.catalogVersion)
+        assertEquals(2002, footballPet.id)
         assertEquals("Argentina", footballPet.name)
         assertEquals("WC 2026", footballPet.category)
         assertEquals(null, footballPet.speechAnchor)
