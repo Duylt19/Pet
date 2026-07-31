@@ -38,6 +38,8 @@ Vertical slice hiện đã có trong source:
   Component focus
   được giữ qua width policy; Wi-Fi/Signal/Charge dùng đúng vector, còn Date cập nhật ngay
   format, bundled font, size và color từ draft.
+- Config chưa lưu lựa chọn icon dùng Wi‑Fi style 2 và Hotspot style 3 theo default UX;
+  Signal, Airplane và Ringer giữ style 1. Lựa chọn đã persist của user không bị ghi đè.
 
 Đây chưa phải release-complete: cần asset ownership approval, device/OEM matrix, Play
 Accessibility declaration và UX validation trước khi bật catalog ngoài debug.

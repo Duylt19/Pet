@@ -26,7 +26,7 @@ data class BatteryStatusConfig(
     val percentColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
     val wifiSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
     val wifiColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
-    val wifiIconStyleIndex: Int = DEFAULT_BATTERY_STATUS_ICON_STYLE_INDEX,
+    val wifiIconStyleIndex: Int = DEFAULT_BATTERY_WIFI_ICON_STYLE_INDEX,
     val dataType: BatteryDataType = BatteryDataType.G2,
     val dataSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
     val dataColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
@@ -38,7 +38,7 @@ data class BatteryStatusConfig(
     val airplaneIconStyleIndex: Int = DEFAULT_BATTERY_STATUS_ICON_STYLE_INDEX,
     val hotspotSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
     val hotspotColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
-    val hotspotIconStyleIndex: Int = DEFAULT_BATTERY_STATUS_ICON_STYLE_INDEX,
+    val hotspotIconStyleIndex: Int = DEFAULT_BATTERY_HOTSPOT_ICON_STYLE_INDEX,
     val ringerSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
     val ringerColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
     val ringerIconStyleIndex: Int = DEFAULT_BATTERY_STATUS_ICON_STYLE_INDEX,
@@ -108,6 +108,8 @@ const val DEFAULT_BATTERY_EMOTION_ID = 1
 const val DEFAULT_BATTERY_ANIMATION_ASSET = "cute_1.json"
 const val DEFAULT_BATTERY_CHARGE_ICON_INDEX = 1
 const val DEFAULT_BATTERY_STATUS_ICON_STYLE_INDEX = 1
+const val DEFAULT_BATTERY_WIFI_ICON_STYLE_INDEX = 2
+const val DEFAULT_BATTERY_HOTSPOT_ICON_STYLE_INDEX = 3
 const val MIN_BATTERY_STATUS_ICON_STYLE_INDEX = 1
 const val MAX_BATTERY_STATUS_ICON_STYLE_INDEX = 4
 const val DEFAULT_BATTERY_BACKGROUND_COLOR = 0xFFE0F7F1.toInt()

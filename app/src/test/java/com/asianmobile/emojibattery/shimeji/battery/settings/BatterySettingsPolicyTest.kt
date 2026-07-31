@@ -11,6 +11,17 @@ class BatterySettingsPolicyTest {
     private val policy = BatterySettingsPolicy(barHeightRange)
 
     @Test
+    fun defaultConfig_usesWifiStyleTwoAndHotspotStyleThree() {
+        val defaults = BatteryStatusConfig()
+
+        assertEquals(2, defaults.wifiIconStyleIndex)
+        assertEquals(3, defaults.hotspotIconStyleIndex)
+        assertEquals(1, defaults.signalIconStyleIndex)
+        assertEquals(1, defaults.airplaneIconStyleIndex)
+        assertEquals(1, defaults.ringerIconStyleIndex)
+    }
+
+    @Test
     fun sanitize_clamps_geometry_and_filters_favorites() {
         val sanitized = policy.sanitize(
             BatteryStatusConfig(

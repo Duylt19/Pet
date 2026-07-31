@@ -135,9 +135,10 @@ không được restore sau process death/reboot.
 - `BatteryStatusConfig` là persistent source of truth. `BatterySettingsPolicy` clamp
   geometry/color/favorite/reward unlock trước khi ghi và sau khi decode DataStore.
 - Wi‑Fi, signal, airplane, hotspot và ringer mỗi nhóm persist `iconStyleIndex` độc lập
-  trong khoảng 1–4. Runtime vẫn lấy trạng thái thật từ Android; style chỉ chọn family
-  drawable. Wi‑Fi/signal off hoặc limited và hotspot pending/error ưu tiên icon trạng thái
-  chuyên biệt để không làm sai nghĩa hệ thống.
+  trong khoảng 1–4. Config mới mặc định Wi‑Fi dùng style 2, hotspot dùng style 3; signal,
+  airplane và ringer dùng style 1. Runtime vẫn lấy trạng thái thật từ Android; style chỉ
+  chọn family drawable. Wi‑Fi/signal off hoặc limited và hotspot pending/error ưu tiên
+  icon trạng thái chuyên biệt để không làm sai nghĩa hệ thống.
 - Catalog theme là cặp mặc định. Khi mở editor từ một theme, `selectedThemeId`,
   `selectedBatteryThemeId` và `selectedEmojiThemeId` cùng nhận ID đó. Sau đó hai component
   ID được chỉnh độc lập; runtime vẽ pet chồng lên pin tại cùng trailing anchor.
