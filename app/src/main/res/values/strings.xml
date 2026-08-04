@@ -986,6 +986,7 @@
     <string name="discover_quick_battery">Battery</string>
     <string name="discover_quick_my_pet">My Pet</string>
     <string name="discover_customize_status_bar">Customize Status Bar</string>
+    <string name="discover_quick_sticker" translatable="false">Sticker</string>
     <string name="discover_banner_placeholder">Banner</string>
     <string name="discover_trending_pets">🔥 Trending Pets</string>
     <string name="discover_pet_category">Breed: %1$s</string>

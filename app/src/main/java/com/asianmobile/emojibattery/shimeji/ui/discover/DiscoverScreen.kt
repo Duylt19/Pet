@@ -516,11 +516,21 @@ private fun QuickActions(
                 onClick = onCustomizeStatusBar
             )
         }
+        item {
+            QuickActionCard(
+                title = stringResource(R.string.discover_quick_sticker),
+                imageRes = R.drawable.img_home_quick_sticker
+            )
+        }
     }
 }
 
 @Composable
-private fun QuickActionCard(title: String, imageRes: Int, onClick: () -> Unit) {
+private fun QuickActionCard(
+    title: String,
+    imageRes: Int,
+    onClick: (() -> Unit)? = null
+) {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
     Box(
         modifier = Modifier
@@ -528,11 +538,17 @@ private fun QuickActionCard(title: String, imageRes: Int, onClick: () -> Unit) {
                 width = dimensionResource(SdpR.dimen._100sdp),
                 height = dimensionResource(SdpR.dimen._42sdp)
             )
-            .shadow(dimensionResource(SdpR.dimen._6sdp), shape)
-            .clip(shape)
-            .background(colorResource(R.color.colors_FFFFFF))
-            .clickable(onClick = onClick)
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .shadow(dimensionResource(SdpR.dimen._6sdp), shape)
+                .clip(shape)
+                .background(colorResource(R.color.colors_FFFFFF))
+                .run {
+                    if (onClick != null) clickable(onClick = onClick) else this
+                }
+        )
         Text(
             text = title,
             color = colorResource(R.color.colors_212327),
@@ -548,7 +564,7 @@ private fun QuickActionCard(title: String, imageRes: Int, onClick: () -> Unit) {
         Image(
             painter = painterResource(imageRes),
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Fit,
             alignment = Alignment.CenterEnd,
             modifier = Modifier
                 .align(Alignment.TopEnd)
