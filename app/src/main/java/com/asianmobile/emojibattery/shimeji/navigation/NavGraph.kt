@@ -18,7 +18,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ui.home.HomeScreen
+import com.asianmobile.emojibattery.shimeji.ui.discover.DiscoverScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogScreen
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.CURRENT_BATTERY_STYLE_ID
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorPage
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorViewModel
@@ -43,6 +45,7 @@ object Routes {
     const val INTRO = "intro"
     const val PERMISSION = "permission"
     const val HOME = "home"
+    const val MY_PET = "my_pet"
     const val PET_CATALOG = "pet_catalog"
     const val PET_DETAIL = "pet_detail"
     const val PET_CUSTOMIZATION = "pet_customization"
@@ -193,6 +196,56 @@ fun AppNavGraph(
             }
 
             composable(Routes.HOME) {
+                DiscoverScreen(
+                    onNavigateToSearch = {
+                        navController.safeNavigate(
+                            Routes.petCatalog(PetCatalogTarget.MIXED, 0),
+                            ignoreDebounce = true
+                        )
+                    },
+                    onNavigateToPremium = {
+                        navigateFromHome(Routes.PREMIUM)
+                    },
+                    onNavigateToBattery = {
+                        navController.safeNavigate(
+                            Routes.BATTERY_CATALOG,
+                            ignoreDebounce = true
+                        )
+                    },
+                    onNavigateToMyPet = {
+                        navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
+                    },
+                    onNavigateToPetStore = {
+                        navController.safeNavigate(
+                            Routes.petCatalog(PetCatalogTarget.MIXED, 0),
+                            ignoreDebounce = true
+                        )
+                    },
+                    onNavigateToMine = {
+                        navigateFromHome(Routes.SETTINGS)
+                    },
+                    onOpenPet = { packKey ->
+                        navController.safeNavigate(
+                            Routes.petDetail(PetCatalogTarget.MIXED, 0, packKey),
+                            ignoreDebounce = true
+                        )
+                    },
+                    onOpenBatteryTheme = { themeId ->
+                        navController.safeNavigate(
+                            Routes.batteryEditor(themeId),
+                            ignoreDebounce = true
+                        )
+                    },
+                    onCustomizeStatusBar = {
+                        navController.safeNavigate(
+                            Routes.batteryEditor(CURRENT_BATTERY_STYLE_ID),
+                            ignoreDebounce = true
+                        )
+                    }
+                )
+            }
+
+            composable(Routes.MY_PET) {
                 HomeScreen(
                     onNavigateToCatalog = { target, slotIndex ->
                         navController.safeNavigate(

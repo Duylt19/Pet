@@ -11,7 +11,8 @@
 | Intro page 2 | `intro_page_2` |
 | Intro page 3 | `intro_page_3` |
 | Permission | `permission` |
-| Home | `home` |
+| Discover Home | `home` |
+| My Pet | `my_pet` |
 | Pet catalog | `pet_catalog` |
 | Pet detail | `pet_detail` |
 | Customize Pet | `pet_customization` |

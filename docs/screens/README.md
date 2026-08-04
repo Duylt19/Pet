@@ -7,7 +7,8 @@
 | `language_settings` | `ui/language/LanguageScreen` | Chọn language từ Settings rồi restart app shell |
 | `intro` | `ui/intro/IntroScreen` | Pager ba trang, có native ads theo config |
 | `permission` | `ui/permission/PermissionScreen` | Overlay special access + notification permission, có Continue/Skip |
-| `home` | `ui/home/HomeScreen` | Mixed/Swarm loại trừ nhau, 12 Mixed slot, global enable, visibility từng pet, Rewarded/Premium |
+| `home` | `ui/discover/DiscoverScreen` | Figma Discover: Emoji Battery toggle, quick actions, pet/battery previews, 4-tab navigation và bottom banner |
+| `my_pet` | `ui/home/HomeScreen` | Mixed/Swarm loại trừ nhau, 12 Mixed slot, global enable, visibility từng pet, Rewarded/Premium |
 | `pet_catalog/{target}/{slotIndex}` | `ui/catalog/PetCatalogScreen` | Lưới GitHub raw/cache; Mixed slot 4–12 có Rewarded gate tuần tự, Premium bypass |
 | `pet_detail/{target}/{slotIndex}/{packKey}` | `ui/catalog/PetDetailScreen` | Hero preview và select action đúng mode/slot |
 | `settings` | `ui/home/settings/SettingsScreen` | My Pet Family roster, commit-on-selection Add flow và app/support |
@@ -20,8 +21,9 @@
 
 ## Visual scope hiện tại
 
-- Product screens từ Home trở đi dùng light cozy palette, rounded cards, thumbnail pet thật
-  và purple/coral accents để tạo cảm giác companion thay vì utility dashboard.
+- Discover dùng wallpaper trắng với gradient pastel, primary pink `#FB3675`, Roboto,
+  horizontal catalog rows và rounded cards theo Figma node `8015:1035`. My Pet và các màn
+  product cũ tiếp tục dùng cozy palette hiện tại cho tới task refresh riêng.
 - Splash, Language/Language Settings, Intro, Permission và Premium giữ nguyên visual hiện
   tại theo quyết định owner; chúng sẽ được update trong các task riêng.
 

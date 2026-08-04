@@ -248,4 +248,17 @@
     <color name="colors_D8F4EE">#D8F4EE</color>
     <color name="colors_F4F8FC">#F4F8FC</color>
     <color name="colors_9297A5">#9297A5</color>
+
+    <!-- Emoji Battery Discover -->
+    <color name="colors_FB3675">#FB3675</color>
+    <color name="colors_FFEBF1">#FFEBF1</color>
+    <color name="colors_FDA3C0">#FDA3C0</color>
+    <color name="colors_DEDEDF">#DEDEDF</color>
+    <color name="colors_B06EFF">#B06EFF</color>
+    <color name="colors_F1E0FF">#F1E0FF</color>
+    <color name="colors_C95DFF">#C95DFF</color>
+    <color name="colors_FFB65B">#FFB65B</color>
+    <color name="colors_FF6B80">#FF6B80</color>
+    <color name="colors_FF57EE">#FF57EE</color>
+    <color name="colors_F0F0F0">#F0F0F0</color>
 </resources>

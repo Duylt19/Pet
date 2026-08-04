@@ -88,7 +88,7 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    TrackScreenView(ScreenName.HOME)
+    TrackScreenView(ScreenName.MY_PET)
 
     val overlaySettingsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()

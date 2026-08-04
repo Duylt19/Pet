@@ -5,13 +5,15 @@ visual system Cute Pet; onboarding và Premium vẫn giữ UI hiện tại cho t
 
 ## Cute Pet product direction
 
-- Home mode dùng nền xanh-trắng nhẹ, primary teal và segmented control rõ selection;
-  Catalog/Settings hiện vẫn dùng warm cream/purple của Cute Pet.
+- Discover Home dùng nền trắng/gradient pastel, primary pink `#FB3675`, card trắng và
+  typography Roboto theo Figma node `8015:1035`. My Pet mode dùng nền xanh-trắng nhẹ,
+  primary teal và segmented control rõ selection; Catalog/Settings hiện vẫn dùng warm
+  cream/purple của Cute Pet.
 - Pet thumbnail thật là visual chính; icon notification chỉ là fallback khi pack chưa có ảnh.
 - Corner radius lớn 16–24 sdp, card rõ hierarchy nhưng ít chrome và không dùng dark utility
   dashboard cho product screens.
-- Home là pet room và session control; Catalog ưu tiên discovery bằng grid; Settings là pet
-  family roster; Customize biểu diễn một hồ sơ pet độc lập.
+- Discover là landing tổng hợp; My Pet là pet room và session control; Catalog ưu tiên
+  discovery bằng grid; Settings là pet family roster; Customize biểu diễn một hồ sơ pet độc lập.
 - Shared primitives nằm ở `ui/component/CutePetComponents.kt`; component dark cũ không được
   dùng cho product screen mới nếu không có lý do tương thích.
 
@@ -25,7 +27,16 @@ Settings dùng cấu trúc pet-first:
 - không hiển thị Sound khi pack schema v1 chưa có audio;
 - Add mở Catalog ở slot trống nhưng chỉ commit `petCount` sau Set/Import thành công.
 
-Home mode contract:
+Discover Home contract:
+
+- route `home` là root sau onboarding và hiển thị dữ liệu thật từ owner/battery catalog;
+- toggle chính điều khiển `BatteryStatusConfig.enabled`, có disclosure và Accessibility gate;
+- bottom navigation cố định trên bottom banner hiện có; không tạo ads placement mới;
+- hero banner và promo creative trong content là presentational slot theo Figma, không gọi ads SDK;
+- Battery Themes dùng favorite state thật; Trending hiện dùng thứ tự catalog cho tới khi
+  server có ranking riêng.
+
+My Pet mode contract:
 
 - `Pet Swarm` và `Mixed Mode` là segmented control loại trừ nhau;
 - global switch điều khiển foreground overlay, không dùng để thay pet selection;

@@ -976,4 +976,27 @@
     <string name="battery_overlay_ringer_vibrate">vibrate mode</string>
     <string name="battery_overlay_ringer_silent">silent mode</string>
     <string name="battery_overlay_hotspot_enabled">hotspot on</string>
+
+    <!-- Emoji Battery Discover -->
+    <string name="discover_brand_name" translatable="false">Emoji Battery</string>
+    <string name="discover_search">Search pets and battery themes</string>
+    <string name="discover_pro" translatable="false">PRO</string>
+    <string name="discover_battery_enable_prompt">Turn on Emoji Battery to get started</string>
+    <string name="discover_battery_enabled">Emoji Battery is active</string>
+    <string name="discover_quick_battery">Battery</string>
+    <string name="discover_quick_my_pet">My Pet</string>
+    <string name="discover_customize_status_bar">Customize Status Bar</string>
+    <string name="discover_banner_placeholder">Banner</string>
+    <string name="discover_trending_pets">🔥 Trending Pets</string>
+    <string name="discover_pet_category">Breed: %1$s</string>
+    <string name="discover_battery_themes">Battery Themes</string>
+    <string name="discover_status_bar_themes">Status bar themes</string>
+    <string name="discover_emoji_title">✨ Emoji</string>
+    <string name="discover_battery_title">🔋 Battery</string>
+    <string name="discover_more">More</string>
+    <string name="discover_favorite_theme">Favorite battery theme</string>
+    <string name="discover_tab_discover">Discover</string>
+    <string name="discover_tab_battery">Battery</string>
+    <string name="discover_tab_pet_store">Pet Store</string>
+    <string name="discover_tab_mine">Mine</string>
 </resources>

@@ -52,7 +52,8 @@ com.asianmobile.emojibattery.shimeji/
 │   ├── language/
 │   ├── intro/
 │   ├── permission/
-│   ├── home/                   # Home + settings
+│   ├── discover/               # Discover Home + catalog summaries
+│   ├── home/                   # My Pet mode + settings
 │   ├── catalog/                # Pack catalog/detail/import/select
 │   ├── premium/
 │   ├── main/

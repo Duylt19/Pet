@@ -13,10 +13,13 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Premium dùng BillingClient và `StartPremiumIndexes` để biết entry source.
 - Native Ad templates dùng light pink-white surface theo Figma node `8047:2973`; các
   biến thể height/item/collapsible chia sẻ cùng background, border, text và CTA palette.
+- Discover Home tái sử dụng banner placement `home_mode_bottom` ở dưới bottom navigation.
+  Hero placeholder và promo creative giữa content là presentational Figma assets, không
+  gọi ads SDK và không tạo placement/request mới.
 
 ## Pet Swarm Rewarded unlock
 
-- Home preload Rewarded khi screen vào composition.
+- My Pet preload Rewarded khi screen vào composition.
 - Khi Rewarded hiển thị được, user free chỉ unlock sau reward callback thật; đóng quảng cáo
   sớm không unlock. Nếu SDK/ad inventory không sẵn sàng, limit hoặc show fail thì flow tiếp
   tục ngay để lỗi quảng cáo không chặn tính năng.
