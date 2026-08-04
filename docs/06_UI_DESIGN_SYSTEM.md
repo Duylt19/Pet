@@ -61,6 +61,11 @@ pet không được lặp ở app-wide Settings hoặc ghi vào global state.
 - User-facing text: `strings.xml`, key `<feature>_<purpose>`.
 - Color: `colors.xml`, key `colors_<HEX>` trừ semantic theme token có chủ đích.
 - Drawable: `ic_` cho icon, `ic_logo_` cho logo vector, `img_` cho bitmap.
+- Asset từ Figma phải ưu tiên SVG và convert thành Android `VectorDrawable`; không export
+  icon đơn giản thành PNG. Chỉ dùng bitmap khi node có image fill/raster, SVG không được hỗ
+  trợ hoặc quá phức tạp để render ổn định trên Android; bitmap fallback phải export `PNG @3x`.
+- Bitmap Figma đặt trong `drawable-nodpi` và luôn có kích thước hiển thị rõ trong Compose để
+  Android không dùng kích thước pixel gốc làm layout size.
 - Font: tái sử dụng `res/font` và theme; không khai báo trùng trong từng component.
 - Không hardcode string/hex color trong Composable.
 

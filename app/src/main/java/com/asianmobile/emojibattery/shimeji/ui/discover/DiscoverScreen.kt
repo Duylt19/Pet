@@ -275,7 +275,7 @@ private fun DiscoverContent(
                         ComponentAssetsSection(
                             title = stringResource(R.string.discover_battery_title),
                             assets = uiState.batteryIcons,
-                            fallbackRes = R.drawable.img_home_battery_heading,
+                            fallbackRes = R.drawable.ic_home_battery,
                             onMore = onBattery,
                             onOpen = onBattery
                         )
@@ -677,7 +677,6 @@ private fun BatteryThemesSection(
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
         SectionHeader(
             title = stringResource(R.string.discover_battery_themes),
-            leadingIconRes = R.drawable.img_home_battery_heading,
             onMore = onMore
         )
         val slots = List(BATTERY_THEME_SLOT_COUNT) { index -> themes.getOrNull(index) }
@@ -717,12 +716,18 @@ private fun BatteryThemeCard(
             .clickable(enabled = theme != null, onClick = onOpen)
     ) {
         AsyncImage(
-            model = theme?.thumbnailPath ?: R.drawable.img_home_battery_heading,
+            model = theme?.thumbnailPath ?: R.drawable.ic_home_battery,
             contentDescription = theme?.name,
             contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxSize(0.86f)
+            modifier = if (theme != null) {
+                Modifier
+                    .align(Alignment.Center)
+                    .fillMaxSize(0.86f)
+            } else {
+                Modifier
+                    .align(Alignment.Center)
+                    .size(dimensionResource(SdpR.dimen._24sdp))
+            }
         )
         Box(
             modifier = Modifier
@@ -893,7 +898,6 @@ private fun ComponentAssetCard(
 private fun SectionHeader(
     title: String,
     onMore: () -> Unit,
-    leadingIconRes: Int? = null,
     underline: Boolean = false
 ) {
     Row(
@@ -907,14 +911,6 @@ private fun SectionHeader(
             .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
         verticalAlignment = Alignment.Top
     ) {
-        if (leadingIconRes != null) {
-            Image(
-                painter = painterResource(leadingIconRes),
-                contentDescription = null,
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
-            )
-            Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
-        }
         Box {
             Text(
                 text = title,
