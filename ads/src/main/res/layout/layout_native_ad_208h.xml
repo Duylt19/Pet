@@ -5,8 +5,8 @@
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
     app:shimmer_auto_start="true"
-    app:shimmer_base_color="@color/colors_1AFFFFFF"
-    app:shimmer_highlight_color="@color/colors_33FFFFFF">
+    app:shimmer_base_color="@color/colors_E6E6E6"
+    app:shimmer_highlight_color="@color/colors_FEFEFE">
 
     <com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView
         android:id="@+id/unifiedAdView"
@@ -60,7 +60,7 @@
                 android:gravity="center_vertical"
                 android:includeFontPadding="false"
                 android:singleLine="true"
-                android:textColor="@color/colors_FFFFFF"
+                android:textColor="@color/colors_000000"
                 android:textSize="@dimen/_12sdp"
                 app:layout_constraintEnd_toEndOf="@+id/mediaView"
                 app:layout_constraintStart_toStartOf="@+id/mediaView"
@@ -97,4 +97,3 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView>
 </com.facebook.shimmer.ShimmerFrameLayout>
-

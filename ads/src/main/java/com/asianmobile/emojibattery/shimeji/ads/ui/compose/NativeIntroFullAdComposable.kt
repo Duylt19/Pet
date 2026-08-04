@@ -221,8 +221,12 @@ private fun populateIntroFullAdView(activity: Activity, nativeAd: NativeAd, adVi
     if (oldAd === nativeAd) return
 
     adView.apply {
-        headlineView = findViewById<TextView?>(R.id.tvTitleAds)?.apply { text = nativeAd.headline }
+        headlineView = findViewById<TextView?>(R.id.tvTitleAds)?.apply {
+            background = null
+            text = nativeAd.headline
+        }
         bodyView = findViewById<TextView?>(R.id.tvMessageAds)?.apply {
+            background = null
             isVisible = !nativeAd.body.isNullOrEmpty()
             text = nativeAd.body.orEmpty()
         }
@@ -231,6 +235,7 @@ private fun populateIntroFullAdView(activity: Activity, nativeAd: NativeAd, adVi
             text = nativeAd.callToAction.orEmpty()
         }
         iconView = findViewById<ImageView?>(R.id.imgIcon)?.apply {
+            background = null
             isVisible = nativeAd.icon != null
             nativeAd.icon?.let { setImageDrawable(it.drawable) }
         }
@@ -240,6 +245,7 @@ private fun populateIntroFullAdView(activity: Activity, nativeAd: NativeAd, adVi
     }
 
     val mediaView = adView.findViewById<MediaView>(R.id.mediaView)
+    mediaView?.background = null
     adView.registerNativeAd(nativeAd, mediaView)
 
     // Blur effect for intro full

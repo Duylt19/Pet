@@ -53,6 +53,14 @@ pet không được lặp ở app-wide Settings hoặc ghi vào global state.
 - Font: tái sử dụng `res/font` và theme; không khai báo trùng trong từng component.
 - Không hardcode string/hex color trong Composable.
 
+## Native ad palette
+
+- Native Ads dùng light surface theo Figma node `8047:2973`: nền `#FEFEFE`, viền và
+  loading placeholder `#E6E6E6`, nội dung `#000000`.
+- Badge `Ad` và CTA dùng gradient ngang `#FF5D7D` → `#FB54BB`; CTA giữ chữ trắng.
+- Tất cả Native Ad template trong module `:ads` dùng chung palette này; thay đổi visual
+  không được làm thay đổi placement, loading callback hoặc premium/ad-free policy.
+
 ## Sizing
 
 Design hiện dùng SDP/SSP. Mapping Figma mặc định:

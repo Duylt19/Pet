@@ -11,6 +11,8 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Navigation có `navigateWithAd()` cho interstitial-aware transition.
 - MainActivity quản lý App Open Ads theo lifecycle.
 - Premium dùng BillingClient và `StartPremiumIndexes` để biết entry source.
+- Native Ad templates dùng light pink-white surface theo Figma node `8047:2973`; các
+  biến thể height/item/collapsible chia sẻ cùng background, border, text và CTA palette.
 
 ## Pet Swarm Rewarded unlock
 
