@@ -17,6 +17,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -55,7 +56,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -67,7 +67,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -114,10 +113,8 @@ import com.intuit.ssp.R as SspR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.roundToInt
-import kotlin.math.sin
 
 private val StoreRoboto = FontFamily.SansSerif
 private val StoreRobotoMedium = FontFamily(Font(R.font.roboto_medium))
@@ -139,9 +136,14 @@ private const val REWARD_TAPE_WIDTH_PX = 52f
 private const val REWARD_TAPE_HEIGHT_PX = 42f
 private const val UNLOCK_FRAME_WIDTH_PX = 360f
 private const val UNLOCK_LIGHTING_SIZE_PX = 310f
-private const val UNLOCK_PET_SIZE_PX = 174f
-private const val UNLOCK_TITLE_WIDTH_PX = 156f
+private const val UNLOCK_HERO_SIZE_PX = 174f
+private const val PET_UNLOCK_TITLE_WIDTH_PX = 156f
+private const val FOOD_UNLOCK_TITLE_WIDTH_PX = 189f
 private const val UNLOCK_TITLE_HEIGHT_PX = 41f
+private const val FOOD_QUANTITY_WIDTH_PX = 52f
+private const val FOOD_QUANTITY_HEIGHT_PX = 34f
+private const val FOOD_QUANTITY_X_IN_HERO_PX = 110f
+private const val FOOD_QUANTITY_Y_IN_HERO_PX = 124f
 
 @Composable
 fun PetStoreScreen(
@@ -240,10 +242,8 @@ fun PetStoreScreen(
         )
     }
     state.revealedFood?.let { food ->
-        FoodItemReveal(
-            title = stringResource(R.string.pet_store_new_food),
-            imageModel = food.imageRes,
-            quantity = "x1",
+        FoodUnlockReveal(
+            food = food,
             onContinue = viewModel::continueAfterFoodReveal
         )
     }
@@ -1045,6 +1045,7 @@ private fun PetUnlockReveal(
             decorFitsSystemWindows = false
         )
     ) {
+        HideDialogNavigationBar()
         PetUnlockRevealContent(
             pet = pet,
             pack = pack,
@@ -1059,6 +1060,32 @@ internal fun PetUnlockRevealContent(
     pack: PetPack?,
     onContinue: () -> Unit,
     lightingProgress: Float? = null
+) {
+    StoreUnlockRevealContent(
+        titleRes = R.drawable.img_pet_unlock_new_pet,
+        titleContentDescription = stringResource(R.string.pet_store_new_pet),
+        titleWidthPx = PET_UNLOCK_TITLE_WIDTH_PX,
+        onContinue = onContinue,
+        lightingProgress = lightingProgress
+    ) {
+        PetSpecialSkillPreview(
+            pet = pet,
+            pack = pack,
+            modifier = Modifier
+                .fillMaxWidth(UNLOCK_HERO_SIZE_PX / UNLOCK_LIGHTING_SIZE_PX)
+                .aspectRatio(1f)
+        )
+    }
+}
+
+@Composable
+private fun StoreUnlockRevealContent(
+    titleRes: Int,
+    titleContentDescription: String,
+    titleWidthPx: Float,
+    onContinue: () -> Unit,
+    lightingProgress: Float? = null,
+    hero: @Composable BoxScope.() -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     BoxWithConstraints(
@@ -1080,28 +1107,22 @@ internal fun PetUnlockRevealContent(
                 .aspectRatio(1f),
             contentAlignment = Alignment.Center
         ) {
-            PetUnlockLighting(
+            StoreUnlockLighting(
                 progress = lightingProgress,
                 modifier = Modifier.fillMaxSize()
             )
-            PetSpecialSkillPreview(
-                pet = pet,
-                pack = pack,
-                modifier = Modifier
-                    .fillMaxWidth(UNLOCK_PET_SIZE_PX / UNLOCK_LIGHTING_SIZE_PX)
-                    .aspectRatio(1f)
-            )
+            hero()
         }
 
         Image(
-            painter = painterResource(R.drawable.img_pet_unlock_new_pet),
-            contentDescription = stringResource(R.string.pet_store_new_pet),
+            painter = painterResource(titleRes),
+            contentDescription = titleContentDescription,
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(y = frameHeight * (237f / 800f))
-                .fillMaxWidth(UNLOCK_TITLE_WIDTH_PX / UNLOCK_FRAME_WIDTH_PX)
-                .aspectRatio(UNLOCK_TITLE_WIDTH_PX / UNLOCK_TITLE_HEIGHT_PX)
+                .fillMaxWidth(titleWidthPx / UNLOCK_FRAME_WIDTH_PX)
+                .aspectRatio(titleWidthPx / UNLOCK_TITLE_HEIGHT_PX)
         )
 
         Text(
@@ -1119,7 +1140,7 @@ internal fun PetUnlockRevealContent(
 }
 
 @Composable
-private fun PetUnlockLighting(progress: Float?, modifier: Modifier = Modifier) {
+private fun StoreUnlockLighting(progress: Float?, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val composition = remember(context) {
         LottieCompositionFactory.fromRawResSync(
@@ -1241,39 +1262,69 @@ private fun PetSpecialSkillSprite(
 }
 
 @Composable
-private fun FoodItemReveal(title: String, imageModel: Any, quantity: String? = null, onContinue: () -> Unit) {
-    Dialog(onDismissRequest = {}, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
-        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = .5f)).clickable(onClick = onContinue), contentAlignment = Alignment.Center) {
-            Box(Modifier.size(dimensionResource(SdpR.dimen._238sdp)), contentAlignment = Alignment.Center) {
-                RevealRays()
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._10sdp))) {
-                    Text(title, color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = dimensionResource(SspR.dimen._21ssp).value.sp, fontStyle = FontStyle.Italic, modifier = Modifier.clip(RoundedCornerShape(dimensionResource(SdpR.dimen._7sdp))).background(colorResource(R.color.colors_FB3675)).padding(horizontal = dimensionResource(SdpR.dimen._6sdp), vertical = dimensionResource(SdpR.dimen._2sdp)))
-                    Box {
-                        AsyncImage(model = imageModel, contentDescription = title, contentScale = ContentScale.Fit, modifier = Modifier.size(dimensionResource(SdpR.dimen._134sdp)))
-                        quantity?.let { Text(it, color = Color.White, fontFamily = StoreRobotoSemiBold, modifier = Modifier.align(Alignment.BottomEnd).clip(CircleShape).background(colorResource(R.color.colors_8D6037)).padding(horizontal = dimensionResource(SdpR.dimen._6sdp))) }
-                    }
-                    Text(stringResource(R.string.pet_store_tap_continue), color = Color.White, fontFamily = StoreRobotoMedium, fontSize = dimensionResource(SspR.dimen._11ssp).value.sp)
-                }
-            }
-        }
+private fun FoodUnlockReveal(food: PetStoreFood, onContinue: () -> Unit) {
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        )
+    ) {
+        HideDialogNavigationBar()
+        FoodUnlockRevealContent(food = food, onContinue = onContinue)
     }
 }
 
 @Composable
-private fun RevealRays() {
-    Canvas(Modifier.fillMaxSize()) {
-        val center = center
-        val radius = size.minDimension / 2f
-        repeat(12) { index ->
-            val start = Math.toRadians((index * 30f - 7f).toDouble())
-            val end = Math.toRadians((index * 30f + 7f).toDouble())
-            val path = Path().apply {
-                moveTo(center.x, center.y)
-                lineTo(center.x + cos(start).toFloat() * radius, center.y + sin(start).toFloat() * radius)
-                lineTo(center.x + cos(end).toFloat() * radius, center.y + sin(end).toFloat() * radius)
-                close()
+internal fun FoodUnlockRevealContent(
+    food: PetStoreFood,
+    onContinue: () -> Unit,
+    lightingProgress: Float? = null
+) {
+    StoreUnlockRevealContent(
+        titleRes = R.drawable.img_food_unlock_new_food,
+        titleContentDescription = stringResource(R.string.pet_store_new_food),
+        titleWidthPx = FOOD_UNLOCK_TITLE_WIDTH_PX,
+        onContinue = onContinue,
+        lightingProgress = lightingProgress
+    ) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth(UNLOCK_HERO_SIZE_PX / UNLOCK_LIGHTING_SIZE_PX)
+                .aspectRatio(1f)
+        ) {
+            Image(
+                painter = painterResource(food.imageRes),
+                contentDescription = food.name,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize()
+            )
+            Box(
+                modifier = Modifier
+                    .offset(
+                        x = maxWidth * (FOOD_QUANTITY_X_IN_HERO_PX / UNLOCK_HERO_SIZE_PX),
+                        y = maxHeight * (FOOD_QUANTITY_Y_IN_HERO_PX / UNLOCK_HERO_SIZE_PX)
+                    )
+                    .width(maxWidth * (FOOD_QUANTITY_WIDTH_PX / UNLOCK_HERO_SIZE_PX))
+                    .height(maxHeight * (FOOD_QUANTITY_HEIGHT_PX / UNLOCK_HERO_SIZE_PX))
+                    .clip(CircleShape)
+                    .background(colorResource(R.color.colors_8D6037))
+                    .border(
+                        width = dimensionResource(SdpR.dimen._1sdp),
+                        color = colorResource(R.color.colors_FFFFFF),
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.pet_store_food_quantity, 1),
+                    color = colorResource(R.color.colors_FFFFFF),
+                    fontFamily = StoreRobotoSemiBold,
+                    fontSize = dimensionResource(SspR.dimen._18ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._25ssp).value.sp,
+                    textAlign = TextAlign.Center
+                )
             }
-            drawPath(path, Color(0x55FFE756))
         }
     }
 }

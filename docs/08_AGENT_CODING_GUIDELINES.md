@@ -8,6 +8,9 @@ Nguồn chi tiết bắt buộc: [android developer skill](../.agents/skills/and
 - Package canonical hiện tại là `com.asianmobile.emojibattery.shimeji`; không tự đổi tiếp nếu owner chưa yêu cầu.
 - Xác định feature boundary, state ownership và navigation impact.
 - Nếu UI từ Figma, phải xem screenshot/design context trước.
+- Với task UI có ít nhất hai luồng độc lập và tốn thời gian (phân tích Figma, export asset,
+  audit code/test), dùng subagent song song; main agent chịu trách nhiệm tích hợp và tránh
+  giao nhiều agent sửa chồng cùng source file.
 
 ## Checklist khi implement
 

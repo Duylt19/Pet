@@ -37,6 +37,23 @@ Khi nhận yêu cầu, **PHẢI** xác định thuộc loại nào:
 - Khi sửa file, dùng `apply_patch`; không ghi file bằng shell redirection.
 - Trên workspace Linux/Codex dùng `./gradlew compileDebugKotlin`. Chỉ dùng `.\gradlew.bat` khi chạy Windows native.
 
+### 0.5. Parallel Subagents cho task UI tốn thời gian
+
+- Khi task có từ hai luồng độc lập trở lên và mỗi luồng cần nhiều thao tác (ví dụ: phân tích
+  node Figma, export/verify asset, rà code hiện tại, tạo baseline screenshot), **PHẢI** tận dụng
+  subagent nếu runtime cho phép.
+- Mặc định chia như sau, tùy phạm vi thực tế:
+  1. **Figma analysis:** screenshot, metadata, design context, thông số layout/token.
+  2. **Asset export:** xác định node cha, ưu tiên SVG/vector, kiểm tra khả năng convert; chỉ dùng
+     PNG @3x khi vector không phù hợp hoặc convert lỗi.
+  3. **Code/test audit:** tìm implementation hiện tại, golden test và liệt kê sai khác.
+- Main agent giữ quyền tích hợp: đọc kết quả, giải quyết mâu thuẫn, sửa source chính, chạy full
+  verification và commit. Không để nhiều agent cùng sửa một source file.
+- Subagent export asset vào đường dẫn tạm hoặc file đích riêng; không ghi token, URL asset ngắn
+  hạn hoặc credential vào repository/log.
+- Không tạo subagent cho thay đổi nhỏ chỉ có một luồng tuần tự; chi phí điều phối không được lớn
+  hơn phần việc. Nếu user yêu cầu delegation thì ưu tiên làm theo yêu cầu đó.
+
 ---
 
 ## QUY TRÌNH A: TẠO MÀN HÌNH MỚI (CREATE)

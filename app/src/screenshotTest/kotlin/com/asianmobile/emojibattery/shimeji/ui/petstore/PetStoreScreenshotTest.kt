@@ -97,6 +97,25 @@ fun PetStoreUnlockRevealScreenshotTest() {
     }
 }
 
+@PreviewTest
+@Preview(widthDp = 360, heightDp = 800)
+@Composable
+fun PetStoreFoodUnlockRevealScreenshotTest() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        PreviewStore(PetStoreTab.FOOD)
+        FoodUnlockRevealContent(
+            food = PetStoreFood(
+                id = "beef_stew",
+                name = "Beef Stew",
+                coinCost = 25,
+                imageRes = R.drawable.img_pet_store_food_beef_stew
+            ),
+            onContinue = {},
+            lightingProgress = 0.45f
+        )
+    }
+}
+
 @Composable
 private fun PreviewStore(tab: PetStoreTab) {
     PetStoreContent(

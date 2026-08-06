@@ -52,12 +52,15 @@ Pet Store visual contract:
   nút là `#C95DFF → #FB54BB`. Selected Pet Store, video và tape giữ asset vector gốc.
   Reward dialog dùng immersive navigation trên chính dialog window để system navigation
   không chiếm vùng CTA; đóng dialog không thay đổi immersive policy của Home activity.
-- unlock-success overlay theo frame `360×800`: nền đen 50%, Lottie lighting chiếm
-  `310/360` chiều rộng tại `y=244`, pet chiếm `174/310` vùng lighting. Title tại `y=237`
-  dùng nguyên artwork node Figma `8175:3957` dưới dạng PNG @3x. Bản SVG có mask và filter
-  không được Android VectorDrawable hỗ trợ nên không dùng; không dựng lại bằng Compose Text.
-  CTA dùng Roboto Medium 20/28 tại `y=554`. Pet vừa cài chạy clip `SPECIAL` thật của pack;
-  chỉ fallback `SPECIAL_2`, rồi thumbnail tĩnh khi pack không cung cấp skill đặc biệt.
+- unlock-success overlay của Pet và Food dùng chung frame `360×800`: nền đen 50%, Lottie
+  lighting chiếm `310/360` chiều rộng tại `y=244`, hero chiếm `174/310` vùng lighting.
+  Title tại `y=237` dùng nguyên artwork Figma PNG @3x, không dựng lại bằng Compose Text:
+  Pet dùng node `8175:3957` rộng `156/360`, Food dùng node `8175:3962` rộng `189/360`.
+  SVG của các title có mask/filter không được Android VectorDrawable hỗ trợ. Food quantity
+  là pill `52×34`, nền `#8D6037`, stroke trắng 1px tại `(203,436)`; artwork món ăn dùng
+  PNG transparent @3x. CTA dùng Roboto Medium 20/28 tại `y=554`. Pet vừa cài chạy clip
+  `SPECIAL` thật của pack; chỉ fallback `SPECIAL_2`, rồi thumbnail tĩnh khi pack không
+  cung cấp skill đặc biệt.
 
 My Pet mode contract:
 
