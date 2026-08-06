@@ -18,6 +18,7 @@
 | `pet_display_mode` | String enum | `MIXED` hoặc `SWARM`; hai mode loại trừ nhau |
 | `pet_slot_enabled` | JSON String | 12 trạng thái visible độc lập của Mixed |
 | `pet_mixed_reward_unlocked_slot_count` | Int | Capacity Mixed đã mở, mặc định 3 và clamp 3–12 |
+| `pet_room_selected_id` | Int | Room background user chọn cho My Pet Room; `0` nghĩa là dùng `defaultRoomId` của catalog |
 | `pet_swarm_pack_key` | String | Pack được nhân bản trong Swarm |
 | `pet_swarm_count` | Int | Số instance Swarm, 1–12 hoặc tối đa 6 trên low-RAM |
 | `pet_swarm_reward_unlocked` | Boolean | Rewarded unlock vĩnh viễn trên device |
@@ -163,6 +164,23 @@ không được restore sau process death/reboot.
   Debug build audit và copy snapshot vào generated assets; release không đóng gói catalog
   `REVIEW_REQUIRED`. Xem
   [`tools/BATTERY_DATA_SNAPSHOT.md`](tools/BATTERY_DATA_SNAPSHOT.md).
+
+## Pet room catalog
+
+- `PetRoomCatalogSnapshot` gồm danh sách `PetRoomEntry` (id, name, slug, entitlement,
+  background path, thumbnail path), `defaultRoomId`, trạng thái loading và typed error.
+  `resolveRoom()` trả về room đang chọn, rồi `defaultRoomId`, rồi room đầu tiên — nên
+  catalog đổi hoặc room bị gỡ vẫn không để My Pet Room không có nền.
+- Catalog `json/rooms.json` dùng schema v1 riêng, chỉ chứa relative path, byte size,
+  SHA-256 và dimension. `RemotePetRoomCatalogRepository` đọc cache trước, revalidate theo
+  cùng `PetCatalogRefreshPolicy` (TTL 24h + ETag + rate-limit backoff) như pet/battery,
+  materialize asset theo nhu cầu và verify size/SHA-256 trước khi dùng.
+- Mỗi room có đúng hai asset: `bg/BG_<id>.png` full-resolution và `thumb/BG_<id>.png` bản
+  preview nhẹ. `RoomCatalogParser` từ chối catalog nếu thumbnail không nhỏ và nhẹ hơn
+  background, nên grid Room không thể vô tình tải ảnh full-size. Release chỉ chấp nhận
+  catalog `APPROVED`; debug chấp nhận cả `REVIEW_REQUIRED`.
+- Selection persist qua `PetRoomRepository`; catalog và selection tách nhau để đổi catalog
+  không làm mất lựa chọn của user.
 
 ## Không có database
 
