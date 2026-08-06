@@ -545,6 +545,17 @@
     <string name="settings_subtitle">Give every buddy their own look and personality.</string>
     <string name="settings_add_pet_hint">There is room for one more tiny friend.</string>
     <string name="settings_app_title">Cute Pet app</string>
+    <string name="mine_banner_premium">Banner Premium</string>
+    <string name="mine_my_pet">My Pet</string>
+    <string name="mine_favourite_recent">Favourite &amp; Recent</string>
+    <string name="mine_section_general">GENERAL</string>
+    <string name="mine_section_other">OTHER</string>
+    <string name="mine_apps_hidden_title">Apps that hide icons</string>
+    <string name="mine_apps_hidden_subtitle">Emoji Battery will be hidden when these apps are opened.</string>
+    <string name="mine_grant_permission">Grant Permission</string>
+    <string name="mine_share_app">Share this app</string>
+    <string name="mine_contact_us">Contact us</string>
+    <string name="mine_current_version">Current Version: %1$s</string>
     <string name="pet_customization_heading">%1$s’s little profile</string>
     <string name="pet_customization_subtitle">Make this buddy feel just right for you.</string>
     <string name="pet_customization_size_value">%1$d%% size</string>

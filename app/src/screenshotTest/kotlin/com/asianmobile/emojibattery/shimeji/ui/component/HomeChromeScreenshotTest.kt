@@ -13,3 +13,13 @@ fun HomeBottomNavigationScreenshotTest() {
         onTabSelected = {}
     )
 }
+
+@PreviewTest
+@Preview(widthDp = 360, heightDp = 62)
+@Composable
+fun HomeBottomNavigationMineScreenshotTest() {
+    HomeBottomNavigation(
+        selectedTab = HomeTab.MINE,
+        onTabSelected = {}
+    )
+}

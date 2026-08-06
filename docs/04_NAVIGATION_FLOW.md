@@ -15,7 +15,7 @@
 | `pet_catalog/{target}/{slotIndex}` | Pet Catalog | `target=MIXED/SWARM`; lưới owner pet từ GitHub raw/cache, download + SHA-256 + Set |
 | `pet_store` | Pet Store | Tab 3 của Home shell: duyệt pet/food, Rewarded/Premium gate, download/verify chỉ để mở khóa |
 | `pet_detail/{target}/{slotIndex}/{packKey}` | Pet Detail | Preview metadata, xác nhận pack cho đúng mode/slot và quay lại Catalog |
-| `settings` | Settings | Tab Mine của Home shell: My Pet Family roster + app/support hub |
+| `settings` | Mine | Tab 4 của Home shell: Emoji Battery toggle, shortcuts và app/support hub |
 | `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
 | `swarm_customization` | Edit Pet Swarm | Character, count, base size/speed, random variation và vùng di chuyển |
 | `battery_catalog` | Battery Styles | Tab 2 của Home shell: catalog local + category/favorite/Premium gate; Accessibility gate trước editor |
@@ -42,7 +42,7 @@ Discover ──My Pet──> My Pet
 Discover ──Search──> Search ──theme──> Customize Status Bar
 Discover ──Pet Store──> Pet Store ──Rewarded/Premium──> Download/verify/unlock (không gán slot)
 Discover ──Trending pet──> Catalog Detail
-Discover ──Mine──> Settings
+Discover ──Mine──> Mine
 My Pet ──Start(no overlay)──> System Overlay Settings ──back──> My Pet
 My Pet ──Start(API 33+, notification missing)──> Notification permission ──result──> Start pet
 My Pet ──Start/Stop──> Pet overlay foreground service
@@ -54,11 +54,13 @@ My Pet ──Swarm locked──> Rewarded completed ──persist unlock──> 
 My Pet ──Swarm + Premium──> tự unlock, không hiển thị Rewarded
 My Pet ──Swarm configured──> Edit Pet Swarm ──Change character──> Catalog(SWARM)
 My Pet ──Add/Change──> Catalog(target, slot) ──search/category──> Download/verify/Set
-Settings ──Pet card──> Customize Pet(slot) ──Change character──> Catalog(slot)
-Settings ──Add pet──> Catalog(slot trống) ──Rewarded nếu là slot 4–12──> Set/Import
-Customize Pet ──Remove──> Settings (shift slot sau, giữ profile riêng)
+Mine ──My Pet──> My Pet
+Mine ──Favourite & Recent──> Battery Styles
+Mine ──Language──> Language Settings
+Mine ──Emoji Battery toggle/Grant Permission──> Accessibility disclosure/settings
+Mine ──Rate/Share/Contact/Privacy──> action tương ứng
 Catalog ──already prepared pack──> Detail ──Use for Pet──> Catalog
-Discover/My Pet ──Settings──> Settings ──Language──> Language Settings
+Discover/My Pet ──Settings──> Mine ──Language──> Language Settings
 Discover/My Pet ──Premium──> Premium(in-app)
 Discover/My Pet ──Battery──> Battery Styles ──theme──> Accessibility gate
 Accessibility gate ──enabled/return enabled──> Customize Battery Bar
@@ -84,7 +86,7 @@ chuyển sang bước đặt tên khi user chạm Continue. Flow này không t�
 - Pet Store là top-level tab; chọn Discover chuyển tab về root thay vì tạo thêm route.
   Pet tải từ Store chỉ được cài/mở khóa, không thay selection của Mixed/Swarm. `View` sau
   khi đặt tên mở My Pet như một destination con.
-- Customize Pet pop về Settings. Pet Detail pop về Catalog; Catalog pop về màn đã mở
+- Customize Pet pop về destination đã mở nó. Pet Detail pop về Catalog; Catalog pop về màn đã mở
   nó. Xác nhận pack trong Detail cũng quay lại Catalog để user thấy selection mới. Add chỉ
   tăng `petCount` sau Set/Import thành công; Back khỏi Catalog không tạo pet.
   `target` parse an toàn về enum, `slotIndex` là typed Int và `packKey` luôn URI-encode

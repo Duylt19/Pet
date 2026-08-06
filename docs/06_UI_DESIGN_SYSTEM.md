@@ -5,27 +5,30 @@ visual system Cute Pet; onboarding và Premium vẫn giữ UI hiện tại cho t
 
 ## Cute Pet product direction
 
-- Discover Home dùng nền trắng/gradient pastel, primary pink `#FB3675`, card trắng và
-  typography Roboto theo Figma node `8015:1035`. My Pet mode dùng nền xanh-trắng nhẹ,
-  primary teal và segmented control rõ selection; Catalog/Settings hiện vẫn dùng warm
-  cream/purple của Cute Pet.
+- Discover Home và Mine dùng nền trắng/gradient pastel, primary pink `#FB3675`, card trắng
+  và typography Roboto theo Figma. My Pet mode dùng nền xanh-trắng nhẹ, primary teal và
+  segmented control rõ selection; Catalog vẫn dùng cozy palette hiện tại.
 - Pet thumbnail thật là visual chính; icon notification chỉ là fallback khi pack chưa có ảnh.
 - Corner radius lớn 16–24 sdp, card rõ hierarchy nhưng ít chrome và không dùng dark utility
   dashboard cho product screens.
 - Discover là landing tổng hợp; My Pet là pet room và session control; Catalog ưu tiên
-  discovery bằng grid; Settings là pet family roster; Customize biểu diễn một hồ sơ pet độc lập.
+  discovery bằng grid; Mine là app/support hub; Customize biểu diễn một hồ sơ pet độc lập.
 - Shared primitives nằm ở `ui/component/CutePetComponents.kt`; component dark cũ không được
   dùng cho product screen mới nếu không có lý do tương thích.
 
 Các màn Splash, Language, Intro, Permission và Premium cố ý không đổi trong refresh này.
 
-Settings dùng cấu trúc pet-first:
+Mine visual contract theo Figma node `8080:4828`:
 
-- `settings`: roster active pet, Add pet và App & support;
-- `pet_customization/{slotIndex}`: identity/change character, Appearance & movement,
-  Interaction & speech, reset position và remove của đúng pet;
-- không hiển thị Sound khi pack schema v1 chưa có audio;
-- Add mở Catalog ở slot trống nhưng chỉ commit `petCount` sau Set/Import thành công.
+- route `settings` là tab Mine của Home shell, dùng lại `HomeHeader`, `HomeEnableCard`,
+  wallpaper, bottom navigation và banner placement chung; screen không tự tạo bottom chrome;
+- thứ tự content là enable card, Premium banner `328×100`, hai shortcut `158×70`, GENERAL
+  và OTHER. Card setting rộng `328/360`, radius 16px, nền trắng và shadow 12%;
+- label dùng Roboto Medium 14/20, subtitle Roboto Regular 12/16, icon vector 24px màu
+  `#FB3675`, divider `#F2F2F2`; hai shortcut illustration là raster phức tạp PNG @3x;
+- toggle điều khiển cùng `BatteryStatusConfig.enabled` và Accessibility gate với Discover;
+  Language, Rate, Share, Contact và Privacy giữ flow thật. My Pet mở route `my_pet`,
+  Favourite & Recent hiện mở Battery Styles; Apps that hide icons giữ callback chờ feature riêng.
 
 Discover Home contract:
 
@@ -33,7 +36,7 @@ Discover Home contract:
 - toggle chính điều khiển `BatteryStatusConfig.enabled`, có disclosure và Accessibility gate;
 - Home shell có bốn tab Discover/Battery/Pet Store/Mine. `HomeBottomNavigation` cố định
   trên bottom banner hiện có; từng screen không tự tạo lại bottom chrome;
-- Discover và Pet Store dùng chung `HomeHeader` và `HomeEnableCard`: header `43sdp`, search
+- Discover, Pet Store và Mine dùng chung `HomeHeader` và `HomeEnableCard`: header `43sdp`, search
   `25sdp`, enable card `37sdp`, switch `34×18sdp`. Không copy component rồi đổi metric riêng;
 - hero banner và promo creative trong content là presentational slot theo Figma, không gọi ads SDK;
 - Battery Themes dùng favorite state thật; Trending hiện dùng thứ tự catalog cho tới khi

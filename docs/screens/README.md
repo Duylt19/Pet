@@ -13,7 +13,7 @@
 | `pet_catalog/{target}/{slotIndex}` | `ui/catalog/PetCatalogScreen` | Lưới GitHub raw/cache; Mixed slot 4–12 có Rewarded gate tuần tự, Premium bypass |
 | `pet_store` | `ui/petstore/PetStoreScreen` | Tab Pet Store: shared Home header/switch, pet/food tabs, reward sheet, verified download, Lottie unlock reveal chạy special movement clip của pack, name/toast; food persistence TODO sau My Pet |
 | `pet_detail/{target}/{slotIndex}/{packKey}` | `ui/catalog/PetDetailScreen` | Hero preview và select action đúng mode/slot |
-| `settings` | `ui/home/settings/SettingsScreen` | My Pet Family roster, commit-on-selection Add flow và app/support |
+| `settings` | `ui/home/settings/SettingsScreen` | Tab Mine theo Figma: shared Home chrome, battery toggle, shortcuts, General và Other actions |
 | `pet_customization/{slotIndex}` | `ui/home/settings/PetCustomizationScreen` | Hồ sơ cute-pet độc lập: character, size, speed, touch, speech, custom messages, position và remove |
 | `swarm_customization` | `ui/home/swarm/SwarmCustomizationScreen` | Edit Swarm riêng: character, count, size/speed, random variation và movement insets |
 | `battery_catalog` | `ui/battery/catalog/BatteryCatalogScreen` | Search/category/theme/favorite/Premium; disclosure + Accessibility gate trước khi mở editor |
@@ -23,7 +23,7 @@
 
 ## Visual scope hiện tại
 
-- Discover dùng wallpaper trắng với gradient pastel, primary pink `#FB3675`, Roboto,
+- Discover và Mine dùng wallpaper trắng với gradient pastel, primary pink `#FB3675`, Roboto,
   horizontal catalog rows và rounded cards theo Figma node `8015:1035`. My Pet và các màn
   product cũ tiếp tục dùng cozy palette hiện tại cho tới task refresh riêng.
 - Splash, Language/Language Settings, Intro, Permission và Premium giữ nguyên visual hiện

@@ -2,76 +2,101 @@ package com.asianmobile.emojibattery.shimeji.ui.home.settings
 
 import android.content.Context
 import android.content.Intent
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.BuildConfig
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
-import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.utils.FeedbackLauncher
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val petSettingsRepository: PetSettingsRepository,
-    private val petPackRepository: PetPackRepository
+    @param:ApplicationContext private val context: Context,
+    private val batterySettingsRepository: BatterySettingsRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(
         SettingsUiState(
             versionName = BuildConfig.VERSION_NAME,
-            maxPets = petSettingsRepository.performanceBudget.maxPets
+            isAccessibilityEnabled = BatteryAccessibility.isEnabled(context)
         )
     )
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
+    private val _effects = Channel<SettingsEffect>(Channel.BUFFERED)
+    val effects = _effects.receiveAsFlow()
+    private var enableBatteryAfterAccessibility = false
+    private var configuredBatteryEnabled = false
+
     init {
         viewModelScope.launch {
-            combine(
-                petSettingsRepository.preferences,
-                petPackRepository.selectedPacks
-            ) { preferences, selectedPacks ->
-                preferences to selectedPacks
-            }.collect { (preferences, selectedPacks) ->
+            batterySettingsRepository.config.collect { config ->
+                configuredBatteryEnabled = config.enabled
+                val accessibilityEnabled = BatteryAccessibility.isEnabled(context)
                 _uiState.update {
                     it.copy(
-                        petCount = preferences.petCount,
-                        petSlots = List(preferences.petCount) { slotIndex ->
-                            val pack = selectedPacks.getOrNull(slotIndex)
-                                ?: selectedPacks.first()
-                            val slot = preferences.slot(slotIndex)
-                            SettingsPetSlotUiState(
-                                slotIndex = slotIndex,
-                                name = pack.manifest.name,
-                                previewImagePath = pack.previewImagePath(),
-                                sizePercent = slot.sizePercent,
-                                speedPercent = slot.speedPercent,
-                                messagesEnabled = slot.messagesEnabled,
-                                interactionEnabled = slot.interactionEnabled
-                            )
-                        }
+                        isBatteryEnabled = config.enabled && accessibilityEnabled,
+                        isAccessibilityEnabled = accessibilityEnabled
                     )
                 }
             }
         }
     }
 
-    fun nextPetSlotForAdd(): Int? {
-        val state = _uiState.value
-        if (!state.canAddPet) return null
-        return state.petCount
+    fun onBatteryToggle() {
+        if (!BatteryAccessibility.isEnabled(context)) {
+            requestBatteryAccessibility(enableAfterGrant = true)
+            return
+        }
+        batterySettingsRepository.setEnabled(!_uiState.value.isBatteryEnabled)
     }
 
-    fun onFeedbackClicked(context: Context) {
+    fun requestBatteryAccessibility(enableAfterGrant: Boolean) {
+        enableBatteryAfterAccessibility = enableAfterGrant
+        _effects.trySend(SettingsEffect.RequestBatteryAccessibility)
+    }
+
+    fun refreshAccessibility() {
+        val enabled = BatteryAccessibility.isEnabled(context)
+        _uiState.update {
+            it.copy(
+                isBatteryEnabled = configuredBatteryEnabled && enabled,
+                isAccessibilityEnabled = enabled
+            )
+        }
+        if (enabled && enableBatteryAfterAccessibility) {
+            enableBatteryAfterAccessibility = false
+            batterySettingsRepository.setEnabled(true)
+        }
+    }
+
+    fun cancelPendingBatteryEnable() {
+        enableBatteryAfterAccessibility = false
+    }
+
+    fun onContactClicked(context: Context) {
         FeedbackLauncher.launch(context)
+    }
+
+    fun onPrivacyClicked(context: Context) {
+        val intent = Intent(
+            Intent.ACTION_VIEW,
+            context.getString(R.string.privacy_policy_default_url).toUri()
+        )
+        runCatching { context.startActivity(intent) }
     }
 
     internal fun sendRateFeedback(

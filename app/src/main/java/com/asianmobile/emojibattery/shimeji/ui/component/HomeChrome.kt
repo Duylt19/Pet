@@ -238,7 +238,15 @@ fun HomeBottomNavigation(
         HomeBottomItem(HomeTab.DISCOVER, R.drawable.ic_home_discover_unselected, stringResource(R.string.discover_tab_discover), selectedTab, onTabSelected, Modifier.weight(1f), R.drawable.ic_home_discover)
         HomeBottomItem(HomeTab.BATTERY, R.drawable.ic_home_battery, stringResource(R.string.discover_tab_battery), selectedTab, onTabSelected, Modifier.weight(1f))
         HomeBottomItem(HomeTab.PET_STORE, R.drawable.ic_home_pet_store, stringResource(R.string.discover_tab_pet_store), selectedTab, onTabSelected, Modifier.weight(1f), R.drawable.ic_home_pet_store_selected)
-        HomeBottomItem(HomeTab.MINE, R.drawable.ic_home_mine, stringResource(R.string.discover_tab_mine), selectedTab, onTabSelected, Modifier.weight(1f))
+        HomeBottomItem(
+            HomeTab.MINE,
+            R.drawable.ic_home_mine,
+            stringResource(R.string.discover_tab_mine),
+            selectedTab,
+            onTabSelected,
+            Modifier.weight(1f),
+            R.drawable.ic_home_mine_selected
+        )
     }
 }
 

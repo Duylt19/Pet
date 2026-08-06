@@ -453,21 +453,23 @@ fun AppNavGraph(
 
             composable(Routes.SETTINGS) {
                 SettingsScreen(
-                    showNativeAd = false,
+                    onSearch = {
+                        navController.safeNavigate(Routes.SEARCH, ignoreDebounce = true)
+                    },
+                    onPremium = {
+                        navigateFromHome(Routes.PREMIUM)
+                    },
                     onNavigateToLanguage = {
                         navigateFromHome(Routes.LANGUAGE_SETTINGS)
                     },
-                    onNavigateToPetCustomization = { slotIndex ->
-                        navController.safeNavigate(
-                            Routes.petCustomization(slotIndex),
-                            ignoreDebounce = true
-                        )
+                    onNavigateToMyPet = {
+                        navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
                     },
-                    onAddPet = { slotIndex ->
-                        navController.safeNavigate(
-                            Routes.petCatalog(PetCatalogTarget.MIXED, slotIndex),
-                            ignoreDebounce = true
-                        )
+                    onNavigateToFavouriteRecent = {
+                        navigateToHomeTab(HomeTab.BATTERY)
+                    },
+                    onOpenAppsHidden = {
+                        // TODO(Mine): connect the app-exclusion picker when its product flow is defined.
                     }
                 )
             }

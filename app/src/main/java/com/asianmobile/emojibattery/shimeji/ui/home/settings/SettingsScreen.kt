@@ -3,7 +3,9 @@ package com.asianmobile.emojibattery.shimeji.ui.home.settings
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.BorderStroke
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,24 +13,26 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,7 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -45,38 +49,70 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_SETTING
-import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
-import com.asianmobile.emojibattery.shimeji.ui.component.AppHeaderBar
-import com.asianmobile.emojibattery.shimeji.ui.component.AppHeaderLeading
-import com.asianmobile.emojibattery.shimeji.ui.component.SettingsRow
-import com.asianmobile.emojibattery.shimeji.ui.component.SettingsSection
-import com.asianmobile.emojibattery.shimeji.ui.component.SettingsTrailing
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
+import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
+import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
+private val MineRoboto = FontFamily.SansSerif
+private val MineRobotoMedium = FontFamily(Font(R.font.roboto_medium))
+
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel = hiltViewModel(),
-    onBack: (() -> Unit)? = null,
-    showNativeAd: Boolean = true,
-    onNavigateToLanguage: () -> Unit = {},
-    onNavigateToPetCustomization: (Int) -> Unit = {},
-    onAddPet: (Int) -> Unit = {}
+    onSearch: () -> Unit,
+    onPremium: () -> Unit,
+    onNavigateToLanguage: () -> Unit,
+    onNavigateToMyPet: () -> Unit,
+    onNavigateToFavouriteRecent: () -> Unit,
+    onOpenAppsHidden: () -> Unit = {},
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     TrackScreenView(ScreenName.SETTINGS)
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val language = remember(context) { currentLanguage(context) }
     var rateAppState by remember { mutableStateOf(RateAppUiState()) }
+    var showPermissionDisclosure by remember { mutableStateOf(false) }
+
+    val accessibilityLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        viewModel.refreshAccessibility()
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                SettingsEffect.RequestBatteryAccessibility -> {
+                    showPermissionDisclosure = true
+                }
+            }
+        }
+    }
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshAccessibility()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     RateAppFlow(
         context = context,
         state = rateAppState,
@@ -84,245 +120,435 @@ fun SettingsScreen(
         onSendFeedback = viewModel::sendRateFeedback
     )
 
-    Column(
+    MineContent(
+        state = state,
+        languageName = language.displayName,
+        languageFlagRes = language.flagRes,
+        onSearch = onSearch,
+        onPremium = onPremium,
+        onBatteryToggle = viewModel::onBatteryToggle,
+        onMyPet = onNavigateToMyPet,
+        onFavouriteRecent = onNavigateToFavouriteRecent,
+        onLanguage = onNavigateToLanguage,
+        onAppsHidden = onOpenAppsHidden,
+        onGrantPermission = {
+            viewModel.requestBatteryAccessibility(enableAfterGrant = false)
+        },
+        onRate = { rateAppState = RateAppUiState(isDialogVisible = true) },
+        onShare = { viewModel.onShareClicked(context) },
+        onContact = { viewModel.onContactClicked(context) },
+        onPrivacy = { viewModel.onPrivacyClicked(context) }
+    )
+
+    if (showPermissionDisclosure) {
+        GrantPermissionDialog(
+            onGrantPermission = {
+                showPermissionDisclosure = false
+                accessibilityLauncher.launch(BatteryAccessibility.settingsIntent())
+            },
+            onMaybeLater = {
+                showPermissionDisclosure = false
+                viewModel.cancelPendingBatteryEnable()
+            }
+        )
+    }
+}
+
+@Composable
+internal fun MineContent(
+    state: SettingsUiState,
+    languageName: String,
+    @DrawableRes languageFlagRes: Int,
+    onSearch: () -> Unit,
+    onPremium: () -> Unit,
+    onBatteryToggle: () -> Unit,
+    onMyPet: () -> Unit,
+    onFavouriteRecent: () -> Unit,
+    onLanguage: () -> Unit,
+    onAppsHidden: () -> Unit,
+    onGrantPermission: () -> Unit,
+    onRate: () -> Unit,
+    onShare: () -> Unit,
+    onContact: () -> Unit,
+    onPrivacy: () -> Unit
+) {
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.colors_FFF9F4))
+            .background(colorResource(R.color.colors_FFFFFF))
     ) {
-        AppHeaderBar(
-            title = stringResource(R.string.settings_title),
-            leadingIcon = onBack?.let { AppHeaderLeading.Back },
-            onLeadingClick = { onBack?.invoke() }
+        Image(
+            painter = painterResource(R.drawable.img_home_wallpaper),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._600sdp))
         )
 
         Column(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
+                .fillMaxSize()
+                .statusBarsPadding()
         ) {
-            Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-            Text(
-                text = stringResource(R.string.settings_heading),
-                color = colorResource(R.color.colors_2F2440),
-                fontFamily = FontFamily(Font(R.font.inter_bold)),
-                fontSize = dimensionResource(SspR.dimen._20ssp).value.sp,
-                modifier = Modifier.padding(
-                    start = dimensionResource(SdpR.dimen._4sdp),
-                    end = dimensionResource(SdpR.dimen._4sdp)
-                )
-            )
-            Text(
-                text = stringResource(R.string.settings_subtitle),
-                color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
-                fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
-                modifier = Modifier.padding(
-                    start = dimensionResource(SdpR.dimen._4sdp),
-                    end = dimensionResource(SdpR.dimen._4sdp),
-                    top = dimensionResource(SdpR.dimen._3sdp),
-                    bottom = dimensionResource(SdpR.dimen._14sdp)
-                )
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            HomeHeader(onSearch = onSearch, onPremium = onPremium)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Text(
-                    text = stringResource(R.string.settings_section_my_pets),
-                    color = colorResource(R.color.colors_2F2440),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                    fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
-                )
-                Text(
+                HomeEnableCard(
                     text = stringResource(
-                        R.string.settings_pet_count_compact,
-                        state.petCount,
-                        state.maxPets
+                        if (state.isBatteryEnabled) {
+                            R.string.discover_battery_enabled
+                        } else {
+                            R.string.discover_battery_enable_prompt
+                        }
                     ),
-                    color = colorResource(R.color.colors_776D84),
-                    fontFamily = FontFamily(Font(R.font.inter_regular)),
-                    fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
+                    checked = state.isBatteryEnabled,
+                    onCheckedChange = onBatteryToggle
                 )
-            }
-            Spacer(Modifier.height(dimensionResource(SdpR.dimen._7sdp)))
-            state.petSlots.forEach { slot ->
-                PetProfileCard(
-                    slot = slot,
-                    onClick = { onNavigateToPetCustomization(slot.slotIndex) }
+                MinePremiumBanner(onClick = onPremium)
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
+                MineQuickActions(
+                    onMyPet = onMyPet,
+                    onFavouriteRecent = onFavouriteRecent
                 )
-                Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
-            }
-            if (state.canAddPet) {
-                OutlinedButton(
-                    onClick = { viewModel.nextPetSlotForAdd()?.let(onAddPet) },
-                    border = BorderStroke(
-                        width = dimensionResource(SdpR.dimen._1sdp),
-                        color = colorResource(R.color.colors_7B61FF)
-                    ),
-                    shape = RoundedCornerShape(dimensionResource(SdpR.dimen._16sdp)),
-                    modifier = Modifier.fillMaxWidth()
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
+                Column(
+                    modifier = Modifier.padding(
+                        horizontal = dimensionResource(SdpR.dimen._12sdp)
+                    )
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_plus),
-                        contentDescription = null,
-                        tint = colorResource(R.color.colors_7B61FF),
-                        modifier = Modifier.size(dimensionResource(SdpR.dimen._16sdp))
-                    )
-                    Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
-                    Text(
-                        text = stringResource(R.string.settings_add_pet),
-                        color = colorResource(R.color.colors_7B61FF),
-                        fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                        fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
-                    )
+                    MineSection(title = stringResource(R.string.mine_section_general)) {
+                        MineRow(
+                            iconRes = R.drawable.ic_mine_language,
+                            title = stringResource(R.string.settings_language_title),
+                            subtitle = languageName,
+                            rowHeight = dimensionResource(SdpR.dimen._29sdp),
+                            trailingFlagRes = languageFlagRes,
+                            onClick = onLanguage
+                        )
+                        MineDivider()
+                        MineRow(
+                            iconRes = R.drawable.ic_mine_apps_hidden,
+                            title = stringResource(R.string.mine_apps_hidden_title),
+                            subtitle = stringResource(R.string.mine_apps_hidden_subtitle),
+                            rowHeight = dimensionResource(SdpR.dimen._42sdp),
+                            onClick = onAppsHidden
+                        )
+                        MineDivider()
+                        MineRow(
+                            iconRes = R.drawable.ic_mine_permission,
+                            title = stringResource(R.string.mine_grant_permission),
+                            rowHeight = dimensionResource(SdpR.dimen._18sdp),
+                            onClick = onGrantPermission
+                        )
+                    }
+
+                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
+
+                    MineSection(title = stringResource(R.string.mine_section_other)) {
+                        MineRow(
+                            iconRes = R.drawable.ic_mine_rate,
+                            title = stringResource(R.string.settings_rate_us_title),
+                            rowHeight = dimensionResource(SdpR.dimen._18sdp),
+                            onClick = onRate
+                        )
+                        MineDivider()
+                        MineRow(
+                            iconRes = R.drawable.ic_mine_share,
+                            title = stringResource(R.string.mine_share_app),
+                            rowHeight = dimensionResource(SdpR.dimen._18sdp),
+                            onClick = onShare
+                        )
+                        MineDivider()
+                        MineRow(
+                            iconRes = R.drawable.ic_mine_contact,
+                            title = stringResource(R.string.mine_contact_us),
+                            rowHeight = dimensionResource(SdpR.dimen._18sdp),
+                            onClick = onContact
+                        )
+                        MineDivider()
+                        MineRow(
+                            iconRes = R.drawable.ic_mine_privacy,
+                            title = stringResource(R.string.settings_privacy_policy_title),
+                            rowHeight = dimensionResource(SdpR.dimen._18sdp),
+                            onClick = onPrivacy
+                        )
+                        MineDivider()
+                        MineRow(
+                            iconRes = R.drawable.ic_mine_version,
+                            title = stringResource(
+                                R.string.mine_current_version,
+                                state.versionName
+                            ),
+                            rowHeight = dimensionResource(SdpR.dimen._18sdp),
+                            onClick = {}
+                        )
+                    }
+                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._18sdp)))
                 }
             }
-            Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-            SettingsSection(title = stringResource(R.string.settings_app_title)) {
-                LanguageSettingsRow(
-                    context = context,
-                    onClick = onNavigateToLanguage
-                )
-                SettingsDivider()
-                SettingsRow(
-                    iconRes = R.drawable.ic_setting_share_v2,
-                    title = stringResource(R.string.settings_share_title),
-                    onClick = { viewModel.onShareClicked(context) }
-                )
-                SettingsDivider()
-                SettingsRow(
-                    iconRes = R.drawable.ic_setting_rate_us_v2,
-                    title = stringResource(R.string.settings_rate_us_title),
-                    onClick = {
-                        rateAppState = RateAppUiState(isDialogVisible = true)
-                    }
-                )
-                SettingsDivider()
-                SettingsRow(
-                    iconRes = R.drawable.ic_setting_feedback_v2,
-                    title = stringResource(R.string.settings_feedback_title),
-                    onClick = { viewModel.onFeedbackClicked(context) }
-                )
-            }
-            Text(
-                text = stringResource(R.string.settings_version_format, state.versionName),
-                color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
-                fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(vertical = dimensionResource(SdpR.dimen._12sdp))
-            )
-        }
-
-        if (showNativeAd) {
-            NativeAdInternal(
-                screenCode = SCREEN_SETTING,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(
-                        start = dimensionResource(SdpR.dimen._12sdp),
-                        end = dimensionResource(SdpR.dimen._12sdp),
-                        bottom = dimensionResource(SdpR.dimen._12sdp)
-                    )
-            )
         }
     }
 }
 
 @Composable
-private fun PetProfileCard(
-    slot: SettingsPetSlotUiState,
-    onClick: () -> Unit
+private fun MinePremiumBanner(onClick: () -> Unit) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
+            .height(dimensionResource(SdpR.dimen._77sdp))
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFEBF1))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(R.string.mine_banner_premium),
+            color = colorResource(R.color.colors_000000),
+            fontFamily = MineRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp
+        )
+    }
+}
+
+@Composable
+private fun MineQuickActions(
+    onMyPet: () -> Unit,
+    onFavouriteRecent: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp)))
-            .background(colorResource(R.color.colors_FFFFFB))
+            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+    ) {
+        MineQuickCard(
+            title = stringResource(R.string.mine_my_pet),
+            imageRes = R.drawable.img_mine_my_pet,
+            backgroundRes = R.color.colors_FBEFC7,
+            borderRes = R.color.colors_FFDD69,
+            imageSize = dimensionResource(SdpR.dimen._49sdp),
+            onClick = onMyPet,
+            modifier = Modifier.weight(1f)
+        )
+        MineQuickCard(
+            title = stringResource(R.string.mine_favourite_recent),
+            imageRes = R.drawable.img_mine_favorite_recent,
+            backgroundRes = R.color.colors_FFDDEA,
+            borderRes = R.color.colors_FD74A7,
+            imageSize = dimensionResource(SdpR.dimen._55sdp),
+            imageOffsetX = dimensionResource(SdpR.dimen._2sdp),
+            imageOffsetY = -dimensionResource(SdpR.dimen._2sdp),
+            onClick = onFavouriteRecent,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun MineQuickCard(
+    title: String,
+    @DrawableRes imageRes: Int,
+    backgroundRes: Int,
+    borderRes: Int,
+    imageSize: Dp,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    imageOffsetX: Dp = 0.dp,
+    imageOffsetY: Dp = 0.dp
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+    val shadowColor = colorResource(R.color.gray_666666).copy(alpha = 0.35f)
+    Box(
+        modifier = modifier
+            .height(dimensionResource(SdpR.dimen._54sdp))
+            .shadow(
+                elevation = dimensionResource(SdpR.dimen._18sdp),
+                shape = shape,
+                ambientColor = shadowColor,
+                spotColor = shadowColor
+            )
+            .clip(shape)
+            .background(colorResource(backgroundRes))
             .border(
-                width = dimensionResource(SdpR.dimen._1sdp),
-                color = colorResource(R.color.colors_E9DFEF),
-                shape = RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp))
+                dimensionResource(SdpR.dimen._1sdp),
+                colorResource(borderRes),
+                shape
             )
             .clickable(onClick = onClick)
-            .padding(dimensionResource(SdpR.dimen._11sdp)),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
+        Text(
+            text = title,
+            color = colorResource(R.color.colors_212327),
+            fontFamily = MineRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Clip,
             modifier = Modifier
-                .size(dimensionResource(SdpR.dimen._42sdp))
-                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
-                .background(
-                    colorResource(
-                        when (slot.slotIndex % 3) {
-                            0 -> R.color.pet_demo_fur
-                            1 -> R.color.colors_BFEBDD
-                            else -> R.color.colors_FF7A9E
-                        }
-                    )
-                ),
-            contentAlignment = Alignment.Center
+                .align(Alignment.CenterStart)
+                .width(dimensionResource(SdpR.dimen._64sdp))
+                .padding(start = dimensionResource(SdpR.dimen._9sdp))
+        )
+        Image(
+            painter = painterResource(imageRes),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = imageOffsetX, y = imageOffsetY)
+                .size(imageSize)
+        )
+    }
+}
+
+@Composable
+private fun MineSection(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Text(
+        text = title,
+        color = colorResource(R.color.colors_6F7073),
+        fontFamily = MineRobotoMedium,
+        fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+        lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+        modifier = Modifier.fillMaxWidth()
+    )
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
+    val shadowColor = colorResource(R.color.gray_666666).copy(alpha = 0.35f)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = dimensionResource(SdpR.dimen._9sdp),
+                shape = shape,
+                ambientColor = shadowColor,
+                spotColor = shadowColor
+            )
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFFFFF))
+            .padding(dimensionResource(SdpR.dimen._12sdp)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp)),
+        content = content
+    )
+}
+
+@Composable
+private fun MineRow(
+    @DrawableRes iconRes: Int,
+    title: String,
+    rowHeight: Dp,
+    onClick: () -> Unit,
+    subtitle: String? = null,
+    @DrawableRes trailingFlagRes: Int? = null
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(rowHeight)
+            .clickable(onClick = onClick),
+        verticalAlignment = if (subtitle == null) Alignment.CenterVertically else Alignment.Top
+    ) {
+        Image(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
+        )
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._9sdp)))
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._2sdp))
         ) {
-            if (slot.previewImagePath != null) {
-                AsyncImage(
-                    model = slot.previewImagePath,
-                    contentDescription = slot.name,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(dimensionResource(SdpR.dimen._3sdp))
-                )
-            } else {
+            Text(
+                text = title,
+                color = colorResource(R.color.colors_212327),
+                fontFamily = MineRobotoMedium,
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+                maxLines = 1
+            )
+            subtitle?.let {
                 Text(
-                    text = (slot.slotIndex + 1).toString(),
-                    color = colorResource(R.color.white),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                    fontSize = dimensionResource(SspR.dimen._13ssp).value.sp
+                    text = it,
+                    color = colorResource(R.color.colors_6F7073),
+                    fontFamily = MineRoboto,
+                    fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp,
+                    maxLines = 2
                 )
             }
         }
-        Spacer(Modifier.width(dimensionResource(SdpR.dimen._10sdp)))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = slot.name,
-                color = colorResource(R.color.colors_2F2440),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
-                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
+        trailingFlagRes?.let { flagRes ->
+            Image(
+                painter = painterResource(flagRes),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(dimensionResource(SdpR.dimen._18sdp))
+                    .clip(CircleShape)
+                    .border(
+                        dimensionResource(SdpR.dimen._1sdp),
+                        colorResource(R.color.colors_E6E6E6),
+                        CircleShape
+                    )
             )
-            Text(
-                text = stringResource(
-                    R.string.settings_pet_profile_summary,
-                    slot.sizePercent,
-                    slot.speedPercent
-                ),
-                color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
-                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
-            )
-            Text(
-                text = stringResource(
-                    if (slot.messagesEnabled && slot.interactionEnabled) {
-                        R.string.settings_pet_profile_fully_interactive
-                    } else {
-                        R.string.settings_pet_profile_limited
-                    }
-                ),
-                color = colorResource(R.color.colors_7B61FF),
-                fontFamily = FontFamily(Font(R.font.inter_medium)),
-                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
-            )
+            Spacer(Modifier.width(dimensionResource(SdpR.dimen._9sdp)))
         }
-        Icon(
+        Image(
             painter = painterResource(R.drawable.ic_setting_chevron_right_v2),
-            contentDescription = stringResource(R.string.settings_customize_pet, slot.name),
-            tint = colorResource(R.color.colors_776D84),
+            contentDescription = null,
             modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
         )
     }
+}
+
+@Composable
+private fun MineDivider() {
+    HorizontalDivider(
+        thickness = dimensionResource(SdpR.dimen._1sdp),
+        color = colorResource(R.color.colors_F2F2F2)
+    )
+}
+
+private data class MineLanguage(
+    val displayName: String,
+    @param:DrawableRes val flagRes: Int
+)
+
+private fun currentLanguage(context: Context): MineLanguage {
+    val preferences = context.getSharedPreferences("language_cache", Context.MODE_PRIVATE)
+    val languageKey = preferences.getString("key_language", "en") ?: "en"
+    val country = preferences.getString("country_language", "US") ?: "US"
+    val flag = when (languageKey) {
+        "en" -> R.drawable.ic_flag_en
+        "hi" -> R.drawable.ic_flag_hi
+        "es" -> R.drawable.ic_flag_es
+        "pt" -> R.drawable.ic_flag_pt
+        "de" -> R.drawable.ic_flag_de
+        "ar" -> R.drawable.ic_flag_ar
+        "vi" -> R.drawable.ic_flag_vi
+        "fr" -> R.drawable.ic_flag_fr
+        "ha" -> R.drawable.ic_flag_ha
+        "af" -> R.drawable.ic_flag_af
+        "zh" -> R.drawable.ic_flag_zh
+        else -> R.drawable.ic_flag_en
+    }
+    val locale = java.util.Locale.Builder()
+        .setLanguage(languageKey)
+        .setRegion(country)
+        .build()
+    return MineLanguage(
+        displayName = locale.getDisplayLanguage(locale).replaceFirstChar { it.uppercase() },
+        flagRes = flag
+    )
 }
 
 @Composable
@@ -388,84 +614,24 @@ private fun RateAppFlow(
     )
 }
 
+@Preview(showBackground = true, widthDp = 360, heightDp = 950)
 @Composable
-private fun LanguageSettingsRow(
-    context: Context,
-    onClick: () -> Unit
-) {
-    val languagePreferences = remember(context) {
-        context.getSharedPreferences("language_cache", Context.MODE_PRIVATE)
-    }
-    val languageKey = languagePreferences.getString("key_language", "en") ?: "en"
-    val country = languagePreferences.getString("country_language", "US") ?: "US"
-    val flag = when (languageKey) {
-        "en" -> R.drawable.ic_flag_en
-        "hi" -> R.drawable.ic_flag_hi
-        "es" -> R.drawable.ic_flag_es
-        "pt" -> R.drawable.ic_flag_pt
-        "de" -> R.drawable.ic_flag_de
-        "ar" -> R.drawable.ic_flag_ar
-        "vi" -> R.drawable.ic_flag_vi
-        "fr" -> R.drawable.ic_flag_fr
-        "ha" -> R.drawable.ic_flag_ha
-        "af" -> R.drawable.ic_flag_af
-        "zh" -> R.drawable.ic_flag_zh
-        else -> R.drawable.ic_flag_en
-    }
-    val locale = java.util.Locale.Builder()
-        .setLanguage(languageKey)
-        .setRegion(country)
-        .build()
-    val displayName = locale.getDisplayLanguage(locale).replaceFirstChar { it.uppercase() }
-
-    SettingsRow(
-        iconRes = R.drawable.ic_setting_language_v2,
-        title = stringResource(R.string.settings_language_title),
-        subtitle = displayName,
-        trailing = SettingsTrailing.Custom {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(flag),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(dimensionResource(SdpR.dimen._18sdp))
-                        .clip(CircleShape)
-                )
-                Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
-                Icon(
-                    painter = painterResource(R.drawable.ic_setting_chevron_right_v2),
-                    contentDescription = null,
-                    tint = Color.Unspecified,
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
-                )
-            }
-        },
-        onClick = onClick
-    )
-}
-
-@Composable
-private fun SettingsDivider() {
-    HorizontalDivider(
-        thickness = dimensionResource(SdpR.dimen._1sdp),
-        color = colorResource(R.color.colors_E9DFEF)
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PetProfileCardPreview() {
-    PetProfileCard(
-        slot = SettingsPetSlotUiState(
-            slotIndex = 0,
-            name = stringResource(R.string.home_pet_default_name),
-            previewImagePath = null,
-            sizePercent = 100,
-            speedPercent = 100,
-            messagesEnabled = true,
-            interactionEnabled = true
-        ),
-        onClick = {}
+private fun MineContentPreview() {
+    MineContent(
+        state = SettingsUiState(versionName = "100"),
+        languageName = "English",
+        languageFlagRes = R.drawable.ic_flag_en,
+        onSearch = {},
+        onPremium = {},
+        onBatteryToggle = {},
+        onMyPet = {},
+        onFavouriteRecent = {},
+        onLanguage = {},
+        onAppsHidden = {},
+        onGrantPermission = {},
+        onRate = {},
+        onShare = {},
+        onContact = {},
+        onPrivacy = {}
     )
 }
