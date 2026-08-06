@@ -1014,5 +1014,25 @@
     <string name="discover_tab_discover">Discover</string>
     <string name="discover_tab_battery">Battery</string>
     <string name="discover_tab_pet_store">Pet Store</string>
+    <string name="pet_store_enable_pet">Turn on to add a pet to your screen</string>
+    <string name="pet_store_banner_placeholder">Banner my pet</string>
+    <string name="pet_store_tab_pets">Pet Store</string>
+    <string name="pet_store_tab_food">Food</string>
+    <string name="pet_store_breed">Breed: %1$s</string>
+    <string name="pet_store_unlock_title">Claim your reward now!</string>
+    <string name="pet_store_unlimited">Unlimited</string>
+    <string name="pet_store_get_free">Get it free</string>
+    <string name="pet_store_downloading">Downloading…</string>
+    <string name="pet_store_new_pet">NEW PET</string>
+    <string name="pet_store_new_food">NEW FOOD</string>
+    <string name="pet_store_tap_continue">Tap to continue</string>
+    <string name="pet_store_name_title">Your pet\'s name</string>
+    <string name="pet_store_name_hint">Pet name</string>
+    <string name="pet_store_save">Save</string>
+    <string name="pet_store_joined">%1$s joined your family!</string>
+    <string name="pet_store_view">View</string>
+    <string name="pet_store_food_received">%1$s added to your food</string>
+    <string name="pet_store_food_reward_title">Claim your reward now!</string>
+    <string name="pet_store_close">Close</string>
     <string name="discover_tab_mine">Mine</string>
 </resources>

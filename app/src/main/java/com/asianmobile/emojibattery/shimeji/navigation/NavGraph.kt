@@ -35,6 +35,7 @@ import com.asianmobile.emojibattery.shimeji.ui.language.LanguageScreen
 import com.asianmobile.emojibattery.shimeji.ui.main.MainViewModel
 import com.asianmobile.emojibattery.shimeji.ui.permission.PermissionScreen
 import com.asianmobile.emojibattery.shimeji.ui.premium.PremiumScreen
+import com.asianmobile.emojibattery.shimeji.ui.petstore.PetStoreScreen
 import com.asianmobile.emojibattery.shimeji.ui.premium.StartPremiumIndexes
 import com.asianmobile.emojibattery.shimeji.ui.splash.SplashScreen
 import com.asianmobile.emojibattery.shimeji.ui.search.SearchScreen
@@ -49,6 +50,7 @@ object Routes {
     const val SEARCH = "search"
     const val MY_PET = "my_pet"
     const val PET_CATALOG = "pet_catalog"
+    const val PET_STORE = "pet_store"
     const val PET_DETAIL = "pet_detail"
     const val PET_CUSTOMIZATION = "pet_customization"
     const val SWARM_CUSTOMIZATION = "swarm_customization"
@@ -215,10 +217,7 @@ fun AppNavGraph(
                         navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
                     },
                     onNavigateToPetStore = {
-                        navController.safeNavigate(
-                            Routes.petCatalog(PetCatalogTarget.MIXED, 0),
-                            ignoreDebounce = true
-                        )
+                        navController.safeNavigate(Routes.PET_STORE, ignoreDebounce = true)
                     },
                     onNavigateToMine = {
                         navigateFromHome(Routes.SETTINGS)
@@ -252,6 +251,29 @@ fun AppNavGraph(
                             Routes.batteryEditor(themeId),
                             ignoreDebounce = true
                         )
+                    }
+                )
+            }
+
+            composable(Routes.PET_STORE) {
+                PetStoreScreen(
+                    onSearch = {
+                        navController.safeNavigate(Routes.SEARCH, ignoreDebounce = true)
+                    },
+                    onPremium = {
+                        navigateFromHome(Routes.PREMIUM)
+                    },
+                    onDiscover = {
+                        navController.safePopBackStack(ignoreDebounce = true)
+                    },
+                    onBattery = {
+                        navController.safeNavigate(Routes.BATTERY_CATALOG, ignoreDebounce = true)
+                    },
+                    onMine = {
+                        navigateFromHome(Routes.SETTINGS)
+                    },
+                    onViewPet = {
+                        navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
                     }
                 )
             }

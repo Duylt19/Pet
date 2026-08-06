@@ -4,11 +4,13 @@ import android.content.Context
 import com.asianmobile.emojibattery.shimeji.data.local.DataStoreManager
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.PetStoreRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.BatteryCatalogParser
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStoreBatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStorePetSettingsRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStorePetStoreRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.HybridBatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.OwnerPetCatalogParser
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.RemoteOwnerPetCatalogRepository
@@ -65,6 +67,12 @@ object DataModule {
     fun providePetSettingsRepository(
         repository: DataStorePetSettingsRepository
     ): PetSettingsRepository = repository
+
+    @Provides
+    @Singleton
+    fun providePetStoreRepository(
+        repository: DataStorePetStoreRepository
+    ): PetStoreRepository = repository
 
     @Provides
     @Singleton

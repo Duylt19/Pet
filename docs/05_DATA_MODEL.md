@@ -14,6 +14,7 @@
 | `pet_selected_pack_keys` | String | 12 pack key độc lập theo slot, newline-delimited |
 | `pet_selected_pack_key` | String | Legacy/mirror slot 1 để migrate dữ liệu cũ |
 | `pet_count` | Int | Số instance, clamp theo device budget |
+| `pet_store_custom_names` | JSON String | Tên pet đặt từ Pet Store theo owner pet ID; pack đã cài là source of truth mở khóa |
 | `pet_display_mode` | String enum | `MIXED` hoặc `SWARM`; hai mode loại trừ nhau |
 | `pet_slot_enabled` | JSON String | 12 trạng thái visible độc lập của Mixed |
 | `pet_mixed_reward_unlocked_slot_count` | Int | Capacity Mixed đã mở, mặc định 3 và clamp 3–12 |
@@ -94,6 +95,9 @@ không được restore sau process death/reboot.
 - `PetPackManifest` là schema v1 versioned gồm identity, canvas, anchor, interaction và action clips/frame metadata.
 - `PetPackRepository.packs/selectedPacks` là `StateFlow`; selection thiếu slot được materialize một lần từ slot 1 thành 12 giá trị độc lập, và built-in Orange Cat luôn là fallback khi key không còn hợp lệ.
 - Installed source chỉ trỏ tới app-private directory sau khi secure installer validate và atomic promote.
+- Pet Store coi `installedPackKey` xuất hiện trong `PetPackRepository.packs` là đã mở khóa.
+  Download Store không gọi `select`, nên không thay đổi Mixed/Swarm. Food hiện chỉ có model
+  presentation; inventory/coin persistence được bổ sung cùng flow My Pet.
 - Pack của controller là snapshot theo từng rebuild. Khi selected key/count thay đổi,
   service preload visual rồi thay controller ngay trong foreground session; invalid/missing
   key vẫn fallback built-in và không đưa file chưa validate vào renderer.

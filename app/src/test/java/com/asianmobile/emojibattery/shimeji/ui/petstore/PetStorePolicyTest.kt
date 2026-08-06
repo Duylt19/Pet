@@ -1,0 +1,24 @@
+package com.asianmobile.emojibattery.shimeji.ui.petstore
+
+import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class PetStorePolicyTest {
+    private val pet = OwnerPetCatalogEntry(42, "Bunny", "Rabbit", null, null, false)
+
+    @Test
+    fun `only installed owner pack is unlocked`() {
+        assertFalse(PetStorePolicy.isUnlocked(pet, emptySet()))
+        assertTrue(PetStorePolicy.isUnlocked(pet, setOf(pet.installedPackKey)))
+    }
+
+    @Test
+    fun `name is trimmed bounded and falls back to catalog name`() {
+        assertEquals("Mochi", PetStorePolicy.normalizedName("  Mochi  ", pet.name))
+        assertEquals("Bunny", PetStorePolicy.normalizedName("   ", pet.name))
+        assertEquals(24, PetStorePolicy.normalizedName("x".repeat(40), pet.name).length)
+    }
+}

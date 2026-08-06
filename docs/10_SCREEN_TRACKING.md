@@ -15,6 +15,7 @@
 | Search | `search` |
 | My Pet | `my_pet` |
 | Pet catalog | `pet_catalog` |
+| Pet Store | `pet_store` |
 | Pet detail | `pet_detail` |
 | Customize Pet | `pet_customization` |
 | Edit Pet Swarm | `swarm_customization` |
