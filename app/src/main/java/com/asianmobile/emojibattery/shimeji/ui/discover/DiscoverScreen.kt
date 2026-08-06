@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -67,6 +68,11 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.airbnb.lottie.LottieCompositionFactory
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
@@ -264,19 +270,14 @@ private fun DiscoverContent(
                         )
                     }
                 }
-                Image(
-                    painter = painterResource(R.drawable.img_home_diy),
-                    contentDescription = stringResource(R.string.discover_customize_status_bar),
-                    contentScale = ContentScale.Fit,
+                HomeDiyFab(
+                    onClick = onCustomizeStatusBar,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(
                             end = dimensionResource(SdpR.dimen._11sdp),
                             bottom = dimensionResource(SdpR.dimen._8sdp)
                         )
-                        .size(dimensionResource(SdpR.dimen._62sdp))
-                        .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._15sdp)))
-                        .clickable(onClick = onCustomizeStatusBar)
                 )
             }
             DiscoverBottomNavigation(
@@ -289,6 +290,70 @@ private fun DiscoverContent(
                 adPosition = HOME_BOTTOM_BANNER_POSITION
             )
             Spacer(Modifier.navigationBarsPadding())
+        }
+    }
+}
+
+@Composable
+internal fun HomeDiyFab(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    sparkleProgress: Float? = null
+) {
+    val asyncStarBlingComposition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.anim_home_star_bling)
+    )
+    val context = LocalContext.current
+    val starBlingComposition = if (sparkleProgress == null) {
+        asyncStarBlingComposition
+    } else {
+        remember(context) {
+            LottieCompositionFactory.fromRawResSync(
+                context,
+                R.raw.anim_home_star_bling
+            ).value
+        }
+    }
+    val fabShape = RoundedCornerShape(dimensionResource(SdpR.dimen._15sdp))
+    Box(
+        modifier = modifier.size(dimensionResource(SdpR.dimen._62sdp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(R.drawable.img_home_diy),
+            contentDescription = stringResource(R.string.discover_customize_status_bar),
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+                .matchParentSize()
+                .shadow(
+                    elevation = dimensionResource(SdpR.dimen._9sdp),
+                    shape = fabShape,
+                    ambientColor = colorResource(R.color.colors_80000000),
+                    spotColor = colorResource(R.color.colors_80000000)
+                )
+                .clip(fabShape)
+                .clickable(onClick = onClick)
+        )
+
+        val sparkleModifier = Modifier
+            .align(Alignment.Center)
+            .requiredSize(
+                width = dimensionResource(SdpR.dimen._100sdp),
+                height = dimensionResource(SdpR.dimen._45sdp)
+            )
+
+        if (sparkleProgress == null) {
+            LottieAnimation(
+                composition = starBlingComposition,
+                iterations = LottieConstants.IterateForever,
+                modifier = sparkleModifier
+            )
+        } else {
+            LottieAnimation(
+                composition = starBlingComposition,
+                progress = { sparkleProgress },
+                modifier = sparkleModifier
+            )
         }
     }
 }
