@@ -6,7 +6,8 @@ import com.android.tools.screenshot.PreviewTest
 import com.asianmobile.emojibattery.shimeji.R
 
 @PreviewTest
-@Preview(widthDp = 360, heightDp = 950)
+@Preview(name = "Compact", widthDp = 360, heightDp = 950)
+@Preview(name = "Wide", widthDp = 411, heightDp = 950)
 @Composable
 fun MineScreenshotTest() {
     MineContent(

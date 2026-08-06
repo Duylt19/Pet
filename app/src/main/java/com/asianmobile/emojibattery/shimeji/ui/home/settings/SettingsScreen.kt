@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -230,7 +231,6 @@ internal fun MineContent(
                             iconRes = R.drawable.ic_mine_language,
                             title = stringResource(R.string.settings_language_title),
                             subtitle = languageName,
-                            rowHeight = dimensionResource(SdpR.dimen._29sdp),
                             trailingFlagRes = languageFlagRes,
                             onClick = onLanguage
                         )
@@ -239,14 +239,12 @@ internal fun MineContent(
                             iconRes = R.drawable.ic_mine_apps_hidden,
                             title = stringResource(R.string.mine_apps_hidden_title),
                             subtitle = stringResource(R.string.mine_apps_hidden_subtitle),
-                            rowHeight = dimensionResource(SdpR.dimen._42sdp),
                             onClick = onAppsHidden
                         )
                         MineDivider()
                         MineRow(
                             iconRes = R.drawable.ic_mine_permission,
                             title = stringResource(R.string.mine_grant_permission),
-                            rowHeight = dimensionResource(SdpR.dimen._18sdp),
                             onClick = onGrantPermission
                         )
                     }
@@ -257,28 +255,24 @@ internal fun MineContent(
                         MineRow(
                             iconRes = R.drawable.ic_mine_rate,
                             title = stringResource(R.string.settings_rate_us_title),
-                            rowHeight = dimensionResource(SdpR.dimen._18sdp),
                             onClick = onRate
                         )
                         MineDivider()
                         MineRow(
                             iconRes = R.drawable.ic_mine_share,
                             title = stringResource(R.string.mine_share_app),
-                            rowHeight = dimensionResource(SdpR.dimen._18sdp),
                             onClick = onShare
                         )
                         MineDivider()
                         MineRow(
                             iconRes = R.drawable.ic_mine_contact,
                             title = stringResource(R.string.mine_contact_us),
-                            rowHeight = dimensionResource(SdpR.dimen._18sdp),
                             onClick = onContact
                         )
                         MineDivider()
                         MineRow(
                             iconRes = R.drawable.ic_mine_privacy,
                             title = stringResource(R.string.settings_privacy_policy_title),
-                            rowHeight = dimensionResource(SdpR.dimen._18sdp),
                             onClick = onPrivacy
                         )
                         MineDivider()
@@ -288,7 +282,6 @@ internal fun MineContent(
                                 R.string.mine_current_version,
                                 state.versionName
                             ),
-                            rowHeight = dimensionResource(SdpR.dimen._18sdp),
                             onClick = {}
                         )
                     }
@@ -450,7 +443,6 @@ private fun MineSection(
 private fun MineRow(
     @DrawableRes iconRes: Int,
     title: String,
-    rowHeight: Dp,
     onClick: () -> Unit,
     subtitle: String? = null,
     @DrawableRes trailingFlagRes: Int? = null
@@ -458,7 +450,7 @@ private fun MineRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(rowHeight)
+            .heightIn(min = dimensionResource(SdpR.dimen._18sdp))
             .clickable(onClick = onClick),
         verticalAlignment = if (subtitle == null) Alignment.CenterVertically else Alignment.Top
     ) {
