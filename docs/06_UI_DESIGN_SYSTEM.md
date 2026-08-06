@@ -39,6 +39,16 @@ Discover Home contract:
 - Battery Themes dùng favorite state thật; Trending hiện dùng thứ tự catalog cho tới khi
   server có ranking riêng.
 
+Pet Store visual contract:
+
+- Pet/Food selector dùng bốn image-fill state riêng từ Figma (`selected`/`unselected`);
+  đây là raster artwork nhiều màu nên lưu PNG @3x trong `drawable-nodpi`, không thay bằng
+  emoji hoặc icon navigation;
+- pet card giữ tỷ lệ `104/142`, image area `104/90`, thumbnail theo tỷ lệ item và crown
+  premium 20px tại top-end;
+- reward sheet dùng Roboto Medium cho title, Roboto Regular cho action; gradient và stroke
+  nút là `#C95DFF → #FB54BB`. Selected Pet Store, video và tape giữ asset vector gốc.
+
 My Pet mode contract:
 
 - `Pet Swarm` và `Mixed Mode` là segmented control loại trừ nhau;

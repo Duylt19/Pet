@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -234,9 +235,9 @@ fun HomeBottomNavigation(
             .background(colorResource(R.color.colors_FFFFFF))
             .padding(horizontal = dimensionResource(SdpR.dimen._6sdp))
     ) {
-        HomeBottomItem(HomeTab.DISCOVER, R.drawable.ic_home_discover, stringResource(R.string.discover_tab_discover), selectedTab, onTabSelected, Modifier.weight(1f))
+        HomeBottomItem(HomeTab.DISCOVER, R.drawable.ic_home_discover_unselected, stringResource(R.string.discover_tab_discover), selectedTab, onTabSelected, Modifier.weight(1f), R.drawable.ic_home_discover)
         HomeBottomItem(HomeTab.BATTERY, R.drawable.ic_home_battery, stringResource(R.string.discover_tab_battery), selectedTab, onTabSelected, Modifier.weight(1f))
-        HomeBottomItem(HomeTab.PET_STORE, R.drawable.ic_home_pet_store, stringResource(R.string.discover_tab_pet_store), selectedTab, onTabSelected, Modifier.weight(1f))
+        HomeBottomItem(HomeTab.PET_STORE, R.drawable.ic_home_pet_store, stringResource(R.string.discover_tab_pet_store), selectedTab, onTabSelected, Modifier.weight(1f), R.drawable.ic_home_pet_store_selected)
         HomeBottomItem(HomeTab.MINE, R.drawable.ic_home_mine, stringResource(R.string.discover_tab_mine), selectedTab, onTabSelected, Modifier.weight(1f))
     }
 }
@@ -248,7 +249,8 @@ private fun HomeBottomItem(
     label: String,
     selectedTab: HomeTab,
     onTabSelected: (HomeTab) -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    selectedIconRes: Int = iconRes
 ) {
     val selected = tab == selectedTab
     Column(
@@ -277,9 +279,12 @@ private fun HomeBottomItem(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(iconRes),
+            Icon(
+                painter = painterResource(if (selected) selectedIconRes else iconRes),
                 contentDescription = label,
+                tint = colorResource(
+                    if (selected) R.color.colors_FB3675 else R.color.colors_6F7073
+                ),
                 modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
             )
         }

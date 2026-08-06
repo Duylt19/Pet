@@ -1,8 +1,15 @@
 package com.asianmobile.emojibattery.shimeji.ui.petstore
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
+import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 
 private val previewPets = listOf(
@@ -26,6 +33,29 @@ fun PetStorePetTabScreenshotTest() {
 @Composable
 fun PetStoreFoodTabScreenshotTest() {
     PreviewStore(PetStoreTab.FOOD)
+}
+
+@PreviewTest
+@Preview(widthDp = 360, heightDp = 300)
+@Composable
+fun PetStoreRewardSheetScreenshotTest() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.colors_000000).copy(alpha = 0.5f)),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        StoreRewardSheetSurface {
+            PetRewardSheetContent(
+                pet = previewPets.first(),
+                isDownloading = false,
+                message = null,
+                onPremium = {},
+                onReward = {},
+                showNativeAd = false
+            )
+        }
+    }
 }
 
 @Composable
