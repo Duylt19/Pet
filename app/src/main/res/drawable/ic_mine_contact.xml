@@ -3,9 +3,6 @@
     android:height="18dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <group android:pivotX="14.8203" android:pivotY="17.1453" android:rotation="-25.2222">
-        <path android:fillColor="#26FB3675" android:pathData="M23.3203,17.1453A8.5,5 0,1 1,6.3203,17.1453A8.5,5 0,1 1,23.3203,17.1453Z" />
-    </group>
     <path android:fillColor="@android:color/transparent" android:strokeColor="#FB3675" android:strokeWidth="1.5" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M8.55,4.8V3M15.75,4.8V3M12.15,21C8.544,21 6.741,21 5.621,19.814C4.5,18.628 4.5,16.718 4.5,12.9C4.5,9.082 4.5,7.172 5.621,5.986C6.741,4.8 8.544,4.8 12.15,4.8C15.756,4.8 17.559,4.8 18.68,5.986C19.8,7.172 19.8,9.082 19.8,12.9C19.8,16.718 19.8,18.628 18.68,19.814C17.559,21 15.756,21 12.15,21Z" />
     <path android:fillColor="@android:color/transparent" android:strokeColor="#FB3675" android:strokeWidth="1.5" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M13.966,9.744C13.966,10.221 13.777,10.679 13.439,11.017C13.101,11.354 12.644,11.544 12.166,11.544C11.689,11.544 11.231,11.354 10.893,11.017C10.556,10.679 10.366,10.221 10.366,9.744C10.366,9.266 10.556,8.808 10.893,8.471C11.231,8.133 11.689,7.944 12.166,7.944C12.644,7.944 13.101,8.133 13.439,8.471C13.777,8.808 13.966,9.266 13.966,9.744ZM8.607,16.244C9.559,14.777 11.072,14.228 12.166,14.229C13.261,14.23 14.729,14.778 15.682,16.245C15.743,16.34 15.76,16.456 15.704,16.555C15.482,16.95 14.79,17.734 14.291,17.787C13.717,17.847 12.215,17.856 12.167,17.856C12.119,17.856 10.572,17.847 9.998,17.787C9.498,17.733 8.807,16.95 8.583,16.554C8.528,16.456 8.546,16.34 8.607,16.244Z" />
 </vector>

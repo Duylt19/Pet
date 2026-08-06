@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,6 +30,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -41,6 +43,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -457,11 +462,7 @@ private fun MineRow(
             .clickable(onClick = onClick),
         verticalAlignment = if (subtitle == null) Alignment.CenterVertically else Alignment.Top
     ) {
-        Image(
-            painter = painterResource(iconRes),
-            contentDescription = null,
-            modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
-        )
+        MineRowIcon(iconRes = iconRes)
         Spacer(Modifier.width(dimensionResource(SdpR.dimen._9sdp)))
         Column(
             modifier = Modifier.weight(1f),
@@ -506,6 +507,38 @@ private fun MineRow(
             painter = painterResource(R.drawable.ic_setting_chevron_right_v2),
             contentDescription = null,
             modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
+        )
+    }
+}
+
+@Composable
+private fun MineRowIcon(@DrawableRes iconRes: Int) {
+    val pink = colorResource(R.color.colors_FB3675)
+    Box(modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val pivot = Offset(
+                x = size.width * (14.8203f / 24f),
+                y = size.height * (17.1453f / 24f)
+            )
+            rotate(degrees = -25.2222f, pivot = pivot) {
+                drawOval(
+                    color = pink.copy(alpha = 0.15f),
+                    topLeft = Offset(
+                        x = size.width * (6.3203f / 24f),
+                        y = size.height * (12.1453f / 24f)
+                    ),
+                    size = Size(
+                        width = size.width * (17f / 24f),
+                        height = size.height * (10f / 24f)
+                    )
+                )
+            }
+        }
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            tint = pink,
+            modifier = Modifier.fillMaxSize()
         )
     }
 }
