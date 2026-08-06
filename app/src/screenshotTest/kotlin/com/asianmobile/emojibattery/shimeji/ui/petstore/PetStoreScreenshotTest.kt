@@ -58,6 +58,21 @@ fun PetStoreRewardSheetScreenshotTest() {
     }
 }
 
+@PreviewTest
+@Preview(widthDp = 360, heightDp = 800)
+@Composable
+fun PetStoreUnlockRevealScreenshotTest() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        PreviewStore(PetStoreTab.PETS)
+        PetUnlockRevealContent(
+            pet = previewPets.first(),
+            pack = null,
+            onContinue = {},
+            lightingProgress = 0.45f
+        )
+    }
+}
+
 @Composable
 private fun PreviewStore(tab: PetStoreTab) {
     PetStoreContent(

@@ -48,6 +48,10 @@ Pet Store visual contract:
   premium 20px tại top-end;
 - reward sheet dùng Roboto Medium cho title, Roboto Regular cho action; gradient và stroke
   nút là `#C95DFF → #FB54BB`. Selected Pet Store, video và tape giữ asset vector gốc.
+- unlock-success overlay theo frame `360×800`: nền đen 50%, Lottie lighting chiếm
+  `310/360` chiều rộng tại `y=244`, pet chiếm `174/310` vùng lighting, title tại `y=237`
+  và CTA Roboto Medium 20/28 tại `y=554`. Pet vừa cài chạy clip `SPECIAL` thật của pack;
+  chỉ fallback `SPECIAL_2`, rồi thumbnail tĩnh khi pack không cung cấp skill đặc biệt.
 
 My Pet mode contract:
 

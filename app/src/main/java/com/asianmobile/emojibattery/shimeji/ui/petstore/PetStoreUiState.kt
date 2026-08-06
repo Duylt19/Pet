@@ -2,6 +2,8 @@ package com.asianmobile.emojibattery.shimeji.ui.petstore
 
 import androidx.annotation.DrawableRes
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetAction
+import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 
 enum class PetStoreTab { PETS, FOOD }
 
@@ -17,6 +19,7 @@ data class PetStoreUiState(
     val selectedPet: OwnerPetCatalogEntry? = null,
     val downloadingPetId: Int? = null,
     val revealedPet: OwnerPetCatalogEntry? = null,
+    val revealedPetPack: PetPack? = null,
     val namingPet: OwnerPetCatalogEntry? = null,
     val joinedPetName: String? = null,
     val selectedFood: PetStoreFood? = null,
@@ -45,4 +48,10 @@ internal object PetStorePolicy {
 
     fun normalizedName(input: String, fallback: String): String =
         input.trim().ifBlank { fallback.trim() }.take(24)
+
+    fun specialSkillAction(availableActions: Set<PetAction>): PetAction? = when {
+        PetAction.SPECIAL in availableActions -> PetAction.SPECIAL
+        PetAction.SPECIAL_2 in availableActions -> PetAction.SPECIAL_2
+        else -> null
+    }
 }

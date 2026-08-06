@@ -16,6 +16,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -43,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,8 +55,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -68,6 +74,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -77,6 +85,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.airbnb.lottie.LottieCompositionFactory
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieConstants
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
@@ -85,7 +96,11 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetAction
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
+import com.asianmobile.emojibattery.shimeji.pet.pack.PetBitmapCache
+import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
+import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.component.PinkLoveSticker
@@ -93,7 +108,12 @@ import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlin.math.cos
+import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 private val StoreRoboto = FontFamily.SansSerif
@@ -110,6 +130,9 @@ private const val REWARD_PET_CARD_WIDTH_PX = 124f
 private const val REWARD_PET_IMAGE_SIZE_PX = 70f
 private const val REWARD_TAPE_WIDTH_PX = 52f
 private const val REWARD_TAPE_HEIGHT_PX = 42f
+private const val UNLOCK_FRAME_WIDTH_PX = 360f
+private const val UNLOCK_LIGHTING_SIZE_PX = 310f
+private const val UNLOCK_PET_SIZE_PX = 174f
 @Composable
 fun PetStoreScreen(
     onSearch: () -> Unit,
@@ -200,14 +223,14 @@ fun PetStoreScreen(
         )
     }
     state.revealedPet?.let { pet ->
-        NewItemReveal(
-            title = stringResource(R.string.pet_store_new_pet),
-            imageModel = pet.thumbnailPath ?: R.drawable.img_home_brand_bunny,
+        PetUnlockReveal(
+            pet = pet,
+            pack = state.revealedPetPack,
             onContinue = viewModel::continueAfterReveal
         )
     }
     state.revealedFood?.let { food ->
-        NewItemReveal(
+        FoodItemReveal(
             title = stringResource(R.string.pet_store_new_food),
             imageModel = food.imageRes,
             quantity = "x1",
@@ -867,7 +890,239 @@ private fun RewardFoodPreview(food: PetStoreFood) {
 }
 
 @Composable
-private fun NewItemReveal(title: String, imageModel: Any, quantity: String? = null, onContinue: () -> Unit) {
+private fun PetUnlockReveal(
+    pet: OwnerPetCatalogEntry,
+    pack: PetPack?,
+    onContinue: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        )
+    ) {
+        PetUnlockRevealContent(
+            pet = pet,
+            pack = pack,
+            onContinue = onContinue
+        )
+    }
+}
+
+@Composable
+internal fun PetUnlockRevealContent(
+    pet: OwnerPetCatalogEntry,
+    pack: PetPack?,
+    onContinue: () -> Unit,
+    lightingProgress: Float? = null
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.colors_000000).copy(alpha = 0.5f))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onContinue
+            )
+    ) {
+        val frameHeight = maxHeight
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = frameHeight * (244f / 800f))
+                .fillMaxWidth(UNLOCK_LIGHTING_SIZE_PX / UNLOCK_FRAME_WIDTH_PX)
+                .aspectRatio(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            PetUnlockLighting(
+                progress = lightingProgress,
+                modifier = Modifier.fillMaxSize()
+            )
+            PetSpecialSkillPreview(
+                pet = pet,
+                pack = pack,
+                modifier = Modifier
+                    .fillMaxWidth(UNLOCK_PET_SIZE_PX / UNLOCK_LIGHTING_SIZE_PX)
+                    .aspectRatio(1f)
+            )
+        }
+
+        PetUnlockTitle(
+            text = stringResource(R.string.pet_store_new_pet),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = frameHeight * (237f / 800f))
+                .graphicsLayer(scaleX = 0.8f)
+        )
+
+        Text(
+            text = stringResource(R.string.pet_store_tap_continue),
+            color = colorResource(R.color.colors_FFFFFF),
+            fontFamily = StoreRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._15ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._22ssp).value.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = frameHeight * (554f / 800f))
+        )
+    }
+}
+
+@Composable
+private fun PetUnlockLighting(progress: Float?, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val composition = remember(context) {
+        LottieCompositionFactory.fromRawResSync(
+            context,
+            R.raw.anim_pet_unlock_lighting
+        ).value
+    }
+    if (progress == null) {
+        LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+            modifier = modifier
+        )
+    } else {
+        LottieAnimation(
+            composition = composition,
+            progress = { progress.coerceIn(0f, 1f) },
+            modifier = modifier
+        )
+    }
+}
+
+@Composable
+private fun PetUnlockTitle(text: String, modifier: Modifier = Modifier) {
+    val outlineDp = dimensionResource(SdpR.dimen._4sdp)
+    val outlineWidth = with(LocalDensity.current) { outlineDp.toPx() }
+    val titleStyle = TextStyle(
+        fontFamily = FontFamily(Font(R.font.be_vietnam_pro_bold)),
+        fontWeight = FontWeight.Bold,
+        fontSize = dimensionResource(SspR.dimen._35ssp).value.sp,
+        lineHeight = dimensionResource(SspR.dimen._31ssp).value.sp,
+        textAlign = TextAlign.Center
+    )
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Text(
+            text = text,
+            color = colorResource(R.color.colors_FB3675),
+            style = titleStyle.copy(drawStyle = Stroke(width = outlineWidth)),
+            maxLines = 1
+        )
+        Text(
+            text = text,
+            color = colorResource(R.color.colors_FFFFFF),
+            style = titleStyle,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+private fun PetSpecialSkillPreview(
+    pet: OwnerPetCatalogEntry,
+    pack: PetPack?,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    var visual by remember(pack?.key) { mutableStateOf<PetPackVisual?>(null) }
+    val availableActions = remember(pack) {
+        pack?.manifest?.clips
+            ?.filterValues { clip -> clip.frames.isNotEmpty() }
+            ?.keys
+            .orEmpty()
+    }
+    val specialAction = remember(availableActions) {
+        PetStorePolicy.specialSkillAction(availableActions)
+    }
+
+    LaunchedEffect(pack?.key) {
+        visual = pack?.let { installedPack ->
+            withContext(Dispatchers.IO) {
+                PetBitmapCache(context.applicationContext).prepare(installedPack)
+            }
+        }
+    }
+
+    val sprite = visual as? PetPackVisual.Sprite
+    val specialFrames = specialAction?.let { sprite?.frames?.get(it) }.orEmpty()
+    if (specialAction != null && specialFrames.isNotEmpty()) {
+        PetSpecialSkillSprite(
+            frames = specialFrames,
+            durationsMillis = pack?.manifest?.clips
+                ?.get(specialAction)
+                ?.frames
+                ?.map { it.durationMillis }
+                .orEmpty(),
+            modifier = modifier
+        )
+    } else {
+        if (pet.thumbnailPath != null) {
+            AsyncImage(
+                model = pet.thumbnailPath,
+                contentDescription = pet.name,
+                contentScale = ContentScale.Fit,
+                modifier = modifier
+            )
+        } else {
+            Image(
+                painter = painterResource(R.drawable.img_home_brand_bunny),
+                contentDescription = pet.name,
+                contentScale = ContentScale.Fit,
+                modifier = modifier
+            )
+        }
+    }
+}
+
+@Composable
+private fun PetSpecialSkillSprite(
+    frames: List<com.asianmobile.emojibattery.shimeji.pet.pack.PetSpriteFrame>,
+    durationsMillis: List<Long>,
+    modifier: Modifier = Modifier
+) {
+    var frameIndex by remember(frames) { mutableIntStateOf(0) }
+    LaunchedEffect(frames, durationsMillis) {
+        frameIndex = 0
+        while (frames.isNotEmpty()) {
+            val currentIndex = frameIndex % frames.size
+            delay(
+                durationsMillis
+                    .getOrElse(currentIndex) { 180L }
+                    .coerceIn(80L, 2_000L)
+            )
+            frameIndex = (currentIndex + 1) % frames.size
+        }
+    }
+
+    val frame = frames.getOrNull(frameIndex) ?: return
+    val bitmap = remember(frame.bitmap) { frame.bitmap.asImageBitmap() }
+    Canvas(modifier = modifier) {
+        val source = frame.source
+        if (source.width() <= 0 || source.height() <= 0) return@Canvas
+        val scale = min(size.width / source.width(), size.height / source.height())
+        val destinationWidth = (source.width() * scale).roundToInt()
+        val destinationHeight = (source.height() * scale).roundToInt()
+        drawImage(
+            image = bitmap,
+            srcOffset = IntOffset(source.left, source.top),
+            srcSize = IntSize(source.width(), source.height()),
+            dstOffset = IntOffset(
+                x = ((size.width - destinationWidth) / 2f).roundToInt(),
+                y = ((size.height - destinationHeight) / 2f).roundToInt()
+            ),
+            dstSize = IntSize(destinationWidth, destinationHeight)
+        )
+    }
+}
+
+@Composable
+private fun FoodItemReveal(title: String, imageModel: Any, quantity: String? = null, onContinue: () -> Unit) {
     Dialog(onDismissRequest = {}, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
         Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = .5f)).clickable(onClick = onContinue), contentAlignment = Alignment.Center) {
             Box(Modifier.size(dimensionResource(SdpR.dimen._238sdp)), contentAlignment = Alignment.Center) {

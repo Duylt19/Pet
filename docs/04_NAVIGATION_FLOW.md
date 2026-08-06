@@ -68,6 +68,10 @@ Customize Battery Bar ──component option──> Component Editor ──Done/
 Customize Battery Bar ──Apply(service on)──> persist config + accessibility overlay
 ```
 
+Sau khi pet được verify/cài thành công, Pet Store hiển thị unlock-success overlay và chạy
+clip movement `SPECIAL` của chính pack vừa cài (`SPECIAL_2`/thumbnail là fallback), rồi mới
+chuyển sang bước đặt tên khi user chạm Continue. Flow này không tự gán pet vào Mixed/Swarm.
+
 ## Back stack
 
 - Splash, Language, Intro và Permission được remove khỏi stack sau khi hoàn tất bước tương ứng.

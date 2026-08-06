@@ -117,11 +117,13 @@ class PetStoreViewModel @Inject constructor(
                 is PetPackInstallResult.Installed -> {
                     // Refresh without preferredKey: Store unlock never changes a Mixed/Swarm slot.
                     petPackRepository.refresh()
+                    val installedPack = petPackRepository.find(pet.installedPackKey)
                     _uiState.update {
                         it.copy(
                             selectedPet = null,
                             downloadingPetId = null,
-                            revealedPet = pet
+                            revealedPet = pet,
+                            revealedPetPack = installedPack
                         )
                     }
                 }
@@ -137,7 +139,13 @@ class PetStoreViewModel @Inject constructor(
 
     fun continueAfterReveal() {
         val pet = _uiState.value.revealedPet ?: return
-        _uiState.update { it.copy(revealedPet = null, namingPet = pet) }
+        _uiState.update {
+            it.copy(
+                revealedPet = null,
+                revealedPetPack = null,
+                namingPet = pet
+            )
+        }
     }
 
     fun savePetName(name: String) {

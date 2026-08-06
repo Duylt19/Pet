@@ -1,6 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.ui.petstore
 
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetAction
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -20,5 +21,18 @@ class PetStorePolicyTest {
         assertEquals("Mochi", PetStorePolicy.normalizedName("  Mochi  ", pet.name))
         assertEquals("Bunny", PetStorePolicy.normalizedName("   ", pet.name))
         assertEquals(24, PetStorePolicy.normalizedName("x".repeat(40), pet.name).length)
+    }
+
+    @Test
+    fun `unlock reveal prefers the primary special movement skill`() {
+        assertEquals(
+            PetAction.SPECIAL,
+            PetStorePolicy.specialSkillAction(setOf(PetAction.SPECIAL_2, PetAction.SPECIAL))
+        )
+        assertEquals(
+            PetAction.SPECIAL_2,
+            PetStorePolicy.specialSkillAction(setOf(PetAction.IDLE, PetAction.SPECIAL_2))
+        )
+        assertEquals(null, PetStorePolicy.specialSkillAction(setOf(PetAction.IDLE)))
     }
 }
