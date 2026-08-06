@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -684,7 +685,7 @@ private fun TrendingPetsSection(
 }
 
 @Composable
-private fun TrendingPetCard(pet: DiscoverPetUiState, onClick: () -> Unit) {
+internal fun TrendingPetCard(pet: DiscoverPetUiState, onClick: () -> Unit) {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
     Column(
         modifier = Modifier
@@ -704,11 +705,11 @@ private fun TrendingPetCard(pet: DiscoverPetUiState, onClick: () -> Unit) {
                 .height(dimensionResource(SdpR.dimen._77sdp)),
             contentAlignment = Alignment.Center
         ) {
-            AsyncImage(
-                model = pet.thumbnailPath ?: R.drawable.img_home_brand_bunny,
+            HomePreviewImage(
+                model = pet.thumbnailPath,
+                fallbackRes = R.drawable.img_home_brand_bunny,
                 contentDescription = pet.name,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._62sdp))
+                modifier = Modifier.fillMaxSize(HOME_ITEM_PREVIEW_FRACTION)
             )
         }
         Text(
@@ -764,7 +765,7 @@ private fun BatteryThemesSection(
 }
 
 @Composable
-private fun BatteryThemeCard(
+internal fun BatteryThemeCard(
     theme: DiscoverThemeUiState?,
     onOpen: () -> Unit,
     onFavorite: () -> Unit,
@@ -779,14 +780,14 @@ private fun BatteryThemeCard(
             .border(dimensionResource(SdpR.dimen._1sdp), colorResource(R.color.colors_DEDEDF), shape)
             .clickable(enabled = theme != null, onClick = onOpen)
     ) {
-        AsyncImage(
-            model = theme?.thumbnailPath ?: R.drawable.ic_home_battery,
+        HomePreviewImage(
+            model = theme?.thumbnailPath,
+            fallbackRes = R.drawable.ic_home_battery,
             contentDescription = theme?.name,
-            contentScale = ContentScale.Fit,
             modifier = if (theme != null) {
                 Modifier
                     .align(Alignment.Center)
-                    .fillMaxSize(0.86f)
+                    .fillMaxSize(HOME_ITEM_PREVIEW_FRACTION)
             } else {
                 Modifier
                     .align(Alignment.Center)
@@ -934,7 +935,7 @@ private fun ComponentAssetsSection(
 }
 
 @Composable
-private fun ComponentAssetCard(
+internal fun ComponentAssetCard(
     asset: DiscoverAssetUiState?,
     fallbackRes: Int,
     onClick: () -> Unit
@@ -949,11 +950,36 @@ private fun ComponentAssetCard(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        AsyncImage(
-            model = asset?.assetPath ?: fallbackRes,
+        HomePreviewImage(
+            model = asset?.assetPath,
+            fallbackRes = fallbackRes,
             contentDescription = asset?.name,
+            modifier = Modifier.fillMaxSize(HOME_ITEM_PREVIEW_FRACTION)
+        )
+    }
+}
+
+@Composable
+private fun HomePreviewImage(
+    model: String?,
+    fallbackRes: Int,
+    contentDescription: String?,
+    modifier: Modifier
+) {
+    if (model == null) {
+        Image(
+            painter = painterResource(fallbackRes),
+            contentDescription = contentDescription,
             contentScale = ContentScale.Fit,
-            modifier = Modifier.size(dimensionResource(SdpR.dimen._54sdp))
+            modifier = modifier
+        )
+    } else {
+        AsyncImage(
+            model = model,
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Fit,
+            filterQuality = FilterQuality.High,
+            modifier = modifier
         )
     }
 }
@@ -1150,3 +1176,4 @@ private fun DiscoverContentPreview() {
 private const val HOME_BOTTOM_BANNER_POSITION = "home_mode_bottom"
 private const val BATTERY_THEME_SLOT_COUNT = 6
 private const val BATTERY_THEME_COLUMN_COUNT = 3
+private const val HOME_ITEM_PREVIEW_FRACTION = 0.65f
