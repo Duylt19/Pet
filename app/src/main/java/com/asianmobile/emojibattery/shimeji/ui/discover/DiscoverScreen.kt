@@ -29,11 +29,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -71,6 +69,7 @@ import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -137,32 +136,14 @@ fun DiscoverScreen(
     )
 
     if (showAccessibilityDisclosure) {
-        AlertDialog(
-            onDismissRequest = {
+        GrantPermissionDialog(
+            onGrantPermission = {
+                showAccessibilityDisclosure = false
+                accessibilityLauncher.launch(BatteryAccessibility.settingsIntent())
+            },
+            onMaybeLater = {
                 showAccessibilityDisclosure = false
                 viewModel.cancelPendingBatteryEnable()
-            },
-            title = { Text(stringResource(R.string.battery_accessibility_title)) },
-            text = { Text(stringResource(R.string.battery_accessibility_disclosure)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showAccessibilityDisclosure = false
-                        accessibilityLauncher.launch(BatteryAccessibility.settingsIntent())
-                    }
-                ) {
-                    Text(stringResource(R.string.battery_open_accessibility_settings))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showAccessibilityDisclosure = false
-                        viewModel.cancelPendingBatteryEnable()
-                    }
-                ) {
-                    Text(stringResource(android.R.string.cancel))
-                }
             }
         )
     }

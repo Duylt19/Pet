@@ -57,6 +57,7 @@ unity-ads = "4.16.5"
 vungle = "7.6.1.0"
 crashlytics-plugin = "3.0.6"
 desugar-jdk-libs = "2.1.5"
+screenshot = "0.0.1-alpha15"
 
 
 billingclient = "8.0.0"
@@ -136,6 +137,7 @@ vungle = { module = "com.google.ads.mediation:vungle", version.ref = "vungle" }
 
 billing = { module = "com.android.billingclient:billing", version.ref = "billingclient" }
 desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar-jdk-libs" }
+screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
 
 
 [plugins]
@@ -147,3 +149,4 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics-plugin" }
+screenshot = { id = "com.android.compose.screenshot", version.ref = "screenshot" }

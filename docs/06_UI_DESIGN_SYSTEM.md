@@ -113,3 +113,6 @@ size → shadow → clip → background → border → clickable → padding
 4. Mapping token vào resource.
 5. Implement theo state contract, không nhét logic vào UI.
 6. Preview/screenshot và compile verify.
+
+Dialog xin quyền dùng custom Compose card theo Figma thay vì `AlertDialog` mặc định. Golden
+image của component được render host-side từ `screenshotTest`, không cần khởi động AVD.

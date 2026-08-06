@@ -10,11 +10,13 @@ plugins {
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.google.services)
     alias(libs.plugins.crashlytics)
+    alias(libs.plugins.screenshot)
 }
 
 android {
     namespace = "com.asianmobile.emojibattery.shimeji"
     compileSdk = 36
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 
     defaultConfig {
         applicationId = "com.asianmobile.emojibattery.shimeji"
@@ -155,6 +157,18 @@ tasks.matching { it.name == "mergeDebugAssets" }.configureEach {
     dependsOn(prepareDebugBatteryAssets)
 }
 
+// Layoutlib cannot load adquality-sdk 9.1.1 because its generated R classes have
+// incompatible InnerClasses metadata. Keep the SDK in normal debug/release builds and
+// remove it only while the host-side Compose screenshot tasks assemble their classpath.
+val isHostScreenshotBuild = gradle.startParameter.taskNames.any { taskName ->
+    taskName.contains("ScreenshotTest", ignoreCase = true)
+}
+if (isHostScreenshotBuild) {
+    configurations.matching { it.name == "debugRuntimeClasspath" }.configureEach {
+        exclude(group = "com.unity3d.ads-mediation", module = "adquality-sdk")
+    }
+}
+
 val prepareDebugBatteryResources by tasks.registering(Sync::class) {
     group = "battery data"
     description = "Packages reviewed Battery status vectors and fonts into debug resources."
@@ -220,6 +234,8 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     testImplementation(libs.junit)
     testImplementation(libs.json)
+    screenshotTestImplementation(libs.screenshot.validation.api)
+    screenshotTestImplementation(libs.compose.ui.tooling)
 
     // Lottie
     implementation(libs.lottie.compose)

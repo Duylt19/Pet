@@ -30,6 +30,9 @@
     <string name="rate_us">Rate us</string>
     <string name="privacy_policy">Privacy policy</string>
     <string name="maybe_later">Maybe later</string>
+    <string name="permission_dialog_title">Grant Permissions</string>
+    <string name="permission_dialog_description">To use Emoji Battery features and ensure the best experience, the app requires a few essential system permissions.</string>
+    <string name="permission_dialog_grant">Grant Permission</string>
     <string name="next">Next</string>
     <string name="confirm">Confirm</string>
     <string name="this_action_can_contain_ads">This action can contain ads</string>

@@ -7,6 +7,7 @@
 | Language/build | Kotlin, KSP, Java 17 | Source và code generation |
 | Android | compile/target SDK 36, min SDK 24 | Platform baseline |
 | UI | Jetpack Compose, Material 3 | Declarative UI |
+| UI screenshot test | Compose Preview Screenshot Testing | Host-side Layoutlib golden test, không cần emulator |
 | App architecture | Single-Activity, MVVM | App shell và feature state |
 | Navigation | Navigation Compose | Route graph/back stack |
 | DI | Dagger Hilt | Dependency graph |
@@ -40,7 +41,14 @@ Không thêm lại dependency chỉ vì từng tồn tại. Mọi dependency m�
 ```bash
 ./gradlew compileDebugKotlin
 ./gradlew testDebugUnitTest
+./gradlew updateDebugScreenshotTest
+./gradlew validateDebugScreenshotTest
 ```
+
+Screenshot test nằm trong `app/src/screenshotTest`; chạy host-side bằng một Gradle worker để
+giữ tải máy thấp. Reference image chỉ cập nhật khi UI mới đã được đối chiếu với Figma.
+Riêng lúc chạy screenshot task, `adquality-sdk` được loại khỏi render classpath vì metadata
+`R` của SDK không tương thích Layoutlib; dependency này vẫn giữ nguyên trong build app bình thường.
 
 ## Firebase sau khi đổi package
 

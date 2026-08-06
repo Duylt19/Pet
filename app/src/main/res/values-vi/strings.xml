@@ -76,6 +76,9 @@
     <string name="rate_us">Đánh giá chúng tôi</string>
     <string name="privacy_policy">Chính sách quyền riêng tư</string>
     <string name="maybe_later">Có thể để sau</string>
+    <string name="permission_dialog_title">Cấp quyền</string>
+    <string name="permission_dialog_description">Để sử dụng các tính năng Emoji Battery và có trải nghiệm tốt nhất, ứng dụng cần một số quyền hệ thống thiết yếu.</string>
+    <string name="permission_dialog_grant">Cấp quyền</string>
     <string name="next">Tiếp theo</string>
     <string name="confirm">Xác nhận</string>
     <string name="this_action_can_contain_ads">Thao tác này có thể chứa quảng cáo</string>
