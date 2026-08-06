@@ -79,13 +79,12 @@ pet không được lặp ở app-wide Settings hoặc ghi vào global state.
 
 ## Sizing
 
-Design hiện dùng SDP/SSP. Mapping Figma mặc định:
+Design hiện dùng SDP/SSP. Phải phân loại kích thước trước khi mapping:
 
-```text
-Android sdp/ssp ≈ Figma px ÷ 1.3
-```
+- Kích thước cục bộ/cố định như padding, spacing, icon/image, height, radius và typography: `Android sdp/ssp ≈ Figma px ÷ 1.3`.
+- Kích thước phụ thuộc viewport như chiều rộng dialog, bottom sheet hoặc card căn theo screen/frame: giữ tỷ lệ Figma `nodeWidth / frameWidth` và dùng `fillMaxWidth(fraction)`. Chỉ dùng `fillMaxHeight(fraction)` khi design xác định rõ tỷ lệ chiều cao theo viewport.
 
-Dùng `dimensionResource` từ `com.intuit.sdp`/`com.intuit.ssp`; làm tròn về resource gần nhất và đối chiếu screenshot.
+Dùng `dimensionResource` từ `com.intuit.sdp`/`com.intuit.ssp` cho nhóm kích thước cục bộ, làm tròn về resource gần nhất và đối chiếu screenshot. Ví dụ Rate dialog rộng `312px` trong frame `360px` dùng `fillMaxWidth(312f / 360f)`; dialog cảm ơn rộng `320px` dùng `fillMaxWidth(320f / 360f)`, không đổi thành `_240sdp`/`_246sdp`.
 
 ## Component hierarchy
 

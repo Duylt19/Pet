@@ -16,6 +16,8 @@ Nguồn chi tiết bắt buộc: [android developer skill](../.agents/skills/and
 - Navigation callback ở screen boundary; route ở NavGraph.
 - Repository/use case cho data/business logic phù hợp.
 - String/color/spacing dùng resource.
+- Trước khi map kích thước Figma, phân loại giá trị cục bộ/cố định và giá trị phụ thuộc viewport.
+- Kích thước cục bộ dùng quy đổi px ÷ `1.3` sang sdp/ssp; chiều rộng container phụ thuộc screen/frame dùng tỷ lệ `nodeWidth / frameWidth`, không dùng fixed sdp.
 - Permission/dependency/service chỉ thêm khi feature cần thật.
 - Analytics và error/empty/loading state được xử lý.
 - Không log hoặc commit secret.

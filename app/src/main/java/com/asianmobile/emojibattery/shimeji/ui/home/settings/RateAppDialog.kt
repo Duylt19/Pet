@@ -67,6 +67,8 @@ import kotlinx.coroutines.delay
 private val RateRobotoRegular = FontFamily.SansSerif
 private val RateRobotoMedium = FontFamily(Font(R.font.roboto_medium))
 private val RateRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
+private const val RateDialogWidthFraction = 312f / 360f
+private const val RateThankYouDialogWidthFraction = 320f / 360f
 
 @Suppress("UNUSED_PARAMETER")
 @Composable
@@ -116,15 +118,15 @@ internal fun RateAppDialogCard(
     artworkProgress: Float? = null,
     showStarIntro: Boolean = true
 ) {
-    val cardWidth = if (state.step is RateAppStep.ThankYou) {
-        dimensionResource(SdpR.dimen._246sdp)
+    val cardWidthFraction = if (state.step is RateAppStep.ThankYou) {
+        RateThankYouDialogWidthFraction
     } else {
-        dimensionResource(SdpR.dimen._240sdp)
+        RateDialogWidthFraction
     }
 
     Box(
         modifier = modifier
-            .width(cardWidth)
+            .fillMaxWidth(cardWidthFraction)
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp)))
             .background(colorResource(R.color.colors_FFFFFF))
     ) {

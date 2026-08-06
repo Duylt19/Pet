@@ -152,8 +152,10 @@ Text(text = stringResource(id = R.string.home_search_placeholder))
 ```
 
 #### Sizing (sdp/ssp) — QUY TẮC CRITICAL
-- **TẤT CẢ** giá trị dp/sp từ Figma **BẮT BUỘC chia cho 1.3** để quy đổi sang sdp/ssp
-- Figma `13px` → `_10sdp`, Figma `16px` → `_12sdp`, Figma `20px` → `_15sdp`
+- Trước khi mapping kích thước, **BẮT BUỘC** phân loại giá trị là cục bộ/cố định hay phụ thuộc viewport.
+- Kích thước cục bộ/cố định như padding, spacing, icon/image, height, radius và typography: chia Figma px cho `1.3` để quy đổi sang sdp/ssp. Ví dụ `13px` → `_10sdp`, `16px` → `_12sdp`, `20px` → `_15sdp`.
+- Chiều rộng container phụ thuộc screen/frame như dialog, bottom sheet hoặc card: **KHÔNG** chia `1.3`; dùng tỷ lệ `nodeWidth / frameWidth` với `fillMaxWidth(fraction)`. Chỉ dùng tỷ lệ tương tự cho chiều cao khi design thể hiện rõ quan hệ với viewport.
+- Ví dụ dialog rộng `312px` trong frame `360px` phải dùng `Modifier.fillMaxWidth(312f / 360f)`, **KHÔNG** đổi thành `_240sdp`.
 - **Kích thước/padding:** `dimensionResource(com.intuit.sdp.R.dimen._Xsdp)`
 - **Typography:** `dimensionResource(com.intuit.ssp.R.dimen._Xssp)`
 - **Border radius:** `RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._Xsdp))`
@@ -166,6 +168,9 @@ Modifier.padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp))
 fontSize = with(LocalDensity.current) {
     dimensionResource(com.intuit.ssp.R.dimen._11ssp).toSp()
 }
+
+// Ví dụ: Figma dialog width = 312px trong frame 360px
+Modifier.fillMaxWidth(312f / 360f)
 ```
 
 #### Font Mapping
@@ -753,8 +758,8 @@ Tool trả về screenshot URL và curl instruction; tải ảnh về artifact b
 
 > ⚠️ **KHÔNG** chỉ nhìn sơ qua — PHẢI phân tích từng pixel:
 > - **Position/Alignment**: top/center/bottom, start/center/end
-> - **Spacing**: gap, padding, margin (Figma px ÷ 1.3 = sdp)
-> - **Size**: width, height của từng element
+> - **Spacing**: gap, padding, margin (giá trị cục bộ: Figma px ÷ 1.3 = sdp)
+> - **Size**: width, height của từng element; container phụ thuộc viewport dùng tỷ lệ `node/frame`
 > - **Colors**: background, text, icon tint, border
 > - **Typography**: font family, weight, size, line height
 > - **Corner radius**: border radius
@@ -835,7 +840,8 @@ Trước khi hoàn tất, kiểm tra:
 ### Code Quality
 - [ ] Không hardcode string nào trong Composable
 - [ ] Không hardcode color nào trong Composable
-- [ ] Tất cả sizing dùng sdp/ssp (đã chia 1.3 từ Figma)
+- [ ] Sizing cục bộ/cố định dùng sdp/ssp sau khi chia `1.3` từ Figma
+- [ ] Container phụ thuộc viewport dùng đúng tỷ lệ `node/frame`, không bị đổi thành fixed sdp
 - [ ] Modifier order đúng chuẩn (clip trước clickable)
 - [ ] Có @Preview cho tất cả major screens/components
 - [ ] Composables pure — side effects trong LaunchedEffect/ViewModel

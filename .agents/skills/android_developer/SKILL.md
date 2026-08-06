@@ -145,7 +145,9 @@ class NewFeatureViewModel @Inject constructor(
 ### 5.3. Spacing và typography
 
 - Project dùng Intuit SDP/SSP cho UI theo design hiện tại.
-- Khi implement Figma: giá trị Figma px chia `1.3`, làm tròn về resource sdp/ssp gần nhất.
+- Với kích thước cục bộ/cố định như padding, spacing, icon/image, height, radius và typography: giá trị Figma px chia `1.3`, làm tròn về resource sdp/ssp gần nhất.
+- Với chiều rộng container phụ thuộc viewport như dialog, bottom sheet hoặc card căn theo screen/frame: không chia `1.3`. Giữ tỷ lệ Figma `nodeWidth / frameWidth` và dùng `fillMaxWidth(fraction)`. Chỉ áp dụng tương tự cho chiều cao khi design xác định rõ tỷ lệ theo viewport.
+- Ví dụ dialog rộng `312px` trong frame `360px` phải dùng `Modifier.fillMaxWidth(312f / 360f)`, không đổi thành `_240sdp`. Không tự thêm max width cho tablet nếu Figma hoặc product spec chưa yêu cầu.
 - Dùng `dimensionResource(com.intuit.sdp.R.dimen._Xsdp)` và `dimensionResource(com.intuit.ssp.R.dimen._Xssp)`.
 - Font phải lấy từ `res/font`/theme; không tạo `FontFamily` trùng lặp nếu có thể tái sử dụng.
 
