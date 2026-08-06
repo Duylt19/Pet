@@ -128,6 +128,10 @@ private const val PET_CARD_IMAGE_AREA_HEIGHT_PX = 90f
 private const val PET_CARD_IMAGE_SIZE_PX = 64f
 private const val PET_SHADOW_WIDTH_PX = 58f
 private const val PET_SHADOW_HEIGHT_PX = 12f
+private const val FOOD_CARD_WIDTH_PX = 104f
+private const val FOOD_CARD_HEIGHT_PX = 122f
+private const val FOOD_CARD_IMAGE_AREA_HEIGHT_PX = 90f
+private const val FOOD_CARD_IMAGE_SIZE_PX = 70f
 private const val REWARD_SHEET_CONTENT_WIDTH_PX = 336f
 private const val REWARD_PET_CARD_WIDTH_PX = 124f
 private const val REWARD_PET_IMAGE_SIZE_PX = 70f
@@ -581,31 +585,125 @@ private fun FoodGrid(onFood: (PetStoreFood) -> Unit) {
 }
 
 @Composable
-private fun FoodCard(food: PetStoreFood, onClick: () -> Unit) {
+internal fun FoodCard(
+    food: PetStoreFood,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._102sdp))
+            .aspectRatio(FOOD_CARD_WIDTH_PX / FOOD_CARD_HEIGHT_PX)
             .clip(shape)
             .background(colorResource(R.color.colors_FFFEF9))
-            .border(dimensionResource(SdpR.dimen._1sdp), colorResource(R.color.colors_FFECD4), shape)
+            .border(
+                dimensionResource(SdpR.dimen._1sdp),
+                colorResource(R.color.colors_FFECD4),
+                shape
+            )
             .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(Modifier.fillMaxWidth().height(dimensionResource(SdpR.dimen._69sdp)), contentAlignment = Alignment.Center) {
-            Image(painterResource(food.imageRes), food.name, Modifier.size(dimensionResource(SdpR.dimen._54sdp)))
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(FOOD_CARD_WIDTH_PX / FOOD_CARD_IMAGE_AREA_HEIGHT_PX)
+        ) {
+            val itemWidth = maxWidth
+            val imageAreaHeight = maxHeight
+            Image(
+                painter = painterResource(food.imageRes),
+                contentDescription = food.name,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = imageAreaHeight * (19f / FOOD_CARD_IMAGE_AREA_HEIGHT_PX))
+                    .fillMaxWidth(FOOD_CARD_IMAGE_SIZE_PX / FOOD_CARD_WIDTH_PX)
+                    .aspectRatio(1f)
+            )
             Row(
-                modifier = Modifier.align(Alignment.TopStart).padding(dimensionResource(SdpR.dimen._5sdp)).clip(CircleShape).background(colorResource(R.color.colors_FFF1B2)).padding(horizontal = dimensionResource(SdpR.dimen._4sdp), vertical = dimensionResource(SdpR.dimen._1sdp)),
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .offset(
+                        x = itemWidth * (6f / FOOD_CARD_WIDTH_PX),
+                        y = imageAreaHeight * (6f / FOOD_CARD_IMAGE_AREA_HEIGHT_PX)
+                    )
+                    .width(itemWidth * (32f / FOOD_CARD_WIDTH_PX))
+                    .height(imageAreaHeight * (18f / FOOD_CARD_IMAGE_AREA_HEIGHT_PX))
+                    .clip(CircleShape)
+                    .background(colorResource(R.color.colors_FFF1B2))
+                    .padding(horizontal = itemWidth * (4f / FOOD_CARD_WIDTH_PX)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("●", color = Color(0xFFFFB32C), fontSize = 7.sp)
-                Spacer(Modifier.width(dimensionResource(SdpR.dimen._2sdp)))
-                Text(food.coinCost.toString(), color = colorResource(R.color.colors_A54905), fontFamily = StoreRobotoMedium, fontSize = dimensionResource(SspR.dimen._8ssp).value.sp)
+                Image(
+                    painter = painterResource(R.drawable.img_pet_store_coin),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .width(itemWidth * (9f / FOOD_CARD_WIDTH_PX))
+                        .height(imageAreaHeight * (12f / FOOD_CARD_IMAGE_AREA_HEIGHT_PX))
+                )
+                Spacer(Modifier.width(itemWidth * (2f / FOOD_CARD_WIDTH_PX)))
+                Text(
+                    text = food.coinCost.toString(),
+                    color = colorResource(R.color.colors_A54905),
+                    fontFamily = StoreRobotoMedium,
+                    fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp,
+                    maxLines = 1
+                )
             }
-            Text("x1", color = Color.White, fontFamily = StoreRobotoMedium, fontSize = dimensionResource(SspR.dimen._8ssp).value.sp, modifier = Modifier.align(Alignment.BottomEnd).padding(end = dimensionResource(SdpR.dimen._15sdp)).clip(CircleShape).background(colorResource(R.color.colors_8D6037)).border(1.dp, Color.White, CircleShape).padding(horizontal = dimensionResource(SdpR.dimen._5sdp)))
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .offset(
+                        x = itemWidth * (62f / FOOD_CARD_WIDTH_PX),
+                        y = imageAreaHeight * (66f / FOOD_CARD_IMAGE_AREA_HEIGHT_PX)
+                    )
+                    .width(itemWidth * (25f / FOOD_CARD_WIDTH_PX))
+                    .height(imageAreaHeight * (18f / FOOD_CARD_IMAGE_AREA_HEIGHT_PX))
+                    .clip(CircleShape)
+                    .background(colorResource(R.color.colors_8D6037))
+                    .border(
+                        dimensionResource(SdpR.dimen._1sdp),
+                        colorResource(R.color.colors_FFFFFF),
+                        CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.pet_store_food_quantity, 1),
+                    color = colorResource(R.color.colors_FFFFFF),
+                    fontFamily = StoreRobotoMedium,
+                    fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp,
+                    maxLines = 1
+                )
+            }
         }
-        Text(food.name, color = colorResource(R.color.colors_212327), fontFamily = StoreRoboto, fontSize = dimensionResource(SspR.dimen._9ssp).value.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(
+                    top = dimensionResource(SdpR.dimen._3sdp),
+                    bottom = dimensionResource(SdpR.dimen._9sdp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = food.name,
+                color = colorResource(R.color.colors_212327),
+                fontFamily = StoreRoboto,
+                fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 

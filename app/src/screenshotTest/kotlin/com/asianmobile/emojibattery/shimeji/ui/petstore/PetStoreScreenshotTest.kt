@@ -3,6 +3,7 @@ package com.asianmobile.emojibattery.shimeji.ui.petstore
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +34,29 @@ fun PetStorePetTabScreenshotTest() {
 @Composable
 fun PetStoreFoodTabScreenshotTest() {
     PreviewStore(PetStoreTab.FOOD)
+}
+
+@PreviewTest
+@Preview(widthDp = 360, heightDp = 180)
+@Composable
+fun PetStoreFoodCardScreenshotTest() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.colors_FFFFFF)),
+        contentAlignment = Alignment.Center
+    ) {
+        FoodCard(
+            food = PetStoreFood(
+                id = "beef_stew",
+                name = "Beef Stew",
+                coinCost = 25,
+                imageRes = R.drawable.img_pet_store_food_beef_stew
+            ),
+            onClick = {},
+            modifier = Modifier.fillMaxWidth(104f / 360f)
+        )
+    }
 }
 
 @PreviewTest

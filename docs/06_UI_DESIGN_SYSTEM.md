@@ -46,6 +46,8 @@ Pet Store visual contract:
   emoji hoặc icon navigation;
 - pet card giữ tỷ lệ `104/142`, image area `104/90`, thumbnail theo tỷ lệ item và crown
   premium 20px tại top-end;
+- food card giữ tỷ lệ `104/122`, image area `104/90`, artwork `70/104`; badge giá tại
+  `(6,6)` dùng coin artwork PNG @3x, badge số lượng tại `(62,66)`, title Roboto 12/16;
 - reward sheet dùng Roboto Medium cho title, Roboto Regular cho action; gradient và stroke
   nút là `#C95DFF → #FB54BB`. Selected Pet Store, video và tape giữ asset vector gốc.
   Reward dialog dùng immersive navigation trên chính dialog window để system navigation

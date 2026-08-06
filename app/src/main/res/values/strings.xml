@@ -1033,6 +1033,7 @@
     <string name="pet_store_view">View</string>
     <string name="pet_store_food_received">%1$s added to your food</string>
     <string name="pet_store_food_reward_title">Claim your reward now!</string>
+    <string name="pet_store_food_quantity">x%1$d</string>
     <string name="pet_store_close">Close</string>
     <string name="discover_tab_mine">Mine</string>
 </resources>
