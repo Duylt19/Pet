@@ -224,8 +224,9 @@ dependencies {
     ksp(libs.kotlin.metadata.jvm)
     implementation(libs.hilt.navigation.compose)
 
-    // SDP & SSP
+    // Image loading and GIF decoding
     implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
 
     // Ads Module
     implementation(project(":ads"))

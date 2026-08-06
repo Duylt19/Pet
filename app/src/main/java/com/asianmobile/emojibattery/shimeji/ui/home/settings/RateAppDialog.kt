@@ -59,6 +59,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ui.component.DismissibleDialogBackdrop
+import com.asianmobile.emojibattery.shimeji.ui.component.PinkLoveSticker
 import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
@@ -395,11 +396,8 @@ private fun ThankYouContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
     ) {
-        Image(
-            painter = painterResource(R.drawable.img_rate_feedback_thanks),
-            contentDescription = null,
-            modifier = Modifier.size(dimensionResource(SdpR.dimen._74sdp)),
-            contentScale = ContentScale.Fit
+        PinkLoveSticker(
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._74sdp))
         )
         Text(
             text = stringResource(R.string.rate_thanks_feedback),

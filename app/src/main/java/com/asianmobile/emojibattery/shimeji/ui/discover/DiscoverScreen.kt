@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
@@ -70,6 +71,7 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
+import com.asianmobile.emojibattery.shimeji.ui.component.PinkLoveSticker
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -292,7 +294,7 @@ private fun DiscoverContent(
 }
 
 @Composable
-private fun DiscoverHeader(onSearch: () -> Unit, onPremium: () -> Unit) {
+internal fun DiscoverHeader(onSearch: () -> Unit, onPremium: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -309,10 +311,10 @@ private fun DiscoverHeader(onSearch: () -> Unit, onPremium: () -> Unit) {
             fontSize = dimensionResource(SspR.dimen._17ssp).value.sp,
             maxLines = 1
         )
-        Image(
-            painter = painterResource(R.drawable.img_home_brand_bunny),
-            contentDescription = null,
-            modifier = Modifier.size(dimensionResource(SdpR.dimen._25sdp))
+        PinkLoveSticker(
+            modifier = Modifier
+                .size(dimensionResource(SdpR.dimen._25sdp))
+                .scale(1.3f)
         )
         Spacer(Modifier.weight(1f))
         Box(

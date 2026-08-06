@@ -13,7 +13,7 @@
 | DI | Dagger Hilt | Dependency graph |
 | Async/state | Coroutines, Flow | Async work và reactive state |
 | Preferences | DataStore Preferences | Onboarding/settings state |
-| Image | Coil Compose | Image loading khi cần |
+| Image | Coil Compose + Coil GIF decoders | Image loading và animated GIF resource trên API 24+ |
 | Pet catalog network | `HttpURLConnection`, Coil OkHttp transport | Private GitHub raw JSON/ZIP/thumbnail với token Remote Config |
 | Animation | Lottie Compose | Splash/onboarding animation |
 | Monetization | `:ads`, Google BillingClient | Ads và premium |

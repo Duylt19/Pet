@@ -2,7 +2,10 @@ package com.asianmobile.emojibattery.shimeji
 
 import android.app.Activity
 import android.app.Application
+import android.os.Build
 import android.os.Bundle
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import com.adjust.sdk.Adjust
 import com.adjust.sdk.AdjustConfig
 import com.adjust.sdk.LogLevel
@@ -25,6 +28,13 @@ class BaseApplication : Application(),
 
     override fun newImageLoader(): coil.ImageLoader {
         return coil.ImageLoader.Builder(this)
+            .components {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    add(ImageDecoderDecoder.Factory())
+                } else {
+                    add(GifDecoder.Factory())
+                }
+            }
             .okHttpClient {
                 okhttp3.OkHttpClient.Builder()
                     .addInterceptor { chain ->
@@ -86,4 +96,3 @@ class BaseApplication : Application(),
     override fun onActivityDestroyed(activity: Activity) {
     }
 }
-
