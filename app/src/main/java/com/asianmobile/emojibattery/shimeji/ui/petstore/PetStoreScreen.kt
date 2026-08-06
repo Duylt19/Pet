@@ -3,6 +3,7 @@ package com.asianmobile.emojibattery.shimeji.ui.petstore
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color as AndroidColor
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -61,6 +62,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -79,6 +81,10 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -692,6 +698,7 @@ private fun FoodRewardSheet(food: PetStoreFood, onDismiss: () -> Unit, onPremium
 @Composable
 private fun StoreRewardSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+        HideDialogNavigationBar()
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -712,6 +719,44 @@ private fun StoreRewardSheet(onDismiss: () -> Unit, content: @Composable ColumnS
                     ),
                 content = content
             )
+        }
+    }
+}
+
+@Composable
+@Suppress("DEPRECATION")
+private fun HideDialogNavigationBar() {
+    val view = LocalView.current
+    DisposableEffect(view) {
+        val window = (view.parent as? DialogWindowProvider)?.window
+        if (window == null) {
+            onDispose {}
+        } else {
+            val decorView = window.decorView
+            val controller = WindowInsetsControllerCompat(window, decorView)
+            fun hideNavigationBar() {
+                WindowCompat.setDecorFitsSystemWindows(window, false)
+                window.navigationBarColor = AndroidColor.TRANSPARENT
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    window.isNavigationBarContrastEnforced = false
+                }
+                controller.isAppearanceLightNavigationBars = false
+                controller.systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.hide(WindowInsetsCompat.Type.navigationBars())
+            }
+
+            val focusListener = android.view.ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
+                if (hasFocus) hideNavigationBar()
+            }
+            hideNavigationBar()
+            decorView.viewTreeObserver.addOnWindowFocusChangeListener(focusListener)
+
+            onDispose {
+                if (decorView.viewTreeObserver.isAlive) {
+                    decorView.viewTreeObserver.removeOnWindowFocusChangeListener(focusListener)
+                }
+            }
         }
     }
 }
