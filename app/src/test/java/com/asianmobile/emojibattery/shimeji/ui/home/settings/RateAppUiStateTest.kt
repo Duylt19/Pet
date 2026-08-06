@@ -1,10 +1,22 @@
 package com.asianmobile.emojibattery.shimeji.ui.home.settings
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class RateAppUiStateTest {
+
+    @Test
+    fun `default feedback options match the Figma flow`() {
+        val options = FeedbackOption.defaultOptions()
+
+        assertEquals(9, options.size)
+        assertEquals(
+            listOf("🔋", "🐾", "🎨", "⚡", "👆", "🔐", "🔋", "❗️", "👀"),
+            options.map(FeedbackOption::emoji)
+        )
+    }
 
     @Test
     fun `send is disabled when no feedback option is selected`() {
