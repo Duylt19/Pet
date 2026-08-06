@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -80,13 +79,14 @@ import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
-import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
+import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
+import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.component.PinkLoveSticker
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -95,7 +95,6 @@ import com.intuit.ssp.R as SspR
 import kotlin.math.cos
 import kotlin.math.sin
 
-private const val PET_STORE_BOTTOM_BANNER_POSITION = "home_mode_bottom"
 private val StoreRoboto = FontFamily.SansSerif
 private val StoreRobotoMedium = FontFamily(Font(R.font.roboto_medium))
 private val StoreRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
@@ -107,9 +106,6 @@ private val StoreButtonGradient = Brush.horizontalGradient(
 fun PetStoreScreen(
     onSearch: () -> Unit,
     onPremium: () -> Unit,
-    onDiscover: () -> Unit,
-    onBattery: () -> Unit,
-    onMine: () -> Unit,
     onViewPet: () -> Unit,
     viewModel: PetStoreViewModel = hiltViewModel()
 ) {
@@ -174,10 +170,7 @@ fun PetStoreScreen(
         onToggle = viewModel::togglePetOverlay,
         onTab = viewModel::selectTab,
         onPet = viewModel::selectPet,
-        onFood = viewModel::selectFood,
-        onDiscover = onDiscover,
-        onBattery = onBattery,
-        onMine = onMine
+        onFood = viewModel::selectFood
     )
 
     state.selectedPet?.let { pet ->
@@ -253,10 +246,7 @@ internal fun PetStoreContent(
     onToggle: () -> Unit,
     onTab: (PetStoreTab) -> Unit,
     onPet: (OwnerPetCatalogEntry) -> Unit,
-    onFood: (PetStoreFood) -> Unit,
-    onDiscover: () -> Unit,
-    onBattery: () -> Unit,
-    onMine: () -> Unit
+    onFood: (PetStoreFood) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -268,29 +258,28 @@ internal fun PetStoreContent(
             )
             .statusBarsPadding()
     ) {
-        StoreHeader(onSearch, onPremium)
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
-        Column(
-            modifier = Modifier.padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-            verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+        HomeHeader(onSearch = onSearch, onPremium = onPremium)
+        HomeEnableCard(
+            text = stringResource(R.string.pet_store_enable_pet),
+            checked = state.isPetRunning,
+            onCheckedChange = onToggle
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
+                .height(dimensionResource(SdpR.dimen._77sdp))
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp)))
+                .background(colorResource(R.color.colors_FFEBF1)),
+            contentAlignment = Alignment.Center
         ) {
-            StoreEnableCard(state.isPetRunning, onToggle)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(dimensionResource(SdpR.dimen._84sdp))
-                    .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp)))
-                    .background(colorResource(R.color.colors_FFEBF1)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.pet_store_banner_placeholder),
-                    color = colorResource(R.color.colors_212327),
-                    fontFamily = StoreRobotoSemiBold,
-                    fontStyle = FontStyle.Italic,
-                    fontSize = dimensionResource(SspR.dimen._16ssp).value.sp
-                )
-            }
+            Text(
+                text = stringResource(R.string.pet_store_banner_placeholder),
+                color = colorResource(R.color.colors_212327),
+                fontFamily = StoreRobotoSemiBold,
+                fontStyle = FontStyle.Italic,
+                fontSize = dimensionResource(SspR.dimen._16ssp).value.sp
+            )
         }
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
         Column(
@@ -318,110 +307,6 @@ internal fun PetStoreContent(
                 PetStoreTab.FOOD -> FoodGrid(onFood)
             }
         }
-        StoreBottomNavigation(onDiscover, onBattery, onMine)
-        BannerAd(
-            modifier = Modifier.fillMaxWidth(),
-            adPosition = PET_STORE_BOTTOM_BANNER_POSITION
-        )
-        Spacer(Modifier.navigationBarsPadding())
-    }
-}
-
-@Composable
-private fun StoreHeader(onSearch: () -> Unit, onPremium: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._46sdp))
-            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = stringResource(R.string.discover_brand_name),
-            color = colorResource(R.color.colors_212327),
-            fontWeight = FontWeight.ExtraBold,
-            fontStyle = FontStyle.Italic,
-            fontSize = dimensionResource(SspR.dimen._17ssp).value.sp
-        )
-        PinkLoveSticker(Modifier.size(dimensionResource(SdpR.dimen._25sdp)))
-        Spacer(Modifier.weight(1f))
-        Box(
-            modifier = Modifier
-                .size(dimensionResource(SdpR.dimen._31sdp))
-                .shadow(dimensionResource(SdpR.dimen._4sdp), CircleShape)
-                .clip(CircleShape)
-                .background(colorResource(R.color.colors_FFFFFF))
-                .clickable(onClick = onSearch),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(R.drawable.ic_home_search),
-                contentDescription = stringResource(R.string.discover_search),
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._17sdp))
-            )
-        }
-        Spacer(Modifier.width(dimensionResource(SdpR.dimen._8sdp)))
-        Row(
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(StoreButtonGradient)
-                .clickable(onClick = onPremium)
-                .padding(horizontal = dimensionResource(SdpR.dimen._8sdp), vertical = dimensionResource(SdpR.dimen._6sdp)),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_home_premium),
-                contentDescription = null,
-                tint = Color.Unspecified,
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._16sdp))
-            )
-            Text("PRO", color = Color.White, fontFamily = StoreRobotoSemiBold, fontSize = dimensionResource(SspR.dimen._12ssp).value.sp)
-        }
-    }
-}
-
-@Composable
-private fun StoreEnableCard(enabled: Boolean, onToggle: () -> Unit) {
-    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp))
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._42sdp))
-            .clip(shape)
-            .background(Brush.horizontalGradient(listOf(Color(0x22FF57EE), Color(0x2293E9FF))))
-            .border(dimensionResource(SdpR.dimen._1sdp), colorResource(R.color.colors_FB3675), shape)
-            .clickable(onClick = onToggle)
-            .padding(horizontal = dimensionResource(SdpR.dimen._10sdp)),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = stringResource(R.string.pet_store_enable_pet),
-            color = colorResource(R.color.colors_212327),
-            fontFamily = StoreRobotoMedium,
-            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-            modifier = Modifier.weight(1f)
-        )
-        StoreSwitch(enabled)
-    }
-}
-
-@Composable
-private fun StoreSwitch(checked: Boolean) {
-    Box(
-        modifier = Modifier
-            .size(width = dimensionResource(SdpR.dimen._35sdp), height = dimensionResource(SdpR.dimen._20sdp))
-            .clip(CircleShape)
-            .background(if (checked) colorResource(R.color.colors_FB3675) else colorResource(R.color.colors_C8C8C9))
-            .padding(dimensionResource(SdpR.dimen._2sdp))
-    ) {
-        Box(
-            Modifier
-                .align(if (checked) Alignment.CenterEnd else Alignment.CenterStart)
-                .size(dimensionResource(SdpR.dimen._16sdp))
-                .clip(CircleShape)
-                .background(Color.White)
-        )
     }
 }
 
@@ -570,26 +455,6 @@ private fun FoodCard(food: PetStoreFood, onClick: () -> Unit) {
             Text("x1", color = Color.White, fontFamily = StoreRobotoMedium, fontSize = dimensionResource(SspR.dimen._8ssp).value.sp, modifier = Modifier.align(Alignment.BottomEnd).padding(end = dimensionResource(SdpR.dimen._15sdp)).clip(CircleShape).background(colorResource(R.color.colors_8D6037)).border(1.dp, Color.White, CircleShape).padding(horizontal = dimensionResource(SdpR.dimen._5sdp)))
         }
         Text(food.name, color = colorResource(R.color.colors_212327), fontFamily = StoreRoboto, fontSize = dimensionResource(SspR.dimen._9ssp).value.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-    }
-}
-
-@Composable
-private fun StoreBottomNavigation(onDiscover: () -> Unit, onBattery: () -> Unit, onMine: () -> Unit) {
-    Row(Modifier.fillMaxWidth().shadow(dimensionResource(SdpR.dimen._5sdp)).background(Color.White).padding(horizontal = dimensionResource(SdpR.dimen._6sdp))) {
-        StoreBottomItem(R.drawable.ic_home_discover, stringResource(R.string.discover_tab_discover), false, onDiscover, Modifier.weight(1f))
-        StoreBottomItem(R.drawable.ic_home_battery, stringResource(R.string.discover_tab_battery), false, onBattery, Modifier.weight(1f))
-        StoreBottomItem(R.drawable.ic_home_pet_store, stringResource(R.string.discover_tab_pet_store), true, {}, Modifier.weight(1f))
-        StoreBottomItem(R.drawable.ic_home_mine, stringResource(R.string.discover_tab_mine), false, onMine, Modifier.weight(1f))
-    }
-}
-
-@Composable
-private fun StoreBottomItem(iconRes: Int, label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
-    Column(modifier.height(dimensionResource(SdpR.dimen._62sdp)).clickable(onClick = onClick).padding(top = dimensionResource(SdpR.dimen._9sdp), bottom = dimensionResource(SdpR.dimen._9sdp)), horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(Modifier.clip(CircleShape).background(if (selected) colorResource(R.color.colors_FFEBF1) else Color.White).padding(horizontal = dimensionResource(SdpR.dimen._15sdp), vertical = dimensionResource(SdpR.dimen._3sdp))) {
-            Image(painterResource(iconRes), label, Modifier.size(dimensionResource(SdpR.dimen._18sdp)))
-        }
-        Text(label, color = colorResource(if (selected) R.color.colors_FB3675 else R.color.colors_6F7073), fontFamily = if (selected) StoreRobotoSemiBold else StoreRobotoMedium, fontSize = dimensionResource(SspR.dimen._9ssp).value.sp)
     }
 }
 
@@ -796,6 +661,11 @@ private fun PetStorePreview() {
                 OwnerPetCatalogEntry(3, "Bunny", "Rabbit", null, null, false)
             )
         ),
-        onSearch = {}, onPremium = {}, onToggle = {}, onTab = {}, onPet = {}, onFood = {}, onDiscover = {}, onBattery = {}, onMine = {}
+        onSearch = {},
+        onPremium = {},
+        onToggle = {},
+        onTab = {},
+        onPet = {},
+        onFood = {}
     )
 }

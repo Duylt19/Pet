@@ -137,6 +137,11 @@ ui/feature/
 ## Navigation boundary
 
 - `AppNavGraph` sở hữu NavController và route wiring.
+- Bốn top-level route `home`, `battery_catalog`, `pet_store`, `settings` nằm trong một
+  Home shell dùng chung. Shell sở hữu bottom navigation và banner; feature screen chỉ sở
+  hữu content để đổi tab không dispose/reload quảng cáo.
+- Chuyển Home tab dùng `popUpTo(home) + saveState/restoreState + launchSingleTop` để giữ
+  ViewModel, scroll và state của từng route.
 - Feature Screen nhận callback như `onBack`, `onOpenSettings`; không nhận NavController nếu không có lý do đặc biệt.
 - Back-stack behavior là một phần contract và phải được document/test.
 

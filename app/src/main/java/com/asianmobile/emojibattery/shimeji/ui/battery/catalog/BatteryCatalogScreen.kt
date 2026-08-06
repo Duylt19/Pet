@@ -88,7 +88,7 @@ private const val ANDROID_ASSET_URI_PREFIX = "file:///android_asset/"
 
 @Composable
 fun BatteryCatalogScreen(
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
     onOpenTheme: (Int) -> Unit,
     onNavigateToPremium: () -> Unit,
     viewModel: BatteryCatalogViewModel = hiltViewModel()
@@ -217,7 +217,7 @@ fun BatteryCatalogScreen(
 @Composable
 private fun BatteryCatalogContent(
     state: BatteryCatalogUiState,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)?,
     onCategory: (Int?) -> Unit,
     onSearch: (String) -> Unit,
     onFavorite: (Int) -> Unit,

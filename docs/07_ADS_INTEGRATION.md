@@ -13,9 +13,12 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Premium dùng BillingClient và `StartPremiumIndexes` để biết entry source.
 - Native Ad templates dùng light pink-white surface theo Figma node `8047:2973`; các
   biến thể height/item/collapsible chia sẻ cùng background, border, text và CTA palette.
-- Discover Home tái sử dụng banner placement `home_mode_bottom` ở dưới bottom navigation.
-  Hero placeholder và promo creative giữa content là presentational Figma assets, không
-  gọi ads SDK và không tạo placement/request mới.
+- Home shell trong `AppNavGraph` sở hữu đúng một `BannerAd` cho placement
+  `home_mode_bottom`, nằm dưới bottom navigation. Banner giữ nguyên composition/ViewModel
+  khi chuyển giữa Discover, Battery, Pet Store và Mine nên không request/reload lại theo tab.
+  Banner chỉ dispose khi đi khỏi toàn bộ nhóm top-level tab. Settings khi chạy trong shell
+  không render thêm native ad để tránh hai placement xếp chồng. Hero placeholder và promo
+  creative giữa content là presentational Figma assets, không gọi ads SDK.
 - Search tái sử dụng native placement `screen_home` ở đáy màn hình theo Figma; placement
   vẫn tuân theo remote key, frequency/ad-free policy và failure fallback chung của module ads.
 - Banner holder dùng nền trắng và shimmer `#E6E6E6` để phần dư quanh creative 320×50

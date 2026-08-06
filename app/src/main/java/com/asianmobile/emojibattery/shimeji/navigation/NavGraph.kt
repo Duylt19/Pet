@@ -3,10 +3,15 @@ package com.asianmobile.emojibattery.shimeji.navigation
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -14,9 +19,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
+import com.asianmobile.emojibattery.shimeji.ui.component.HomeBottomNavigation
+import com.asianmobile.emojibattery.shimeji.ui.component.HomeTab
 import com.asianmobile.emojibattery.shimeji.ui.home.HomeScreen
 import com.asianmobile.emojibattery.shimeji.ui.discover.DiscoverScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogScreen
@@ -75,6 +84,23 @@ object Routes {
         "$BATTERY_EDITOR_COMPONENT/$themeId/$page"
 }
 
+private const val HOME_BOTTOM_BANNER_POSITION = "home_mode_bottom"
+
+internal fun homeTabForRoute(route: String?): HomeTab? = when (route) {
+    Routes.HOME -> HomeTab.DISCOVER
+    Routes.BATTERY_CATALOG -> HomeTab.BATTERY
+    Routes.PET_STORE -> HomeTab.PET_STORE
+    Routes.SETTINGS -> HomeTab.MINE
+    else -> null
+}
+
+internal fun routeForHomeTab(tab: HomeTab): String = when (tab) {
+    HomeTab.DISCOVER -> Routes.HOME
+    HomeTab.BATTERY -> Routes.BATTERY_CATALOG
+    HomeTab.PET_STORE -> Routes.PET_STORE
+    HomeTab.MINE -> Routes.SETTINGS
+}
+
 @Composable
 fun AppNavGraph(
     startDestination: String,
@@ -84,12 +110,30 @@ fun AppNavGraph(
 ) {
     val context = LocalContext.current
     val navController = rememberNavController()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val selectedHomeTab = homeTabForRoute(currentBackStackEntry?.destination?.route)
+
+    fun navigateToHomeTab(tab: HomeTab) {
+        val route = routeForHomeTab(tab)
+        if (currentBackStackEntry?.destination?.route == route) return
+
+        val navigate = {
+            navController.safeNavigate(route, ignoreDebounce = true) {
+                popUpTo(Routes.HOME) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+        if (tab == HomeTab.MINE) {
+            navigateWithAd(context, route, navigate)
+        } else {
+            navigate()
+        }
+    }
 
     fun navigateFromHome(route: String) {
         when (route) {
-            Routes.SETTINGS -> navigateWithAd(context, route) {
-                navController.safeNavigate(Routes.SETTINGS, ignoreDebounce = true)
-            }
+            Routes.SETTINGS -> navigateToHomeTab(HomeTab.MINE)
 
             Routes.LANGUAGE_SETTINGS -> navigateWithAd(context, route) {
                 navController.safeNavigate(Routes.LANGUAGE_SETTINGS, ignoreDebounce = true)
@@ -108,11 +152,13 @@ fun AppNavGraph(
         }
     }
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        NavHost(
-            navController = navController,
-            startDestination = startDestination
-        ) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.weight(1f)) {
+            NavHost(
+                navController = navController,
+                startDestination = startDestination,
+                modifier = Modifier.fillMaxSize()
+            ) {
             composable(Routes.SPLASH) {
                 SplashScreen(
                     viewModel = viewModel,
@@ -208,19 +254,13 @@ fun AppNavGraph(
                         navigateFromHome(Routes.PREMIUM)
                     },
                     onNavigateToBattery = {
-                        navController.safeNavigate(
-                            Routes.BATTERY_CATALOG,
-                            ignoreDebounce = true
-                        )
+                        navigateToHomeTab(HomeTab.BATTERY)
                     },
                     onNavigateToMyPet = {
                         navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
                     },
                     onNavigateToPetStore = {
-                        navController.safeNavigate(Routes.PET_STORE, ignoreDebounce = true)
-                    },
-                    onNavigateToMine = {
-                        navigateFromHome(Routes.SETTINGS)
+                        navigateToHomeTab(HomeTab.PET_STORE)
                     },
                     onOpenPet = { packKey ->
                         navController.safeNavigate(
@@ -263,15 +303,6 @@ fun AppNavGraph(
                     onPremium = {
                         navigateFromHome(Routes.PREMIUM)
                     },
-                    onDiscover = {
-                        navController.safePopBackStack(ignoreDebounce = true)
-                    },
-                    onBattery = {
-                        navController.safeNavigate(Routes.BATTERY_CATALOG, ignoreDebounce = true)
-                    },
-                    onMine = {
-                        navigateFromHome(Routes.SETTINGS)
-                    },
                     onViewPet = {
                         navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
                     }
@@ -309,7 +340,6 @@ fun AppNavGraph(
 
             composable(Routes.BATTERY_CATALOG) {
                 BatteryCatalogScreen(
-                    onBack = { navController.safePopBackStack(ignoreDebounce = true) },
                     onOpenTheme = { themeId ->
                         navController.safeNavigate(
                             Routes.batteryEditor(themeId),
@@ -423,11 +453,7 @@ fun AppNavGraph(
 
             composable(Routes.SETTINGS) {
                 SettingsScreen(
-                    onBack = {
-                        navigateWithAd(context, Routes.HOME) {
-                            navController.safePopBackStack(ignoreDebounce = true)
-                        }
-                    },
+                    showNativeAd = false,
                     onNavigateToLanguage = {
                         navigateFromHome(Routes.LANGUAGE_SETTINGS)
                     },
@@ -534,6 +560,18 @@ fun AppNavGraph(
                     }
                 )
             }
+            }
+        }
+        if (selectedHomeTab != null) {
+            HomeBottomNavigation(
+                selectedTab = selectedHomeTab,
+                onTabSelected = ::navigateToHomeTab
+            )
+            BannerAd(
+                modifier = Modifier.fillMaxWidth(),
+                adPosition = HOME_BOTTOM_BANNER_POSITION
+            )
+            Spacer(Modifier.navigationBarsPadding())
         }
     }
 }

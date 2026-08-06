@@ -66,7 +66,8 @@ import com.intuit.ssp.R as SspR
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
-    onBack: () -> Unit = {},
+    onBack: (() -> Unit)? = null,
+    showNativeAd: Boolean = true,
     onNavigateToLanguage: () -> Unit = {},
     onNavigateToPetCustomization: (Int) -> Unit = {},
     onAddPet: (Int) -> Unit = {}
@@ -90,8 +91,8 @@ fun SettingsScreen(
     ) {
         AppHeaderBar(
             title = stringResource(R.string.settings_title),
-            leadingIcon = AppHeaderLeading.Back,
-            onLeadingClick = onBack
+            leadingIcon = onBack?.let { AppHeaderLeading.Back },
+            onLeadingClick = { onBack?.invoke() }
         )
 
         Column(
@@ -216,17 +217,19 @@ fun SettingsScreen(
             )
         }
 
-        NativeAdInternal(
-            screenCode = SCREEN_SETTING,
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(
-                    start = dimensionResource(SdpR.dimen._12sdp),
-                    end = dimensionResource(SdpR.dimen._12sdp),
-                    bottom = dimensionResource(SdpR.dimen._12sdp)
-                )
-        )
+        if (showNativeAd) {
+            NativeAdInternal(
+                screenCode = SCREEN_SETTING,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(
+                        start = dimensionResource(SdpR.dimen._12sdp),
+                        end = dimensionResource(SdpR.dimen._12sdp),
+                        bottom = dimensionResource(SdpR.dimen._12sdp)
+                    )
+            )
+        }
     }
 }
 

@@ -31,7 +31,10 @@ Discover Home contract:
 
 - route `home` là root sau onboarding và hiển thị dữ liệu thật từ owner/battery catalog;
 - toggle chính điều khiển `BatteryStatusConfig.enabled`, có disclosure và Accessibility gate;
-- bottom navigation cố định trên bottom banner hiện có; không tạo ads placement mới;
+- Home shell có bốn tab Discover/Battery/Pet Store/Mine. `HomeBottomNavigation` cố định
+  trên bottom banner hiện có; từng screen không tự tạo lại bottom chrome;
+- Discover và Pet Store dùng chung `HomeHeader` và `HomeEnableCard`: header `43sdp`, search
+  `25sdp`, enable card `37sdp`, switch `34×18sdp`. Không copy component rồi đổi metric riêng;
 - hero banner và promo creative trong content là presentational slot theo Figma, không gọi ads SDK;
 - Battery Themes dùng favorite state thật; Trending hiện dùng thứ tự catalog cho tới khi
   server có ranking riêng.
@@ -91,6 +94,8 @@ Dùng `dimensionResource` từ `com.intuit.sdp`/`com.intuit.ssp` cho nhóm kích
 - Screen: collect state, effect và wiring action.
 - Section/component: stateless nếu có thể.
 - Shared component chỉ đặt ở `ui/component` khi có ít nhất hai consumer hoặc có contract reusable rõ.
+- Shared Home chrome (`HomeHeader`, `HomeEnableCard`, `HomeBottomNavigation`) do shell/feature
+  gọi theo đúng ownership: screen sở hữu header/card, `AppNavGraph` sở hữu bottom navigation.
 - Feature-only component giữ cạnh feature để tránh global component folder phình to.
 
 ## Modifier và interaction

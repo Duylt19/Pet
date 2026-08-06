@@ -43,7 +43,7 @@ sealed class AppHeaderLeading {
 @Composable
 fun AppHeaderBar(
     title: String,
-    leadingIcon: AppHeaderLeading = AppHeaderLeading.Hamburger,
+    leadingIcon: AppHeaderLeading? = AppHeaderLeading.Hamburger,
     onLeadingClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailing: @Composable RowScope.() -> Unit = {}
@@ -82,27 +82,29 @@ fun AppHeaderBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Leading Icon
-                val iconRes = when (leadingIcon) {
-                    AppHeaderLeading.Hamburger -> R.drawable.ic_hamburger_list
-                    AppHeaderLeading.Back -> R.drawable.ic_arrow_back
-                    AppHeaderLeading.Close -> R.drawable.ic_close_x
-                    AppHeaderLeading.Settings -> R.drawable.ic_settings_outline
-                }
+                if (leadingIcon != null) {
+                    val iconRes = when (leadingIcon) {
+                        AppHeaderLeading.Hamburger -> R.drawable.ic_hamburger_list
+                        AppHeaderLeading.Back -> R.drawable.ic_arrow_back
+                        AppHeaderLeading.Close -> R.drawable.ic_close_x
+                        AppHeaderLeading.Settings -> R.drawable.ic_settings_outline
+                    }
 
-                Box(
-                    modifier = Modifier
-                        .size(dimensionResource(SdpR.dimen._34sdp))
-                        .clip(CircleShape)
-                        .background(colorResource(R.color.colors_FFFFFB))
-                        .clickable(onClick = onLeadingClick),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(iconRes),
-                        contentDescription = null,
-                        tint = contentColor,
-                        modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(dimensionResource(SdpR.dimen._34sdp))
+                            .clip(CircleShape)
+                            .background(colorResource(R.color.colors_FFFFFB))
+                            .clickable(onClick = onLeadingClick),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(iconRes),
+                            contentDescription = null,
+                            tint = contentColor,
+                            modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
+                        )
+                    }
                 }
 
                 Box(modifier = Modifier.weight(1f))

@@ -7,11 +7,11 @@
 | `language_settings` | `ui/language/LanguageScreen` | Chọn language từ Settings rồi restart app shell |
 | `intro` | `ui/intro/IntroScreen` | Pager ba trang, có native ads theo config |
 | `permission` | `ui/permission/PermissionScreen` | Overlay special access + notification permission, có Continue/Skip |
-| `home` | `ui/discover/DiscoverScreen` | Figma Discover: Emoji Battery toggle, quick actions, pet/battery previews, 4-tab navigation và bottom banner |
+| `home` | `ui/discover/DiscoverScreen` | Tab Discover: Emoji Battery toggle, quick actions và pet/battery previews; bottom chrome do Home shell sở hữu |
 | `search` | `ui/search/SearchScreen` | Figma Search: input/chip tìm kiếm, banner, lưới battery theme và native ad cố định cuối màn |
 | `my_pet` | `ui/home/HomeScreen` | Mixed/Swarm loại trừ nhau, 12 Mixed slot, global enable, visibility từng pet, Rewarded/Premium |
 | `pet_catalog/{target}/{slotIndex}` | `ui/catalog/PetCatalogScreen` | Lưới GitHub raw/cache; Mixed slot 4–12 có Rewarded gate tuần tự, Premium bypass |
-| `pet_store` | `ui/petstore/PetStoreScreen` | Figma Pet Store: pet/food tabs, reward sheet, verified pet download, reveal/name/toast; food persistence TODO sau My Pet |
+| `pet_store` | `ui/petstore/PetStoreScreen` | Tab Pet Store: shared Home header/switch, pet/food tabs, reward sheet, verified download, reveal/name/toast; food persistence TODO sau My Pet |
 | `pet_detail/{target}/{slotIndex}/{packKey}` | `ui/catalog/PetDetailScreen` | Hero preview và select action đúng mode/slot |
 | `settings` | `ui/home/settings/SettingsScreen` | My Pet Family roster, commit-on-selection Add flow và app/support |
 | `pet_customization/{slotIndex}` | `ui/home/settings/PetCustomizationScreen` | Hồ sơ cute-pet độc lập: character, size, speed, touch, speech, custom messages, position và remove |

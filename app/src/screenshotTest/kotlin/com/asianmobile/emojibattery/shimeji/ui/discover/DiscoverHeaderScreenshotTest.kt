@@ -10,6 +10,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
 
 @PreviewTest
 @Preview(widthDp = 360, heightDp = 80)
@@ -21,6 +22,6 @@ fun DiscoverHeaderScreenshotTest() {
             .background(colorResource(R.color.colors_FFFFFF)),
         contentAlignment = Alignment.Center
     ) {
-        DiscoverHeader(onSearch = {}, onPremium = {})
+        HomeHeader(onSearch = {}, onPremium = {})
     }
 }

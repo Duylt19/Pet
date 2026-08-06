@@ -42,9 +42,6 @@ private fun PreviewStore(tab: PetStoreTab) {
         onToggle = {},
         onTab = {},
         onPet = {},
-        onFood = {},
-        onDiscover = {},
-        onBattery = {},
-        onMine = {}
+        onFood = {}
     )
 }

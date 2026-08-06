@@ -9,16 +9,16 @@
 | `language_settings` | Language settings | Mở từ Settings |
 | `intro` | Intro pager | First-run |
 | `permission` | Permission | Request overlay/notification, có Continue/Skip |
-| `home` | Discover | Landing Emoji Battery: battery toggle, catalog preview, quick actions và bottom navigation |
+| `home` | Discover | Tab 1 của Home shell: battery toggle, catalog preview và quick actions |
 | `search` | Search | Tìm battery theme theo tên/category, chip gợi ý và lưới recommended |
 | `my_pet` | My Pet | Mixed/Pet Swarm; enable/disable pet overlay + Catalog/Settings/Premium |
 | `pet_catalog/{target}/{slotIndex}` | Pet Catalog | `target=MIXED/SWARM`; lưới owner pet từ GitHub raw/cache, download + SHA-256 + Set |
-| `pet_store` | Pet Store | Store riêng: duyệt pet/food, Rewarded/Premium gate, download/verify chỉ để mở khóa |
+| `pet_store` | Pet Store | Tab 3 của Home shell: duyệt pet/food, Rewarded/Premium gate, download/verify chỉ để mở khóa |
 | `pet_detail/{target}/{slotIndex}/{packKey}` | Pet Detail | Preview metadata, xác nhận pack cho đúng mode/slot và quay lại Catalog |
-| `settings` | Settings | My Pet Family roster + app/support hub |
+| `settings` | Settings | Tab Mine của Home shell: My Pet Family roster + app/support hub |
 | `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
 | `swarm_customization` | Edit Pet Swarm | Character, count, base size/speed, random variation và vùng di chuyển |
-| `battery_catalog` | Battery Styles | Catalog local + category/favorite/Premium gate; Accessibility gate trước editor |
+| `battery_catalog` | Battery Styles | Tab 2 của Home shell: catalog local + category/favorite/Premium gate; Accessibility gate trước editor |
 | `battery_editor/{themeId}` | Customize Status Bar | Overview khởi tạo cặp pet+pin, cho phép đổi hai phần độc lập, giữ draft và live preview qua Accessibility |
 | `battery_editor_component/{themeId}/{page}` | Battery component editor | Destination riêng cho Size/Appearance/Emoji/Battery và từng status component; dùng chung ViewModel/draft với overview |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
@@ -33,6 +33,8 @@ Language ──confirm──> Intro
 Intro ──finish──> Premium(onboarding, optional) ──close──> Permission
 Intro ──finish──> Permission
 Permission ──continue/skip──> Discover Home
+
+Home shell tabs: Discover ⇄ Battery Styles ⇄ Pet Store ⇄ Mine/Settings
 
 Discover ──Emoji Battery toggle(no access)──> Accessibility disclosure/settings ──back──> enable battery overlay
 Discover ──Battery/Theme/Emoji──> Battery Styles hoặc Customize Status Bar
@@ -69,11 +71,15 @@ Customize Battery Bar ──Apply(service on)──> persist config + accessibil
 ## Back stack
 
 - Splash, Language, Intro và Permission được remove khỏi stack sau khi hoàn tất bước tương ứng.
-- Discover là root sau onboarding. Search, My Pet, Settings, Catalog, Battery và Premium in-app pop
-  về destination đã mở chúng; My Pet không thay thế root Discover.
+- Discover là root sau onboarding. Battery Styles, Pet Store và Settings là top-level tab
+  của cùng Home shell. Mỗi lần đổi tab dùng `saveState/restoreState` và `launchSingleTop`,
+  vì vậy ViewModel, scroll và navigation state của tab được giữ lại.
+- Search, My Pet, Catalog và Premium là destination con và pop về destination đã mở chúng;
+  My Pet không thay thế root Discover.
 - Search `Cancel`/Back pop về Discover; chọn theme mở Battery Editor và Back quay lại Search.
-- Pet Store Back/Discover pop về Discover; pet tải từ Store chỉ được cài/mở khóa, không thay
-  selection của Mixed/Swarm. `View` sau khi đặt tên mở My Pet như một destination con.
+- Pet Store là top-level tab; chọn Discover chuyển tab về root thay vì tạo thêm route.
+  Pet tải từ Store chỉ được cài/mở khóa, không thay selection của Mixed/Swarm. `View` sau
+  khi đặt tên mở My Pet như một destination con.
 - Customize Pet pop về Settings. Pet Detail pop về Catalog; Catalog pop về màn đã mở
   nó. Xác nhận pack trong Detail cũng quay lại Catalog để user thấy selection mới. Add chỉ
   tăng `petCount` sau Set/Import thành công; Back khỏi Catalog không tạo pet.
@@ -105,6 +111,8 @@ Customize Battery Bar ──Apply(service on)──> persist config + accessibil
 - Route constant chỉ định nghĩa trong `Routes`.
 - Dùng `safeNavigate`/`safePopBackStack`.
 - Full-screen ad transition dùng `navigateWithAd` theo policy.
+- Bottom navigation và placement `home_mode_bottom` do Home shell trong `AppNavGraph` sở
+  hữu; top-level feature screen không tự render bottom chrome/banner.
 - String argument phải encode; enum argument phải parse an toàn với fallback.
 - Không phục hồi route Private Browser cũ nếu chưa có feature spec mới.
 - Overlay permission được mở qua `Settings.ACTION_MANAGE_OVERLAY_PERMISSION`; đây là special access, không phải runtime permission dialog.
