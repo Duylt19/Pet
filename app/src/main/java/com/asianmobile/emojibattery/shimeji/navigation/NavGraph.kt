@@ -37,6 +37,7 @@ import com.asianmobile.emojibattery.shimeji.ui.permission.PermissionScreen
 import com.asianmobile.emojibattery.shimeji.ui.premium.PremiumScreen
 import com.asianmobile.emojibattery.shimeji.ui.premium.StartPremiumIndexes
 import com.asianmobile.emojibattery.shimeji.ui.splash.SplashScreen
+import com.asianmobile.emojibattery.shimeji.ui.search.SearchScreen
 
 object Routes {
     const val SPLASH = "splash"
@@ -45,6 +46,7 @@ object Routes {
     const val INTRO = "intro"
     const val PERMISSION = "permission"
     const val HOME = "home"
+    const val SEARCH = "search"
     const val MY_PET = "my_pet"
     const val PET_CATALOG = "pet_catalog"
     const val PET_DETAIL = "pet_detail"
@@ -198,10 +200,7 @@ fun AppNavGraph(
             composable(Routes.HOME) {
                 DiscoverScreen(
                     onNavigateToSearch = {
-                        navController.safeNavigate(
-                            Routes.petCatalog(PetCatalogTarget.MIXED, 0),
-                            ignoreDebounce = true
-                        )
+                        navController.safeNavigate(Routes.SEARCH, ignoreDebounce = true)
                     },
                     onNavigateToPremium = {
                         navigateFromHome(Routes.PREMIUM)
@@ -239,6 +238,18 @@ fun AppNavGraph(
                     onCustomizeStatusBar = {
                         navController.safeNavigate(
                             Routes.batteryEditor(CURRENT_BATTERY_STYLE_ID),
+                            ignoreDebounce = true
+                        )
+                    }
+                )
+            }
+
+            composable(Routes.SEARCH) {
+                SearchScreen(
+                    onCancel = { navController.safePopBackStack(ignoreDebounce = true) },
+                    onOpenTheme = { themeId ->
+                        navController.safeNavigate(
+                            Routes.batteryEditor(themeId),
                             ignoreDebounce = true
                         )
                     }

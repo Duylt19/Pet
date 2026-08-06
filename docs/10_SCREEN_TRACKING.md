@@ -12,6 +12,7 @@
 | Intro page 3 | `intro_page_3` |
 | Permission | `permission` |
 | Discover Home | `home` |
+| Search | `search` |
 | My Pet | `my_pet` |
 | Pet catalog | `pet_catalog` |
 | Pet detail | `pet_detail` |

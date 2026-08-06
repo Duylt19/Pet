@@ -8,6 +8,7 @@
 | `intro` | `ui/intro/IntroScreen` | Pager ba trang, có native ads theo config |
 | `permission` | `ui/permission/PermissionScreen` | Overlay special access + notification permission, có Continue/Skip |
 | `home` | `ui/discover/DiscoverScreen` | Figma Discover: Emoji Battery toggle, quick actions, pet/battery previews, 4-tab navigation và bottom banner |
+| `search` | `ui/search/SearchScreen` | Figma Search: input/chip tìm kiếm, banner, lưới battery theme và native ad cố định cuối màn |
 | `my_pet` | `ui/home/HomeScreen` | Mixed/Swarm loại trừ nhau, 12 Mixed slot, global enable, visibility từng pet, Rewarded/Premium |
 | `pet_catalog/{target}/{slotIndex}` | `ui/catalog/PetCatalogScreen` | Lưới GitHub raw/cache; Mixed slot 4–12 có Rewarded gate tuần tự, Premium bypass |
 | `pet_detail/{target}/{slotIndex}/{packKey}` | `ui/catalog/PetDetailScreen` | Hero preview và select action đúng mode/slot |

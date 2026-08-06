@@ -28,6 +28,7 @@ class ScreenNameTest {
             "intro_page_3",
             "permission",
             "home",
+            "search",
             "my_pet",
             "pet_catalog",
             "pet_detail",

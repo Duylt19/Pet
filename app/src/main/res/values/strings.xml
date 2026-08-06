@@ -987,6 +987,17 @@
     <string name="discover_quick_my_pet">My Pet</string>
     <string name="discover_customize_status_bar">Customize Status Bar</string>
     <string name="discover_quick_sticker" translatable="false">Sticker</string>
+    <string name="search_battery_hint">Search battery</string>
+    <string name="search_cancel">Cancel</string>
+    <string name="search_most_searched">🔥 Most Searched</string>
+    <string name="search_recommended">✨ Recommended for You</string>
+    <string name="search_tag_anime" translatable="false">Anime</string>
+    <string name="search_tag_sanrio" translatable="false">Sanrio</string>
+    <string name="search_tag_kpop" translatable="false">Kpop</string>
+    <string name="search_tag_cute">Cute</string>
+    <string name="search_tag_animal">Animal</string>
+    <string name="search_no_results">No matching battery themes</string>
+    <string name="search_load_error">Unable to load battery themes</string>
     <string name="discover_banner_placeholder">Banner</string>
     <string name="discover_trending_pets">🔥 Trending Pets</string>
     <string name="discover_pet_category">Breed: %1$s</string>

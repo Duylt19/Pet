@@ -16,6 +16,8 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Discover Home tái sử dụng banner placement `home_mode_bottom` ở dưới bottom navigation.
   Hero placeholder và promo creative giữa content là presentational Figma assets, không
   gọi ads SDK và không tạo placement/request mới.
+- Search tái sử dụng native placement `screen_home` ở đáy màn hình theo Figma; placement
+  vẫn tuân theo remote key, frequency/ad-free policy và failure fallback chung của module ads.
 - Banner holder dùng nền trắng và shimmer `#E6E6E6` để phần dư quanh creative 320×50
   hòa vào surface 360px của Figma thay vì lộ dải nền tối.
 

@@ -10,6 +10,7 @@
 | `intro` | Intro pager | First-run |
 | `permission` | Permission | Request overlay/notification, có Continue/Skip |
 | `home` | Discover | Landing Emoji Battery: battery toggle, catalog preview, quick actions và bottom navigation |
+| `search` | Search | Tìm battery theme theo tên/category, chip gợi ý và lưới recommended |
 | `my_pet` | My Pet | Mixed/Pet Swarm; enable/disable pet overlay + Catalog/Settings/Premium |
 | `pet_catalog/{target}/{slotIndex}` | Pet Catalog | `target=MIXED/SWARM`; lưới owner pet từ GitHub raw/cache, download + SHA-256 + Set |
 | `pet_detail/{target}/{slotIndex}/{packKey}` | Pet Detail | Preview metadata, xác nhận pack cho đúng mode/slot và quay lại Catalog |
@@ -35,7 +36,8 @@ Permission ──continue/skip──> Discover Home
 Discover ──Emoji Battery toggle(no access)──> Accessibility disclosure/settings ──back──> enable battery overlay
 Discover ──Battery/Theme/Emoji──> Battery Styles hoặc Customize Status Bar
 Discover ──My Pet──> My Pet
-Discover ──Pet Store/Search/Trending──> Catalog/Detail
+Discover ──Search──> Search ──theme──> Customize Status Bar
+Discover ──Pet Store/Trending──> Catalog/Detail
 Discover ──Mine──> Settings
 My Pet ──Start(no overlay)──> System Overlay Settings ──back──> My Pet
 My Pet ──Start(API 33+, notification missing)──> Notification permission ──result──> Start pet
@@ -65,8 +67,9 @@ Customize Battery Bar ──Apply(service on)──> persist config + accessibil
 ## Back stack
 
 - Splash, Language, Intro và Permission được remove khỏi stack sau khi hoàn tất bước tương ứng.
-- Discover là root sau onboarding. My Pet, Settings, Catalog, Battery và Premium in-app pop
+- Discover là root sau onboarding. Search, My Pet, Settings, Catalog, Battery và Premium in-app pop
   về destination đã mở chúng; My Pet không thay thế root Discover.
+- Search `Cancel`/Back pop về Discover; chọn theme mở Battery Editor và Back quay lại Search.
 - Customize Pet pop về Settings. Pet Detail pop về Catalog; Catalog pop về màn đã mở
   nó. Xác nhận pack trong Detail cũng quay lại Catalog để user thấy selection mới. Add chỉ
   tăng `petCount` sau Set/Import thành công; Back khỏi Catalog không tạo pet.
