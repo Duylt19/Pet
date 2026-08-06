@@ -57,11 +57,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -139,6 +136,9 @@ private const val REWARD_TAPE_HEIGHT_PX = 42f
 private const val UNLOCK_FRAME_WIDTH_PX = 360f
 private const val UNLOCK_LIGHTING_SIZE_PX = 310f
 private const val UNLOCK_PET_SIZE_PX = 174f
+private const val UNLOCK_TITLE_WIDTH_PX = 156f
+private const val UNLOCK_TITLE_HEIGHT_PX = 41f
+
 @Composable
 fun PetStoreScreen(
     onSearch: () -> Unit,
@@ -995,12 +995,15 @@ internal fun PetUnlockRevealContent(
             )
         }
 
-        PetUnlockTitle(
-            text = stringResource(R.string.pet_store_new_pet),
+        Image(
+            painter = painterResource(R.drawable.img_pet_unlock_new_pet),
+            contentDescription = stringResource(R.string.pet_store_new_pet),
+            contentScale = ContentScale.Fit,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(y = frameHeight * (237f / 800f))
-                .graphicsLayer(scaleX = 0.8f)
+                .fillMaxWidth(UNLOCK_TITLE_WIDTH_PX / UNLOCK_FRAME_WIDTH_PX)
+                .aspectRatio(UNLOCK_TITLE_WIDTH_PX / UNLOCK_TITLE_HEIGHT_PX)
         )
 
         Text(
@@ -1037,33 +1040,6 @@ private fun PetUnlockLighting(progress: Float?, modifier: Modifier = Modifier) {
             composition = composition,
             progress = { progress.coerceIn(0f, 1f) },
             modifier = modifier
-        )
-    }
-}
-
-@Composable
-private fun PetUnlockTitle(text: String, modifier: Modifier = Modifier) {
-    val outlineDp = dimensionResource(SdpR.dimen._4sdp)
-    val outlineWidth = with(LocalDensity.current) { outlineDp.toPx() }
-    val titleStyle = TextStyle(
-        fontFamily = FontFamily(Font(R.font.be_vietnam_pro_bold)),
-        fontWeight = FontWeight.Bold,
-        fontSize = dimensionResource(SspR.dimen._35ssp).value.sp,
-        lineHeight = dimensionResource(SspR.dimen._31ssp).value.sp,
-        textAlign = TextAlign.Center
-    )
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Text(
-            text = text,
-            color = colorResource(R.color.colors_FB3675),
-            style = titleStyle.copy(drawStyle = Stroke(width = outlineWidth)),
-            maxLines = 1
-        )
-        Text(
-            text = text,
-            color = colorResource(R.color.colors_FFFFFF),
-            style = titleStyle,
-            maxLines = 1
         )
     }
 }
