@@ -23,7 +23,6 @@
     <string name="back">Back</string>
     <string name="exit_dialog_title">Do you want to exit the app?</string>
     <string name="exit_dialog_tap_to_exit">Tap to exit</string>
-    <string name="exit_dialog_close">Close exit dialog</string>
     <string name="cancel">Cancel</string>
     <string name="continue_value">Continue</string>
     <string name="remove">Remove</string>

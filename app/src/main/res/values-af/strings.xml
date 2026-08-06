@@ -5,7 +5,6 @@
     <string name="back">Terug</string>
     <string name="exit_dialog_title">Wil jy die toepassing verlaat?</string>
     <string name="exit_dialog_tap_to_exit">Tik om te verlaat</string>
-    <string name="exit_dialog_close">Maak uitgangdialoog toe</string>
     <string name="cancel">Kanselleer</string>
     <string name="continue_value">Gaan voort</string>
     <string name="remove">Verwyder</string>

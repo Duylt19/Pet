@@ -5,7 +5,6 @@
     <string name="back">返回</string>
     <string name="exit_dialog_title">您想退出应用吗？</string>
     <string name="exit_dialog_tap_to_exit">点按退出</string>
-    <string name="exit_dialog_close">关闭退出对话框</string>
     <string name="cancel">取消</string>
     <string name="continue_value">继续</string>
     <string name="remove">移除</string>

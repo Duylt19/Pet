@@ -69,7 +69,6 @@
     <string name="back">Quay lại</string>
     <string name="exit_dialog_title">Bạn có muốn thoát ứng dụng không?</string>
     <string name="exit_dialog_tap_to_exit">Nhấn để thoát</string>
-    <string name="exit_dialog_close">Đóng hộp thoại thoát</string>
     <string name="cancel">Hủy</string>
     <string name="continue_value">Tiếp tục</string>
     <string name="remove">Gỡ bỏ</string>

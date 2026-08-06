@@ -5,7 +5,6 @@
     <string name="back">Zurück</string>
     <string name="exit_dialog_title">Möchten Sie die App beenden?</string>
     <string name="exit_dialog_tap_to_exit">Tippen, um zu beenden</string>
-    <string name="exit_dialog_close">Exit-Dialog schließen</string>
     <string name="cancel">Abbrechen</string>
     <string name="continue_value">Weiter</string>
     <string name="remove">Entfernen</string>

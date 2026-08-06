@@ -5,7 +5,6 @@
     <string name="back">رجوع</string>
     <string name="exit_dialog_title">هل تريد الخروج من التطبيق؟</string>
     <string name="exit_dialog_tap_to_exit">اضغط للخروج</string>
-    <string name="exit_dialog_close">إغلاق مربع حوار الخروج</string>
     <string name="cancel">إلغاء</string>
     <string name="continue_value">متابعة</string>
     <string name="remove">إزالة</string>

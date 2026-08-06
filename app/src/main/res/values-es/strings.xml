@@ -5,7 +5,6 @@
     <string name="back">Atrás</string>
     <string name="exit_dialog_title">¿Quieres salir de la aplicación?</string>
     <string name="exit_dialog_tap_to_exit">Toca para salir</string>
-    <string name="exit_dialog_close">Cerrar el cuadro de diálogo de salida</string>
     <string name="cancel">Cancelar</string>
     <string name="continue_value">Continuar</string>
     <string name="remove">Quitar</string>
