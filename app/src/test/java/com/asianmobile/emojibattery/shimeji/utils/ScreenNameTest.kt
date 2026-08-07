@@ -29,6 +29,7 @@ class ScreenNameTest {
             "permission",
             "home",
             "search",
+            "favourite_recent",
             "my_pet",
             "pet_catalog",
             "pet_store",

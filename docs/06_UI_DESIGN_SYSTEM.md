@@ -28,7 +28,13 @@ Mine visual contract theo Figma node `8080:4828`:
   `#FB3675`, divider `#F2F2F2`; hai shortcut illustration là raster phức tạp PNG @3x;
 - toggle điều khiển cùng `BatteryStatusConfig.enabled` và Accessibility gate với Discover;
   Language, Rate, Share, Contact và Privacy giữ flow thật. My Pet mở route `my_pet`,
-  Favourite & Recent hiện mở Battery Styles; Apps that hide icons giữ callback chờ feature riêng.
+- Favourite & Recent là destination riêng: hai tab cố định, lưới ba cột dùng favorite battery
+  state thật và native ad cố định cuối màn. Recent giữ empty state cho tới khi product định nghĩa
+  action tạo lịch sử, thứ tự MRU và giới hạn retention; Apps that hide icons giữ callback chờ
+  feature riêng.
+- Favourite & Recent bám đúng hai header state trong Figma: empty dùng title 24px ở dòng riêng;
+  populated dùng title 20px inline. Icon back/heart/history và empty illustration giữ vector;
+  thumbnail theme tiếp tục load từ battery catalog thay vì đóng gói sáu bitmap demo.
 
 Discover Home contract:
 

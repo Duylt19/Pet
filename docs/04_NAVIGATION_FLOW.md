@@ -11,6 +11,7 @@
 | `permission` | Permission | Request overlay/notification, có Continue/Skip |
 | `home` | Discover | Tab 1 của Home shell: battery toggle, catalog preview và quick actions |
 | `search` | Search | Tìm battery theme theo tên/category, chip gợi ý và lưới recommended |
+| `favourite_recent` | Favourite & Recent | Favourite battery theme đã lưu; Recent giữ empty state cho tới khi có contract MRU |
 | `my_pet` | My Pet Room | Scene phòng in-app + sheet ba tab; Back pop về màn trước, shortcut mở tab Pet Store |
 | `pet_catalog/{target}/{slotIndex}` | Pet Catalog | `target=MIXED/SWARM`; lưới owner pet từ GitHub raw/cache, download + SHA-256 + Set |
 | `pet_store` | Pet Store | Tab 3 của Home shell: duyệt pet/food, Rewarded/Premium gate, download/verify chỉ để mở khóa |
@@ -55,7 +56,7 @@ My Pet ──Swarm + Premium──> tự unlock, không hiển thị Rewarded
 My Pet ──Swarm configured──> Edit Pet Swarm ──Change character──> Catalog(SWARM)
 My Pet ──Add/Change──> Catalog(target, slot) ──search/category──> Download/verify/Set
 Mine ──My Pet──> My Pet
-Mine ──Favourite & Recent──> Battery Styles
+Mine ──Favourite & Recent──> Favourite & Recent ──favourite theme──> Customize Status Bar
 Mine ──Language──> Language Settings
 Mine ──Emoji Battery toggle/Grant Permission──> Accessibility disclosure/settings
 Mine ──Rate/Share/Contact/Privacy──> action tương ứng

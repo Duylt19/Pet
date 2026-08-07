@@ -13,6 +13,7 @@
 | Permission | `permission` |
 | Discover Home | `home` |
 | Search | `search` |
+| Favourite & Recent | `favourite_recent` |
 | My Pet | `my_pet` |
 | Pet catalog | `pet_catalog` |
 | Pet Store | `pet_store` |

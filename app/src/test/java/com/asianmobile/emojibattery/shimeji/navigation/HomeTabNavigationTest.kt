@@ -13,6 +13,7 @@ class HomeTabNavigationTest {
         assertEquals(HomeTab.PET_STORE, homeTabForRoute(Routes.PET_STORE))
         assertEquals(HomeTab.MINE, homeTabForRoute(Routes.SETTINGS))
         assertNull(homeTabForRoute(Routes.SEARCH))
+        assertNull(homeTabForRoute(Routes.FAVOURITE_RECENT))
     }
 
     @Test

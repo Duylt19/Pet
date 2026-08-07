@@ -27,6 +27,7 @@ import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeBottomNavigation
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeTab
 import com.asianmobile.emojibattery.shimeji.ui.discover.DiscoverScreen
+import com.asianmobile.emojibattery.shimeji.ui.favoriterecent.FavouriteRecentScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.CURRENT_BATTERY_STYLE_ID
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorPage
@@ -57,6 +58,7 @@ object Routes {
     const val PERMISSION = "permission"
     const val HOME = "home"
     const val SEARCH = "search"
+    const val FAVOURITE_RECENT = "favourite_recent"
     const val MY_PET = "my_pet"
     const val PET_CATALOG = "pet_catalog"
     const val PET_STORE = "pet_store"
@@ -295,6 +297,19 @@ fun AppNavGraph(
                 )
             }
 
+            composable(Routes.FAVOURITE_RECENT) {
+                FavouriteRecentScreen(
+                    onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                    onPremium = { navigateFromHome(Routes.PREMIUM) },
+                    onOpenTheme = { themeId ->
+                        navController.safeNavigate(
+                            Routes.batteryEditor(themeId),
+                            ignoreDebounce = true
+                        )
+                    }
+                )
+            }
+
             composable(Routes.PET_STORE) {
                 PetStoreScreen(
                     onSearch = {
@@ -450,7 +465,7 @@ fun AppNavGraph(
                         navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
                     },
                     onNavigateToFavouriteRecent = {
-                        navigateToHomeTab(HomeTab.BATTERY)
+                        navController.safeNavigate(Routes.FAVOURITE_RECENT, ignoreDebounce = true)
                     },
                     onOpenAppsHidden = {
                         // TODO(Mine): connect the app-exclusion picker when its product flow is defined.
