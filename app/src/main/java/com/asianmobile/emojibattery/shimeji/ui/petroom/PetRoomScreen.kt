@@ -581,15 +581,6 @@ private fun PetCard(
                 .weight(PET_CARD_IMAGE_WEIGHT),
             contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = dimensionResource(SdpR.dimen._5sdp))
-                    .width(dimensionResource(SdpR.dimen._45sdp))
-                    .height(dimensionResource(SdpR.dimen._9sdp))
-                    .clip(CircleShape)
-                    .background(colorResource(R.color.colors_000000).copy(alpha = PET_SHADOW_ALPHA))
-            )
             pet.thumbnailPath?.let { path ->
                 AsyncImage(
                     model = path,
@@ -610,25 +601,35 @@ private fun PetCard(
                     .clickable(onClick = onRemove)
             )
         }
-        Text(
-            text = pet.name,
-            color = colorResource(R.color.colors_212327),
-            fontWeight = FontWeight.Medium,
-            fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Text(
-            text = stringResource(R.string.pet_room_breed, pet.breed),
-            color = colorResource(R.color.colors_FDA3C0),
-            fontSize = dimensionResource(SspR.dimen._6ssp).value.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(PET_CARD_TEXT_WEIGHT)
+                .padding(top = dimensionResource(SdpR.dimen._2sdp)),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = pet.name,
+                color = colorResource(R.color.colors_212327),
+                fontWeight = FontWeight.Medium,
+                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = stringResource(R.string.pet_room_breed, pet.breed),
+                color = colorResource(R.color.colors_FDA3C0),
+                fontSize = dimensionResource(SspR.dimen._6ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._8ssp).value.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
@@ -1080,10 +1081,10 @@ private const val ROOM_GRID_COLUMNS = 3
 private const val PET_CARD_ASPECT_RATIO = 104f / 106f
 private const val TALL_CARD_ASPECT_RATIO = 104f / 122f
 private const val PET_CARD_IMAGE_WEIGHT = 70f / 106f
+private const val PET_CARD_TEXT_WEIGHT = 36f / 106f
 private val TAB_DASH = 3.dp
 private const val DETAIL_RULE_DASH_PX = 5.4f
 private const val ADD_PET_CARD_KEY = "add_pet"
-private const val PET_SHADOW_ALPHA = 0.05f
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
