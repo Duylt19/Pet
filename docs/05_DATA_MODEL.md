@@ -185,6 +185,10 @@ không được restore sau process death/reboot.
   catalog `APPROVED`; debug chấp nhận cả `REVIEW_REQUIRED`.
 - Selection persist qua `PetRoomRepository`; catalog và selection tách nhau để đổi catalog
   không làm mất lựa chọn của user.
+- Room `1` được đóng gói trong APK (`PetRoomBundledBackground`) và là `defaultRoomId` của
+  catalog, nên phòng luôn có nền kể cả lần chạy đầu hoặc khi offline. Background của room
+  khác chỉ tải khi user chạm vào card đó, verify SHA-256 xong mới được áp dụng; thumbnail
+  vẫn tải sẵn vì chỉ vài chục KB.
 
 ## Không có database
 

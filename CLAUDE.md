@@ -106,10 +106,30 @@ never copied into the Android source tree.
 
 ### Remote catalogs (`data/remote/`)
 
-Pet and battery catalogs are fetched from a private GitHub raw repo (`PetServerConfig`,
-`BatteryServerConfig`) with a Remote Config token, cache-first + 24h TTL revalidation with
-ETag/rate-limit backoff, and SHA-256 verification on asset download. Release only accepts
-`APPROVED` catalog entries; debug keeps the packaged snapshot as fallback.
+**This app is a client of a private content server.** Pets, battery themes and My Pet Room
+backgrounds are not in the APK — they are published to a separate repository and fetched at
+runtime. The server lives at `Asian-Mobile-Inc/Server-Emoji-Battery-Shimeji-Pet-AM` (usually
+cloned next to this project, e.g. `../Server-Emoji-Battery-Shimeji-Pet-AM`), and the app reads
+its `master` branch over `raw.githubusercontent.com`.
+
+| Catalog | Client config | Server file |
+|---|---|---|
+| Pets | `PetServerConfig` | `json/pets.json` + `data/<id>.zip` + `thumb/<id>.png` |
+| Battery | `BatteryServerConfig` | `json/batteries.json` + `battery/**` |
+| Rooms | `RoomServerConfig` | `json/rooms.json` + `room/bg|thumb/BG_<id>.png` |
+
+Every catalog follows the same contract: the repo is **private**, so requests carry
+`Authorization: Bearer <token>` where the token comes from the Firebase Remote Config key
+`github_token_pet_server` (default in source must stay empty). Reads are cache-first with 24h
+TTL revalidation, ETag and rate-limit backoff; every downloaded asset is verified against the
+byte size and SHA-256 the catalog declares before it is used. Release only accepts `APPROVED`
+catalog entries; debug keeps the packaged snapshot as fallback.
+
+Adding or changing catalog content is a **change in the server repository**, not here: build it
+with that repo's `tools/*_pipeline.py`, which recomputes size/SHA-256 and runs the same
+validation as its CI. `PetRoomBundledBackground` is the one exception — room `1` also ships in
+the APK so the room is never empty offline, and it must stay listed in `json/rooms.json` as the
+catalog's `defaultRoomId`.
 
 ## UI conventions
 

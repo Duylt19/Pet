@@ -45,6 +45,29 @@
 
 Research records evidence and clean-room decisions; it is not a runtime specification and contains no decompiled source or binary assets in Git. The separately authorized owner data snapshot is intentionally ignored from source control.
 
+## Content server
+
+App này là **client của một content server riêng**: pet, battery theme và room background không
+nằm trong APK mà được publish sang repository
+`Asian-Mobile-Inc/Server-Emoji-Battery-Shimeji-Pet-AM` (thường clone cạnh project này) và đọc
+qua `raw.githubusercontent.com` nhánh `master`.
+
+| Catalog | Config phía app | File phía server |
+|---|---|---|
+| Pet | `PetServerConfig` | `json/pets.json`, `data/<id>.zip`, `thumb/<id>.png` |
+| Battery | `BatteryServerConfig` | `json/batteries.json`, `battery/**` |
+| Room | `RoomServerConfig` | `json/rooms.json`, `room/bg|thumb/BG_<id>.png` |
+
+Repo private nên mọi request gửi `Authorization: Bearer <token>`; token lấy từ Remote Config key
+`github_token_pet_server` và default trong source luôn rỗng. Đọc cache-first, revalidate TTL 24h
++ ETag + rate-limit backoff, và mọi asset tải về đều verify byte size/SHA-256 theo catalog trước
+khi dùng. Release chỉ nhận catalog `APPROVED`.
+
+Thêm/sửa nội dung catalog là **thay đổi ở repo server**, không phải ở đây: build bằng
+`tools/*_pipeline.py` của repo đó để size/SHA-256 được tính lại và chạy đúng validation của CI.
+Ngoại lệ duy nhất là room `1`: nó vừa nằm trong catalog (`defaultRoomId`) vừa được đóng gói trong
+APK qua `PetRoomBundledBackground` để phòng không bao giờ trống khi offline.
+
 ## Owner data tools
 
 - [Clone and audit an authorized pet data snapshot](tools/PET_DATA_SNAPSHOT.md)

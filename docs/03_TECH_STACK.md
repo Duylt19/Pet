@@ -15,6 +15,7 @@
 | Preferences | DataStore Preferences | Onboarding/settings state |
 | Image | Coil Compose + Coil GIF decoders | Image loading và animated GIF resource trên API 24+ |
 | Pet catalog network | `HttpURLConnection`, Coil OkHttp transport | Private GitHub raw JSON/ZIP/thumbnail với token Remote Config |
+| Room catalog network | `HttpURLConnection` | `json/rooms.json` + background/thumbnail từ cùng private server; room `1` đóng gói sẵn trong APK làm fallback offline |
 | Animation | Lottie Compose | Splash/onboarding animation |
 | Monetization | `:ads`, Google BillingClient | Ads và premium |
 | Observability | Firebase Analytics/Crashlytics/Remote Config | Tracking/config/crash |
