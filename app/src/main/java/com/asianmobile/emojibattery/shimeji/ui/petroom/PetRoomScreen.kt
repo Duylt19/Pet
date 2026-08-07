@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.ui.petroom
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,8 +37,15 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -49,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -212,14 +221,33 @@ private fun PetRoomTopBar(
                     contentDescription = null,
                     modifier = Modifier.width(dimensionResource(SdpR.dimen._137sdp))
                 )
-                Text(
-                    text = title,
-                    color = colorResource(R.color.colors_FFFFFF),
-                    fontWeight = FontWeight.Medium,
-                    fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                // The exported sign carries no text, so the plate and title are drawn here and
+                // the title can become the pet name without printing over the artwork.
+                Box(
+                    modifier = Modifier
+                        .width(dimensionResource(SdpR.dimen._105sdp))
+                        .height(dimensionResource(SdpR.dimen._20sdp))
+                        .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
+                        .background(colorResource(R.color.colors_8F6250))
+                        .border(
+                            1.dp,
+                            colorResource(R.color.colors_8B5748),
+                            RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp))
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = title,
+                        color = colorResource(R.color.colors_FFFFFF),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(
+                            horizontal = dimensionResource(SdpR.dimen._4sdp)
+                        )
+                    )
+                }
             }
         }
         RoundIconButton(
@@ -232,7 +260,8 @@ private fun PetRoomTopBar(
                 if (isMusicOn) R.string.pet_room_music_on else R.string.pet_room_music_off
             ),
             iconSize = SdpR.dimen._18sdp,
-            onClick = onToggleMusic
+            onClick = onToggleMusic,
+            borderRes = R.color.colors_FEC1D4
         )
     }
 }
@@ -246,13 +275,17 @@ private fun RoundIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     tint: Color = Color.Unspecified,
-    rotationDegrees: Float = 0f
+    rotationDegrees: Float = 0f,
+    backgroundRes: Int = R.color.colors_FFFFFF,
+    borderRes: Int = R.color.colors_C8C8C9
 ) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._8sdp))
     Box(
         modifier = modifier
             .size(dimensionResource(SdpR.dimen._25sdp))
-            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._8sdp)))
-            .background(colorResource(R.color.colors_FFFFFF))
+            .clip(shape)
+            .background(colorResource(backgroundRes))
+            .border(1.dp, colorResource(borderRes), shape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -294,7 +327,9 @@ private fun SheetToggle(
         onClick = onClick,
         modifier = modifier,
         tint = colorResource(R.color.colors_725938),
-        rotationDegrees = if (isExpanded) 0f else 180f
+        rotationDegrees = if (isExpanded) 0f else 180f,
+        backgroundRes = R.color.colors_F7F0E7,
+        borderRes = R.color.colors_DCCAB1
     )
 }
 
@@ -422,7 +457,11 @@ private fun PetRoomTabItem(
                     .fillMaxWidth(SELECTED_TAB_DASH_RATIO)
                     .fillMaxHeight()
                     .padding(top = dimensionResource(SdpR.dimen._4sdp))
-                    .border(1.dp, colorResource(R.color.colors_B69B7D), shape)
+                    .dashedBorder(
+                        color = colorResource(R.color.colors_B69B7D),
+                        shape = shape,
+                        dash = TAB_DASH
+                    )
             )
         }
         Row(
@@ -669,7 +708,7 @@ private fun PetDetailPanel(
 
 @Composable
 private fun DetailRow(labelRes: Int, value: String) {
-    Column {
+    Column(modifier = Modifier.padding(bottom = dimensionResource(SdpR.dimen._8sdp))) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = stringResource(labelRes),
@@ -687,8 +726,8 @@ private fun DetailRow(labelRes: Int, value: String) {
                 overflow = TextOverflow.Ellipsis
             )
         }
-        HorizontalDivider(
-            color = colorResource(R.color.colors_8F6250).copy(alpha = DIVIDER_ALPHA),
+        DashedRule(
+            color = colorResource(R.color.colors_8F6250),
             modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._2sdp))
         )
     }
@@ -939,6 +978,49 @@ private fun RoomCard(room: PetRoomThumbnailUiState, onClick: () -> Unit) {
     }
 }
 
+/** Figma draws several room borders with a dash pattern; Modifier.border only strokes solid. */
+private fun Modifier.dashedBorder(
+    color: Color,
+    shape: Shape,
+    strokeWidth: Dp = 1.dp,
+    dash: Dp,
+    gap: Dp = dash
+): Modifier = drawWithContent {
+    drawContent()
+    val outline = shape.createOutline(size, layoutDirection, this)
+    val path = Path().apply {
+        when (outline) {
+            is Outline.Rounded -> addRoundRect(outline.roundRect)
+            is Outline.Rectangle -> addRect(outline.rect)
+            is Outline.Generic -> addPath(outline.path)
+        }
+    }
+    drawPath(
+        path = path,
+        color = color,
+        style = Stroke(
+            width = strokeWidth.toPx(),
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash.toPx(), gap.toPx()))
+        )
+    )
+}
+
+/** Figma underlines every detail row with a 7/7 dashed rule. */
+@Composable
+private fun DashedRule(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier.fillMaxWidth().height(1.dp)) {
+        drawLine(
+            color = color,
+            start = Offset(0f, size.height / 2f),
+            end = Offset(size.width, size.height / 2f),
+            strokeWidth = size.height,
+            pathEffect = PathEffect.dashPathEffect(
+                floatArrayOf(DETAIL_RULE_DASH_PX, DETAIL_RULE_DASH_PX)
+            )
+        )
+    }
+}
+
 private fun PetRoomTab.iconRes(): Int = when (this) {
     PetRoomTab.MY_PET -> R.drawable.ic_pet_room_tab_pet
     PetRoomTab.FOOD -> R.drawable.ic_pet_room_tab_food
@@ -957,7 +1039,8 @@ private const val SELECTED_TAB_INNER_RATIO = 108f / 114f
 private const val SELECTED_TAB_DASH_RATIO = 102f / 114f
 private const val STORE_SHORTCUT_ASPECT_RATIO = 50f / 74.33f
 private const val ROOM_GRID_COLUMNS = 3
-private const val DIVIDER_ALPHA = 0.5f
+private val TAB_DASH = 3.dp
+private const val DETAIL_RULE_DASH_PX = 5.4f
 private const val ADD_PET_CARD_KEY = "add_pet"
 private const val PET_SHADOW_ALPHA = 0.05f
 
