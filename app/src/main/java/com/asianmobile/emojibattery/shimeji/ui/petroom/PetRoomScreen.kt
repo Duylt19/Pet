@@ -113,8 +113,14 @@ fun PetRoomScreen(
     PetRoomContent(
         uiState = uiState,
         scene = scene,
-        onNavigateBack = onNavigateBack,
-        onOpenPetStore = onOpenPetStore,
+        onNavigateBack = {
+            viewModel.playClick()
+            onNavigateBack()
+        },
+        onOpenPetStore = {
+            viewModel.playClick()
+            onOpenPetStore()
+        },
         onToggleMusic = viewModel::toggleMusic,
         onToggleSheet = viewModel::toggleSheet,
         onSelectTab = viewModel::selectTab,

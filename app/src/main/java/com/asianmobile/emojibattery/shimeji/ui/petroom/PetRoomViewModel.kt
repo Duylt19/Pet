@@ -28,6 +28,7 @@ import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomBundledBackground
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomMusicPlayer
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomSizePolicy
+import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomSoundPlayer
 import com.asianmobile.emojibattery.shimeji.ui.petstore.PET_FOOD_CATALOG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -58,7 +59,8 @@ class PetRoomViewModel @Inject constructor(
     private val careRepository: PetCareRepository,
     private val foodRepository: PetFoodRepository,
     private val bitmapCache: PetBitmapCache,
-    private val musicPlayer: PetRoomMusicPlayer
+    private val musicPlayer: PetRoomMusicPlayer,
+    private val soundPlayer: PetRoomSoundPlayer
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PetRoomUiState())
     val uiState: StateFlow<PetRoomUiState> = _uiState.asStateFlow()
@@ -143,7 +145,12 @@ class PetRoomViewModel @Inject constructor(
         }
     }
 
-    fun selectTab(tab: PetRoomTab) = _uiState.update { state ->
+    fun selectTab(tab: PetRoomTab): Unit = run {
+        soundPlayer.playFlip()
+        selectTabInternal(tab)
+    }
+
+    private fun selectTabInternal(tab: PetRoomTab) = _uiState.update { state ->
         val (selected, expanded) = PetRoomSheetPolicy.onTabSelected(
             current = state.selectedTab,
             requested = tab,
@@ -152,11 +159,18 @@ class PetRoomViewModel @Inject constructor(
         state.copy(selectedTab = selected, isSheetExpanded = expanded, message = null)
     }
 
-    fun toggleSheet() = _uiState.update { state ->
-        state.copy(isSheetExpanded = PetRoomSheetPolicy.toggleExpanded(state.isSheetExpanded))
+    fun toggleSheet() {
+        soundPlayer.playClick()
+        _uiState.update { state ->
+            state.copy(isSheetExpanded = PetRoomSheetPolicy.toggleExpanded(state.isSheetExpanded))
+        }
     }
 
+    /** Taps the screen owns rather than the ViewModel, such as Back and the Pet Store shortcut. */
+    fun playClick() = soundPlayer.playClick()
+
     fun toggleMusic() {
+        soundPlayer.playClick()
         viewModelScope.launch { roomRepository.setMusicOn(!_uiState.value.isMusicOn) }
     }
 
@@ -167,6 +181,7 @@ class PetRoomViewModel @Inject constructor(
      */
     fun onScreenResumed() {
         isScreenResumed = true
+        soundPlayer.prepare()
         if (_uiState.value.isMusicOn) musicPlayer.play()
         if (PetOverlayRuntime.isRunning.value) {
             restoreOverlayOnExit = true
@@ -194,6 +209,7 @@ class PetRoomViewModel @Inject constructor(
      * else downloads with the card showing progress, and a failure leaves the current room alone.
      */
     fun selectRoom(roomId: Int) {
+        soundPlayer.playClick()
         val snapshot = catalogRepository.snapshot.value
         val room = snapshot.findRoom(roomId) ?: return
         if (PetRoomBundledBackground.isBundled(roomId) ||
@@ -224,17 +240,20 @@ class PetRoomViewModel @Inject constructor(
     }
 
     fun openPet(petId: Int) {
+        soundPlayer.playClick()
         selectedPetId = petId
         _uiState.update { it.copy(isSheetExpanded = true, message = null) }
         refreshDetail()
     }
 
     fun closeDetail() {
+        soundPlayer.playClick()
         selectedPetId = null
         _uiState.update { it.copy(detail = null, message = null) }
     }
 
     fun toggleOnScreen() {
+        soundPlayer.playClick()
         val detail = _uiState.value.detail ?: return
         val preferences = petSettingsRepository.preferences.value
         when (
@@ -265,6 +284,7 @@ class PetRoomViewModel @Inject constructor(
 
     /** Feeding is why the Food tab exists, so a tap there always targets the open pet. */
     fun feed(foodId: String) {
+        soundPlayer.playClick()
         val detail = _uiState.value.detail
         if (detail == null) {
             showMessage(PetRoomMessage.SELECT_A_PET_FIRST)
@@ -291,6 +311,7 @@ class PetRoomViewModel @Inject constructor(
 
     /** Slot one carries the shared values; the dialog edits those and Save fans them out. */
     fun openSettings() {
+        soundPlayer.playClick()
         val slot = petSettingsRepository.preferences.value.slot(0)
         _uiState.update {
             it.copy(
@@ -308,7 +329,10 @@ class PetRoomViewModel @Inject constructor(
         }
     }
 
-    fun closeSettings() = _uiState.update { it.copy(settings = null) }
+    fun closeSettings() {
+        soundPlayer.playClick()
+        _uiState.update { it.copy(settings = null) }
+    }
 
     fun updateSettingsSpeed(percent: Int) = _uiState.update { state ->
         state.copy(settings = state.settings?.copy(speedPercent = percent))
@@ -319,6 +343,7 @@ class PetRoomViewModel @Inject constructor(
     }
 
     fun saveSettings() {
+        soundPlayer.playClick()
         val settings = _uiState.value.settings ?: return
         // One profile for every pet: the design has no per-pet settings screen yet.
         repeat(MAX_PET_SLOTS) { slotIndex ->
@@ -329,6 +354,7 @@ class PetRoomViewModel @Inject constructor(
     }
 
     fun requestRemovePet(petId: Int) {
+        soundPlayer.playClick()
         val pet = _uiState.value.pets.firstOrNull { it.petId == petId } ?: return
         _uiState.update { it.copy(petPendingRemoval = pet) }
     }
@@ -489,6 +515,7 @@ class PetRoomViewModel @Inject constructor(
 
     override fun onCleared() {
         musicPlayer.release()
+        soundPlayer.release()
         super.onCleared()
     }
 
