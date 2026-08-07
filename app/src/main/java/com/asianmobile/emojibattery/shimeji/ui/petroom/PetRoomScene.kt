@@ -1,6 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.ui.petroom
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -9,6 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.onSizeChanged
@@ -32,7 +35,8 @@ import kotlin.math.roundToInt
 @Composable
 fun PetRoomScene(
     pets: List<PetRoomSceneEntry>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onPetTapped: (String) -> Unit = {}
 ) {
     var sceneSize by remember { mutableStateOf(IntSize.Zero) }
     val runtimes = remember(pets, sceneSize) {
@@ -62,7 +66,16 @@ fun PetRoomScene(
         }
     }
 
-    Canvas(modifier = modifier.onSizeChanged { sceneSize = it }) {
+    Canvas(
+        modifier = modifier
+            .onSizeChanged { sceneSize = it }
+            .pointerInput(runtimes) {
+                detectTapGestures { offset ->
+                    // Topmost pet wins so a tap never opens the one drawn underneath.
+                    runtimes.lastOrNull { it.contains(offset) }?.let { onPetTapped(it.packKey) }
+                }
+            }
+    ) {
         // Read the frame stamp so every clock tick recomposes the draw pass.
         @Suppress("UNUSED_EXPRESSION")
         frame
@@ -123,6 +136,7 @@ private fun PetRoomSceneEntry.toRuntime(index: Int, sceneSize: IntSize): PetRoom
         y = bounds.bottom - petSize
     )
     return PetRoomSceneRuntime(
+        packKey = packKey,
         engine = engine,
         state = engine.initialState(bounds = bounds, size = size, position = position),
         visual = visual as? PetPackVisual.Sprite
@@ -130,10 +144,18 @@ private fun PetRoomSceneEntry.toRuntime(index: Int, sceneSize: IntSize): PetRoom
 }
 
 private class PetRoomSceneRuntime(
+    val packKey: String,
     val engine: PetEngine,
     var state: PetState,
     val visual: PetPackVisual.Sprite?
-)
+) {
+    fun contains(offset: Offset): Boolean {
+        val left = state.position.x
+        val top = state.position.y
+        return offset.x >= left && offset.x <= left + state.size.width &&
+            offset.y >= top && offset.y <= top + state.size.height
+    }
+}
 
 private const val NANOS_PER_MILLI = 1_000_000L
 private const val MAX_TICK_MILLIS = 250L

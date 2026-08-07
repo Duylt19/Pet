@@ -9,6 +9,11 @@ interface PetRoomRepository {
 
     suspend fun selectRoom(roomId: Int)
 
+    /** Whether the user left room music on. */
+    val isMusicOn: StateFlow<Boolean>
+
+    suspend fun setMusicOn(enabled: Boolean)
+
     companion object {
         const val NO_ROOM_SELECTED = 0
     }

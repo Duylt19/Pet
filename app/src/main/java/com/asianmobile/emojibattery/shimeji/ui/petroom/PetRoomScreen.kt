@@ -32,6 +32,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +52,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
@@ -70,6 +74,19 @@ fun PetRoomScreen(
     TrackScreenView(ScreenName.MY_PET)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scene by viewModel.scene.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> viewModel.onScreenResumed()
+                Lifecycle.Event.ON_PAUSE -> viewModel.onScreenPaused()
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     PetRoomContent(
         uiState = uiState,
@@ -83,7 +100,8 @@ fun PetRoomScreen(
         onOpenPet = viewModel::openPet,
         onCloseDetail = viewModel::closeDetail,
         onToggleOnScreen = viewModel::toggleOnScreen,
-        onFeed = viewModel::feed
+        onFeed = viewModel::feed,
+        onPetTapped = viewModel::openPetByPackKey
     )
 }
 
@@ -100,7 +118,8 @@ private fun PetRoomContent(
     onOpenPet: (Int) -> Unit = {},
     onCloseDetail: () -> Unit = {},
     onToggleOnScreen: () -> Unit = {},
-    onFeed: (String) -> Unit = {}
+    onFeed: (String) -> Unit = {},
+    onPetTapped: (String) -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -116,10 +135,15 @@ private fun PetRoomContent(
             )
         }
 
-        PetRoomScene(pets = scene, modifier = Modifier.fillMaxSize())
+        PetRoomScene(
+            pets = scene,
+            modifier = Modifier.fillMaxSize(),
+            onPetTapped = onPetTapped
+        )
 
         Column(modifier = Modifier.fillMaxSize()) {
             PetRoomTopBar(
+                title = uiState.detail?.name ?: stringResource(R.string.pet_room_title),
                 isMusicOn = uiState.isMusicOn,
                 onNavigateBack = onNavigateBack,
                 onToggleMusic = onToggleMusic,
@@ -159,6 +183,7 @@ private fun PetRoomContent(
 
 @Composable
 private fun PetRoomTopBar(
+    title: String,
     isMusicOn: Boolean,
     onNavigateBack: () -> Unit,
     onToggleMusic: () -> Unit,
@@ -188,7 +213,7 @@ private fun PetRoomTopBar(
                     modifier = Modifier.width(dimensionResource(SdpR.dimen._137sdp))
                 )
                 Text(
-                    text = stringResource(R.string.pet_room_title),
+                    text = title,
                     color = colorResource(R.color.colors_FFFFFF),
                     fontWeight = FontWeight.Medium,
                     fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,

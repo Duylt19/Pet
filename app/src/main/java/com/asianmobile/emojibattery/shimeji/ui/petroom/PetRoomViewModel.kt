@@ -20,6 +20,7 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineClips
 import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineSupportedActions
+import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomMusicPlayer
 import com.asianmobile.emojibattery.shimeji.ui.petstore.PET_FOOD_CATALOG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.SimpleDateFormat
@@ -45,7 +46,8 @@ class PetRoomViewModel @Inject constructor(
     private val petSettingsRepository: PetSettingsRepository,
     private val careRepository: PetCareRepository,
     private val foodRepository: PetFoodRepository,
-    private val bitmapCache: PetBitmapCache
+    private val bitmapCache: PetBitmapCache,
+    private val musicPlayer: PetRoomMusicPlayer
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PetRoomUiState())
     val uiState: StateFlow<PetRoomUiState> = _uiState.asStateFlow()
@@ -53,6 +55,7 @@ class PetRoomViewModel @Inject constructor(
     val scene: StateFlow<List<PetRoomSceneEntry>> = _scene.asStateFlow()
 
     private var selectedPetId: Int? = null
+    private var isScreenResumed = false
 
     init {
         viewModelScope.launch {
@@ -91,6 +94,12 @@ class PetRoomViewModel @Inject constructor(
             petPackRepository.packs.collect { packs -> _scene.value = buildScene(packs) }
         }
         viewModelScope.launch {
+            roomRepository.isMusicOn.collect { isOn ->
+                _uiState.update { it.copy(isMusicOn = isOn) }
+                if (isOn && isScreenResumed) musicPlayer.play() else musicPlayer.pause()
+            }
+        }
+        viewModelScope.launch {
             foodRepository.inventory.collect { inventory ->
                 _uiState.update { state -> state.copy(foods = foods(inventory)) }
             }
@@ -117,7 +126,26 @@ class PetRoomViewModel @Inject constructor(
         state.copy(isSheetExpanded = PetRoomSheetPolicy.toggleExpanded(state.isSheetExpanded))
     }
 
-    fun toggleMusic() = _uiState.update { it.copy(isMusicOn = !it.isMusicOn) }
+    fun toggleMusic() {
+        viewModelScope.launch { roomRepository.setMusicOn(!_uiState.value.isMusicOn) }
+    }
+
+    /** Music follows the screen: it must not keep playing once the user leaves the room. */
+    fun onScreenResumed() {
+        isScreenResumed = true
+        if (_uiState.value.isMusicOn) musicPlayer.play()
+    }
+
+    fun onScreenPaused() {
+        isScreenResumed = false
+        musicPlayer.pause()
+    }
+
+    /** Opens the pet the user tapped inside the scene. */
+    fun openPetByPackKey(packKey: String) {
+        val pet = _uiState.value.pets.firstOrNull { it.packKey == packKey } ?: return
+        openPet(pet.petId)
+    }
 
     fun selectRoom(roomId: Int) {
         viewModelScope.launch { roomRepository.selectRoom(roomId) }
@@ -298,6 +326,11 @@ class PetRoomViewModel @Inject constructor(
     /** Slots past the configured roster are free for a new room pet to take. */
     private fun PetPreferences.roomSlotKeys(): List<String> =
         petSlots.mapIndexed { index, slot -> if (index < petCount) slot.packKey else "" }
+
+    override fun onCleared() {
+        musicPlayer.release()
+        super.onCleared()
+    }
 
     private companion object {
         const val MAX_SCENE_PETS = 6

@@ -89,6 +89,10 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8191:5950`:
   `#FFDF50→#EDB90E`, `#FF4E4E→#BF3535`;
 - Energy tụt 1%/phút kể cả khi app đóng và chỉ hồi khi cho ăn; food card tiêu một phần, nút `+`
   đưa về Pet Store vì đó là nơi nhận thêm food bằng Rewarded;
+- chạm một pet trong scene mở đúng panel của pet đó; pet vẽ trên cùng thắng nên tap không mở
+  nhầm con nằm dưới. Title bar đổi thành tên pet khi panel mở;
+- nút music phát `res/raw/bgm_pet_room.ogg` lặp, persist trạng thái và chỉ phát khi màn đang
+  resume; rời màn là pause, ViewModel bị clear thì release decoder;
 - Swarm tạm ẩn khỏi navigation trong v1; `ui/home/HomeScreen` và `swarm_customization` giữ
   nguyên code cho bản sau.
 

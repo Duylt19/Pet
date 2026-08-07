@@ -2,6 +2,7 @@ package com.asianmobile.emojibattery.shimeji.data.repository.impl
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import com.asianmobile.emojibattery.shimeji.data.local.dataStore
 import com.asianmobile.emojibattery.shimeji.data.repository.PetRoomRepository
@@ -24,12 +25,15 @@ class DataStorePetRoomRepository @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val selected = MutableStateFlow(NO_ROOM_SELECTED)
     override val selectedRoomId: StateFlow<Int> = selected.asStateFlow()
+    private val music = MutableStateFlow(false)
+    override val isMusicOn: StateFlow<Boolean> = music.asStateFlow()
 
     init {
         scope.launch {
             context.dataStore.data.collect { preferences ->
                 selected.value = preferences[SELECTED_ROOM_ID]?.takeIf { it > 0 }
                     ?: NO_ROOM_SELECTED
+                music.value = preferences[MUSIC_ON] ?: false
             }
         }
     }
@@ -39,7 +43,12 @@ class DataStorePetRoomRepository @Inject constructor(
         context.dataStore.edit { preferences -> preferences[SELECTED_ROOM_ID] = roomId }
     }
 
+    override suspend fun setMusicOn(enabled: Boolean) {
+        context.dataStore.edit { preferences -> preferences[MUSIC_ON] = enabled }
+    }
+
     private companion object {
         val SELECTED_ROOM_ID = intPreferencesKey("pet_room_selected_id")
+        val MUSIC_ON = booleanPreferencesKey("pet_room_music_on")
     }
 }
