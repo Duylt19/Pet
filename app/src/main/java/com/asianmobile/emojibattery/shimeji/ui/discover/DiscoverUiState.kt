@@ -39,4 +39,5 @@ sealed interface DiscoverEffect {
     data object RequestBatteryAccessibility : DiscoverEffect
     data object OpenOverlaySettings : DiscoverEffect
     data object RequestNotificationPermission : DiscoverEffect
+    data object ChooseAPetFirst : DiscoverEffect
 }

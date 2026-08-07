@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -22,6 +23,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRosterPolicy
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayStartResult
 import com.asianmobile.emojibattery.shimeji.ui.home.HomePetCommand
@@ -33,7 +35,8 @@ class DiscoverViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val petCatalogRepository: OwnerPetCatalogRepository,
     private val batteryCatalogRepository: BatteryCatalogRepository,
-    private val batterySettingsRepository: BatterySettingsRepository
+    private val batterySettingsRepository: BatterySettingsRepository,
+    private val petSettingsRepository: PetSettingsRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(
         DiscoverUiState(isAccessibilityEnabled = BatteryAccessibility.isEnabled(context))
@@ -152,6 +155,18 @@ class DiscoverViewModel @Inject constructor(
     }
 
     private fun startPet() {
+        // Without a pet turned on in My Pet Room the session would fall back to the built-in
+        // pack, putting a cat on screen the user never chose.
+        val preferences = petSettingsRepository.preferences.value
+        val hasChosenPet = PetOverlayRosterPolicy.hasChosenPet(
+            slotPackKeys = preferences.petSlots.map { it.packKey },
+            slotEnabled = preferences.petSlots.map { it.isEnabled },
+            petCount = preferences.petCount
+        )
+        if (!hasChosenPet) {
+            emitEffect(DiscoverEffect.ChooseAPetFirst)
+            return
+        }
         if (PetOverlay.start(context) == PetOverlayStartResult.PERMISSION_REQUIRED) {
             emitEffect(DiscoverEffect.OpenOverlaySettings)
         }

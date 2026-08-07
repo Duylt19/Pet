@@ -22,6 +22,7 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineClips
 import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineSupportedActions
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRosterPolicy
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomMusicPlayer
 import com.asianmobile.emojibattery.shimeji.ui.petstore.PET_FOOD_CATALOG
@@ -370,9 +371,11 @@ class PetRoomViewModel @Inject constructor(
             }
         }
 
-    /** Slots past the configured roster are free for a new room pet to take. */
     private fun PetPreferences.roomSlotKeys(): List<String> =
-        petSlots.mapIndexed { index, slot -> if (index < petCount) slot.packKey else "" }
+        PetOverlayRosterPolicy.freeableSlotKeys(
+            slotPackKeys = petSlots.map { it.packKey },
+            petCount = petCount
+        )
 
     override fun onCleared() {
         musicPlayer.release()

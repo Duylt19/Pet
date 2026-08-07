@@ -77,6 +77,7 @@ import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
+import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
@@ -130,6 +131,11 @@ fun DiscoverScreen(
 
                 DiscoverEffect.OpenOverlaySettings ->
                     overlayPermissionLauncher.launch(PetOverlay.permissionIntent(context))
+
+                DiscoverEffect.ChooseAPetFirst -> ToastHelper.show(
+                    context,
+                    context.getString(R.string.discover_pet_choose_first)
+                )
 
                 DiscoverEffect.RequestNotificationPermission ->
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
