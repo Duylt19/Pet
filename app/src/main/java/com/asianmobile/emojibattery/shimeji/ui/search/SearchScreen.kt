@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -12,8 +13,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -42,8 +45,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -64,7 +69,8 @@ private val SearchRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
 fun SearchScreen(
     onCancel: () -> Unit,
     onOpenTheme: (Int) -> Unit,
-    viewModel: SearchViewModel = hiltViewModel()
+    viewModel: SearchViewModel = hiltViewModel(),
+    onOpenPet: (String) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -74,7 +80,9 @@ fun SearchScreen(
         onQueryChanged = viewModel::updateQuery,
         onCancel = onCancel,
         onOpenTheme = onOpenTheme,
-        onToggleFavorite = viewModel::toggleFavorite
+        onToggleFavorite = viewModel::toggleFavorite,
+        onSelectTab = viewModel::selectTab,
+        onOpenPet = onOpenPet
     )
 }
 
@@ -84,7 +92,9 @@ private fun SearchContent(
     onQueryChanged: (String) -> Unit,
     onCancel: () -> Unit,
     onOpenTheme: (Int) -> Unit,
-    onToggleFavorite: (Int) -> Unit
+    onToggleFavorite: (Int) -> Unit,
+    onSelectTab: (SearchTab) -> Unit = {},
+    onOpenPet: (String) -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -115,14 +125,15 @@ private fun SearchContent(
                 )
             ) {
                 item {
-                    MostSearchedSection(onSearch = onQueryChanged)
-                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
+                    SearchTabStrip(selected = uiState.selectedTab, onSelectTab = onSelectTab)
+                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
                 }
                 item {
-                    RecommendedSection(
+                    ResultsSection(
                         uiState = uiState,
                         onOpenTheme = onOpenTheme,
-                        onToggleFavorite = onToggleFavorite
+                        onToggleFavorite = onToggleFavorite,
+                        onOpenPet = onOpenPet
                     )
                 }
             }
@@ -134,6 +145,77 @@ private fun SearchContent(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .navigationBarsPadding()
+        )
+    }
+}
+
+@Composable
+private fun SearchTabStrip(selected: SearchTab, onSelectTab: (SearchTab) -> Unit) {
+    Row(
+        modifier = Modifier
+            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._43sdp))
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
+            .background(colorResource(R.color.colors_FFFFFF))
+            .padding(dimensionResource(SdpR.dimen._3sdp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        SearchTabItem(
+            labelRes = R.string.search_tab_pets,
+            iconRes = R.drawable.img_search_tab_pet,
+            isSelected = selected == SearchTab.PETS,
+            onClick = { onSelectTab(SearchTab.PETS) },
+            modifier = Modifier.weight(1f)
+        )
+        SearchTabItem(
+            labelRes = R.string.search_tab_battery,
+            iconRes = R.drawable.img_search_tab_battery,
+            isSelected = selected == SearchTab.BATTERY,
+            onClick = { onSelectTab(SearchTab.BATTERY) },
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun SearchTabItem(
+    labelRes: Int,
+    iconRes: Int,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+    Row(
+        modifier = modifier
+            .fillMaxHeight()
+            .clip(shape)
+            .background(
+                if (isSelected) {
+                    colorResource(R.color.colors_FFEBF1)
+                } else {
+                    androidx.compose.ui.graphics.Color.Transparent
+                }
+            )
+            .clickable(onClick = onClick),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
+        )
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
+        Text(
+            text = stringResource(labelRes),
+            color = colorResource(
+                if (isSelected) R.color.colors_FB3675 else R.color.colors_6F7073
+            ),
+            fontFamily = SearchRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
+            maxLines = 1
         )
     }
 }
@@ -220,66 +302,11 @@ private fun SearchHeader(
 }
 
 @Composable
-private fun MostSearchedSection(onSearch: (String) -> Unit) {
-    val tags = listOf(
-        stringResource(R.string.search_tag_anime),
-        stringResource(R.string.search_tag_sanrio),
-        stringResource(R.string.search_tag_kpop),
-        stringResource(R.string.search_tag_cute),
-        stringResource(R.string.search_tag_cute),
-        stringResource(R.string.search_tag_animal)
-    )
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = dimensionResource(SdpR.dimen._12sdp),
-                vertical = dimensionResource(SdpR.dimen._6sdp)
-            ),
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
-    ) {
-        SearchSectionTitle(text = stringResource(R.string.search_most_searched))
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp)),
-            verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
-        ) {
-            tags.forEach { tag ->
-                SearchTag(label = tag, onClick = { onSearch(tag) })
-            }
-        }
-    }
-}
-
-@Composable
-private fun SearchTag(label: String, onClick: () -> Unit) {
-    Text(
-        text = label,
-        color = colorResource(R.color.colors_212327),
-        fontFamily = SearchRobotoRegular,
-        fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-        lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
-        modifier = Modifier
-            .height(dimensionResource(SdpR.dimen._25sdp))
-            .shadow(
-                elevation = dimensionResource(SdpR.dimen._6sdp),
-                shape = CircleShape,
-                clip = false
-            )
-            .clip(CircleShape)
-            .background(colorResource(R.color.colors_FFFFFF))
-            .clickable(onClick = onClick)
-            .padding(
-                horizontal = dimensionResource(SdpR.dimen._12sdp),
-                vertical = dimensionResource(SdpR.dimen._4sdp)
-            )
-    )
-}
-
-@Composable
-private fun RecommendedSection(
+private fun ResultsSection(
     uiState: SearchUiState,
     onOpenTheme: (Int) -> Unit,
-    onToggleFavorite: (Int) -> Unit
+    onToggleFavorite: (Int) -> Unit,
+    onOpenPet: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -290,7 +317,7 @@ private fun RecommendedSection(
             ),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
     ) {
-        SearchSectionTitle(text = stringResource(R.string.search_recommended))
+        SearchSectionTitle(text = stringResource(R.string.search_results))
         Image(
             painter = painterResource(R.drawable.img_home_promo_banner),
             contentDescription = null,
@@ -300,7 +327,7 @@ private fun RecommendedSection(
                 .height(dimensionResource(SdpR.dimen._38sdp))
         )
         when {
-            uiState.isLoading && uiState.recommendedThemes.isEmpty() -> {
+            uiState.isLoading && uiState.isEmpty -> {
                 SearchMessage {
                     CircularProgressIndicator(
                         color = colorResource(R.color.colors_FB3675),
@@ -318,7 +345,7 @@ private fun RecommendedSection(
                     )
                 }
             }
-            uiState.recommendedThemes.isEmpty() -> {
+            uiState.isEmpty -> {
                 SearchMessage {
                     Text(
                         text = stringResource(R.string.search_no_results),
@@ -328,6 +355,28 @@ private fun RecommendedSection(
                     )
                 }
             }
+            uiState.selectedTab == SearchTab.PETS -> {
+                uiState.pets.chunked(SEARCH_COLUMN_COUNT).forEach { rowPets ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            dimensionResource(SdpR.dimen._9sdp)
+                        )
+                    ) {
+                        rowPets.forEach { pet ->
+                            SearchPetCard(
+                                pet = pet,
+                                onOpen = { onOpenPet(pet.packKey) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        repeat(SEARCH_COLUMN_COUNT - rowPets.size) {
+                            Spacer(Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+
             else -> {
                 uiState.recommendedThemes.chunked(SEARCH_COLUMN_COUNT).forEach { rowThemes ->
                     Row(
@@ -348,6 +397,88 @@ private fun RecommendedSection(
                     }
                 }
             }
+        }
+    }
+}
+
+/** Figma: 101x142 card, art on top of a 101x90 area, name and breed below. */
+@Composable
+private fun SearchPetCard(
+    pet: SearchPetUiState,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+    Column(
+        modifier = modifier
+            .aspectRatio(SEARCH_PET_CARD_ASPECT_RATIO)
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFFFFF))
+            .border(1.dp, colorResource(R.color.colors_DEDEDF), shape)
+            .clickable(onClick = onOpen)
+    ) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(SEARCH_PET_IMAGE_WEIGHT)
+        ) {
+            val unit = maxWidth / SEARCH_PET_CARD_WIDTH
+            pet.thumbnailPath?.let { path ->
+                AsyncImage(
+                    model = path,
+                    contentDescription = pet.name,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(unit * 64f)
+                )
+            }
+            if (pet.isLocked) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(unit * 8f)
+                        .size(unit * 24f)
+                        .clip(CircleShape)
+                        .background(colorResource(R.color.colors_FFEA89)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.img_pet_store_premium_crown),
+                        contentDescription = null,
+                        modifier = Modifier.size(unit * 16f)
+                    )
+                }
+            }
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(SEARCH_PET_TEXT_WEIGHT),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = pet.name,
+                color = colorResource(R.color.colors_212327),
+                fontFamily = SearchRobotoMedium,
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = stringResource(R.string.pet_room_breed, pet.breed),
+                color = colorResource(R.color.colors_FDA3C0),
+                fontFamily = SearchRobotoRegular,
+                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
@@ -461,4 +592,8 @@ private fun SearchContentPreview() {
     )
 }
 
+private const val SEARCH_PET_CARD_ASPECT_RATIO = 101f / 142f
+private const val SEARCH_PET_IMAGE_WEIGHT = 90f / 142f
+private const val SEARCH_PET_TEXT_WEIGHT = 52f / 142f
+private const val SEARCH_PET_CARD_WIDTH = 101f
 private const val SEARCH_COLUMN_COUNT = 3

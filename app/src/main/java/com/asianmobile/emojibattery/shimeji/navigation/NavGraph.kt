@@ -288,6 +288,12 @@ fun AppNavGraph(
             composable(Routes.SEARCH) {
                 SearchScreen(
                     onCancel = { navController.safePopBackStack(ignoreDebounce = true) },
+                    onOpenPet = { packKey ->
+                        navController.safeNavigate(
+                            Routes.petDetail(PetCatalogTarget.MIXED, 0, packKey),
+                            ignoreDebounce = true
+                        )
+                    },
                     onOpenTheme = { themeId ->
                         navController.safeNavigate(
                             Routes.batteryEditor(themeId),
