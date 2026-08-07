@@ -312,7 +312,13 @@ fun AppNavGraph(
             composable(Routes.MY_PET) {
                 PetRoomScreen(
                     onNavigateBack = { navController.safePopBackStack() },
-                    onOpenPetStore = { navigateToHomeTab(HomeTab.PET_STORE) }
+                    onOpenPetStore = {
+                        // Leave the room before switching tabs. navigateToHomeTab saves the
+                        // current stack under `home`, so jumping straight from here would make
+                        // a later Discover tap restore My Pet Room instead of Discover.
+                        navController.safePopBackStack(ignoreDebounce = true)
+                        navigateToHomeTab(HomeTab.PET_STORE)
+                    }
                 )
             }
 

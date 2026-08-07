@@ -83,15 +83,22 @@ class PetRoomViewModel @Inject constructor(
                     },
                     installedPackKeys = packs.mapTo(mutableSetOf(), PetPack::key),
                     customNames = names
-                ) to catalog.isLoading
-            }.collect { (roster, isLoading) ->
+                ) to packs
+            }.collect { (roster, packs) ->
                 rememberAdoptions(roster)
-                _uiState.update { it.copy(pets = roster, isRosterLoading = isLoading) }
+                _uiState.update {
+                    it.copy(
+                        pets = roster,
+                        isRosterLoading = ownerCatalogRepository.snapshot.value.isLoading
+                    )
+                }
                 refreshDetail()
+                // The scene shows exactly the pets the My Pet tab lists. Drawing every installed
+                // pack would put the built-in pack and any pack the catalog cannot describe into
+                // the room, which is what made the room disagree with the roster.
+                val rosterKeys = roster.mapTo(mutableSetOf(), PetRoomPetUiState::packKey)
+                _scene.value = buildScene(packs.filter { it.key in rosterKeys })
             }
-        }
-        viewModelScope.launch {
-            petPackRepository.packs.collect { packs -> _scene.value = buildScene(packs) }
         }
         viewModelScope.launch {
             roomRepository.isMusicOn.collect { isOn ->

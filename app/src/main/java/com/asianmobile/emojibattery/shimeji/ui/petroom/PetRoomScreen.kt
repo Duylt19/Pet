@@ -883,7 +883,7 @@ private fun FoodCard(food: PetRoomFoodUiState, onFeed: () -> Unit, onAdd: () -> 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._69sdp))
+                .weight(FOOD_CARD_IMAGE_WEIGHT)
         ) {
             Image(
                 painter = painterResource(food.imageRes),
@@ -891,16 +891,19 @@ private fun FoodCard(food: PetRoomFoodUiState, onFeed: () -> Unit, onAdd: () -> 
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .size(dimensionResource(SdpR.dimen._46sdp))
+                    .size(dimensionResource(SdpR.dimen._54sdp))
             )
+            // Figma: 32x18 pill at (6,6) holding the energy this portion restores.
             Row(
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(dimensionResource(SdpR.dimen._4sdp))
-                    .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
-                    .background(colorResource(R.color.colors_FFECD4))
+                    .padding(dimensionResource(SdpR.dimen._5sdp))
+                    .height(dimensionResource(SdpR.dimen._14sdp))
+                    .clip(CircleShape)
+                    .background(colorResource(R.color.colors_FFF1B2))
                     .padding(horizontal = dimensionResource(SdpR.dimen._3sdp)),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._1sdp))
             ) {
                 Image(
                     painter = painterResource(R.drawable.img_pet_room_energy_icon),
@@ -911,45 +914,75 @@ private fun FoodCard(food: PetRoomFoodUiState, onFeed: () -> Unit, onAdd: () -> 
                     text = food.energyValue.toString(),
                     color = colorResource(R.color.colors_A54905),
                     fontWeight = FontWeight.Medium,
-                    fontSize = dimensionResource(SspR.dimen._6ssp).value.sp
+                    fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp
                 )
             }
-            Icon(
-                painter = painterResource(R.drawable.ic_pet_room_add),
-                contentDescription = stringResource(R.string.pet_room_add_food),
-                tint = colorResource(R.color.colors_D3BEA2),
+            // Figma: 20x20 dashed circle at (78,6).
+            Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(dimensionResource(SdpR.dimen._4sdp))
-                    .size(dimensionResource(SdpR.dimen._14sdp))
+                    .padding(dimensionResource(SdpR.dimen._5sdp))
+                    .size(dimensionResource(SdpR.dimen._15sdp))
                     .clip(CircleShape)
-                    .clickable(onClick = onAdd)
-            )
-            Text(
-                text = stringResource(R.string.pet_room_food_portions, food.portions),
-                color = colorResource(R.color.colors_FFFFFF),
-                fontWeight = FontWeight.Medium,
-                fontSize = dimensionResource(SspR.dimen._6ssp).value.sp,
+                    .background(colorResource(R.color.colors_E1CCB9))
+                    .dashedBorder(
+                        color = colorResource(R.color.colors_D3BEA2),
+                        shape = CircleShape,
+                        dash = TAB_DASH
+                    )
+                    .clickable(onClick = onAdd),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_pet_room_add),
+                    contentDescription = stringResource(R.string.pet_room_add_food),
+                    tint = colorResource(R.color.colors_FFFFFF),
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._13sdp))
+                )
+            }
+            // Figma: 26x18 pill at (62,66), inset from the corner rather than flush to it.
+            Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(dimensionResource(SdpR.dimen._4sdp))
-                    .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._5sdp)))
-                    .background(colorResource(R.color.colors_8F6250))
                     .padding(
-                        horizontal = dimensionResource(SdpR.dimen._4sdp),
-                        vertical = dimensionResource(SdpR.dimen._1sdp)
+                        end = dimensionResource(SdpR.dimen._12sdp),
+                        bottom = dimensionResource(SdpR.dimen._5sdp)
                     )
+                    .height(dimensionResource(SdpR.dimen._14sdp))
+                    .clip(CircleShape)
+                    .background(colorResource(R.color.colors_8D6037))
+                    .border(1.dp, colorResource(R.color.colors_FFFFFF), CircleShape)
+                    .padding(horizontal = dimensionResource(SdpR.dimen._5sdp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.pet_room_food_portions, food.portions),
+                    color = colorResource(R.color.colors_FFFFFF),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp
+                )
+            }
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(FOOD_CARD_TEXT_WEIGHT)
+                .padding(top = dimensionResource(SdpR.dimen._3sdp)),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = food.name,
+                color = colorResource(R.color.colors_212327),
+                fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
             )
         }
-        Text(
-            text = food.name,
-            color = colorResource(R.color.colors_212327),
-            fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
 
@@ -994,8 +1027,9 @@ private fun RoomCard(room: PetRoomThumbnailUiState, onClick: () -> Unit) {
             .aspectRatio(TALL_CARD_ASPECT_RATIO)
             .clip(shape)
             .background(colorResource(R.color.colors_FFFEF9))
+            // Figma marks the active room with a 3px pink edge, not the 2px cream one.
             .border(
-                width = if (room.isSelected) 2.dp else 1.dp,
+                width = if (room.isSelected) 3.dp else 2.dp,
                 color = colorResource(
                     if (room.isSelected) R.color.colors_FB3675 else R.color.colors_FFECD4
                 ),
@@ -1011,6 +1045,17 @@ private fun RoomCard(room: PetRoomThumbnailUiState, onClick: () -> Unit) {
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(shape)
+            )
+        }
+        if (room.isSelected) {
+            Icon(
+                painter = painterResource(R.drawable.ic_pet_room_selected),
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(dimensionResource(SdpR.dimen._3sdp))
+                    .size(dimensionResource(SdpR.dimen._21sdp))
             )
         }
     }
@@ -1082,6 +1127,8 @@ private const val PET_CARD_ASPECT_RATIO = 104f / 106f
 private const val TALL_CARD_ASPECT_RATIO = 104f / 122f
 private const val PET_CARD_IMAGE_WEIGHT = 70f / 106f
 private const val PET_CARD_TEXT_WEIGHT = 36f / 106f
+private const val FOOD_CARD_IMAGE_WEIGHT = 90f / 122f
+private const val FOOD_CARD_TEXT_WEIGHT = 32f / 122f
 private val TAB_DASH = 3.dp
 private const val DETAIL_RULE_DASH_PX = 5.4f
 private const val ADD_PET_CARD_KEY = "add_pet"
