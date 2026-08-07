@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -575,18 +576,20 @@ private fun PetCard(
             .border(2.dp, colorResource(R.color.colors_FFECD4), shape)
             .clickable(onClick = onClick)
     ) {
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(PET_CARD_IMAGE_WEIGHT),
-            contentAlignment = Alignment.Center
+                .weight(PET_CARD_IMAGE_WEIGHT)
         ) {
+            val unit = maxWidth / FIGMA_CARD_WIDTH
             pet.thumbnailPath?.let { path ->
                 AsyncImage(
                     model = path,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._38sdp))
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(unit * 50f)
                 )
             }
             Icon(
@@ -595,8 +598,8 @@ private fun PetCard(
                 tint = Color.Unspecified,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(dimensionResource(SdpR.dimen._6sdp))
-                    .size(dimensionResource(SdpR.dimen._12sdp))
+                    .padding(unit * 8f)
+                    .size(unit * 16f)
                     .clip(CircleShape)
                     .clickable(onClick = onRemove)
             )
@@ -880,35 +883,38 @@ private fun FoodCard(food: PetRoomFoodUiState, onFeed: () -> Unit, onAdd: () -> 
             .border(2.dp, colorResource(R.color.colors_FFECD4), shape)
             .clickable(onClick = onFeed)
     ) {
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(FOOD_CARD_IMAGE_WEIGHT)
         ) {
+            // The grid decides how wide a card is, so every inset is a share of that width
+            // rather than a fixed dp, and the Figma proportions hold on any screen.
+            val unit = maxWidth / FIGMA_CARD_WIDTH
             Image(
                 painter = painterResource(food.imageRes),
                 contentDescription = food.name,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(dimensionResource(SdpR.dimen._54sdp))
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = unit * 1f)
+                    .size(unit * 70f)
             )
-            // Figma: 32x18 pill at (6,6) holding the energy this portion restores.
             Row(
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(dimensionResource(SdpR.dimen._5sdp))
-                    .height(dimensionResource(SdpR.dimen._14sdp))
+                    .padding(unit * 6f)
+                    .height(unit * 18f)
                     .clip(CircleShape)
                     .background(colorResource(R.color.colors_FFF1B2))
-                    .padding(horizontal = dimensionResource(SdpR.dimen._3sdp)),
+                    .padding(horizontal = unit * 4f),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._1sdp))
+                horizontalArrangement = Arrangement.spacedBy(unit * 2f)
             ) {
                 Image(
                     painter = painterResource(R.drawable.img_pet_room_energy_icon),
                     contentDescription = null,
-                    modifier = Modifier.height(dimensionResource(SdpR.dimen._9sdp))
+                    modifier = Modifier.height(unit * 12f)
                 )
                 Text(
                     text = food.energyValue.toString(),
@@ -918,12 +924,11 @@ private fun FoodCard(food: PetRoomFoodUiState, onFeed: () -> Unit, onAdd: () -> 
                     lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp
                 )
             }
-            // Figma: 20x20 dashed circle at (78,6).
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(dimensionResource(SdpR.dimen._5sdp))
-                    .size(dimensionResource(SdpR.dimen._15sdp))
+                    .padding(unit * 6f)
+                    .size(unit * 20f)
                     .clip(CircleShape)
                     .background(colorResource(R.color.colors_E1CCB9))
                     .dashedBorder(
@@ -938,22 +943,19 @@ private fun FoodCard(food: PetRoomFoodUiState, onFeed: () -> Unit, onAdd: () -> 
                     painter = painterResource(R.drawable.ic_pet_room_add),
                     contentDescription = stringResource(R.string.pet_room_add_food),
                     tint = colorResource(R.color.colors_FFFFFF),
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._13sdp))
+                    modifier = Modifier.size(unit * 17f)
                 )
             }
-            // Figma: 26x18 pill at (62,66), inset from the corner rather than flush to it.
+            // Figma hangs the portion pill on the bottom-right corner of the food artwork.
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(
-                        end = dimensionResource(SdpR.dimen._12sdp),
-                        bottom = dimensionResource(SdpR.dimen._5sdp)
-                    )
-                    .height(dimensionResource(SdpR.dimen._14sdp))
+                    .padding(end = unit * 16f, bottom = unit * 6f)
+                    .height(unit * 18f)
                     .clip(CircleShape)
                     .background(colorResource(R.color.colors_8D6037))
                     .border(1.dp, colorResource(R.color.colors_FFFFFF), CircleShape)
-                    .padding(horizontal = dimensionResource(SdpR.dimen._5sdp)),
+                    .padding(horizontal = unit * 7f),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -1009,7 +1011,7 @@ private fun RoomTabContent(
         columns = GridCells.Fixed(ROOM_GRID_COLUMNS),
         contentPadding = PaddingValues(dimensionResource(SdpR.dimen._12sdp)),
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp)),
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp)),
         modifier = Modifier.fillMaxSize()
     ) {
         items(uiState.rooms, key = PetRoomThumbnailUiState::id) { room ->
@@ -1129,6 +1131,7 @@ private const val PET_CARD_IMAGE_WEIGHT = 70f / 106f
 private const val PET_CARD_TEXT_WEIGHT = 36f / 106f
 private const val FOOD_CARD_IMAGE_WEIGHT = 90f / 122f
 private const val FOOD_CARD_TEXT_WEIGHT = 32f / 122f
+private const val FIGMA_CARD_WIDTH = 104f
 private val TAB_DASH = 3.dp
 private const val DETAIL_RULE_DASH_PX = 5.4f
 private const val ADD_PET_CARD_KEY = "add_pet"
