@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.ui.petroom
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
@@ -20,9 +21,12 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineClips
 import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineSupportedActions
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomMusicPlayer
 import com.asianmobile.emojibattery.shimeji.ui.petstore.PET_FOOD_CATALOG
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -38,6 +42,7 @@ import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class PetRoomViewModel @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val catalogRepository: PetRoomCatalogRepository,
     private val roomRepository: PetRoomRepository,
     private val ownerCatalogRepository: OwnerPetCatalogRepository,
@@ -56,6 +61,7 @@ class PetRoomViewModel @Inject constructor(
 
     private var selectedPetId: Int? = null
     private var isScreenResumed = false
+    private var restoreOverlayOnExit = false
 
     init {
         viewModelScope.launch {
@@ -137,15 +143,27 @@ class PetRoomViewModel @Inject constructor(
         viewModelScope.launch { roomRepository.setMusicOn(!_uiState.value.isMusicOn) }
     }
 
-    /** Music follows the screen: it must not keep playing once the user leaves the room. */
+    /**
+     * Music and the floating overlay both follow the screen. The room already shows the pets, so
+     * leaving them floating on top would show the same pet twice; the overlay comes back exactly
+     * when the user leaves the room.
+     */
     fun onScreenResumed() {
         isScreenResumed = true
         if (_uiState.value.isMusicOn) musicPlayer.play()
+        if (PetOverlayRuntime.isRunning.value) {
+            restoreOverlayOnExit = true
+            PetOverlay.stop(context)
+        }
     }
 
     fun onScreenPaused() {
         isScreenResumed = false
         musicPlayer.pause()
+        if (restoreOverlayOnExit) {
+            restoreOverlayOnExit = false
+            PetOverlay.start(context)
+        }
     }
 
     /** Opens the pet the user tapped inside the scene. */

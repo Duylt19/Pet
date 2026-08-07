@@ -11,26 +11,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetAction
-import com.asianmobile.emojibattery.shimeji.pet.engine.PetBounds
-import com.asianmobile.emojibattery.shimeji.pet.engine.PetEngine
-import com.asianmobile.emojibattery.shimeji.pet.engine.PetEvent
-import com.asianmobile.emojibattery.shimeji.pet.engine.PetSize
-import com.asianmobile.emojibattery.shimeji.pet.engine.PetState
-import com.asianmobile.emojibattery.shimeji.pet.engine.PetVector
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetClip
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
+import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomFloor
+import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomWanderState
+import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomWanderer
 import kotlin.math.roundToInt
 
 /**
- * Draws the owned pets inside the room artwork. One shared frame clock ticks every engine, the
- * same way the overlay controller does, so adding a pet costs a reducer call rather than a
- * timer.
+ * Draws the owned pets wandering the room floor. One shared frame clock advances every pet, the
+ * way the overlay controller does, so a pet costs a step and a draw rather than its own timer.
  */
 @Composable
 fun PetRoomScene(
@@ -43,7 +41,16 @@ fun PetRoomScene(
         if (sceneSize == IntSize.Zero) {
             emptyList()
         } else {
-            pets.mapIndexed { index, entry -> entry.toRuntime(index, sceneSize) }
+            val floor = PetRoomFloor(
+                left = sceneSize.width * FLOOR_SIDE_MARGIN,
+                right = sceneSize.width * (1f - FLOOR_SIDE_MARGIN),
+                top = sceneSize.height * FLOOR_TOP_RATIO,
+                bottom = sceneSize.height * FLOOR_BOTTOM_RATIO
+            )
+            val petSize = sceneSize.width * PET_WIDTH_RATIO
+            pets.mapIndexed { index, entry ->
+                entry.toRuntime(index, pets.size, floor, petSize)
+            }
         }
     }
     var frame by remember { mutableStateOf(0L) }
@@ -57,11 +64,7 @@ fun PetRoomScene(
                 .coerceIn(0L, MAX_TICK_MILLIS)
             previousNanos = nanos
             if (elapsedMillis <= 0L) continue
-            runtimes.forEach { runtime ->
-                runtime.state = runtime.engine
-                    .reduce(runtime.state, PetEvent.Tick(elapsedMillis))
-                    .state
-            }
+            runtimes.forEach { it.advance(elapsedMillis) }
             frame = nanos
         }
     }
@@ -71,98 +74,152 @@ fun PetRoomScene(
             .onSizeChanged { sceneSize = it }
             .pointerInput(runtimes) {
                 detectTapGestures { offset ->
-                    // Topmost pet wins so a tap never opens the one drawn underneath.
-                    runtimes.lastOrNull { it.contains(offset) }?.let { onPetTapped(it.packKey) }
+                    // Front pets are drawn last, so they also win the tap.
+                    runtimes.sortedBy { it.state.y }
+                        .lastOrNull { it.contains(offset) }
+                        ?.let { onPetTapped(it.packKey) }
                 }
             }
     ) {
         // Read the frame stamp so every clock tick recomposes the draw pass.
         @Suppress("UNUSED_EXPRESSION")
         frame
-        runtimes.forEach { runtime -> drawPet(runtime) }
+        // Painter's order by depth: a pet standing further back cannot cover one in front.
+        runtimes.sortedBy { it.state.y }.forEach { drawPet(it) }
     }
 }
 
 private fun DrawScope.drawPet(runtime: PetRoomSceneRuntime) {
     val visual = runtime.visual ?: return
-    val state = runtime.state
-    val frames = visual.frames[state.action]
-        ?: visual.frames[state.action.roomFallback()]
+    val frames = visual.frames[runtime.action]
         ?: visual.frames[PetAction.IDLE]
         ?: return
     if (frames.isEmpty()) return
-    val frame = frames[state.frameIndex.coerceIn(0, frames.lastIndex)]
+    val frame = frames[runtime.frameIndex.coerceIn(0, frames.lastIndex)]
 
-    val boxWidth = state.size.width
-    val boxHeight = state.size.height
-    val fitScale = minOf(boxWidth / visual.canvas.width, boxHeight / visual.canvas.height)
+    val bounds = runtime.bounds()
+    val fitScale = minOf(
+        bounds.width / visual.canvas.width,
+        bounds.height / visual.canvas.height
+    )
     val drawWidth = visual.canvas.width * fitScale
     val drawHeight = visual.canvas.height * fitScale
-    val anchorX = state.position.x + boxWidth * 0.5f
-    val anchorY = state.position.y + boxHeight
-    val left = anchorX - visual.anchor.x * drawWidth
-    val top = anchorY - visual.anchor.y * drawHeight
+    val left = bounds.centerX - visual.anchor.x * drawWidth
+    val top = bounds.bottom - visual.anchor.y * drawHeight
 
-    drawImage(
-        image = frame.bitmap.asImageBitmap(),
-        srcOffset = IntOffset(frame.source.left, frame.source.top),
-        srcSize = IntSize(frame.source.width(), frame.source.height()),
-        dstOffset = IntOffset(left.roundToInt(), top.roundToInt()),
-        dstSize = IntSize(drawWidth.roundToInt(), drawHeight.roundToInt())
-    )
+    val draw = {
+        drawImage(
+            image = frame.bitmap.asImageBitmap(),
+            srcOffset = IntOffset(frame.source.left, frame.source.top),
+            srcSize = IntSize(frame.source.width(), frame.source.height()),
+            dstOffset = IntOffset(left.roundToInt(), top.roundToInt()),
+            dstSize = IntSize(drawWidth.roundToInt(), drawHeight.roundToInt())
+        )
+    }
+    if (runtime.state.facingRight) {
+        draw()
+    } else {
+        // Packs draw one way only, so walking the other way is a mirror.
+        scale(scaleX = -1f, scaleY = 1f, pivot = Offset(bounds.centerX, bounds.bottom)) { draw() }
+    }
 }
 
-/** The room blocks the climbing repertoire, so those frames never need a fallback here. */
-private fun PetAction.roomFallback(): PetAction = when (this) {
-    PetAction.RUN, PetAction.CREEP -> PetAction.WALK
-    PetAction.EMOTE -> PetAction.WINK
-    PetAction.FLOOR_PLAY, PetAction.SPRAWL -> PetAction.SIT
-    else -> PetAction.IDLE
-}
-
-private fun PetRoomSceneEntry.toRuntime(index: Int, sceneSize: IntSize): PetRoomSceneRuntime {
-    val petSize = (sceneSize.width * PET_WIDTH_RATIO).coerceAtMost(MAX_PET_SIZE_PX)
-    val size = PetSize(petSize, petSize)
-    val bounds = PetBounds(
-        left = 0f,
-        top = sceneSize.height * FLOOR_TOP_RATIO,
-        right = sceneSize.width.toFloat(),
-        bottom = sceneSize.height * FLOOR_BOTTOM_RATIO
-    )
-    val engine = PetEngine(engineConfig)
-    val slot = (index + 1f) / (SPAWN_SLOTS + 1f)
-    val position = PetVector(
-        x = sceneSize.width * slot - petSize * 0.5f,
-        y = bounds.bottom - petSize
+private fun PetRoomSceneEntry.toRuntime(
+    index: Int,
+    count: Int,
+    floor: PetRoomFloor,
+    petSize: Float
+): PetRoomSceneRuntime {
+    val wanderer = PetRoomWanderer(
+        seed = packKey.hashCode().toLong(),
+        floor = floor,
+        walkSpeedPerSecond = petSize * WALK_SPEED_PER_PET_WIDTH
     )
     return PetRoomSceneRuntime(
         packKey = packKey,
-        engine = engine,
-        state = engine.initialState(bounds = bounds, size = size, position = position),
-        visual = visual as? PetPackVisual.Sprite
+        floor = floor,
+        petSize = petSize,
+        wanderer = wanderer,
+        state = wanderer.initial(index, count),
+        visual = visual as? PetPackVisual.Sprite,
+        clips = engineConfig.clips
     )
 }
 
 private class PetRoomSceneRuntime(
     val packKey: String,
-    val engine: PetEngine,
-    var state: PetState,
-    val visual: PetPackVisual.Sprite?
+    private val floor: PetRoomFloor,
+    private val petSize: Float,
+    private val wanderer: PetRoomWanderer,
+    state: PetRoomWanderState,
+    val visual: PetPackVisual.Sprite?,
+    private val clips: Map<PetAction, PetClip>
 ) {
+    var state: PetRoomWanderState = state
+        private set
+    var frameIndex: Int = 0
+        private set
+
+    private var clipElapsedMillis = 0L
+
+    val action: PetAction
+        get() = if (state.isWalking && visual?.frames?.containsKey(PetAction.WALK) == true) {
+            PetAction.WALK
+        } else {
+            PetAction.IDLE
+        }
+
+    fun advance(elapsedMillis: Long) {
+        val previousAction = action
+        state = wanderer.advance(state, elapsedMillis)
+        if (action != previousAction) {
+            clipElapsedMillis = 0L
+            frameIndex = 0
+            return
+        }
+        val clip = clips[action] ?: return
+        clipElapsedMillis += elapsedMillis
+        var duration = clip.frames[frameIndex.coerceIn(0, clip.frames.lastIndex)].durationMillis
+        while (clipElapsedMillis >= duration) {
+            clipElapsedMillis -= duration
+            frameIndex = (frameIndex + 1) % clip.frames.size
+            duration = clip.frames[frameIndex].durationMillis
+        }
+    }
+
+    fun bounds(): PetRoomSpriteBounds {
+        val scale = floor.scaleAt(state.y)
+        val height = petSize * scale
+        return PetRoomSpriteBounds(
+            centerX = state.x,
+            bottom = state.y,
+            width = height,
+            height = height
+        )
+    }
+
     fun contains(offset: Offset): Boolean {
-        val left = state.position.x
-        val top = state.position.y
-        return offset.x >= left && offset.x <= left + state.size.width &&
-            offset.y >= top && offset.y <= top + state.size.height
+        val bounds = bounds()
+        return offset.x >= bounds.centerX - bounds.width / 2f &&
+            offset.x <= bounds.centerX + bounds.width / 2f &&
+            offset.y >= bounds.bottom - bounds.height &&
+            offset.y <= bounds.bottom
     }
 }
 
+private data class PetRoomSpriteBounds(
+    val centerX: Float,
+    val bottom: Float,
+    val width: Float,
+    val height: Float
+)
+
 private const val NANOS_PER_MILLI = 1_000_000L
 private const val MAX_TICK_MILLIS = 250L
-private const val PET_WIDTH_RATIO = 0.23f
-private const val MAX_PET_SIZE_PX = 320f
-private const val SPAWN_SLOTS = 4f
+private const val PET_WIDTH_RATIO = 0.2f
+private const val WALK_SPEED_PER_PET_WIDTH = 0.55f
+private const val FLOOR_SIDE_MARGIN = 0.06f
 
 // Figma places the pets on the rug band of the room artwork.
-private const val FLOOR_TOP_RATIO = 0.52f
+private const val FLOOR_TOP_RATIO = 0.5f
 private const val FLOOR_BOTTOM_RATIO = 0.72f
