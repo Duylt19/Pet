@@ -26,6 +26,7 @@ import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRosterPolicy
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomMusicPlayer
+import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomSizePolicy
 import com.asianmobile.emojibattery.shimeji.ui.petstore.PET_FOOD_CATALOG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -38,6 +39,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,6 +67,7 @@ class PetRoomViewModel @Inject constructor(
     private var selectedPetId: Int? = null
     private var isScreenResumed = false
     private var restoreOverlayOnExit = false
+    private var roomPacks: List<PetPack> = emptyList()
 
     init {
         viewModelScope.launch {
@@ -104,8 +108,10 @@ class PetRoomViewModel @Inject constructor(
                 // The scene shows exactly the pets the My Pet tab lists. Drawing every installed
                 // pack would put the built-in pack and any pack the catalog cannot describe into
                 // the room, which is what made the room disagree with the roster.
-                val rosterKeys = roster.mapTo(mutableSetOf(), PetRoomPetUiState::packKey)
-                _scene.value = buildScene(packs.filter { it.key in rosterKeys })
+                roomPacks = packs.filter { pack ->
+                    pack.key in roster.mapTo(mutableSetOf(), PetRoomPetUiState::packKey)
+                }
+                _scene.value = buildScene(roomPacks)
             }
         }
         viewModelScope.launch {
@@ -125,6 +131,13 @@ class PetRoomViewModel @Inject constructor(
                 careRepository.adoptedAtMillis,
                 petSettingsRepository.preferences
             ) { _, _, _ -> Unit }.collect { refreshDetail() }
+        }
+        viewModelScope.launch {
+            // Size and speed are the same setting the overlay uses, so the room follows it.
+            petSettingsRepository.preferences
+                .map { it.slot(0).sizePercent to it.slot(0).speedPercent }
+                .distinctUntilChanged()
+                .collect { _scene.value = buildScene(roomPacks) }
         }
     }
 
@@ -394,22 +407,32 @@ class PetRoomViewModel @Inject constructor(
         }
     }
 
-    private suspend fun buildScene(packs: List<PetPack>): List<PetRoomSceneEntry> =
-        withContext(Dispatchers.Default) {
+    private suspend fun buildScene(packs: List<PetPack>): List<PetRoomSceneEntry> {
+        val slot = petSettingsRepository.preferences.value.slot(0)
+        val density = context.resources.displayMetrics.density
+        val speedMultiplier = PetRoomSizePolicy.speedMultiplier(slot.speedPercent)
+        return withContext(Dispatchers.Default) {
             packs.take(MAX_SCENE_PETS).map { pack ->
                 PetRoomSceneEntry(
                     packKey = pack.key,
                     visual = bitmapCache.prepare(pack),
                     engineConfig = PetEngineConfig(
-                        clips = pack.manifest.toEngineClips(),
+                        clips = pack.manifest.toEngineClips(speedMultiplier),
                         tapAction = pack.manifest.interaction.tapAction,
                         supportedActions = pack.manifest.toEngineSupportedActions(),
                         behaviorProfile = PetBehaviorProfiles.ROOM,
                         behaviorSeed = pack.manifest.id.hashCode().toLong()
-                    )
+                    ),
+                    petSizePx = PetRoomSizePolicy.petSizePixels(
+                        packDefaultScale = pack.manifest.canvas.defaultScale,
+                        sizePercent = slot.sizePercent,
+                        density = density
+                    ),
+                    speedMultiplier = speedMultiplier
                 )
             }
         }
+    }
 
     private fun PetPreferences.roomSlotKeys(): List<String> =
         PetOverlayRosterPolicy.freeableSlotKeys(

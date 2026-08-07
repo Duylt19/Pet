@@ -48,9 +48,8 @@ fun PetRoomScene(
                 top = sceneSize.height * FLOOR_TOP_RATIO,
                 bottom = sceneSize.height * FLOOR_BOTTOM_RATIO
             )
-            val petSize = sceneSize.width * PET_WIDTH_RATIO
             pets.mapIndexed { index, entry ->
-                entry.toRuntime(index, pets.size, floor, petSize)
+                entry.toRuntime(index, pets.size, floor)
             }
         }
     }
@@ -129,20 +128,19 @@ private fun DrawScope.drawPet(runtime: PetRoomSceneRuntime) {
 private fun PetRoomSceneEntry.toRuntime(
     index: Int,
     count: Int,
-    floor: PetRoomFloor,
-    petSize: Float
+    floor: PetRoomFloor
 ): PetRoomSceneRuntime {
     val sprite = visual as? PetPackVisual.Sprite
     val wanderer = PetRoomWanderer(
         seed = packKey.hashCode().toLong(),
         floor = floor,
-        walkSpeedPerSecond = petSize * WALK_SPEED_PER_PET_WIDTH,
+        walkSpeedPerSecond = petSizePx * WALK_SPEED_PER_PET_WIDTH * speedMultiplier,
         rests = sprite.availableRests()
     )
     return PetRoomSceneRuntime(
         packKey = packKey,
         floor = floor,
-        petSize = petSize,
+        petSize = petSizePx,
         wanderer = wanderer,
         state = wanderer.initial(index, count),
         visual = sprite,
@@ -242,7 +240,6 @@ private fun PetPackVisual.Sprite?.availableRests(): List<PetRoomRest> {
 
 private const val NANOS_PER_MILLI = 1_000_000L
 private const val MAX_TICK_MILLIS = 250L
-private const val PET_WIDTH_RATIO = 0.2f
 private const val WALK_SPEED_PER_PET_WIDTH = 0.55f
 private const val FLOOR_SIDE_MARGIN = 0.06f
 

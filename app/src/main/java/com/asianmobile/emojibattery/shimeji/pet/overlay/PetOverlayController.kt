@@ -30,6 +30,7 @@ import com.asianmobile.emojibattery.shimeji.pet.engine.PetSocialSnapshot
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetState
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetVector
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
+import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomSizePolicy
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
 import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineClips
 import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineSupportedActions
@@ -904,13 +905,12 @@ internal class PetOverlayController(
         slotPreferences: PetSlotPreferences
     ): Int = petSizePixels(pack, slotPreferences.sizePercent)
 
+    // Shared with My Pet Room so one size setting means one size in both places.
     private fun petSizePixels(
         pack: PetPack,
         sizePercent: Int
     ): Int = appContext.dpToPixels(
-        (PET_SIZE_DP * pack.manifest.canvas.defaultScale * sizePercent / 100f)
-            .roundToInt()
-            .coerceIn(MIN_PET_SIZE_DP, MAX_PET_SIZE_DP)
+        PetRoomSizePolicy.petSizeDp(pack.manifest.canvas.defaultScale, sizePercent)
     )
 
     private fun createEngine(
@@ -986,9 +986,6 @@ internal class PetOverlayController(
     )
 
     private companion object {
-        const val PET_SIZE_DP = 84
-        const val MIN_PET_SIZE_DP = 48
-        const val MAX_PET_SIZE_DP = 144
         const val START_MARGIN_DP = 20
         const val OVERLAY_WINDOW_TITLE = "Cute Pet overlay"
         const val SPEECH_WINDOW_TITLE = "Cute Pet speech"

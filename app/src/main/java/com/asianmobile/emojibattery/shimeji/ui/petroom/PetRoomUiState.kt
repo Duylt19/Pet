@@ -74,7 +74,10 @@ data class PetRoomThumbnailUiState(
 data class PetRoomSceneEntry(
     val packKey: String,
     val visual: PetPackVisual,
-    val engineConfig: PetEngineConfig
+    val engineConfig: PetEngineConfig,
+    /** Same pixel size the overlay would draw this pack at, for the same size setting. */
+    val petSizePx: Float,
+    val speedMultiplier: Float
 )
 
 object PetRoomRosterPolicy {
