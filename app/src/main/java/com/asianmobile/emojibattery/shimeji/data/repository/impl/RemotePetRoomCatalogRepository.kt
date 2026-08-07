@@ -87,6 +87,14 @@ class RemotePetRoomCatalogRepository @Inject constructor(
         )?.absolutePath
     }
 
+    override fun cachedAssetPath(path: String?): String? {
+        val record = path?.let(assetsByPath::get) ?: return null
+        return client.cachedAsset(
+            expectedSizeBytes = record.sizeBytes,
+            expectedSha256 = record.sha256
+        )?.absolutePath
+    }
+
     private fun publish(document: RoomCatalogDocument) {
         if (!BuildConfig.DEBUG && !document.distributionApproved) {
             state.value = PetRoomCatalogSnapshot(

@@ -10,4 +10,7 @@ interface PetRoomCatalogRepository {
 
     /** Downloads and verifies a catalog asset, returning its local path. */
     suspend fun materializeAsset(path: String?): String?
+
+    /** Local path of an asset already downloaded and verified, without fetching anything. */
+    fun cachedAssetPath(path: String?): String?
 }

@@ -25,6 +25,7 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineSupportedActions
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRosterPolicy
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
+import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomBundledBackground
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomMusicPlayer
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomSizePolicy
 import com.asianmobile.emojibattery.shimeji.ui.petstore.PET_FOOD_CATALOG
@@ -68,6 +69,7 @@ class PetRoomViewModel @Inject constructor(
     private var isScreenResumed = false
     private var restoreOverlayOnExit = false
     private var roomPacks: List<PetPack> = emptyList()
+    private var downloadingRoomId: Int? = null
 
     init {
         viewModelScope.launch {
@@ -187,8 +189,38 @@ class PetRoomViewModel @Inject constructor(
         openPet(pet.petId)
     }
 
+    /**
+     * Applying a room may need its background first. The bundled room is always ready; anything
+     * else downloads with the card showing progress, and a failure leaves the current room alone.
+     */
     fun selectRoom(roomId: Int) {
-        viewModelScope.launch { roomRepository.selectRoom(roomId) }
+        val snapshot = catalogRepository.snapshot.value
+        val room = snapshot.findRoom(roomId) ?: return
+        if (PetRoomBundledBackground.isBundled(roomId) ||
+            catalogRepository.cachedAssetPath(room.backgroundPath) != null
+        ) {
+            viewModelScope.launch { roomRepository.selectRoom(roomId) }
+            return
+        }
+        if (downloadingRoomId != null) return
+        downloadingRoomId = roomId
+        refreshRooms()
+        viewModelScope.launch {
+            val path = catalogRepository.materializeAsset(room.backgroundPath)
+            downloadingRoomId = null
+            if (path == null) {
+                showMessage(PetRoomMessage.ROOM_DOWNLOAD_FAILED)
+                refreshRooms()
+                return@launch
+            }
+            roomRepository.selectRoom(roomId)
+        }
+    }
+
+    private fun refreshRooms() {
+        viewModelScope.launch {
+            applyCatalog(catalogRepository.snapshot.value, roomRepository.selectedRoomId.value)
+        }
     }
 
     fun openPet(petId: Int) {
@@ -389,17 +421,32 @@ class PetRoomViewModel @Inject constructor(
     private suspend fun applyCatalog(snapshot: PetRoomCatalogSnapshot, selectedRoomId: Int) {
         val activeRoom = snapshot.resolveRoom(selectedRoomId)
         val thumbnails = snapshot.rooms.map { room ->
+            val bundled = PetRoomBundledBackground.isBundled(room.id)
             PetRoomThumbnailUiState(
                 id = room.id,
                 name = room.name,
-                thumbnailPath = catalogRepository.materializeAsset(room.thumbnailPath),
-                isSelected = room.id == activeRoom?.id
+                // Previews are small, so they are fetched up front; backgrounds are not.
+                thumbnailPath = if (bundled) {
+                    null
+                } else {
+                    catalogRepository.materializeAsset(room.thumbnailPath)
+                },
+                thumbnailRes = PetRoomBundledBackground.thumbnailResOrNull(room.id),
+                isSelected = room.id == activeRoom?.id,
+                needsDownload = !bundled &&
+                    catalogRepository.cachedAssetPath(room.backgroundPath) == null,
+                isDownloading = room.id == downloadingRoomId
             )
         }
-        val backgroundPath = catalogRepository.materializeAsset(activeRoom?.backgroundPath)
+        val backgroundPath = activeRoom
+            ?.takeUnless { PetRoomBundledBackground.isBundled(it.id) }
+            ?.let { catalogRepository.cachedAssetPath(it.backgroundPath) }
         _uiState.update { state ->
             state.copy(
-                backgroundPath = backgroundPath ?: state.backgroundPath,
+                backgroundPath = backgroundPath,
+                backgroundRes = activeRoom?.id?.let(
+                    PetRoomBundledBackground::backgroundResOrNull
+                ) ?: PetRoomBundledBackground.backgroundRes.takeIf { backgroundPath == null },
                 rooms = thumbnails,
                 isRoomCatalogLoading = snapshot.isLoading,
                 roomCatalogFailed = !snapshot.isLoading && snapshot.rooms.isEmpty()

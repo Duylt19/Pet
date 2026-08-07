@@ -102,6 +102,12 @@ class GithubRoomCatalogClient @Inject constructor(
         readMetadata().copy(retryAfterEpochMillis = retryAtEpochMillis)
     )
 
+    /** The already-downloaded file for this asset, or null when it still has to be fetched. */
+    fun cachedAsset(expectedSizeBytes: Long, expectedSha256: String): File? {
+        val file = File(assetDirectory, "$expectedSha256.png")
+        return file.takeIf { it.isFile && verify(it, expectedSizeBytes, expectedSha256) }
+    }
+
     @Synchronized
     fun materializeAsset(
         relativePath: String,

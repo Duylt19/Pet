@@ -14,6 +14,8 @@ data class PetRoomUiState(
     val isSheetExpanded: Boolean = true,
     val isMusicOn: Boolean = false,
     val backgroundPath: String? = null,
+    /** Drawable of the room that ships with the app, used until a download replaces it. */
+    val backgroundRes: Int? = null,
     val pets: List<PetRoomPetUiState> = emptyList(),
     val isRosterLoading: Boolean = true,
     val rooms: List<PetRoomThumbnailUiState> = emptyList(),
@@ -47,6 +49,7 @@ data class PetRoomFoodUiState(
 )
 
 enum class PetRoomMessage {
+    ROOM_DOWNLOAD_FAILED,
     REMOVE_FAILED,
     SELECT_A_PET_FIRST,
     OUT_OF_FOOD,
@@ -67,7 +70,11 @@ data class PetRoomThumbnailUiState(
     val id: Int,
     val name: String,
     val thumbnailPath: String?,
-    val isSelected: Boolean
+    val thumbnailRes: Int?,
+    val isSelected: Boolean,
+    /** The background still has to be fetched before this room can be applied. */
+    val needsDownload: Boolean,
+    val isDownloading: Boolean
 )
 
 /** Everything the scene needs to run one pet: its sprites and its engine configuration. */

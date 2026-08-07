@@ -1092,4 +1092,6 @@
     <string name="pet_room_settings_reset">Reset</string>
     <string name="pet_room_settings_cancel">Cancel</string>
     <string name="pet_room_settings_save">Save</string>
+    <string name="pet_room_download">Download this room</string>
+    <string name="pet_room_download_failed">Could not download this room. Check your connection.</string>
 </resources>

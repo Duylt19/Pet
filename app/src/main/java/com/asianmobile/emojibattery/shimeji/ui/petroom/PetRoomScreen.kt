@@ -30,11 +30,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +52,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -71,6 +74,7 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.pet.care.PetEnergyLevel
 import com.asianmobile.emojibattery.shimeji.pet.care.PetEnergyPolicy
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
+import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
@@ -96,6 +100,14 @@ fun PetRoomScreen(
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    val context = LocalContext.current
+    LaunchedEffect(uiState.message) {
+        if (uiState.message == PetRoomMessage.ROOM_DOWNLOAD_FAILED) {
+            ToastHelper.show(context, context.getString(R.string.pet_room_download_failed))
+            viewModel.dismissMessage()
+        }
     }
 
     PetRoomContent(
@@ -155,6 +167,13 @@ private fun PetRoomContent(
         uiState.backgroundPath?.let { path ->
             AsyncImage(
                 model = path,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } ?: uiState.backgroundRes?.let { res ->
+            Image(
+                painter = painterResource(res),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -1069,7 +1088,16 @@ private fun RoomCard(room: PetRoomThumbnailUiState, onClick: () -> Unit) {
             )
             .clickable(onClick = onClick)
     ) {
-        room.thumbnailPath?.let { path ->
+        room.thumbnailRes?.let { res ->
+            Image(
+                painter = painterResource(res),
+                contentDescription = room.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(shape)
+            )
+        } ?: room.thumbnailPath?.let { path ->
             AsyncImage(
                 model = path,
                 contentDescription = room.name,
@@ -1077,6 +1105,31 @@ private fun RoomCard(room: PetRoomThumbnailUiState, onClick: () -> Unit) {
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(shape)
+            )
+        }
+        when {
+            room.isDownloading -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(shape)
+                    .background(colorResource(R.color.colors_000000).copy(alpha = SCRIM_ALPHA)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color = colorResource(R.color.colors_FFFFFF),
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._21sdp))
+                )
+            }
+
+            room.needsDownload -> Icon(
+                painter = painterResource(R.drawable.ic_download_arrow),
+                contentDescription = stringResource(R.string.pet_room_download),
+                tint = colorResource(R.color.colors_FFFFFF),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(dimensionResource(SdpR.dimen._3sdp))
+                    .size(dimensionResource(SdpR.dimen._15sdp))
             )
         }
         if (room.isSelected) {
@@ -1154,6 +1207,7 @@ private const val SELECTED_TAB_INNER_RATIO = 108f / 114f
 private const val SELECTED_TAB_DASH_RATIO = 102f / 114f
 private const val STORE_SHORTCUT_ASPECT_RATIO = 50f / 74.33f
 private const val ROOM_GRID_COLUMNS = 3
+private const val SCRIM_ALPHA = 0.45f
 // Figma: pet and add cards are 104x106, food and room cards 104x122.
 private const val PET_CARD_ASPECT_RATIO = 104f / 106f
 private const val TALL_CARD_ASPECT_RATIO = 104f / 122f
@@ -1179,7 +1233,10 @@ private fun PetRoomScreenPreview() {
                     id = index + 1,
                     name = "Room ${index + 1}",
                     thumbnailPath = null,
-                    isSelected = index == 0
+                    thumbnailRes = null,
+                    isSelected = index == 0,
+                    needsDownload = index > 0,
+                    isDownloading = false
                 )
             }
         ),
