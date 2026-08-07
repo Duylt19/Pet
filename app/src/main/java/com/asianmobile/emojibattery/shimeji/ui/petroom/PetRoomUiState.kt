@@ -150,20 +150,6 @@ object PetRoomSettingsPolicy {
         return "$whole.${tenth}x"
     }
 
-    fun fraction(value: Int, steps: List<Int>): Float {
-        if (steps.size <= 1) return 0f
-        val index = steps.indexOf(nearest(value, steps)).coerceAtLeast(0)
-        return index.toFloat() / (steps.size - 1)
-    }
-
-    fun valueAt(fraction: Float, steps: List<Int>): Int {
-        if (steps.isEmpty()) return DEFAULT_PERCENT
-        val index = (fraction.coerceIn(0f, 1f) * (steps.size - 1)).toInt()
-        val remainder = fraction.coerceIn(0f, 1f) * (steps.size - 1) - index
-        val rounded = if (remainder >= 0.5f) index + 1 else index
-        return steps[rounded.coerceIn(0, steps.lastIndex)]
-    }
-
     fun nearest(value: Int, steps: List<Int>): Int =
         steps.minByOrNull { kotlin.math.abs(it - value) } ?: DEFAULT_PERCENT
 }

@@ -2,31 +2,26 @@ package com.asianmobile.emojibattery.shimeji.ui.petroom
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -35,7 +30,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -198,10 +192,7 @@ private fun SettingSlider(
     }
 }
 
-/**
- * A slider that only stops on the steps the pet settings accept, drawn the way Figma draws it:
- * a soft pink track with a solid bar as the thumb.
- */
+/** Material 3 slider, snapped to the steps the pet settings accept and themed pink. */
 @Composable
 private fun StepSlider(
     value: Int,
@@ -209,64 +200,25 @@ private fun StepSlider(
     onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val currentSteps = rememberUpdatedState(steps)
-    val onChange = rememberUpdatedState(onValueChange)
-    val density = LocalDensity.current
-    BoxWithConstraints(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._29sdp))
-    ) {
-        val trackWidthPx = with(density) { maxWidth.toPx() }
-        val fraction = PetRoomSettingsPolicy.fraction(value, steps)
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._9sdp))
-                .clip(CircleShape)
-                .background(colorResource(R.color.colors_FFEBF1))
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .fillMaxWidth(fraction.coerceAtLeast(MIN_PROGRESS_FRACTION))
-                .height(dimensionResource(SdpR.dimen._9sdp))
-                .clip(CircleShape)
-                .background(colorResource(R.color.colors_FB3675))
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .offsetFraction(fraction)
-                .width(dimensionResource(SdpR.dimen._3sdp))
-                .height(dimensionResource(SdpR.dimen._29sdp))
-                .clip(CircleShape)
-                .background(colorResource(R.color.colors_FB3675))
-        )
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .pointerInput(steps) {
-                    detectHorizontalDragGestures { change, _ ->
-                        val next = PetRoomSettingsPolicy.valueAt(
-                            fraction = change.position.x / trackWidthPx,
-                            steps = currentSteps.value
-                        )
-                        onChange.value(next)
-                    }
-                }
-        )
-    }
-}
-
-/** Keeps the thumb inside the track instead of hanging off both ends. */
-private fun Modifier.offsetFraction(fraction: Float): Modifier = layout { measurable, constraints ->
-    val placeable = measurable.measure(constraints)
-    val travel = (constraints.maxWidth - placeable.width).coerceAtLeast(0)
-    layout(placeable.width, placeable.height) {
-        placeable.placeRelative((travel * fraction).roundToInt(), 0)
-    }
+    val pink = colorResource(R.color.colors_FB3675)
+    val index = steps.indexOf(PetRoomSettingsPolicy.nearest(value, steps)).coerceAtLeast(0)
+    Slider(
+        value = index.toFloat(),
+        onValueChange = { position ->
+            onValueChange(steps[position.roundToInt().coerceIn(0, steps.lastIndex)])
+        },
+        valueRange = 0f..(steps.size - 1).toFloat(),
+        steps = (steps.size - 2).coerceAtLeast(0),
+        colors = SliderDefaults.colors(
+            thumbColor = pink,
+            activeTrackColor = pink,
+            inactiveTrackColor = colorResource(R.color.colors_FFEBF1),
+            // Figma draws a plain track, so the step ticks stay invisible.
+            activeTickColor = Color.Transparent,
+            inactiveTickColor = Color.Transparent
+        ),
+        modifier = modifier.fillMaxWidth()
+    )
 }
 
 @Composable
@@ -295,7 +247,6 @@ private fun DialogButton(
 }
 
 private const val SETTINGS_DIALOG_WIDTH_FRACTION = 320f / 360f
-private const val MIN_PROGRESS_FRACTION = 0.04f
 
 @Preview(showBackground = true, backgroundColor = 0xFF9B9C9E, widthDp = 360, heightDp = 420)
 @Composable
