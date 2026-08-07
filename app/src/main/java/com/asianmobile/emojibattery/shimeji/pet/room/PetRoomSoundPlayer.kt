@@ -28,7 +28,10 @@ class PetRoomSoundPlayer @Inject constructor(
             .setMaxStreams(MAX_STREAMS)
             .setAudioAttributes(
                 AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                    // USAGE_MEDIA, not SONIFICATION: sonification plays on the system stream,
+                    // which most phones keep muted, so the taps were silent while the room
+                    // music was audible.
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build()
             )
@@ -42,10 +45,10 @@ class PetRoomSoundPlayer @Inject constructor(
     }
 
     /** Every tap in the room that is not a tab. */
-    fun playClick() = play(clickId)
+    fun playClick() = play(Sample.CLICK)
 
     /** Switching between My Pet, Food and Room. */
-    fun playFlip() = play(flipId)
+    fun playFlip() = play(Sample.FLIP)
 
     @Synchronized
     fun release() {
@@ -55,11 +58,20 @@ class PetRoomSoundPlayer @Inject constructor(
     }
 
     @Synchronized
-    private fun play(sampleId: Int) {
-        // A tap before the sample finished loading is silent rather than a crackle.
+    private fun play(sample: Sample) {
+        // A tap can land before the room reported it resumed, so build the pool on demand
+        // rather than dropping the sound and every sound after it.
+        prepare()
+        val sampleId = when (sample) {
+            Sample.CLICK -> clickId
+            Sample.FLIP -> flipId
+        }
+        // Loading is asynchronous; a tap during that window stays silent instead of crackling.
         if (sampleId == 0 || sampleId !in loaded) return
         pool?.play(sampleId, VOLUME, VOLUME, 1, 0, 1f)
     }
+
+    private enum class Sample { CLICK, FLIP }
 
     private companion object {
         const val MAX_STREAMS = 4
