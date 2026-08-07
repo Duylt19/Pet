@@ -57,6 +57,41 @@ data class PetBehaviorProfile(
 }
 
 object PetBehaviorProfiles {
+    /**
+     * My Pet Room draws pets inside a furnished scene, so the climbing and ceiling repertoire
+     * that suits a full-screen overlay would send them across the artwork. Keep the ground
+     * repertoire and let the room read as a room.
+     */
+    val ROOM = PetBehaviorProfile(
+        groundDelayMillis = 2_500L..6_000L,
+        idleDurationMillis = 2_500L..6_000L,
+        runDurationMillis = 1_200L..2_600L,
+        creepDurationMillis = 2_000L..4_500L,
+        wallJumpChancePercent = 0,
+        wallDescendChancePercent = 0,
+        maxNonClimbCombosBeforeClimb = Int.MAX_VALUE,
+        blockedActions = setOf(
+            PetAction.CLIMB_WALL,
+            PetAction.CLIMB_DOWN,
+            PetAction.CLIMB_CEILING,
+            PetAction.HOLD_WALL,
+            PetAction.HOLD_CEILING,
+            PetAction.DANGLE,
+            PetAction.TALK,
+            PetAction.TALK_WALK
+        ),
+        autonomousComboRules = listOf(
+            PetComboRule(PetComboId.CURIOUS_SCOUT, 12),
+            PetComboRule(PetComboId.COZY_BREAK, 10),
+            PetComboRule(PetComboId.HAPPY_ZOOMIES, 10),
+            PetComboRule(PetComboId.CLUMSY_RECOVERY, 6),
+            PetComboRule(PetComboId.TINY_PERFORMANCE, 6),
+            PetComboRule(PetComboId.DAYDREAM, 8),
+            PetComboRule(PetComboId.BUSY_PATROL, 8),
+            PetComboRule(PetComboId.PEEK_AND_DASH, 6)
+        )
+    )
+
     val SWARM = PetBehaviorProfile(
         groundDelayMillis = 900L..2_400L,
         idleDurationMillis = 800L..1_800L,

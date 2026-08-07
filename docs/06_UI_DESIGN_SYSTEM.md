@@ -79,6 +79,9 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8191:5950`:
   icon 18px cùng màu;
 - card grid ba cột: card room/food `104×122`, card pet `104×106` nền `#FFFEF9` viền `#FFECD4`
   2px radius 16; ô add `104×106` nền `#FFECD4` viền `#8F6250` với vòng tròn nét đứt `#D3BEA2`;
+- pet đã sở hữu chạy trực tiếp trong scene bằng `PetEngine` với profile `PetBehaviorProfiles.ROOM`:
+  chặn toàn bộ leo tường/trần và speech, chỉ giữ combo mặt đất, và bị giới hạn trong dải sàn
+  `0.52–0.72` chiều cao scene. Một frame clock chung tick mọi engine như overlay controller;
 - Swarm tạm ẩn khỏi navigation trong v1; `ui/home/HomeScreen` và `swarm_customization` giữ
   nguyên code cho bản sau.
 

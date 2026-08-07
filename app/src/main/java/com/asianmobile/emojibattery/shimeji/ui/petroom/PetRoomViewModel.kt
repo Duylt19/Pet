@@ -7,8 +7,13 @@ import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepos
 import com.asianmobile.emojibattery.shimeji.data.repository.PetRoomCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetRoomRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetStoreRepository
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetBehaviorProfiles
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetEngineConfig
+import com.asianmobile.emojibattery.shimeji.pet.pack.PetBitmapCache
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
+import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineClips
+import com.asianmobile.emojibattery.shimeji.pet.pack.toEngineSupportedActions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +21,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class PetRoomViewModel @Inject constructor(
@@ -24,10 +31,13 @@ class PetRoomViewModel @Inject constructor(
     private val roomRepository: PetRoomRepository,
     private val ownerCatalogRepository: OwnerPetCatalogRepository,
     private val petPackRepository: PetPackRepository,
-    private val petStoreRepository: PetStoreRepository
+    private val petStoreRepository: PetStoreRepository,
+    private val bitmapCache: PetBitmapCache
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PetRoomUiState())
     val uiState: StateFlow<PetRoomUiState> = _uiState.asStateFlow()
+    private val _scene = MutableStateFlow<List<PetRoomSceneEntry>>(emptyList())
+    val scene: StateFlow<List<PetRoomSceneEntry>> = _scene.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -60,7 +70,27 @@ class PetRoomViewModel @Inject constructor(
                 _uiState.update { it.copy(pets = roster, isRosterLoading = isLoading) }
             }
         }
+        viewModelScope.launch {
+            petPackRepository.packs.collect { packs -> _scene.value = buildScene(packs) }
+        }
     }
+
+    private suspend fun buildScene(packs: List<PetPack>): List<PetRoomSceneEntry> =
+        withContext(Dispatchers.Default) {
+            packs.take(MAX_SCENE_PETS).map { pack ->
+                PetRoomSceneEntry(
+                    packKey = pack.key,
+                    visual = bitmapCache.prepare(pack),
+                    engineConfig = PetEngineConfig(
+                        clips = pack.manifest.toEngineClips(),
+                        tapAction = pack.manifest.interaction.tapAction,
+                        supportedActions = pack.manifest.toEngineSupportedActions(),
+                        behaviorProfile = PetBehaviorProfiles.ROOM,
+                        behaviorSeed = pack.manifest.id.hashCode().toLong()
+                    )
+                )
+            }
+        }
 
     fun selectTab(tab: PetRoomTab) = _uiState.update { state ->
         val (selected, expanded) = PetRoomSheetPolicy.onTabSelected(
@@ -100,5 +130,9 @@ class PetRoomViewModel @Inject constructor(
                 roomCatalogFailed = !snapshot.isLoading && snapshot.rooms.isEmpty()
             )
         }
+    }
+
+    private companion object {
+        const val MAX_SCENE_PETS = 6
     }
 }

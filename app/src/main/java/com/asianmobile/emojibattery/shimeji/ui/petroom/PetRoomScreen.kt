@@ -62,9 +62,11 @@ fun PetRoomScreen(
 ) {
     TrackScreenView(ScreenName.MY_PET)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val scene by viewModel.scene.collectAsStateWithLifecycle()
 
     PetRoomContent(
         uiState = uiState,
+        scene = scene,
         onNavigateBack = onNavigateBack,
         onOpenPetStore = onOpenPetStore,
         onToggleMusic = viewModel::toggleMusic,
@@ -77,6 +79,7 @@ fun PetRoomScreen(
 @Composable
 private fun PetRoomContent(
     uiState: PetRoomUiState,
+    scene: List<PetRoomSceneEntry>,
     onNavigateBack: () -> Unit,
     onOpenPetStore: () -> Unit,
     onToggleMusic: () -> Unit,
@@ -97,6 +100,8 @@ private fun PetRoomContent(
                 modifier = Modifier.fillMaxSize()
             )
         }
+
+        PetRoomScene(pets = scene, modifier = Modifier.fillMaxSize())
 
         Column(modifier = Modifier.fillMaxSize()) {
             PetRoomTopBar(
@@ -578,6 +583,7 @@ private const val PET_SHADOW_ALPHA = 0.05f
 @Composable
 private fun PetRoomScreenPreview() {
     PetRoomContent(
+        scene = emptyList(),
         uiState = PetRoomUiState(
             selectedTab = PetRoomTab.ROOM,
             isRoomCatalogLoading = false,

@@ -1,5 +1,8 @@
 package com.asianmobile.emojibattery.shimeji.ui.petroom
 
+import com.asianmobile.emojibattery.shimeji.pet.engine.PetEngineConfig
+import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
+
 enum class PetRoomTab {
     MY_PET,
     FOOD,
@@ -32,6 +35,13 @@ data class PetRoomThumbnailUiState(
     val name: String,
     val thumbnailPath: String?,
     val isSelected: Boolean
+)
+
+/** Everything the scene needs to run one pet: its sprites and its engine configuration. */
+data class PetRoomSceneEntry(
+    val packKey: String,
+    val visual: PetPackVisual,
+    val engineConfig: PetEngineConfig
 )
 
 object PetRoomRosterPolicy {
