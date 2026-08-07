@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -125,7 +126,8 @@ private fun PetRoomContent(
             PetRoomSheet(
                 uiState = uiState,
                 onSelectTab = onSelectTab,
-                onSelectRoom = onSelectRoom
+                onSelectRoom = onSelectRoom,
+                onAddPet = onOpenPetStore
             )
         }
     }
@@ -251,7 +253,8 @@ private fun SheetToggle(
 private fun PetRoomSheet(
     uiState: PetRoomUiState,
     onSelectTab: (PetRoomTab) -> Unit,
-    onSelectRoom: (Int) -> Unit
+    onSelectRoom: (Int) -> Unit,
+    onAddPet: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         PetRoomTabStrip(selectedTab = uiState.selectedTab, onSelectTab = onSelectTab)
@@ -278,13 +281,18 @@ private fun PetRoomSheet(
                     .navigationBarsPadding()
             ) {
                 when (uiState.selectedTab) {
+                    PetRoomTab.MY_PET -> MyPetTabContent(
+                        pets = uiState.pets,
+                        onAddPet = onAddPet
+                    )
+
                     PetRoomTab.ROOM -> RoomTabContent(
                         uiState = uiState,
                         onSelectRoom = onSelectRoom
                     )
 
-                    // My Pet and Food arrive with the roster and inventory phases.
-                    PetRoomTab.MY_PET, PetRoomTab.FOOD -> Unit
+                    // Food arrives with the inventory phase.
+                    PetRoomTab.FOOD -> Unit
                 }
             }
         }
@@ -378,6 +386,111 @@ private fun PetRoomTabItem(
 }
 
 @Composable
+private fun MyPetTabContent(
+    pets: List<PetRoomPetUiState>,
+    onAddPet: () -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(ROOM_GRID_COLUMNS),
+        contentPadding = PaddingValues(dimensionResource(SdpR.dimen._12sdp)),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp)),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        item(key = ADD_PET_CARD_KEY) { AddPetCard(onClick = onAddPet) }
+        items(pets, key = PetRoomPetUiState::packKey) { pet -> PetCard(pet = pet) }
+    }
+}
+
+@Composable
+private fun AddPetCard(onClick: () -> Unit) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._82sdp))
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFECD4))
+            .border(1.dp, colorResource(R.color.colors_8F6250), shape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(dimensionResource(SdpR.dimen._37sdp))
+                .clip(CircleShape)
+                .background(colorResource(R.color.colors_FFFFFF))
+                .border(1.dp, colorResource(R.color.colors_D3BEA2), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_pet_room_add),
+                contentDescription = stringResource(R.string.pet_room_add_pet),
+                tint = colorResource(R.color.colors_D3BEA2),
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._31sdp))
+            )
+        }
+    }
+}
+
+@Composable
+private fun PetCard(pet: PetRoomPetUiState) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._82sdp))
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFFEF9))
+            .border(2.dp, colorResource(R.color.colors_FFECD4), shape)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._54sdp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = dimensionResource(SdpR.dimen._5sdp))
+                    .width(dimensionResource(SdpR.dimen._45sdp))
+                    .height(dimensionResource(SdpR.dimen._9sdp))
+                    .clip(CircleShape)
+                    .background(colorResource(R.color.colors_000000).copy(alpha = PET_SHADOW_ALPHA))
+            )
+            pet.thumbnailPath?.let { path ->
+                AsyncImage(
+                    model = path,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._38sdp))
+                )
+            }
+        }
+        Text(
+            text = pet.name,
+            color = colorResource(R.color.colors_212327),
+            fontWeight = FontWeight.Medium,
+            fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = stringResource(R.string.pet_room_breed, pet.breed),
+            color = colorResource(R.color.colors_FDA3C0),
+            fontSize = dimensionResource(SspR.dimen._6ssp).value.sp,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
 private fun RoomTabContent(
     uiState: PetRoomUiState,
     onSelectRoom: (Int) -> Unit
@@ -458,6 +571,8 @@ private const val SELECTED_TAB_INNER_RATIO = 108f / 114f
 private const val SELECTED_TAB_DASH_RATIO = 102f / 114f
 private const val STORE_SHORTCUT_ASPECT_RATIO = 50f / 74.33f
 private const val ROOM_GRID_COLUMNS = 3
+private const val ADD_PET_CARD_KEY = "add_pet"
+private const val PET_SHADOW_ALPHA = 0.05f
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable

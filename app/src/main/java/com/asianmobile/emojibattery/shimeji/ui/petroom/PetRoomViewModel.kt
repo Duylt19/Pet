@@ -3,8 +3,12 @@ package com.asianmobile.emojibattery.shimeji.ui.petroom
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.data.model.PetRoomCatalogSnapshot
+import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetRoomCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetRoomRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.PetStoreRepository
+import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
+import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +21,10 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class PetRoomViewModel @Inject constructor(
     private val catalogRepository: PetRoomCatalogRepository,
-    private val roomRepository: PetRoomRepository
+    private val roomRepository: PetRoomRepository,
+    private val ownerCatalogRepository: OwnerPetCatalogRepository,
+    private val petPackRepository: PetPackRepository,
+    private val petStoreRepository: PetStoreRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PetRoomUiState())
     val uiState: StateFlow<PetRoomUiState> = _uiState.asStateFlow()
@@ -29,6 +36,29 @@ class PetRoomViewModel @Inject constructor(
                 roomRepository.selectedRoomId
             ) { snapshot, selectedRoomId -> snapshot to selectedRoomId }
                 .collect { (snapshot, selectedRoomId) -> applyCatalog(snapshot, selectedRoomId) }
+        }
+        viewModelScope.launch {
+            combine(
+                ownerCatalogRepository.snapshot,
+                petPackRepository.packs,
+                petStoreRepository.customNames
+            ) { catalog, packs, names ->
+                PetRoomRosterPolicy.roster(
+                    catalogEntries = catalog.entries.map { entry ->
+                        PetRoomRosterSource(
+                            petId = entry.id,
+                            packKey = entry.installedPackKey,
+                            catalogName = entry.name,
+                            category = entry.category,
+                            thumbnailPath = entry.thumbnailPath
+                        )
+                    },
+                    installedPackKeys = packs.mapTo(mutableSetOf(), PetPack::key),
+                    customNames = names
+                ) to catalog.isLoading
+            }.collect { (roster, isLoading) ->
+                _uiState.update { it.copy(pets = roster, isRosterLoading = isLoading) }
+            }
         }
     }
 

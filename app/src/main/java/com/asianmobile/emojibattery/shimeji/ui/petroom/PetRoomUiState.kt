@@ -11,9 +11,20 @@ data class PetRoomUiState(
     val isSheetExpanded: Boolean = true,
     val isMusicOn: Boolean = false,
     val backgroundPath: String? = null,
+    val pets: List<PetRoomPetUiState> = emptyList(),
+    val isRosterLoading: Boolean = true,
     val rooms: List<PetRoomThumbnailUiState> = emptyList(),
     val isRoomCatalogLoading: Boolean = true,
     val roomCatalogFailed: Boolean = false
+)
+
+/** One pet the user already owns. Ownership is the installed pack, as in Pet Store. */
+data class PetRoomPetUiState(
+    val petId: Int,
+    val packKey: String,
+    val name: String,
+    val breed: String,
+    val thumbnailPath: String?
 )
 
 data class PetRoomThumbnailUiState(
@@ -21,6 +32,39 @@ data class PetRoomThumbnailUiState(
     val name: String,
     val thumbnailPath: String?,
     val isSelected: Boolean
+)
+
+object PetRoomRosterPolicy {
+    /**
+     * The room shows every pet the user owns, ordered by the catalog so the grid does not
+     * reshuffle between launches. A pack without a catalog entry is skipped rather than shown
+     * with a placeholder name.
+     */
+    fun roster(
+        catalogEntries: List<PetRoomRosterSource>,
+        installedPackKeys: Set<String>,
+        customNames: Map<Int, String>
+    ): List<PetRoomPetUiState> = catalogEntries
+        .filter { it.packKey in installedPackKeys }
+        .map { entry ->
+            PetRoomPetUiState(
+                petId = entry.petId,
+                packKey = entry.packKey,
+                name = customNames[entry.petId]?.trim()?.takeIf(String::isNotEmpty)
+                    ?: entry.catalogName,
+                breed = entry.category,
+                thumbnailPath = entry.thumbnailPath
+            )
+        }
+}
+
+/** Catalog fields the roster needs, kept free of the catalog model so it stays unit-testable. */
+data class PetRoomRosterSource(
+    val petId: Int,
+    val packKey: String,
+    val catalogName: String,
+    val category: String,
+    val thumbnailPath: String?
 )
 
 /**
