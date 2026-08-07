@@ -1096,4 +1096,8 @@
     <string name="search_tab_pets">Shimeji Pets</string>
     <string name="search_tab_battery">Battery</string>
     <string name="search_results">Result search</string>
+    <string name="permission_dialog_accessibility_title">Turn on accessibility mode</string>
+    <string name="permission_dialog_accessibility_message">Enable accessibility to display Cute Pet over all apps. Emoji Battery does not collect or share personal information.</string>
+    <string name="permission_dialog_cancel">Cancel</string>
+    <string name="permission_dialog_allow">Allow</string>
 </resources>
