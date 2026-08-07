@@ -26,6 +26,9 @@ interface PetPackRepository {
     fun selectedPackForSlot(slotIndex: Int): PetPack
     fun select(key: String, slotIndex: Int = 0): Boolean
     fun refresh(preferredKey: String? = null, preferredSlotIndex: Int = 0)
+
+    /** Deletes an installed pack from disk. The built-in pack cannot be removed. */
+    fun remove(key: String): Boolean
 }
 
 @Singleton
@@ -71,6 +74,18 @@ class FilePetPackRepository @Inject constructor(
     }
 
     @Synchronized
+    override fun remove(key: String): Boolean {
+        val pack = find(key) ?: return false
+        val source = pack.source as? PetPackSource.Installed ?: return false
+        val directory = File(source.directoryPath)
+        val installedRoot = File(storageRoot, "installed")
+        // Refuse anything that is not inside the app-private install root.
+        if (!directory.canonicalPath.startsWith(installedRoot.canonicalPath)) return false
+        val deleted = directory.deleteRecursively()
+        if (deleted) refresh()
+        return deleted
+    }
+
     override fun refresh(preferredKey: String?, preferredSlotIndex: Int) {
         val installedRoot = File(storageRoot, "installed")
         val installed = installedRoot.listFiles().orEmpty()

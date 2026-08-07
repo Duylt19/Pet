@@ -110,7 +110,10 @@ fun PetRoomScreen(
         onCloseDetail = viewModel::closeDetail,
         onToggleOnScreen = viewModel::toggleOnScreen,
         onFeed = viewModel::feed,
-        onPetTapped = viewModel::openPetByPackKey
+        onPetTapped = viewModel::openPetByPackKey,
+        onRemovePet = viewModel::requestRemovePet,
+        onConfirmRemovePet = viewModel::confirmRemovePet,
+        onCancelRemovePet = viewModel::cancelRemovePet
     )
 }
 
@@ -128,7 +131,10 @@ private fun PetRoomContent(
     onCloseDetail: () -> Unit = {},
     onToggleOnScreen: () -> Unit = {},
     onFeed: (String) -> Unit = {},
-    onPetTapped: (String) -> Unit = {}
+    onPetTapped: (String) -> Unit = {},
+    onRemovePet: (Int) -> Unit = {},
+    onConfirmRemovePet: () -> Unit = {},
+    onCancelRemovePet: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -184,7 +190,16 @@ private fun PetRoomContent(
                 onOpenPet = onOpenPet,
                 onCloseDetail = onCloseDetail,
                 onToggleOnScreen = onToggleOnScreen,
-                onFeed = onFeed
+                onFeed = onFeed,
+                onRemovePet = onRemovePet
+            )
+        }
+
+        uiState.petPendingRemoval?.let { pet ->
+            PetRoomRemoveDialog(
+                pet = pet,
+                onConfirm = onConfirmRemovePet,
+                onDismiss = onCancelRemovePet
             )
         }
     }
@@ -342,7 +357,8 @@ private fun PetRoomSheet(
     onOpenPet: (Int) -> Unit,
     onCloseDetail: () -> Unit,
     onToggleOnScreen: () -> Unit,
-    onFeed: (String) -> Unit
+    onFeed: (String) -> Unit,
+    onRemovePet: (Int) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         PetRoomTabStrip(selectedTab = uiState.selectedTab, onSelectTab = onSelectTab)
@@ -380,7 +396,8 @@ private fun PetRoomSheet(
                     uiState.selectedTab == PetRoomTab.MY_PET -> MyPetTabContent(
                         pets = uiState.pets,
                         onAddPet = onAddPet,
-                        onOpenPet = onOpenPet
+                        onOpenPet = onOpenPet,
+                        onRemovePet = onRemovePet
                     )
 
                     uiState.selectedTab == PetRoomTab.FOOD -> FoodTabContent(
@@ -490,7 +507,8 @@ private fun PetRoomTabItem(
 private fun MyPetTabContent(
     pets: List<PetRoomPetUiState>,
     onAddPet: () -> Unit,
-    onOpenPet: (Int) -> Unit
+    onOpenPet: (Int) -> Unit,
+    onRemovePet: (Int) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(ROOM_GRID_COLUMNS),
@@ -501,7 +519,11 @@ private fun MyPetTabContent(
     ) {
         item(key = ADD_PET_CARD_KEY) { AddPetCard(onClick = onAddPet) }
         items(pets, key = PetRoomPetUiState::packKey) { pet ->
-            PetCard(pet = pet, onClick = { onOpenPet(pet.petId) })
+            PetCard(
+                pet = pet,
+                onClick = { onOpenPet(pet.petId) },
+                onRemove = { onRemovePet(pet.petId) }
+            )
         }
     }
 }
@@ -512,7 +534,7 @@ private fun AddPetCard(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._82sdp))
+            .aspectRatio(PET_CARD_ASPECT_RATIO)
             .clip(shape)
             .background(colorResource(R.color.colors_FFECD4))
             .border(1.dp, colorResource(R.color.colors_8F6250), shape)
@@ -538,12 +560,16 @@ private fun AddPetCard(onClick: () -> Unit) {
 }
 
 @Composable
-private fun PetCard(pet: PetRoomPetUiState, onClick: () -> Unit) {
+private fun PetCard(
+    pet: PetRoomPetUiState,
+    onClick: () -> Unit,
+    onRemove: () -> Unit
+) {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._82sdp))
+            .aspectRatio(PET_CARD_ASPECT_RATIO)
             .clip(shape)
             .background(colorResource(R.color.colors_FFFEF9))
             .border(2.dp, colorResource(R.color.colors_FFECD4), shape)
@@ -552,7 +578,7 @@ private fun PetCard(pet: PetRoomPetUiState, onClick: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._54sdp)),
+                .weight(PET_CARD_IMAGE_WEIGHT),
             contentAlignment = Alignment.Center
         ) {
             Box(
@@ -572,6 +598,17 @@ private fun PetCard(pet: PetRoomPetUiState, onClick: () -> Unit) {
                     modifier = Modifier.size(dimensionResource(SdpR.dimen._38sdp))
                 )
             }
+            Icon(
+                painter = painterResource(R.drawable.ic_pet_room_delete),
+                contentDescription = stringResource(R.string.pet_room_remove_pet),
+                tint = Color.Unspecified,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(dimensionResource(SdpR.dimen._6sdp))
+                    .size(dimensionResource(SdpR.dimen._12sdp))
+                    .clip(CircleShape)
+                    .clickable(onClick = onRemove)
+            )
         }
         Text(
             text = pet.name,
@@ -836,7 +873,7 @@ private fun FoodCard(food: PetRoomFoodUiState, onFeed: () -> Unit, onAdd: () -> 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._94sdp))
+            .aspectRatio(TALL_CARD_ASPECT_RATIO)
             .clip(shape)
             .background(colorResource(R.color.colors_FFFEF9))
             .border(2.dp, colorResource(R.color.colors_FFECD4), shape)
@@ -953,7 +990,7 @@ private fun RoomCard(room: PetRoomThumbnailUiState, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._94sdp))
+            .aspectRatio(TALL_CARD_ASPECT_RATIO)
             .clip(shape)
             .background(colorResource(R.color.colors_FFFEF9))
             .border(
@@ -1039,6 +1076,10 @@ private const val SELECTED_TAB_INNER_RATIO = 108f / 114f
 private const val SELECTED_TAB_DASH_RATIO = 102f / 114f
 private const val STORE_SHORTCUT_ASPECT_RATIO = 50f / 74.33f
 private const val ROOM_GRID_COLUMNS = 3
+// Figma: pet and add cards are 104x106, food and room cards 104x122.
+private const val PET_CARD_ASPECT_RATIO = 104f / 106f
+private const val TALL_CARD_ASPECT_RATIO = 104f / 122f
+private const val PET_CARD_IMAGE_WEIGHT = 70f / 106f
 private val TAB_DASH = 3.dp
 private const val DETAIL_RULE_DASH_PX = 5.4f
 private const val ADD_PET_CARD_KEY = "add_pet"

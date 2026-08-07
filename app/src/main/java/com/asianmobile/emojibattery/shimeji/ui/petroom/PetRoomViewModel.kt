@@ -217,6 +217,28 @@ class PetRoomViewModel @Inject constructor(
         }
     }
 
+    fun requestRemovePet(petId: Int) {
+        val pet = _uiState.value.pets.firstOrNull { it.petId == petId } ?: return
+        _uiState.update { it.copy(petPendingRemoval = pet) }
+    }
+
+    fun cancelRemovePet() = _uiState.update { it.copy(petPendingRemoval = null) }
+
+    fun confirmRemovePet() {
+        val pet = _uiState.value.petPendingRemoval ?: return
+        _uiState.update { it.copy(petPendingRemoval = null) }
+        if (!petPackRepository.remove(pet.packKey)) {
+            showMessage(PetRoomMessage.REMOVE_FAILED)
+            return
+        }
+        // A removed pet must not keep an overlay slot, or the floating session would still
+        // show a pack the user no longer owns.
+        val preferences = petSettingsRepository.preferences.value
+        val slotIndex = preferences.roomSlotKeys().indexOf(pet.packKey)
+        if (slotIndex >= 0) petSettingsRepository.removePet(slotIndex)
+        if (selectedPetId == pet.petId) closeDetail()
+    }
+
     fun dismissMessage() = _uiState.update { it.copy(message = null) }
 
     private fun showMessage(message: PetRoomMessage) =

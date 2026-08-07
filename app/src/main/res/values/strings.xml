@@ -548,6 +548,13 @@
     <string name="mine_banner_premium">Banner Premium</string>
     <string name="mine_my_pet">My Pet</string>
     <string name="mine_favourite_recent">Favourite &amp; Recent</string>
+    <string name="favourite_recent_title">Favourite &amp; Recent</string>
+    <string name="favourite_recent_title_populated">Favourites &amp; Recent</string>
+    <string name="favourite_recent_favourite_tab">Favourite</string>
+    <string name="favourite_recent_recent_tab">Recent</string>
+    <string name="favourite_recent_empty_title">No emoji battery yet!</string>
+    <string name="favourite_recent_empty_subtitle">Add a new one to start</string>
+    <string name="favourite_recent_back">Back</string>
     <string name="mine_section_general">GENERAL</string>
     <string name="mine_section_other">OTHER</string>
     <string name="mine_apps_hidden_title">Apps that hide icons</string>
@@ -1071,4 +1078,9 @@
     <string name="pet_room_energy_value">%1$d/%2$d</string>
     <string name="pet_room_add_food">Get more food</string>
     <string name="pet_room_food_portions">x%1$d</string>
+    <string name="pet_room_remove_pet">Remove pet</string>
+    <string name="pet_room_remove_title">Remove %1$s?</string>
+    <string name="pet_room_remove_message">This pet leaves your room and its energy is lost. You can get it again from Pet Store.</string>
+    <string name="pet_room_remove_confirm">Remove</string>
+    <string name="pet_room_remove_cancel">Keep pet</string>
 </resources>

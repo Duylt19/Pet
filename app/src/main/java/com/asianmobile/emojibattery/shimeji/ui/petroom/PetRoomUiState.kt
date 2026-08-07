@@ -21,7 +21,8 @@ data class PetRoomUiState(
     val roomCatalogFailed: Boolean = false,
     val detail: PetRoomDetailUiState? = null,
     val foods: List<PetRoomFoodUiState> = emptyList(),
-    val message: PetRoomMessage? = null
+    val message: PetRoomMessage? = null,
+    val petPendingRemoval: PetRoomPetUiState? = null
 )
 
 /** The panel that replaces the sheet body once the user taps a pet. */
@@ -45,6 +46,7 @@ data class PetRoomFoodUiState(
 )
 
 enum class PetRoomMessage {
+    REMOVE_FAILED,
     SELECT_A_PET_FIRST,
     OUT_OF_FOOD,
     ALREADY_FULL,
