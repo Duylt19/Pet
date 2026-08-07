@@ -515,7 +515,7 @@ private fun SearchThemeCard(
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .align(Alignment.Center)
-                .fillMaxSize(0.95f)
+                .fillMaxSize(SEARCH_THEME_ART_FRACTION)
         )
         Box(
             modifier = Modifier
@@ -584,6 +584,10 @@ private fun SearchContentPreview() {
     )
 }
 
+// Figma sizes the battery art at 96 of a 101 card, but that artwork carries its own transparent
+// margin while the catalog thumbnails are cropped tight, so the same number reads much larger
+// here. Pull it in until the card breathes the way the design does.
+private const val SEARCH_THEME_ART_FRACTION = 0.8f
 private const val SEARCH_PET_CARD_ASPECT_RATIO = 101f / 142f
 private const val SEARCH_PET_IMAGE_WEIGHT = 90f / 142f
 private const val SEARCH_PET_TEXT_WEIGHT = 52f / 142f
