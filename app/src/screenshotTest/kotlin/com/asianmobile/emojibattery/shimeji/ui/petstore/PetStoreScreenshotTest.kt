@@ -50,7 +50,7 @@ fun PetStoreFoodCardScreenshotTest() {
             food = PetStoreFood(
                 id = "beef_stew",
                 name = "Beef Stew",
-                coinCost = 25,
+                energyValue = 25,
                 imageRes = R.drawable.img_pet_store_food_beef_stew
             ),
             onClick = {},
@@ -107,7 +107,7 @@ fun PetStoreFoodUnlockRevealScreenshotTest() {
             food = PetStoreFood(
                 id = "beef_stew",
                 name = "Beef Stew",
-                coinCost = 25,
+                energyValue = 25,
                 imageRes = R.drawable.img_pet_store_food_beef_stew
             ),
             onContinue = {},
