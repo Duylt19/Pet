@@ -1047,4 +1047,16 @@
     <string name="pet_store_food_quantity">x%1$d</string>
     <string name="pet_store_close">Close</string>
     <string name="discover_tab_mine">Mine</string>
+    <string name="pet_room_title">My Pet Room</string>
+    <string name="pet_room_tab_pet">My Pet</string>
+    <string name="pet_room_tab_food">Food</string>
+    <string name="pet_room_tab_room">Room</string>
+    <string name="pet_room_back">Back</string>
+    <string name="pet_room_music_on">Turn music off</string>
+    <string name="pet_room_music_off">Turn music on</string>
+    <string name="pet_room_collapse_sheet">Hide panel</string>
+    <string name="pet_room_expand_sheet">Show panel</string>
+    <string name="pet_room_open_store">Pet Store</string>
+    <string name="pet_room_add_pet">Add pet</string>
+    <string name="pet_room_rooms_unavailable">Rooms are unavailable right now</string>
 </resources>

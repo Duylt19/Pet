@@ -65,7 +65,24 @@ Pet Store visual contract:
   `SPECIAL` thật của pack; chỉ fallback `SPECIAL_2`, rồi thumbnail tĩnh khi pack không
   cung cấp skill đặc biệt.
 
-My Pet mode contract:
+My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8191:5950`:
+
+- route `my_pet` là scene phòng full-screen, background lấy từ room catalog (`bg/BG_<id>.png`)
+  và vẽ `ContentScale.Crop`; không dùng Home chrome, không có bottom navigation;
+- top bar `360×64` gồm back `32×32`, biển gỗ `178×40` (`img_pet_room_sign`) mang title, và
+  music toggle `32×32` hai state. Mọi action là nút trắng bo góc `32×32`, icon canh giữa;
+- shortcut Pet Store `50×68` nằm mép phải dưới top bar; chevron `32×32` ngay trên sheet
+  thu/mở sheet và xoay 180° khi đã thu;
+- sheet `360×236` = tab strip `346×40` + body `360×196` nền `#F7F0E7`, viền `#8F6250`,
+  radius trên 12px. Tab được chọn cao `40` radius 16 với hai lớp `#E4CCB1` (108) và viền nét
+  đứt `#B69B7D` (102); tab thường cao `32` radius 12. Label Roboto Medium 14/20 `#725938`,
+  icon 18px cùng màu;
+- card grid ba cột: card room/food `104×122`, card pet `104×106` nền `#FFFEF9` viền `#FFECD4`
+  2px radius 16; ô add `104×106` nền `#FFECD4` viền `#8F6250` với vòng tròn nét đứt `#D3BEA2`;
+- Swarm tạm ẩn khỏi navigation trong v1; `ui/home/HomeScreen` và `swarm_customization` giữ
+  nguyên code cho bản sau.
+
+My Pet mode contract (ẩn trong v1, giữ cho bản sau):
 
 - `Pet Swarm` và `Mixed Mode` là segmented control loại trừ nhau;
 - global switch điều khiển foreground overlay, không dùng để thay pet selection;

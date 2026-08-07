@@ -26,7 +26,6 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeBottomNavigation
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeTab
-import com.asianmobile.emojibattery.shimeji.ui.home.HomeScreen
 import com.asianmobile.emojibattery.shimeji.ui.discover.DiscoverScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.CURRENT_BATTERY_STYLE_ID
@@ -44,6 +43,7 @@ import com.asianmobile.emojibattery.shimeji.ui.language.LanguageScreen
 import com.asianmobile.emojibattery.shimeji.ui.main.MainViewModel
 import com.asianmobile.emojibattery.shimeji.ui.permission.PermissionScreen
 import com.asianmobile.emojibattery.shimeji.ui.premium.PremiumScreen
+import com.asianmobile.emojibattery.shimeji.ui.petroom.PetRoomScreen
 import com.asianmobile.emojibattery.shimeji.ui.petstore.PetStoreScreen
 import com.asianmobile.emojibattery.shimeji.ui.premium.StartPremiumIndexes
 import com.asianmobile.emojibattery.shimeji.ui.splash.SplashScreen
@@ -310,31 +310,9 @@ fun AppNavGraph(
             }
 
             composable(Routes.MY_PET) {
-                HomeScreen(
-                    onNavigateToCatalog = { target, slotIndex ->
-                        navController.safeNavigate(
-                            Routes.petCatalog(target, slotIndex),
-                            ignoreDebounce = true
-                        )
-                    },
-                    onNavigateToBattery = {
-                        navController.safeNavigate(
-                            Routes.BATTERY_CATALOG,
-                            ignoreDebounce = true
-                        )
-                    },
-                    onNavigateToSettings = {
-                        navigateFromHome(Routes.SETTINGS)
-                    },
-                    onNavigateToPremium = {
-                        navigateFromHome(Routes.PREMIUM)
-                    },
-                    onNavigateToSwarmCustomization = {
-                        navController.safeNavigate(
-                            Routes.SWARM_CUSTOMIZATION,
-                            ignoreDebounce = true
-                        )
-                    }
+                PetRoomScreen(
+                    onNavigateBack = { navController.safePopBackStack() },
+                    onOpenPetStore = { navigateToHomeTab(HomeTab.PET_STORE) }
                 )
             }
 

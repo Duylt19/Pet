@@ -9,7 +9,7 @@
 | `permission` | `ui/permission/PermissionScreen` | Overlay special access + notification permission, có Continue/Skip |
 | `home` | `ui/discover/DiscoverScreen` | Tab Discover: Emoji Battery toggle, quick actions và pet/battery previews; bottom chrome do Home shell sở hữu |
 | `search` | `ui/search/SearchScreen` | Figma Search: input/chip tìm kiếm, banner, lưới battery theme và native ad cố định cuối màn |
-| `my_pet` | `ui/home/HomeScreen` | Mixed/Swarm loại trừ nhau, 12 Mixed slot, global enable, visibility từng pet, Rewarded/Premium |
+| `my_pet` | `ui/petroom/PetRoomScreen` | My Pet Room: scene phòng full-screen, top bar biển gỗ + music, shortcut Pet Store, sheet ba tab My Pet/Food/Room. Tab Room chọn background từ catalog và persist; tab My Pet/Food thuộc phase roster và inventory |
 | `pet_catalog/{target}/{slotIndex}` | `ui/catalog/PetCatalogScreen` | Lưới GitHub raw/cache; Mixed slot 4–12 có Rewarded gate tuần tự, Premium bypass |
 | `pet_store` | `ui/petstore/PetStoreScreen` | Tab Pet Store: shared Home header/switch, pet/food tabs, reward sheet, verified download, Lottie unlock reveal chạy special movement clip của pack, name/toast; food persistence TODO sau My Pet |
 | `pet_detail/{target}/{slotIndex}/{packKey}` | `ui/catalog/PetDetailScreen` | Hero preview và select action đúng mode/slot |
