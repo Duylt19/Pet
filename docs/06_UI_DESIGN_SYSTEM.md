@@ -85,9 +85,25 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8191:5950`:
   icon 18px cùng màu;
 - card grid ba cột: card room/food `104×122`, card pet `104×106` nền `#FFFEF9` viền `#FFECD4`
   2px radius 16; ô add `104×106` nền `#FFECD4` viền `#8F6250` với vòng tròn nét đứt `#D3BEA2`;
-- pet đã sở hữu chạy trực tiếp trong scene bằng `PetEngine` với profile `PetBehaviorProfiles.ROOM`:
-  chặn toàn bộ leo tường/trần và speech, chỉ giữ combo mặt đất, và bị giới hạn trong dải sàn
-  `0.52–0.72` chiều cao scene. Một frame clock chung tick mọi engine như overlay controller;
+- pet đã sở hữu đi lại trong scene bằng `PetRoomWander`, không dùng `PetEngine`: engine overlay
+  dựng cho góc nhìn ngang nên trọng lực dồn mọi pet về một đường sàn. Phòng nhìn từ phía trước
+  nên sàn là hình thang phối cảnh `0.50–0.72` chiều cao scene, mép sau hẹp hơn 14%; pet chọn một
+  điểm bất kỳ trên sàn, đi tới, nghỉ rồi đi tiếp. Pet ở xa vẽ nhỏ hơn (0,78–1,0) và thứ tự vẽ
+  theo chiều sâu. Sprite pack vẽ mặt sang **trái**, nên đi sang phải mới lật gương — cùng quy
+  ước với `PetSpriteTransformPolicy` của overlay;
+- kiểu nghỉ (đứng/ngồi/nằm/nghịch/biểu cảm) chỉ được chọn trong số action pack thật sự có frame;
+  ngồi và nằm kéo dài 4–9 giây, các kiểu khác 1,2–4,5 giây. Một frame clock chung tick mọi pet;
+- pet nổi bị tắt khi vào My Pet Room và bật lại khi rời màn, vì phòng đã hiển thị chính các pet
+  đó; chỉ khôi phục nếu overlay đang chạy lúc user vào phòng;
+- card trong sheet giữ tỉ lệ Figma bằng `aspectRatio` (`104/106` cho pet và ô add, `104/122` cho
+  food và room), và mọi kích thước bên trong card suy ra từ bề rộng card đã đo
+  (`maxWidth / 104`) chứ không dùng sdp cố định — ô lưới rộng hơn 104px trên phần lớn thiết bị;
+- food card: ảnh món `70` canh đáy vùng ảnh `104×90`, pill giá `32×18` nền `#FFF1B2` chữ
+  `#A54905`, pill số lượng `26×18` nền `#8D6037` viền trắng bám góc dưới phải ảnh, nút `+` là
+  vòng tròn `20×20` nền `#E1CCB9` viền nét đứt `#D3BEA2`, tên món Roboto Regular 12/16;
+- room card selected dùng viền `#FB3675` 3px kèm badge check `28×28`; unselected viền `#FFECD4`
+  2px. Card pet có nút xoá `16×16` tại `(8,8)` góc trên phải và xoá phải qua dialog xác nhận
+  dựng theo `GrantPermissionDialog`;
 - panel chi tiết pet thay body sheet: hàng back `24` + nhãn `Pet on screen` `#FB3675` + toggle
   `44×24`; khối info `336×78` với thumbnail `78×78` (ảnh `60×60`, băng dính `44×35`) và ba dòng
   label `#8F6250` 11/16 · value `#212327` 12/16 ngăn bằng divider nét đứt; khối Energy có chip

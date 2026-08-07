@@ -13,9 +13,11 @@ settings và các quy ước kiến trúc hiện có.
 - Root Gradle project name hiện vẫn là `PrivateBrowser` (không ảnh hưởng package cài đặt).
 - Flow: Splash → Language → Intro → Permission → Discover Home.
 - Permission giải thích/request overlay special access và notification permission; user vẫn có thể Skip.
-- Discover Home tổng hợp Emoji Battery, pet/battery catalog và 4-tab navigation. My Pet
-  điều khiển Start/Stop Mixed 1–12 pet hoặc Swarm 1–12 bản sao. Ba slot Mixed đầu miễn phí;
-  slot 4–12 mở khóa tuần tự bằng Rewarded.
+- Discover Home tổng hợp Emoji Battery, pet/battery catalog và 4-tab navigation. Card
+  `Turn on to add a pet to your screen` bật/tắt pet nổi và chạm vào card mở My Pet Room.
+- My Pet Room là phòng in-app: pet đã sở hữu đi lại trong phòng, sheet ba tab My Pet/Food/Room
+  quản lý roster, cho ăn và đổi background. Chọn pet nào hiện trên màn hình bằng toggle
+  `Pet on screen` trong panel chi tiết từng pet. Mixed/Swarm tạm ẩn khỏi navigation ở v1.
 - Mỗi slot pet chọn được character riêng; Catalog tải 1.062 owner pet (gồm 36 pack WC 2026
   với 864 frame gốc)
   từ private GitHub
@@ -28,8 +30,8 @@ settings và các quy ước kiến trúc hiện có.
   Catalog 898 theme, 20 nền, 20 emotion và 26 animation tải từ cùng private GitHub static
   server với Pet; JSON cache/revalidate và asset được tải, verify SHA-256 theo nhu cầu.
   Debug vẫn giữ packaged snapshot fallback, còn release chỉ nhận catalog `APPROVED`.
-- Discover Home dùng pink/white Figma direction; My Pet, Catalog, Settings và Customize
-  tiếp tục dùng cozy light design hiện tại; onboarding/Premium giữ visual hiện tại.
+- Discover Home, My Pet Room và Pet Store dùng pink/white Figma direction; Catalog, Settings
+  và Customize tiếp tục dùng cozy light design hiện tại; onboarding/Premium giữ visual hiện tại.
 - Browser, search engine, clear browsing data, storage permission, download, media, Room và service cũ đã bị xóa.
 
 ## Kiến trúc bắt buộc
