@@ -75,6 +75,7 @@ import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.ui.component.AppActionToast
+import com.asianmobile.emojibattery.shimeji.ui.component.CATALOG_ITEM_PREVIEW_FRACTION
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
@@ -586,7 +587,7 @@ internal fun TrendingPetCard(pet: DiscoverPetUiState, onClick: () -> Unit) {
                 model = pet.thumbnailPath,
                 fallbackRes = R.drawable.img_home_brand_bunny,
                 contentDescription = pet.name,
-                modifier = Modifier.fillMaxSize(HOME_ITEM_PREVIEW_FRACTION)
+                modifier = Modifier.fillMaxSize(CATALOG_ITEM_PREVIEW_FRACTION)
             )
         }
         Text(
@@ -664,7 +665,7 @@ internal fun BatteryThemeCard(
             modifier = if (theme != null) {
                 Modifier
                     .align(Alignment.Center)
-                    .fillMaxSize(HOME_ITEM_PREVIEW_FRACTION)
+                    .fillMaxSize(CATALOG_ITEM_PREVIEW_FRACTION)
             } else {
                 Modifier
                     .align(Alignment.Center)
@@ -831,7 +832,7 @@ internal fun ComponentAssetCard(
             model = asset?.assetPath,
             fallbackRes = fallbackRes,
             contentDescription = asset?.name,
-            modifier = Modifier.fillMaxSize(HOME_ITEM_PREVIEW_FRACTION)
+            modifier = Modifier.fillMaxSize(CATALOG_ITEM_PREVIEW_FRACTION)
         )
     }
 }
@@ -954,4 +955,3 @@ private fun DiscoverContentPreview() {
 
 private const val BATTERY_THEME_SLOT_COUNT = 6
 private const val BATTERY_THEME_COLUMN_COUNT = 3
-private const val HOME_ITEM_PREVIEW_FRACTION = 0.65f
