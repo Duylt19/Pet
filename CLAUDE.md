@@ -1,42 +1,130 @@
-# Cute Pet/Shimeji — Agent Context
+# CLAUDE.md
 
-Đây là project Android Cute Pet/Shimeji, không còn là ứng dụng Private Browser. Package hiện hành là `com.asianmobile.emojibattery.shimeji`.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Nguồn hướng dẫn
+## Project status
 
-Đọc theo thứ tự:
+Android **Cute Pet / Shimeji** app (floating on-screen pets + battery status overlay). This is
+no longer the Private Browser codebase it was forked from.
 
-1. `.agents/AGENTS.md`
-2. `.agents/skills/android_developer/SKILL.md`
-3. `docs/PACKAGE_IDENTITY.md`
-4. `docs/README.md`
-5. Các file foundation liên quan trong `docs/`
+- Display name `Cute Pet`; canonical namespace/applicationId `com.asianmobile.emojibattery.shimeji`.
+- `rootProject.name = "PrivateBrowser"`, the `Theme.PrivateBrowser` style and Firebase project
+  `privatebrower-7168d` are legacy identifiers kept **on purpose** — never infer the package from
+  them and never rename them as a side effect. Read `docs/PACKAGE_IDENTITY.md` before touching
+  app identity, Firebase config or app-specific storage paths.
+- Browser, tabs, search engine, bookmarks/history, downloads, media viewer, Room and the old
+  foreground service are deleted. Some empty package directories (`ui/browser`, `ui/bookmarks`,
+  `data/database`, …) still linger — do not treat them as existing capabilities. Re-adding
+  anything similar is a **new feature**: contract, DI, permission, manifest, tests, docs.
 
-Nếu tài liệu và source khác nhau, source hiện tại là bằng chứng thực thi; agent phải cập nhật tài liệu trong cùng thay đổi để khôi phục tính nhất quán.
+## Working agreement
 
-## App shell và infrastructure được giữ lại
+- Talk to the owner in **Vietnamese**; code, identifiers and commit messages in **English**
+  (`Handle`/`Fix`/`Update`/`Refactor`/`Remove` prefixes).
+- Markdown under `docs/` is part of the implementation. When source and docs disagree, source
+  wins and docs must be repaired in the same change. `.agents/skills/android_developer/SKILL.md`
+  §11 has the change → document mapping table.
+- Read order for anything non-trivial: `.agents/AGENTS.md` →
+  `.agents/skills/android_developer/SKILL.md` → `docs/PACKAGE_IDENTITY.md` → `docs/README.md` →
+  the topical file under `docs/`.
+- Figma work follows `.agents/skills/figma_to_compose/SKILL.md`; file key/node ID come from the
+  URL the owner gives per task, token only from `$FIGMA_ACCESS_TOKEN`.
 
-- Single-Activity, Compose, MVVM, Hilt, Flow.
-- Splash, Language, Intro, Permission, Home, Settings, Premium.
-- Home có Start/Stop session 1–3 pet khác nhau cùng các lối Catalog/Settings/Premium.
-- DataStore onboarding/language.
-- Ads module, billing, analytics, remote config và localization.
-- Settings là hub pet/app; `pet_customization/{slotIndex}` sở hữu option riêng của từng
-  pet, còn hub giữ language, share, rating, feedback và version. Permission xử lý overlay
-  special access + notification runtime permission.
+## Commands
 
-## Không còn tồn tại
+```bash
+./gradlew compileDebugKotlin                 # compile check — the default verification
+./gradlew testDebugUnitTest                  # all unit tests (:app + :ads)
+./gradlew :app:testDebugUnitTest --tests "*PetEngineTest"        # one test class
+./gradlew :app:testDebugUnitTest --tests "*PetEngineTest.walks*" # one test method
+./gradlew updateDebugScreenshotTest          # regenerate Compose preview golden images
+./gradlew validateDebugScreenshotTest        # verify UI against goldens
+python3 -m unittest tools.tests.test_battery_data_snapshot       # tests for the python tools
+```
 
-Không giả định hoặc tham chiếu như source hiện hành tới BrowserEngine, TabManager, WebView browser screen, search engine, clear browsing data, broad storage access, bookmarks/history database, download service, media/file tabs, Room schema hoặc foreground service cũ.
+Do **not** run `assembleDebug`/`assembleRelease` just to check that code compiles; assemble only
+when an APK is actually needed.
 
-Muốn thêm lại một capability tương tự phải xem đó là feature mới: thiết kế contract, dependency, permission, manifest, test và docs từ đầu.
+Screenshot tests live in `app/src/screenshotTest/kotlin` with references under
+`app/src/screenshotTestDebug/reference/`. Only refresh a reference after the new UI has been
+compared against Figma. `adquality-sdk` is excluded from the render classpath during
+`*ScreenshotTest*` tasks only (its generated `R` metadata breaks Layoutlib) — normal builds keep it.
 
-## Quy tắc phát triển
+## Architecture
 
-- Mỗi screen mới dùng bộ ba `Screen`/`ViewModel`/`UiState`.
-- UI nhận state và callback; navigation nằm ở NavGraph, nghiệp vụ nằm ở ViewModel/use case.
-- Data access qua repository interface; implementation đặt dưới `data/repository/impl`.
-- String/color/spacing dùng Android resources; UI từ Figma quy đổi px ÷ 1.3 sang sdp/ssp theo guideline.
-- Cập nhật routes, analytics, tests và Markdown khi thay đổi flow/architecture.
-- Không lưu token, API key hoặc credential thật trong repository.
-- Sau thay đổi chạy compile + unit test và tạo commit tiếng Anh rõ nghĩa.
+Two modules: `:app` (shell + all features) and `:ads` (ad SDKs, Firebase Remote Config, ad
+composables/utilities). Never put product logic in `:ads`; never call an ad SDK directly from a
+feature.
+
+Layering — `Composable → ViewModel → (UseCase) → Repository interface → impl/DataStore/platform`.
+UI never touches DataStore, network or services directly; ViewModels never hold `Activity`,
+`View` or `NavController`. Repository interfaces live in `data/repository/`, implementations in
+`data/repository/impl/`, bound in `di/DataModule.kt`.
+
+Each screen is a `XScreen.kt` + `XViewModel.kt` + `XUiState.kt` triple under
+`ui/<feature>/`; immutable `UiState`, expose `StateFlow`, collect with
+`collectAsStateWithLifecycle()`.
+
+### Navigation
+
+Single Activity (`MainActivity`) → `navigation/NavGraph.kt`. `Routes` holds every route constant
+plus the typed route builders (`Routes.petCatalog(target, slotIndex)`, `Routes.batteryEditor(id)`,
+…). `NavExtensions.kt` provides `safeNavigate()`/`safePopBackStack()` (double-tap guard) and
+`navigateWithAd()` for interstitial-gated destinations. Onboarding steps pop with
+`inclusive = true`. The four bottom tabs (`HomeTab` in `ui/component/HomeChrome.kt`) map to
+`home` / `battery_catalog` / `pet_store` / `settings` via `homeTabForRoute`/`routeForHomeTab`.
+Flow: Splash → Language → Intro → Permission → Home.
+
+Adding/removing a route also means updating `docs/04_NAVIGATION_FLOW.md`,
+`docs/screens/README.md`, `ScreenName` in `utils/AnalyticsHelper.kt` (visible screens use
+`TrackScreenView(ScreenName.X)`) and the navigation tests.
+
+### Pet runtime (`pet/`)
+
+- `pet/engine/` — pure Kotlin state machine, timeline, geometry, crowd/social direction. No
+  Android framework imports, so it is directly unit-testable and most tests live here.
+- `pet/overlay/` — `PetOverlay` (special-access check + start/stop), `PetOverlayService`
+  (`specialUse` foreground service, mandatory notification), `PetOverlayController` (bounded
+  window list, one shared adaptive frame clock), `PetOverlayView`, `PetSpeechBubbleView`.
+- `pet/pack/` — pack-v1 schema, manifest parser, security validator, ZIP installer, sprite cache.
+- `pet/settings/`, `pet/speech/` — pure policy objects (session budget, layout, speech placement).
+
+Two session modes: **Mixed** 1–12 different pets (slots 1–3 free, 4–12 unlocked sequentially via
+rewarded ads) and **Swarm** 1–12 copies of one pack. Behavioural invariants (FPS budgets, speech
+windows, reconciliation rules) are specified in `docs/features/PET_OVERLAY.md` — read it before
+changing controller/engine behaviour.
+
+### Battery status (`battery/`)
+
+Opt-in status-bar cover drawn by `StatusBarAccessibilityService` into a
+`TYPE_ACCESSIBILITY_OVERLAY`; no node retrieval or automation. Gated by
+`BuildConfig.BATTERY_STATUS_ENABLED` (true in debug, false in release). Debug builds package an
+audited catalog from `private_data/battery-apk-1.0.2/` via the `auditDebugBatterySnapshot` /
+`prepareDebugBatteryAssets` / `prepareDebugBatteryResources` Gradle tasks (they need `python3`
+and silently skip when the snapshot directory is absent). `private_data/` is git-ignored and
+never copied into the Android source tree.
+
+### Remote catalogs (`data/remote/`)
+
+Pet and battery catalogs are fetched from a private GitHub raw repo (`PetServerConfig`,
+`BatteryServerConfig`) with a Remote Config token, cache-first + 24h TTL revalidation with
+ETag/rate-limit backoff, and SHA-256 verification on asset download. Release only accepts
+`APPROVED` catalog entries; debug keeps the packaged snapshot as fallback.
+
+## UI conventions
+
+- No hardcoded user-facing strings/colors: `res/values/strings.xml` keys as
+  `<feature>_<purpose>`, colors as `colors_<HEX>` in `colors.xml`.
+- Sizing uses Intuit SDP/SSP: `dimensionResource(com.intuit.sdp.R.dimen._Xsdp)` /
+  `...ssp.R.dimen._Xssp`. Local fixed values (padding, icon size, radius, text) = Figma px ÷ 1.3
+  rounded to the nearest resource. Viewport-relative widths (dialogs, sheets, cards) are **not**
+  divided — keep the Figma ratio via `Modifier.fillMaxWidth(nodeWidth / frameWidth)`.
+- Modifier order: `size → shadow → clip → background → border → clickable → padding`.
+- Icon naming: monochrome `ic_<name>.xml`, multicolour `ic_logo_<name>.xml`, bitmaps
+  `img_<name>.webp/png`. No `.svg` in `res/`.
+
+## Before finishing
+
+`./gradlew compileDebugKotlin` + `./gradlew testDebugUnitTest` + `git diff --check`, docs updated
+in the same change, then a clear English commit. Never commit real tokens — Remote Config
+defaults in `ads/src/main/res/xml/remote_config_defaults.xml` must stay empty in source.
