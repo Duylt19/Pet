@@ -1060,4 +1060,6 @@
     <string name="pet_room_add_pet">Add pet</string>
     <string name="pet_room_rooms_unavailable">Rooms are unavailable right now</string>
     <string name="pet_room_breed">Breed: %1$s</string>
+    <string name="discover_pet_enable_prompt">Turn on to add a pet to your screen</string>
+    <string name="discover_pet_enabled">Pet is on your screen</string>
 </resources>

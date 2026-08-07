@@ -17,6 +17,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayStartResult
+import com.asianmobile.emojibattery.shimeji.ui.home.HomePetCommand
+import com.asianmobile.emojibattery.shimeji.ui.home.HomePetPolicy
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -40,13 +49,18 @@ class DiscoverViewModel @Inject constructor(
             combine(
                 petCatalogRepository.snapshot,
                 batteryCatalogRepository.snapshot,
-                batterySettingsRepository.config
-            ) { pets, batteryCatalog, batteryConfig ->
+                batterySettingsRepository.config,
+                PetOverlayRuntime.isRunning
+            ) { pets, batteryCatalog, batteryConfig, isPetRunning ->
                 val accessibilityEnabled = BatteryAccessibility.isEnabled(context)
                 DiscoverUiState(
                     isLoading = pets.isLoading || batteryCatalog.isLoading,
                     isBatteryEnabled = batteryConfig.enabled && accessibilityEnabled,
                     isAccessibilityEnabled = accessibilityEnabled,
+                    isPetRunning = isPetRunning,
+                    isPetOverlayGranted = PetOverlay.canDraw(context),
+                    isNotificationGranted = isNotificationGranted(),
+                    isNotificationPermissionRequired = NOTIFICATION_PERMISSION_REQUIRED,
                     trendingPets = pets.entries.take(MAX_TRENDING_PETS).map { pet ->
                         DiscoverPetUiState(
                             packKey = pet.installedPackKey,
@@ -107,6 +121,52 @@ class DiscoverViewModel @Inject constructor(
         batterySettingsRepository.setEnabled(!_uiState.value.isBatteryEnabled)
     }
 
+    /** Discover owns the floating-pet switch while My Pet Room owns the room itself. */
+    fun onPetToggle() {
+        val state = _uiState.value
+        when (
+            HomePetPolicy.nextCommand(
+                overlayGranted = PetOverlay.canDraw(context),
+                notificationPermissionRequired = NOTIFICATION_PERMISSION_REQUIRED,
+                notificationGranted = isNotificationGranted(),
+                isPetRunning = state.isPetRunning
+            )
+        ) {
+            HomePetCommand.OPEN_OVERLAY_SETTINGS -> emitEffect(DiscoverEffect.OpenOverlaySettings)
+            HomePetCommand.REQUEST_NOTIFICATION_PERMISSION ->
+                emitEffect(DiscoverEffect.RequestNotificationPermission)
+
+            HomePetCommand.START -> startPet()
+            HomePetCommand.STOP -> PetOverlay.stop(context)
+        }
+    }
+
+    /** Called after the user returns from the overlay or notification permission screens. */
+    fun refreshPetPermissions() {
+        _uiState.update {
+            it.copy(
+                isPetOverlayGranted = PetOverlay.canDraw(context),
+                isNotificationGranted = isNotificationGranted()
+            )
+        }
+    }
+
+    private fun startPet() {
+        if (PetOverlay.start(context) == PetOverlayStartResult.PERMISSION_REQUIRED) {
+            emitEffect(DiscoverEffect.OpenOverlaySettings)
+        }
+    }
+
+    private fun emitEffect(effect: DiscoverEffect) {
+        viewModelScope.launch { _effects.send(effect) }
+    }
+
+    private fun isNotificationGranted(): Boolean = !NOTIFICATION_PERMISSION_REQUIRED ||
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+
     fun refreshAccessibility() {
         val enabled = BatteryAccessibility.isEnabled(context)
         _uiState.update { it.copy(isAccessibilityEnabled = enabled) }
@@ -125,6 +185,7 @@ class DiscoverViewModel @Inject constructor(
     }
 
     private companion object {
+        val NOTIFICATION_PERMISSION_REQUIRED = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
         const val MAX_TRENDING_PETS = 12
         const val MAX_BATTERY_THEMES = 6
         const val MAX_STATUS_BAR_THEMES = 8

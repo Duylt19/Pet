@@ -4,6 +4,10 @@ data class DiscoverUiState(
     val isLoading: Boolean = true,
     val isBatteryEnabled: Boolean = false,
     val isAccessibilityEnabled: Boolean = false,
+    val isPetRunning: Boolean = false,
+    val isPetOverlayGranted: Boolean = false,
+    val isNotificationGranted: Boolean = false,
+    val isNotificationPermissionRequired: Boolean = false,
     val trendingPets: List<DiscoverPetUiState> = emptyList(),
     val batteryThemes: List<DiscoverThemeUiState> = emptyList(),
     val statusBarThemes: List<DiscoverAssetUiState> = emptyList(),
@@ -33,4 +37,6 @@ data class DiscoverAssetUiState(
 
 sealed interface DiscoverEffect {
     data object RequestBatteryAccessibility : DiscoverEffect
+    data object OpenOverlaySettings : DiscoverEffect
+    data object RequestNotificationPermission : DiscoverEffect
 }

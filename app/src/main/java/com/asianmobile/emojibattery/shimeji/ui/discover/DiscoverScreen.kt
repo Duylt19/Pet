@@ -31,6 +31,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import android.Manifest
+import android.os.Build
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,6 +73,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
@@ -102,6 +105,19 @@ fun DiscoverScreen(
     ) {
         viewModel.refreshAccessibility()
     }
+    val overlayPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        viewModel.refreshPetPermissions()
+        viewModel.onPetToggle()
+    }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        // A denied notification never blocks the overlay; the service posts its own channel.
+        viewModel.refreshPetPermissions()
+        viewModel.onPetToggle()
+    }
 
     TrackScreenView(ScreenName.HOME)
 
@@ -111,12 +127,25 @@ fun DiscoverScreen(
                 DiscoverEffect.RequestBatteryAccessibility -> {
                     showAccessibilityDisclosure = true
                 }
+
+                DiscoverEffect.OpenOverlaySettings ->
+                    overlayPermissionLauncher.launch(PetOverlay.permissionIntent(context))
+
+                DiscoverEffect.RequestNotificationPermission ->
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        notificationPermissionLauncher.launch(
+                            Manifest.permission.POST_NOTIFICATIONS
+                        )
+                    }
             }
         }
     }
     DisposableEffect(lifecycleOwner, viewModel) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshAccessibility()
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshAccessibility()
+                viewModel.refreshPetPermissions()
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
@@ -127,6 +156,7 @@ fun DiscoverScreen(
         onSearch = onNavigateToSearch,
         onPremium = onNavigateToPremium,
         onBatteryToggle = viewModel::onBatteryToggle,
+        onPetToggle = viewModel::onPetToggle,
         onBattery = onNavigateToBattery,
         onMyPet = onNavigateToMyPet,
         onPetStore = onNavigateToPetStore,
@@ -156,6 +186,7 @@ private fun DiscoverContent(
     onSearch: () -> Unit,
     onPremium: () -> Unit,
     onBatteryToggle: () -> Unit,
+    onPetToggle: () -> Unit,
     onBattery: () -> Unit,
     onMyPet: () -> Unit,
     onPetStore: () -> Unit,
@@ -201,6 +232,19 @@ private fun DiscoverContent(
                             ),
                             checked = uiState.isBatteryEnabled,
                             onCheckedChange = onBatteryToggle
+                        )
+                    }
+                    item {
+                        HomeEnableCard(
+                            text = stringResource(
+                                if (uiState.isPetRunning) {
+                                    R.string.discover_pet_enabled
+                                } else {
+                                    R.string.discover_pet_enable_prompt
+                                }
+                            ),
+                            checked = uiState.isPetRunning,
+                            onCheckedChange = onPetToggle
                         )
                     }
                     item {
@@ -880,6 +924,7 @@ private fun DiscoverContentPreview() {
         onSearch = {},
         onPremium = {},
         onBatteryToggle = {},
+        onPetToggle = {},
         onBattery = {},
         onMyPet = {},
         onPetStore = {},

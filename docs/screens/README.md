@@ -7,7 +7,7 @@
 | `language_settings` | `ui/language/LanguageScreen` | Chọn language từ Settings rồi restart app shell |
 | `intro` | `ui/intro/IntroScreen` | Pager ba trang, có native ads theo config |
 | `permission` | `ui/permission/PermissionScreen` | Overlay special access + notification permission, có Continue/Skip |
-| `home` | `ui/discover/DiscoverScreen` | Tab Discover: Emoji Battery toggle, quick actions và pet/battery previews; bottom chrome do Home shell sở hữu |
+| `home` | `ui/discover/DiscoverScreen` | Tab Discover: Emoji Battery toggle, floating-pet toggle (overlay special access + notification gate), quick actions và pet/battery previews; bottom chrome do Home shell sở hữu |
 | `search` | `ui/search/SearchScreen` | Figma Search: input/chip tìm kiếm, banner, lưới battery theme và native ad cố định cuối màn |
 | `my_pet` | `ui/petroom/PetRoomScreen` | My Pet Room: scene phòng full-screen, top bar biển gỗ + music, shortcut Pet Store, sheet ba tab My Pet/Food/Room. Tab My Pet liệt kê pet đã sở hữu (pack đã cài) kèm ô `+` mở Pet Store; tab Room chọn background từ catalog và persist; tab Food thuộc phase inventory |
 | `pet_catalog/{target}/{slotIndex}` | `ui/catalog/PetCatalogScreen` | Lưới GitHub raw/cache; Mixed slot 4–12 có Rewarded gate tuần tự, Premium bypass |
