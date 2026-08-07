@@ -19,6 +19,9 @@
 | `pet_slot_enabled` | JSON String | 12 trạng thái visible độc lập của Mixed |
 | `pet_mixed_reward_unlocked_slot_count` | Int | Capacity Mixed đã mở, mặc định 3 và clamp 3–12 |
 | `pet_room_selected_id` | Int | Room background user chọn cho My Pet Room; `0` nghĩa là dùng `defaultRoomId` của catalog |
+| `pet_care_energy` | JSON String | Năng lượng từng pet: `percent` cuối cùng và mốc `updatedAt` để tính hao mòn khi đọc |
+| `pet_care_adopted_at` | JSON String | Ngày nhận nuôi từng pet; ghi một lần, cài lại pack không reset |
+| `pet_food_inventory` | JSON String | Số phần ăn còn giữ theo food ID, clamp 0–99 |
 | `pet_swarm_pack_key` | String | Pack được nhân bản trong Swarm |
 | `pet_swarm_count` | Int | Số instance Swarm, 1–12 hoặc tối đa 6 trên low-RAM |
 | `pet_swarm_reward_unlocked` | Boolean | Rewarded unlock vĩnh viễn trên device |
