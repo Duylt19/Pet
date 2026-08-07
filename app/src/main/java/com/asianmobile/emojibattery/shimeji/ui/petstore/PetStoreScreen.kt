@@ -106,6 +106,7 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.component.AppActionToast
+import com.asianmobile.emojibattery.shimeji.ui.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.ui.component.PinkLoveSticker
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -123,6 +124,7 @@ private val StoreRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
 private const val PET_CARD_WIDTH_PX = 104f
 private const val PET_CARD_HEIGHT_PX = 142f
 private const val PET_CARD_IMAGE_AREA_HEIGHT_PX = 90f
+private const val PET_PREMIUM_BADGE_PX = 24f
 private const val PET_CARD_IMAGE_SIZE_PX = 64f
 private const val PET_SHADOW_WIDTH_PX = 58f
 private const val PET_SHADOW_HEIGHT_PX = 12f
@@ -522,13 +524,11 @@ private fun PetCard(
                 )
             }
             if (!isUnlocked) {
-                Image(
-                    painter = painterResource(R.drawable.img_pet_store_premium_crown),
-                    contentDescription = null,
+                PetPremiumBadge(
                     modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(dimensionResource(SdpR.dimen._5sdp))
-                        .size(dimensionResource(SdpR.dimen._15sdp))
+                        .align(Alignment.TopStart)
+                        .padding(dimensionResource(SdpR.dimen._6sdp))
+                        .fillMaxWidth(PET_PREMIUM_BADGE_PX / PET_CARD_WIDTH_PX)
                 )
             }
             if (isDownloading) {

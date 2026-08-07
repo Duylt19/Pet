@@ -56,6 +56,7 @@ import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
+import com.asianmobile.emojibattery.shimeji.ui.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -434,21 +435,12 @@ private fun SearchPetCard(
                 )
             }
             if (pet.isLocked) {
-                Box(
+                PetPremiumBadge(
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .padding(unit * 8f)
                         .size(unit * 24f)
-                        .clip(CircleShape)
-                        .background(colorResource(R.color.colors_FFEA89)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.img_pet_store_premium_crown),
-                        contentDescription = null,
-                        modifier = Modifier.size(unit * 16f)
-                    )
-                }
+                )
             }
         }
         Column(
