@@ -22,6 +22,7 @@ import com.asianmobile.emojibattery.shimeji.pet.engine.PetAction
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetClip
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomFloor
+import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomRest
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomWanderState
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomWanderer
 import kotlin.math.roundToInt
@@ -116,11 +117,12 @@ private fun DrawScope.drawPet(runtime: PetRoomSceneRuntime) {
             dstSize = IntSize(drawWidth.roundToInt(), drawHeight.roundToInt())
         )
     }
+    // Pack sprites are drawn facing left, the way the overlay treats them, so walking right is
+    // the mirrored case.
     if (runtime.state.facingRight) {
-        draw()
-    } else {
-        // Packs draw one way only, so walking the other way is a mirror.
         scale(scaleX = -1f, scaleY = 1f, pivot = Offset(bounds.centerX, bounds.bottom)) { draw() }
+    } else {
+        draw()
     }
 }
 
@@ -130,10 +132,12 @@ private fun PetRoomSceneEntry.toRuntime(
     floor: PetRoomFloor,
     petSize: Float
 ): PetRoomSceneRuntime {
+    val sprite = visual as? PetPackVisual.Sprite
     val wanderer = PetRoomWanderer(
         seed = packKey.hashCode().toLong(),
         floor = floor,
-        walkSpeedPerSecond = petSize * WALK_SPEED_PER_PET_WIDTH
+        walkSpeedPerSecond = petSize * WALK_SPEED_PER_PET_WIDTH,
+        rests = sprite.availableRests()
     )
     return PetRoomSceneRuntime(
         packKey = packKey,
@@ -141,7 +145,7 @@ private fun PetRoomSceneEntry.toRuntime(
         petSize = petSize,
         wanderer = wanderer,
         state = wanderer.initial(index, count),
-        visual = visual as? PetPackVisual.Sprite,
+        visual = sprite,
         clips = engineConfig.clips
     )
 }
@@ -163,11 +167,20 @@ private class PetRoomSceneRuntime(
     private var clipElapsedMillis = 0L
 
     val action: PetAction
-        get() = if (state.isWalking && visual?.frames?.containsKey(PetAction.WALK) == true) {
-            PetAction.WALK
+        get() = if (state.isWalking) {
+            firstAvailable(PetAction.WALK, PetAction.RUN) ?: PetAction.IDLE
         } else {
-            PetAction.IDLE
+            when (state.rest) {
+                PetRoomRest.STAND -> PetAction.IDLE
+                PetRoomRest.SIT -> firstAvailable(PetAction.SIT)
+                PetRoomRest.LIE -> firstAvailable(PetAction.SPRAWL, PetAction.DANGLE)
+                PetRoomRest.PLAY -> firstAvailable(PetAction.FLOOR_PLAY, PetAction.TRIP)
+                PetRoomRest.EMOTE -> firstAvailable(PetAction.EMOTE, PetAction.WINK)
+            } ?: PetAction.IDLE
         }
+
+    private fun firstAvailable(vararg actions: PetAction): PetAction? =
+        actions.firstOrNull { visual?.frames?.get(it)?.isNotEmpty() == true }
 
     fun advance(elapsedMillis: Long) {
         val previousAction = action
@@ -213,6 +226,19 @@ private data class PetRoomSpriteBounds(
     val width: Float,
     val height: Float
 )
+
+/** A pack only rests in ways it has frames for; the rest of the repertoire is skipped. */
+private fun PetPackVisual.Sprite?.availableRests(): List<PetRoomRest> {
+    if (this == null) return listOf(PetRoomRest.STAND)
+    fun has(vararg actions: PetAction) = actions.any { frames[it]?.isNotEmpty() == true }
+    return buildList {
+        add(PetRoomRest.STAND)
+        if (has(PetAction.SIT)) add(PetRoomRest.SIT)
+        if (has(PetAction.SPRAWL, PetAction.DANGLE)) add(PetRoomRest.LIE)
+        if (has(PetAction.FLOOR_PLAY, PetAction.TRIP)) add(PetRoomRest.PLAY)
+        if (has(PetAction.EMOTE, PetAction.WINK)) add(PetRoomRest.EMOTE)
+    }
+}
 
 private const val NANOS_PER_MILLI = 1_000_000L
 private const val MAX_TICK_MILLIS = 250L

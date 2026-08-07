@@ -89,6 +89,57 @@ class PetRoomWanderTest {
     }
 
     @Test
+    fun `a pack that can only stand never picks another rest`() {
+        val wanderer = PetRoomWanderer(
+            seed = 9L,
+            floor = floor,
+            walkSpeedPerSecond = 400f,
+            rests = listOf(PetRoomRest.STAND)
+        )
+        var state = wanderer.initial(index = 0, count = 1)
+
+        repeat(3_000) {
+            state = wanderer.advance(state, elapsedMillis = 16L)
+            assertEquals(PetRoomRest.STAND, state.rest)
+        }
+    }
+
+    @Test
+    fun `a pack that can lie down eventually does`() {
+        val wanderer = PetRoomWanderer(
+            seed = 4L,
+            floor = floor,
+            walkSpeedPerSecond = 600f,
+            rests = listOf(PetRoomRest.STAND, PetRoomRest.SIT, PetRoomRest.LIE)
+        )
+        var state = wanderer.initial(index = 0, count = 1)
+        val seen = mutableSetOf<PetRoomRest>()
+
+        repeat(20_000) {
+            state = wanderer.advance(state, elapsedMillis = 16L)
+            if (!state.isWalking) seen.add(state.rest)
+        }
+
+        assertTrue("only saw ${'$'}seen", seen.containsAll(setOf(PetRoomRest.LIE, PetRoomRest.SIT)))
+    }
+
+    @Test
+    fun `a walking pet is never mid rest`() {
+        val wanderer = PetRoomWanderer(
+            seed = 6L,
+            floor = floor,
+            walkSpeedPerSecond = 300f,
+            rests = listOf(PetRoomRest.STAND, PetRoomRest.LIE)
+        )
+        var state = wanderer.initial(index = 0, count = 1)
+
+        repeat(3_000) {
+            state = wanderer.advance(state, elapsedMillis = 16L)
+            if (state.isWalking) assertEquals(PetRoomRest.STAND, state.rest)
+        }
+    }
+
+    @Test
     fun `a zero length tick changes nothing`() {
         val wanderer = PetRoomWanderer(seed = 1L, floor = floor, walkSpeedPerSecond = 200f)
         val state = wanderer.initial(index = 0, count = 1)

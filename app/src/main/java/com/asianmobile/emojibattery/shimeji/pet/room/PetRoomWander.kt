@@ -40,6 +40,15 @@ data class PetRoomFloor(
     }
 }
 
+/** What a pet does while it is not walking. Which of these a pack can show is up to its clips. */
+enum class PetRoomRest {
+    STAND,
+    SIT,
+    LIE,
+    PLAY,
+    EMOTE
+}
+
 data class PetRoomWanderState(
     val x: Float,
     val y: Float,
@@ -47,6 +56,7 @@ data class PetRoomWanderState(
     val targetY: Float,
     val facingRight: Boolean,
     val isWalking: Boolean,
+    val rest: PetRoomRest,
     val phaseRemainingMillis: Long
 )
 
@@ -57,9 +67,23 @@ data class PetRoomWanderState(
 class PetRoomWanderer(
     seed: Long,
     private val floor: PetRoomFloor,
-    private val walkSpeedPerSecond: Float
+    private val walkSpeedPerSecond: Float,
+    rests: List<PetRoomRest> = listOf(PetRoomRest.STAND)
 ) {
     private val random = Random(seed)
+
+    /**
+     * Standing is the safe default and stays the most common, but a pack that can sit, lie down
+     * or play gets to do so, which is what makes the room feel lived in.
+     */
+    private val restPool: List<PetRoomRest> = buildList {
+        val available = rests.ifEmpty { listOf(PetRoomRest.STAND) }.distinct()
+        available.forEach { rest ->
+            repeat(if (rest == PetRoomRest.STAND) STAND_WEIGHT else OTHER_REST_WEIGHT) {
+                add(rest)
+            }
+        }
+    }
 
     fun initial(index: Int, count: Int): PetRoomWanderState {
         // Spread the first arrivals across the floor instead of stacking them on one line.
@@ -73,7 +97,8 @@ class PetRoomWanderer(
             targetY = y,
             facingRight = random.nextBoolean(),
             isWalking = false,
-            phaseRemainingMillis = randomPauseMillis()
+            rest = PetRoomRest.STAND,
+            phaseRemainingMillis = randomPauseMillis(PetRoomRest.STAND)
         )
     }
 
@@ -100,6 +125,7 @@ class PetRoomWanderer(
                 targetX > state.x
             },
             isWalking = true,
+            rest = PetRoomRest.STAND,
             phaseRemainingMillis = 0L
         )
     }
@@ -110,11 +136,13 @@ class PetRoomWanderer(
         val distance = hypot(dx, dy)
         val step = walkSpeedPerSecond * elapsedMillis / MILLIS_PER_SECOND
         if (distance <= step || distance <= ARRIVE_EPSILON) {
+            val rest = restPool.random(random)
             return state.copy(
                 x = state.targetX,
                 y = state.targetY,
                 isWalking = false,
-                phaseRemainingMillis = randomPauseMillis()
+                rest = rest,
+                phaseRemainingMillis = randomPauseMillis(rest)
             )
         }
         val nextY = floor.clampY(state.y + dy / distance * step)
@@ -122,13 +150,22 @@ class PetRoomWanderer(
         return state.copy(x = nextX, y = nextY)
     }
 
-    private fun randomPauseMillis(): Long =
-        random.nextLong(MIN_PAUSE_MILLIS, MAX_PAUSE_MILLIS)
+    /** Lying down for a second would look like a twitch, so settled rests last longer. */
+    private fun randomPauseMillis(rest: PetRoomRest): Long = when (rest) {
+        PetRoomRest.LIE, PetRoomRest.SIT ->
+            random.nextLong(MIN_SETTLED_PAUSE_MILLIS, MAX_SETTLED_PAUSE_MILLIS)
+
+        else -> random.nextLong(MIN_PAUSE_MILLIS, MAX_PAUSE_MILLIS)
+    }
 
     private companion object {
         const val MILLIS_PER_SECOND = 1_000f
         const val MIN_PAUSE_MILLIS = 1_200L
         const val MAX_PAUSE_MILLIS = 4_500L
+        const val MIN_SETTLED_PAUSE_MILLIS = 4_000L
+        const val MAX_SETTLED_PAUSE_MILLIS = 9_000L
+        const val STAND_WEIGHT = 4
+        const val OTHER_REST_WEIGHT = 3
         const val ARRIVE_EPSILON = 0.5f
         const val FACING_EPSILON = 1f
 
