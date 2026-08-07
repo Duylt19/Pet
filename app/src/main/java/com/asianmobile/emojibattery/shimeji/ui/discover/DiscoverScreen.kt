@@ -74,10 +74,10 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
+import com.asianmobile.emojibattery.shimeji.ui.component.AppActionToast
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
-import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
@@ -101,6 +101,7 @@ fun DiscoverScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showAccessibilityDisclosure by remember { mutableStateOf(false) }
+    var showChoosePetToast by remember { mutableStateOf(false) }
     val accessibilityLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
@@ -132,10 +133,7 @@ fun DiscoverScreen(
                 DiscoverEffect.OpenOverlaySettings ->
                     overlayPermissionLauncher.launch(PetOverlay.permissionIntent(context))
 
-                DiscoverEffect.ChooseAPetFirst -> ToastHelper.show(
-                    context,
-                    context.getString(R.string.discover_pet_choose_first)
-                )
+                DiscoverEffect.ChooseAPetFirst -> showChoosePetToast = true
 
                 DiscoverEffect.RequestNotificationPermission ->
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -171,6 +169,18 @@ fun DiscoverScreen(
         onToggleFavorite = viewModel::toggleFavorite,
         onCustomizeStatusBar = onCustomizeStatusBar
     )
+
+    if (showChoosePetToast) {
+        AppActionToast(
+            text = stringResource(R.string.discover_pet_choose_first),
+            action = stringResource(R.string.discover_pet_choose_first_action),
+            onDismiss = { showChoosePetToast = false },
+            onAction = {
+                showChoosePetToast = false
+                onNavigateToMyPet()
+            }
+        )
+    }
 
     if (showAccessibilityDisclosure) {
         GrantPermissionDialog(

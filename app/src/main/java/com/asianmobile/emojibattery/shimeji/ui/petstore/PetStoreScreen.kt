@@ -105,6 +105,7 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
+import com.asianmobile.emojibattery.shimeji.ui.component.AppActionToast
 import com.asianmobile.emojibattery.shimeji.ui.component.PinkLoveSticker
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -251,7 +252,7 @@ fun PetStoreScreen(
         PetNameDialog(pet = pet, onSave = viewModel::savePetName)
     }
     state.joinedPetName?.let { name ->
-        StoreToast(
+        AppActionToast(
             text = stringResource(R.string.pet_store_joined, name),
             action = stringResource(R.string.pet_store_view),
             onDismiss = viewModel::dismissJoinedToast,
@@ -262,7 +263,7 @@ fun PetStoreScreen(
         )
     }
     state.acquiredFood?.let { food ->
-        StoreToast(
+        AppActionToast(
             text = stringResource(R.string.pet_store_food_received, food.name),
             action = null,
             onDismiss = viewModel::dismissFoodToast,
@@ -270,7 +271,7 @@ fun PetStoreScreen(
         )
     }
     state.message?.takeIf { state.selectedPet == null }?.let { message ->
-        StoreToast(
+        AppActionToast(
             text = message,
             action = null,
             onDismiss = viewModel::dismissMessage,
@@ -1353,26 +1354,6 @@ private fun PetNameDialog(pet: OwnerPetCatalogEntry, onSave: (String) -> Unit) {
         }
     }
 }
-
-@Composable
-private fun StoreToast(text: String, action: String?, onDismiss: () -> Unit, onAction: () -> Unit) {
-    LaunchedEffect(text) {
-        kotlinx.coroutines.delay(3_000)
-        onDismiss()
-    }
-    Box(Modifier.fillMaxSize().padding(bottom = dimensionResource(SdpR.dimen._91sdp)), contentAlignment = Alignment.BottomCenter) {
-        Row(
-            modifier = Modifier.shadow(dimensionResource(SdpR.dimen._6sdp), CircleShape).clip(CircleShape).background(Color.White).padding(horizontal = dimensionResource(SdpR.dimen._12sdp), vertical = dimensionResource(SdpR.dimen._8sdp)),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
-        ) {
-            PinkLoveSticker(Modifier.size(dimensionResource(SdpR.dimen._20sdp)))
-            Text(text, color = colorResource(R.color.colors_212327), fontFamily = StoreRobotoMedium, fontSize = dimensionResource(SspR.dimen._9ssp).value.sp, maxLines = 1)
-            action?.let { Text(it, color = colorResource(R.color.colors_FB3675), fontFamily = StoreRobotoSemiBold, fontSize = dimensionResource(SspR.dimen._9ssp).value.sp, modifier = Modifier.clickable(onClick = onAction)) }
-        }
-    }
-}
-
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable

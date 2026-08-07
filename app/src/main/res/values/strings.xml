@@ -1083,7 +1083,7 @@
     <string name="pet_room_remove_message">This pet leaves your room and its energy is lost. You can get it again from Pet Store.</string>
     <string name="pet_room_remove_confirm">Remove</string>
     <string name="pet_room_remove_cancel">Keep pet</string>
-    <string name="discover_pet_choose_first">Turn a pet on in My Pet Room first</string>
+    <string name="discover_pet_choose_first">Pick a pet for your screen first</string>
     <string name="pet_room_settings">Pet settings</string>
     <string name="pet_room_settings_title">Setting Pet</string>
     <string name="pet_room_settings_speed">Speed: </string>
@@ -1094,4 +1094,5 @@
     <string name="pet_room_settings_save">Save</string>
     <string name="pet_room_download">Download this room</string>
     <string name="pet_room_download_failed">Could not download this room. Check your connection.</string>
+    <string name="discover_pet_choose_first_action">View</string>
 </resources>
