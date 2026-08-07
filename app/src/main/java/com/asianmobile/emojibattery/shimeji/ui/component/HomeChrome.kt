@@ -140,7 +140,8 @@ fun HomeHeader(
 fun HomeEnableCard(
     text: String,
     checked: Boolean,
-    onCheckedChange: () -> Unit
+    onCheckedChange: () -> Unit,
+    onClick: (() -> Unit)? = null
 ) {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
     val pink = colorResource(R.color.colors_FB3675)
@@ -163,6 +164,10 @@ fun HomeEnableCard(
                 width = dimensionResource(SdpR.dimen._1sdp),
                 brush = Brush.horizontalGradient(listOf(violet, pink)),
                 shape = shape
+            )
+            .then(
+                // The switch keeps its own hit area; the rest of the card is the entry point.
+                if (onClick == null) Modifier else Modifier.clickable(onClick = onClick)
             )
             .padding(horizontal = dimensionResource(SdpR.dimen._9sdp)),
         verticalAlignment = Alignment.CenterVertically

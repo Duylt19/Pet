@@ -244,7 +244,8 @@ private fun DiscoverContent(
                                 }
                             ),
                             checked = uiState.isPetRunning,
-                            onCheckedChange = onPetToggle
+                            onCheckedChange = onPetToggle,
+                            onClick = onMyPet
                         )
                     }
                     item {
