@@ -114,7 +114,12 @@ fun PetRoomScreen(
         onPetTapped = viewModel::openPetByPackKey,
         onRemovePet = viewModel::requestRemovePet,
         onConfirmRemovePet = viewModel::confirmRemovePet,
-        onCancelRemovePet = viewModel::cancelRemovePet
+        onCancelRemovePet = viewModel::cancelRemovePet,
+        onOpenSettings = viewModel::openSettings,
+        onCloseSettings = viewModel::closeSettings,
+        onSettingsSpeedChange = viewModel::updateSettingsSpeed,
+        onSettingsSizeChange = viewModel::updateSettingsSize,
+        onSaveSettings = viewModel::saveSettings
     )
 }
 
@@ -135,7 +140,12 @@ private fun PetRoomContent(
     onPetTapped: (String) -> Unit = {},
     onRemovePet: (Int) -> Unit = {},
     onConfirmRemovePet: () -> Unit = {},
-    onCancelRemovePet: () -> Unit = {}
+    onCancelRemovePet: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
+    onCloseSettings: () -> Unit = {},
+    onSettingsSpeedChange: (Int) -> Unit = {},
+    onSettingsSizeChange: (Int) -> Unit = {},
+    onSaveSettings: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -165,7 +175,17 @@ private fun PetRoomContent(
                 onToggleMusic = onToggleMusic,
                 modifier = Modifier.statusBarsPadding()
             )
-            Spacer(modifier = Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+            Spacer(modifier = Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
+            RoundIconButton(
+                iconRes = R.drawable.ic_pet_room_settings,
+                contentDescription = stringResource(R.string.pet_room_settings),
+                iconSize = SdpR.dimen._15sdp,
+                onClick = onOpenSettings,
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(end = dimensionResource(SdpR.dimen._12sdp))
+            )
+            Spacer(modifier = Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
             PetStoreShortcut(
                 onClick = onOpenPetStore,
                 modifier = Modifier
@@ -193,6 +213,16 @@ private fun PetRoomContent(
                 onToggleOnScreen = onToggleOnScreen,
                 onFeed = onFeed,
                 onRemovePet = onRemovePet
+            )
+        }
+
+        uiState.settings?.let { settings ->
+            PetRoomSettingsDialog(
+                settings = settings,
+                onSpeedChange = onSettingsSpeedChange,
+                onSizeChange = onSettingsSizeChange,
+                onSave = onSaveSettings,
+                onDismiss = onCloseSettings
             )
         }
 

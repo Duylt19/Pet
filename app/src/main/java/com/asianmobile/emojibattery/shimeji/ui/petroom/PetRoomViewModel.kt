@@ -3,6 +3,7 @@ package com.asianmobile.emojibattery.shimeji.ui.petroom
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.asianmobile.emojibattery.shimeji.data.model.MAX_PET_SLOTS
 import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
 import com.asianmobile.emojibattery.shimeji.data.model.PetRoomCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
@@ -241,6 +242,45 @@ class PetRoomViewModel @Inject constructor(
             )
             refreshDetail()
         }
+    }
+
+    /** Slot one carries the shared values; the dialog edits those and Save fans them out. */
+    fun openSettings() {
+        val slot = petSettingsRepository.preferences.value.slot(0)
+        _uiState.update {
+            it.copy(
+                settings = PetRoomSettingsUiState(
+                    speedPercent = PetRoomSettingsPolicy.nearest(
+                        slot.speedPercent,
+                        PetRoomSettingsPolicy.SPEED_STEPS
+                    ),
+                    sizePercent = PetRoomSettingsPolicy.nearest(
+                        slot.sizePercent,
+                        PetRoomSettingsPolicy.SIZE_STEPS
+                    )
+                )
+            )
+        }
+    }
+
+    fun closeSettings() = _uiState.update { it.copy(settings = null) }
+
+    fun updateSettingsSpeed(percent: Int) = _uiState.update { state ->
+        state.copy(settings = state.settings?.copy(speedPercent = percent))
+    }
+
+    fun updateSettingsSize(percent: Int) = _uiState.update { state ->
+        state.copy(settings = state.settings?.copy(sizePercent = percent))
+    }
+
+    fun saveSettings() {
+        val settings = _uiState.value.settings ?: return
+        // One profile for every pet: the design has no per-pet settings screen yet.
+        repeat(MAX_PET_SLOTS) { slotIndex ->
+            petSettingsRepository.updateSpeedPercent(slotIndex, settings.speedPercent)
+            petSettingsRepository.updateSizePercent(slotIndex, settings.sizePercent)
+        }
+        _uiState.update { it.copy(settings = null) }
     }
 
     fun requestRemovePet(petId: Int) {

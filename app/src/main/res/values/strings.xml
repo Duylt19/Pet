@@ -1084,4 +1084,12 @@
     <string name="pet_room_remove_confirm">Remove</string>
     <string name="pet_room_remove_cancel">Keep pet</string>
     <string name="discover_pet_choose_first">Turn a pet on in My Pet Room first</string>
+    <string name="pet_room_settings">Pet settings</string>
+    <string name="pet_room_settings_title">Setting Pet</string>
+    <string name="pet_room_settings_speed">Speed: </string>
+    <string name="pet_room_settings_size">Size: </string>
+    <string name="pet_room_settings_value">(%1$s)</string>
+    <string name="pet_room_settings_reset">Reset</string>
+    <string name="pet_room_settings_cancel">Cancel</string>
+    <string name="pet_room_settings_save">Save</string>
 </resources>

@@ -22,7 +22,8 @@ data class PetRoomUiState(
     val detail: PetRoomDetailUiState? = null,
     val foods: List<PetRoomFoodUiState> = emptyList(),
     val message: PetRoomMessage? = null,
-    val petPendingRemoval: PetRoomPetUiState? = null
+    val petPendingRemoval: PetRoomPetUiState? = null,
+    val settings: PetRoomSettingsUiState? = null
 )
 
 /** The panel that replaces the sheet body once the user taps a pet. */
@@ -125,4 +126,41 @@ object PetRoomSheetPolicy {
         current != requested -> requested to true
         else -> current to !isExpanded
     }
+}
+
+/** Speed and size shared by every pet until the design gives each pet its own profile. */
+data class PetRoomSettingsUiState(
+    val speedPercent: Int,
+    val sizePercent: Int
+)
+
+object PetRoomSettingsPolicy {
+    const val DEFAULT_PERCENT = 100
+
+    /** The steps the pet settings repository already accepts. */
+    val SPEED_STEPS: List<Int> = (50..150 step 25).toList()
+    val SIZE_STEPS: List<Int> = (50..150 step 10).toList()
+
+    fun label(percent: Int): String {
+        val whole = percent / 100
+        val tenth = (percent % 100) / 10
+        return "$whole.${tenth}x"
+    }
+
+    fun fraction(value: Int, steps: List<Int>): Float {
+        if (steps.size <= 1) return 0f
+        val index = steps.indexOf(nearest(value, steps)).coerceAtLeast(0)
+        return index.toFloat() / (steps.size - 1)
+    }
+
+    fun valueAt(fraction: Float, steps: List<Int>): Int {
+        if (steps.isEmpty()) return DEFAULT_PERCENT
+        val index = (fraction.coerceIn(0f, 1f) * (steps.size - 1)).toInt()
+        val remainder = fraction.coerceIn(0f, 1f) * (steps.size - 1) - index
+        val rounded = if (remainder >= 0.5f) index + 1 else index
+        return steps[rounded.coerceIn(0, steps.lastIndex)]
+    }
+
+    fun nearest(value: Int, steps: List<Int>): Int =
+        steps.minByOrNull { kotlin.math.abs(it - value) } ?: DEFAULT_PERCENT
 }
