@@ -82,6 +82,13 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8191:5950`:
 - pet đã sở hữu chạy trực tiếp trong scene bằng `PetEngine` với profile `PetBehaviorProfiles.ROOM`:
   chặn toàn bộ leo tường/trần và speech, chỉ giữ combo mặt đất, và bị giới hạn trong dải sàn
   `0.52–0.72` chiều cao scene. Một frame clock chung tick mọi engine như overlay controller;
+- panel chi tiết pet thay body sheet: hàng back `24` + nhãn `Pet on screen` `#FB3675` + toggle
+  `44×24`; khối info `336×78` với thumbnail `78×78` (ảnh `60×60`, băng dính `44×35`) và ba dòng
+  label `#8F6250` 11/16 · value `#212327` 12/16 ngăn bằng divider nét đứt; khối Energy có chip
+  `77×24` nền `#8F6250` và thanh `336×42`. Thanh dùng ba gradient theo mức: `#94DF37→#47B321`,
+  `#FFDF50→#EDB90E`, `#FF4E4E→#BF3535`;
+- Energy tụt 1%/phút kể cả khi app đóng và chỉ hồi khi cho ăn; food card tiêu một phần, nút `+`
+  đưa về Pet Store vì đó là nơi nhận thêm food bằng Rewarded;
 - Swarm tạm ẩn khỏi navigation trong v1; `ui/home/HomeScreen` và `swarm_customization` giữ
   nguyên code cho bản sau.
 

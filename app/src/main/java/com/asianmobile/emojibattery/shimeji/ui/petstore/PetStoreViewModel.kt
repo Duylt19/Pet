@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.PetFoodRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetStoreRepository
 import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
@@ -32,7 +33,8 @@ class PetStoreViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val ownerCatalogRepository: OwnerPetCatalogRepository,
     private val petPackRepository: PetPackRepository,
-    private val petStoreRepository: PetStoreRepository
+    private val petStoreRepository: PetStoreRepository,
+    private val petFoodRepository: PetFoodRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PetStoreUiState())
     val uiState: StateFlow<PetStoreUiState> = _uiState.asStateFlow()
@@ -166,7 +168,7 @@ class PetStoreViewModel @Inject constructor(
 
     fun acquireFoodPreview() {
         val food = _uiState.value.selectedFood ?: return
-        // TODO(My Pet): persist inventory/coin balance after the My Pet feeding model is defined.
+        viewModelScope.launch { petFoodRepository.grant(food.id) }
         _uiState.update { it.copy(selectedFood = null, revealedFood = food) }
     }
 

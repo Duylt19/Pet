@@ -580,7 +580,7 @@ private fun FoodGrid(onFood: (PetStoreFood) -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
     ) {
-        items(PET_STORE_FOOD, key = PetStoreFood::id) { food -> FoodCard(food) { onFood(food) } }
+        items(PET_FOOD_CATALOG, key = PetStoreFood::id) { food -> FoodCard(food) { onFood(food) } }
     }
 }
 
@@ -646,7 +646,7 @@ internal fun FoodCard(
                 )
                 Spacer(Modifier.width(itemWidth * (2f / FOOD_CARD_WIDTH_PX)))
                 Text(
-                    text = food.coinCost.toString(),
+                    text = food.energyValue.toString(),
                     color = colorResource(R.color.colors_A54905),
                     fontFamily = StoreRobotoMedium,
                     fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
@@ -1024,7 +1024,7 @@ private fun RewardFoodPreview(food: PetStoreFood) {
             Image(painterResource(food.imageRes), food.name, Modifier.size(dimensionResource(SdpR.dimen._54sdp)))
             Row(Modifier.align(Alignment.TopStart).padding(dimensionResource(SdpR.dimen._5sdp)).clip(CircleShape).background(colorResource(R.color.colors_FFF1B2)).padding(horizontal = dimensionResource(SdpR.dimen._4sdp)), verticalAlignment = Alignment.CenterVertically) {
                 Text("●", color = Color(0xFFFFB32C), fontSize = 7.sp)
-                Text(food.coinCost.toString(), color = colorResource(R.color.colors_A54905), fontFamily = StoreRobotoMedium, fontSize = dimensionResource(SspR.dimen._8ssp).value.sp)
+                Text(food.energyValue.toString(), color = colorResource(R.color.colors_A54905), fontFamily = StoreRobotoMedium, fontSize = dimensionResource(SspR.dimen._8ssp).value.sp)
             }
             Text("x1", color = Color.White, fontFamily = StoreRobotoMedium, fontSize = dimensionResource(SspR.dimen._8ssp).value.sp, modifier = Modifier.align(Alignment.BottomEnd).padding(end = dimensionResource(SdpR.dimen._14sdp)).clip(CircleShape).background(colorResource(R.color.colors_8D6037)).border(1.dp, Color.White, CircleShape).padding(horizontal = dimensionResource(SdpR.dimen._5sdp)))
         }
@@ -1373,18 +1373,6 @@ private fun StoreToast(text: String, action: String?, onDismiss: () -> Unit, onA
     }
 }
 
-private val PET_STORE_FOOD = listOf(
-    PetStoreFood("beef_stew", "Beef Stew", 25, R.drawable.img_pet_store_food_beef_stew),
-    PetStoreFood("grilled_salmon", "Grilled Salmon", 30, R.drawable.img_pet_store_food_grilled_salmon),
-    PetStoreFood("meatball_pasta", "Meatball Pasta", 25, R.drawable.img_pet_store_food_meatball_pasta),
-    PetStoreFood("vegetable_rice", "Vegetable Rice", 20, R.drawable.img_pet_store_food_vegetable_rice),
-    PetStoreFood("fruit_bowl", "Fruit Bowl", 15, R.drawable.img_pet_store_food_fruit_bowl),
-    PetStoreFood("roast_chicken", "Roast Chicken", 30, R.drawable.img_pet_store_food_roast_chicken),
-    PetStoreFood("fried_egg", "Fried Egg", 15, R.drawable.img_pet_store_food_fried_egg),
-    PetStoreFood("steak", "Steak", 35, R.drawable.img_pet_store_food_steak),
-    PetStoreFood("vegetables", "Vegetables", 10, R.drawable.img_pet_store_food_vegetables),
-    PetStoreFood("pet_treats", "Pet Treats", 10, R.drawable.img_pet_store_food_pet_treats)
-)
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable

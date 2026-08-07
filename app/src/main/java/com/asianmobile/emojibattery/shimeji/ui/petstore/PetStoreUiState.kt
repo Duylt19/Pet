@@ -1,6 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.ui.petstore
 
 import androidx.annotation.DrawableRes
+import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetAction
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
@@ -31,8 +32,23 @@ data class PetStoreUiState(
 data class PetStoreFood(
     val id: String,
     val name: String,
-    val coinCost: Int,
+    /** Energy this portion restores when a pet eats it. */
+    val energyValue: Int,
     @param:DrawableRes val imageRes: Int
+)
+
+/** The food the app sells. Pet Store grants portions; My Pet Room spends them. */
+val PET_FOOD_CATALOG: List<PetStoreFood> = listOf(
+    PetStoreFood("beef_stew", "Beef Stew", 25, R.drawable.img_pet_store_food_beef_stew),
+    PetStoreFood("grilled_salmon", "Grilled Salmon", 30, R.drawable.img_pet_store_food_grilled_salmon),
+    PetStoreFood("meatball_pasta", "Meatball Pasta", 25, R.drawable.img_pet_store_food_meatball_pasta),
+    PetStoreFood("vegetable_rice", "Vegetable Rice", 20, R.drawable.img_pet_store_food_vegetable_rice),
+    PetStoreFood("fruit_bowl", "Fruit Bowl", 15, R.drawable.img_pet_store_food_fruit_bowl),
+    PetStoreFood("roast_chicken", "Roast Chicken", 30, R.drawable.img_pet_store_food_roast_chicken),
+    PetStoreFood("fried_egg", "Fried Egg", 15, R.drawable.img_pet_store_food_fried_egg),
+    PetStoreFood("steak", "Steak", 35, R.drawable.img_pet_store_food_steak),
+    PetStoreFood("vegetables", "Vegetables", 10, R.drawable.img_pet_store_food_vegetables),
+    PetStoreFood("pet_treats", "Pet Treats", 10, R.drawable.img_pet_store_food_pet_treats)
 )
 
 sealed interface PetStoreEffect {

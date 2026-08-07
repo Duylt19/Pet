@@ -18,8 +18,38 @@ data class PetRoomUiState(
     val isRosterLoading: Boolean = true,
     val rooms: List<PetRoomThumbnailUiState> = emptyList(),
     val isRoomCatalogLoading: Boolean = true,
-    val roomCatalogFailed: Boolean = false
+    val roomCatalogFailed: Boolean = false,
+    val detail: PetRoomDetailUiState? = null,
+    val foods: List<PetRoomFoodUiState> = emptyList(),
+    val message: PetRoomMessage? = null
 )
+
+/** The panel that replaces the sheet body once the user taps a pet. */
+data class PetRoomDetailUiState(
+    val petId: Int,
+    val packKey: String,
+    val name: String,
+    val breed: String,
+    val adoptedOn: String,
+    val thumbnailPath: String?,
+    val energyPercent: Int,
+    val isOnScreen: Boolean
+)
+
+data class PetRoomFoodUiState(
+    val id: String,
+    val name: String,
+    val energyValue: Int,
+    val imageRes: Int,
+    val portions: Int
+)
+
+enum class PetRoomMessage {
+    SELECT_A_PET_FIRST,
+    OUT_OF_FOOD,
+    ALREADY_FULL,
+    NO_FREE_OVERLAY_SLOT
+}
 
 /** One pet the user already owns. Ownership is the installed pack, as in Pet Store. */
 data class PetRoomPetUiState(
