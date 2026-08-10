@@ -488,7 +488,11 @@ fun AppNavGraph(
                         navController.safeNavigate(
                             Routes.GRANT_PERMISSIONS,
                             ignoreDebounce = true
-                        )
+                        ) {
+                            // ignoreDebounce turns the double-tap guard off, so without this a
+                            // quick double tap stacks two identical screens to back out of.
+                            launchSingleTop = true
+                        }
                     }
                 )
             }
