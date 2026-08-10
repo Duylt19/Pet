@@ -28,7 +28,9 @@ data class PetBackgroundRestrictionSignals(
     /** How the overlay process died last, if the platform recorded it. API 30+. */
     val lastOverlayKill: PetProcessKillKind? = null,
     /** The vendor ships a power manager documented to kill foreground services. */
-    val isAggressiveVendor: Boolean = false
+    val isAggressiveVendor: Boolean = false,
+    /** This ROM has its own auto-start allowlist, which the platform exemption does not touch. */
+    val hasVendorPowerScreen: Boolean = false
 )
 
 /**
@@ -103,6 +105,12 @@ object PetBatteryOptimizationPolicy {
         else -> null
     }
 }
+
+/**
+ * The vendor allowlist is a separate ask from the platform exemption: granting one does not grant
+ * the other, so this stays offered even after the exemption is in place.
+ */
+fun PetBackgroundRestrictionSignals.shouldOfferVendorAllowlist(): Boolean = hasVendorPowerScreen
 
 enum class PetExemptionReason {
     /** Settings has the app on "Restricted"; the overlay will be stopped. */

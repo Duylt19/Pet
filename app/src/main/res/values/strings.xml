@@ -1117,4 +1117,6 @@
     <string name="grant_permissions_battery_body">Help Emoji Battery stay active and prevent the system from stopping its services.</string>
     <string name="grant_permissions_notification_title">Notification access</string>
     <string name="grant_permissions_notification_body">Get reminders and updates about your pet.</string>
+    <string name="grant_permissions_autostart_title">Allow auto-start</string>
+    <string name="grant_permissions_autostart_body">Your device keeps its own list of apps allowed to run in the background. Add Cute Pet so your pet is not stopped.</string>
 </resources>

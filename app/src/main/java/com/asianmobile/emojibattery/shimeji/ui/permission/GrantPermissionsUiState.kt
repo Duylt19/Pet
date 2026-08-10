@@ -9,6 +9,11 @@ data class GrantPermissionsUiState(
      * grants network and wake locks the pet overlay never uses.
      */
     val isBatteryRowVisible: Boolean = false,
+    /**
+     * The ROM has its own auto-start allowlist. No API reads or writes it, so the row is an
+     * action rather than a toggle and stays available even after the platform exemption.
+     */
+    val isAutoStartRowVisible: Boolean = false,
     val isNotificationGranted: Boolean = false,
     /** Below API 33 the notification permission does not exist, so its row is hidden. */
     val isNotificationRowVisible: Boolean = false
@@ -21,6 +26,7 @@ data class GrantPermissionsUiState(
 enum class GrantPermissionsTarget {
     ACCESSIBILITY,
     OVERLAY,
+    VENDOR_AUTO_START,
     BATTERY_OPTIMIZATION,
     NOTIFICATION
 }
@@ -35,6 +41,12 @@ sealed interface GrantPermissionsEffect {
      * use cases this app is not in.
      */
     data object OpenBatteryOptimizationSettings : GrantPermissionsEffect
+
+    /**
+     * The vendor's own auto-start list. Separate from the platform exemption: granting one does
+     * not grant the other, and there is no API to read either the state or the result.
+     */
+    data object OpenVendorAutoStartSettings : GrantPermissionsEffect
     data object RequestNotificationPermission : GrantPermissionsEffect
     data object OpenAppNotificationSettings : GrantPermissionsEffect
 }

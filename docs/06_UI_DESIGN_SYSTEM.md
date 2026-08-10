@@ -97,6 +97,11 @@ Grant Permissions contract theo Figma node `8080:7477` và `8080:10255`:
   vendor. Ba tín hiệu đầu là đo thật nên bắt được cả ROM tuỳ biến lẫn hãng mới; danh sách
   vendor chỉ dùng cho máy API < 30 hoặc lần chạy đầu chưa có sự cố nào. Row ẩn khi đã cấp;
 - native ad ghim cố định dưới cùng màn, ngoài `LazyColumn`, nên nó không cuộn cùng danh sách;
+- row **Allow auto-start** hiện khi ROM có allowlist riêng của hãng (`PetVendorPowerSettings`
+  resolve component qua `PackageManager`, package khai trong `<queries>` để API 30+ nhìn thấy).
+  Đây là ask tách biệt với battery exemption: cấp cái này không cấp cái kia, nên row vẫn hiện
+  ngay cả khi user đã cấp exemption. Không API nào đọc được trạng thái allowlist, nên row dùng
+  mũi tên thay switch và intent được resolve lại đúng lúc chạm;
 - dialog accessibility (`GrantPermissionDialog`) dùng shield gradient `#FF5D7D → #FB54BB`,
   title 20/28 và hai nút bằng nhau `Cancel` `#F2F2F2` / `Allow` `#FB3675`.
 

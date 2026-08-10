@@ -3,7 +3,9 @@ package com.asianmobile.emojibattery.shimeji.pet.overlay
 import android.app.ActivityManager
 import android.app.ApplicationExitInfo
 import android.app.usage.UsageStatsManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.PowerManager
 import androidx.core.content.ContextCompat
@@ -25,8 +27,26 @@ class PetBackgroundRestrictionReader @Inject constructor(
         isBackgroundRestricted = isBackgroundRestricted(),
         isInRestrictedStandbyBucket = isInRestrictedStandbyBucket(),
         lastOverlayKill = lastOverlayKill(),
-        isAggressiveVendor = PetBatteryOptimizationPolicy.isAggressiveVendor(Build.MANUFACTURER)
+        isAggressiveVendor = PetBatteryOptimizationPolicy.isAggressiveVendor(Build.MANUFACTURER),
+        hasVendorPowerScreen = vendorPowerIntent() != null
     )
+
+    /**
+     * The vendor's own auto-start screen, if this ROM has one. Resolved rather than assumed:
+     * these components move between ROM versions, so an entry that no longer exists is skipped
+     * instead of throwing when the user taps.
+     */
+    fun vendorPowerIntent(): Intent? = runCatching {
+        PetVendorPowerSettings.CANDIDATES
+            .asSequence()
+            .map { screen ->
+                Intent().setComponent(ComponentName(screen.packageName, screen.className))
+            }
+            .firstOrNull { intent ->
+                context.packageManager.resolveActivity(intent, 0) != null
+            }
+            ?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }.getOrNull()
 
     fun isIgnoringBatteryOptimization(): Boolean = runCatching {
         ContextCompat.getSystemService(context, PowerManager::class.java)

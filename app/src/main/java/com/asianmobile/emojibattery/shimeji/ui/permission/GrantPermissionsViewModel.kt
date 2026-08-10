@@ -11,6 +11,7 @@ import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBackgroundRestrictionReader
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBatteryOptimizationPolicy
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
+import com.asianmobile.emojibattery.shimeji.pet.overlay.shouldOfferVendorAllowlist
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -44,10 +45,14 @@ class GrantPermissionsViewModel @Inject constructor(
             isOverlayGranted = PetOverlay.canDraw(context),
             isBatteryOptimizationIgnored = signals.isAlreadyIgnoringOptimization,
             isBatteryRowVisible = PetBatteryOptimizationPolicy.shouldOfferExemption(signals),
+            isAutoStartRowVisible = signals.shouldOfferVendorAllowlist(),
             isNotificationGranted = isNotificationGranted(),
             isNotificationRowVisible = NOTIFICATION_PERMISSION_EXISTS
         )
     }
+
+    /** Resolved at tap time, so a ROM update between load and tap cannot send a dead intent. */
+    fun vendorAutoStartIntent() = restrictionReader.vendorPowerIntent()
 
     fun onTargetClicked(target: GrantPermissionsTarget) {
         val state = _uiState.value
@@ -57,6 +62,9 @@ class GrantPermissionsViewModel @Inject constructor(
 
             GrantPermissionsTarget.OVERLAY ->
                 GrantPermissionsEffect.OpenOverlaySettings.takeUnless { state.isOverlayGranted }
+
+            GrantPermissionsTarget.VENDOR_AUTO_START ->
+                GrantPermissionsEffect.OpenVendorAutoStartSettings
 
             GrantPermissionsTarget.BATTERY_OPTIMIZATION ->
                 GrantPermissionsEffect.OpenBatteryOptimizationSettings

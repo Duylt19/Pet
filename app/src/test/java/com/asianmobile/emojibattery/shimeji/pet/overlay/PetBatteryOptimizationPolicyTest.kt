@@ -128,6 +128,31 @@ class PetBatteryOptimizationPolicyTest {
     }
 
     @Test
+    fun `the vendor allowlist is offered whenever the ROM has one`() {
+        assertTrue(
+            PetBackgroundRestrictionSignals(hasVendorPowerScreen = true)
+                .shouldOfferVendorAllowlist()
+        )
+    }
+
+    @Test
+    fun `the vendor allowlist stays offered after the platform exemption is granted`() {
+        // Granting one does not grant the other, so this must not disappear with the exemption.
+        val signals = PetBackgroundRestrictionSignals(
+            isAlreadyIgnoringOptimization = true,
+            hasVendorPowerScreen = true
+        )
+
+        assertFalse(PetBatteryOptimizationPolicy.shouldOfferExemption(signals))
+        assertTrue(signals.shouldOfferVendorAllowlist())
+    }
+
+    @Test
+    fun `a ROM without its own allowlist is never sent to one`() {
+        assertFalse(PetBackgroundRestrictionSignals().shouldOfferVendorAllowlist())
+    }
+
+    @Test
     fun `the vendor match ignores case and stray whitespace`() {
         assertTrue(PetBatteryOptimizationPolicy.isAggressiveVendor("  XIAOMI "))
     }

@@ -103,6 +103,10 @@ fun GrantPermissionsScreen(
                 GrantPermissionsEffect.OpenBatteryOptimizationSettings ->
                     settingsLauncher.launch(batteryOptimizationIntent(context.packageName))
 
+                GrantPermissionsEffect.OpenVendorAutoStartSettings ->
+                    // Resolved again at tap: the ROM may have updated since the screen loaded.
+                    viewModel.vendorAutoStartIntent()?.let(settingsLauncher::launch)
+
                 GrantPermissionsEffect.OpenAppNotificationSettings ->
                     settingsLauncher.launch(appNotificationIntent(context.packageName))
 
@@ -219,6 +223,17 @@ private fun GrantPermissionsContent(
                             onClick = {
                                 onTargetClicked(GrantPermissionsTarget.BATTERY_OPTIMIZATION)
                             }
+                        )
+                    }
+                }
+                if (uiState.isAutoStartRowVisible) {
+                    item {
+                        PermissionCard(
+                            iconRes = R.drawable.img_permission_battery,
+                            titleRes = R.string.grant_permissions_autostart_title,
+                            bodyRes = R.string.grant_permissions_autostart_body,
+                            checked = null,
+                            onClick = { onTargetClicked(GrantPermissionsTarget.VENDOR_AUTO_START) }
                         )
                     }
                 }
@@ -475,7 +490,8 @@ private fun PermissionCard(
     iconRes: Int,
     titleRes: Int,
     bodyRes: Int,
-    checked: Boolean,
+    /** Null when no API reports the state, which is drawn as an action rather than a toggle. */
+    checked: Boolean?,
     onClick: () -> Unit
 ) {
     Row(
@@ -510,7 +526,16 @@ private fun PermissionCard(
             )
         }
         Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
-        AppSwitch(checked = checked, onCheckedChange = onClick)
+        if (checked == null) {
+            Icon(
+                painter = painterResource(R.drawable.ic_arrow_right),
+                contentDescription = null,
+                tint = colorResource(R.color.colors_C8C8C9),
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
+            )
+        } else {
+            AppSwitch(checked = checked, onCheckedChange = onClick)
+        }
     }
 }
 
