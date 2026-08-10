@@ -25,8 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +55,7 @@ import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.PetSwarmMovementInsets
 import com.asianmobile.emojibattery.shimeji.pet.settings.PetSettingsPolicy
+import com.asianmobile.emojibattery.shimeji.ui.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTopBar
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -437,14 +436,7 @@ private fun SwarmToggleRow(
                 fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
             )
         }
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedTrackColor = colorResource(R.color.colors_12B890),
-                uncheckedTrackColor = colorResource(R.color.colors_9297A5)
-            )
-        )
+        AppSwitch(checked = checked, onCheckedChange = { onCheckedChange(!checked) })
     }
 }
 

@@ -90,8 +90,14 @@ Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343`
 - `ui/component/AppSwitch.kt` là switch duy nhất của app; mọi toggle dùng nó, không màn nào
   tự vẽ bản riêng. Track `44×24` radius 12, núm `20×20` thụt vào `2`, núm **luôn trắng**;
   chỉ track đổi màu: bật `#FB3675`, tắt `#C8C8C9`;
+- inset của núm phải **tính ra từ `(trackHeight - knobSize) / 2`**, không được khai báo thành
+  dimension riêng. Mỗi giá trị sdp làm tròn theo bucket của chính nó, nên `_2sdp` cạnh
+  `_18sdp`/`_15sdp` lệch khỏi tâm — bản cũ chừa `2` phía trên nhưng chỉ `1` phía dưới nên núm
+  bị đẩy lên. Cùng lý do, vị trí bật là `trackWidth - inset - knobSize` chứ không phải
+  `_17sdp`, và núm căn `Alignment.CenterStart` rồi chỉ offset theo trục ngang;
 - có golden `AppSwitchStatesScreenshotTest` chụp cả hai state, vì trước đó switch không được
-  phủ gì nên đã lệch design mà không ai phát hiện.
+  phủ gì nên đã lệch design mà không ai phát hiện. Kiểm tra bằng cách đo lề núm trong golden:
+  lề trên phải bằng lề dưới, và lề trái khi tắt phải bằng lề phải khi bật.
 
 Grant Permissions contract theo Figma node `8080:9754`:
 

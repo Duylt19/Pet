@@ -41,8 +41,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
@@ -107,6 +105,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_STYLE_INDEX
+import com.asianmobile.emojibattery.shimeji.ui.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTopBar
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
@@ -2166,18 +2165,7 @@ private fun ToggleRow(label: String, checked: Boolean, onChecked: (Boolean) -> U
             fontFamily = FontFamily(Font(R.font.inter_medium)),
             fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
         )
-        Switch(
-            checked = checked,
-            onCheckedChange = onChecked,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = colorResource(R.color.colors_FFFFFF),
-                checkedTrackColor = colorResource(R.color.colors_12B890),
-                checkedBorderColor = colorResource(R.color.colors_12B890),
-                uncheckedThumbColor = colorResource(R.color.colors_FFFFFF),
-                uncheckedTrackColor = colorResource(R.color.colors_E0F7F1),
-                uncheckedBorderColor = colorResource(R.color.colors_C8C8C9)
-            )
-        )
+        AppSwitch(checked = checked, onCheckedChange = { onChecked(!checked) })
     }
 }
 

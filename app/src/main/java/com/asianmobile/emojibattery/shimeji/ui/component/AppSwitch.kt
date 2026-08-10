@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
@@ -33,19 +34,19 @@ fun AppSwitch(
     onCheckedChange: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val trackWidth = dimensionResource(SdpR.dimen._34sdp)
+    val trackHeight = dimensionResource(SdpR.dimen._18sdp)
+    val knobSize = dimensionResource(SdpR.dimen._15sdp)
+    // Derived, never a resource of its own: sdp rounds every dimension into its own bucket, so a
+    // hardcoded inset drifts away from (track - knob) / 2 and leaves the knob off-centre.
+    val knobInset = (trackHeight - knobSize) / 2
     val knobOffset by animateDpAsState(
-        targetValue = dimensionResource(
-            if (checked) SdpR.dimen._17sdp else SdpR.dimen._2sdp
-        ),
+        targetValue = if (checked) trackWidth - knobInset - knobSize else knobInset,
         label = "appSwitchKnob"
     )
-    val knobInset = dimensionResource(SdpR.dimen._2sdp)
     Box(
         modifier = modifier
-            .size(
-                width = dimensionResource(SdpR.dimen._34sdp),
-                height = dimensionResource(SdpR.dimen._18sdp)
-            )
+            .size(width = trackWidth, height = trackHeight)
             .clip(CircleShape)
             .background(
                 colorResource(
@@ -58,12 +59,14 @@ fun AppSwitch(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onValueChange = { onCheckedChange() }
-            )
+            ),
+        // Centred rather than offset vertically, so the knob cannot drift off the track's axis.
+        contentAlignment = Alignment.CenterStart
     ) {
         Box(
             modifier = Modifier
-                .offset { IntOffset(knobOffset.roundToPx(), knobInset.roundToPx()) }
-                .size(dimensionResource(SdpR.dimen._15sdp))
+                .offset { IntOffset(knobOffset.roundToPx(), 0) }
+                .size(knobSize)
                 .clip(CircleShape)
                 .background(colorResource(R.color.colors_FFFFFF))
         )
