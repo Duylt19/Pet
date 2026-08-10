@@ -51,8 +51,11 @@ Discover Home contract:
 Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
 
 - landing dùng shared `HomeHeader`/`HomeEnableCard`, promo composite PNG @3x, category section
-  dạng carousel và card `110×110px`; preview runtime `96×96px` dùng `ContentScale.Crop`,
-  favorite ở top-end, crown Premium ở top-start;
+  dạng carousel và card `110×110px`; preview runtime dùng chung tỉ lệ `65%` và
+  `ContentScale.Fit` của Discover vì asset dữ liệu thật có bounds khác mock Figma, favorite ở
+  top-end, crown Premium ở top-start;
+- crown Premium của Pet Store, Search và Battery dùng chung `PetPremiumBadge`: nền
+  `#FFEA89` 50% và crown artwork theo tỉ lệ `18/24`, không dựng badge riêng theo từng feature;
 - category header tạm dùng chung flame vector `18×18px`, không tint. Mapping icon theo category
   được thay sau mà không đổi layout hoặc catalog schema;
 - More mở child route có header Back/title/PRO, inline banner và grid ba cột. Card detail giữ

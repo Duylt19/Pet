@@ -16,8 +16,8 @@ import androidx.compose.ui.res.painterResource
 import com.asianmobile.emojibattery.shimeji.R
 
 /**
- * The badge on a pet the user has not unlocked: a 24 unit yellow disc with the 18 unit crown
- * artwork inside. Shared by Pet Store and Search so a locked pet looks the same in both grids.
+ * The badge on locked catalog artwork: a translucent 24 unit yellow disc with the 18 unit crown
+ * inside. Shared by Pet Store, Search, and Battery so Premium state stays visually identical.
  */
 @Composable
 fun PetPremiumBadge(modifier: Modifier = Modifier) {
@@ -25,7 +25,7 @@ fun PetPremiumBadge(modifier: Modifier = Modifier) {
         modifier = modifier
             .aspectRatio(1f)
             .clip(CircleShape)
-            .background(colorResource(R.color.colors_FFEA89)),
+            .background(colorResource(R.color.colors_FFEA89).copy(alpha = 0.5f)),
         contentAlignment = Alignment.Center
     ) {
         Image(

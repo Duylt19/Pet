@@ -63,6 +63,7 @@ import com.asianmobile.emojibattery.shimeji.ui.component.CATALOG_ITEM_PREVIEW_FR
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.component.HomePremiumButton
+import com.asianmobile.emojibattery.shimeji.ui.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.ui.component.RewardGradientButton
 import com.asianmobile.emojibattery.shimeji.ui.component.RewardOfferSheet
 import com.asianmobile.emojibattery.shimeji.ui.component.RewardOutlineButton
@@ -71,7 +72,6 @@ import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
 private const val BATTERY_DETAIL_PREVIEW_FRACTION = 0.7303f
-private const val BATTERY_LANDING_PREVIEW_FRACTION = 96f / 110f
 
 private val BatteryRobotoMedium = FontFamily(Font(R.font.roboto_medium))
 private val BatteryRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
@@ -294,14 +294,14 @@ private fun BatteryLandingThemeCard(
     ) {
         BatteryThemePreview(
             theme = theme,
-            modifier = Modifier.fillMaxSize(BATTERY_LANDING_PREVIEW_FRACTION),
-            contentScale = ContentScale.Crop
+            modifier = Modifier.fillMaxSize(CATALOG_ITEM_PREVIEW_FRACTION)
         )
         if (premium) {
-            BatteryPremiumBadge(
+            PetPremiumBadge(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(dimensionResource(SdpR.dimen._5sdp))
+                    .size(dimensionResource(SdpR.dimen._18sdp))
             )
         }
         Box(
@@ -479,10 +479,11 @@ private fun BatteryDetailThemeCard(
             modifier = Modifier.fillMaxSize(BATTERY_DETAIL_PREVIEW_FRACTION)
         )
         if (premium) {
-            BatteryPremiumBadge(
+            PetPremiumBadge(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(dimensionResource(SdpR.dimen._5sdp))
+                    .size(dimensionResource(SdpR.dimen._18sdp))
             )
         }
     }
@@ -501,7 +502,7 @@ private fun BatteryThemePreview(
                 painter = painterResource(R.drawable.ic_home_battery),
                 contentDescription = displayName,
                 contentScale = ContentScale.Fit,
-                modifier = Modifier.fillMaxSize(CATALOG_ITEM_PREVIEW_FRACTION)
+                modifier = Modifier.fillMaxSize()
             )
         } else {
             AsyncImage(
@@ -512,23 +513,6 @@ private fun BatteryThemePreview(
                 modifier = Modifier.fillMaxSize()
             )
         }
-    }
-}
-
-@Composable
-private fun BatteryPremiumBadge(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .size(dimensionResource(SdpR.dimen._18sdp))
-            .clip(CircleShape)
-            .background(colorResource(R.color.colors_FFEA89).copy(alpha = 0.5f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(R.drawable.img_pet_premium_badge),
-            contentDescription = stringResource(R.string.battery_premium_theme),
-            modifier = Modifier.size(dimensionResource(SdpR.dimen._14sdp))
-        )
     }
 }
 
