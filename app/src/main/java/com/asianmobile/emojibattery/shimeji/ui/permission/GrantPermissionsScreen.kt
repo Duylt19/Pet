@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -68,7 +70,6 @@ import com.intuit.ssp.R as SspR
 @Composable
 fun GrantPermissionsScreen(
     onNavigateBack: () -> Unit = {},
-    onNavigateToPremium: () -> Unit = {},
     viewModel: GrantPermissionsViewModel = hiltViewModel()
 ) {
     TrackScreenView(ScreenName.GRANT_PERMISSIONS)
@@ -121,7 +122,6 @@ fun GrantPermissionsScreen(
     GrantPermissionsContent(
         uiState = uiState,
         onNavigateBack = onNavigateBack,
-        onNavigateToPremium = onNavigateToPremium,
         onTargetClicked = viewModel::onTargetClicked
     )
 }
@@ -150,207 +150,167 @@ private fun appDetailsIntent(packageName: String): Intent = Intent(
 )
 
 @Composable
-private fun GrantPermissionsContent(
+internal fun GrantPermissionsContent(
     uiState: GrantPermissionsUiState,
     onNavigateBack: () -> Unit,
-    onNavigateToPremium: () -> Unit,
     onTargetClicked: (GrantPermissionsTarget) -> Unit
 ) {
-    Box(
+    // The design keeps this screen on a plain white sheet: the shared wallpaper is switched off
+    // so the white cards read against it via their shadow rather than a colour change.
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(R.color.colors_FFFFFF))
+            .statusBarsPadding()
     ) {
-        Image(
-            painter = painterResource(R.drawable.img_home_wallpaper),
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier.fillMaxSize()
-        )
-        Column(
+        GrantPermissionsHeader(onNavigateBack = onNavigateBack)
+        LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
+                .fillMaxWidth()
+                .weight(1f),
+            contentPadding = PaddingValues(
+                start = dimensionResource(SdpR.dimen._12sdp),
+                end = dimensionResource(SdpR.dimen._12sdp),
+                top = dimensionResource(SdpR.dimen._6sdp),
+                bottom = dimensionResource(SdpR.dimen._12sdp)
+            ),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
         ) {
-            GrantPermissionsHeader(
-                onNavigateBack = onNavigateBack,
-                onNavigateToPremium = onNavigateToPremium
-            )
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentPadding = PaddingValues(
-                    horizontal = dimensionResource(SdpR.dimen._12sdp),
-                    vertical = dimensionResource(SdpR.dimen._9sdp)
-                ),
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
-            ) {
+            item {
+                SectionHeading(
+                    step = "1",
+                    titleRes = R.string.grant_permissions_section_necessary
+                )
+            }
+            item {
+                AccessibilityCard(
+                    isEnabled = uiState.isAccessibilityEnabled,
+                    onClick = { onTargetClicked(GrantPermissionsTarget.ACCESSIBILITY) }
+                )
+            }
+            item {
+                SectionHeading(
+                    step = "2",
+                    titleRes = R.string.grant_permissions_section_stability,
+                    modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._5sdp))
+                )
+            }
+            item {
+                PermissionCard(
+                    iconRes = R.drawable.img_permission_overlay,
+                    titleRes = R.string.grant_permissions_overlay_title,
+                    bodyRes = R.string.grant_permissions_overlay_body,
+                    checked = uiState.isOverlayGranted,
+                    onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
+                )
+            }
+            if (uiState.isBatteryRowVisible) {
                 item {
-                    SectionHeading(
-                        step = "1",
-                        titleRes = R.string.grant_permissions_section_necessary
+                    PermissionCard(
+                        iconRes = R.drawable.img_permission_battery,
+                        titleRes = R.string.grant_permissions_battery_title,
+                        bodyRes = R.string.grant_permissions_battery_body,
+                        checked = uiState.isBatteryOptimizationIgnored,
+                        onClick = {
+                            onTargetClicked(GrantPermissionsTarget.BATTERY_OPTIMIZATION)
+                        }
                     )
                 }
+            }
+            if (uiState.isAutoStartRowVisible) {
                 item {
-                    AccessibilityCard(
-                        isEnabled = uiState.isAccessibilityEnabled,
-                        onClick = { onTargetClicked(GrantPermissionsTarget.ACCESSIBILITY) }
+                    PermissionCard(
+                        iconRes = R.drawable.img_permission_battery,
+                        titleRes = R.string.grant_permissions_autostart_title,
+                        bodyRes = R.string.grant_permissions_autostart_body,
+                        checked = null,
+                        onClick = { onTargetClicked(GrantPermissionsTarget.VENDOR_AUTO_START) }
                     )
                 }
+            }
+            if (uiState.isNotificationRowVisible) {
                 item {
                     SectionHeading(
-                        step = "2",
-                        titleRes = R.string.grant_permissions_section_stability
+                        step = "3",
+                        titleRes = R.string.grant_permissions_section_recommend,
+                        subtitleRes = R.string.grant_permissions_recommend_subtitle,
+                        modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._5sdp))
                     )
                 }
                 item {
                     PermissionCard(
-                        iconRes = R.drawable.img_permission_overlay,
-                        titleRes = R.string.grant_permissions_overlay_title,
-                        bodyRes = R.string.grant_permissions_overlay_body,
-                        checked = uiState.isOverlayGranted,
-                        onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
+                        iconRes = R.drawable.img_permission_notification,
+                        titleRes = R.string.grant_permissions_notification_title,
+                        bodyRes = R.string.grant_permissions_notification_body,
+                        checked = uiState.isNotificationGranted,
+                        onClick = { onTargetClicked(GrantPermissionsTarget.NOTIFICATION) }
                     )
                 }
-                if (uiState.isBatteryRowVisible) {
-                    item {
-                        PermissionCard(
-                            iconRes = R.drawable.img_permission_battery,
-                            titleRes = R.string.grant_permissions_battery_title,
-                            bodyRes = R.string.grant_permissions_battery_body,
-                            checked = uiState.isBatteryOptimizationIgnored,
-                            onClick = {
-                                onTargetClicked(GrantPermissionsTarget.BATTERY_OPTIMIZATION)
-                            }
-                        )
-                    }
-                }
-                if (uiState.isAutoStartRowVisible) {
-                    item {
-                        PermissionCard(
-                            iconRes = R.drawable.img_permission_battery,
-                            titleRes = R.string.grant_permissions_autostart_title,
-                            bodyRes = R.string.grant_permissions_autostart_body,
-                            checked = null,
-                            onClick = { onTargetClicked(GrantPermissionsTarget.VENDOR_AUTO_START) }
-                        )
-                    }
-                }
-                if (uiState.isNotificationRowVisible) {
-                    item {
-                        SectionHeading(
-                            step = "3",
-                            titleRes = R.string.grant_permissions_section_recommend,
-                            subtitleRes = R.string.grant_permissions_recommend_subtitle
-                        )
-                    }
-                    item {
-                        PermissionCard(
-                            iconRes = R.drawable.img_permission_notification,
-                            titleRes = R.string.grant_permissions_notification_title,
-                            bodyRes = R.string.grant_permissions_notification_body,
-                            checked = uiState.isNotificationGranted,
-                            onClick = { onTargetClicked(GrantPermissionsTarget.NOTIFICATION) }
-                        )
-                    }
-                }
-                item { Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp))) }
             }
-            // Pinned below the list rather than the last row of it, so the ad stays put while
-            // the permissions scroll.
-            NativeAdInternal(
-                screenCode = SCREEN_PERMISSION,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-            )
         }
-    }
-}
-
-@Composable
-private fun GrantPermissionsHeader(
-    onNavigateBack: () -> Unit,
-    onNavigateToPremium: () -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
+        // Pinned below the list rather than the last row of it, so the ad stays put while
+        // the permissions scroll.
+        NativeAdInternal(
+            screenCode = SCREEN_PERMISSION,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._43sdp))
-                .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_pet_room_back),
-                contentDescription = stringResource(R.string.pet_room_back),
-                tint = colorResource(R.color.colors_212327),
-                modifier = Modifier
-                    .size(dimensionResource(SdpR.dimen._21sdp))
-                    .clip(CircleShape)
-                    .clickable(role = Role.Button, onClick = onNavigateBack)
-            )
-            Spacer(Modifier.width(dimensionResource(SdpR.dimen._9sdp)))
-            Text(
-                text = stringResource(R.string.grant_permissions_nav),
-                color = colorResource(R.color.colors_212327),
-                fontWeight = FontWeight.SemiBold,
-                fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
-                modifier = Modifier.weight(1f)
-            )
-            PremiumPill(onClick = onNavigateToPremium)
-        }
-        Text(
-            text = stringResource(R.string.grant_permissions_title),
-            color = colorResource(R.color.colors_212327),
-            fontWeight = FontWeight.SemiBold,
-            fontSize = dimensionResource(SspR.dimen._18ssp).value.sp,
-            modifier = Modifier.padding(
-                horizontal = dimensionResource(SdpR.dimen._12sdp),
-                vertical = dimensionResource(SdpR.dimen._6sdp)
-            )
+                .navigationBarsPadding()
         )
     }
 }
 
+/** DROP_SHADOW r=9 a=0.17 on every white card in the design. */
 @Composable
-private fun PremiumPill(onClick: () -> Unit) {
+private fun Modifier.cardSurface(): Modifier {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
+    val shadowColor = Color.Black.copy(alpha = 0.17f)
+    return this
+        .shadow(
+            elevation = dimensionResource(SdpR.dimen._5sdp),
+            shape = shape,
+            ambientColor = shadowColor,
+            spotColor = shadowColor
+        )
+        .clip(shape)
+        .background(colorResource(R.color.colors_FFFFFF))
+}
+
+@Composable
+private fun GrantPermissionsHeader(onNavigateBack: () -> Unit) {
     Row(
         modifier = Modifier
-            .height(dimensionResource(SdpR.dimen._25sdp))
-            .clip(CircleShape)
-            .background(
-                Brush.horizontalGradient(
-                    listOf(
-                        colorResource(R.color.colors_FFB65B),
-                        colorResource(R.color.colors_FF6B80),
-                        colorResource(R.color.colors_FF57EE)
-                    )
-                )
-            )
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = dimensionResource(SdpR.dimen._6sdp)),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._43sdp))
+            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(R.drawable.img_pet_store_premium_crown),
-            contentDescription = null,
-            modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
+        Icon(
+            painter = painterResource(R.drawable.ic_pet_room_back),
+            contentDescription = stringResource(R.string.pet_room_back),
+            tint = colorResource(R.color.colors_212327),
+            modifier = Modifier
+                .size(dimensionResource(SdpR.dimen._21sdp))
+                .clip(CircleShape)
+                .clickable(role = Role.Button, onClick = onNavigateBack)
         )
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._9sdp)))
         Text(
-            text = stringResource(R.string.premium_pro),
-            color = colorResource(R.color.colors_FFFFFF),
+            text = stringResource(R.string.grant_permissions_nav),
+            color = colorResource(R.color.colors_212327),
             fontWeight = FontWeight.SemiBold,
-            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
+            fontSize = dimensionResource(SspR.dimen._15ssp).value.sp
         )
     }
 }
 
 @Composable
-private fun SectionHeading(step: String, titleRes: Int, subtitleRes: Int? = null) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+private fun SectionHeading(
+    step: String,
+    titleRes: Int,
+    modifier: Modifier = Modifier,
+    subtitleRes: Int? = null
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
@@ -363,10 +323,10 @@ private fun SectionHeading(step: String, titleRes: Int, subtitleRes: Int? = null
                     text = step,
                     color = colorResource(R.color.colors_FFFFFF),
                     fontWeight = FontWeight.Medium,
-                    fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
+                    fontSize = dimensionResource(SspR.dimen._12ssp).value.sp
                 )
             }
-            Spacer(Modifier.width(dimensionResource(SdpR.dimen._9sdp)))
+            Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
             Text(
                 text = stringResource(titleRes),
                 color = colorResource(R.color.colors_212327),
@@ -379,7 +339,7 @@ private fun SectionHeading(step: String, titleRes: Int, subtitleRes: Int? = null
                 text = stringResource(it),
                 color = colorResource(R.color.colors_6F7073),
                 fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
-                modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._4sdp))
+                modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._6sdp))
             )
         }
     }
@@ -390,8 +350,7 @@ private fun AccessibilityCard(isEnabled: Boolean, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
-            .background(colorResource(R.color.colors_FFFFFF))
+            .cardSurface()
             .padding(dimensionResource(SdpR.dimen._12sdp)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
     ) {
@@ -417,15 +376,19 @@ private fun AccessibilityCard(isEnabled: Boolean, onClick: () -> Unit) {
                     text = stringResource(R.string.grant_permissions_accessibility_body),
                     color = colorResource(R.color.colors_6F7073),
                     fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
-                    modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._4sdp))
+                    modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._3sdp))
                 )
             }
         }
         Image(
             painter = painterResource(R.drawable.img_permission_accessibility_steps),
             contentDescription = null,
-            contentScale = ContentScale.FillWidth,
-            modifier = Modifier.fillMaxWidth()
+            contentScale = ContentScale.FillBounds,
+            // The phone previews overflow their frame by 4px, so the art is exported at the
+            // render bounds (296x96) rather than the layout bounds, and drawn at that ratio.
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(STEPS_ART_RATIO)
         )
         Box(
             modifier = Modifier
@@ -453,6 +416,8 @@ private fun AccessibilityCard(isEnabled: Boolean, onClick: () -> Unit) {
     }
 }
 
+private const val STEPS_ART_RATIO = 296f / 96f
+
 @Composable
 private fun StatusPill(isEnabled: Boolean) {
     Box(
@@ -460,12 +425,12 @@ private fun StatusPill(isEnabled: Boolean) {
             .clip(CircleShape)
             .background(
                 colorResource(
-                    if (isEnabled) R.color.colors_E8F7EE else R.color.colors_FFECEC
+                    if (isEnabled) R.color.colors_E6F9EF else R.color.colors_FFECEC
                 )
             )
             .padding(
-                horizontal = dimensionResource(SdpR.dimen._6sdp),
-                vertical = dimensionResource(SdpR.dimen._2sdp)
+                horizontal = dimensionResource(SdpR.dimen._8sdp),
+                vertical = dimensionResource(SdpR.dimen._3sdp)
             )
     ) {
         Text(
@@ -477,9 +442,10 @@ private fun StatusPill(isEnabled: Boolean) {
                 }
             ),
             color = colorResource(
-                if (isEnabled) R.color.colors_2AA96A else R.color.colors_F04438
+                if (isEnabled) R.color.colors_00C062 else R.color.colors_F04438
             ),
-            fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+            fontWeight = FontWeight.Medium,
+            fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
             maxLines = 1
         )
     }
@@ -497,8 +463,7 @@ private fun PermissionCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
-            .background(colorResource(R.color.colors_FFFFFF))
+            .cardSurface()
             .clickable(role = Role.Button, onClick = onClick)
             .padding(dimensionResource(SdpR.dimen._12sdp)),
         verticalAlignment = Alignment.CenterVertically
@@ -522,7 +487,7 @@ private fun PermissionCard(
                 text = stringResource(bodyRes),
                 color = colorResource(R.color.colors_6F7073),
                 fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
-                modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._2sdp))
+                modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._3sdp))
             )
         }
         Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
@@ -548,7 +513,6 @@ private fun GrantPermissionsPreview() {
             isNotificationRowVisible = true
         ),
         onNavigateBack = {},
-        onNavigateToPremium = {},
         onTargetClicked = {}
     )
 }

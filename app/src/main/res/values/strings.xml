@@ -1100,8 +1100,7 @@
     <string name="permission_dialog_accessibility_message">Enable accessibility to display Cute Pet over all apps. Emoji Battery does not collect or share personal information.</string>
     <string name="permission_dialog_cancel">Cancel</string>
     <string name="permission_dialog_allow">Allow</string>
-    <string name="grant_permissions_title">Grant Permissions</string>
-    <string name="grant_permissions_nav">Permission</string>
+    <string name="grant_permissions_nav">Grant Permission</string>
     <string name="grant_permissions_section_necessary">Necessary Permission</string>
     <string name="grant_permissions_section_stability">Enhanced Stability Permissions</string>
     <string name="grant_permissions_section_recommend">Recommend Permissions</string>

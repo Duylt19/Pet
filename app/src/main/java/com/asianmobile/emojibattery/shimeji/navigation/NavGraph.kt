@@ -289,8 +289,7 @@ fun AppNavGraph(
 
             composable(Routes.GRANT_PERMISSIONS) {
                 GrantPermissionsScreen(
-                    onNavigateBack = { navController.safePopBackStack() },
-                    onNavigateToPremium = { navigateFromHome(Routes.PREMIUM) }
+                    onNavigateBack = { navController.safePopBackStack() }
                 )
             }
 

@@ -79,16 +79,25 @@ Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343`
 - có golden `AppSwitchStatesScreenshotTest` chụp cả hai state, vì trước đó switch không được
   phủ gì nên đã lệch design mà không ai phát hiện.
 
-Grant Permissions contract theo Figma node `8080:7477` và `8080:10255`:
+Grant Permissions contract theo Figma node `8080:9754`:
 
-- route `grant_permissions` mở từ Mine, dùng wallpaper chung; top nav `360×56` có back 28,
-  title `Permission` Roboto 600 18/26 và pill PRO gradient `#FFB65B → #FF6B80 → #FF57EE`,
-  bên dưới là heading `Grant Permissions` Roboto 600 24/32;
-- ba nhóm đánh số bằng chip tròn `24×24` nền `#FB3675`: Necessary, Enhanced Stability,
-  Recommend. Card trắng radius 16, icon quyền `34×34` radius 10 với gradient riêng từng quyền;
+- route `grant_permissions` mở từ Mine. Nền **trắng phẳng** — lớp wallpaper trong design bị tắt,
+  card trắng nổi lên bằng shadow chứ không bằng đổi màu nền;
+- top nav `360×56` có back 28 và **một** title duy nhất `Grant Permission` Roboto 600 20/28.
+  Node PRO pill và heading lớn `Grant Permissions` đều là layer ẩn trong Figma nên không dựng;
+- ba nhóm đánh số bằng chip tròn `24×24` nền `#FB3675` (số Roboto 500 16/24), cách chip 8px:
+  Necessary, Enhanced Stability, Recommend. Khoảng cách heading → card và card → card là 12px,
+  giữa hai nhóm là 20px;
+- card trắng `328×?` radius 16, padding trong 16, shadow `DROP_SHADOW r=9 offset=(0,0) a=0.17`
+  (Compose: `shadow(_5sdp, alpha 0.17)`); icon quyền `34×34` radius 10 với gradient riêng
+  từng quyền, cách text 8px, text cách switch 8px;
 - card accessibility có badge `Required` `#FFECEC`/`#F04438` hoặc `Allowed`
-  `#E8F7EE`/`#2AA96A`, minh hoạ hai bước và CTA `Go to Settings` gradient
-  `#C95DFF → #FB54BB`; các card còn lại dùng `AppSwitch` chung với Home;
+  `#E6F9EF`/`#00C062` (Roboto 500 10/14, padding 10×4), minh hoạ hai bước và CTA
+  `Go to Settings` gradient `#C95DFF → #FB54BB` cao 40; các card còn lại dùng `AppSwitch`
+  chung với Home;
+- ảnh minh hoạ hai bước export theo **render bounds `296×96`**, không phải layout bounds
+  `296×92`: hai khung điện thoại tràn khỏi frame 4px, export theo layout bounds thì đáy bị
+  cắt. Compose dựng bằng `aspectRatio(296f/96f)`;
 - row Ignore Battery Optimization **không biến mất sau khi cấp**: nó hiện khi exemption có ý
   nghĩa với máy này, còn switch phản ánh trạng thái, nên user vẫn thấy và gỡ lại được;
 - không quyền nào được cấp trong app: mỗi mục chỉ mở system surface tương ứng rồi đọc lại
