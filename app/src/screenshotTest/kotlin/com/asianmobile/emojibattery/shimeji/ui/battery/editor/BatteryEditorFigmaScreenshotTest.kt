@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.android.tools.screenshot.PreviewTest
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationType
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
@@ -39,6 +41,24 @@ fun BatteryEditorBatteryPickerScreenshotTest() {
 @Composable
 fun BatteryEditorThemePickerScreenshotTest() {
     PreviewEditorPage(BatteryEditorPage.BACKGROUND_THEMES)
+}
+
+@PreviewTest
+@Preview(name = "Status bar color picker", widthDp = 360, heightDp = 491)
+@Composable
+fun BatteryEditorColorPickerScreenshotTest() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0x80000000)),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        StatusBarColorPickerSurface(
+            selectedColor = 0xFFE8794D.toInt(),
+            onColorChange = {},
+            onDismiss = {}
+        )
+    }
 }
 
 @Composable
@@ -96,15 +116,26 @@ private fun previewEditorState(): BatteryEditorUiState {
             type = BatteryDecorationType.BACKGROUND
         )
     }
+    val animations = List(5) { index ->
+        BatteryAnimationEntry(
+            id = index + 1,
+            name = "Animation ${index + 1}",
+            assetPath = "",
+            type = BatteryAnimationType.GIF
+        )
+    }
     return BatteryEditorUiState(
         theme = themes[1],
         themes = themes,
         backgrounds = backgrounds,
+        animations = animations,
         config = BatteryStatusConfig(
             enabled = false,
             selectedThemeId = themes[1].id,
             selectedBatteryThemeId = themes[1].id,
             selectedEmojiThemeId = themes[2].id,
+            showAnimation = true,
+            animationAssetName = animations.first().name,
             backgroundDecorationId = backgrounds.first().id,
             backgroundColorArgb = 0xFF111111.toInt(),
             foregroundColorArgb = 0xFFFFFFFF.toInt(),

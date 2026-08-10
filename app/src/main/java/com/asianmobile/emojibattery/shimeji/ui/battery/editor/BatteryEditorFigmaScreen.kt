@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.ui.battery.editor
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,22 +35,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -59,22 +60,32 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.ui.component.HomePremiumButton
 import com.asianmobile.emojibattery.shimeji.ui.component.PetPremiumBadge
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
 private val StatusBarRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-private val StatusBarRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
+private val StatusBarRobotoSemiBold = FontFamily.SansSerif
+private val StatusBarColorWheelBrush = Brush.sweepGradient(
+    (0 until 360 step 15).map { hue -> Color.hsv(hue.toFloat(), 0.7f, 0.92f) }
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -184,6 +195,7 @@ private fun EditorLargeTopBar(
                 text = stringResource(R.string.battery_editor_title),
                 color = colorResource(R.color.colors_212327),
                 fontFamily = StatusBarRobotoSemiBold,
+                fontWeight = FontWeight.SemiBold,
                 fontSize = titleSize,
                 lineHeight = (
                     dimensionResource(SspR.dimen._24ssp).value +
@@ -230,6 +242,7 @@ private fun EditorCompactTopBar(
                 text = title,
                 color = colorResource(R.color.colors_212327),
                 fontFamily = StatusBarRobotoSemiBold,
+                fontWeight = FontWeight.SemiBold,
                 fontSize = dimensionResource(SspR.dimen._15ssp).value.sp,
                 lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp
             )
@@ -271,6 +284,7 @@ private fun StatusBarOverview(
     onBackgroundDecoration: (Int) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit
 ) {
+    var activeColorTarget by remember { mutableStateOf<StatusBarColorTarget?>(null) }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -288,6 +302,7 @@ private fun StatusBarOverview(
             EditorDesignSection(title = stringResource(R.string.battery_editor_template)) {
                 TemplatePickerRow(
                     title = stringResource(R.string.battery_editor_battery_picker),
+                    titleIcon = R.drawable.ic_statusbar_template_battery,
                     state = state,
                     component = BatteryThemeComponent.BATTERY,
                     selectedThemeId = state.config.selectedBatteryThemeId,
@@ -297,24 +312,36 @@ private fun StatusBarOverview(
                 Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
                 TemplatePickerRow(
                     title = stringResource(R.string.battery_editor_emoji_picker),
+                    titleIcon = R.drawable.img_statusbar_template_emoji,
                     state = state,
                     component = BatteryThemeComponent.EMOJI,
                     selectedThemeId = state.config.selectedEmojiThemeId,
                     onMore = { onOpenPage(BatteryEditorPage.EMOJI_TEMPLATES) },
                     onSelectTheme = onSelectTheme
                 )
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+                AnimationPickerRow(
+                    state = state,
+                    onMore = { onOpenPage(BatteryEditorPage.ANIMATION) },
+                    onConfig = onConfig
+                )
             }
         }
         item {
             EditorDesignSection(title = stringResource(R.string.battery_editor_background)) {
-                DesignRowHeader(title = stringResource(R.string.battery_editor_color))
+                DesignRowHeader(
+                    title = stringResource(R.string.battery_editor_color),
+                    titleIcon = R.drawable.img_statusbar_color_palette
+                )
                 StatusBarColorPalette(
                     selected = state.config.backgroundColorArgb,
-                    onSelected = onBackgroundColor
+                    onSelected = onBackgroundColor,
+                    onCustomClick = { activeColorTarget = StatusBarColorTarget.BACKGROUND }
                 )
                 Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
                 DesignRowHeader(
                     title = stringResource(R.string.battery_editor_theme_picker),
+                    titleEmoji = stringResource(R.string.battery_editor_theme_icon),
                     onMore = { onOpenPage(BatteryEditorPage.BACKGROUND_THEMES) }
                 )
                 BackgroundThemeRow(
@@ -331,7 +358,8 @@ private fun StatusBarOverview(
                     selected = state.config.percentColorArgb,
                     onSelected = { color ->
                         onConfig(state.config.copy(percentColorArgb = color))
-                    }
+                    },
+                    onCustomClick = { activeColorTarget = StatusBarColorTarget.PERCENTAGE }
                 )
                 Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
                 DesignSlider(
@@ -391,6 +419,24 @@ private fun StatusBarOverview(
             }
         }
     }
+    activeColorTarget?.let { target ->
+        val selectedColor = when (target) {
+            StatusBarColorTarget.BACKGROUND -> state.config.backgroundColorArgb
+            StatusBarColorTarget.PERCENTAGE -> state.config.percentColorArgb
+        }
+        StatusBarColorPickerSheet(
+            selectedColor = selectedColor,
+            onColorChange = { color ->
+                when (target) {
+                    StatusBarColorTarget.BACKGROUND -> onBackgroundColor(color)
+                    StatusBarColorTarget.PERCENTAGE -> {
+                        onConfig(state.config.copy(percentColorArgb = color))
+                    }
+                }
+            },
+            onDismiss = { activeColorTarget = null }
+        )
+    }
 }
 
 @Composable
@@ -403,6 +449,7 @@ private fun EditorDesignSection(
             text = title,
             color = colorResource(R.color.colors_212327),
             fontFamily = StatusBarRobotoSemiBold,
+            fontWeight = FontWeight.SemiBold,
             fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
             lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp
         )
@@ -411,10 +458,10 @@ private fun EditorDesignSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
-                    elevation = dimensionResource(SdpR.dimen._9sdp),
+                    elevation = dimensionResource(SdpR.dimen._18sdp),
                     shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)),
-                    ambientColor = Color(0x1F666666),
-                    spotColor = Color(0x1F666666)
+                    ambientColor = colorResource(R.color.colors_1F666666),
+                    spotColor = colorResource(R.color.colors_1F666666)
                 )
                 .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
                 .background(colorResource(R.color.colors_FFFFFF))
@@ -428,16 +475,20 @@ private fun EditorDesignSection(
 @Composable
 private fun TemplatePickerRow(
     title: String,
+    @DrawableRes titleIcon: Int,
     state: BatteryEditorUiState,
     component: BatteryThemeComponent,
     selectedThemeId: Int,
     onMore: () -> Unit,
     onSelectTheme: (BatteryThemeEntry, BatteryThemeComponent) -> Unit
 ) {
-    DesignRowHeader(title = title, onMore = onMore)
+    DesignRowHeader(title = title, titleIcon = titleIcon, onMore = onMore)
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+    val orderedThemes = remember(state.themes, selectedThemeId) {
+        state.themes.sortedByDescending { it.id == selectedThemeId }
+    }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
-        items(state.themes, key = { it.id }) { theme ->
+        items(orderedThemes, key = { it.id }) { theme ->
             val locked = theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
                 !state.isPremium && theme.id !in state.config.rewardUnlockedThemeIds
             TemplateOption(
@@ -453,11 +504,65 @@ private fun TemplatePickerRow(
 }
 
 @Composable
-private fun DesignRowHeader(title: String, onMore: (() -> Unit)? = null) {
+private fun AnimationPickerRow(
+    state: BatteryEditorUiState,
+    onMore: () -> Unit,
+    onConfig: (BatteryStatusConfig) -> Unit
+) {
+    DesignRowHeader(
+        title = stringResource(R.string.battery_component_animation),
+        titleIcon = R.drawable.img_statusbar_template_animation,
+        onMore = onMore
+    )
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+    val orderedAnimations = remember(state.animations, state.config.animationAssetName) {
+        state.animations.sortedByDescending { it.name == state.config.animationAssetName }
+    }
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
+        items(orderedAnimations, key = { it.id }) { animation ->
+            AnimationTemplateOption(
+                animation = animation,
+                selected = state.config.showAnimation &&
+                    state.config.animationAssetName == animation.name,
+                onClick = {
+                    onConfig(
+                        state.config.copy(
+                            showAnimation = true,
+                            animationAssetName = animation.name
+                        )
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun DesignRowHeader(
+    title: String,
+    @DrawableRes titleIcon: Int? = null,
+    titleEmoji: String? = null,
+    onMore: (() -> Unit)? = null
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        when {
+            titleIcon != null -> Image(
+                painter = painterResource(titleIcon),
+                contentDescription = null,
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._12sdp))
+            )
+            titleEmoji != null -> Text(
+                text = titleEmoji,
+                fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp
+            )
+        }
+        if (titleIcon != null || titleEmoji != null) {
+            Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
+        }
         Text(
             text = title,
             color = colorResource(R.color.colors_212327),
@@ -471,22 +576,72 @@ private fun DesignRowHeader(title: String, onMore: (() -> Unit)? = null) {
                 modifier = Modifier
                     .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
                     .clickable(onClick = onMore)
-                    .padding(start = dimensionResource(SdpR.dimen._6sdp)),
+                    .padding(vertical = dimensionResource(SdpR.dimen._2sdp)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(R.string.discover_more),
                     color = colorResource(R.color.colors_212327),
-                    fontFamily = FontFamily(Font(R.font.inter_regular)),
-                    fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
+                    fontFamily = FontFamily.Default,
+                    fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp
                 )
+                Spacer(Modifier.width(dimensionResource(SdpR.dimen._2sdp)))
                 Icon(
-                    painter = painterResource(R.drawable.ic_chevron_right),
+                    painter = painterResource(R.drawable.ic_statusbar_more),
                     contentDescription = null,
-                    tint = colorResource(R.color.colors_212327),
+                    tint = Color.Unspecified,
                     modifier = Modifier.size(dimensionResource(SdpR.dimen._11sdp))
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun AnimationTemplateOption(
+    animation: BatteryAnimationEntry,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp))
+    Box(
+        modifier = Modifier
+            .size(dimensionResource(SdpR.dimen._46sdp))
+            .clip(shape)
+            .background(
+                colorResource(if (selected) R.color.colors_FFEBF1 else R.color.colors_FFFFFF)
+            )
+            .border(
+                dimensionResource(SdpR.dimen._1sdp),
+                colorResource(if (selected) R.color.colors_FB3675 else R.color.colors_FFEBF1),
+                shape
+            )
+            .semantics {
+                this.selected = selected
+                contentDescription = animation.name
+            }
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        if (animation.type == BatteryAnimationType.LOTTIE && animation.assetPath.isNotBlank()) {
+            val composition by rememberLottieComposition(
+                LottieCompositionSpec.File(animation.assetPath)
+            )
+            LottieAnimation(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._38sdp))
+            )
+        } else {
+            AsyncImage(
+                model = animation.assetPath,
+                fallback = painterResource(R.drawable.img_statusbar_template_animation),
+                error = painterResource(R.drawable.img_statusbar_template_animation),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._38sdp))
+            )
         }
     }
 }
@@ -552,25 +707,49 @@ private fun TemplateOption(
 }
 
 @Composable
-private fun StatusBarColorPalette(selected: Int, onSelected: (Int) -> Unit) {
+private fun StatusBarColorPalette(
+    selected: Int,
+    onSelected: (Int) -> Unit,
+    onCustomClick: () -> Unit
+) {
     val colors = listOf(
-        0xFFFFFFFF.toInt(),
-        0xFF000000.toInt(),
-        0xFF545454.toInt(),
-        0xFFFFCFCF.toInt(),
-        0xFFFFE5C7.toInt(),
-        0xFFFFF6A2.toInt(),
-        0xFFB7FCC6.toInt()
+        colorResource(R.color.colors_FFFFFF),
+        colorResource(R.color.colors_000000),
+        colorResource(R.color.colors_545454),
+        colorResource(R.color.colors_FFCFCF),
+        colorResource(R.color.colors_FFE5C7),
+        colorResource(R.color.colors_FFF6A2),
+        colorResource(R.color.colors_B7FCC6)
     )
-    Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
+    val presetArgb = remember(colors) { colors.map(Color::toArgb) }
+    Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
     LazyRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
-        items(colors) { argb ->
+        item(key = "custom_color") {
+            val isSelected = selected !in presetArgb
+            Box(
+                modifier = Modifier
+                    .size(dimensionResource(SdpR.dimen._22sdp))
+                    .clip(CircleShape)
+                    .background(StatusBarColorWheelBrush)
+                    .border(
+                        dimensionResource(SdpR.dimen._1sdp),
+                        colorResource(
+                            if (isSelected) R.color.colors_FB3675 else R.color.colors_FFEBF1
+                        ),
+                        CircleShape
+                    )
+                    .semantics { this.selected = isSelected }
+                    .clickable(onClick = onCustomClick)
+            )
+        }
+        items(colors) { color ->
+            val argb = color.toArgb()
             val isSelected = selected == argb
             Box(
                 modifier = Modifier
                     .size(dimensionResource(SdpR.dimen._22sdp))
                     .clip(CircleShape)
-                    .background(Color(argb))
+                    .background(color)
                     .border(
                         dimensionResource(SdpR.dimen._1sdp),
                         colorResource(
@@ -593,7 +772,7 @@ private fun BackgroundThemeRow(
 ) {
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
     LazyRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
-        items(backgrounds.take(8), key = { it.id }) { background ->
+        items(backgrounds.take(3), key = { it.id }) { background ->
             BackgroundThemeOption(
                 background = background,
                 selected = selectedId == background.id,
@@ -614,65 +793,89 @@ private fun DesignSlider(
     range: ClosedFloatingPointRange<Float>,
     onValueChange: (Float) -> Unit
 ) {
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = label,
-                color = colorResource(R.color.colors_212327),
-                fontFamily = StatusBarRobotoMedium,
-                fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
-                modifier = Modifier.weight(1f)
+    val coercedValue = value.coerceIn(range)
+    val fraction = if (range.endInclusive == range.start) {
+        0f
+    } else {
+        ((coercedValue - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
+        Text(
+            text = label,
+            color = colorResource(R.color.colors_212327),
+            fontFamily = StatusBarRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Slider(
+                value = coercedValue,
+                onValueChange = onValueChange,
+                valueRange = range,
+                thumb = {
+                    Box(
+                        Modifier
+                            .width(dimensionResource(SdpR.dimen._3sdp))
+                            .height(dimensionResource(SdpR.dimen._29sdp))
+                            .clip(CircleShape)
+                            .background(colorResource(R.color.colors_FB3675))
+                    )
+                },
+                track = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(dimensionResource(SdpR.dimen._9sdp))
+                            .clip(CircleShape)
+                            .background(colorResource(R.color.colors_FFEBF1))
+                    ) {
+                        Box(
+                            Modifier
+                                .fillMaxWidth(fraction)
+                                .height(dimensionResource(SdpR.dimen._9sdp))
+                                .background(colorResource(R.color.colors_FB3675))
+                        )
+                        Box(
+                            Modifier
+                                .align(Alignment.CenterEnd)
+                                .padding(end = dimensionResource(SdpR.dimen._3sdp))
+                                .size(dimensionResource(SdpR.dimen._3sdp))
+                                .clip(CircleShape)
+                                .background(colorResource(R.color.colors_FDA3C0))
+                        )
+                    }
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(dimensionResource(SdpR.dimen._38sdp))
             )
+            Spacer(Modifier.width(dimensionResource(SdpR.dimen._12sdp)))
             Text(
                 text = stringResource(R.string.battery_editor_dp_value, value.toInt()),
                 color = colorResource(R.color.colors_212327),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
-                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
+                fontFamily = StatusBarRobotoMedium,
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+                textAlign = TextAlign.End,
+                modifier = Modifier.width(dimensionResource(SdpR.dimen._25sdp))
             )
         }
-        Slider(
-            value = value.coerceIn(range),
-            onValueChange = onValueChange,
-            valueRange = range,
-            colors = SliderDefaults.colors(
-                thumbColor = colorResource(R.color.colors_FB3675),
-                activeTrackColor = colorResource(R.color.colors_FB3675),
-                inactiveTrackColor = colorResource(R.color.colors_FFEBF1),
-                activeTickColor = Color.Transparent,
-                inactiveTickColor = Color.Transparent
-            ),
-            thumb = {
-                Box(
-                    Modifier
-                        .width(dimensionResource(SdpR.dimen._3sdp))
-                        .height(dimensionResource(SdpR.dimen._29sdp))
-                        .clip(CircleShape)
-                        .background(colorResource(R.color.colors_FB3675))
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._38sdp))
-        )
     }
 }
 
 @Composable
 private fun StatusBarComponentGrid(onOpenPage: (BatteryEditorPage) -> Unit) {
     val destinations = listOf(
-        FigmaComponentDestination(R.string.battery_component_airplane, BatteryEditorPage.AIRPLANE, "ic_status_airplane_classic"),
-        FigmaComponentDestination(R.string.battery_component_ringer, BatteryEditorPage.RINGER, "ic_status_silent_bell_outline"),
-        FigmaComponentDestination(R.string.battery_component_date_short, BatteryEditorPage.DATE_TIME, "ic_datetime"),
-        FigmaComponentDestination(R.string.battery_component_hotspot, BatteryEditorPage.HOTSPOT, "ic_status_hotspot_orbit"),
-        FigmaComponentDestination(R.string.battery_component_emotion, BatteryEditorPage.EMOJI, "ic_notification_pet"),
-        FigmaComponentDestination(R.string.battery_component_wifi, BatteryEditorPage.WIFI, "ic_status_wifi_solid"),
-        FigmaComponentDestination(R.string.battery_component_signal, BatteryEditorPage.SIGNAL, "ic_status_signal_rounded"),
-        FigmaComponentDestination(R.string.battery_component_data_short, BatteryEditorPage.DATA, "ic_data"),
-        FigmaComponentDestination(R.string.battery_component_charge_short, BatteryEditorPage.CHARGE, "ic_charge"),
-        FigmaComponentDestination(R.string.battery_component_clock, BatteryEditorPage.DATE_TIME, "ic_datetime")
+        FigmaComponentDestination(R.string.battery_component_airplane, BatteryEditorPage.AIRPLANE, R.drawable.ic_statusbar_custom_airplane),
+        FigmaComponentDestination(R.string.battery_component_ringer, BatteryEditorPage.RINGER, R.drawable.ic_statusbar_custom_ringer),
+        FigmaComponentDestination(R.string.battery_component_date_short, BatteryEditorPage.DATE_TIME, R.drawable.ic_statusbar_custom_date),
+        FigmaComponentDestination(R.string.battery_component_hotspot, BatteryEditorPage.HOTSPOT, R.drawable.ic_statusbar_custom_hotspot),
+        FigmaComponentDestination(R.string.battery_component_emotion, BatteryEditorPage.EMOJI, R.drawable.ic_statusbar_custom_emotion),
+        FigmaComponentDestination(R.string.battery_component_wifi, BatteryEditorPage.WIFI, R.drawable.ic_statusbar_custom_wifi),
+        FigmaComponentDestination(R.string.battery_component_signal, BatteryEditorPage.SIGNAL, R.drawable.ic_statusbar_custom_signal),
+        FigmaComponentDestination(R.string.battery_component_data_short, BatteryEditorPage.DATA, R.drawable.ic_statusbar_custom_data),
+        FigmaComponentDestination(R.string.battery_component_charge_short, BatteryEditorPage.CHARGE, R.drawable.ic_statusbar_custom_charge),
+        FigmaComponentDestination(R.string.battery_component_clock, BatteryEditorPage.DATE_TIME, R.drawable.ic_statusbar_custom_clock)
     )
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))) {
         destinations.chunked(4).forEach { rowItems ->
@@ -699,11 +902,6 @@ private fun FigmaComponentTile(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val context = LocalContext.current
-    val resources = LocalResources.current
-    val drawableId = remember(destination.iconName, resources) {
-        resources.getIdentifier(destination.iconName, "drawable", context.packageName)
-    }
     Column(
         modifier = modifier.clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -716,20 +914,11 @@ private fun FigmaComponentTile(
                 .background(colorResource(R.color.colors_FFEBF1)),
             contentAlignment = Alignment.Center
         ) {
-            if (drawableId != 0) {
-                Icon(
-                    painter = painterResource(drawableId),
-                    contentDescription = null,
-                    tint = colorResource(R.color.colors_212327),
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._28sdp))
-                )
-            } else {
-                Text(
-                    text = stringResource(destination.label).take(1),
-                    color = colorResource(R.color.colors_212327),
-                    fontFamily = StatusBarRobotoSemiBold
-                )
-            }
+            Image(
+                painter = painterResource(destination.icon),
+                contentDescription = null,
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._28sdp))
+            )
         }
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
         Text(
@@ -794,6 +983,7 @@ private fun StatusBarApplyPanel(enabled: Boolean, onApply: () -> Unit) {
                 text = stringResource(R.string.battery_apply),
                 color = colorResource(R.color.colors_FFFFFF),
                 fontFamily = StatusBarRobotoSemiBold,
+                fontWeight = FontWeight.SemiBold,
                 fontSize = dimensionResource(SspR.dimen._14ssp).value.sp
             )
         }
@@ -991,8 +1181,13 @@ private fun pickerTitle(page: BatteryEditorPage): String = when (page) {
 private data class FigmaComponentDestination(
     @param:androidx.annotation.StringRes val label: Int,
     val page: BatteryEditorPage,
-    val iconName: String
+    @param:DrawableRes val icon: Int
 )
+
+private enum class StatusBarColorTarget {
+    BACKGROUND,
+    PERCENTAGE
+}
 
 private const val PICKER_ART_FRACTION = 0.7303f
 private const val FIGMA_FREE_BACKGROUND_COUNT = 5

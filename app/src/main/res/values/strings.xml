@@ -889,6 +889,7 @@
     <string name="battery_editor_battery_picker">Battery</string>
     <string name="battery_editor_emoji_picker">Emoji</string>
     <string name="battery_editor_theme_picker">Theme</string>
+    <string name="battery_editor_theme_icon">🏞️</string>
     <string name="battery_editor_template">Template</string>
     <string name="battery_editor_background">Background</string>
     <string name="battery_editor_color">Color</string>
@@ -901,6 +902,12 @@
     <string name="battery_editor_right_margin">Right Margin</string>
     <string name="battery_editor_customize_icon">Customize icon</string>
     <string name="battery_editor_dp_value">%1$d dp</string>
+    <string name="battery_color_picker_title">Select color</string>
+    <string name="battery_color_picker_grid">Grid</string>
+    <string name="battery_color_picker_sliders">Sliders</string>
+    <string name="battery_color_picker_opacity">OPACITY</string>
+    <string name="battery_color_picker_rgb">RGB</string>
+    <string name="battery_color_picker_percentage">%1$d%%</string>
     <string name="battery_component_date_short">Date</string>
     <string name="battery_component_emotion">Emotion</string>
     <string name="battery_component_data_short">Data</string>

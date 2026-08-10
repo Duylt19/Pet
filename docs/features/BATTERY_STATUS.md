@@ -19,6 +19,9 @@ Vertical slice hiện đã có trong source:
 - Editor dùng Material app bar `exitUntilCollapsed`, preview nhúng luôn hiển thị và các
   library Battery/Emoji/Theme là child destination dùng chung ViewModel/draft. Battery/Emoji
   dùng grid ba cột; Theme dùng grid hai cột từ catalog runtime.
+- Overview có đủ picker Battery/Emoji/Animation, Color/Theme và color picker HSV + opacity.
+  Preset, slider và color picker đều cập nhật draft ngay; overlay thật chỉ nhận thay đổi khi
+  feature đang bật.
 - Catalog luôn cho phép mở editor để thử bằng preview nhúng. Overlay status bar thật chỉ nhận
   draft live khi feature đã được bật; nếu feature đang tắt thì editor không tự bật overlay dù
   Accessibility đã được cấp. Apply vẫn yêu cầu Accessibility trước khi bật.
@@ -54,15 +57,13 @@ Battery entry và ngăn service attach window cho tới khi các gate được d
 ## Luồng người dùng
 
 ```text
-Home → Battery styles → chọn theme
-                          ├─ Accessibility chưa bật → disclosure → Settings
-                          │                              └─ bật → Customize status bar
-                          └─ Accessibility đã bật → Customize status bar
+Home → Battery styles → chọn theme → Customize status bar
                                       ├─ khởi tạo pet + pin cùng item
-                                      ├─ đổi pet và pin độc lập theo category
-                                      ├─ live preview trên status bar
+                                      ├─ đổi pet, pin, animation, nền và màu trong draft
+                                      ├─ feature đang bật → live preview trên status bar
+                                      ├─ feature đang tắt → chỉ preview nhúng
                                       ├─ destination editor con → Done/Back → overview giữ scroll
-                                      └─ Apply → persist + render
+                                      └─ Apply → nếu thiếu quyền thì disclosure → persist + render
 ```
 
 Premium theme chưa mở hiển thị dialog Rewarded/Premium. Theme thiếu hoặc sai checksum
