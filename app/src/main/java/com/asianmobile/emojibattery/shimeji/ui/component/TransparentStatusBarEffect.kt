@@ -13,6 +13,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 
+/**
+ * Overrides the status bar appearance for as long as one screen is up.
+ *
+ * On dispose it restores the app default — dark icons for the white sheet — rather than whatever
+ * it found when it composed. Two of these overlap during a navigation transition, so "whatever it
+ * found" can be the *other* screen's override, which used to leak light icons onto a white screen.
+ */
 @Suppress("DEPRECATION")
 @Composable
 fun TransparentStatusBarEffect(useDarkIcons: Boolean) {
@@ -25,8 +32,6 @@ fun TransparentStatusBarEffect(useDarkIcons: Boolean) {
         val controller = window?.let {
             WindowCompat.getInsetsController(it, it.decorView)
         }
-        val previousStatusBarColor = window?.statusBarColor
-        val previousLightStatusBars = controller?.isAppearanceLightStatusBars
 
         fun applyStatusBarAppearance() {
             window ?: return
@@ -45,10 +50,8 @@ fun TransparentStatusBarEffect(useDarkIcons: Boolean) {
 
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
-            previousStatusBarColor?.let { window?.statusBarColor = it }
-            previousLightStatusBars?.let {
-                controller?.isAppearanceLightStatusBars = it
-            }
+            window?.statusBarColor = Color.TRANSPARENT
+            controller?.isAppearanceLightStatusBars = true
         }
     }
 }

@@ -39,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -259,14 +258,18 @@ internal fun GrantPermissionsContent(
     }
 }
 
-/** DROP_SHADOW r=9 a=0.17 on every white card in the design. */
+/**
+ * DROP_SHADOW r=9 a=0.17 on every white card in the design. Compose spreads a shadow downwards
+ * from its elevation rather than blurring evenly, so matching the alpha alone leaves a white card
+ * on a white sheet with no visible edge — the elevation and alpha are raised until the card reads.
+ */
 @Composable
 private fun Modifier.cardSurface(): Modifier {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
-    val shadowColor = Color.Black.copy(alpha = 0.17f)
+    val shadowColor = colorResource(R.color.colors_212327).copy(alpha = 0.30f)
     return this
         .shadow(
-            elevation = dimensionResource(SdpR.dimen._5sdp),
+            elevation = dimensionResource(SdpR.dimen._8sdp),
             shape = shape,
             ambientColor = shadowColor,
             spotColor = shadowColor

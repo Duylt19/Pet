@@ -71,6 +71,20 @@ Pet Store visual contract:
   `SPECIAL` thật của pack; chỉ fallback `SPECIAL_2`, rồi thumbnail tĩnh khi pack không
   cung cấp skill đặc biệt.
 
+System bar:
+
+- app chạy edge-to-edge, status bar và navigation bar luôn trong suốt. Mặc định là
+  `isAppearanceLightStatusBars = true` — "light bar" nghĩa là nền sáng nên hệ thống vẽ đồng hồ
+  và icon **màu tối**, đủ tương phản với tông trắng chủ đạo của app;
+- chỉ bốn màn onboarding full-bleed (Splash, Language, Intro, Permission) lật lại icon sáng
+  bằng `TransparentStatusBarEffect(useDarkIcons = false)`;
+- `MainActivity.hideSystemNavigationBar()` chạy theo mỗi lần đổi window focus và
+  `onResume()` chỉ set lại **màu** bar; cả hai không đụng tới appearance, nếu không override
+  của màn đang hiện sẽ bị ghi đè ngay khi focus quay lại;
+- `TransparentStatusBarEffect` khi dispose trả về **mặc định app** (icon tối), không trả về
+  "giá trị trước đó": hai effect chồng nhau lúc chuyển màn nên "giá trị trước đó" có thể là
+  override của màn kia và làm icon sáng lọt sang màn nền trắng.
+
 Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343` (tắt):
 
 - `ui/component/AppSwitch.kt` là switch duy nhất của app; mọi toggle dùng nó, không màn nào
@@ -88,8 +102,10 @@ Grant Permissions contract theo Figma node `8080:9754`:
 - ba nhóm đánh số bằng chip tròn `24×24` nền `#FB3675` (số Roboto 500 16/24), cách chip 8px:
   Necessary, Enhanced Stability, Recommend. Khoảng cách heading → card và card → card là 12px,
   giữa hai nhóm là 20px;
-- card trắng `328×?` radius 16, padding trong 16, shadow `DROP_SHADOW r=9 offset=(0,0) a=0.17`
-  (Compose: `shadow(_5sdp, alpha 0.17)`); icon quyền `34×34` radius 10 với gradient riêng
+- card trắng `328×?` radius 16, padding trong 16, shadow `DROP_SHADOW r=9 offset=(0,0) a=0.17`.
+  Compose đổ bóng xuống dưới theo elevation chứ không blur đều như Figma, nên copy đúng alpha
+  thì card trắng trên nền trắng gần như mất viền — dùng `shadow(_8sdp, #212327 alpha 0.30)`
+  để bóng đọc được; icon quyền `34×34` radius 10 với gradient riêng
   từng quyền, cách text 8px, text cách switch 8px;
 - card accessibility có badge `Required` `#FFECEC`/`#F04438` hoặc `Allowed`
   `#E6F9EF`/`#00C062` (Roboto 500 10/14, padding 10×4), minh hoạ hai bước và CTA

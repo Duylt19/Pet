@@ -49,11 +49,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // The app sits on a white sheet, so the status bar draws its clock and icons dark by
+        // default. The onboarding screens are full-bleed artwork and flip this back to light
+        // for themselves via TransparentStatusBarEffect.
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+            statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
         )
-        applyDarkSystemBars()
+        applyLightSystemBars()
 
         setContent {
             val mainUiState by mainViewModel.uiState.collectAsState()
@@ -142,8 +145,14 @@ class MainActivity : ComponentActivity() {
         finishAffinity()
     }
 
+    /**
+     * Runs on every window focus change, so it must leave the status bar alone: a screen that
+     * asked for light icons would otherwise lose them the moment focus came back.
+     */
+    @Suppress("DEPRECATION")
     private fun hideSystemNavigationBar() {
-        applyDarkSystemBars()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.navigationBarColor = Color.TRANSPARENT
         WindowInsetsControllerCompat(window, window.decorView).apply {
             systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -152,13 +161,18 @@ class MainActivity : ComponentActivity() {
     }
 
     @Suppress("DEPRECATION")
-    private fun applyDarkSystemBars() {
+    private fun applyTransparentSystemBars() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = Color.TRANSPARENT
+    }
+
+    private fun applyLightSystemBars() {
+        applyTransparentSystemBars()
         WindowInsetsControllerCompat(window, window.decorView).apply {
-            isAppearanceLightStatusBars = false
-            isAppearanceLightNavigationBars = false
+            // "Light bars" means a light background, so the platform draws dark content on them.
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
         }
     }
 
@@ -169,7 +183,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        applyDarkSystemBars()
+        // Colours only: whether the icons are light or dark belongs to whichever screen is up.
+        applyTransparentSystemBars()
         if (
             AdOverlayState.isAdShowing.value &&
             !InterstitialUtil.getInstance().isShowing &&
