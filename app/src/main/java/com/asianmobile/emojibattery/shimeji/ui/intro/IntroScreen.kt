@@ -56,10 +56,10 @@ private val robotoMediumFontFamily = FontFamily(
     Font(R.font.roboto_medium, FontWeight.Medium)
 )
 private val interRegularFontFamily = FontFamily(
-    Font(R.font.inter_regular, FontWeight.Normal)
+    Font(R.font.roboto_regular, FontWeight.Normal)
 )
 private val interSemiBoldFontFamily = FontFamily(
-    Font(R.font.inter_semibold, FontWeight.SemiBold)
+    Font(R.font.roboto_semibold, FontWeight.SemiBold)
 )
 
 private data class IntroPage(

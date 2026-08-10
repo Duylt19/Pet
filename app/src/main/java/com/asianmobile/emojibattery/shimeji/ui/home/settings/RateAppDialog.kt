@@ -58,6 +58,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ui.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ui.component.DismissibleDialogBackdrop
 import com.asianmobile.emojibattery.shimeji.ui.component.PinkLoveSticker
 import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
@@ -65,7 +66,7 @@ import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 import kotlinx.coroutines.delay
 
-private val RateRobotoRegular = FontFamily.SansSerif
+private val RateRobotoRegular = RobotoFontFamily
 private val RateRobotoMedium = FontFamily(Font(R.font.roboto_medium))
 private val RateRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 private const val RateDialogWidthFraction = 312f / 360f

@@ -63,9 +63,9 @@ internal fun PetMessageEditorDialog(
         message.codePointCount(0, message.length)
     } ?: 0
     val isValid = isWithinCountLimit && isWithinLengthLimit
-    val fontRegular = FontFamily(Font(R.font.inter_regular))
-    val fontMedium = FontFamily(Font(R.font.inter_medium))
-    val fontSemiBold = FontFamily(Font(R.font.inter_semibold))
+    val fontRegular = FontFamily(Font(R.font.roboto_regular))
+    val fontMedium = FontFamily(Font(R.font.roboto_medium))
+    val fontSemiBold = FontFamily(Font(R.font.roboto_semibold))
 
     Dialog(
         onDismissRequest = onDismiss,

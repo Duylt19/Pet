@@ -121,13 +121,13 @@ fun PetCustomizationScreen(
                     state.name.ifBlank { stringResource(R.string.home_pet_default_name) }
                 ),
                 color = colorResource(R.color.colors_2F2440),
-                fontFamily = FontFamily(Font(R.font.inter_bold)),
+                fontFamily = FontFamily(Font(R.font.roboto_bold)),
                 fontSize = dimensionResource(SspR.dimen._20ssp).value.sp
             )
             Text(
                 text = stringResource(R.string.pet_customization_subtitle),
                 color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontFamily = FontFamily(Font(R.font.roboto_regular)),
                 fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
             )
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
@@ -211,7 +211,7 @@ fun PetCustomizationScreen(
             Text(
                 text = stringResource(R.string.pet_customization_apply_note),
                 color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontFamily = FontFamily(Font(R.font.roboto_regular)),
                 fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(SdpR.dimen._4sdp),
@@ -222,7 +222,7 @@ fun PetCustomizationScreen(
                 Text(
                     text = stringResource(R.string.pet_customization_remove),
                     color = colorResource(R.color.colors_E45D6A),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                     fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
@@ -271,7 +271,7 @@ private fun PetIdentityCard(
                 Text(
                     text = (state.slotIndex + 1).toString(),
                     color = colorResource(R.color.colors_7B61FF),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                     fontSize = dimensionResource(SspR.dimen._17ssp).value.sp
                 )
             }
@@ -280,14 +280,14 @@ private fun PetIdentityCard(
         Text(
             text = state.name.ifBlank { stringResource(R.string.home_pet_default_name) },
             color = colorResource(R.color.colors_2F2440),
-            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontFamily = FontFamily(Font(R.font.roboto_semibold)),
             fontSize = dimensionResource(SspR.dimen._14ssp).value.sp
         )
         if (state.author.isNotBlank()) {
             Text(
                 text = stringResource(R.string.pet_customization_by_author, state.author),
                 color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontFamily = FontFamily(Font(R.font.roboto_regular)),
                 fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
             )
         }
@@ -295,7 +295,7 @@ private fun PetIdentityCard(
         Text(
             text = stringResource(R.string.pet_customization_change_character),
             color = colorResource(R.color.colors_5D46D7),
-            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontFamily = FontFamily(Font(R.font.roboto_semibold)),
             fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
             modifier = Modifier
                 .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp)))
@@ -454,7 +454,7 @@ private fun PetValueSettingsRow(
                 Text(
                     text = value,
                     color = colorResource(R.color.colors_2F2440),
-                    fontFamily = FontFamily(Font(R.font.inter_medium)),
+                    fontFamily = FontFamily(Font(R.font.roboto_medium)),
                     fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.width(dimensionResource(SdpR.dimen._34sdp))
@@ -483,7 +483,7 @@ private fun StepperButton(
         color = colorResource(
             if (enabled) R.color.colors_7B61FF else R.color.colors_776D84
         ),
-        fontFamily = FontFamily(Font(R.font.inter_semibold)),
+        fontFamily = FontFamily(Font(R.font.roboto_semibold)),
         fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
         textAlign = TextAlign.Center,
         modifier = Modifier

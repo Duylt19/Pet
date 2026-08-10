@@ -64,12 +64,15 @@ Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
   DIY FAB và Lottie star bling dùng lại component Discover.
 
 Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:7466`,
-`8227:6510`, `8155:4852`, `8345:6797`, `8227:6044`, `8240:8590`:
+`8227:6510`, `8155:4852`, `8345:6797`, `8227:6044`, `8240:8590`, `8345:7719`:
 
 - overview dùng Material large app bar `exitUntilCollapsed`: title lớn khi expanded và title
   inline khi collapsed; Back và PRO luôn pinned;
-- preview `328×50px` luôn hiện. Overlay thật chỉ live-update khi feature đã bật; trạng thái
-  tắt chỉ dùng preview nhúng;
+- preview `328×50px` luôn được ghim ngay dưới app bar trên overview và mọi màn More; chỉ phần
+  option bên dưới cuộn. Overlay thật chỉ live-update khi feature đã bật; trạng thái tắt chỉ
+  dùng preview nhúng. Preview dùng cùng thứ tự vật lý với renderer thật: trailing LTR là
+  Hotspot → Signal/Data → Wifi → Percentage → Battery/Emoji pair → Charge; Battery và Emoji
+  chồng cùng tâm và mọi component cách nhau 4dp;
 - More Battery/Emoji mở grid ba cột với artwork 73.03% item; More Theme mở grid hai cột từ
   background catalog runtime. Tất cả child giữ chung draft và Back không tự Apply;
 - Template có đủ Battery, Emoji và Animation; header dùng icon Figma 16px và chevron vector
@@ -82,7 +85,9 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
 - toàn màn dùng Roboto local đúng weight: top bar/section/Apply là SemiBold 600, row/slider/grid
   là Medium 500 và More là Regular 400. Top bar collapsed 20/28, expanded 24/32; không dùng
   SansSerif synthetic hoặc Roboto Condensed để giả SemiBold;
-- Apply là panel sticky phía trên banner editor dùng chung.
+- Apply là Roboto SemiBold 18/26 và nằm trong panel sticky phía trên banner editor dùng chung;
+- Back khi draft chưa Apply mở discard sheet full-width theo node `8345:7719`: Cancel giữ draft,
+  Exit restore config đã lưu rồi pop; sheet dùng native `HEIGHT_222`.
 
 Pet Store visual contract:
 
@@ -261,6 +266,10 @@ pet không được lặp ở app-wide Settings hoặc ghi vào global state.
   trợ hoặc quá phức tạp để render ổn định trên Android; bitmap fallback phải export `PNG @3x`.
 - Bitmap Figma đặt trong `drawable-nodpi` và luôn có kích thước hiển thị rõ trong Compose để
   Android không dùng kích thước pixel gốc làm layout size.
+- Typography mặc định toàn app dùng `RobotoFontFamily` từ `ui/theme/Type.kt`, gồm Regular
+  400, Medium 500, SemiBold 600 và Bold 700; mọi Material 3 text role đều phải kế thừa family
+  này. Chỉ giữ font riêng cho artwork/promo đã được Figma chỉ định và lựa chọn font ngày giờ
+  do user cấu hình. Native-ad typography tiếp tục thuộc design contract riêng của module ads.
 - Font: tái sử dụng `res/font` và theme; không khai báo trùng trong từng component.
 - Không hardcode string/hex color trong Composable.
 

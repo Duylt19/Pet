@@ -139,7 +139,7 @@ private fun PermissionScreenContent(
             Text(
                 text = stringResource(R.string.permission_title),
                 color = colorResource(R.color.white),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._18ssp).value.sp,
                 lineHeight = dimensionResource(SspR.dimen._24ssp).value.sp,
                 textAlign = TextAlign.Center
@@ -148,7 +148,7 @@ private fun PermissionScreenContent(
             Text(
                 text = stringResource(R.string.permission_subtitle),
                 color = colorResource(R.color.colors_9B9C9E),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontFamily = FontFamily(Font(R.font.roboto_regular)),
                 fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
                 lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
                 textAlign = TextAlign.Center
@@ -206,14 +206,14 @@ private fun PermissionItem(
             Text(
                 text = title,
                 color = colorResource(R.color.white),
-                fontFamily = FontFamily(Font(R.font.inter_medium)),
+                fontFamily = FontFamily(Font(R.font.roboto_medium)),
                 fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
             )
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._3sdp)))
             Text(
                 text = subtitle,
                 color = colorResource(R.color.colors_9B9C9E),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontFamily = FontFamily(Font(R.font.roboto_regular)),
                 fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
                 lineHeight = dimensionResource(SspR.dimen._11ssp).value.sp
             )

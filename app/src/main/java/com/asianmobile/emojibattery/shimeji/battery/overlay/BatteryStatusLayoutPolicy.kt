@@ -1,5 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.battery.overlay
 
+const val BATTERY_STATUS_COMPONENT_GAP_DP = 4f
+
 /**
  * Pure layout policy shared by the overlay and editor preview.
  *

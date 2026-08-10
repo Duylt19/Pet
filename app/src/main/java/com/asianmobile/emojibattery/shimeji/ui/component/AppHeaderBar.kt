@@ -48,7 +48,7 @@ fun AppHeaderBar(
     modifier: Modifier = Modifier,
     trailing: @Composable RowScope.() -> Unit = {}
 ) {
-    val fontSemiBold = FontFamily(Font(R.font.inter_semibold))
+    val fontSemiBold = FontFamily(Font(R.font.roboto_semibold))
     val bgColor = colorResource(R.color.colors_FFF9F4)
     val contentColor = colorResource(R.color.colors_2F2440)
 

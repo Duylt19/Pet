@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ui.theme.RobotoFontFamily
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
@@ -72,7 +73,7 @@ fun HomeHeader(
         Text(
             text = stringResource(R.string.discover_brand_name),
             color = colorResource(R.color.colors_212327),
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = RobotoFontFamily,
             fontWeight = FontWeight.ExtraBold,
             fontStyle = FontStyle.Italic,
             fontSize = dimensionResource(SspR.dimen._17ssp).value.sp,

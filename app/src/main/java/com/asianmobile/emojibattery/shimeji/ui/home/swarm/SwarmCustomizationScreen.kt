@@ -182,7 +182,7 @@ private fun SwarmCustomizationContent(
             Text(
                 text = stringResource(R.string.swarm_customization_live_note),
                 color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontFamily = FontFamily(Font(R.font.roboto_regular)),
                 fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(SdpR.dimen._4sdp),
@@ -207,7 +207,7 @@ private fun SwarmCustomizationContent(
         ) {
             Text(
                 text = stringResource(R.string.common_done),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
             )
         }
@@ -266,7 +266,7 @@ private fun SwarmIdentityCard(
                     stringResource(R.string.home_pet_default_name)
                 },
                 color = colorResource(R.color.colors_2F2440),
-                fontFamily = FontFamily(Font(R.font.inter_bold)),
+                fontFamily = FontFamily(Font(R.font.roboto_bold)),
                 fontSize = dimensionResource(SspR.dimen._15ssp).value.sp,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -278,7 +278,7 @@ private fun SwarmIdentityCard(
                         state.author
                     ),
                     color = colorResource(R.color.colors_776D84),
-                    fontFamily = FontFamily(Font(R.font.inter_regular)),
+                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
                     fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
                 )
             }
@@ -286,7 +286,7 @@ private fun SwarmIdentityCard(
             Text(
                 text = stringResource(R.string.pet_customization_change_character),
                 color = colorResource(R.color.colors_12B890),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
             )
         }
@@ -315,7 +315,7 @@ private fun SwarmSectionTitle(title: String) {
         Text(
             text = title,
             color = colorResource(R.color.colors_2F2440),
-            fontFamily = FontFamily(Font(R.font.inter_bold)),
+            fontFamily = FontFamily(Font(R.font.roboto_bold)),
             fontWeight = FontWeight.Bold,
             fontSize = dimensionResource(SspR.dimen._15ssp).value.sp
         )
@@ -350,13 +350,13 @@ private fun SwarmCountRow(
             Text(
                 text = stringResource(R.string.swarm_customization_count),
                 color = colorResource(R.color.colors_2F2440),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
             )
             Text(
                 text = stringResource(R.string.swarm_customization_count_description, maxCount),
                 color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontFamily = FontFamily(Font(R.font.roboto_regular)),
                 fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
             )
         }
@@ -369,7 +369,7 @@ private fun SwarmCountRow(
         Text(
             text = count.toString(),
             color = colorResource(R.color.colors_12B890),
-            fontFamily = FontFamily(Font(R.font.inter_bold)),
+            fontFamily = FontFamily(Font(R.font.roboto_bold)),
             fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.size(dimensionResource(SdpR.dimen._30sdp))
@@ -426,13 +426,13 @@ private fun SwarmToggleRow(
             Text(
                 text = title,
                 color = colorResource(R.color.colors_2F2440),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
             )
             Text(
                 text = subtitle,
                 color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontFamily = FontFamily(Font(R.font.roboto_regular)),
                 fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
             )
         }
@@ -462,14 +462,14 @@ private fun SwarmValueSlider(
             Text(
                 text = title,
                 color = colorResource(R.color.colors_2F2440),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
                 modifier = Modifier.weight(1f)
             )
             Text(
                 text = valueLabel,
                 color = colorResource(R.color.colors_12B890),
-                fontFamily = FontFamily(Font(R.font.inter_medium)),
+                fontFamily = FontFamily(Font(R.font.roboto_medium)),
                 fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
             )
         }

@@ -31,6 +31,8 @@ data class BatteryAnimatedAsset(
 
 class BatteryStatusBarView(context: Context) : View(context) {
     private val density = resources.displayMetrics.density
+    private val robotoMediumTypeface = ResourcesCompat.getFont(context, R.font.roboto_medium)
+        ?: Typeface.create("sans-serif-medium", Typeface.NORMAL)
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val destination = RectF()
     private val drawableCache = mutableMapOf<String, Drawable?>()
@@ -119,7 +121,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
         val centerY = height / 2f
         val leftPadding = config.leftPaddingDp * density
         val rightPadding = config.rightPaddingDp * density
-        val gap = 4f * density
+        val gap = BATTERY_STATUS_COMPONENT_GAP_DP * density
         val availableWidth = contentRight - leftPadding - rightPadding
         val layout = cachedLayout
             ?.takeIf { cachedLayoutWidth == availableWidth }
@@ -263,7 +265,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                 centerY,
                 config.percentSizeDp,
                 config.percentColorArgb,
-                Typeface.DEFAULT_BOLD,
+                robotoMediumTypeface,
                 fromLeft
             ).afterGap(gap, fromLeft)
         }
@@ -289,7 +291,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                 centerY,
                 config.dataSizeDp,
                 config.dataColorArgb,
-                Typeface.DEFAULT_BOLD,
+                robotoMediumTypeface,
                 fromLeft
             ).afterGap(gap, fromLeft)
             cursor = drawStatusIcon(
@@ -435,7 +437,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         measuredTextWidth(
                             percentageText,
                             config.percentSizeDp,
-                            Typeface.DEFAULT_BOLD
+                            robotoMediumTypeface
                         ),
                         gap,
                         priority = 95
@@ -462,7 +464,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                     measuredTextWidth(
                         config.dataType.label,
                         config.dataSizeDp,
-                        Typeface.DEFAULT_BOLD
+                        robotoMediumTypeface
                     ) + gap
                 add(
                     layoutItem(
@@ -648,7 +650,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
         centerY: Float,
         sizeDp: Float,
         color: Int,
-        typeface: Typeface = Typeface.DEFAULT_BOLD
+        typeface: Typeface = robotoMediumTypeface
     ): Float {
         prepareText(sizeDp, color, typeface, Paint.Align.LEFT)
         canvas.drawText(value, left, textBaseline(centerY), paint)
@@ -662,7 +664,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
         centerY: Float,
         sizeDp: Float,
         color: Int,
-        typeface: Typeface = Typeface.DEFAULT_BOLD
+        typeface: Typeface = robotoMediumTypeface
     ): Float {
         prepareText(sizeDp, color, typeface, Paint.Align.RIGHT)
         canvas.drawText(value, right, textBaseline(centerY), paint)
@@ -719,8 +721,8 @@ class BatteryStatusBarView(context: Context) : View(context) {
             "font",
             context.packageName
         )
-        return if (id == 0) Typeface.DEFAULT_BOLD
-        else ResourcesCompat.getFont(context, id) ?: Typeface.DEFAULT_BOLD
+        return if (id == 0) robotoMediumTypeface
+        else ResourcesCompat.getFont(context, id) ?: robotoMediumTypeface
     }
 
     private fun drawBuiltInBattery(

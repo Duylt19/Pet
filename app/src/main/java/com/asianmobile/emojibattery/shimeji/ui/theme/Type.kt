@@ -5,44 +5,67 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import com.asianmobile.emojibattery.shimeji.R
+
+val RobotoFontFamily = FontFamily(
+    Font(R.font.roboto_regular, FontWeight.Normal),
+    Font(R.font.roboto_medium, FontWeight.Medium),
+    Font(R.font.roboto_semibold, FontWeight.SemiBold),
+    Font(R.font.roboto_bold, FontWeight.Bold)
+)
 
 @Composable
-fun appTypography() = Typography(
-    headlineLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = ssp(22)
-    ),
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = ssp(17)
-    ),
-    titleMedium = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = ssp(14)
-    ),
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = ssp(12)
-    ),
-    bodyMedium = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = ssp(11)
-    ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = ssp(10)
+fun appTypography(): Typography {
+    val defaults = Typography()
+    return Typography(
+        displayLarge = defaults.displayLarge.withRoboto(),
+        displayMedium = defaults.displayMedium.withRoboto(),
+        displaySmall = defaults.displaySmall.withRoboto(),
+        headlineLarge = TextStyle(
+            fontFamily = RobotoFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = ssp(22)
+        ),
+        headlineMedium = defaults.headlineMedium.withRoboto(),
+        headlineSmall = defaults.headlineSmall.withRoboto(),
+        titleLarge = TextStyle(
+            fontFamily = RobotoFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = ssp(17)
+        ),
+        titleMedium = TextStyle(
+            fontFamily = RobotoFontFamily,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = ssp(14)
+        ),
+        titleSmall = defaults.titleSmall.withRoboto(),
+        bodyLarge = TextStyle(
+            fontFamily = RobotoFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = ssp(12)
+        ),
+        bodyMedium = TextStyle(
+            fontFamily = RobotoFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = ssp(11)
+        ),
+        bodySmall = defaults.bodySmall.withRoboto(),
+        labelLarge = defaults.labelLarge.withRoboto(),
+        labelMedium = defaults.labelMedium.withRoboto(),
+        labelSmall = TextStyle(
+            fontFamily = RobotoFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = ssp(10)
+        )
     )
-)
+}
+
+private fun TextStyle.withRoboto(): TextStyle = copy(fontFamily = RobotoFontFamily)
 
 @Composable
 private fun ssp(value: Int): TextUnit {
@@ -62,5 +85,3 @@ private fun ssp(value: Int): TextUnit {
     }
     return dimensionResource(res).value.sp
 }
-
-

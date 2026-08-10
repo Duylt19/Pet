@@ -83,8 +83,9 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   quảng cáo sớm.
 - Tránh chồng App Open Ads với interstitial/premium/full-screen flow.
 - Không thêm placement mới nếu chưa có product/UX decision.
-- Battery Rewarded là unlock trigger đã được owner duyệt. Editor chỉ thêm bottom banner đã
-  được Figma chỉ định; reward sheet dùng native `HEIGHT_222` được mô tả ở trên.
+- Battery Rewarded là unlock trigger đã được owner duyệt. Editor có bottom banner đã được
+  Figma chỉ định; reward sheet và discard-changes sheet dùng native `HEIGHT_222`, mỗi sheet có
+  `instanceKey` riêng để không dùng chung ad object với placement khác trong cùng back stack.
 - Screen code phải là constant trong ads config, không hardcode rải rác.
 - Premium user/ad-free policy phải được kiểm tra ở integration boundary chung.
 - Khi xóa screen, xóa placement/config không còn consumer.

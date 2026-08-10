@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
@@ -284,137 +283,139 @@ private fun StatusBarOverview(
     onConfig: (BatteryStatusConfig) -> Unit
 ) {
     var activeColorTarget by remember { mutableStateOf<StatusBarColorTarget?>(null) }
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding),
-        contentPadding = PaddingValues(
-            start = dimensionResource(SdpR.dimen._12sdp),
-            end = dimensionResource(SdpR.dimen._12sdp),
-            top = dimensionResource(SdpR.dimen._9sdp),
-            bottom = dimensionResource(SdpR.dimen._12sdp)
-        ),
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
+            .padding(innerPadding)
+            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
     ) {
-        item { BatteryPreview(state = state, page = BatteryEditorPage.OVERVIEW) }
-        item {
-            EditorDesignSection(title = stringResource(R.string.battery_editor_template)) {
-                TemplatePickerRow(
-                    title = stringResource(R.string.battery_editor_battery_picker),
-                    titleIcon = R.drawable.ic_statusbar_template_battery,
-                    state = state,
-                    component = BatteryThemeComponent.BATTERY,
-                    selectedThemeId = state.config.selectedBatteryThemeId,
-                    onMore = { onOpenPage(BatteryEditorPage.BATTERY_TEMPLATES) },
-                    onSelectTheme = onSelectTheme
-                )
-                Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-                TemplatePickerRow(
-                    title = stringResource(R.string.battery_editor_emoji_picker),
-                    titleIcon = R.drawable.img_statusbar_template_emoji,
-                    state = state,
-                    component = BatteryThemeComponent.EMOJI,
-                    selectedThemeId = state.config.selectedEmojiThemeId,
-                    onMore = { onOpenPage(BatteryEditorPage.EMOJI_TEMPLATES) },
-                    onSelectTheme = onSelectTheme
-                )
-                Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-                AnimationPickerRow(
-                    state = state,
-                    onMore = { onOpenPage(BatteryEditorPage.ANIMATION) },
-                    onConfig = onConfig
-                )
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
+        BatteryPreview(state = state, page = BatteryEditorPage.OVERVIEW)
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(bottom = dimensionResource(SdpR.dimen._12sdp)),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
+        ) {
+            item {
+                EditorDesignSection(title = stringResource(R.string.battery_editor_template)) {
+                    TemplatePickerRow(
+                        title = stringResource(R.string.battery_editor_battery_picker),
+                        titleIcon = R.drawable.ic_statusbar_template_battery,
+                        state = state,
+                        component = BatteryThemeComponent.BATTERY,
+                        selectedThemeId = state.config.selectedBatteryThemeId,
+                        onMore = { onOpenPage(BatteryEditorPage.BATTERY_TEMPLATES) },
+                        onSelectTheme = onSelectTheme
+                    )
+                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+                    TemplatePickerRow(
+                        title = stringResource(R.string.battery_editor_emoji_picker),
+                        titleIcon = R.drawable.img_statusbar_template_emoji,
+                        state = state,
+                        component = BatteryThemeComponent.EMOJI,
+                        selectedThemeId = state.config.selectedEmojiThemeId,
+                        onMore = { onOpenPage(BatteryEditorPage.EMOJI_TEMPLATES) },
+                        onSelectTheme = onSelectTheme
+                    )
+                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+                    AnimationPickerRow(
+                        state = state,
+                        onMore = { onOpenPage(BatteryEditorPage.ANIMATION) },
+                        onConfig = onConfig
+                    )
+                }
             }
-        }
-        item {
-            EditorDesignSection(title = stringResource(R.string.battery_editor_background)) {
-                DesignRowHeader(
-                    title = stringResource(R.string.battery_editor_color),
-                    titleIcon = R.drawable.img_statusbar_color_palette
-                )
-                StatusBarColorPalette(
-                    selected = state.config.backgroundColorArgb,
-                    onSelected = onBackgroundColor,
-                    onCustomClick = { activeColorTarget = StatusBarColorTarget.BACKGROUND }
-                )
-                Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-                DesignRowHeader(
-                    title = stringResource(R.string.battery_editor_theme_picker),
-                    titleEmoji = stringResource(R.string.battery_editor_theme_icon),
-                    onMore = { onOpenPage(BatteryEditorPage.BACKGROUND_THEMES) }
-                )
-                BackgroundThemeRow(
-                    backgrounds = state.backgrounds,
-                    selectedId = state.config.backgroundDecorationId,
-                    onSelected = onBackgroundDecoration
-                )
+            item {
+                EditorDesignSection(title = stringResource(R.string.battery_editor_background)) {
+                    DesignRowHeader(
+                        title = stringResource(R.string.battery_editor_color),
+                        titleIcon = R.drawable.img_statusbar_color_palette
+                    )
+                    StatusBarColorPalette(
+                        selected = state.config.backgroundColorArgb,
+                        onSelected = onBackgroundColor,
+                        onCustomClick = { activeColorTarget = StatusBarColorTarget.BACKGROUND }
+                    )
+                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+                    DesignRowHeader(
+                        title = stringResource(R.string.battery_editor_theme_picker),
+                        titleEmoji = stringResource(R.string.battery_editor_theme_icon),
+                        onMore = { onOpenPage(BatteryEditorPage.BACKGROUND_THEMES) }
+                    )
+                    BackgroundThemeRow(
+                        backgrounds = state.backgrounds,
+                        selectedId = state.config.backgroundDecorationId,
+                        onSelected = onBackgroundDecoration
+                    )
+                }
             }
-        }
-        item {
-            EditorDesignSection(title = stringResource(R.string.battery_editor_percentage)) {
-                DesignRowHeader(title = stringResource(R.string.battery_editor_color))
-                StatusBarColorPalette(
-                    selected = state.config.percentColorArgb,
-                    onSelected = { color ->
-                        onConfig(state.config.copy(percentColorArgb = color))
-                    },
-                    onCustomClick = { activeColorTarget = StatusBarColorTarget.PERCENTAGE }
-                )
-                Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-                DesignSlider(
-                    label = stringResource(R.string.battery_editor_size_label),
-                    value = state.config.percentSizeDp,
-                    range = 10f..32f,
-                    onValueChange = { value ->
-                        onConfig(state.config.copy(percentSizeDp = value))
-                    }
-                )
+            item {
+                EditorDesignSection(title = stringResource(R.string.battery_editor_percentage)) {
+                    DesignRowHeader(title = stringResource(R.string.battery_editor_color))
+                    StatusBarColorPalette(
+                        selected = state.config.percentColorArgb,
+                        onSelected = { color ->
+                            onConfig(state.config.copy(percentColorArgb = color))
+                        },
+                        onCustomClick = { activeColorTarget = StatusBarColorTarget.PERCENTAGE }
+                    )
+                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+                    DesignSlider(
+                        label = stringResource(R.string.battery_editor_size_label),
+                        value = state.config.percentSizeDp,
+                        range = 10f..32f,
+                        onValueChange = { value ->
+                            onConfig(state.config.copy(percentSizeDp = value))
+                        }
+                    )
+                }
             }
-        }
-        item {
-            EditorDesignSection(title = stringResource(R.string.battery_editor_layout_size)) {
-                DesignSlider(
-                    label = stringResource(R.string.battery_editor_emoji_battery),
-                    value = state.config.emojiSizeDp,
-                    range = 12f..48f,
-                    onValueChange = { value ->
-                        onConfig(
-                            state.config.copy(
-                                emojiSizeDp = value,
-                                batterySizeDp = value
+            item {
+                EditorDesignSection(title = stringResource(R.string.battery_editor_layout_size)) {
+                    DesignSlider(
+                        label = stringResource(R.string.battery_editor_emoji_battery),
+                        value = state.config.emojiSizeDp,
+                        range = 12f..48f,
+                        onValueChange = { value ->
+                            onConfig(
+                                state.config.copy(
+                                    emojiSizeDp = value,
+                                    batterySizeDp = value
+                                )
                             )
-                        )
-                    }
-                )
-                DesignSlider(
-                    label = stringResource(R.string.battery_editor_height),
-                    value = state.config.barHeightDp,
-                    range = state.barHeightRange.minimumDp..state.barHeightRange.maximumDp,
-                    onValueChange = { value ->
-                        onConfig(state.config.copy(barHeightDp = value))
-                    }
-                )
-                DesignSlider(
-                    label = stringResource(R.string.battery_editor_left_margin),
-                    value = state.config.leftPaddingDp,
-                    range = 0f..48f,
-                    onValueChange = { value ->
-                        onConfig(state.config.copy(leftPaddingDp = value))
-                    }
-                )
-                DesignSlider(
-                    label = stringResource(R.string.battery_editor_right_margin),
-                    value = state.config.rightPaddingDp,
-                    range = 0f..48f,
-                    onValueChange = { value ->
-                        onConfig(state.config.copy(rightPaddingDp = value))
-                    }
-                )
+                        }
+                    )
+                    DesignSlider(
+                        label = stringResource(R.string.battery_editor_height),
+                        value = state.config.barHeightDp,
+                        range = state.barHeightRange.minimumDp..state.barHeightRange.maximumDp,
+                        onValueChange = { value ->
+                            onConfig(state.config.copy(barHeightDp = value))
+                        }
+                    )
+                    DesignSlider(
+                        label = stringResource(R.string.battery_editor_left_margin),
+                        value = state.config.leftPaddingDp,
+                        range = 0f..48f,
+                        onValueChange = { value ->
+                            onConfig(state.config.copy(leftPaddingDp = value))
+                        }
+                    )
+                    DesignSlider(
+                        label = stringResource(R.string.battery_editor_right_margin),
+                        value = state.config.rightPaddingDp,
+                        range = 0f..48f,
+                        onValueChange = { value ->
+                            onConfig(state.config.copy(rightPaddingDp = value))
+                        }
+                    )
+                }
             }
-        }
-        item {
-            EditorDesignSection(title = stringResource(R.string.battery_editor_customize_icon)) {
-                StatusBarComponentGrid(onOpenPage)
+            item {
+                EditorDesignSection(title = stringResource(R.string.battery_editor_customize_icon)) {
+                    StatusBarComponentGrid(onOpenPage)
+                }
             }
         }
     }
@@ -482,17 +483,18 @@ private fun TemplatePickerRow(
 ) {
     DesignRowHeader(title = title, titleIcon = titleIcon, onMore = onMore)
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-    val orderedThemes = remember(state.themes, selectedThemeId) {
-        state.themes.sortedByDescending { it.id == selectedThemeId }
-    }
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
-        items(orderedThemes, key = { it.id }) { theme ->
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+    ) {
+        items(state.themes, key = { it.id }) { theme ->
             val locked = theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
                 !state.isPremium && theme.id !in state.config.rewardUnlockedThemeIds
+            val isPending = state.assetSelectionInProgress ==
+                BatteryEditorThemeSelection(theme.id, component)
             TemplateOption(
                 theme = theme,
                 component = component,
-                selected = selectedThemeId == theme.id,
+                selected = selectedThemeId == theme.id || isPending,
                 locked = locked,
                 enabled = state.assetSelectionInProgress == null,
                 onClick = { onSelectTheme(theme, component) }
@@ -513,11 +515,8 @@ private fun AnimationPickerRow(
         onMore = onMore
     )
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-    val orderedAnimations = remember(state.animations, state.config.animationAssetName) {
-        state.animations.sortedByDescending { it.name == state.config.animationAssetName }
-    }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
-        items(orderedAnimations, key = { it.id }) { animation ->
+        items(state.animations, key = { it.id }) { animation ->
             AnimationTemplateOption(
                 animation = animation,
                 selected = state.config.showAnimation &&
@@ -622,25 +621,48 @@ private fun AnimationTemplateOption(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        if (animation.type == BatteryAnimationType.LOTTIE && animation.assetPath.isNotBlank()) {
-            val composition by rememberLottieComposition(
-                LottieCompositionSpec.File(animation.assetPath)
-            )
-            LottieAnimation(
-                composition = composition,
-                iterations = LottieConstants.IterateForever,
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._38sdp))
-            )
-        } else {
-            AsyncImage(
-                model = animation.assetPath,
-                fallback = painterResource(R.drawable.img_statusbar_template_animation),
-                error = painterResource(R.drawable.img_statusbar_template_animation),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._38sdp))
-            )
+        BatteryAnimationAsset(
+            animation = animation,
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._38sdp))
+        )
+    }
+}
+
+@Composable
+internal fun BatteryAnimationAsset(
+    animation: BatteryAnimationEntry,
+    modifier: Modifier = Modifier
+) {
+    if (animation.type == BatteryAnimationType.LOTTIE && animation.assetPath.isNotBlank()) {
+        val spec = remember(animation.assetPath) {
+            when {
+                animation.assetPath.startsWith(ANDROID_ASSET_URI_PREFIX) -> {
+                    LottieCompositionSpec.Asset(
+                        animation.assetPath.removePrefix(ANDROID_ASSET_URI_PREFIX)
+                    )
+                }
+                animation.assetPath.startsWith("http://") ||
+                    animation.assetPath.startsWith("https://") -> {
+                    LottieCompositionSpec.Url(animation.assetPath)
+                }
+                else -> LottieCompositionSpec.File(animation.assetPath)
+            }
         }
+        val composition by rememberLottieComposition(spec)
+        LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+            modifier = modifier
+        )
+    } else {
+        AsyncImage(
+            model = animation.assetPath,
+            fallback = painterResource(R.drawable.img_statusbar_template_animation),
+            error = painterResource(R.drawable.img_statusbar_template_animation),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = modifier
+        )
     }
 }
 
@@ -769,8 +791,11 @@ private fun BackgroundThemeRow(
     onSelected: (Int) -> Unit
 ) {
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
+    val previewBackgrounds = remember(backgrounds, selectedId) {
+        statusBarBackgroundPreviewItems(backgrounds, selectedId)
+    }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
-        items(backgrounds.take(3), key = { it.id }) { background ->
+        items(previewBackgrounds, key = { it.id }) { background ->
             BackgroundThemeOption(
                 background = background,
                 selected = selectedId == background.id,
@@ -781,6 +806,16 @@ private fun BackgroundThemeRow(
             )
         }
     }
+}
+
+internal fun statusBarBackgroundPreviewItems(
+    backgrounds: List<BatteryDecorationEntry>,
+    selectedId: Int
+): List<BatteryDecorationEntry> {
+    val initial = backgrounds.take(FIGMA_INLINE_BACKGROUND_COUNT)
+    if (initial.any { it.id == selectedId }) return initial
+    val selected = backgrounds.firstOrNull { it.id == selectedId } ?: return initial
+    return backgrounds.take(FIGMA_INLINE_BACKGROUND_COUNT - 1) + selected
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -969,66 +1004,65 @@ private fun StatusBarPicker(
     onBackgroundDecoration: (Int) -> Unit
 ) {
     val columns = if (page == BatteryEditorPage.BACKGROUND_THEMES) 2 else 3
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(columns),
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding),
-        contentPadding = PaddingValues(
-            start = dimensionResource(SdpR.dimen._12sdp),
-            end = dimensionResource(SdpR.dimen._12sdp),
-            top = dimensionResource(SdpR.dimen._9sdp),
-            bottom = dimensionResource(SdpR.dimen._12sdp)
-        ),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp)),
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
+            .padding(innerPadding)
+            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
     ) {
-        item(key = "status_bar_picker_preview", span = { GridItemSpan(columns) }) {
-            Column {
-                BatteryPreview(state = state, page = page)
-                Spacer(Modifier.height(dimensionResource(SdpR.dimen._3sdp)))
-            }
-        }
-        if (page == BatteryEditorPage.BACKGROUND_THEMES) {
-            items(state.backgrounds.size, key = { state.backgrounds[it].id }) { index ->
-                val background = state.backgrounds[index]
-                // TODO: replace this visual policy when background entitlement is in catalog data.
-                val locked = index >= FIGMA_FREE_BACKGROUND_COUNT && !state.isPremium
-                BackgroundThemeOption(
-                    background = background,
-                    selected = state.config.backgroundDecorationId == background.id,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(dimensionResource(SdpR.dimen._46sdp)),
-                    showSelectionBorder = false,
-                    locked = locked,
-                    onClick = {
-                        if (locked) onPremium() else onBackgroundDecoration(background.id)
-                    }
-                )
-            }
-        } else {
-            val component = if (page == BatteryEditorPage.BATTERY_TEMPLATES) {
-                BatteryThemeComponent.BATTERY
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
+        BatteryPreview(state = state, page = page)
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(columns),
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(bottom = dimensionResource(SdpR.dimen._12sdp)),
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp)),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
+        ) {
+            if (page == BatteryEditorPage.BACKGROUND_THEMES) {
+                items(state.backgrounds.size, key = { state.backgrounds[it].id }) { index ->
+                    val background = state.backgrounds[index]
+                    // TODO: replace this policy when background entitlement is catalog data.
+                    val locked = index >= FIGMA_FREE_BACKGROUND_COUNT && !state.isPremium
+                    BackgroundThemeOption(
+                        background = background,
+                        selected = state.config.backgroundDecorationId == background.id,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(dimensionResource(SdpR.dimen._46sdp)),
+                        showSelectionBorder = true,
+                        locked = locked,
+                        onClick = {
+                            if (locked) onPremium() else onBackgroundDecoration(background.id)
+                        }
+                    )
+                }
             } else {
-                BatteryThemeComponent.EMOJI
-            }
-            val selectedId = if (component == BatteryThemeComponent.BATTERY) {
-                state.config.selectedBatteryThemeId
-            } else {
-                state.config.selectedEmojiThemeId
-            }
-            items(state.themes, key = { it.id }) { theme ->
-                val locked = theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
-                    !state.isPremium && theme.id !in state.config.rewardUnlockedThemeIds
-                PickerThemeCard(
-                    theme = theme,
-                    component = component,
-                    selected = selectedId == theme.id,
-                    locked = locked,
-                    enabled = state.assetSelectionInProgress == null,
-                    onClick = { onSelectTheme(theme, component) }
-                )
+                val component = if (page == BatteryEditorPage.BATTERY_TEMPLATES) {
+                    BatteryThemeComponent.BATTERY
+                } else {
+                    BatteryThemeComponent.EMOJI
+                }
+                val selectedId = if (component == BatteryThemeComponent.BATTERY) {
+                    state.config.selectedBatteryThemeId
+                } else {
+                    state.config.selectedEmojiThemeId
+                }
+                items(state.themes, key = { it.id }) { theme ->
+                    val locked = theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
+                        !state.isPremium && theme.id !in state.config.rewardUnlockedThemeIds
+                    val isPending = state.assetSelectionInProgress ==
+                        BatteryEditorThemeSelection(theme.id, component)
+                    PickerThemeCard(
+                        theme = theme,
+                        component = component,
+                        selected = selectedId == theme.id || isPending,
+                        locked = locked,
+                        enabled = state.assetSelectionInProgress == null,
+                        onClick = { onSelectTheme(theme, component) }
+                    )
+                }
             }
         }
     }
@@ -1122,12 +1156,14 @@ private fun BackgroundThemeOption(
             .semantics { this.selected = selected }
             .clickable(onClick = onClick)
     ) {
-        AsyncImage(
-            model = background.assetPath,
-            contentDescription = background.name,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+        if (background.assetPath.isNotBlank()) {
+            AsyncImage(
+                model = background.assetPath,
+                contentDescription = background.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
         if (locked) {
             PetPremiumBadge(
                 modifier = Modifier
@@ -1160,3 +1196,5 @@ private enum class StatusBarColorTarget {
 
 private const val PICKER_ART_FRACTION = 0.7303f
 private const val FIGMA_FREE_BACKGROUND_COUNT = 5
+private const val FIGMA_INLINE_BACKGROUND_COUNT = 3
+private const val ANDROID_ASSET_URI_PREFIX = "file:///android_asset/"

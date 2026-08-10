@@ -96,7 +96,7 @@ fun PetDetailScreen(
                     pack.manifest.clips.size
                 ),
                 color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontFamily = FontFamily(Font(R.font.roboto_regular)),
                 fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
                 textAlign = TextAlign.Center
             )
@@ -107,7 +107,7 @@ fun PetDetailScreen(
                     pack.manifest.author ?: stringResource(R.string.pet_catalog_unknown_author)
                 ),
                 color = colorResource(R.color.colors_7B61FF),
-                fontFamily = FontFamily(Font(R.font.inter_medium)),
+                fontFamily = FontFamily(Font(R.font.roboto_medium)),
                 fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
             )
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._18sdp)))
@@ -177,7 +177,7 @@ private fun PetDetailMetric(label: String, value: String, tintColorRes: Int) {
         Text(
             text = value,
             color = colorResource(R.color.colors_2F2440),
-            fontFamily = FontFamily(Font(R.font.inter_bold)),
+            fontFamily = FontFamily(Font(R.font.roboto_bold)),
             fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
             maxLines = 1
         )
@@ -185,7 +185,7 @@ private fun PetDetailMetric(label: String, value: String, tintColorRes: Int) {
         Text(
             text = label,
             color = colorResource(R.color.colors_776D84),
-            fontFamily = FontFamily(Font(R.font.inter_regular)),
+            fontFamily = FontFamily(Font(R.font.roboto_regular)),
             fontSize = dimensionResource(SspR.dimen._7ssp).value.sp
         )
     }
@@ -203,7 +203,7 @@ private fun UnavailablePet() {
         Text(
             text = stringResource(R.string.pet_detail_unavailable),
             color = colorResource(R.color.colors_776D84),
-            fontFamily = FontFamily(Font(R.font.inter_regular)),
+            fontFamily = FontFamily(Font(R.font.roboto_regular)),
             textAlign = TextAlign.Center
         )
     }

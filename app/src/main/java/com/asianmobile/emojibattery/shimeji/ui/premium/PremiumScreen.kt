@@ -84,6 +84,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ui.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.ads.utils.Utils
 import com.asianmobile.emojibattery.shimeji.constant.BASE_MONTHLY_COST_ID
@@ -252,7 +253,7 @@ fun PremiumScreen(
                             )
                         ),
                         fontSize = dimensionResource(id = R_dimen_ssp.dimen._16ssp).value.sp,
-                        fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                        fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                     ),
                     modifier = Modifier.padding(bottom = dimensionResource(id = R_dimen.dimen._16sdp))
                 )
@@ -270,14 +271,14 @@ fun PremiumScreen(
                         text = stringResource(id = R.string.premium_all_features),
                         fontSize = dimensionResource(id = R_dimen_ssp.dimen._12ssp).value.sp,
                         color = colorResource(id = R.color.gray_4D4D4D),
-                        fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                        fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                         modifier = Modifier.weight(1f)
                     )
                     Text(
                         text = stringResource(id = R.string.premium_free),
                         fontSize = dimensionResource(id = R_dimen_ssp.dimen._12ssp).value.sp,
                         color = colorResource(id = R.color.gray_4D4D4D),
-                        fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                        fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(dimensionResource(id = R_dimen.dimen._40sdp))
                     )
@@ -285,7 +286,7 @@ fun PremiumScreen(
                         text = stringResource(id = R.string.premium_pro),
                         fontSize = dimensionResource(id = R_dimen_ssp.dimen._12ssp).value.sp,
                         color = colorResource(id = R.color.blue_007BFD),
-                        fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                        fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(dimensionResource(id = R_dimen.dimen._40sdp))
                     )
@@ -413,7 +414,7 @@ fun PremiumScreen(
                         text = stringResource(id = R.string.premium_subscribe_now),
                         color = colorResource(id = R.color.white),
                         fontSize = dimensionResource(id = R_dimen_ssp.dimen._14ssp).value.sp,
-                        fontFamily = FontFamily(Font(R.font.inter_medium))
+                        fontFamily = FontFamily(Font(R.font.roboto_medium))
                     )
                 }
 
@@ -424,7 +425,7 @@ fun PremiumScreen(
                     color = colorResource(id = R.color.gray_666666),
                     textDecoration = TextDecoration.Underline,
                     fontSize = dimensionResource(id = R_dimen_ssp.dimen._9ssp).value.sp,
-                    fontFamily = FontFamily(Font(R.font.inter_medium)),
+                    fontFamily = FontFamily(Font(R.font.roboto_medium)),
                     modifier = Modifier
                         .padding(bottom = dimensionResource(id = R_dimen.dimen._4sdp))
                         .clickable {
@@ -444,7 +445,7 @@ fun PremiumScreen(
                     color = colorResource(id = R.color.gray_666666),
                     fontSize = dimensionResource(id = R_dimen_ssp.dimen._9ssp).value.sp,
                     lineHeight = dimensionResource(id = R_dimen_ssp.dimen._11ssp).value.sp,
-                    fontFamily = FontFamily(Font(R.font.inter_regular)),
+                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = dimensionResource(id = R_dimen.dimen._12sdp))
                 )
@@ -499,7 +500,7 @@ fun FeatureRow(icon: Int, title: String, freeChecked: Boolean) {
                 text = title,
                 fontSize = dimensionResource(id = R_dimen_ssp.dimen._12ssp).value.sp,
                 color = colorResource(id = R.color.gray_4D4D4D),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontFamily = FontFamily(Font(R.font.roboto_regular)),
                 modifier = Modifier.weight(1f)
             )
             Box(
@@ -580,7 +581,7 @@ fun PackageCard(
                     text = title,
                     fontSize = dimensionResource(id = if (isSelected) R_dimen_ssp.dimen._12ssp else R_dimen_ssp.dimen._10ssp).value.sp,
                     color = colorResource(id = R.color.black_171717),
-                    fontFamily = FontFamily(Font(R.font.inter_medium)),
+                    fontFamily = FontFamily(Font(R.font.roboto_medium)),
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(dimensionResource(id = R_dimen.dimen._10sdp)))
@@ -588,7 +589,7 @@ fun PackageCard(
                     text = price,
                     fontSize = dimensionResource(id = if (isSelected) R_dimen_ssp.dimen._13ssp else R_dimen_ssp.dimen._11ssp).value.sp,
                     color = colorResource(id = R.color.black_171717),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(dimensionResource(id = R_dimen.dimen._7sdp)))
@@ -596,7 +597,7 @@ fun PackageCard(
                     text = desc ?: "",
                     fontSize = dimensionResource(id = if (isSelected) R_dimen_ssp.dimen._9ssp else R_dimen_ssp.dimen._8ssp).value.sp,
                     color = colorResource(id = R.color.gray_8A8A8A),
-                    fontFamily = FontFamily(Font(R.font.inter_regular)),
+                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
                     textAlign = TextAlign.Center
                 )
             }
@@ -619,7 +620,7 @@ fun PackageCard(
                         text = stringResource(id = R.string.premium_sale_79).uppercase(),
                         color = colorResource(id = R.color.white),
                         fontSize = dimensionResource(id = R_dimen_ssp.dimen._8ssp).value.sp,
-                        fontFamily = FontFamily.SansSerif,
+                        fontFamily = RobotoFontFamily,
                         modifier = Modifier,
                         lineHeight = dimensionResource(id = R_dimen_ssp.dimen._8ssp).value.sp
                     )

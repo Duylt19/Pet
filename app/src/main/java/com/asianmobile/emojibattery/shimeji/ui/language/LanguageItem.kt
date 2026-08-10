@@ -72,7 +72,7 @@ internal fun LanguageItem(
 
         Text(
             text = language.name,
-            fontFamily = FontFamily(Font(R.font.inter_regular)),
+            fontFamily = FontFamily(Font(R.font.roboto_regular)),
             fontSize = dimensionResource(id = R_dimen_ssp.dimen._12ssp).value.sp,
             lineHeight = dimensionResource(id = R_dimen_ssp.dimen._18ssp).value.sp,
             color = colorResource(R.color.white),

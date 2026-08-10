@@ -11,6 +11,7 @@ import android.text.TextUtils
 import android.util.TypedValue
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.pet.speech.PetSpeechBoxConstraints
 import com.asianmobile.emojibattery.shimeji.pet.speech.PetSpeechBoxSize
@@ -35,6 +36,7 @@ internal class PetSpeechBubbleView(context: Context) : View(context) {
     }
     private val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.colors_FFFFFF)
+        typeface = ResourcesCompat.getFont(context, R.font.roboto_regular)
         textSize = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_SP,
             14f,

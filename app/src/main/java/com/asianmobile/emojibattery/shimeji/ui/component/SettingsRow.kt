@@ -52,8 +52,8 @@ fun SettingsRow(
     renderIconAsImage: Boolean = false,
     onClick: () -> Unit
 ) {
-    val fontMedium = FontFamily(Font(R.font.inter_medium))
-    val fontRegular = FontFamily(Font(R.font.inter_regular))
+    val fontMedium = FontFamily(Font(R.font.roboto_medium))
+    val fontRegular = FontFamily(Font(R.font.roboto_regular))
 
     Row(
         modifier = Modifier

@@ -934,10 +934,10 @@
     <string name="battery_editor_percentage_off">Percentage hidden</string>
     <string name="battery_editor_more_components">More status components</string>
     <string name="battery_editor_more_components_hint">Customize every status component. The overlay updates each icon from the current device state.</string>
-    <string name="battery_discard_title">Discard battery changes?</string>
-    <string name="battery_discard_message">Your unapplied battery bar changes will be lost.</string>
-    <string name="battery_discard_confirm">Discard</string>
-    <string name="battery_discard_keep_editing">Keep editing</string>
+    <string name="battery_discard_title">Discard Changes?</string>
+    <string name="battery_discard_message">Your changes haven’t been saved. Are you sure you want to exit?</string>
+    <string name="battery_discard_cancel">Cancel</string>
+    <string name="battery_discard_exit">Exit</string>
     <string name="battery_component_wifi">Wi-Fi</string>
     <string name="battery_component_signal">Signal</string>
     <string name="battery_component_data">Mobile data</string>

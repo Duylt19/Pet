@@ -136,7 +136,7 @@ fun LanguageScreen(
 
                     Text(
                         text = stringResource(R.string.language),
-                        fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                        fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                         fontSize = dimensionResource(id = R_ssp.dimen._15ssp).value.sp,
                         lineHeight = dimensionResource(id = R_ssp.dimen._22ssp).value.sp,
                         color = colorResource(R.color.white)
@@ -265,7 +265,7 @@ fun LanguageScreen(
                 Spacer(modifier = Modifier.height(dimensionResource(R_sdp.dimen._3sdp)))
                 Text(
                     text = stringResource(R.string.setting_up_your_app_experience_please_wait_a_moment),
-                    fontFamily = FontFamily(Font(R.font.inter_regular)),
+                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
                     fontSize = dimensionResource(id = R_ssp.dimen._13ssp).value.sp,
                     color = colorResource(R.color.white),
                     textAlign = TextAlign.Center,

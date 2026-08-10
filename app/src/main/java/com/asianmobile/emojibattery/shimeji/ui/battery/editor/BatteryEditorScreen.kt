@@ -86,15 +86,18 @@ import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ui.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BATTERY_STATUS_COMPONENT_GAP_DP
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryConnectivityState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryHotspotState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryRingerState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutItem
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutPolicy
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutResult
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatterySystemStatusPolicy
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_CATEGORY_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
@@ -353,25 +356,12 @@ internal fun BatteryEditorScreen(
     }
 
     if (showDiscardConfirmation) {
-        AlertDialog(
-            onDismissRequest = { showDiscardConfirmation = false },
-            title = { Text(stringResource(R.string.battery_discard_title)) },
-            text = { Text(stringResource(R.string.battery_discard_message)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDiscardConfirmation = false
-                        viewModel.discardDraft()
-                        onBack()
-                    }
-                ) {
-                    Text(stringResource(R.string.battery_discard_confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDiscardConfirmation = false }) {
-                    Text(stringResource(R.string.battery_discard_keep_editing))
-                }
+        BatteryDiscardChangesSheet(
+            onDismiss = { showDiscardConfirmation = false },
+            onExit = {
+                showDiscardConfirmation = false
+                viewModel.discardDraft()
+                onBack()
             }
         )
     }
@@ -432,12 +422,22 @@ private fun BatteryEditorContent(
                         Text(
                             text = stringResource(R.string.common_done),
                             color = colorResource(R.color.colors_12B890),
-                            fontFamily = FontFamily(Font(R.font.inter_semibold))
+                            fontFamily = FontFamily(Font(R.font.roboto_semibold))
                         )
                     }
                 }
             }
         )
+        BatteryPreview(
+            state = state,
+            page = page,
+            modifier = Modifier.padding(
+                start = dimensionResource(SdpR.dimen._12sdp),
+                end = dimensionResource(SdpR.dimen._12sdp),
+                top = dimensionResource(SdpR.dimen._9sdp)
+            )
+        )
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -596,7 +596,7 @@ private fun OverviewEditor(
     Text(
         text = stringResource(R.string.battery_editor_overview_hint),
         color = colorResource(R.color.colors_776D84),
-        fontFamily = FontFamily(Font(R.font.inter_regular)),
+        fontFamily = FontFamily(Font(R.font.roboto_regular)),
         fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
     )
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._14sdp)))
@@ -752,7 +752,7 @@ private fun ThemeCategoryChip(
         color = colorResource(
             if (selected) R.color.colors_FFFFFF else R.color.colors_776D84
         ),
-        fontFamily = FontFamily(Font(R.font.inter_semibold)),
+        fontFamily = FontFamily(Font(R.font.roboto_semibold)),
         fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
         modifier = Modifier
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._14sdp)))
@@ -868,7 +868,7 @@ private fun ThemeComponentOption(
                         }
                     ),
                     color = colorResource(R.color.colors_FFFFFF),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                     fontSize = dimensionResource(SspR.dimen._7ssp).value.sp,
                     maxLines = 1
                 )
@@ -892,7 +892,7 @@ private fun ThemeComponentOption(
                 Text(
                     text = loadingLabel,
                     color = colorResource(R.color.colors_12B890),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                     fontSize = dimensionResource(SspR.dimen._7ssp).value.sp,
                     maxLines = 1
                 )
@@ -1134,13 +1134,16 @@ private fun AnimationEditor(
                         selected = config.animationAssetName == animation.name,
                         contentDescription = animation.name,
                         onClick = {
-                            onConfig(config.copy(animationAssetName = animation.name))
+                            onConfig(
+                                config.copy(
+                                    showAnimation = true,
+                                    animationAssetName = animation.name
+                                )
+                            )
                         }
                     ) {
-                        AsyncImage(
-                            model = animation.assetPath,
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
+                        BatteryAnimationAsset(
+                            animation = animation,
                             modifier = Modifier.fillMaxSize()
                         )
                         Text(
@@ -1244,7 +1247,7 @@ private fun StatusIconStylePicker(
     Text(
         text = label ?: stringResource(R.string.battery_status_icon_style),
         color = colorResource(R.color.colors_776D84),
-        fontFamily = FontFamily(Font(R.font.inter_medium)),
+        fontFamily = FontFamily(Font(R.font.roboto_medium)),
         fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
         modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._8sdp))
     )
@@ -1382,7 +1385,7 @@ private fun StatusTypePicker(
     Text(
         text = label,
         color = colorResource(R.color.colors_776D84),
-        fontFamily = FontFamily(Font(R.font.inter_medium)),
+        fontFamily = FontFamily(Font(R.font.roboto_medium)),
         fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
         modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._8sdp))
     )
@@ -1397,7 +1400,7 @@ private fun StatusTypePicker(
                 color = colorResource(
                     if (active) R.color.colors_FFFFFF else R.color.colors_2F2440
                 ),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
                 modifier = Modifier
                     .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
@@ -1421,7 +1424,7 @@ private fun EditorPageHint(text: String) {
     Text(
         text = text,
         color = colorResource(R.color.colors_776D84),
-        fontFamily = FontFamily(Font(R.font.inter_regular)),
+        fontFamily = FontFamily(Font(R.font.roboto_regular)),
         fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
         modifier = Modifier.padding(bottom = dimensionResource(SdpR.dimen._10sdp))
     )
@@ -1443,7 +1446,7 @@ private fun EditorSectionTitle(title: String) {
         Text(
             text = title,
             color = colorResource(R.color.colors_2F2440),
-            fontFamily = FontFamily(Font(R.font.inter_bold)),
+            fontFamily = FontFamily(Font(R.font.roboto_bold)),
             fontWeight = FontWeight.Bold,
             fontSize = dimensionResource(SspR.dimen._13ssp).value.sp
         )
@@ -1505,13 +1508,13 @@ private fun EditorNavigationRow(
             Text(
                 text = title,
                 color = colorResource(R.color.colors_2F2440),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
             )
             Text(
                 text = summary,
                 color = colorResource(R.color.colors_776D84),
-                fontFamily = FontFamily(Font(R.font.inter_regular)),
+                fontFamily = FontFamily(Font(R.font.roboto_regular)),
                 fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -1653,7 +1656,7 @@ private fun StatusComponentTile(
                 Text(
                     text = label.take(1),
                     color = colorResource(R.color.colors_12B890),
-                    fontFamily = FontFamily(Font(R.font.inter_bold))
+                    fontFamily = FontFamily(Font(R.font.roboto_bold))
                 )
             }
         }
@@ -1661,7 +1664,7 @@ private fun StatusComponentTile(
         Text(
             text = label,
             color = colorResource(R.color.colors_2F2440),
-            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontFamily = FontFamily(Font(R.font.roboto_semibold)),
             fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
         )
         Text(
@@ -1689,7 +1692,7 @@ private fun AccessibilityState(accessibilityEnabled: Boolean) {
         color = colorResource(
             if (accessibilityEnabled) R.color.colors_12B890 else R.color.colors_776D84
         ),
-        fontFamily = FontFamily(Font(R.font.inter_regular)),
+        fontFamily = FontFamily(Font(R.font.roboto_regular)),
         fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
     )
 }
@@ -1738,7 +1741,7 @@ private fun ApplyFooter(
         ) {
             Text(
                 text = stringResource(R.string.battery_apply),
-                fontFamily = FontFamily(Font(R.font.inter_semibold))
+                fontFamily = FontFamily(Font(R.font.roboto_semibold))
             )
         }
         if (isApplied) {
@@ -1758,7 +1761,8 @@ private fun ApplyFooter(
 @Composable
 internal fun BatteryPreview(
     state: BatteryEditorUiState,
-    page: BatteryEditorPage
+    page: BatteryEditorPage,
+    modifier: Modifier = Modifier
 ) {
     val config = state.config
     val previewDescription = stringResource(R.string.battery_overlay_description, 82)
@@ -1766,12 +1770,12 @@ internal fun BatteryPreview(
     val backgroundPath = state.backgrounds
         .firstOrNull { it.id == config.backgroundDecorationId }
         ?.assetPath
+        ?.takeIf(String::isNotBlank)
     val emotionPath = state.emotions
         .firstOrNull { it.id == config.emotionDecorationId }
         ?.assetPath
-    val animationPath = state.animations
+    val animation = state.animations
         .firstOrNull { it.name == config.animationAssetName }
-        ?.assetPath
     val emojiTheme = state.themes.firstOrNull {
         it.id == config.selectedEmojiThemeId
     } ?: state.theme
@@ -1783,7 +1787,7 @@ internal fun BatteryPreview(
     }
     val previewDateFont = previewDateFontFamily(config.dateTimeFont)
     BoxWithConstraints(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(dimensionResource(SdpR.dimen._38sdp))
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._11sdp)))
@@ -1795,7 +1799,7 @@ internal fun BatteryPreview(
             emojiTheme.emojiPath,
             batteryTheme.batteryPath,
             emotionPath,
-            animationPath,
+            animation?.assetPath,
             maxWidth,
             focusedComponent
         ) {
@@ -1806,7 +1810,7 @@ internal fun BatteryPreview(
                     config.rightPaddingDp,
                 hasEmoji = emojiTheme.emojiPath != null,
                 hasEmotion = emotionPath != null,
-                hasAnimation = animationPath != null,
+                hasAnimation = animation != null,
                 focusedComponent = focusedComponent
             )
         }
@@ -1825,7 +1829,8 @@ internal fun BatteryPreview(
                     start = config.leftPaddingDp.dp,
                     end = config.rightPaddingDp.dp
                 ),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(BATTERY_STATUS_COMPONENT_GAP_DP.dp)
         ) {
             if (layout.shows(BatteryStatusComponent.TIME)) {
                 Text(
@@ -1867,22 +1872,10 @@ internal fun BatteryPreview(
                 )
             }
             if (layout.shows(BatteryStatusComponent.ANIMATION)) {
-                animationPath?.let { path ->
-                    AsyncImage(
-                        model = path,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
+                animation?.let { entry ->
+                    BatteryAnimationAsset(
+                        animation = entry,
                         modifier = Modifier.size(config.animationSizeDp.dp)
-                    )
-                }
-            }
-            if (layout.shows(BatteryStatusComponent.THEME_EMOJI)) {
-                emojiTheme.emojiPath?.let { path ->
-                    AsyncImage(
-                        model = path,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.size(config.emojiSizeDp.dp)
                     )
                 }
             }
@@ -1897,80 +1890,109 @@ internal fun BatteryPreview(
                 }
             }
             Spacer(Modifier.weight(1f))
-            if (layout.shows(BatteryStatusComponent.CHARGE)) {
-                PreviewStatusIcon(
-                    iconName = "charge_%02d".format(config.chargeIconIndex),
-                    sizeDp = config.chargeSizeDp,
-                    colorArgb = config.chargeColorArgb
-                )
-            }
-            if (layout.shows(BatteryStatusComponent.BATTERY)) {
-                batteryTheme.batteryPath?.let { path ->
-                    AsyncImage(
-                        model = path,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.size(config.batterySizeDp.dp)
+            batteryPreviewTrailingOrder(layout).forEach { component ->
+                when (component) {
+                    BatteryStatusComponent.HOTSPOT -> PreviewStatusIcon(
+                        iconName = requireNotNull(
+                            BatterySystemStatusPolicy.hotspotIcon(
+                                BatteryHotspotState.ENABLED,
+                                config.hotspotIconStyleIndex
+                            )
+                        ),
+                        sizeDp = config.hotspotSizeDp,
+                        colorArgb = config.hotspotColorArgb
                     )
-                } ?: Box(
-                    modifier = Modifier
-                        .size(
-                            width = config.batterySizeDp.dp,
-                            height = (config.batterySizeDp * 0.48f).dp
+                    BatteryStatusComponent.CELLULAR -> {
+                        PreviewStatusIcon(
+                            iconName = BatterySystemStatusPolicy.cellularIcon(
+                                BatteryConnectivityState.CONNECTED,
+                                config.signalIconStyleIndex
+                            ),
+                            sizeDp = config.signalSizeDp,
+                            colorArgb = config.signalColorArgb
                         )
-                        .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._3sdp)))
-                        .background(Color(config.foregroundColorArgb))
+                        Text(
+                            text = config.dataType.label,
+                            color = Color(config.dataColorArgb),
+                            fontSize = config.dataSizeDp.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    BatteryStatusComponent.WIFI -> PreviewStatusIcon(
+                        iconName = BatterySystemStatusPolicy.wifiIcon(
+                            BatteryConnectivityState.CONNECTED,
+                            config.wifiIconStyleIndex
+                        ),
+                        sizeDp = config.wifiSizeDp,
+                        colorArgb = config.wifiColorArgb
                     )
-            }
-            if (layout.shows(BatteryStatusComponent.PERCENTAGE)) {
-                Text(
-                    text = stringResource(R.string.battery_preview_percentage),
-                    color = Color(config.percentColorArgb),
-                    fontFamily = FontFamily(Font(R.font.roboto_medium)),
-                    fontSize = config.percentSizeDp.sp
-                )
-            }
-            if (layout.shows(BatteryStatusComponent.WIFI)) {
-                PreviewStatusIcon(
-                    iconName = BatterySystemStatusPolicy.wifiIcon(
-                        BatteryConnectivityState.CONNECTED,
-                        config.wifiIconStyleIndex
-                    ),
-                    sizeDp = config.wifiSizeDp,
-                    colorArgb = config.wifiColorArgb
-                )
-            }
-            if (layout.shows(BatteryStatusComponent.CELLULAR)) {
-                Text(
-                    text = config.dataType.label,
-                    color = Color(config.dataColorArgb),
-                    fontSize = config.dataSizeDp.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                PreviewStatusIcon(
-                    iconName = BatterySystemStatusPolicy.cellularIcon(
-                        BatteryConnectivityState.CONNECTED,
-                        config.signalIconStyleIndex
-                    ),
-                    sizeDp = config.signalSizeDp,
-                    colorArgb = config.signalColorArgb
-                )
-            }
-            if (layout.shows(BatteryStatusComponent.HOTSPOT)) {
-                PreviewStatusIcon(
-                    iconName = requireNotNull(
-                        BatterySystemStatusPolicy.hotspotIcon(
-                            BatteryHotspotState.ENABLED,
-                            config.hotspotIconStyleIndex
+                    BatteryStatusComponent.PERCENTAGE -> Text(
+                        text = stringResource(R.string.battery_preview_percentage),
+                        color = Color(config.percentColorArgb),
+                        fontFamily = FontFamily(Font(R.font.roboto_medium)),
+                        fontSize = config.percentSizeDp.sp
+                    )
+                    BatteryStatusComponent.BATTERY -> {
+                        val pairSize = maxOf(
+                            config.batterySizeDp,
+                            if (emojiTheme.emojiPath != null) config.emojiSizeDp else 0f
                         )
-                    ),
-                    sizeDp = config.hotspotSizeDp,
-                    colorArgb = config.hotspotColorArgb
-                )
+                        Box(
+                            modifier = Modifier.size(pairSize.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            batteryTheme.batteryPath?.let { path ->
+                                AsyncImage(
+                                    model = path,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier.size(config.batterySizeDp.dp)
+                                )
+                            } ?: Box(
+                                modifier = Modifier
+                                    .size(
+                                        width = config.batterySizeDp.dp,
+                                        height = (config.batterySizeDp * 0.48f).dp
+                                    )
+                                    .clip(
+                                        RoundedCornerShape(
+                                            dimensionResource(SdpR.dimen._3sdp)
+                                        )
+                                    )
+                                    .background(Color(config.foregroundColorArgb))
+                            )
+                            emojiTheme.emojiPath?.let { path ->
+                                AsyncImage(
+                                    model = path,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier.size(config.emojiSizeDp.dp)
+                                )
+                            }
+                        }
+                    }
+                    BatteryStatusComponent.CHARGE -> PreviewStatusIcon(
+                        iconName = "charge_%02d".format(config.chargeIconIndex),
+                        sizeDp = config.chargeSizeDp,
+                        colorArgb = config.chargeColorArgb
+                    )
+                    else -> Unit
+                }
             }
         }
     }
 }
+
+internal fun batteryPreviewTrailingOrder(
+    layout: BatteryStatusLayoutResult
+): List<BatteryStatusComponent> = listOf(
+    BatteryStatusComponent.HOTSPOT,
+    BatteryStatusComponent.CELLULAR,
+    BatteryStatusComponent.WIFI,
+    BatteryStatusComponent.PERCENTAGE,
+    BatteryStatusComponent.BATTERY,
+    BatteryStatusComponent.CHARGE
+).filter(layout::shows)
 
 internal fun batteryPreviewLayout(
     config: BatteryStatusConfig,
@@ -1982,7 +2004,7 @@ internal fun batteryPreviewLayout(
 ) = BatteryStatusLayoutPolicy().resolve(
     availableWidth = availableWidthDp,
     items = buildList {
-        val gap = 4f
+        val gap = BATTERY_STATUS_COMPONENT_GAP_DP
         if (config.showTime) {
             add(
                 BatteryStatusLayoutItem(
@@ -2183,7 +2205,7 @@ private fun previewDateFontFamily(font: BatteryDateFont): FontFamily {
         resources.getIdentifier(font.resourceName, "font", context.packageName)
     }
     return remember(fontResource) {
-        if (fontResource == 0) FontFamily.Default else FontFamily(Font(fontResource))
+        if (fontResource == 0) RobotoFontFamily else FontFamily(Font(fontResource))
     }
 }
 
@@ -2199,7 +2221,7 @@ private fun ToggleRow(label: String, checked: Boolean, onChecked: (Boolean) -> U
         Text(
             text = label,
             color = colorResource(R.color.colors_2F2440),
-            fontFamily = FontFamily(Font(R.font.inter_medium)),
+            fontFamily = FontFamily(Font(R.font.roboto_medium)),
             fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
         )
         AppSwitch(checked = checked, onCheckedChange = { onChecked(!checked) })
@@ -2216,7 +2238,7 @@ private fun EditorSlider(
     Text(
         text = stringResource(R.string.battery_slider_value, label, value.toInt()),
         color = colorResource(R.color.colors_776D84),
-        fontFamily = FontFamily(Font(R.font.inter_medium)),
+        fontFamily = FontFamily(Font(R.font.roboto_medium)),
         fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
         modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._8sdp))
     )
@@ -2249,7 +2271,7 @@ private fun ColorPalette(label: String, selected: Int, onColor: (Int) -> Unit) {
     Text(
         text = label,
         color = colorResource(R.color.colors_776D84),
-        fontFamily = FontFamily(Font(R.font.inter_medium)),
+        fontFamily = FontFamily(Font(R.font.roboto_medium)),
         fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
         modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._8sdp))
     )
@@ -2298,7 +2320,7 @@ private fun DecorationPicker(
     Text(
         text = label,
         color = colorResource(R.color.colors_776D84),
-        fontFamily = FontFamily(Font(R.font.inter_medium)),
+        fontFamily = FontFamily(Font(R.font.roboto_medium)),
         fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
         modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._8sdp))
     )

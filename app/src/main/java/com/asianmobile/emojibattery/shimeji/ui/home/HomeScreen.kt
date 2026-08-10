@@ -325,7 +325,7 @@ private fun GlobalEnableCard(
                 }
             ),
             color = colorResource(R.color.colors_2F2440),
-            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontFamily = FontFamily(Font(R.font.roboto_semibold)),
             fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
             modifier = Modifier.weight(1f)
         )
@@ -392,7 +392,7 @@ private fun ModeTab(
             color = colorResource(
                 if (selected) R.color.colors_12B890 else R.color.colors_9297A5
             ),
-            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontFamily = FontFamily(Font(R.font.roboto_semibold)),
             fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
             textAlign = TextAlign.Center
         )
@@ -488,7 +488,7 @@ private fun MixedPetCard(
             Text(
                 text = pet.name,
                 color = colorResource(R.color.colors_2F2440),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -579,7 +579,7 @@ private fun AddMixedPetCard(
             color = colorResource(
                 if (enabled) R.color.colors_12B890 else R.color.colors_9297A5
             ),
-            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontFamily = FontFamily(Font(R.font.roboto_semibold)),
             fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
             textAlign = TextAlign.Center
         )
@@ -633,7 +633,7 @@ private fun ModeSectionHeading(title: String, description: String) {
     Text(
         text = description,
         color = colorResource(R.color.colors_776D84),
-        fontFamily = FontFamily(Font(R.font.inter_regular)),
+        fontFamily = FontFamily(Font(R.font.roboto_regular)),
         fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
         lineHeight = dimensionResource(SspR.dimen._13ssp).value.sp
     )
@@ -662,14 +662,14 @@ private fun SwarmLockedCard(
         Text(
             text = stringResource(R.string.home_mode_swarm_locked_title),
             color = colorResource(R.color.colors_2F2440),
-            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontFamily = FontFamily(Font(R.font.roboto_semibold)),
             fontSize = dimensionResource(SspR.dimen._14ssp).value.sp
         )
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._5sdp)))
         Text(
             text = stringResource(R.string.home_mode_swarm_locked_description),
             color = colorResource(R.color.colors_776D84),
-            fontFamily = FontFamily(Font(R.font.inter_regular)),
+            fontFamily = FontFamily(Font(R.font.roboto_regular)),
             fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
             textAlign = TextAlign.Center
         )
@@ -682,7 +682,7 @@ private fun SwarmLockedCard(
         Text(
             text = stringResource(R.string.home_mode_swarm_premium_hint),
             color = colorResource(R.color.colors_12B890),
-            fontFamily = FontFamily(Font(R.font.inter_medium)),
+            fontFamily = FontFamily(Font(R.font.roboto_medium)),
             fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier
@@ -728,13 +728,13 @@ private fun SwarmEmptyCard(onClick: () -> Unit) {
         Text(
             text = stringResource(R.string.home_mode_swarm_empty_title),
             color = colorResource(R.color.colors_2F2440),
-            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontFamily = FontFamily(Font(R.font.roboto_semibold)),
             fontSize = dimensionResource(SspR.dimen._13ssp).value.sp
         )
         Text(
             text = stringResource(R.string.home_mode_swarm_empty_description),
             color = colorResource(R.color.colors_776D84),
-            fontFamily = FontFamily(Font(R.font.inter_regular)),
+            fontFamily = FontFamily(Font(R.font.roboto_regular)),
             fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
             textAlign = TextAlign.Center
         )
@@ -771,7 +771,7 @@ private fun SwarmConfiguredCard(
                 Text(
                     text = name,
                     color = colorResource(R.color.colors_2F2440),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                     fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -779,7 +779,7 @@ private fun SwarmConfiguredCard(
                 Text(
                     text = stringResource(R.string.home_mode_swarm_change),
                     color = colorResource(R.color.colors_12B890),
-                    fontFamily = FontFamily(Font(R.font.inter_medium)),
+                    fontFamily = FontFamily(Font(R.font.roboto_medium)),
                     fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
                     modifier = Modifier
                         .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
@@ -789,7 +789,7 @@ private fun SwarmConfiguredCard(
                 Text(
                     text = stringResource(R.string.home_mode_swarm_edit),
                     color = colorResource(R.color.colors_2F2440),
-                    fontFamily = FontFamily(Font(R.font.inter_medium)),
+                    fontFamily = FontFamily(Font(R.font.roboto_medium)),
                     fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
                     modifier = Modifier
                         .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
@@ -831,7 +831,7 @@ private fun SwarmConfiguredCard(
             Text(
                 text = stringResource(R.string.home_mode_swarm_count, count),
                 color = colorResource(R.color.colors_12B890),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f)
@@ -917,7 +917,7 @@ private fun HomeMessageCard(message: HomeMessage) {
     Text(
         text = text,
         color = colorResource(R.color.colors_E45D6A),
-        fontFamily = FontFamily(Font(R.font.inter_medium)),
+        fontFamily = FontFamily(Font(R.font.roboto_medium)),
         fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
         modifier = Modifier
             .fillMaxWidth()
@@ -1006,7 +1006,7 @@ private fun BottomNavigationItem(
             Text(
                 text = label,
                 color = colorResource(R.color.colors_FFFFFF),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
             )
         }

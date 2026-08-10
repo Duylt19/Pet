@@ -42,10 +42,10 @@ import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
 val CutePetTitleFont: FontFamily
-    @Composable get() = FontFamily(Font(R.font.inter_bold))
+    @Composable get() = FontFamily(Font(R.font.roboto_bold))
 
 val CutePetBodyFont: FontFamily
-    @Composable get() = FontFamily(Font(R.font.inter_regular))
+    @Composable get() = FontFamily(Font(R.font.roboto_regular))
 
 @Composable
 fun CutePetTopBar(
@@ -160,7 +160,7 @@ fun CutePetSectionHeader(
             Text(
                 text = action,
                 color = colorResource(R.color.colors_7B61FF),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
                 modifier = Modifier
                     .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._8sdp)))
@@ -206,7 +206,7 @@ fun CutePetPrimaryButton(
         } else {
             Text(
                 text = text,
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
             )
         }
@@ -247,7 +247,7 @@ fun CutePetStatusPill(
         Text(
             text = text,
             color = colorResource(R.color.colors_2F2440),
-            fontFamily = FontFamily(Font(R.font.inter_medium)),
+            fontFamily = FontFamily(Font(R.font.roboto_medium)),
             fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
         )
     }

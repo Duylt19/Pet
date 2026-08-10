@@ -35,10 +35,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ui.theme.RobotoFontFamily
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
-private val PermissionDialogRobotoRegular = FontFamily.SansSerif
+private val PermissionDialogRobotoRegular = RobotoFontFamily
 private val PermissionDialogRobotoMedium = FontFamily(Font(R.font.roboto_medium))
 private val PermissionDialogRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 

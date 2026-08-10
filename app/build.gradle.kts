@@ -157,6 +157,13 @@ tasks.matching { it.name == "mergeDebugAssets" }.configureEach {
     dependsOn(prepareDebugBatteryAssets)
 }
 
+tasks.matching {
+    it.name.contains("Debug", ignoreCase = true) &&
+        it.name.contains("Lint", ignoreCase = true)
+}.configureEach {
+    dependsOn(prepareDebugBatteryAssets)
+}
+
 // Layoutlib cannot load adquality-sdk 9.1.1 because its generated R classes have
 // incompatible InnerClasses metadata. Keep the SDK in normal debug/release builds and
 // remove it only while the host-side Compose screenshot tasks assemble their classpath.

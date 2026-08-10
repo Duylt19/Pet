@@ -90,6 +90,7 @@ import com.airbnb.lottie.LottieCompositionFactory
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieConstants
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ui.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
@@ -120,7 +121,7 @@ import kotlinx.coroutines.withContext
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-private val StoreRoboto = FontFamily.SansSerif
+private val StoreRoboto = RobotoFontFamily
 private val StoreRobotoMedium = FontFamily(Font(R.font.roboto_medium))
 private val StoreRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 private const val PET_CARD_WIDTH_PX = 104f

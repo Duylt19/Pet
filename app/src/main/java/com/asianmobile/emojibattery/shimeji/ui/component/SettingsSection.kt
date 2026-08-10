@@ -27,7 +27,7 @@ fun SettingsSection(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val fontSemiBold = FontFamily(Font(R.font.inter_semibold))
+    val fontSemiBold = FontFamily(Font(R.font.roboto_semibold))
 
     Column(modifier = modifier) {
         Text(

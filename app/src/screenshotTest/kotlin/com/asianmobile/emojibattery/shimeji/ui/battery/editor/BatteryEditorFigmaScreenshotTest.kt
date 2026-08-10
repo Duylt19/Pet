@@ -22,6 +22,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
+import com.asianmobile.emojibattery.shimeji.ui.component.RewardOfferSheetSurface
 
 @PreviewTest
 @Preview(name = "Status bar editor expanded", widthDp = 360, heightDp = 800)
@@ -78,6 +79,36 @@ fun BatteryEditorMaterialSliderScreenshotTest() {
             range = 8f..24f,
             onValueChange = {}
         )
+    }
+}
+
+@PreviewTest
+@Preview(name = "Status bar discard changes", widthDp = 360, heightDp = 416)
+@Composable
+fun BatteryEditorDiscardChangesScreenshotTest() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0x80000000)),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        RewardOfferSheetSurface {
+            BatteryDiscardChangesSheetContent(
+                onCancel = {},
+                onExit = {},
+                nativeAdContent = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(171.dp)
+                            .background(Color(0xFFF2F2F2)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Native ad 336×222")
+                    }
+                }
+            )
+        }
     }
 }
 

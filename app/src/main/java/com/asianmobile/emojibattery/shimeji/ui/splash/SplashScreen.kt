@@ -181,7 +181,7 @@ fun SplashScreen(
                     Text(
                         text = stringResource(R.string.this_action_can_contain_ads),
                         fontSize = dimensionResource(id = R_ssp.dimen._11ssp).value.sp,
-                        fontFamily = FontFamily(Font(R.font.inter_regular)),
+                        fontFamily = FontFamily(Font(R.font.roboto_regular)),
                         color = colorResource(R.color.colors_FFFFFF),
                         modifier = Modifier
                             .padding(horizontal = dimensionResource(id = R_sdp.dimen._13sdp))

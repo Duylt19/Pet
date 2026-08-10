@@ -207,7 +207,7 @@ private fun PetCatalogContent(
                         )
                     },
                     color = colorResource(R.color.colors_5D46D7),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                     fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
                     modifier = Modifier
                         .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._10sdp)))
@@ -221,7 +221,7 @@ private fun PetCatalogContent(
                 Text(
                     text = stringResource(R.string.pet_catalog_import_hint),
                     color = colorResource(R.color.colors_776D84),
-                    fontFamily = FontFamily(Font(R.font.inter_regular)),
+                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
                     fontSize = dimensionResource(SspR.dimen._8ssp).value.sp
                 )
             }
@@ -287,7 +287,7 @@ private fun MixedSlotRewardGate(
         Text(
             text = stringResource(R.string.pet_catalog_mixed_slot_locked_description),
             color = colorResource(R.color.colors_776D84),
-            fontFamily = FontFamily(Font(R.font.inter_regular)),
+            fontFamily = FontFamily(Font(R.font.roboto_regular)),
             fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
             textAlign = TextAlign.Center
         )
@@ -300,7 +300,7 @@ private fun MixedSlotRewardGate(
         Text(
             text = stringResource(R.string.pet_catalog_mixed_slot_premium_hint),
             color = colorResource(R.color.colors_12B890),
-            fontFamily = FontFamily(Font(R.font.inter_medium)),
+            fontFamily = FontFamily(Font(R.font.roboto_medium)),
             fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier
@@ -355,7 +355,7 @@ private fun ImportButton(isInstalling: Boolean, onImport: () -> Unit) {
             Text(
                 text = stringResource(R.string.pet_catalog_import),
                 color = colorResource(R.color.colors_2F2440),
-                fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                 fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
             )
         }
@@ -426,7 +426,7 @@ private fun CatalogGrid(
                 uiState.visiblePets.size
             ),
             color = colorResource(R.color.colors_776D84),
-            fontFamily = FontFamily(Font(R.font.inter_medium)),
+            fontFamily = FontFamily(Font(R.font.roboto_medium)),
             fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
             modifier = Modifier.padding(
                 start = dimensionResource(SdpR.dimen._16sdp),
@@ -480,7 +480,7 @@ private fun CatalogSearch(query: String, onQueryChanged: (String) -> Unit) {
         placeholder = {
             Text(
                 text = stringResource(R.string.pet_catalog_search_hint),
-                fontFamily = FontFamily(Font(R.font.inter_regular))
+                fontFamily = FontFamily(Font(R.font.roboto_regular))
             )
         },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
@@ -573,7 +573,7 @@ private fun OwnerPetCard(
                 Text(
                     text = stringResource(R.string.pet_catalog_selected_badge),
                     color = colorResource(R.color.colors_FFFFFF),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                     fontSize = dimensionResource(SspR.dimen._7ssp).value.sp,
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -591,7 +591,7 @@ private fun OwnerPetCard(
         Text(
             text = pet.name,
             color = colorResource(R.color.colors_2F2440),
-            fontFamily = FontFamily(Font(R.font.inter_semibold)),
+            fontFamily = FontFamily(Font(R.font.roboto_semibold)),
             fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -599,7 +599,7 @@ private fun OwnerPetCard(
         Text(
             text = pet.category,
             color = colorResource(R.color.colors_7B61FF),
-            fontFamily = FontFamily(Font(R.font.inter_medium)),
+            fontFamily = FontFamily(Font(R.font.roboto_medium)),
             fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -637,7 +637,7 @@ private fun OwnerPetCard(
                         !pet.hasLocalArchive -> stringResource(R.string.pet_catalog_not_synced)
                         else -> stringResource(R.string.pet_catalog_set)
                     },
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                     fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
                 )
             }
@@ -650,7 +650,7 @@ private fun CatalogMessage(message: PetCatalogMessage) {
     Text(
         text = catalogMessageText(message),
         color = colorResource(R.color.colors_5D46D7),
-        fontFamily = FontFamily(Font(R.font.inter_medium)),
+        fontFamily = FontFamily(Font(R.font.roboto_medium)),
         fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
         modifier = Modifier
             .fillMaxWidth()
@@ -708,7 +708,7 @@ private fun CatalogError(
         Text(
             text = message,
             color = colorResource(R.color.colors_776D84),
-            fontFamily = FontFamily(Font(R.font.inter_regular)),
+            fontFamily = FontFamily(Font(R.font.roboto_regular)),
             fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
             textAlign = TextAlign.Center
         )
@@ -726,7 +726,7 @@ private fun CatalogEmpty() {
         Text(
             text = stringResource(R.string.pet_catalog_no_results),
             color = colorResource(R.color.colors_776D84),
-            fontFamily = FontFamily(Font(R.font.inter_regular))
+            fontFamily = FontFamily(Font(R.font.roboto_regular))
         )
     }
 }

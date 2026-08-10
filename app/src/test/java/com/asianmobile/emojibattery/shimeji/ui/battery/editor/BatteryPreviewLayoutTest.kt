@@ -1,7 +1,9 @@
 package com.asianmobile.emojibattery.shimeji.ui.battery.editor
 
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutResult
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -90,5 +92,27 @@ class BatteryPreviewLayoutTest {
 
         assertTrue(layout.shows(BatteryStatusComponent.BATTERY))
         assertFalse(layout.shows(BatteryStatusComponent.THEME_EMOJI))
+    }
+
+    @Test
+    fun trailingComponents_followRuntimePhysicalLeftToRightOrder() {
+        val allTrailingComponents = linkedSetOf(
+            BatteryStatusComponent.HOTSPOT,
+            BatteryStatusComponent.CELLULAR,
+            BatteryStatusComponent.WIFI,
+            BatteryStatusComponent.PERCENTAGE,
+            BatteryStatusComponent.BATTERY,
+            BatteryStatusComponent.CHARGE
+        )
+
+        assertEquals(
+            allTrailingComponents.toList(),
+            batteryPreviewTrailingOrder(
+                BatteryStatusLayoutResult(
+                    visibleComponents = allTrailingComponents,
+                    hiddenComponents = emptySet()
+                )
+            )
+        )
     }
 }

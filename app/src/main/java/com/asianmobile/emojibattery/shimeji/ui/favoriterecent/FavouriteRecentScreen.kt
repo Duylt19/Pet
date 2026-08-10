@@ -48,6 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ui.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
@@ -56,7 +57,7 @@ import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
-private val FavouriteRecentRobotoRegular = FontFamily.Default
+private val FavouriteRecentRobotoRegular = RobotoFontFamily
 private val FavouriteRecentRobotoMedium = FontFamily(Font(R.font.roboto_medium))
 private val FavouriteRecentRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 
