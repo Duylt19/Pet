@@ -4,11 +4,11 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.os.PowerManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBackgroundRestrictionReader
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBatteryOptimizationPolicy
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +23,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class GrantPermissionsViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context,
+    private val restrictionReader: PetBackgroundRestrictionReader
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GrantPermissionsUiState())
     val uiState: StateFlow<GrantPermissionsUiState> = _uiState.asStateFlow()
@@ -37,15 +38,12 @@ class GrantPermissionsViewModel @Inject constructor(
 
     /** Every permission here is granted on a system screen, so re-read them on every resume. */
     fun refresh() {
-        val ignoringBatteryOptimization = isIgnoringBatteryOptimization()
+        val signals = restrictionReader.read()
         _uiState.value = GrantPermissionsUiState(
             isAccessibilityEnabled = BatteryAccessibility.isEnabled(context),
             isOverlayGranted = PetOverlay.canDraw(context),
-            isBatteryOptimizationIgnored = ignoringBatteryOptimization,
-            isBatteryRowVisible = PetBatteryOptimizationPolicy.shouldOfferExemption(
-                manufacturer = Build.MANUFACTURER,
-                isAlreadyIgnoring = ignoringBatteryOptimization
-            ),
+            isBatteryOptimizationIgnored = signals.isAlreadyIgnoringOptimization,
+            isBatteryRowVisible = PetBatteryOptimizationPolicy.shouldOfferExemption(signals),
             isNotificationGranted = isNotificationGranted(),
             isNotificationRowVisible = NOTIFICATION_PERMISSION_EXISTS
         )
@@ -79,10 +77,6 @@ class GrantPermissionsViewModel @Inject constructor(
 
     private var hasAskedForNotification = false
 
-    private fun isIgnoringBatteryOptimization(): Boolean = runCatching {
-        val power = ContextCompat.getSystemService(context, PowerManager::class.java)
-        power?.isIgnoringBatteryOptimizations(context.packageName) == true
-    }.getOrDefault(false)
 
     private fun isNotificationGranted(): Boolean = !NOTIFICATION_PERMISSION_EXISTS ||
         ContextCompat.checkSelfPermission(
