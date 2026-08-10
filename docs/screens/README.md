@@ -18,14 +18,15 @@
 | `settings` | `ui/home/settings/SettingsScreen` | Tab Mine theo Figma: shared Home chrome, battery toggle, shortcuts, General và Other actions |
 | `pet_customization/{slotIndex}` | `ui/home/settings/PetCustomizationScreen` | Hồ sơ cute-pet độc lập: character, size, speed, touch, speech, custom messages, position và remove |
 | `swarm_customization` | `ui/home/swarm/SwarmCustomizationScreen` | Edit Swarm riêng: character, count, size/speed, random variation và movement insets |
-| `battery_catalog` | `ui/battery/catalog/BatteryCatalogScreen` | Search/category/theme/favorite/Premium; disclosure + Accessibility gate trước khi mở editor |
+| `battery_catalog` | `ui/battery/catalog/BatteryCatalogScreen` | Tab Battery theo Figma: shared Home header/toggle, promo Customize Status Bar, carousel theo category, favorite/Premium, native ad sau Trending và Accessibility gate |
+| `battery_category/{categoryId}` | `ui/battery/catalog/BatteryCategoryScreen` | Child route từ More: Back/title/PRO, inline banner, grid ba cột, selected theme và crown Premium; dùng chung catalog ViewModel |
 | `battery_editor/{themeId}` | `ui/battery/editor/BatteryEditorScreen` | Overview khởi tạo cặp pet+pin; picker category đổi hai asset độc lập, Rewarded/Premium theo component, live preview, Apply cố định và disclosure |
 | `battery_editor_component/{themeId}/{page}` | `ui/battery/editor/BatteryEditorScreen` | Destination editor riêng theo component, dùng ViewModel/draft của overview; Back/Done phục hồi đúng vị trí cuộn và có screen tracking độc lập |
 | `premium/{startByIndex}` | `ui/premium/PremiumScreen` | Subscription UI, close behavior theo entry source |
 
 ## Visual scope hiện tại
 
-- Discover và Mine dùng wallpaper trắng với gradient pastel, primary pink `#FB3675`, Roboto,
+- Discover, Battery, Battery category và Mine dùng wallpaper trắng với gradient pastel, primary pink `#FB3675`, Roboto,
   horizontal catalog rows và rounded cards theo Figma node `8015:1035`. My Pet và các màn
   product cũ tiếp tục dùng cozy palette hiện tại cho tới task refresh riêng.
 - Splash, Language/Language Settings, Intro, Permission và Premium giữ nguyên visual hiện

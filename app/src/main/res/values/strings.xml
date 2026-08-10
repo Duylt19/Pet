@@ -1118,4 +1118,5 @@
     <string name="grant_permissions_notification_body">Get reminders and updates about your pet.</string>
     <string name="grant_permissions_autostart_title">Allow auto-start</string>
     <string name="grant_permissions_autostart_body">Your device keeps its own list of apps allowed to run in the background. Add Cute Pet so your pet is not stopped.</string>
+    <string name="battery_category_back">Back</string>
 </resources>

@@ -38,6 +38,7 @@ class ScreenNameTest {
             "pet_customization",
             "swarm_customization",
             "battery_catalog",
+            "battery_category",
             "battery_editor",
             "battery_size_editor",
             "battery_appearance_editor",

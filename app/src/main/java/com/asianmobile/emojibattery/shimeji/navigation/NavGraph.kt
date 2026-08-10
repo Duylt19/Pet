@@ -29,6 +29,8 @@ import com.asianmobile.emojibattery.shimeji.ui.component.HomeTab
 import com.asianmobile.emojibattery.shimeji.ui.discover.DiscoverScreen
 import com.asianmobile.emojibattery.shimeji.ui.favoriterecent.FavouriteRecentScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogScreen
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogViewModel
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCategoryScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.CURRENT_BATTERY_STYLE_ID
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorPage
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorScreen
@@ -69,6 +71,7 @@ object Routes {
     const val SWARM_CUSTOMIZATION = "swarm_customization"
     const val SETTINGS = "settings"
     const val BATTERY_CATALOG = "battery_catalog"
+    const val BATTERY_CATEGORY = "battery_category"
     const val BATTERY_EDITOR = "battery_editor"
     const val BATTERY_EDITOR_COMPONENT = "battery_editor_component"
     const val PREMIUM = "premium"
@@ -84,6 +87,7 @@ object Routes {
     ): String = "$PET_DETAIL/${target.name}/$slotIndex/${Uri.encode(packKey)}"
     fun petCustomization(slotIndex: Int): String = "$PET_CUSTOMIZATION/$slotIndex"
     fun batteryEditor(themeId: Int): String = "$BATTERY_EDITOR/$themeId"
+    fun batteryCategory(categoryId: Int): String = "$BATTERY_CATEGORY/$categoryId"
     fun batteryEditorComponent(themeId: Int, page: String): String =
         "$BATTERY_EDITOR_COMPONENT/$themeId/$page"
 }
@@ -105,6 +109,9 @@ internal fun routeForHomeTab(tab: HomeTab): String = when (tab) {
     HomeTab.MINE -> Routes.SETTINGS
 }
 
+internal fun showHomeBottomBanner(route: String?): Boolean =
+    homeTabForRoute(route) != null || route?.startsWith("${Routes.BATTERY_CATEGORY}/") == true
+
 @Composable
 fun AppNavGraph(
     startDestination: String,
@@ -116,6 +123,9 @@ fun AppNavGraph(
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val selectedHomeTab = homeTabForRoute(currentBackStackEntry?.destination?.route)
+    val shouldShowHomeBottomBanner = showHomeBottomBanner(
+        currentBackStackEntry?.destination?.route
+    )
 
     fun navigateToHomeTab(tab: HomeTab) {
         val route = routeForHomeTab(tab)
@@ -353,6 +363,15 @@ fun AppNavGraph(
 
             composable(Routes.BATTERY_CATALOG) {
                 BatteryCatalogScreen(
+                    onSearch = {
+                        navController.safeNavigate(Routes.SEARCH, ignoreDebounce = true)
+                    },
+                    onOpenCategory = { categoryId ->
+                        navController.safeNavigate(
+                            Routes.batteryCategory(categoryId),
+                            ignoreDebounce = true
+                        ) { launchSingleTop = true }
+                    },
                     onOpenTheme = { themeId ->
                         navController.safeNavigate(
                             Routes.batteryEditor(themeId),
@@ -365,6 +384,35 @@ fun AppNavGraph(
                             ignoreDebounce = true
                         )
                     }
+                )
+            }
+
+            composable(
+                route = "${Routes.BATTERY_CATEGORY}/{categoryId}",
+                arguments = listOf(navArgument("categoryId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val catalogEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Routes.BATTERY_CATALOG)
+                }
+                val catalogViewModel = hiltViewModel<BatteryCatalogViewModel>(catalogEntry)
+                BatteryCategoryScreen(
+                    categoryId = backStackEntry.arguments?.getInt("categoryId") ?: 0,
+                    onBack = {
+                        navController.safePopBackStack(ignoreDebounce = true)
+                    },
+                    onNavigateToPremium = {
+                        navController.safeNavigate(
+                            "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
+                            ignoreDebounce = true
+                        )
+                    },
+                    onOpenTheme = { themeId ->
+                        navController.safeNavigate(
+                            Routes.batteryEditor(themeId),
+                            ignoreDebounce = true
+                        )
+                    },
+                    viewModel = catalogViewModel
                 )
             }
 
@@ -592,6 +640,8 @@ fun AppNavGraph(
                 selectedTab = selectedHomeTab,
                 onTabSelected = ::navigateToHomeTab
             )
+        }
+        if (shouldShowHomeBottomBanner) {
             BannerAd(
                 modifier = Modifier.fillMaxWidth(),
                 adPosition = HOME_BOTTOM_BANNER_POSITION

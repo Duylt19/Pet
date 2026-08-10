@@ -21,6 +21,7 @@
 | `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
 | `swarm_customization` | Edit Pet Swarm | Character, count, base size/speed, random variation và vùng di chuyển |
 | `battery_catalog` | Battery Styles | Tab 2 của Home shell: catalog local + category/favorite/Premium gate; Accessibility gate trước editor |
+| `battery_category/{categoryId}` | Battery category | Child destination từ action More: grid ba cột của category, Back về đúng vị trí Battery Styles |
 | `battery_editor/{themeId}` | Customize Status Bar | Overview khởi tạo cặp pet+pin, cho phép đổi hai phần độc lập, giữ draft và live preview qua Accessibility |
 | `battery_editor_component/{themeId}/{page}` | Battery component editor | Destination riêng cho Size/Appearance/Emoji/Battery và từng status component; dùng chung ViewModel/draft với overview |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
@@ -65,7 +66,7 @@ Mine ──Rate/Share/Contact/Privacy──> action tương ứng
 Catalog ──already prepared pack──> Detail ──Use for Pet──> Catalog
 Discover/My Pet ──Settings──> Mine ──Language──> Language Settings
 Discover/My Pet ──Premium──> Premium(in-app)
-Discover/My Pet ──Battery──> Battery Styles ──theme──> Accessibility gate
+Discover/My Pet ──Battery──> Battery Styles ──More──> Battery category ──theme──> Accessibility gate
 Accessibility gate ──enabled/return enabled──> Customize Battery Bar
   └─ theme ID khởi tạo cả pet + pin; editor có thể mix hai theme khác nhau
 Customize Battery Bar ──locked pet/pin──> Rewarded hoặc Premium ──return──> chọn component
@@ -95,7 +96,9 @@ chuyển sang bước đặt tên khi user chạm Continue. Flow này không t�
   `target` parse an toàn về enum, `slotIndex` là typed Int và `packKey` luôn URI-encode
   trước navigation.
 - Edit Pet Swarm pop về My Pet; Catalog mở từ màn này pop về Edit Pet Swarm.
-- Battery Editor pop về Battery Styles; Battery Styles pop về Home. Premium mở từ
+- Battery category dùng chung catalog ViewModel; Editor mở từ category sẽ pop về category,
+  sau đó Back pop về đúng scroll của Battery Styles. Battery Editor mở trực tiếp từ landing
+  pop về Battery Styles; Battery Styles là top-level Home tab. Premium mở từ
   catalog hoặc picker component trong editor rồi quay lại đúng destination theo back stack;
   editor refresh entitlement và hoàn tất pending component selection khi resume.
 - Mỗi Battery component editor là một destination nằm trên overview. Nó dùng ViewModel của
@@ -121,7 +124,8 @@ chuyển sang bước đặt tên khi user chạm Continue. Flow này không t�
 - Dùng `safeNavigate`/`safePopBackStack`.
 - Full-screen ad transition dùng `navigateWithAd` theo policy.
 - Bottom navigation và placement `home_mode_bottom` do Home shell trong `AppNavGraph` sở
-  hữu; top-level feature screen không tự render bottom chrome/banner.
+  hữu. Child `battery_category/{categoryId}` ẩn bottom navigation nhưng tiếp tục dùng cùng
+  banner holder để không request/reload banner khi đi từ Battery Styles sang category.
 - String argument phải encode; enum argument phải parse an toàn với fallback.
 - Không phục hồi route Private Browser cũ nếu chưa có feature spec mới.
 - Overlay permission được mở qua `Settings.ACTION_MANAGE_OVERLAY_PERMISSION`; đây là special access, không phải runtime permission dialog.

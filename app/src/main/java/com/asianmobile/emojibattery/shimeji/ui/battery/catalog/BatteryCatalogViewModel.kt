@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
@@ -12,7 +13,6 @@ import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepos
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,55 +34,48 @@ class BatteryCatalogViewModel @Inject constructor(
     val uiState: StateFlow<BatteryCatalogUiState> = _uiState.asStateFlow()
     private val _effects = Channel<BatteryCatalogEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
-    private var currentPreviewAssetJob: Job? = null
-    private var requestedCurrentStyleKey: String? = null
-    private var preparedCurrentStyleKey: String? = null
-    private var preparedCurrentStyle: BatteryCurrentStyle? = null
+    private var configuredBatteryEnabled = false
+    private var enableBatteryAfterAccessibility = false
 
     init {
         viewModelScope.launch {
             combine(catalogRepository.snapshot, settingsRepository.config) { catalog, config ->
                 catalog to config
             }.collect { (catalog, config) ->
-                val rawCurrentStyle = displayPolicy.currentStyle(catalog, config)
                 _uiState.update { current ->
-                    reduce(current, catalog, config, rawCurrentStyle)
+                    reduce(current, catalog, config)
                 }
-                prepareCurrentPreviewAssets(rawCurrentStyle)
             }
-        }
-    }
-
-    fun selectCategory(categoryId: Int?) {
-        _uiState.update { current ->
-            current.copy(
-                selectedCategoryId = categoryId,
-                visibleThemes = displayPolicy.filterThemes(
-                    current.themes,
-                    categoryId,
-                    current.searchQuery
-                )
-            )
-        }
-    }
-
-    fun updateSearchQuery(query: String) {
-        _uiState.update { current ->
-            current.copy(
-                searchQuery = query,
-                visibleThemes = displayPolicy.filterThemes(
-                    current.themes,
-                    current.selectedCategoryId,
-                    query
-                )
-            )
         }
     }
 
     fun toggleFavorite(themeId: Int) = settingsRepository.toggleFavorite(themeId)
 
+    fun onBatteryToggle() {
+        if (!BatteryAccessibility.isEnabled(context)) {
+            enableBatteryAfterAccessibility = true
+            emit(BatteryCatalogEffect.RequestBatteryAccessibility)
+            return
+        }
+        settingsRepository.setEnabled(!_uiState.value.isBatteryEnabled)
+    }
+
+    fun refreshAccessibility() {
+        val accessibilityEnabled = BatteryAccessibility.isEnabled(context)
+        _uiState.update {
+            it.copy(isBatteryEnabled = configuredBatteryEnabled && accessibilityEnabled)
+        }
+        if (accessibilityEnabled && enableBatteryAfterAccessibility) {
+            enableBatteryAfterAccessibility = false
+            settingsRepository.setEnabled(true)
+        }
+    }
+
+    fun cancelPendingBatteryEnable() {
+        enableBatteryAfterAccessibility = false
+    }
+
     fun requestCurrentStyle() {
-        if (_uiState.value.currentStyle == null) return
         emit(BatteryCatalogEffect.OpenTheme(CURRENT_BATTERY_STYLE_ID))
     }
 
@@ -206,83 +199,23 @@ class BatteryCatalogViewModel @Inject constructor(
     private fun reduce(
         current: BatteryCatalogUiState,
         catalog: BatteryCatalogSnapshot,
-        config: BatteryStatusConfig,
-        rawCurrentStyle: BatteryCurrentStyle?
-    ): BatteryCatalogUiState = current.copy(
-        themes = catalog.themes,
-        visibleThemes = displayPolicy.filterThemes(
-            catalog.themes,
-            current.selectedCategoryId,
-            current.searchQuery
-        ),
-        categories = displayPolicy.filterCategories(catalog.categories),
-        favoriteThemeIds = config.favoriteThemeIds,
-        rewardUnlockedThemeIds = config.rewardUnlockedThemeIds,
-        isPremium = SharedPreferencesUtils.getIsPremium(context),
-        currentStyle = preparedCurrentStyle
-            ?.takeIf {
-                preparedCurrentStyleKey == currentStyleAssetKey(rawCurrentStyle)
-            }
-            ?: rawCurrentStyle,
-        pendingUnlockThemeId = current.pendingUnlockThemeId
-            ?.takeIf { id -> catalog.themes.any { it.id == id } },
-        isLoading = catalog.isLoading,
-        error = catalog.error
-    )
-
-    private fun prepareCurrentPreviewAssets(style: BatteryCurrentStyle?) {
-        val assetKey = currentStyleAssetKey(style)
-        if (style == null) {
-            currentPreviewAssetJob?.cancel()
-            currentPreviewAssetJob = null
-            requestedCurrentStyleKey = null
-            preparedCurrentStyleKey = null
-            preparedCurrentStyle = null
-            return
-        }
-        if (assetKey == preparedCurrentStyleKey || assetKey == requestedCurrentStyleKey) return
-        currentPreviewAssetJob?.cancel()
-        requestedCurrentStyleKey = assetKey
-        currentPreviewAssetJob = viewModelScope.launch {
-            val localEmotionPath = catalogRepository.materializeAsset(style.emotionPath)
-                ?: style.emotionPath
-            val localAnimationPath = catalogRepository.materializeAsset(
-                style.animation?.assetPath
-            ) ?: style.animation?.assetPath
-            val prepared = style.copy(
-                emotionPath = localEmotionPath,
-                animation = style.animation?.copy(
-                    assetPath = localAnimationPath ?: style.animation.assetPath
-                )
-            )
-            if (requestedCurrentStyleKey != assetKey) return@launch
-            preparedCurrentStyleKey = assetKey
-            preparedCurrentStyle = prepared
-            _uiState.update { current ->
-                if (currentStyleAssetKey(current.currentStyle) == assetKey ||
-                    current.currentStyle?.config == style.config
-                ) {
-                    current.copy(currentStyle = prepared)
-                } else {
-                    current
-                }
-            }
-        }
-    }
-
-    private fun currentStyleAssetKey(style: BatteryCurrentStyle?): String? {
-        style ?: return null
-        return listOf(
-            style.config.selectedBatteryThemeId,
-            style.config.selectedEmojiThemeId,
-            style.config.backgroundDecorationId,
-            style.config.showEmotion,
-            style.config.emotionDecorationId,
-            style.emotionPath,
-            style.config.showAnimation,
-            style.config.animationAssetName,
-            style.animation?.assetPath
-        ).joinToString("|")
+        config: BatteryStatusConfig
+    ): BatteryCatalogUiState {
+        configuredBatteryEnabled = config.enabled
+        return current.copy(
+            themes = catalog.themes,
+            categories = displayPolicy.filterCategories(catalog.categories),
+            sections = displayPolicy.sections(catalog.categories, catalog.themes),
+            selectedThemeId = config.selectedThemeId,
+            isBatteryEnabled = config.enabled && BatteryAccessibility.isEnabled(context),
+            favoriteThemeIds = config.favoriteThemeIds,
+            rewardUnlockedThemeIds = config.rewardUnlockedThemeIds,
+            isPremium = SharedPreferencesUtils.getIsPremium(context),
+            pendingUnlockThemeId = current.pendingUnlockThemeId
+                ?.takeIf { id -> catalog.themes.any { it.id == id } },
+            isLoading = catalog.isLoading,
+            error = catalog.error
+        )
     }
 
     private fun emit(effect: BatteryCatalogEffect) {

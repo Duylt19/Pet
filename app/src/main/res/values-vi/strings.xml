@@ -803,4 +803,5 @@
     <string name="battery_overlay_ringer_vibrate">đang bật chế độ rung</string>
     <string name="battery_overlay_ringer_silent">đang bật chế độ im lặng</string>
     <string name="battery_overlay_hotspot_enabled">điểm phát sóng đang bật</string>
+    <string name="battery_category_back">Quay lại</string>
 </resources>

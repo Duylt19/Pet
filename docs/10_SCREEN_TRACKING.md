@@ -22,6 +22,7 @@
 | Customize Pet | `pet_customization` |
 | Edit Pet Swarm | `swarm_customization` |
 | Battery styles | `battery_catalog` |
+| Battery category | `battery_category` |
 | Customize status bar overview | `battery_editor` |
 | Battery size editor | `battery_size_editor` |
 | Battery appearance editor | `battery_appearance_editor` |

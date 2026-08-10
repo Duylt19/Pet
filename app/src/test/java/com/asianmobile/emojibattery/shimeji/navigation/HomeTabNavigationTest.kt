@@ -14,6 +14,7 @@ class HomeTabNavigationTest {
         assertEquals(HomeTab.MINE, homeTabForRoute(Routes.SETTINGS))
         assertNull(homeTabForRoute(Routes.SEARCH))
         assertNull(homeTabForRoute(Routes.FAVOURITE_RECENT))
+        assertNull(homeTabForRoute("${Routes.BATTERY_CATEGORY}/{categoryId}"))
     }
 
     @Test
@@ -22,5 +23,13 @@ class HomeTabNavigationTest {
         assertEquals(Routes.BATTERY_CATALOG, routeForHomeTab(HomeTab.BATTERY))
         assertEquals(Routes.PET_STORE, routeForHomeTab(HomeTab.PET_STORE))
         assertEquals(Routes.SETTINGS, routeForHomeTab(HomeTab.MINE))
+    }
+
+    @Test
+    fun `battery category keeps the shared banner without showing as a home tab`() {
+        assertEquals("${Routes.BATTERY_CATEGORY}/17", Routes.batteryCategory(17))
+        assertEquals(true, showHomeBottomBanner(Routes.BATTERY_CATALOG))
+        assertEquals(true, showHomeBottomBanner("${Routes.BATTERY_CATEGORY}/{categoryId}"))
+        assertEquals(false, showHomeBottomBanner(Routes.SEARCH))
     }
 }

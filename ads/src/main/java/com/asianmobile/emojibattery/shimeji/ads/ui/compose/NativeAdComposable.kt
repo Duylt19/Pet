@@ -50,6 +50,7 @@ private const val TAG = "NativeAdComposable"
 // ─────────────────────────────────────────────────────────
 
 enum class AdType {
+    HEIGHT_150,
     HEIGHT_208,
     HEIGHT_222,
     HEIGHT_222_SMALL_CTA,
@@ -90,6 +91,7 @@ fun NativeAdInternal(
 
     val layoutRes = remember(adType) {
         when (adType) {
+            AdType.HEIGHT_150 -> R.layout.layout_native_ad_150h
             AdType.HEIGHT_208 -> R.layout.layout_native_ad_208h
             AdType.HEIGHT_222 -> R.layout.layout_native_ad_222h
             AdType.HEIGHT_222_SMALL_CTA -> R.layout.layout_native_ad_222h_small_cta

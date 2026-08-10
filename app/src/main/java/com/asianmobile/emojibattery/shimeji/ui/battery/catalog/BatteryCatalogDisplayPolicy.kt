@@ -2,8 +2,6 @@ package com.asianmobile.emojibattery.shimeji.ui.battery.catalog
 
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_CATEGORY_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
-import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogSnapshot
-import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 
 class BatteryCatalogDisplayPolicy {
@@ -11,39 +9,6 @@ class BatteryCatalogDisplayPolicy {
         categories: List<BatteryCatalogCategory>
     ): List<BatteryCatalogCategory> = categories.filterNot { category ->
         category.id == BUILT_IN_BATTERY_CATEGORY_ID
-    }
-
-    fun currentStyle(
-        catalog: BatteryCatalogSnapshot,
-        config: BatteryStatusConfig
-    ): BatteryCurrentStyle? {
-        if (!config.hasApplied) return null
-        return BatteryCurrentStyle(
-            config = config,
-            batteryTheme = catalog.themes.firstOrNull {
-                it.id == config.selectedBatteryThemeId
-            },
-            emojiTheme = catalog.themes.firstOrNull {
-                it.id == config.selectedEmojiThemeId
-            },
-            backgroundPath = catalog.backgrounds.firstOrNull {
-                it.id == config.backgroundDecorationId
-            }?.assetPath,
-            emotionPath = if (config.showEmotion) {
-                catalog.emotions.firstOrNull {
-                    it.id == config.emotionDecorationId
-                }?.assetPath
-            } else {
-                null
-            },
-            animation = if (config.showAnimation) {
-                catalog.animations.firstOrNull {
-                    it.name == config.animationAssetName
-                }
-            } else {
-                null
-            }
-        )
     }
 
     fun filterThemes(
@@ -61,7 +26,23 @@ class BatteryCatalogDisplayPolicy {
                 matchesSearch
         }
     }
+
+    fun sections(
+        categories: List<BatteryCatalogCategory>,
+        themes: List<BatteryThemeEntry>
+    ): List<BatteryCatalogSection> = filterCategories(categories).mapNotNull { category ->
+        val categoryThemes = themes.filter { theme ->
+            !theme.isBuiltIn && theme.categoryId == category.id
+        }
+        categoryThemes.takeIf(List<BatteryThemeEntry>::isNotEmpty)?.let { entries ->
+            BatteryCatalogSection(category = category, themes = entries)
+        }
+    }
 }
+
+internal fun batteryCategoryDisplayName(rawName: String): String = rawName
+    .replace(BATTERY_CATEGORY_SYMBOL_PREFIX, "")
+    .trim()
 
 internal fun batteryThemeDisplayName(rawName: String): String {
     val normalized = rawName
@@ -87,3 +68,4 @@ internal fun batteryThemeDisplayName(rawName: String): String {
 private val BATTERY_CAMEL_CASE_BOUNDARY = Regex("(?<=[\\p{Ll}\\d])(?=\\p{Lu})")
 private val BATTERY_NAME_SEPARATORS = Regex("[_-]+")
 private val BATTERY_NAME_WHITESPACE = Regex("\\s+")
+private val BATTERY_CATEGORY_SYMBOL_PREFIX = Regex("^[^\\p{L}\\p{N}]+")

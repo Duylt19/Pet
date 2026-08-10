@@ -16,7 +16,8 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Home shell trong `AppNavGraph` sở hữu đúng một `BannerAd` cho placement
   `home_mode_bottom`, nằm dưới bottom navigation. Banner giữ nguyên composition/ViewModel
   khi chuyển giữa Discover, Battery, Pet Store và Mine nên không request/reload lại theo tab.
-  Banner chỉ dispose khi đi khỏi toàn bộ nhóm top-level tab. Settings khi chạy trong shell
+  Battery category ẩn bottom navigation nhưng vẫn giữ cùng holder/banner key khi mở từ Battery.
+  Banner chỉ dispose khi đi khỏi toàn bộ nhóm này. Settings khi chạy trong shell
   không render thêm native ad để tránh hai placement xếp chồng. Hero placeholder và promo
   creative giữa content là presentational Figma assets, không gọi ads SDK.
 - Grant Permissions dùng lại native placement `screen_permission` của màn Permission onboarding,
@@ -24,6 +25,9 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   cùng một ngữ cảnh xin quyền.
 - Search tái sử dụng native placement `screen_home` ở đáy màn hình theo Figma; placement
   vẫn tuân theo remote key, frequency/ad-free policy và failure fallback chung của module ads.
+- Battery landing tái sử dụng native placement `screen_home` với template `HEIGHT_150` sau
+  section đầu tiên. Category detail có banner inline `battery_category_inline`; creative do SDK
+  tải, không đóng gói ảnh quảng cáo mẫu trong Figma. Bottom banner vẫn là holder của shell.
 - Banner holder dùng nền trắng và shimmer `#E6E6E6` để phần dư quanh creative 320×50
   hòa vào surface 360px của Figma thay vì lộ dải nền tối.
 
@@ -74,8 +78,8 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   quảng cáo sớm.
 - Tránh chồng App Open Ads với interstitial/premium/full-screen flow.
 - Không thêm placement mới nếu chưa có product/UX decision.
-- Battery Rewarded là unlock trigger đã được owner duyệt; không thêm banner/native vào
-  Catalog hoặc editor trong thay đổi này.
+- Battery Rewarded là unlock trigger đã được owner duyệt. Catalog chỉ dùng các placement
+  landing/category được mô tả ở trên; editor và reward dialog không tự thêm banner/native.
 - Screen code phải là constant trong ads config, không hardcode rải rác.
 - Premium user/ad-free policy phải được kiểm tra ở integration boundary chung.
 - Khi xóa screen, xóa placement/config không còn consumer.

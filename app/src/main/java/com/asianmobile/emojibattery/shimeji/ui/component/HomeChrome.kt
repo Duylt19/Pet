@@ -100,39 +100,47 @@ fun HomeHeader(
             )
         }
         Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
-        Row(
-            modifier = Modifier
-                .shadow(dimensionResource(SdpR.dimen._6sdp), CircleShape)
-                .clip(CircleShape)
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(
-                            colorResource(R.color.colors_FFB65B),
-                            colorResource(R.color.colors_FF6B80),
-                            colorResource(R.color.colors_FF57EE)
-                        )
+        HomePremiumButton(onClick = onPremium)
+    }
+}
+
+@Composable
+fun HomePremiumButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .shadow(dimensionResource(SdpR.dimen._6sdp), CircleShape)
+            .clip(CircleShape)
+            .background(
+                Brush.horizontalGradient(
+                    listOf(
+                        colorResource(R.color.colors_FFB65B),
+                        colorResource(R.color.colors_FF6B80),
+                        colorResource(R.color.colors_FF57EE)
                     )
                 )
-                .clickable(onClick = onPremium)
-                .padding(
-                    horizontal = dimensionResource(SdpR.dimen._6sdp),
-                    vertical = dimensionResource(SdpR.dimen._5sdp)
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
-        ) {
-            Image(
-                painter = painterResource(R.drawable.img_home_crown),
-                contentDescription = null,
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
             )
-            Text(
-                text = stringResource(R.string.discover_pro),
-                color = colorResource(R.color.colors_FFFFFF),
-                fontFamily = HomeRobotoSemiBold,
-                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
-            )
-        }
+            .clickable(onClick = onClick)
+            .padding(
+                horizontal = dimensionResource(SdpR.dimen._6sdp),
+                vertical = dimensionResource(SdpR.dimen._5sdp)
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
+    ) {
+        Image(
+            painter = painterResource(R.drawable.img_home_crown),
+            contentDescription = null,
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
+        )
+        Text(
+            text = stringResource(R.string.discover_pro),
+            color = colorResource(R.color.colors_FFFFFF),
+            fontFamily = HomeRobotoSemiBold,
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
+        )
     }
 }
 

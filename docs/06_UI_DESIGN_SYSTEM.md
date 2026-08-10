@@ -48,6 +48,17 @@ Discover Home contract:
 - Battery Themes dùng favorite state thật; Trending hiện dùng thứ tự catalog cho tới khi
   server có ranking riêng.
 
+Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
+
+- landing dùng shared `HomeHeader`/`HomeEnableCard`, promo composite PNG @3x, category section
+  dạng carousel và card `110×110px`; favorite ở top-end, crown Premium ở top-start;
+- category header tạm dùng chung flame vector `18×18px`, không tint. Mapping icon theo category
+  được thay sau mà không đổi layout hoặc catalog schema;
+- More mở child route có header Back/title/PRO, inline banner và grid ba cột. Card detail giữ
+  tỷ lệ vuông, preview `74/101.333`, selected dùng `#FFEBF1` + stroke `#FB3675`, không hiện heart;
+- landing giữ Home bottom navigation; detail ẩn navigation nhưng giữ cùng bottom banner holder.
+  DIY FAB và Lottie star bling dùng lại component Discover.
+
 Pet Store visual contract:
 
 - Pet/Food selector dùng bốn image-fill state riêng từ Figma (`selected`/`unselected`);
