@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBatteryOptimizationPolicy
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -36,10 +37,15 @@ class GrantPermissionsViewModel @Inject constructor(
 
     /** Every permission here is granted on a system screen, so re-read them on every resume. */
     fun refresh() {
+        val ignoringBatteryOptimization = isIgnoringBatteryOptimization()
         _uiState.value = GrantPermissionsUiState(
             isAccessibilityEnabled = BatteryAccessibility.isEnabled(context),
             isOverlayGranted = PetOverlay.canDraw(context),
-            isBatteryOptimizationIgnored = isIgnoringBatteryOptimization(),
+            isBatteryOptimizationIgnored = ignoringBatteryOptimization,
+            isBatteryRowVisible = PetBatteryOptimizationPolicy.shouldOfferExemption(
+                manufacturer = Build.MANUFACTURER,
+                isAlreadyIgnoring = ignoringBatteryOptimization
+            ),
             isNotificationGranted = isNotificationGranted(),
             isNotificationRowVisible = NOTIFICATION_PERMISSION_EXISTS
         )

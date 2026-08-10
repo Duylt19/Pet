@@ -4,6 +4,11 @@ data class GrantPermissionsUiState(
     val isAccessibilityEnabled: Boolean = false,
     val isOverlayGranted: Boolean = false,
     val isBatteryOptimizationIgnored: Boolean = false,
+    /**
+     * Only vendors that kill foreground services see this row: on stock Android the exemption
+     * grants network and wake locks the pet overlay never uses.
+     */
+    val isBatteryRowVisible: Boolean = false,
     val isNotificationGranted: Boolean = false,
     /** Below API 33 the notification permission does not exist, so its row is hidden. */
     val isNotificationRowVisible: Boolean = false
