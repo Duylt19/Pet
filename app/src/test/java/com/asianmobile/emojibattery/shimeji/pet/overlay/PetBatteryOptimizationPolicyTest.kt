@@ -8,16 +8,11 @@ import org.junit.Test
 
 class PetBatteryOptimizationPolicyTest {
     @Test
-    fun `a device that already granted the exemption is never asked again`() {
-        val signals = PetBackgroundRestrictionSignals(
-            isAlreadyIgnoringOptimization = true,
-            isBackgroundRestricted = true,
-            isInRestrictedStandbyBucket = true,
-            lastOverlayKill = PetProcessKillKind.SIGNALLED,
-            isAggressiveVendor = true
-        )
+    fun `granting the exemption keeps the row, so the user can still revoke it`() {
+        val signals = PetBackgroundRestrictionSignals(isAlreadyIgnoringOptimization = true)
 
-        assertFalse(PetBatteryOptimizationPolicy.shouldOfferExemption(signals))
+        assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
+        // Nothing left to ask for, so the row shows state rather than a reason.
         assertNull(PetBatteryOptimizationPolicy.reasonFor(signals))
     }
 
@@ -25,7 +20,7 @@ class PetBatteryOptimizationPolicyTest {
     fun `a stock device with nothing wrong is never asked`() {
         val signals = PetBackgroundRestrictionSignals()
 
-        assertFalse(PetBatteryOptimizationPolicy.shouldOfferExemption(signals))
+        assertFalse(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
         assertNull(PetBatteryOptimizationPolicy.reasonFor(signals))
     }
 
@@ -33,7 +28,7 @@ class PetBatteryOptimizationPolicyTest {
     fun `being background restricted is enough on any device`() {
         val signals = PetBackgroundRestrictionSignals(isBackgroundRestricted = true)
 
-        assertTrue(PetBatteryOptimizationPolicy.shouldOfferExemption(signals))
+        assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
         assertEquals(
             PetExemptionReason.BACKGROUND_RESTRICTED,
             PetBatteryOptimizationPolicy.reasonFor(signals)
@@ -44,7 +39,7 @@ class PetBatteryOptimizationPolicyTest {
     fun `the restricted standby bucket is enough on any device`() {
         val signals = PetBackgroundRestrictionSignals(isInRestrictedStandbyBucket = true)
 
-        assertTrue(PetBatteryOptimizationPolicy.shouldOfferExemption(signals))
+        assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
         assertEquals(
             PetExemptionReason.RESTRICTED_BUCKET,
             PetBatteryOptimizationPolicy.reasonFor(signals)
@@ -58,7 +53,7 @@ class PetBatteryOptimizationPolicyTest {
             isAggressiveVendor = false
         )
 
-        assertTrue(PetBatteryOptimizationPolicy.shouldOfferExemption(signals))
+        assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
         assertEquals(
             PetExemptionReason.PREVIOUSLY_KILLED,
             PetBatteryOptimizationPolicy.reasonFor(signals)
@@ -69,7 +64,7 @@ class PetBatteryOptimizationPolicyTest {
     fun `the user closing the app is not treated as a symptom`() {
         assertFalse(PetBatteryOptimizationPolicy.isUnexpectedKill(PetProcessKillKind.USER))
         assertFalse(
-            PetBatteryOptimizationPolicy.shouldOfferExemption(
+            PetBatteryOptimizationPolicy.isExemptionRelevant(
                 PetBackgroundRestrictionSignals(lastOverlayKill = PetProcessKillKind.USER)
             )
         )
@@ -103,7 +98,7 @@ class PetBatteryOptimizationPolicyTest {
     fun `the vendor list decides only when nothing measurable applies`() {
         val signals = PetBackgroundRestrictionSignals(isAggressiveVendor = true)
 
-        assertTrue(PetBatteryOptimizationPolicy.shouldOfferExemption(signals))
+        assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
         assertEquals(
             PetExemptionReason.AGGRESSIVE_VENDOR,
             PetBatteryOptimizationPolicy.reasonFor(signals)
@@ -143,7 +138,6 @@ class PetBatteryOptimizationPolicyTest {
             hasVendorPowerScreen = true
         )
 
-        assertFalse(PetBatteryOptimizationPolicy.shouldOfferExemption(signals))
         assertTrue(signals.shouldOfferVendorAllowlist())
     }
 

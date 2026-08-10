@@ -186,49 +186,6 @@ fun HomeEnableCard(
 }
 
 @Composable
-fun AppSwitch(checked: Boolean, onCheckedChange: () -> Unit) {
-    val knobOffset by animateDpAsState(
-        targetValue = dimensionResource(
-            if (checked) SdpR.dimen._17sdp else SdpR.dimen._2sdp
-        ),
-        label = "homeSwitch"
-    )
-    val knobYOffset = dimensionResource(SdpR.dimen._2sdp)
-    Box(
-        modifier = Modifier
-            .size(
-                width = dimensionResource(SdpR.dimen._34sdp),
-                height = dimensionResource(SdpR.dimen._18sdp)
-            )
-            .clip(CircleShape)
-            .background(
-                colorResource(
-                    if (checked) R.color.colors_F1E0FF else R.color.colors_C8C8C9
-                )
-            )
-            .toggleable(
-                value = checked,
-                role = Role.Switch,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onValueChange = { onCheckedChange() }
-            )
-    ) {
-        Box(
-            modifier = Modifier
-                .offset { IntOffset(knobOffset.roundToPx(), knobYOffset.roundToPx()) }
-                .size(dimensionResource(SdpR.dimen._15sdp))
-                .clip(CircleShape)
-                .background(
-                    colorResource(
-                        if (checked) R.color.colors_B06EFF else R.color.colors_FFFFFF
-                    )
-                )
-        )
-    }
-}
-
-@Composable
 fun HomeBottomNavigation(
     selectedTab: HomeTab,
     onTabSelected: (HomeTab) -> Unit

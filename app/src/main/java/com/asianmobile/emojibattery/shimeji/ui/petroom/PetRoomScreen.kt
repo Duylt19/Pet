@@ -73,6 +73,7 @@ import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.pet.care.PetEnergyLevel
 import com.asianmobile.emojibattery.shimeji.pet.care.PetEnergyPolicy
+import com.asianmobile.emojibattery.shimeji.ui.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -733,7 +734,7 @@ private fun PetDetailPanel(
                 fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
             )
             Spacer(modifier = Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
-            OnScreenToggle(checked = detail.isOnScreen, onClick = onToggleOnScreen)
+            AppSwitch(checked = detail.isOnScreen, onCheckedChange = onToggleOnScreen)
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
@@ -825,28 +826,6 @@ private fun DetailRow(labelRes: Int, value: String) {
         DashedRule(
             color = colorResource(R.color.colors_8F6250),
             modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._2sdp))
-        )
-    }
-}
-
-@Composable
-private fun OnScreenToggle(checked: Boolean, onClick: () -> Unit) {
-    val track = colorResource(if (checked) R.color.colors_FB3675 else R.color.colors_C8C8C9)
-    Box(
-        modifier = Modifier
-            .width(dimensionResource(SdpR.dimen._34sdp))
-            .height(dimensionResource(SdpR.dimen._18sdp))
-            .clip(CircleShape)
-            .background(track)
-            .clickable(onClick = onClick)
-            .padding(dimensionResource(SdpR.dimen._2sdp)),
-        contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart
-    ) {
-        Box(
-            modifier = Modifier
-                .size(dimensionResource(SdpR.dimen._15sdp))
-                .clip(CircleShape)
-                .background(colorResource(R.color.colors_FFFFFF))
         )
     }
 }

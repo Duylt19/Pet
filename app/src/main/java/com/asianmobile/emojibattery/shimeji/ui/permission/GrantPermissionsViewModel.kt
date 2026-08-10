@@ -44,7 +44,7 @@ class GrantPermissionsViewModel @Inject constructor(
             isAccessibilityEnabled = BatteryAccessibility.isEnabled(context),
             isOverlayGranted = PetOverlay.canDraw(context),
             isBatteryOptimizationIgnored = signals.isAlreadyIgnoringOptimization,
-            isBatteryRowVisible = PetBatteryOptimizationPolicy.shouldOfferExemption(signals),
+            isBatteryRowVisible = PetBatteryOptimizationPolicy.isExemptionRelevant(signals),
             isAutoStartRowVisible = signals.shouldOfferVendorAllowlist(),
             isNotificationGranted = isNotificationGranted(),
             isNotificationRowVisible = NOTIFICATION_PERMISSION_EXISTS
@@ -66,9 +66,9 @@ class GrantPermissionsViewModel @Inject constructor(
             GrantPermissionsTarget.VENDOR_AUTO_START ->
                 GrantPermissionsEffect.OpenVendorAutoStartSettings
 
+            // Always opens the list: the user may be turning it off again.
             GrantPermissionsTarget.BATTERY_OPTIMIZATION ->
                 GrantPermissionsEffect.OpenBatteryOptimizationSettings
-                    .takeUnless { state.isBatteryOptimizationIgnored }
 
             // Once denied, the runtime prompt never shows again, so send the user to settings.
             GrantPermissionsTarget.NOTIFICATION -> when {

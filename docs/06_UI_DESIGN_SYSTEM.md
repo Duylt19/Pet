@@ -71,6 +71,14 @@ Pet Store visual contract:
   `SPECIAL` thật của pack; chỉ fallback `SPECIAL_2`, rồi thumbnail tĩnh khi pack không
   cung cấp skill đặc biệt.
 
+Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343` (tắt):
+
+- `ui/component/AppSwitch.kt` là switch duy nhất của app; mọi toggle dùng nó, không màn nào
+  tự vẽ bản riêng. Track `44×24` radius 12, núm `20×20` thụt vào `2`, núm **luôn trắng**;
+  chỉ track đổi màu: bật `#FB3675`, tắt `#C8C8C9`;
+- có golden `AppSwitchStatesScreenshotTest` chụp cả hai state, vì trước đó switch không được
+  phủ gì nên đã lệch design mà không ai phát hiện.
+
 Grant Permissions contract theo Figma node `8080:7477` và `8080:10255`:
 
 - route `grant_permissions` mở từ Mine, dùng wallpaper chung; top nav `360×56` có back 28,
@@ -81,6 +89,8 @@ Grant Permissions contract theo Figma node `8080:7477` và `8080:10255`:
 - card accessibility có badge `Required` `#FFECEC`/`#F04438` hoặc `Allowed`
   `#E8F7EE`/`#2AA96A`, minh hoạ hai bước và CTA `Go to Settings` gradient
   `#C95DFF → #FB54BB`; các card còn lại dùng `AppSwitch` chung với Home;
+- row Ignore Battery Optimization **không biến mất sau khi cấp**: nó hiện khi exemption có ý
+  nghĩa với máy này, còn switch phản ánh trạng thái, nên user vẫn thấy và gỡ lại được;
 - không quyền nào được cấp trong app: mỗi mục chỉ mở system surface tương ứng rồi đọc lại
   trạng thái ở `ON_RESUME`. Ignore Battery Optimization mở
   `ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS` thay vì hộp thoại một chạm, vì hộp thoại đó

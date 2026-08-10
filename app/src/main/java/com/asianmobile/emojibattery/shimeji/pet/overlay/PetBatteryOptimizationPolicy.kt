@@ -84,18 +84,18 @@ object PetBatteryOptimizationPolicy {
     }
 
     /**
-     * The row is shown only where the exemption can help and the user has not already granted
-     * it, so a device that needs nothing never asks.
+     * Whether the exemption means anything on this device, granted or not. A device that needs
+     * nothing never sees the row; a device that does keeps it, so the user can see the state and
+     * revoke it rather than watching the row vanish the moment they grant it.
      */
-    fun shouldOfferExemption(signals: PetBackgroundRestrictionSignals): Boolean {
-        if (signals.isAlreadyIgnoringOptimization) return false
-        return signals.isBackgroundRestricted ||
+    fun isExemptionRelevant(signals: PetBackgroundRestrictionSignals): Boolean =
+        signals.isAlreadyIgnoringOptimization ||
+            signals.isBackgroundRestricted ||
             signals.isInRestrictedStandbyBucket ||
             isUnexpectedKill(signals.lastOverlayKill) ||
             signals.isAggressiveVendor
-    }
 
-    /** Why the row is being shown, so the screen can say something true about it. */
+    /** Why the row still needs acting on. Null once granted: there is nothing left to ask. */
     fun reasonFor(signals: PetBackgroundRestrictionSignals): PetExemptionReason? = when {
         signals.isAlreadyIgnoringOptimization -> null
         signals.isBackgroundRestricted -> PetExemptionReason.BACKGROUND_RESTRICTED
