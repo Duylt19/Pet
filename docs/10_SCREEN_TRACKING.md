@@ -11,6 +11,7 @@
 | Intro page 2 | `intro_page_2` |
 | Intro page 3 | `intro_page_3` |
 | Permission | `permission` |
+| Grant Permissions | `grant_permissions` |
 | Discover Home | `home` |
 | Search | `search` |
 | Favourite & Recent | `favourite_recent` |

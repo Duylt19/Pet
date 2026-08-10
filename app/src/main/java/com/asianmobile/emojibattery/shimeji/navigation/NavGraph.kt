@@ -42,6 +42,7 @@ import com.asianmobile.emojibattery.shimeji.ui.home.swarm.SwarmCustomizationScre
 import com.asianmobile.emojibattery.shimeji.ui.intro.IntroScreen
 import com.asianmobile.emojibattery.shimeji.ui.language.LanguageScreen
 import com.asianmobile.emojibattery.shimeji.ui.main.MainViewModel
+import com.asianmobile.emojibattery.shimeji.ui.permission.GrantPermissionsScreen
 import com.asianmobile.emojibattery.shimeji.ui.permission.PermissionScreen
 import com.asianmobile.emojibattery.shimeji.ui.premium.PremiumScreen
 import com.asianmobile.emojibattery.shimeji.ui.petroom.PetRoomScreen
@@ -59,6 +60,7 @@ object Routes {
     const val HOME = "home"
     const val SEARCH = "search"
     const val FAVOURITE_RECENT = "favourite_recent"
+    const val GRANT_PERMISSIONS = "grant_permissions"
     const val MY_PET = "my_pet"
     const val PET_CATALOG = "pet_catalog"
     const val PET_STORE = "pet_store"
@@ -285,6 +287,13 @@ fun AppNavGraph(
                 )
             }
 
+            composable(Routes.GRANT_PERMISSIONS) {
+                GrantPermissionsScreen(
+                    onNavigateBack = { navController.safePopBackStack() },
+                    onNavigateToPremium = { navigateFromHome(Routes.PREMIUM) }
+                )
+            }
+
             composable(Routes.SEARCH) {
                 SearchScreen(
                     onCancel = { navController.safePopBackStack(ignoreDebounce = true) },
@@ -475,6 +484,12 @@ fun AppNavGraph(
                     },
                     onOpenAppsHidden = {
                         // TODO(Mine): connect the app-exclusion picker when its product flow is defined.
+                    },
+                    onNavigateToGrantPermissions = {
+                        navController.safeNavigate(
+                            Routes.GRANT_PERMISSIONS,
+                            ignoreDebounce = true
+                        )
                     }
                 )
             }

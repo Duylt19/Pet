@@ -181,12 +181,12 @@ fun HomeEnableCard(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
-        HomeSwitch(checked = checked, onCheckedChange = onCheckedChange)
+        AppSwitch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 
 @Composable
-private fun HomeSwitch(checked: Boolean, onCheckedChange: () -> Unit) {
+fun AppSwitch(checked: Boolean, onCheckedChange: () -> Unit) {
     val knobOffset by animateDpAsState(
         targetValue = dimensionResource(
             if (checked) SdpR.dimen._17sdp else SdpR.dimen._2sdp

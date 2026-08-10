@@ -1100,4 +1100,21 @@
     <string name="permission_dialog_accessibility_message">Enable accessibility to display Cute Pet over all apps. Emoji Battery does not collect or share personal information.</string>
     <string name="permission_dialog_cancel">Cancel</string>
     <string name="permission_dialog_allow">Allow</string>
+    <string name="grant_permissions_title">Grant Permissions</string>
+    <string name="grant_permissions_nav">Permission</string>
+    <string name="grant_permissions_section_necessary">Necessary Permission</string>
+    <string name="grant_permissions_section_stability">Enhanced Stability Permissions</string>
+    <string name="grant_permissions_section_recommend">Recommend Permissions</string>
+    <string name="grant_permissions_recommend_subtitle">Stay Connected with Your Pet</string>
+    <string name="grant_permissions_accessibility_title">Turn on Accessibility Mode</string>
+    <string name="grant_permissions_accessibility_body">Accessibility permission is required to show Emoji Battery via swipe gestures. No personal data is collected.</string>
+    <string name="grant_permissions_go_to_settings">Go to Settings</string>
+    <string name="grant_permissions_required">Required</string>
+    <string name="grant_permissions_allowed">Allowed</string>
+    <string name="grant_permissions_overlay_title">Draw over other apps</string>
+    <string name="grant_permissions_overlay_body">Allow Emoji Battery to appear on top of other apps.</string>
+    <string name="grant_permissions_battery_title">Ignore Battery Optimization</string>
+    <string name="grant_permissions_battery_body">Help Emoji Battery stay active and prevent the system from stopping its services.</string>
+    <string name="grant_permissions_notification_title">Notification access</string>
+    <string name="grant_permissions_notification_body">Get reminders and updates about your pet.</string>
 </resources>

@@ -27,6 +27,7 @@ class ScreenNameTest {
             "intro_page_2",
             "intro_page_3",
             "permission",
+        "grant_permissions",
             "home",
             "search",
             "favourite_recent",

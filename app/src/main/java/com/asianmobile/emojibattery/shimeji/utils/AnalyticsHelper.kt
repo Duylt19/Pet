@@ -24,6 +24,7 @@ enum class ScreenName(val value: String) {
     INTRO_PAGE_2("intro_page_2"),
     INTRO_PAGE_3("intro_page_3"),
     PERMISSION("permission"),
+    GRANT_PERMISSIONS("grant_permissions"),
     HOME("home"),
     SEARCH("search"),
     FAVOURITE_RECENT("favourite_recent"),

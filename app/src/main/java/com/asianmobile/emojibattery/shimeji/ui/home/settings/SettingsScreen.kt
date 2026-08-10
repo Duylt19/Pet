@@ -86,6 +86,7 @@ fun SettingsScreen(
     onNavigateToMyPet: () -> Unit,
     onNavigateToFavouriteRecent: () -> Unit,
     onOpenAppsHidden: () -> Unit = {},
+    onNavigateToGrantPermissions: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     TrackScreenView(ScreenName.SETTINGS)
@@ -137,9 +138,7 @@ fun SettingsScreen(
         onFavouriteRecent = onNavigateToFavouriteRecent,
         onLanguage = onNavigateToLanguage,
         onAppsHidden = onOpenAppsHidden,
-        onGrantPermission = {
-            viewModel.requestBatteryAccessibility(enableAfterGrant = false)
-        },
+        onGrantPermission = onNavigateToGrantPermissions,
         onRate = { rateAppState = RateAppUiState(isDialogVisible = true) },
         onShare = { viewModel.onShareClicked(context) },
         onContact = { viewModel.onContactClicked(context) },

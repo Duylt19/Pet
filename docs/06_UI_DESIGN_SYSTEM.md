@@ -71,6 +71,24 @@ Pet Store visual contract:
   `SPECIAL` thật của pack; chỉ fallback `SPECIAL_2`, rồi thumbnail tĩnh khi pack không
   cung cấp skill đặc biệt.
 
+Grant Permissions contract theo Figma node `8080:7477` và `8080:10255`:
+
+- route `grant_permissions` mở từ Mine, dùng wallpaper chung; top nav `360×56` có back 28,
+  title `Permission` Roboto 600 18/26 và pill PRO gradient `#FFB65B → #FF6B80 → #FF57EE`,
+  bên dưới là heading `Grant Permissions` Roboto 600 24/32;
+- ba nhóm đánh số bằng chip tròn `24×24` nền `#FB3675`: Necessary, Enhanced Stability,
+  Recommend. Card trắng radius 16, icon quyền `34×34` radius 10 với gradient riêng từng quyền;
+- card accessibility có badge `Required` `#FFECEC`/`#F04438` hoặc `Allowed`
+  `#E8F7EE`/`#2AA96A`, minh hoạ hai bước và CTA `Go to Settings` gradient
+  `#C95DFF → #FB54BB`; các card còn lại dùng `AppSwitch` chung với Home;
+- không quyền nào được cấp trong app: mỗi mục chỉ mở system surface tương ứng rồi đọc lại
+  trạng thái ở `ON_RESUME`. Ignore Battery Optimization mở
+  `ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS` thay vì hộp thoại một chạm, vì hộp thoại đó
+  cần `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` — quyền Play chỉ cấp cho nhóm use case hẹp mà
+  app này không thuộc về;
+- dialog accessibility (`GrantPermissionDialog`) dùng shield gradient `#FF5D7D → #FB54BB`,
+  title 20/28 và hai nút bằng nhau `Cancel` `#F2F2F2` / `Allow` `#FB3675`.
+
 My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8191:5950`:
 
 - route `my_pet` là scene phòng full-screen, background lấy từ room catalog (`bg/BG_<id>.png`)
