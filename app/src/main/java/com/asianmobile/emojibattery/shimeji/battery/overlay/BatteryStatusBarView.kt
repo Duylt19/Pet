@@ -54,6 +54,13 @@ class BatteryStatusBarView(context: Context) : View(context) {
         repeatCount = LottieDrawable.INFINITE
         callback = this@BatteryStatusBarView
     }
+    private val lottieCompositionLifecycle = BatteryLottieCompositionLifecycle<LottieComposition>(
+        cancelAnimation = lottieDrawable::cancelAnimation,
+        clearComposition = lottieDrawable::clearComposition,
+        setComposition = { composition -> lottieDrawable.setComposition(composition) },
+        playAnimation = lottieDrawable::playAnimation,
+        isAnimating = lottieDrawable::isAnimating
+    )
 
     fun render(
         config: BatteryStatusConfig,
@@ -90,14 +97,13 @@ class BatteryStatusBarView(context: Context) : View(context) {
         }
         cachedLayout = null
         if (this.animation !== animation) {
-            this.animation = animation
             animationStartedAt = SystemClock.uptimeMillis()
-            lottieDrawable.cancelAnimation()
-            lottieDrawable.composition = animation?.lottieComposition
-            if (config.showAnimation && animation?.lottieComposition != null) {
-                lottieDrawable.playAnimation()
-            }
         }
+        this.animation = animation
+        lottieCompositionLifecycle.update(
+            composition = animation?.lottieComposition,
+            shouldPlay = config.showAnimation
+        )
         contentDescription = buildStatusDescription()
         invalidate()
     }
@@ -832,8 +838,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
     }
 
     override fun onDetachedFromWindow() {
-        lottieDrawable.cancelAnimation()
-        lottieDrawable.composition = null
+        lottieCompositionLifecycle.reset()
         animation = null
         emoji = null
         battery = null
