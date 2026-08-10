@@ -50,7 +50,6 @@ import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_PERMISSION
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
-import com.asianmobile.emojibattery.shimeji.ui.component.TransparentStatusBarEffect
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -112,7 +111,6 @@ private fun PermissionScreenContent(
     onContinue: () -> Unit,
     onSkip: () -> Unit
 ) {
-    TransparentStatusBarEffect(useDarkIcons = false)
     TrackScreenView(ScreenName.PERMISSION)
     BackHandler { }
 

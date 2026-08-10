@@ -46,7 +46,6 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_INTRO
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_INTRO_SECOND
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
-import com.asianmobile.emojibattery.shimeji.ui.component.TransparentStatusBarEffect
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import kotlinx.coroutines.launch
@@ -98,7 +97,6 @@ private val introPages = listOf(
 fun IntroScreen(
     onFinish: () -> Unit
 ) {
-    TransparentStatusBarEffect(useDarkIcons = false)
 
     val pagerState = rememberPagerState(pageCount = { introPages.size })
     val coroutineScope = rememberCoroutineScope()

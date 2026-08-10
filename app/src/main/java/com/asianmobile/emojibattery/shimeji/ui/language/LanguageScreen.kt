@@ -66,7 +66,6 @@ import com.asianmobile.emojibattery.shimeji.ads.data.CheckShowAdsUtil
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ads.utils.Utils
-import com.asianmobile.emojibattery.shimeji.ui.component.TransparentStatusBarEffect
 import com.intuit.sdp.R as R_sdp
 import com.intuit.ssp.R as R_ssp
 
@@ -77,7 +76,6 @@ fun LanguageScreen(
     onConfirm: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
-    TransparentStatusBarEffect(useDarkIcons = false)
 
     TrackScreenView(
         if (isSettings) ScreenName.LANGUAGE_SETTINGS else ScreenName.LANGUAGE_ONBOARDING

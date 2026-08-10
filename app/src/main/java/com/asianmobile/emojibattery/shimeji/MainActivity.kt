@@ -49,9 +49,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // The app sits on a white sheet, so the status bar draws its clock and icons dark by
-        // default. The onboarding screens are full-bleed artwork and flip this back to light
-        // for themselves via TransparentStatusBarEffect.
+        // The app sits on a white sheet, so the status bar draws its clock and icons dark on
+        // every screen. Nothing overrides this per screen: a screen that needs light icons
+        // would have to be dark enough to read them, and none of them are any more.
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
@@ -149,10 +149,8 @@ class MainActivity : ComponentActivity() {
      * Runs on every window focus change, so it must leave the status bar alone: a screen that
      * asked for light icons would otherwise lose them the moment focus came back.
      */
-    @Suppress("DEPRECATION")
     private fun hideSystemNavigationBar() {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.navigationBarColor = Color.TRANSPARENT
+        applyLightSystemBars()
         WindowInsetsControllerCompat(window, window.decorView).apply {
             systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -160,15 +158,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * The single place the system bar look is decided. Re-applied on resume and on every focus
+     * change, because a settings screen, a full-screen ad or a system dialog hands the window
+     * back with its own appearance still set.
+     */
     @Suppress("DEPRECATION")
-    private fun applyTransparentSystemBars() {
+    private fun applyLightSystemBars() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = Color.TRANSPARENT
-    }
-
-    private fun applyLightSystemBars() {
-        applyTransparentSystemBars()
         WindowInsetsControllerCompat(window, window.decorView).apply {
             // "Light bars" means a light background, so the platform draws dark content on them.
             isAppearanceLightStatusBars = true
@@ -183,8 +182,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Colours only: whether the icons are light or dark belongs to whichever screen is up.
-        applyTransparentSystemBars()
+        // Re-asserted here because returning from a system settings screen or a full-screen ad
+        // hands the window back with the host's bar appearance still on it.
+        applyLightSystemBars()
         if (
             AdOverlayState.isAdShowing.value &&
             !InterstitialUtil.getInstance().isShowing &&

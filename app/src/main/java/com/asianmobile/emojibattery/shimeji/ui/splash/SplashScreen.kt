@@ -59,7 +59,6 @@ import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils.setC
 import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialLauncherUtil
 import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
-import com.asianmobile.emojibattery.shimeji.ui.component.TransparentStatusBarEffect
 import com.asianmobile.emojibattery.shimeji.ui.main.MainViewModel
 import com.intuit.sdp.R as R_sdp
 import com.intuit.ssp.R as R_ssp
@@ -73,7 +72,6 @@ fun SplashScreen(
     skipLauncherAd: Boolean = false,
     onNextScreen: () -> Unit
 ) {
-    TransparentStatusBarEffect(useDarkIcons = false)
 
     TrackScreenView(ScreenName.SPLASH)
     val context = LocalContext.current

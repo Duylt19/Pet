@@ -73,17 +73,17 @@ Pet Store visual contract:
 
 System bar:
 
-- app chạy edge-to-edge, status bar và navigation bar luôn trong suốt. Mặc định là
+- app chạy edge-to-edge, status bar và navigation bar luôn trong suốt. **Mọi màn** dùng
   `isAppearanceLightStatusBars = true` — "light bar" nghĩa là nền sáng nên hệ thống vẽ đồng hồ
   và icon **màu tối**, đủ tương phản với tông trắng chủ đạo của app;
-- chỉ bốn màn onboarding full-bleed (Splash, Language, Intro, Permission) lật lại icon sáng
-  bằng `TransparentStatusBarEffect(useDarkIcons = false)`;
-- `MainActivity.hideSystemNavigationBar()` chạy theo mỗi lần đổi window focus và
-  `onResume()` chỉ set lại **màu** bar; cả hai không đụng tới appearance, nếu không override
-  của màn đang hiện sẽ bị ghi đè ngay khi focus quay lại;
-- `TransparentStatusBarEffect` khi dispose trả về **mặc định app** (icon tối), không trả về
-  "giá trị trước đó": hai effect chồng nhau lúc chuyển màn nên "giá trị trước đó" có thể là
-  override của màn kia và làm icon sáng lọt sang màn nền trắng.
+- `MainActivity.applyLightSystemBars()` là **nơi duy nhất** quyết định hình thức system bar.
+  Không màn nào override; helper `TransparentStatusBarEffect` cũ đã bị xoá. Màn nào muốn icon
+  sáng thì phải đủ tối để đọc được icon sáng, và không màn nào còn như vậy trong thiết kế mới;
+- helper được gọi lại ở `onCreate`, `onResume` và mỗi lần đổi window focus, vì màn system
+  settings, full-screen ad hay system dialog trả window về kèm appearance của chính nó;
+- **nợ đã biết**: onboarding Language và Permission (`ui/language`, `ui/permission/PermissionScreen`)
+  vẫn còn nền `#161718`, nên icon tối chìm trên hai màn đó cho tới khi UI của chúng được
+  dựng lại theo tông trắng. Splash và Intro dùng `img_splash_bg` sáng nên đọc bình thường.
 
 Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343` (tắt):
 
