@@ -5,64 +5,82 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class HomePetPolicyTest {
+    private fun command(
+        hasChosenPet: Boolean = true,
+        overlayGranted: Boolean = true,
+        notificationPermissionRequired: Boolean = true,
+        notificationGranted: Boolean = true,
+        notificationAlreadyAsked: Boolean = false,
+        isPetRunning: Boolean = false
+    ) = HomePetPolicy.nextCommand(
+        hasChosenPet = hasChosenPet,
+        overlayGranted = overlayGranted,
+        notificationPermissionRequired = notificationPermissionRequired,
+        notificationGranted = notificationGranted,
+        notificationAlreadyAsked = notificationAlreadyAsked,
+        isPetRunning = isPetRunning
+    )
+
     @Test
     fun `running pet always stops without requesting permissions`() {
-        val command = HomePetPolicy.nextCommand(
-            overlayGranted = false,
-            notificationPermissionRequired = true,
-            notificationGranted = false,
-            isPetRunning = true
+        assertEquals(
+            HomePetCommand.STOP,
+            command(
+                hasChosenPet = false,
+                overlayGranted = false,
+                notificationGranted = false,
+                isPetRunning = true
+            )
         )
+    }
 
-        assertEquals(HomePetCommand.STOP, command)
+    @Test
+    fun `nothing is asked for until a pet has been chosen`() {
+        // Otherwise the user spends two system screens granting access for a pet that then
+        // never appears, and only afterwards learns they had to pick one.
+        assertEquals(
+            HomePetCommand.CHOOSE_PET,
+            command(hasChosenPet = false, overlayGranted = false, notificationGranted = false)
+        )
     }
 
     @Test
     fun `overlay access is required before notification permission`() {
-        val command = HomePetPolicy.nextCommand(
-            overlayGranted = false,
-            notificationPermissionRequired = true,
-            notificationGranted = false,
-            isPetRunning = false
+        assertEquals(
+            HomePetCommand.OPEN_OVERLAY_SETTINGS,
+            command(overlayGranted = false, notificationGranted = false)
         )
-
-        assertEquals(HomePetCommand.OPEN_OVERLAY_SETTINGS, command)
     }
 
     @Test
     fun `notification permission is requested after overlay access`() {
-        val command = HomePetPolicy.nextCommand(
-            overlayGranted = true,
-            notificationPermissionRequired = true,
-            notificationGranted = false,
-            isPetRunning = false
+        assertEquals(
+            HomePetCommand.REQUEST_NOTIFICATION_PERMISSION,
+            command(notificationGranted = false)
         )
+    }
 
-        assertEquals(HomePetCommand.REQUEST_NOTIFICATION_PERMISSION, command)
+    @Test
+    fun `the notification permission is only ever asked for once`() {
+        // A permanently denied permission returns from its launcher without showing anything,
+        // so asking again on the retry would spin forever. The overlay does not need it.
+        assertEquals(
+            HomePetCommand.START,
+            command(notificationGranted = false, notificationAlreadyAsked = true)
+        )
     }
 
     @Test
     fun `pet starts when required access is ready`() {
-        val command = HomePetPolicy.nextCommand(
-            overlayGranted = true,
-            notificationPermissionRequired = true,
-            notificationGranted = true,
-            isPetRunning = false
-        )
-
-        assertEquals(HomePetCommand.START, command)
+        assertEquals(HomePetCommand.START, command())
     }
 
     @Test
     fun `pet starts without notification runtime permission on older Android`() {
-        val command = HomePetPolicy.nextCommand(
-            overlayGranted = true,
-            notificationPermissionRequired = false,
-            notificationGranted = false,
-            isPetRunning = false
+        assertEquals(
+            HomePetCommand.START,
+            command(notificationPermissionRequired = false, notificationGranted = false)
         )
-
-        assertEquals(HomePetCommand.START, command)
     }
 
     @Test

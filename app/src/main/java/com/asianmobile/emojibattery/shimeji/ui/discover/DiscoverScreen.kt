@@ -111,15 +111,12 @@ fun DiscoverScreen(
     val overlayPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        viewModel.refreshPetPermissions()
-        viewModel.onPetToggle()
+        viewModel.onOverlayPermissionResult()
     }
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) {
-        // A denied notification never blocks the overlay; the service posts its own channel.
-        viewModel.refreshPetPermissions()
-        viewModel.onPetToggle()
+        viewModel.onNotificationPermissionResult()
     }
 
     TrackScreenView(ScreenName.HOME)

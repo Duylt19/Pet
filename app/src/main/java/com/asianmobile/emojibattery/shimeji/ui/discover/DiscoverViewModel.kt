@@ -129,20 +129,28 @@ class DiscoverViewModel @Inject constructor(
         val state = _uiState.value
         when (
             HomePetPolicy.nextCommand(
+                hasChosenPet = hasChosenPet(),
                 overlayGranted = PetOverlay.canDraw(context),
                 notificationPermissionRequired = NOTIFICATION_PERMISSION_REQUIRED,
                 notificationGranted = isNotificationGranted(),
+                notificationAlreadyAsked = hasAskedForNotification,
                 isPetRunning = state.isPetRunning
             )
         ) {
+            HomePetCommand.CHOOSE_PET -> emitEffect(DiscoverEffect.ChooseAPetFirst)
             HomePetCommand.OPEN_OVERLAY_SETTINGS -> emitEffect(DiscoverEffect.OpenOverlaySettings)
-            HomePetCommand.REQUEST_NOTIFICATION_PERMISSION ->
+            HomePetCommand.REQUEST_NOTIFICATION_PERMISSION -> {
+                hasAskedForNotification = true
                 emitEffect(DiscoverEffect.RequestNotificationPermission)
+            }
 
             HomePetCommand.START -> startPet()
             HomePetCommand.STOP -> PetOverlay.stop(context)
         }
     }
+
+    /** The runtime prompt only ever shows once, so a second ask would never reach the user. */
+    private var hasAskedForNotification = false
 
     /** Called after the user returns from the overlay or notification permission screens. */
     fun refreshPetPermissions() {
@@ -154,19 +162,35 @@ class DiscoverViewModel @Inject constructor(
         }
     }
 
-    private fun startPet() {
-        // Without a pet turned on in My Pet Room the session would fall back to the built-in
-        // pack, putting a cat on screen the user never chose.
+    /**
+     * Only carries on when the access was actually given. Retrying unconditionally would send a
+     * user who declined straight back to the same system screen, with no way out but to grant it.
+     */
+    fun onOverlayPermissionResult() {
+        refreshPetPermissions()
+        if (PetOverlay.canDraw(context)) onPetToggle()
+    }
+
+    /** A denied notification never blocks the overlay; the pet starts either way. */
+    fun onNotificationPermissionResult() {
+        refreshPetPermissions()
+        onPetToggle()
+    }
+
+    /**
+     * Without a pet turned on in My Pet Room the session would fall back to the built-in pack,
+     * putting a cat on screen the user never chose.
+     */
+    private fun hasChosenPet(): Boolean {
         val preferences = petSettingsRepository.preferences.value
-        val hasChosenPet = PetOverlayRosterPolicy.hasChosenPet(
+        return PetOverlayRosterPolicy.hasChosenPet(
             slotPackKeys = preferences.petSlots.map { it.packKey },
             slotEnabled = preferences.petSlots.map { it.isEnabled },
             petCount = preferences.petCount
         )
-        if (!hasChosenPet) {
-            emitEffect(DiscoverEffect.ChooseAPetFirst)
-            return
-        }
+    }
+
+    private fun startPet() {
         if (PetOverlay.start(context) == PetOverlayStartResult.PERMISSION_REQUIRED) {
             emitEffect(DiscoverEffect.OpenOverlaySettings)
         }

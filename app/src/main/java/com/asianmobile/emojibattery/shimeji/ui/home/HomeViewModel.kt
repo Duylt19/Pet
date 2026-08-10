@@ -45,6 +45,7 @@ class HomeViewModel @Inject constructor(
     private val _effects = Channel<HomeEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
     private var startAfterNotificationResult = false
+    private var hasAskedForNotification = false
 
     init {
         viewModelScope.launch {
@@ -105,15 +106,20 @@ class HomeViewModel @Inject constructor(
         }
         when (
             HomePetPolicy.nextCommand(
+                // Already gated above, so the policy never has to report it again here.
+                hasChosenPet = true,
                 overlayGranted = state.overlayGranted,
                 notificationPermissionRequired = state.notificationPermissionRequired,
                 notificationGranted = state.notificationGranted,
+                notificationAlreadyAsked = hasAskedForNotification,
                 isPetRunning = state.isPetRunning
             )
         ) {
+            HomePetCommand.CHOOSE_PET -> showMessage(HomeMessage.KEEP_ONE_MIXED_PET_VISIBLE)
             HomePetCommand.OPEN_OVERLAY_SETTINGS -> emit(HomeEffect.OpenOverlaySettings)
             HomePetCommand.REQUEST_NOTIFICATION_PERMISSION -> {
                 startAfterNotificationResult = true
+                hasAskedForNotification = true
                 emit(HomeEffect.RequestNotificationPermission)
             }
             HomePetCommand.START -> startPet()

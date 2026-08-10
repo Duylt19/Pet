@@ -23,6 +23,30 @@ Platform và product vertical slice đã hoàn tất. `PetOverlay.start(context)
 - Service `exported=false`, trả `START_NOT_STICKY`, không có boot receiver và không tự restart.
 - Play Console phải khai báo/review foreground-service type trước release.
 
+## Thứ tự khi bấm switch pet (Discover)
+
+`HomePetPolicy.nextCommand` là nơi duy nhất quyết định, `DiscoverViewModel.onPetToggle` chỉ thi
+hành. Thứ tự bắt buộc:
+
+1. đang chạy → `STOP`, không hỏi gì thêm;
+2. **chưa chọn pet nào → `CHOOSE_PET`** (toast dẫn sang My Pet Room). Phải đứng **trước** mọi
+   permission: hỏi xong hai màn hệ thống rồi mới báo "chưa chọn pet" là bắt user trả giá cho
+   việc không xảy ra;
+3. chưa có overlay access → `OPEN_OVERLAY_SETTINGS`. Đây là quyền **bắt buộc**;
+4. API 33+ chưa có `POST_NOTIFICATIONS` và **chưa hỏi lần nào** → `REQUEST_NOTIFICATION_PERMISSION`.
+   Chỉ hỏi **một lần**: quyền này không bắt buộc cho overlay, và khi user đã từ chối vĩnh viễn thì
+   launcher trả kết quả ngay mà không hiện dialog — hỏi lại ở mỗi lần retry là vòng lặp không thoát
+   được;
+5. còn lại → `START`.
+
+Callback của launcher cũng phải phân biệt: overlay chỉ đi tiếp **khi đã được cấp**
+(`onOverlayPermissionResult`), nếu không user bấm back sẽ bị ném lại đúng màn system settings đó.
+Notification thì đi tiếp bất kể kết quả (`onNotificationPermissionResult`) vì pet vẫn chạy được.
+
+Battery-optimisation exemption **không** nằm trong luồng này: nó không bắt buộc, chỉ có ý nghĩa
+trên máy giết foreground service, và được hỏi ở màn Grant Permissions theo
+`PetBatteryOptimizationPolicy`.
+
 Nguồn platform: [Android foreground-service types](https://developer.android.com/develop/background-work/services/fgs/service-types), [launch foreground service](https://developer.android.com/develop/background-work/services/fgs/launch), [TYPE_APPLICATION_OVERLAY](https://developer.android.com/reference/android/view/WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY), [overlay special access](https://developer.android.com/reference/android/provider/Settings#canDrawOverlays(android.content.Context)).
 
 ## Runtime invariants
