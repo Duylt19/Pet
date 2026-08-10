@@ -65,6 +65,7 @@ fun NativeAdInternal(
     screenCode: String,
     modifier: Modifier = Modifier,
     customAdId: String? = null,
+    instanceKey: String? = null,
     reloadKey: Int = 0,
     adTypeOverride: AdType? = null,
     loadResult: (Boolean) -> Unit = {}
@@ -80,8 +81,9 @@ fun NativeAdInternal(
     val activity = remember(context, view) {
         context.findActivity() ?: view.context.findActivity()
     }
-    val adViewModel: NativeAdViewModel =
-        viewModel(key = "NativeAdViewModel_${screenCode}_${customAdId ?: ""}")
+    val adViewModel: NativeAdViewModel = viewModel(
+        key = "NativeAdViewModel_${screenCode}_${instanceKey ?: customAdId.orEmpty()}"
+    )
     val placement = remember(screenCode) {
         NativeAdPlacementCatalog.find(screenCode)
     }

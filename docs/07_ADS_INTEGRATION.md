@@ -59,8 +59,10 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 ## Battery style Rewarded unlock
 
 - Theme `FREE`, theme đã reward-unlock và toàn bộ theme của user Premium mở trực tiếp.
-- Chạm theme `PREMIUM` chưa mở sẽ hiện dialog có ba action: xem Rewarded, nâng cấp
-  Premium hoặc hủy; không tự điều hướng thẳng sang paywall.
+- Chạm theme `PREMIUM` chưa mở sẽ hiện bottom sheet với preview, hai action `Unlimited` và
+  `Get it free`, cùng native `HEIGHT_222`; đóng bằng Back hoặc chạm scrim khi chưa loading.
+  Sheet dùng placement `screen_home` nhưng có `instanceKey` riêng để không tranh ad object
+  với native `HEIGHT_150` của landing.
 - Rewarded chỉ được preload khi free user còn ít nhất một theme Premium chưa mở; Premium
   không tạo ad request. `EARNED` persist đúng theme ID vào
   `battery_status_reward_unlocked_theme_ids` rồi tự mở editor; `DISMISSED` giữ dialog và
@@ -78,8 +80,8 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   quảng cáo sớm.
 - Tránh chồng App Open Ads với interstitial/premium/full-screen flow.
 - Không thêm placement mới nếu chưa có product/UX decision.
-- Battery Rewarded là unlock trigger đã được owner duyệt. Catalog chỉ dùng các placement
-  landing/category được mô tả ở trên; editor và reward dialog không tự thêm banner/native.
+- Battery Rewarded là unlock trigger đã được owner duyệt. Catalog/editor không thêm banner
+  riêng; reward sheet chỉ dùng native `HEIGHT_222` được mô tả ở trên.
 - Screen code phải là constant trong ads config, không hardcode rải rác.
 - Premium user/ad-free policy phải được kiểm tra ở integration boundary chung.
 - Khi xóa screen, xóa placement/config không còn consumer.

@@ -51,7 +51,8 @@ Discover Home contract:
 Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
 
 - landing dùng shared `HomeHeader`/`HomeEnableCard`, promo composite PNG @3x, category section
-  dạng carousel và card `110×110px`; favorite ở top-end, crown Premium ở top-start;
+  dạng carousel và card `110×110px`; preview runtime `96×96px` dùng `ContentScale.Crop`,
+  favorite ở top-end, crown Premium ở top-start;
 - category header tạm dùng chung flame vector `18×18px`, không tint. Mapping icon theo category
   được thay sau mà không đổi layout hoặc catalog schema;
 - More mở child route có header Back/title/PRO, inline banner và grid ba cột. Card detail giữ
@@ -68,8 +69,10 @@ Pet Store visual contract:
   premium 20px tại top-end;
 - food card giữ tỷ lệ `104/122`, image area `104/90`, artwork `70/104`; badge giá tại
   `(6,6)` dùng coin artwork PNG @3x, badge số lượng tại `(62,66)`, title Roboto 12/16;
-- reward sheet dùng Roboto Medium cho title, Roboto Regular cho action; gradient và stroke
-  nút là `#C95DFF → #FB54BB`. Selected Pet Store, video và tape giữ asset vector gốc.
+- reward sheet dùng Roboto Medium cho title và action; gradient và stroke nút là
+  `#C95DFF → #FB54BB`. Selected Pet Store, video và tape giữ asset vector gốc. Pet Store và
+  Battery dùng chung `RewardOfferSheet` full-width; Battery có preview `110×110px` và native
+  slot `336×222px` theo Figma `8145:4924`.
   Reward dialog dùng immersive navigation trên chính dialog window để system navigation
   không chiếm vùng CTA; đóng dialog không thay đổi immersive policy của Home activity.
 - unlock-success overlay của Pet và Food dùng chung frame `360×800`: nền đen 50%, Lottie

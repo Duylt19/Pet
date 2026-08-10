@@ -67,7 +67,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -108,6 +107,9 @@ import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.component.AppActionToast
 import com.asianmobile.emojibattery.shimeji.ui.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.ui.component.PinkLoveSticker
+import com.asianmobile.emojibattery.shimeji.ui.component.RewardGradientButton
+import com.asianmobile.emojibattery.shimeji.ui.component.RewardOfferSheet
+import com.asianmobile.emojibattery.shimeji.ui.component.RewardOutlineButton
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -710,7 +712,7 @@ internal fun FoodCard(
 
 @Composable
 private fun PetRewardSheet(pet: OwnerPetCatalogEntry, isDownloading: Boolean, message: String?, onDismiss: () -> Unit, onPremium: () -> Unit, onReward: () -> Unit) {
-    StoreRewardSheet(onDismiss) {
+    RewardOfferSheet(onDismiss) {
         PetRewardSheetContent(
             pet = pet,
             isDownloading = isDownloading,
@@ -753,14 +755,14 @@ internal fun ColumnScope.PetRewardSheetContent(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
     ) {
-        StoreOutlineButton(
+        RewardOutlineButton(
             text = stringResource(R.string.pet_store_unlimited),
             onClick = onPremium,
             modifier = Modifier.weight(1f),
             enabled = !isDownloading,
             iconRes = R.drawable.img_pet_store_premium_crown
         )
-        StoreGradientButton(
+        RewardGradientButton(
             text = if (isDownloading) {
                 stringResource(R.string.pet_store_downloading)
             } else {
@@ -783,42 +785,14 @@ internal fun ColumnScope.PetRewardSheetContent(
 
 @Composable
 private fun FoodRewardSheet(food: PetStoreFood, onDismiss: () -> Unit, onPremium: () -> Unit, onAcquire: () -> Unit) {
-    StoreRewardSheet(onDismiss) {
+    RewardOfferSheet(onDismiss) {
         RewardFoodPreview(food)
         Text(stringResource(R.string.pet_store_food_reward_title), color = colorResource(R.color.colors_212327), fontFamily = StoreRobotoMedium, fontSize = dimensionResource(SspR.dimen._14ssp).value.sp, lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
-            StoreOutlineButton(stringResource(R.string.pet_store_unlimited), onPremium, Modifier.weight(1f), iconRes = R.drawable.img_pet_store_premium_crown)
-            StoreGradientButton(stringResource(R.string.pet_store_get_free), onAcquire, Modifier.weight(1f), iconRes = R.drawable.ic_pet_store_reward_video)
+            RewardOutlineButton(stringResource(R.string.pet_store_unlimited), onPremium, Modifier.weight(1f), iconRes = R.drawable.img_pet_store_premium_crown)
+            RewardGradientButton(stringResource(R.string.pet_store_get_free), onAcquire, Modifier.weight(1f), iconRes = R.drawable.ic_pet_store_reward_video)
         }
         NativeAdInternal(screenCode = SCREEN_HOME, adTypeOverride = AdType.HEIGHT_222, modifier = Modifier.fillMaxWidth())
-    }
-}
-
-@Composable
-private fun StoreRewardSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
-        HideDialogNavigationBar()
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(colorResource(R.color.colors_000000).copy(alpha = 0.5f))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onDismiss
-                )
-        ) {
-            StoreRewardSheetSurface(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {}
-                    ),
-                content = content
-            )
-        }
     }
 }
 
@@ -856,66 +830,6 @@ private fun HideDialogNavigationBar() {
                     decorView.viewTreeObserver.removeOnWindowFocusChangeListener(focusListener)
                 }
             }
-        }
-    }
-}
-
-@Composable
-internal fun StoreRewardSheetSurface(
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(
-                RoundedCornerShape(
-                    topStart = dimensionResource(SdpR.dimen._18sdp),
-                    topEnd = dimensionResource(SdpR.dimen._18sdp)
-                )
-            )
-            .background(colorResource(R.color.colors_FFFFFF))
-            .padding(
-                start = dimensionResource(SdpR.dimen._9sdp),
-                end = dimensionResource(SdpR.dimen._9sdp),
-                top = dimensionResource(SdpR.dimen._15sdp),
-                bottom = dimensionResource(SdpR.dimen._9sdp)
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp)),
-        content = content
-    )
-}
-
-@Composable
-private fun StoreGradientButton(text: String, onClick: () -> Unit, modifier: Modifier, enabled: Boolean = true, iconRes: Int? = null) {
-    val rewardGradient = Brush.horizontalGradient(
-        listOf(colorResource(R.color.colors_C95DFF), colorResource(R.color.colors_FB54BB))
-    )
-    val disabled = colorResource(R.color.colors_C8C8C9)
-    Box(modifier.height(dimensionResource(SdpR.dimen._38sdp)).clip(CircleShape).background(if (enabled) rewardGradient else Brush.horizontalGradient(listOf(disabled, disabled))).clickable(enabled = enabled, onClick = onClick), contentAlignment = Alignment.Center) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
-            iconRes?.let { Image(painterResource(it), null, modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))) }
-            Text(text, color = colorResource(R.color.colors_FFFFFF), fontFamily = StoreRoboto, fontSize = dimensionResource(SspR.dimen._12ssp).value.sp, lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp)
-        }
-    }
-}
-
-@Composable
-private fun StoreOutlineButton(text: String, onClick: () -> Unit, modifier: Modifier, enabled: Boolean = true, iconRes: Int? = null) {
-    val rewardGradient = Brush.horizontalGradient(
-        listOf(colorResource(R.color.colors_C95DFF), colorResource(R.color.colors_FB54BB))
-    )
-    val disabled = colorResource(R.color.colors_C8C8C9)
-    val textStyle = if (enabled) {
-        TextStyle(brush = rewardGradient)
-    } else {
-        TextStyle(color = disabled)
-    }
-    Box(modifier.height(dimensionResource(SdpR.dimen._38sdp)).clip(CircleShape).background(colorResource(R.color.colors_FFFFFF)).border(dimensionResource(SdpR.dimen._1sdp), if (enabled) rewardGradient else Brush.linearGradient(listOf(disabled, disabled)), CircleShape).clickable(enabled = enabled, onClick = onClick), contentAlignment = Alignment.Center) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
-            iconRes?.let { Image(painterResource(it), null, modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))) }
-            Text(text, style = textStyle, fontFamily = StoreRoboto, fontSize = dimensionResource(SspR.dimen._12ssp).value.sp, lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp)
         }
     }
 }
@@ -1350,7 +1264,7 @@ private fun PetNameDialog(pet: OwnerPetCatalogEntry, onSave: (String) -> Unit) {
                 colors = TextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White, focusedIndicatorColor = colorResource(R.color.colors_FB3675), unfocusedIndicatorColor = colorResource(R.color.colors_C8C8C9)),
                 modifier = Modifier.fillMaxWidth().height(dimensionResource(SdpR.dimen._42sdp))
             )
-            StoreGradientButton(stringResource(R.string.pet_store_save), { onSave(name) }, Modifier.width(dimensionResource(SdpR.dimen._155sdp)), enabled = name.isNotBlank())
+            RewardGradientButton(stringResource(R.string.pet_store_save), { onSave(name) }, Modifier.width(dimensionResource(SdpR.dimen._155sdp)), enabled = name.isNotBlank())
         }
     }
 }

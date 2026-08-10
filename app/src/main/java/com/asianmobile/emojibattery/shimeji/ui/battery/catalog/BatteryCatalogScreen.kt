@@ -3,10 +3,6 @@ package com.asianmobile.emojibattery.shimeji.ui.battery.catalog
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -15,9 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -35,7 +28,6 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
-import com.intuit.sdp.R as SdpR
 
 @Composable
 fun BatteryCatalogScreen(
@@ -166,8 +158,8 @@ internal fun BatteryCatalogFlowHost(
 
     val pendingTheme = state.themes.firstOrNull { it.id == state.pendingUnlockThemeId }
     if (pendingTheme != null) {
-        BatteryRewardUnlockDialog(
-            themeName = pendingTheme.name,
+        BatteryRewardUnlockSheet(
+            theme = pendingTheme,
             isLoading = state.isRewardInProgress,
             rewardNotEarned = state.message == BatteryCatalogMessage.REWARD_NOT_EARNED,
             onDismiss = viewModel::dismissUnlockDialog,
@@ -186,51 +178,4 @@ internal fun BatteryCatalogFlowHost(
             }
         )
     }
-}
-
-@Composable
-internal fun BatteryRewardUnlockDialog(
-    themeName: String,
-    isLoading: Boolean,
-    rewardNotEarned: Boolean,
-    onDismiss: () -> Unit,
-    onWatchReward: () -> Unit,
-    onPremium: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = { if (!isLoading) onDismiss() },
-        title = { Text(stringResource(R.string.battery_reward_unlock_title, themeName)) },
-        text = {
-            Column {
-                Text(stringResource(R.string.battery_reward_unlock_message))
-                if (rewardNotEarned) {
-                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._8sdp)))
-                    Text(
-                        text = stringResource(R.string.battery_reward_not_earned),
-                        color = colorResource(R.color.colors_E45D6A)
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onWatchReward, enabled = !isLoading) {
-                Text(
-                    stringResource(
-                        if (isLoading) R.string.battery_reward_loading
-                        else R.string.battery_reward_watch
-                    )
-                )
-            }
-        },
-        dismissButton = {
-            Row {
-                TextButton(onClick = onPremium, enabled = !isLoading) {
-                    Text(stringResource(R.string.battery_reward_get_premium))
-                }
-                TextButton(onClick = onDismiss, enabled = !isLoading) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        }
-    )
 }

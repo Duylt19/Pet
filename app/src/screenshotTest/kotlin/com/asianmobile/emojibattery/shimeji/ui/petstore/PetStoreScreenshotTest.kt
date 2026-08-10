@@ -12,6 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
+import com.asianmobile.emojibattery.shimeji.ui.component.RewardOfferSheetSurface
 
 private val previewPets = listOf(
     OwnerPetCatalogEntry(1, "Cattey", "Cat", null, null, false),
@@ -69,7 +70,7 @@ fun PetStoreRewardSheetScreenshotTest() {
             .background(colorResource(R.color.colors_000000).copy(alpha = 0.5f)),
         contentAlignment = Alignment.BottomCenter
     ) {
-        StoreRewardSheetSurface {
+        RewardOfferSheetSurface {
             PetRewardSheetContent(
                 pet = previewPets.first(),
                 isDownloading = false,

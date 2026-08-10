@@ -63,11 +63,15 @@ import com.asianmobile.emojibattery.shimeji.ui.component.CATALOG_ITEM_PREVIEW_FR
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.component.HomePremiumButton
+import com.asianmobile.emojibattery.shimeji.ui.component.RewardGradientButton
+import com.asianmobile.emojibattery.shimeji.ui.component.RewardOfferSheet
+import com.asianmobile.emojibattery.shimeji.ui.component.RewardOutlineButton
 import com.asianmobile.emojibattery.shimeji.ui.discover.HomeDiyFab
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
 private const val BATTERY_DETAIL_PREVIEW_FRACTION = 0.7303f
+private const val BATTERY_LANDING_PREVIEW_FRACTION = 96f / 110f
 
 private val BatteryRobotoMedium = FontFamily(Font(R.font.roboto_medium))
 private val BatteryRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
@@ -290,7 +294,8 @@ private fun BatteryLandingThemeCard(
     ) {
         BatteryThemePreview(
             theme = theme,
-            modifier = Modifier.fillMaxSize(CATALOG_ITEM_PREVIEW_FRACTION)
+            modifier = Modifier.fillMaxSize(BATTERY_LANDING_PREVIEW_FRACTION),
+            contentScale = ContentScale.Crop
         )
         if (premium) {
             BatteryPremiumBadge(
@@ -484,23 +489,29 @@ private fun BatteryDetailThemeCard(
 }
 
 @Composable
-private fun BatteryThemePreview(theme: BatteryThemeEntry, modifier: Modifier) {
+private fun BatteryThemePreview(
+    theme: BatteryThemeEntry,
+    modifier: Modifier,
+    contentScale: ContentScale = ContentScale.Fit
+) {
     val displayName = batteryThemeDisplayName(theme.name)
-    if (theme.thumbnailPath == null) {
-        Image(
-            painter = painterResource(R.drawable.ic_home_battery),
-            contentDescription = displayName,
-            contentScale = ContentScale.Fit,
-            modifier = modifier
-        )
-    } else {
-        AsyncImage(
-            model = theme.thumbnailPath,
-            contentDescription = displayName,
-            contentScale = ContentScale.Fit,
-            filterQuality = FilterQuality.High,
-            modifier = modifier
-        )
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        if (theme.thumbnailPath == null) {
+            Image(
+                painter = painterResource(R.drawable.ic_home_battery),
+                contentDescription = displayName,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize(CATALOG_ITEM_PREVIEW_FRACTION)
+            )
+        } else {
+            AsyncImage(
+                model = theme.thumbnailPath,
+                contentDescription = displayName,
+                contentScale = contentScale,
+                filterQuality = FilterQuality.High,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 
@@ -514,11 +525,113 @@ private fun BatteryPremiumBadge(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(R.drawable.img_home_crown),
+            painter = painterResource(R.drawable.img_pet_premium_badge),
             contentDescription = stringResource(R.string.battery_premium_theme),
             modifier = Modifier.size(dimensionResource(SdpR.dimen._14sdp))
         )
     }
+}
+
+@Composable
+internal fun BatteryRewardUnlockSheet(
+    theme: BatteryThemeEntry,
+    isLoading: Boolean,
+    rewardNotEarned: Boolean,
+    onDismiss: () -> Unit,
+    onWatchReward: () -> Unit,
+    onPremium: () -> Unit
+) {
+    RewardOfferSheet(onDismiss = if (isLoading) ({}) else onDismiss) {
+        BatteryRewardUnlockSheetContent(
+            theme = theme,
+            isLoading = isLoading,
+            rewardNotEarned = rewardNotEarned,
+            onWatchReward = onWatchReward,
+            onPremium = onPremium
+        )
+    }
+}
+
+@Composable
+internal fun BatteryRewardUnlockSheetContent(
+    theme: BatteryThemeEntry,
+    isLoading: Boolean,
+    rewardNotEarned: Boolean,
+    onWatchReward: () -> Unit,
+    onPremium: () -> Unit,
+    nativeAdContent: @Composable () -> Unit = { BatteryRewardNativeAd() }
+) {
+    val previewShape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+    Box(
+        modifier = Modifier
+            .size(dimensionResource(SdpR.dimen._85sdp))
+            .clip(previewShape)
+            .background(colorResource(R.color.colors_FFFBFC))
+            .border(
+                dimensionResource(SdpR.dimen._2sdp),
+                colorResource(R.color.colors_FEC1D4),
+                previewShape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        BatteryThemePreview(
+            theme = theme,
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._74sdp))
+        )
+    }
+    Text(
+        text = stringResource(R.string.battery_reward_unlock_title),
+        color = colorResource(R.color.colors_212327),
+        fontFamily = BatteryRobotoMedium,
+        fontWeight = FontWeight.Medium,
+        fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
+        lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth(312f / 336f)
+    )
+    if (rewardNotEarned) {
+        Text(
+            text = stringResource(R.string.battery_reward_not_earned),
+            color = colorResource(R.color.colors_FB3675),
+            fontFamily = BatteryRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
+    ) {
+        RewardOutlineButton(
+            text = stringResource(R.string.battery_reward_get_premium),
+            onClick = onPremium,
+            modifier = Modifier.weight(1f),
+            enabled = !isLoading,
+            iconRes = R.drawable.img_pet_store_premium_crown
+        )
+        RewardGradientButton(
+            text = stringResource(
+                if (isLoading) R.string.battery_reward_loading
+                else R.string.battery_reward_watch
+            ),
+            onClick = onWatchReward,
+            modifier = Modifier.weight(1f),
+            enabled = !isLoading,
+            iconRes = if (isLoading) null else R.drawable.ic_pet_store_reward_video
+        )
+    }
+    nativeAdContent()
+}
+
+@Composable
+private fun BatteryRewardNativeAd() {
+    NativeAdInternal(
+        screenCode = SCREEN_HOME,
+        instanceKey = "battery_reward_sheet",
+        adTypeOverride = AdType.HEIGHT_222,
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 @Composable
@@ -626,6 +739,64 @@ internal fun BatteryInlineBannerPreviewSlot() {
             .fillMaxSize()
             .background(colorResource(R.color.colors_FFEBF1))
     )
+}
+
+@Composable
+internal fun BatteryRewardAdPreviewSlot() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._171sdp))
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._8sdp)))
+            .background(colorResource(R.color.colors_FEFEFE))
+            .border(
+                dimensionResource(SdpR.dimen._1sdp),
+                colorResource(R.color.colors_E5E5E5),
+                RoundedCornerShape(dimensionResource(SdpR.dimen._8sdp))
+            )
+            .padding(dimensionResource(SdpR.dimen._9sdp)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
+    ) {
+        Row(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
+        ) {
+            Box(
+                Modifier
+                    .size(dimensionResource(SdpR.dimen._37sdp))
+                    .background(colorResource(R.color.colors_DEDEDF))
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxWidth(0.55f)
+                        .height(dimensionResource(SdpR.dimen._12sdp))
+                        .background(colorResource(R.color.colors_DEDEDF))
+                )
+                Box(
+                    Modifier
+                        .fillMaxWidth(0.35f)
+                        .height(dimensionResource(SdpR.dimen._9sdp))
+                        .background(colorResource(R.color.colors_F0F0F0))
+                )
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(colorResource(R.color.colors_DEDEDF))
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._37sdp))
+                .clip(CircleShape)
+                .background(colorResource(R.color.colors_FB3675))
+        )
+    }
 }
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)

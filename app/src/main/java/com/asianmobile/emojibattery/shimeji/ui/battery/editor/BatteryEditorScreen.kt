@@ -107,7 +107,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_STYLE_INDEX
 import com.asianmobile.emojibattery.shimeji.ui.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTopBar
-import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockDialog
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockSheet
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -277,8 +277,8 @@ internal fun BatteryEditorScreen(
         it.id == state.pendingSelection?.themeId
     }
     if (pendingTheme != null) {
-        BatteryRewardUnlockDialog(
-            themeName = pendingTheme.name,
+        BatteryRewardUnlockSheet(
+            theme = pendingTheme,
             isLoading = state.isRewardInProgress,
             rewardNotEarned = state.message == BatteryEditorMessage.REWARD_NOT_EARNED,
             onDismiss = viewModel::dismissUnlockDialog,
