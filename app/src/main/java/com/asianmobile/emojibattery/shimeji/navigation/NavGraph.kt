@@ -23,6 +23,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
+import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_BATTERY_EDITOR_BOTTOM
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeBottomNavigation
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeTab
@@ -112,6 +113,10 @@ internal fun routeForHomeTab(tab: HomeTab): String = when (tab) {
 internal fun showHomeBottomBanner(route: String?): Boolean =
     homeTabForRoute(route) != null || route?.startsWith("${Routes.BATTERY_CATEGORY}/") == true
 
+internal fun showBatteryEditorBottomBanner(route: String?): Boolean =
+    route?.startsWith("${Routes.BATTERY_EDITOR}/") == true ||
+        route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true
+
 @Composable
 fun AppNavGraph(
     startDestination: String,
@@ -124,6 +129,9 @@ fun AppNavGraph(
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val selectedHomeTab = homeTabForRoute(currentBackStackEntry?.destination?.route)
     val shouldShowHomeBottomBanner = showHomeBottomBanner(
+        currentBackStackEntry?.destination?.route
+    )
+    val shouldShowBatteryEditorBottomBanner = showBatteryEditorBottomBanner(
         currentBackStackEntry?.destination?.route
     )
 
@@ -641,10 +649,14 @@ fun AppNavGraph(
                 onTabSelected = ::navigateToHomeTab
             )
         }
-        if (shouldShowHomeBottomBanner) {
+        if (shouldShowHomeBottomBanner || shouldShowBatteryEditorBottomBanner) {
             BannerAd(
                 modifier = Modifier.fillMaxWidth(),
-                adPosition = HOME_BOTTOM_BANNER_POSITION
+                adPosition = if (shouldShowBatteryEditorBottomBanner) {
+                    BANNER_BATTERY_EDITOR_BOTTOM
+                } else {
+                    HOME_BOTTOM_BANNER_POSITION
+                }
             )
             Spacer(Modifier.navigationBarsPadding())
         }

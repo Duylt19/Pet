@@ -63,6 +63,16 @@ Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
 - landing giữ Home bottom navigation; detail ẩn navigation nhưng giữ cùng bottom banner holder.
   DIY FAB và Lottie star bling dùng lại component Discover.
 
+Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8227:6044`, `8240:8590`:
+
+- overview dùng Material large app bar `exitUntilCollapsed`: title lớn khi expanded và title
+  inline khi collapsed; Back và PRO luôn pinned;
+- preview `328×50px` luôn hiện. Overlay thật chỉ live-update khi feature đã bật; trạng thái
+  tắt chỉ dùng preview nhúng;
+- More Battery/Emoji mở grid ba cột với artwork 73.03% item; More Theme mở grid hai cột từ
+  background catalog runtime. Tất cả child giữ chung draft và Back không tự Apply;
+- Apply là panel sticky phía trên banner editor dùng chung.
+
 Pet Store visual contract:
 
 - Pet/Food selector dùng bốn image-fill state riêng từ Figma (`selected`/`unselected`);

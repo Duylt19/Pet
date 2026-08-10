@@ -145,6 +145,9 @@ private val RINGER_ICON_STYLES = (1..MAX_BATTERY_STATUS_ICON_STYLE_INDEX).map { 
 
 internal enum class BatteryEditorPage {
     OVERVIEW,
+    BATTERY_TEMPLATES,
+    EMOJI_TEMPLATES,
+    BACKGROUND_THEMES,
     SIZE,
     APPEARANCE,
     EMOJI,
@@ -255,6 +258,7 @@ internal fun BatteryEditorScreen(
         onBack = requestBack,
         onDone = onBack,
         onOpenPage = onOpenPage,
+        onPremium = onNavigateToPremium,
         onShowTime = viewModel::setShowTime,
         onShowPercentage = viewModel::setShowPercentage,
         onBarHeight = viewModel::setBarHeight,
@@ -381,6 +385,7 @@ private fun BatteryEditorContent(
     onBack: () -> Unit,
     onDone: () -> Unit,
     onOpenPage: (BatteryEditorPage) -> Unit,
+    onPremium: () -> Unit,
     onShowTime: (Boolean) -> Unit,
     onShowPercentage: (Boolean) -> Unit,
     onBarHeight: (Float) -> Unit,
@@ -396,6 +401,21 @@ private fun BatteryEditorContent(
     onApply: () -> Unit,
     onDisable: () -> Unit
 ) {
+    if (page == BatteryEditorPage.OVERVIEW || page.isFigmaPickerPage()) {
+        BatteryEditorFigmaContent(
+            state = state,
+            page = page,
+            onBack = onBack,
+            onOpenPage = onOpenPage,
+            onPremium = onPremium,
+            onSelectTheme = onSelectTheme,
+            onBackgroundColor = onBackgroundColor,
+            onBackgroundDecoration = onBackgroundDecoration,
+            onConfig = onConfig,
+            onApply = onApply
+        )
+        return
+    }
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
@@ -425,13 +445,10 @@ private fun BatteryEditorContent(
                 .padding(horizontal = dimensionResource(SdpR.dimen._16sdp))
         ) {
             when (page) {
-                BatteryEditorPage.OVERVIEW -> OverviewEditor(
-                    state = state,
-                    onOpenPage = onOpenPage,
-                    onShowTime = onShowTime,
-                    onShowPercentage = onShowPercentage,
-                    onSelectTheme = onSelectTheme
-                )
+                BatteryEditorPage.OVERVIEW,
+                BatteryEditorPage.BATTERY_TEMPLATES,
+                BatteryEditorPage.EMOJI_TEMPLATES,
+                BatteryEditorPage.BACKGROUND_THEMES -> Unit
                 BatteryEditorPage.SIZE -> SizeEditor(
                     state = state,
                     onBarHeight = onBarHeight,
@@ -534,6 +551,9 @@ private fun BatteryEditorContent(
 @Composable
 private fun editorPageTitle(page: BatteryEditorPage): String = when (page) {
     BatteryEditorPage.OVERVIEW -> stringResource(R.string.battery_editor_title)
+    BatteryEditorPage.BATTERY_TEMPLATES -> stringResource(R.string.battery_editor_battery_picker)
+    BatteryEditorPage.EMOJI_TEMPLATES -> stringResource(R.string.battery_editor_emoji_picker)
+    BatteryEditorPage.BACKGROUND_THEMES -> stringResource(R.string.battery_editor_theme_picker)
     BatteryEditorPage.SIZE -> stringResource(R.string.battery_editor_size_title)
     BatteryEditorPage.APPEARANCE -> stringResource(R.string.battery_editor_appearance_title)
     BatteryEditorPage.EMOJI -> stringResource(R.string.battery_editor_emoji_title)
@@ -1736,7 +1756,7 @@ private fun ApplyFooter(
 }
 
 @Composable
-private fun BatteryPreview(
+internal fun BatteryPreview(
     state: BatteryEditorUiState,
     page: BatteryEditorPage
 ) {
@@ -1752,6 +1772,12 @@ private fun BatteryPreview(
     val animationPath = state.animations
         .firstOrNull { it.name == config.animationAssetName }
         ?.assetPath
+    val emojiTheme = state.themes.firstOrNull {
+        it.id == config.selectedEmojiThemeId
+    } ?: state.theme
+    val batteryTheme = state.themes.firstOrNull {
+        it.id == config.selectedBatteryThemeId
+    } ?: state.theme
     val previewDate = remember(config.dateFormat) {
         SimpleDateFormat(config.dateFormat.pattern, Locale.getDefault()).format(Date())
     }
@@ -1759,14 +1785,15 @@ private fun BatteryPreview(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .height(config.barHeightDp.dp)
-            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._20sdp)))
+            .height(dimensionResource(SdpR.dimen._38sdp))
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._11sdp)))
             .background(Color(config.backgroundColorArgb))
             .semantics { contentDescription = previewDescription }
     ) {
         val layout = remember(
             config,
-            state.theme.emojiPath,
+            emojiTheme.emojiPath,
+            batteryTheme.batteryPath,
             emotionPath,
             animationPath,
             maxWidth,
@@ -1777,7 +1804,7 @@ private fun BatteryPreview(
                 availableWidthDp = maxWidth.value -
                     config.leftPaddingDp -
                     config.rightPaddingDp,
-                hasEmoji = state.theme.emojiPath != null,
+                hasEmoji = emojiTheme.emojiPath != null,
                 hasEmotion = emotionPath != null,
                 hasAnimation = animationPath != null,
                 focusedComponent = focusedComponent
@@ -1850,7 +1877,7 @@ private fun BatteryPreview(
                 }
             }
             if (layout.shows(BatteryStatusComponent.THEME_EMOJI)) {
-                state.theme.emojiPath?.let { path ->
+                emojiTheme.emojiPath?.let { path ->
                     AsyncImage(
                         model = path,
                         contentDescription = null,
@@ -1878,7 +1905,7 @@ private fun BatteryPreview(
                 )
             }
             if (layout.shows(BatteryStatusComponent.BATTERY)) {
-                state.theme.batteryPath?.let { path ->
+                batteryTheme.batteryPath?.let { path ->
                     AsyncImage(
                         model = path,
                         contentDescription = null,
@@ -2091,8 +2118,18 @@ private fun BatteryEditorPage.previewComponent(): BatteryStatusComponent? = when
     else -> null
 }
 
+internal fun BatteryEditorPage.isFigmaPickerPage(): Boolean = when (this) {
+    BatteryEditorPage.BATTERY_TEMPLATES,
+    BatteryEditorPage.EMOJI_TEMPLATES,
+    BatteryEditorPage.BACKGROUND_THEMES -> true
+    else -> false
+}
+
 private fun BatteryEditorPage.analyticsScreen(): ScreenName = when (this) {
     BatteryEditorPage.OVERVIEW -> ScreenName.BATTERY_EDITOR
+    BatteryEditorPage.BATTERY_TEMPLATES -> ScreenName.BATTERY_ICON_EDITOR
+    BatteryEditorPage.EMOJI_TEMPLATES -> ScreenName.BATTERY_EMOJI_EDITOR
+    BatteryEditorPage.BACKGROUND_THEMES -> ScreenName.BATTERY_APPEARANCE_EDITOR
     BatteryEditorPage.SIZE -> ScreenName.BATTERY_SIZE_EDITOR
     BatteryEditorPage.APPEARANCE -> ScreenName.BATTERY_APPEARANCE_EDITOR
     BatteryEditorPage.EMOJI -> ScreenName.BATTERY_EMOJI_EDITOR
@@ -2345,6 +2382,7 @@ private fun BatteryEditorOverviewPreview() {
         onBack = {},
         onDone = {},
         onOpenPage = {},
+        onPremium = {},
         onShowTime = {},
         onShowPercentage = {},
         onBarHeight = {},

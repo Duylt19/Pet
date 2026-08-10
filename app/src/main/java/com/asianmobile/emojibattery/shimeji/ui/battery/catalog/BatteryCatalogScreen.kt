@@ -70,22 +70,12 @@ internal fun BatteryCatalogFlowHost(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var pendingAccessibilityThemeId by rememberSaveable { mutableStateOf<Int?>(null) }
     var showAccessibilityDisclosure by rememberSaveable { mutableStateOf(false) }
 
-    val continueToEditorIfAllowed = {
-        val pendingThemeId = pendingAccessibilityThemeId
-        if (pendingThemeId != null && BatteryAccessibility.isEnabled(context)) {
-            pendingAccessibilityThemeId = null
-            showAccessibilityDisclosure = false
-            onOpenTheme(pendingThemeId)
-        }
-    }
     val accessibilityLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
         viewModel.refreshAccessibility()
-        continueToEditorIfAllowed()
     }
     val requiresRewardAd = !state.isPremium && state.themes.any { theme ->
         theme.assetsReady &&
@@ -102,12 +92,7 @@ internal fun BatteryCatalogFlowHost(
         viewModel.effects.collect { effect ->
             when (effect) {
                 is BatteryCatalogEffect.OpenTheme -> {
-                    if (BatteryAccessibility.isEnabled(context)) {
-                        onOpenTheme(effect.themeId)
-                    } else {
-                        pendingAccessibilityThemeId = effect.themeId
-                        showAccessibilityDisclosure = true
-                    }
+                    onOpenTheme(effect.themeId)
                 }
 
                 BatteryCatalogEffect.ShowRewardedAd -> {
@@ -122,18 +107,16 @@ internal fun BatteryCatalogFlowHost(
                 }
 
                 BatteryCatalogEffect.RequestBatteryAccessibility -> {
-                    pendingAccessibilityThemeId = null
                     showAccessibilityDisclosure = true
                 }
             }
         }
     }
-    DisposableEffect(lifecycleOwner, pendingAccessibilityThemeId) {
+    DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.refreshEntitlement()
                 viewModel.refreshAccessibility()
-                continueToEditorIfAllowed()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -150,7 +133,6 @@ internal fun BatteryCatalogFlowHost(
             },
             onMaybeLater = {
                 showAccessibilityDisclosure = false
-                pendingAccessibilityThemeId = null
                 viewModel.cancelPendingBatteryEnable()
             }
         )

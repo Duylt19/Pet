@@ -3,12 +3,12 @@ package com.asianmobile.emojibattery.shimeji.battery.overlay
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.Test
 
 class BatteryEditorPreviewSessionTest {
     @Test
-    fun preview_isForcedEnabled_andTracksFocusedComponent() {
+    fun preview_preservesActivationState_andTracksFocusedComponent() {
         val session = BatteryEditorPreviewSession()
         session.start("editor", BatteryStatusConfig(enabled = false))
         session.update(
@@ -18,7 +18,7 @@ class BatteryEditorPreviewSessionTest {
         )
 
         val preview = session.preview.value
-        assertTrue(requireNotNull(preview).config.enabled)
+        assertFalse(requireNotNull(preview).config.enabled)
         assertEquals(42, preview.config.selectedEmojiThemeId)
         assertEquals(BatteryStatusComponent.WIFI, preview.focusedComponent)
     }

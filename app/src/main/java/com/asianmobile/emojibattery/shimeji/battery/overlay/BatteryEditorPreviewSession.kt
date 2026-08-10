@@ -30,7 +30,7 @@ class BatteryEditorPreviewSession @Inject constructor() {
             ?.focusedComponent
         _preview.value = BatteryEditorPreview(
             ownerId = ownerId,
-            config = config.copy(enabled = true),
+            config = config,
             focusedComponent = focusedComponent
         )
     }
@@ -44,7 +44,7 @@ class BatteryEditorPreviewSession @Inject constructor() {
         if (current != null && current.ownerId != ownerId) return
         _preview.value = BatteryEditorPreview(
             ownerId = ownerId,
-            config = config.copy(enabled = true),
+            config = config,
             focusedComponent = focusedComponent
         )
     }

@@ -28,6 +28,9 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Battery landing tái sử dụng native placement `screen_home` với template `HEIGHT_150` sau
   section đầu tiên. Category detail có banner inline `battery_category_inline`; creative do SDK
   tải, không đóng gói ảnh quảng cáo mẫu trong Figma. Bottom banner vẫn là holder của shell.
+- Customize Status Bar và các child library dùng một holder shell riêng với key
+  `battery_editor_bottom`, nằm ngoài NavHost content để overview → Battery/Emoji/Theme không
+  tự tạo hoặc reload banner.
 - Banner holder dùng nền trắng và shimmer `#E6E6E6` để phần dư quanh creative 320×50
   hòa vào surface 360px của Figma thay vì lộ dải nền tối.
 
@@ -80,8 +83,8 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   quảng cáo sớm.
 - Tránh chồng App Open Ads với interstitial/premium/full-screen flow.
 - Không thêm placement mới nếu chưa có product/UX decision.
-- Battery Rewarded là unlock trigger đã được owner duyệt. Catalog/editor không thêm banner
-  riêng; reward sheet chỉ dùng native `HEIGHT_222` được mô tả ở trên.
+- Battery Rewarded là unlock trigger đã được owner duyệt. Editor chỉ thêm bottom banner đã
+  được Figma chỉ định; reward sheet dùng native `HEIGHT_222` được mô tả ở trên.
 - Screen code phải là constant trong ads config, không hardcode rải rác.
 - Premium user/ad-free policy phải được kiểm tra ở integration boundary chung.
 - Khi xóa screen, xóa placement/config không còn consumer.

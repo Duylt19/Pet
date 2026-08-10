@@ -16,14 +16,12 @@ Vertical slice hiện đã có trong source:
 - Chọn một theme trong catalog khởi tạo đúng cặp pet + pin của theme đó. Editor có hai
   picker category độc lập để mix pet của theme A với pin của theme B; entitlement
   Rewarded/Premium được kiểm tra cho từng lựa chọn.
-- Editor dùng overview → destination riêng cho Size/Appearance/Emoji/Battery và 9 status
-  component. Các destination dùng chung ViewModel/draft với overview, nên Done/Back phục
-  hồi đúng scroll offset, không reload picker và có analytics screen riêng. Preview draft
-  trực tiếp trên Accessibility status bar, Apply cố định, cảnh báo bỏ draft, phục hồi
-  draft sau process death, 20 nền, 20 emotion và 26 animation đã audit.
-- Catalog kiểm tra Accessibility trước khi mở editor. Nếu service chưa bật, app hiện
-  disclosure rồi mở Accessibility Settings; chỉ khi quay lại và quyền đang bật mới vào
-  editor để live preview có hiệu lực ngay. Apply vẫn giữ guard tương tự cho deep route.
+- Editor dùng Material app bar `exitUntilCollapsed`, preview nhúng luôn hiển thị và các
+  library Battery/Emoji/Theme là child destination dùng chung ViewModel/draft. Battery/Emoji
+  dùng grid ba cột; Theme dùng grid hai cột từ catalog runtime.
+- Catalog luôn cho phép mở editor để thử bằng preview nhúng. Overlay status bar thật chỉ nhận
+  draft live khi feature đã được bật; nếu feature đang tắt thì editor không tự bật overlay dù
+  Accessibility đã được cấp. Apply vẫn yêu cầu Accessibility trước khi bật.
 - `StatusBarAccessibilityService` vẽ một `TYPE_ACCESSIBILITY_OVERLAY` full-width,
   non-touchable ở cạnh trên; cập nhật pin, charging, time/date, network, airplane, ringer,
   hotspot và dùng theme/nền/emotion/animation đã chọn.
@@ -190,8 +188,8 @@ không ship cover mode.
 ## Runtime
 
 Service combine applied config + editor preview session + catalog bằng Flow. Preview
-session process-local chỉ tồn tại khi editor visible, ép `enabled=true` cho preview và
-không ghi DataStore. Khi editor đóng, service lập tức quay về applied config. Hai bitmap
+session process-local chỉ tồn tại khi editor visible và không ghi DataStore. Applied config
+`enabled=false` luôn thắng preview; khi editor đóng, service quay về applied config. Hai bitmap
 pet/pin được resolve độc lập, decode ngoài main thread và cache theo khóa asset.
 Battery/time/system receiver và một `ConnectivityManager.NetworkCallback` theo dõi các
 network đủ điều kiện, cache `NetworkCapabilities` theo từng `Network`, rồi

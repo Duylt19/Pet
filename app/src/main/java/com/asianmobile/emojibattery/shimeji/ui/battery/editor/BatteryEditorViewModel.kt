@@ -149,10 +149,6 @@ class BatteryEditorViewModel @Inject constructor(
         previewClientCount += 1
         previewStopJob?.cancel()
         previewStopJob = null
-        if (!previewActive) {
-            previewActive = true
-            previewSession.start(previewOwnerId, _uiState.value.config)
-        }
         publishPreview(_uiState.value.config)
     }
 
@@ -373,7 +369,18 @@ class BatteryEditorViewModel @Inject constructor(
     }
 
     private fun publishPreview(config: BatteryStatusConfig) {
-        if (!previewActive) return
+        if (!BatteryEditorLivePreviewPolicy.shouldPublish(
+                storedEnabled = latestStored.enabled,
+                previewClientCount = previewClientCount
+            )
+        ) {
+            if (previewActive) stopPreviewImmediately()
+            return
+        }
+        if (!previewActive) {
+            previewActive = true
+            previewSession.start(previewOwnerId, config)
+        }
         previewSession.update(previewOwnerId, config, focusedComponent)
     }
 

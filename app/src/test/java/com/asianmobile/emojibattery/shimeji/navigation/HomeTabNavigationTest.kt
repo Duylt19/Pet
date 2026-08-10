@@ -32,4 +32,19 @@ class HomeTabNavigationTest {
         assertEquals(true, showHomeBottomBanner("${Routes.BATTERY_CATEGORY}/{categoryId}"))
         assertEquals(false, showHomeBottomBanner(Routes.SEARCH))
     }
+
+    @Test
+    fun `battery editor family keeps one editor banner placement`() {
+        assertEquals(
+            true,
+            showBatteryEditorBottomBanner("${Routes.BATTERY_EDITOR}/{themeId}")
+        )
+        assertEquals(
+            true,
+            showBatteryEditorBottomBanner(
+                "${Routes.BATTERY_EDITOR_COMPONENT}/{themeId}/{page}"
+            )
+        )
+        assertEquals(false, showBatteryEditorBottomBanner(Routes.BATTERY_CATALOG))
+    }
 }

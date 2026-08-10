@@ -20,10 +20,10 @@
 | `settings` | Mine | Tab 4 của Home shell: Emoji Battery toggle, shortcuts và app/support hub |
 | `pet_customization/{slotIndex}` | Customize Pet | Character, size, speed, touch, speech, messages và position của đúng slot |
 | `swarm_customization` | Edit Pet Swarm | Character, count, base size/speed, random variation và vùng di chuyển |
-| `battery_catalog` | Battery Styles | Tab 2 của Home shell: catalog local + category/favorite/Premium gate; Accessibility gate trước editor |
+| `battery_catalog` | Battery Styles | Tab 2 của Home shell: catalog local + category/favorite/Premium gate; editor luôn mở được với preview nhúng |
 | `battery_category/{categoryId}` | Battery category | Child destination từ action More: grid ba cột của category, Back về đúng vị trí Battery Styles |
 | `battery_editor/{themeId}` | Customize Status Bar | Overview khởi tạo cặp pet+pin, cho phép đổi hai phần độc lập, giữ draft và live preview qua Accessibility |
-| `battery_editor_component/{themeId}/{page}` | Battery component editor | Destination riêng cho Size/Appearance/Emoji/Battery và từng status component; dùng chung ViewModel/draft với overview |
+| `battery_editor_component/{themeId}/{page}` | Battery editor child | Library Battery/Emoji/Theme và từng status component; dùng chung ViewModel/draft với overview |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
 ## Flow
@@ -66,8 +66,8 @@ Mine ──Rate/Share/Contact/Privacy──> action tương ứng
 Catalog ──already prepared pack──> Detail ──Use for Pet──> Catalog
 Discover/My Pet ──Settings──> Mine ──Language──> Language Settings
 Discover/My Pet ──Premium──> Premium(in-app)
-Discover/My Pet ──Battery──> Battery Styles ──More──> Battery category ──theme──> Accessibility gate
-Accessibility gate ──enabled/return enabled──> Customize Battery Bar
+Discover/My Pet ──Battery──> Battery Styles ──More──> Battery category ──theme──> Customize Battery Bar
+Customize Battery Bar ──Apply khi chưa có quyền──> Accessibility disclosure/settings
   └─ theme ID khởi tạo cả pet + pin; editor có thể mix hai theme khác nhau
 Customize Battery Bar ──locked pet/pin──> Rewarded hoặc Premium ──return──> chọn component
 Customize Battery Bar ──component option──> Component Editor ──Done/Back──> đúng scroll offset của overview
@@ -104,9 +104,8 @@ chuyển sang bước đặt tên khi user chạm Continue. Flow này không t�
 - Mỗi Battery component editor là một destination nằm trên overview. Nó dùng ViewModel của
   overview để giữ nguyên draft/live preview; Back hoặc Done chỉ pop destination con, vì vậy
   overview phục hồi đúng scroll offset và không khởi tạo lại catalog/picker.
-- Theme selection trong Battery Styles chỉ navigate sau khi Accessibility đang bật.
-  Pending theme ID dùng saveable state nên quay lại từ Settings/process recreation vẫn mở
-  đúng editor; cancel Settings giữ user ở catalog. Editor vẫn tự gate Apply cho deep route.
+- Theme selection trong Battery Styles mở editor ngay cả khi chưa có Accessibility. Preview
+  nhúng vẫn hoạt động; Apply mới hiện disclosure và chỉ bật overlay khi quyền hợp lệ.
 - Catalog là boundary authoritative cho Mixed slot Rewarded dù được mở từ Home, Settings
   hay deep route. Chỉ slot kế tiếp được mở; đóng/fail ad không tăng capacity. Premium
   bypass gate và entitlement được refresh khi Catalog resume.

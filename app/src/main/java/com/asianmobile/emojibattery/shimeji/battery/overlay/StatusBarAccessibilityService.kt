@@ -151,7 +151,8 @@ class StatusBarAccessibilityService : AccessibilityService() {
                 catalogRepository.snapshot,
                 editorPreviewSession.preview
             ) { storedConfig, catalog, preview ->
-                val config = preview?.config ?: storedConfig
+                val previewSource = resolveBatteryOverlayPreviewSource(storedConfig, preview)
+                val config = previewSource.config
                 BatteryOverlaySources(
                     config = config,
                     batteryTheme = catalog.themes.firstOrNull {
@@ -169,7 +170,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
                     animationPath = catalog.animations
                         .firstOrNull { it.name == config.animationAssetName }
                         ?.assetPath,
-                    previewFocus = preview?.focusedComponent
+                    previewFocus = previewSource.focusedComponent
                 )
             }.collect { sources ->
                 currentConfig = sources.config
