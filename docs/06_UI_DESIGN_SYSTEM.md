@@ -86,6 +86,7 @@ Grant Permissions contract theo Figma node `8080:7477` và `8080:10255`:
   `ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS` thay vì hộp thoại một chạm, vì hộp thoại đó
   cần `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` — quyền Play chỉ cấp cho nhóm use case hẹp mà
   app này không thuộc về;
+- native ad ghim cố định dưới cùng màn, ngoài `LazyColumn`, nên nó không cuộn cùng danh sách;
 - dialog accessibility (`GrantPermissionDialog`) dùng shield gradient `#FF5D7D → #FB54BB`,
   title 20/28 và hai nút bằng nhau `Cancel` `#F2F2F2` / `Allow` `#FB3675`.
 

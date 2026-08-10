@@ -19,6 +19,9 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   Banner chỉ dispose khi đi khỏi toàn bộ nhóm top-level tab. Settings khi chạy trong shell
   không render thêm native ad để tránh hai placement xếp chồng. Hero placeholder và promo
   creative giữa content là presentational Figma assets, không gọi ads SDK.
+- Grant Permissions dùng lại native placement `screen_permission` của màn Permission onboarding,
+  ghim cố định dưới danh sách quyền chứ không cuộn theo. Không thêm placement mới vì hai màn
+  cùng một ngữ cảnh xin quyền.
 - Search tái sử dụng native placement `screen_home` ở đáy màn hình theo Figma; placement
   vẫn tuân theo remote key, frequency/ad-free policy và failure fallback chung của module ads.
 - Banner holder dùng nền trắng và shimmer `#E6E6E6` để phần dư quanh creative 320×50

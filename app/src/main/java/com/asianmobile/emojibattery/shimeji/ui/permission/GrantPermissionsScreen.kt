@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,6 +55,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_PERMISSION
+import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.ui.component.AppSwitch
@@ -170,8 +173,10 @@ private fun GrantPermissionsContent(
                 onNavigateToPremium = onNavigateToPremium
             )
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentPadding = PaddingValues(
                     horizontal = dimensionResource(SdpR.dimen._12sdp),
                     vertical = dimensionResource(SdpR.dimen._9sdp)
                 ),
@@ -233,6 +238,14 @@ private fun GrantPermissionsContent(
                 }
                 item { Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp))) }
             }
+            // Pinned below the list rather than the last row of it, so the ad stays put while
+            // the permissions scroll.
+            NativeAdInternal(
+                screenCode = SCREEN_PERMISSION,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+            )
         }
     }
 }
