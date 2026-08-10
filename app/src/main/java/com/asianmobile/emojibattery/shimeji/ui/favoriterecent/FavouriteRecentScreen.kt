@@ -58,7 +58,7 @@ import com.intuit.ssp.R as SspR
 
 private val FavouriteRecentRobotoRegular = FontFamily.Default
 private val FavouriteRecentRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-private val FavouriteRecentRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
+private val FavouriteRecentRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 
 @Composable
 fun FavouriteRecentScreen(

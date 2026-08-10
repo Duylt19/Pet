@@ -30,7 +30,7 @@ import com.intuit.ssp.R as SspR
 import kotlinx.coroutines.delay
 
 private val ToastRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-private val ToastRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
+private val ToastRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 
 /**
  * The white pill the app uses to confirm something happened, with an optional action. Shared by

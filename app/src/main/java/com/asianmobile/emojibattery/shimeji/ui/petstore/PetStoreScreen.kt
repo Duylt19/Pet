@@ -122,7 +122,7 @@ import kotlin.math.roundToInt
 
 private val StoreRoboto = FontFamily.SansSerif
 private val StoreRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-private val StoreRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
+private val StoreRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 private const val PET_CARD_WIDTH_PX = 104f
 private const val PET_CARD_HEIGHT_PX = 142f
 private const val PET_CARD_IMAGE_AREA_HEIGHT_PX = 90f

@@ -76,7 +76,12 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   14px. Color có custom wheel, bảy preset và ba theme preview; custom wheel mở HSV/opacity
   sheet, cập nhật trực tiếp cùng draft/live-preview policy;
 - card dùng shadow token `#6666661F`, y=8, blur=24; slider dùng Roboto Medium 16/24 cho
-  label và 14/20 cho value. Mười icon Customize đều dùng VectorDrawable Figma màu `#FB3675`;
+  label và 14/20 cho value. Slider dùng Material 3 interaction/semantics giống Pet Settings,
+  track hồng không tick và vùng điều khiển cao 48px theo Figma; không tự vẽ thumb dạng thanh.
+  Mười icon Customize đều dùng VectorDrawable Figma màu `#FB3675`;
+- toàn màn dùng Roboto local đúng weight: top bar/section/Apply là SemiBold 600, row/slider/grid
+  là Medium 500 và More là Regular 400. Top bar collapsed 20/28, expanded 24/32; không dùng
+  SansSerif synthetic hoặc Roboto Condensed để giả SemiBold;
 - Apply là panel sticky phía trên banner editor dùng chung.
 
 Pet Store visual contract:

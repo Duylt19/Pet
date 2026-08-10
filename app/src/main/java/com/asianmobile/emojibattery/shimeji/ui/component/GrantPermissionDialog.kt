@@ -40,7 +40,7 @@ import com.intuit.ssp.R as SspR
 
 private val PermissionDialogRobotoRegular = FontFamily.SansSerif
 private val PermissionDialogRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-private val PermissionDialogRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
+private val PermissionDialogRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 
 @Composable
 fun GrantPermissionDialog(

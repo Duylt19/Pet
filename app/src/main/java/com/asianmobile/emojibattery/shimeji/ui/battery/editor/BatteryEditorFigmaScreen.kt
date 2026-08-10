@@ -35,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -60,7 +61,6 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
@@ -81,8 +81,9 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
+private val StatusBarRobotoRegular = FontFamily(Font(R.font.roboto_regular))
 private val StatusBarRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-private val StatusBarRobotoSemiBold = FontFamily.SansSerif
+private val StatusBarRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 private val StatusBarColorWheelBrush = Brush.sweepGradient(
     (0 until 360 step 15).map { hue -> Color.hsv(hue.toFloat(), 0.7f, 0.92f) }
 )
@@ -195,11 +196,10 @@ private fun EditorLargeTopBar(
                 text = stringResource(R.string.battery_editor_title),
                 color = colorResource(R.color.colors_212327),
                 fontFamily = StatusBarRobotoSemiBold,
-                fontWeight = FontWeight.SemiBold,
                 fontSize = titleSize,
                 lineHeight = (
                     dimensionResource(SspR.dimen._24ssp).value +
-                        (dimensionResource(SspR.dimen._20ssp).value -
+                        (dimensionResource(SspR.dimen._22ssp).value -
                             dimensionResource(SspR.dimen._24ssp).value) * collapsedFraction
                     ).sp,
                 maxLines = 1,
@@ -242,9 +242,8 @@ private fun EditorCompactTopBar(
                 text = title,
                 color = colorResource(R.color.colors_212327),
                 fontFamily = StatusBarRobotoSemiBold,
-                fontWeight = FontWeight.SemiBold,
                 fontSize = dimensionResource(SspR.dimen._15ssp).value.sp,
-                lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp
+                lineHeight = dimensionResource(SspR.dimen._22ssp).value.sp
             )
             Spacer(Modifier.weight(1f))
             HomePremiumButton(
@@ -449,7 +448,6 @@ private fun EditorDesignSection(
             text = title,
             color = colorResource(R.color.colors_212327),
             fontFamily = StatusBarRobotoSemiBold,
-            fontWeight = FontWeight.SemiBold,
             fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
             lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp
         )
@@ -582,7 +580,7 @@ private fun DesignRowHeader(
                 Text(
                     text = stringResource(R.string.discover_more),
                     color = colorResource(R.color.colors_212327),
-                    fontFamily = FontFamily.Default,
+                    fontFamily = StatusBarRobotoRegular,
                     fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
                     lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp
                 )
@@ -787,18 +785,14 @@ private fun BackgroundThemeRow(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DesignSlider(
+internal fun DesignSlider(
     label: String,
     value: Float,
     range: ClosedFloatingPointRange<Float>,
     onValueChange: (Float) -> Unit
 ) {
     val coercedValue = value.coerceIn(range)
-    val fraction = if (range.endInclusive == range.start) {
-        0f
-    } else {
-        ((coercedValue - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
-    }
+    val pink = colorResource(R.color.colors_FB3675)
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
         Text(
             text = label,
@@ -812,39 +806,13 @@ private fun DesignSlider(
                 value = coercedValue,
                 onValueChange = onValueChange,
                 valueRange = range,
-                thumb = {
-                    Box(
-                        Modifier
-                            .width(dimensionResource(SdpR.dimen._3sdp))
-                            .height(dimensionResource(SdpR.dimen._29sdp))
-                            .clip(CircleShape)
-                            .background(colorResource(R.color.colors_FB3675))
-                    )
-                },
-                track = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(dimensionResource(SdpR.dimen._9sdp))
-                            .clip(CircleShape)
-                            .background(colorResource(R.color.colors_FFEBF1))
-                    ) {
-                        Box(
-                            Modifier
-                                .fillMaxWidth(fraction)
-                                .height(dimensionResource(SdpR.dimen._9sdp))
-                                .background(colorResource(R.color.colors_FB3675))
-                        )
-                        Box(
-                            Modifier
-                                .align(Alignment.CenterEnd)
-                                .padding(end = dimensionResource(SdpR.dimen._3sdp))
-                                .size(dimensionResource(SdpR.dimen._3sdp))
-                                .clip(CircleShape)
-                                .background(colorResource(R.color.colors_FDA3C0))
-                        )
-                    }
-                },
+                colors = SliderDefaults.colors(
+                    thumbColor = pink,
+                    activeTrackColor = pink,
+                    inactiveTrackColor = colorResource(R.color.colors_FFEBF1),
+                    activeTickColor = Color.Transparent,
+                    inactiveTickColor = Color.Transparent
+                ),
                 modifier = Modifier
                     .weight(1f)
                     .height(dimensionResource(SdpR.dimen._38sdp))
@@ -857,6 +825,7 @@ private fun DesignSlider(
                 fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
                 lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
                 textAlign = TextAlign.End,
+                maxLines = 1,
                 modifier = Modifier.width(dimensionResource(SdpR.dimen._25sdp))
             )
         }
@@ -983,8 +952,8 @@ private fun StatusBarApplyPanel(enabled: Boolean, onApply: () -> Unit) {
                 text = stringResource(R.string.battery_apply),
                 color = colorResource(R.color.colors_FFFFFF),
                 fontFamily = StatusBarRobotoSemiBold,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = dimensionResource(SspR.dimen._14ssp).value.sp
+                fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp
             )
         }
     }

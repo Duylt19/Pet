@@ -84,7 +84,7 @@ import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
 private val DiscoverRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-private val DiscoverRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
+private val DiscoverRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 
 @Composable
 fun DiscoverScreen(

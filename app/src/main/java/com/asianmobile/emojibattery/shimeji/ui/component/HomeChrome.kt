@@ -55,7 +55,7 @@ enum class HomeTab {
 }
 
 private val HomeRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-private val HomeRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
+private val HomeRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 
 @Composable
 fun HomeHeader(
@@ -139,7 +139,8 @@ fun HomePremiumButton(
             text = stringResource(R.string.discover_pro),
             color = colorResource(R.color.colors_FFFFFF),
             fontFamily = HomeRobotoSemiBold,
-            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp
         )
     }
 }

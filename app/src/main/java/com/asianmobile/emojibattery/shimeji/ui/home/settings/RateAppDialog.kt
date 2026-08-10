@@ -67,7 +67,7 @@ import kotlinx.coroutines.delay
 
 private val RateRobotoRegular = FontFamily.SansSerif
 private val RateRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-private val RateRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
+private val RateRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 private const val RateDialogWidthFraction = 312f / 360f
 private const val RateThankYouDialogWidthFraction = 320f / 360f
 

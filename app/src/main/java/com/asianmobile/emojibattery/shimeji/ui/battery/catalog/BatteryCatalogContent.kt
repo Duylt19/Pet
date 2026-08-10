@@ -74,7 +74,7 @@ import com.intuit.ssp.R as SspR
 private const val BATTERY_DETAIL_PREVIEW_FRACTION = 0.7303f
 
 private val BatteryRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-private val BatteryRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
+private val BatteryRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 
 @Composable
 internal fun BatteryCatalogContent(

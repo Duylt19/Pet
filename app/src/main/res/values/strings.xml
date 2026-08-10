@@ -901,7 +901,7 @@
     <string name="battery_editor_left_margin">Left Margin</string>
     <string name="battery_editor_right_margin">Right Margin</string>
     <string name="battery_editor_customize_icon">Customize icon</string>
-    <string name="battery_editor_dp_value">%1$d dp</string>
+    <string name="battery_editor_dp_value">%1$ddp</string>
     <string name="battery_color_picker_title">Select color</string>
     <string name="battery_color_picker_grid">Grid</string>
     <string name="battery_color_picker_sliders">Sliders</string>

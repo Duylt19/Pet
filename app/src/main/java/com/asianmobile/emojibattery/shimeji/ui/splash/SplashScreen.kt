@@ -151,7 +151,7 @@ fun SplashScreen(
                         text = stringResource(R.string.splash_title),
                         style = TextStyle(
                             fontSize = dimensionResource(id = R_ssp.dimen._22ssp).value.sp,
-                            fontFamily = FontFamily(Font(R.font.roboto_600)),
+                            fontFamily = FontFamily(Font(R.font.roboto_semibold)),
                             fontWeight = FontWeight.SemiBold,
                             fontStyle = FontStyle.Italic,
                             color = colorResource(R.color.colors_FFFFFF),

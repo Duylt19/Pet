@@ -1926,7 +1926,7 @@ internal fun BatteryPreview(
                 Text(
                     text = stringResource(R.string.battery_preview_percentage),
                     color = Color(config.percentColorArgb),
-                    fontFamily = FontFamily(Font(R.font.inter_semibold)),
+                    fontFamily = FontFamily(Font(R.font.roboto_medium)),
                     fontSize = config.percentSizeDp.sp
                 )
             }

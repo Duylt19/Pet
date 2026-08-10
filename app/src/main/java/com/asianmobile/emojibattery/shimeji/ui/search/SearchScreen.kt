@@ -65,7 +65,7 @@ import com.intuit.ssp.R as SspR
 
 private val SearchRobotoRegular = FontFamily.Default
 private val SearchRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-private val SearchRobotoSemiBold = FontFamily(Font(R.font.roboto_600))
+private val SearchRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 
 @Composable
 fun SearchScreen(

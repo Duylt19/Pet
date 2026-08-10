@@ -7,6 +7,7 @@
 | Language/build | Kotlin, KSP, Java 17 | Source và code generation |
 | Android | compile/target SDK 36, min SDK 24 | Platform baseline |
 | UI | Jetpack Compose, Material 3 | Declarative UI |
+| Product typography | Roboto v3.016 (OFL 1.1) | Local Regular 400, Medium 500, SemiBold 600 và Bold 700, cùng upstream `googlefonts/roboto-3-classic` |
 | UI screenshot test | Compose Preview Screenshot Testing | Host-side Layoutlib golden test, không cần emulator |
 | App architecture | Single-Activity, MVVM | App shell và feature state |
 | Navigation | Navigation Compose | Route graph/back stack |
@@ -36,6 +37,11 @@
 - Download/remux service dependencies.
 
 Không thêm lại dependency chỉ vì từng tồn tại. Mọi dependency mới phải có call site thật, version catalog entry và lý do kiến trúc rõ.
+
+Roboto được đóng gói trong `app/src/main/res/font`. Không dùng `roboto_600.ttf` cũ: file đó
+thực chất là Roboto Condensed Bold. Bốn resource mới phải giữ đúng mapping
+`roboto_regular`/`roboto_medium`/`roboto_semibold`/`roboto_bold`; SemiBold là static instance
+weight 600 được tạo từ variable font chính thức của cùng release v3.016.
 
 ## Verification
 

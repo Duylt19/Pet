@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -57,6 +58,25 @@ fun BatteryEditorColorPickerScreenshotTest() {
             selectedColor = 0xFFE8794D.toInt(),
             onColorChange = {},
             onDismiss = {}
+        )
+    }
+}
+
+@PreviewTest
+@Preview(name = "Status bar Material slider", widthDp = 360, heightDp = 112)
+@Composable
+fun BatteryEditorMaterialSliderScreenshotTest() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        DesignSlider(
+            label = "Size",
+            value = 16f,
+            range = 8f..24f,
+            onValueChange = {}
         )
     }
 }
