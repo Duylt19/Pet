@@ -160,7 +160,16 @@ System bar:
 - **nợ đã biết**: onboarding Permission (`ui/permission/PermissionScreen`)
   vẫn còn nền `#161718`, nên icon tối chìm trên màn đó cho tới khi UI được
   dựng lại theo tông trắng. Language đã dùng nền trắng; Splash/Welcome Back dùng wallpaper pastel và Intro dùng
-  `img_splash_bg` sáng nên đọc bình thường.
+  ba hero composite pastel của Intro sáng nên đọc bình thường.
+
+Intro onboarding theo Figma nodes `8088:13113`, `8088:13148`, `8088:13201`:
+
+- mỗi trang dùng một asset composite lossless @3x (`img_intro1/2/3.webp`) export từ parent
+  `Mask group`; asset chỉ chứa phone mockup, character, glow, overlay và fade phức tạp;
+- title, indicator, Next/Start, gradient button và native ad vẫn là UI thật. Không export toàn
+  frame vì sẽ bake status bar iPhone, text và ad creative mẫu vào bitmap;
+- page 1/3 giữ placement `SCREEN_INTRO`/`SCREEN_INTRO_SECOND` cao 222; page 2 không có ad.
+  Pager, analytics và completion flow không thay đổi.
 
 Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343` (tắt):
 

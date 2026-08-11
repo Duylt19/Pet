@@ -101,15 +101,9 @@
     <string name="search_placeholder">Search or type a URL</string>
 
     <!-- Intro / Onboarding -->
-    <string name="intro_title_1">Meet Your Cute\nScreen Companion.</string>
-    <string name="intro_title_highlight_1">Screen Companion.</string>
-    <string name="intro_message_1">Bring a playful animated pet\nto every screen.</string>
-    <string name="intro_title_2">Play Anywhere\nOn Your Screen.</string>
-    <string name="intro_title_highlight_2">On Your Screen.</string>
-    <string name="intro_message_2">Drag, tap, and watch your pet\nexplore the screen edges.</string>
-    <string name="intro_title_3">Make It\nUniquely Yours.</string>
-    <string name="intro_title_highlight_3">Uniquely Yours.</string>
-    <string name="intro_message_3">Choose your companion and tune\nits size, speed, and behavior.</string>
+    <string name="intro_title_1">Show your battery level\nwith playful emojis</string>
+    <string name="intro_title_2">Custom your status bar to\nmatch your style</string>
+    <string name="intro_title_3">Enjoy adorable pets moving\nacross your screen</string>
     <string name="start">Start</string>
 
     <string name="share_app">Share app</string>
