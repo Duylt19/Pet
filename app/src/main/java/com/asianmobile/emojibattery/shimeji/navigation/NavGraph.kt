@@ -2,7 +2,6 @@ package com.asianmobile.emojibattery.shimeji.navigation
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -36,12 +35,7 @@ import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.CURRENT_BATTERY_S
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorPage
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorViewModel
-import com.asianmobile.emojibattery.shimeji.ui.pet.catalog.PetCatalogScreen
-import com.asianmobile.emojibattery.shimeji.ui.pet.catalog.PetCatalogTarget
-import com.asianmobile.emojibattery.shimeji.ui.pet.catalog.PetDetailScreen
-import com.asianmobile.emojibattery.shimeji.ui.pet.customization.PetCustomizationScreen
 import com.asianmobile.emojibattery.shimeji.ui.settings.mine.SettingsScreen
-import com.asianmobile.emojibattery.shimeji.ui.pet.swarm.SwarmCustomizationScreen
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.intro.IntroScreen
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.language.LanguageScreen
 import com.asianmobile.emojibattery.shimeji.ui.app.MainViewModel
@@ -65,11 +59,7 @@ object Routes {
     const val FAVOURITE_RECENT = "favourite_recent"
     const val GRANT_PERMISSIONS = "grant_permissions"
     const val MY_PET = "my_pet"
-    const val PET_CATALOG = "pet_catalog"
     const val PET_STORE = "pet_store"
-    const val PET_DETAIL = "pet_detail"
-    const val PET_CUSTOMIZATION = "pet_customization"
-    const val SWARM_CUSTOMIZATION = "swarm_customization"
     const val SETTINGS = "settings"
     const val BATTERY_CATALOG = "battery_catalog"
     const val BATTERY_CATEGORY = "battery_category"
@@ -77,16 +67,6 @@ object Routes {
     const val BATTERY_EDITOR_COMPONENT = "battery_editor_component"
     const val PREMIUM = "premium"
 
-    fun petCatalog(
-        target: PetCatalogTarget,
-        slotIndex: Int = 0
-    ): String = "$PET_CATALOG/${target.name}/$slotIndex"
-    fun petDetail(
-        target: PetCatalogTarget,
-        slotIndex: Int,
-        packKey: String
-    ): String = "$PET_DETAIL/${target.name}/$slotIndex/${Uri.encode(packKey)}"
-    fun petCustomization(slotIndex: Int): String = "$PET_CUSTOMIZATION/$slotIndex"
     fun batteryEditor(themeId: Int): String = "$BATTERY_EDITOR/$themeId"
     fun batteryCategory(categoryId: Int): String = "$BATTERY_CATEGORY/$categoryId"
     fun batteryEditorComponent(themeId: Int, page: String): String =
@@ -281,12 +261,6 @@ fun AppNavGraph(
                     onNavigateToPetStore = {
                         navigateToHomeTab(HomeTab.PET_STORE)
                     },
-                    onOpenPet = { packKey ->
-                        navController.safeNavigate(
-                            Routes.petDetail(PetCatalogTarget.MIXED, 0, packKey),
-                            ignoreDebounce = true
-                        )
-                    },
                     onOpenBatteryTheme = { themeId ->
                         navController.safeNavigate(
                             Routes.batteryEditor(themeId),
@@ -311,11 +285,8 @@ fun AppNavGraph(
             composable(Routes.SEARCH) {
                 SearchScreen(
                     onCancel = { navController.safePopBackStack(ignoreDebounce = true) },
-                    onOpenPet = { packKey ->
-                        navController.safeNavigate(
-                            Routes.petDetail(PetCatalogTarget.MIXED, 0, packKey),
-                            ignoreDebounce = true
-                        )
+                    onOpenPetStore = {
+                        navigateToHomeTab(HomeTab.PET_STORE)
                     },
                     onOpenTheme = { themeId ->
                         navController.safeNavigate(
@@ -473,50 +444,6 @@ fun AppNavGraph(
                 )
             }
 
-            composable(
-                route = "${Routes.PET_CATALOG}/{target}/{slotIndex}",
-                arguments = listOf(
-                    navArgument("target") { type = NavType.StringType },
-                    navArgument("slotIndex") { type = NavType.IntType }
-                )
-            ) { backStackEntry ->
-                val slotIndex = backStackEntry.arguments?.getInt("slotIndex") ?: 0
-                val target = backStackEntry.arguments?.getString("target")
-                    ?.let { encoded ->
-                        PetCatalogTarget.entries.firstOrNull { it.name == encoded }
-                    }
-                    ?: PetCatalogTarget.MIXED
-                PetCatalogScreen(
-                    onBack = { navController.safePopBackStack(ignoreDebounce = true) },
-                    onNavigateToPremium = {
-                        navController.safeNavigate(
-                            "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
-                            ignoreDebounce = true
-                        )
-                    },
-                    onOpenPack = { packKey ->
-                        navController.safeNavigate(
-                            Routes.petDetail(target, slotIndex, packKey),
-                            ignoreDebounce = true
-                        )
-                    }
-                )
-            }
-
-            composable(
-                route = "${Routes.PET_DETAIL}/{target}/{slotIndex}/{packKey}",
-                arguments = listOf(
-                    navArgument("target") { type = NavType.StringType },
-                    navArgument("slotIndex") { type = NavType.IntType },
-                    navArgument("packKey") { type = NavType.StringType }
-                )
-            ) { backStackEntry ->
-                PetDetailScreen(
-                    packKey = backStackEntry.arguments?.getString("packKey").orEmpty(),
-                    onBack = { navController.safePopBackStack(ignoreDebounce = true) }
-                )
-            }
-
             composable(Routes.SETTINGS) {
                 SettingsScreen(
                     onSearch = {
@@ -546,40 +473,6 @@ fun AppNavGraph(
                             // quick double tap stacks two identical screens to back out of.
                             launchSingleTop = true
                         }
-                    }
-                )
-            }
-
-            composable(
-                route = "${Routes.PET_CUSTOMIZATION}/{slotIndex}",
-                arguments = listOf(navArgument("slotIndex") { type = NavType.IntType })
-            ) {
-                PetCustomizationScreen(
-                    onBack = {
-                        navController.safePopBackStack(ignoreDebounce = true)
-                    },
-                    onChangeCharacter = { slotIndex ->
-                        navController.safeNavigate(
-                            Routes.petCatalog(PetCatalogTarget.MIXED, slotIndex),
-                            ignoreDebounce = true
-                        )
-                    },
-                    onPetRemoved = {
-                        navController.safePopBackStack(ignoreDebounce = true)
-                    }
-                )
-            }
-
-            composable(Routes.SWARM_CUSTOMIZATION) {
-                SwarmCustomizationScreen(
-                    onBack = {
-                        navController.safePopBackStack(ignoreDebounce = true)
-                    },
-                    onChangeCharacter = {
-                        navController.safeNavigate(
-                            Routes.petCatalog(PetCatalogTarget.SWARM),
-                            ignoreDebounce = true
-                        )
                     }
                 )
             }

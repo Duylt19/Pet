@@ -89,7 +89,6 @@ fun DiscoverScreen(
     onNavigateToPremium: () -> Unit,
     onNavigateToBattery: () -> Unit,
     onNavigateToPetStore: () -> Unit,
-    onOpenPet: (String) -> Unit,
     onOpenBatteryTheme: (Int) -> Unit,
     onCustomizeStatusBar: () -> Unit,
     viewModel: DiscoverViewModel = hiltViewModel()
@@ -128,7 +127,6 @@ fun DiscoverScreen(
         onBatteryToggle = viewModel::onBatteryToggle,
         onBattery = onNavigateToBattery,
         onPetStore = onNavigateToPetStore,
-        onOpenPet = onOpenPet,
         onOpenTheme = onOpenBatteryTheme,
         onToggleFavorite = viewModel::toggleFavorite,
         onCustomizeStatusBar = onCustomizeStatusBar
@@ -156,7 +154,6 @@ private fun DiscoverContent(
     onBatteryToggle: () -> Unit,
     onBattery: () -> Unit,
     onPetStore: () -> Unit,
-    onOpenPet: (String) -> Unit,
     onOpenTheme: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
     onCustomizeStatusBar: () -> Unit
@@ -207,7 +204,7 @@ private fun DiscoverContent(
                             pets = uiState.trendingPets,
                             isLoading = uiState.isLoading,
                             onMore = onPetStore,
-                            onOpenPet = onOpenPet
+                            onOpenPet = { onPetStore() }
                         )
                     }
                     item {
@@ -773,7 +770,6 @@ private fun DiscoverContentPreview() {
         onBatteryToggle = {},
         onBattery = {},
         onPetStore = {},
-        onOpenPet = {},
         onOpenTheme = {},
         onToggleFavorite = {},
         onCustomizeStatusBar = {}

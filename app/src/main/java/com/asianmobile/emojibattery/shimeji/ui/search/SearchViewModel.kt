@@ -65,7 +65,6 @@ class SearchViewModel @Inject constructor(
         val pets = petCatalog.entries.map { pet ->
             SearchPetUiState(
                 id = pet.id,
-                packKey = pet.installedPackKey,
                 name = pet.name,
                 breed = pet.category,
                 thumbnailPath = pet.thumbnailPath,

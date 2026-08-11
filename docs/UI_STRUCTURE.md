@@ -15,18 +15,14 @@ ui/
 │   ├── intro/
 │   └── permission/
 ├── home/
-│   ├── discover/
-│   └── legacy/             # Không có destination trong NavGraph
+│   └── discover/
 ├── battery/
 │   ├── catalog/
 │   ├── favoriterecent/
 │   └── editor/
 ├── pet/
-│   ├── catalog/
 │   ├── store/
-│   ├── room/
-│   ├── customization/
-│   └── swarm/
+│   └── room/
 ├── settings/
 │   ├── mine/
 │   └── permissions/
@@ -52,8 +48,6 @@ feature phải di chuyển test cùng lúc.
 | Status bar editor | `battery_editor/*` | `ui/battery/editor` |
 | Pet Store tab | `pet_store` | `ui/pet/store` |
 | My Pet Room | `my_pet` | `ui/pet/room` |
-| Pet catalog/detail | `pet_catalog/*`, `pet_detail/*` | `ui/pet/catalog` |
-| Pet settings | `pet_customization/*`, `swarm_customization` | `ui/pet/customization`, `ui/pet/swarm` |
 | Mine tab | `settings` | `ui/settings/mine` |
 | Permission manager | `grant_permissions` | `ui/settings/permissions` |
 | Search | `search` | `ui/search` |
@@ -68,8 +62,6 @@ feature phải di chuyển test cùng lúc.
   tạo theme package khác.
 - `navigation/AppNavGraph.kt` chỉ wiring route/callback. Business state vẫn thuộc
   ViewModel của feature.
-- `ui/home/legacy` được giữ để tránh xóa nghiệp vụ trong refactor package;
-  không được dùng làm entry cho code mới.
 
 ## Home shell
 

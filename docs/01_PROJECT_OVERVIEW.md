@@ -29,11 +29,10 @@ release capability này còn bị chặn bởi asset/policy/device verification.
 - Language onboarding + language settings.
 - Intro/onboarding pages.
 - Permission UX cho overlay special access và notification permission, có Skip.
-- Home điều khiển hai mode loại trừ nhau: Mixed 1–12 pet với visibility riêng và Swarm
-  1–12 bản sao, cùng Start/Stop/Catalog/Settings/Premium.
-- Settings quản lý roster 1–12 pet; mỗi slot có màn Customize Pet riêng cho
-  character/size/speed/position/interaction/speech. Language/share/rate/feedback/version
-  nằm ở khu vực app-wide, không trộn với pet profile.
+- Discover, Battery, Pet Store và Mine là bốn tab của Home shell. Pet Store sở hữu unlock;
+  My Pet Room sở hữu roster, food, room background và toggle pet nổi theo từng pet.
+- Language/share/rate/feedback/version nằm ở Mine; không còn Catalog/Detail/Customize/Swarm
+  UI màu xanh cũ.
 - Premium/billing, ads, analytics, remote config, theme và reusable components.
 - Battery catalog/editor debug với built-in fallback, DataStore config và Accessibility
   status-cover disclosure.

@@ -17,22 +17,21 @@ settings và các quy ước kiến trúc hiện có.
   giữ toggle Emoji Battery; pet nổi được quản lý trong My Pet Room/Pet Store.
 - My Pet Room là phòng in-app: pet đã sở hữu đi lại trong phòng, sheet ba tab My Pet/Food/Room
   quản lý roster, cho ăn và đổi background. Chọn pet nào hiện trên màn hình bằng toggle
-  `Pet on screen` trong panel chi tiết từng pet. Mixed/Swarm tạm ẩn khỏi navigation ở v1.
-- Mỗi slot pet chọn được character riêng; Catalog tải 1.062 owner pet (gồm 36 pack WC 2026
+  `Pet on screen` trong panel chi tiết từng pet.
+- Pet Store tải 1.062 owner pet (gồm 36 pack WC 2026
   với 864 frame gốc)
   từ private GitHub
   static server, đọc cache trước và revalidate theo TTL 24 giờ + ETag/rate-limit backoff,
   tải/verify ZIP theo SHA-256 khi user bấm Set và vẫn hỗ trợ import pack `.zip` schema v1
   được validate an toàn.
-- Settings là pet roster + app/support; mỗi slot mở một hồ sơ Customize Pet riêng cho
-  character, size, speed, touch, speech, custom messages và position.
+- Mine là hub app/support; pet đã sở hữu và trạng thái hiện trên màn hình được quản lý trong
+  My Pet Room, không còn flow Catalog/Detail/Customize màu xanh cũ.
 - Battery tab mở catalog/editor và một Accessibility status-cover overlay opt-in.
   Catalog 898 theme, 20 nền, 20 emotion và 26 animation tải từ cùng private GitHub static
   server với Pet; JSON cache/revalidate và asset được tải, verify SHA-256 theo nhu cầu.
   Debug vẫn giữ packaged snapshot fallback, còn release chỉ nhận catalog `APPROVED`.
 - Discover Home, My Pet Room, Pet Store và Splash/App Open Welcome Back dùng pink/white
-  Figma direction; Catalog, Settings và Customize tiếp tục dùng cozy light design hiện tại;
-  Language/Intro/Permission/Premium giữ visual hiện tại.
+  Figma direction; Language/Intro/Permission/Premium giữ visual hiện tại.
 - Browser, search engine, clear browsing data, storage permission, download, media, Room và service cũ đã bị xóa.
 
 ## Kiến trúc bắt buộc
@@ -73,9 +72,9 @@ app/src/main/java/com/asianmobile/emojibattery/shimeji/
 ├── ui/
 │   ├── app/                     # MainViewModel/app-level presentation
 │   ├── onboarding/              # splash → language → intro → permission
-│   ├── home/                    # Discover + legacy Home không còn route
+│   ├── home/                    # Discover
 │   ├── battery/                 # catalog → favourite/recent → editor
-│   ├── pet/                     # catalog/store/room/customization/swarm
+│   ├── pet/                     # Pet Store + My Pet Room
 │   ├── settings/                # Mine + permission management
 │   ├── search/
 │   ├── premium/

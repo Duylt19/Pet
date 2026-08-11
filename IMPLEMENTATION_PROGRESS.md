@@ -35,11 +35,6 @@
 | Owner pet data snapshot | Done | 1,026 animated base packs plus 36 original WC 2026 packs/864 frames and 180 custom assets, with pinned APK/API provenance and CRC/SHA-256 inventory |
 | Local owner pet catalog | Done | 1,062 pets, 269 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |
 | Private GitHub pet server | Done | 1.062 JSON records + 2.124 ZIP/PNG assets, size/SHA-256 validation, original WC 2026 frame/provenance audit, Remote Config token, cache-first catalog with 24h TTL/ETag/rate-limit backoff, and on-demand verified download |
-| Different pet per slot + Settings refactor | Done | 1–12 slot selections, per-pack overlay instances, slot-aware Catalog/Detail, grouped Settings and reset-position guard |
-| Per-pet customization + Settings redesign | Done | Pet-first roster, commit-on-selection Add flow, independent size/speed/touch/speech/messages/position per slot, remove/shift migration và app-only Settings section |
-| Cute Pet product UI refresh | Done | Home pet room, Catalog discovery grid, friendly Detail, My Pet Family Settings và per-pet Customize dùng chung cozy light design; onboarding/Premium giữ nguyên |
-| Mixed + Pet Swarm home flow | Done | Hai mode loại trừ nhau; Mixed visibility theo pet cập nhật live, Swarm 1–12 có Rewarded unlock/Premium bypass và adaptive FPS |
-| Pet Swarm customization | Done | Màn edit riêng với character/count, base size/speed, deterministic variation và movement area bốn cạnh cập nhật live |
 | Swarm playful runtime profile | Done | Chặn TALK/TALK_WALK ở engine, không tạo social/crowd coordinator và ưu tiên wall/ceiling/aerial stunt với nhịp nghỉ ngắn |
 | Incremental Swarm roster | Done | Count +/- chỉ add/remove instance chênh lệch, giữ state/window của pet cũ và tính lại shared FPS thay vì rebuild cả đàn |
 | Random live Swarm spawn | Done | Pet thêm mới chọn ngẫu nhiên 1/12 ứng viên an toàn xa đàn hiện có; initial Start và pet cũ giữ nguyên |

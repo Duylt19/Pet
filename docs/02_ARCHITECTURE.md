@@ -48,9 +48,9 @@ com.asianmobile.emojibattery.shimeji/
 ├── ui/
 │   ├── app/                    # App-level presentation state
 │   ├── onboarding/             # Splash, Language, Intro, Permission
-│   ├── home/                   # Discover; legacy Home không còn route tách riêng
+│   ├── home/                   # Discover
 │   ├── battery/                # Catalog, Favourite/Recent, Editor
-│   ├── pet/                    # Catalog, Store, Room, Customization, Swarm
+│   ├── pet/                    # Pet Store và My Pet Room
 │   ├── settings/               # Mine và permission management
 │   ├── search/
 │   ├── premium/
@@ -84,7 +84,7 @@ ui/<domain>/<feature>/
 ## Data boundary
 
 - Interface repository cho phép thay data source và test ViewModel/use case.
-- `OwnerPetCatalogRepository` giữ Catalog UI độc lập với network/cache. Production
+- `OwnerPetCatalogRepository` giữ Pet Store/Search/Discover độc lập với network/cache. Production
   implementation đọc cache trước, revalidate private GitHub raw theo TTL 24 giờ + ETag,
   tôn trọng rate-limit retry deadline, cache JSON/metadata trong app-private storage, tải
   ZIP on-demand vào cache và chỉ chuyển sang installer sau khi size/SHA-256 khớp. Pack

@@ -82,18 +82,6 @@ không reset action, combo, vị trí hoặc animation cursor.
 
 ## Phase 6 — Monetization, performance and release policy
 
-- [Done] Replace the root Home with the Figma `8015:1035` Discover experience: pink/white
-  design tokens, real pet/battery catalog summaries, Accessibility-aware Emoji Battery
-  toggle, four-tab navigation and preserved My Pet Mixed/Swarm route without a new ad placement.
-- [Done] Redesign all in-app product screens after onboarding around a cozy Cute Pet flow:
-  Home pet room → Catalog discovery → Detail confirmation → My Pet Family → per-pet
-  customization. Keep Splash, Language, Intro, Permission and Premium unchanged for their
-  dedicated follow-up redesigns.
-- [Done] Add mutually exclusive Mixed/Pet Swarm modes on Home. Mixed supports live
-  per-pet visibility; Swarm repeats one selected pack up to the device budget, unlocks
-  only after a real Rewarded callback for free users, and bypasses Rewarded for Premium.
-- [Done] Add a dedicated Pet Swarm editor with live count, base size/speed, deterministic
-  per-instance variation and optional four-edge movement constraints.
 - [Done] Add a Swarm-only runtime profile: block TALK/TALK_WALK at engine level, remove
   social/crowd coordination entirely and favor short-delay wall, ceiling and aerial
   stunt stories with safe pack-aware degradation.
