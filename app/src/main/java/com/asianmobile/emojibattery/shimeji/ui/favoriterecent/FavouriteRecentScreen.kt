@@ -18,23 +18,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -52,6 +55,7 @@ import com.asianmobile.emojibattery.shimeji.ui.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
+import com.asianmobile.emojibattery.shimeji.ui.component.HomePremiumButton
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -81,6 +85,7 @@ fun FavouriteRecentScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun FavouriteRecentContent(
     uiState: FavouriteRecentUiState,
@@ -92,7 +97,12 @@ internal fun FavouriteRecentContent(
     showNativeAd: Boolean = true
 ) {
     val themes = uiState.visibleThemes
-    val usesCompactHeader = themes.isNotEmpty()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val collapsedFraction = scrollBehavior.state.collapsedFraction
+    val expandedContentGap = dimensionResource(SdpR.dimen._6sdp)
+    val collapsedContentGap = dimensionResource(SdpR.dimen._9sdp)
+    val contentGap = expandedContentGap +
+        (collapsedContentGap - expandedContentGap) * collapsedFraction
 
     Box(
         modifier = Modifier
@@ -106,39 +116,53 @@ internal fun FavouriteRecentContent(
             modifier = Modifier.fillMaxSize()
         )
 
-        Column(
+        Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
-        ) {
-            if (usesCompactHeader) {
-                FavouriteRecentCompactHeader(onBack = onBack, onPremium = onPremium)
-                Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
-            } else {
-                FavouriteRecentEmptyHeader(onBack = onBack, onPremium = onPremium)
-                Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            containerColor = Color.Transparent,
+            topBar = {
+                FavouriteRecentLargeTopBar(
+                    onBack = onBack,
+                    onPremium = onPremium,
+                    collapsedFraction = collapsedFraction,
+                    scrollBehavior = scrollBehavior
+                )
             }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                Spacer(Modifier.height(contentGap))
+                FavouriteRecentTabs(
+                    selectedTab = uiState.selectedTab,
+                    onSelectTab = onSelectTab
+                )
 
-            FavouriteRecentTabs(
-                selectedTab = uiState.selectedTab,
-                onSelectTab = onSelectTab
-            )
-
-            when {
-                uiState.isLoading && themes.isEmpty() -> Spacer(Modifier.weight(1f))
-                themes.isEmpty() -> {
-                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._37sdp)))
-                    FavouriteRecentEmptyState()
-                    Spacer(Modifier.weight(1f))
-                }
-                else -> {
-                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-                    FavouriteRecentGrid(
-                        themes = themes,
-                        onOpenTheme = onOpenTheme,
-                        onToggleFavorite = onToggleFavorite,
-                        modifier = Modifier.weight(1f)
-                    )
+                when {
+                    uiState.isLoading && themes.isEmpty() -> {
+                        FavouriteRecentEmptyBody(
+                            showEmptyState = false,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    themes.isEmpty() -> {
+                        FavouriteRecentEmptyBody(
+                            showEmptyState = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    else -> {
+                        Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+                        FavouriteRecentGrid(
+                            themes = themes,
+                            onOpenTheme = onOpenTheme,
+                            onToggleFavorite = onToggleFavorite,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         }
@@ -156,110 +180,68 @@ internal fun FavouriteRecentContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FavouriteRecentEmptyHeader(onBack: () -> Unit, onPremium: () -> Unit) {
-    FavouriteRecentTopActions(onBack = onBack, onPremium = onPremium)
-    Text(
-        text = stringResource(R.string.favourite_recent_title),
-        color = colorResource(R.color.colors_212327),
-        fontFamily = FavouriteRecentRobotoSemiBold,
-        fontSize = dimensionResource(SspR.dimen._18ssp).value.sp,
-        lineHeight = dimensionResource(SspR.dimen._25ssp).value.sp,
-        maxLines = 1,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._25sdp))
-            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
+private fun FavouriteRecentLargeTopBar(
+    onBack: () -> Unit,
+    onPremium: () -> Unit,
+    collapsedFraction: Float,
+    scrollBehavior: androidx.compose.material3.TopAppBarScrollBehavior
+) {
+    val expandedSize = dimensionResource(SspR.dimen._18ssp).value.sp
+    val collapsedSize = dimensionResource(SspR.dimen._15ssp).value.sp
+    val expandedLineHeight = dimensionResource(SspR.dimen._25ssp).value.sp
+    val collapsedLineHeight = dimensionResource(SspR.dimen._22ssp).value.sp
+    LargeTopAppBar(
+        title = {
+            Text(
+                text = stringResource(R.string.favourite_recent_title),
+                color = colorResource(R.color.colors_212327),
+                fontFamily = FavouriteRecentRobotoSemiBold,
+                fontSize = (
+                    expandedSize.value +
+                        (collapsedSize.value - expandedSize.value) * collapsedFraction
+                    ).sp,
+                lineHeight = (
+                    expandedLineHeight.value +
+                        (collapsedLineHeight.value - expandedLineHeight.value) * collapsedFraction
+                    ).sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        navigationIcon = { FavouriteRecentBackButton(onClick = onBack) },
+        actions = {
+            HomePremiumButton(
+                onClick = onPremium,
+                modifier = Modifier.padding(end = dimensionResource(SdpR.dimen._12sdp))
+            )
+        },
+        collapsedHeight = dimensionResource(SdpR.dimen._43sdp),
+        expandedHeight = dimensionResource(SdpR.dimen._77sdp),
+        colors = TopAppBarDefaults.largeTopAppBarColors(
+            containerColor = Color.Transparent,
+            scrolledContainerColor = Color.Transparent
+        ),
+        scrollBehavior = scrollBehavior
     )
-}
-
-@Composable
-private fun FavouriteRecentCompactHeader(onBack: () -> Unit, onPremium: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._43sdp))
-            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        FavouriteRecentBackButton(onClick = onBack)
-        Spacer(Modifier.width(dimensionResource(SdpR.dimen._9sdp)))
-        Text(
-            text = stringResource(R.string.favourite_recent_title_populated),
-            color = colorResource(R.color.colors_212327),
-            fontFamily = FavouriteRecentRobotoSemiBold,
-            fontSize = dimensionResource(SspR.dimen._15ssp).value.sp,
-            lineHeight = dimensionResource(SspR.dimen._22ssp).value.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(Modifier.weight(1f))
-        FavouriteRecentPremiumButton(onClick = onPremium)
-    }
-}
-
-@Composable
-private fun FavouriteRecentTopActions(onBack: () -> Unit, onPremium: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._43sdp))
-            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        FavouriteRecentBackButton(onClick = onBack)
-        Spacer(Modifier.weight(1f))
-        FavouriteRecentPremiumButton(onClick = onPremium)
-    }
 }
 
 @Composable
 private fun FavouriteRecentBackButton(onClick: () -> Unit) {
-    Icon(
-        painter = painterResource(R.drawable.ic_favorite_recent_back),
-        contentDescription = stringResource(R.string.favourite_recent_back),
-        tint = Color.Unspecified,
+    Box(
         modifier = Modifier
-            .size(dimensionResource(SdpR.dimen._22sdp))
+            .padding(start = dimensionResource(SdpR.dimen._6sdp))
+            .size(dimensionResource(SdpR.dimen._32sdp))
             .clip(CircleShape)
-            .clickable(onClick = onClick)
-    )
-}
-
-@Composable
-private fun FavouriteRecentPremiumButton(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .shadow(dimensionResource(SdpR.dimen._6sdp), CircleShape)
-            .clip(CircleShape)
-            .background(
-                Brush.horizontalGradient(
-                    listOf(
-                        colorResource(R.color.colors_FFB65B),
-                        colorResource(R.color.colors_FF6B80),
-                        colorResource(R.color.colors_FF57EE)
-                    )
-                )
-            )
-            .clickable(onClick = onClick)
-            .padding(
-                horizontal = dimensionResource(SdpR.dimen._6sdp),
-                vertical = dimensionResource(SdpR.dimen._5sdp)
-            ),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp)),
-        verticalAlignment = Alignment.CenterVertically
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
     ) {
-        Image(
-            painter = painterResource(R.drawable.img_home_crown),
-            contentDescription = null,
-            modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
-        )
-        Text(
-            text = stringResource(R.string.discover_pro),
-            color = colorResource(R.color.colors_FFFFFF),
-            fontFamily = FavouriteRecentRobotoSemiBold,
-            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp
+        Icon(
+            painter = painterResource(R.drawable.ic_favorite_recent_back),
+            contentDescription = stringResource(R.string.favourite_recent_back),
+            tint = Color.Unspecified,
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._22sdp))
         )
     }
 }
@@ -374,6 +356,26 @@ private fun FavouriteRecentEmptyState() {
             fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
             lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp
         )
+    }
+}
+
+@Composable
+private fun FavouriteRecentEmptyBody(
+    showEmptyState: Boolean,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(bottom = dimensionResource(SdpR.dimen._177sdp))
+    ) {
+        item {
+            if (showEmptyState) {
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._37sdp)))
+                FavouriteRecentEmptyState()
+            } else {
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._1sdp)))
+            }
+        }
     }
 }
 

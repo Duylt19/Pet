@@ -55,9 +55,12 @@ Mine visual contract theo Figma node `8080:4828`:
   state thật và native ad cố định cuối màn. Recent giữ empty state cho tới khi product định nghĩa
   action tạo lịch sử, thứ tự MRU và giới hạn retention; Apps that hide icons giữ callback chờ
   feature riêng.
-- Favourite & Recent bám đúng hai header state trong Figma: empty dùng title 24px ở dòng riêng;
-  populated dùng title 20px inline. Icon back/heart/history và empty illustration giữ vector;
-  thumbnail theme tiếp tục load từ battery catalog thay vì đóng gói sáu bitmap demo.
+- Favourite & Recent dùng một Material large app bar `exitUntilCollapsed` cho cả hai tab và mọi
+  trạng thái dữ liệu: title 24px khi expanded, chuyển thành 20px inline khi collapsed. Tab bar
+  luôn nằm ngay dưới app bar và cả empty state lẫn grid đều phát nested scroll; header không còn
+  bị khóa expanded/collapsed dựa trên việc tab có item hay không. Icon back/heart/history và empty
+  illustration giữ vector; thumbnail theme tiếp tục load từ battery catalog thay vì đóng gói sáu
+  bitmap demo.
 
 Discover Home contract:
 

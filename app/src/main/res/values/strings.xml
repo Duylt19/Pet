@@ -549,7 +549,6 @@
     <string name="mine_my_pet">My Pet</string>
     <string name="mine_favourite_recent">Favourite &amp; Recent</string>
     <string name="favourite_recent_title">Favourite &amp; Recent</string>
-    <string name="favourite_recent_title_populated">Favourites &amp; Recent</string>
     <string name="favourite_recent_favourite_tab">Favourite</string>
     <string name="favourite_recent_recent_tab">Recent</string>
     <string name="favourite_recent_empty_title">No emoji battery yet!</string>
