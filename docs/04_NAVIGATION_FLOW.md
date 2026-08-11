@@ -15,7 +15,7 @@
 | `grant_permissions` | Grant Permission | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Lối vào duy nhất là row trong Mine, không có interstitial; Back pop về Mine. Khác hẳn `permission` (bước onboarding) |
 | `my_pet` | My Pet Room | Scene phòng in-app + sheet ba tab; Back pop về màn trước, shortcut mở tab Pet Store |
 | `pet_store` | Pet Store | Tab 3 của Home shell: duyệt pet/food, Rewarded/Premium gate, download/verify chỉ để mở khóa |
-| `settings` | Mine | Tab 4 của Home shell: Emoji Battery toggle, shortcuts và app/support hub |
+| `settings` | Mine | Tab 4 của Home shell: Emoji Battery toggle, shortcuts, app-exclusion sheet, shared pet-settings dialog và app/support hub |
 | `battery_catalog` | Battery Styles | Tab 2 của Home shell: catalog local + category/favorite/Premium gate; editor luôn mở được với preview nhúng |
 | `battery_category/{categoryId}` | Battery category | Child destination từ action More: grid ba cột của category, Back về đúng vị trí Battery Styles |
 | `battery_editor/{themeId}` | Customize Status Bar | Overview khởi tạo cặp pet+pin, cho phép đổi hai phần độc lập, giữ draft và live preview qua Accessibility |
@@ -48,6 +48,8 @@ Mine ──My Pet──> My Pet
 Mine ──Favourite & Recent──> Favourite & Recent ──favourite theme──> Customize Status Bar
 Mine ──Language──> Language Settings
 Mine ──Emoji Battery toggle──> Accessibility disclosure/settings
+Mine ──Apps that hide icons──> modal picker ──switch app──> persist local package exclusion
+Mine ──Setting Pets──> shared speed/size dialog ──Save──> apply cho toàn bộ pet slots
 Mine ──Grant Permission──> Grant Permissions ──Accessibility chưa cấp──> consent disclosure ──Settings
                                       └─ quyền đã cấp/permission khác ──> system surface tương ứng ──back──> đọc lại trạng thái
 Mine ──Rate/Share/Contact/Privacy──> action tương ứng

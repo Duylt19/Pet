@@ -461,9 +461,6 @@ fun AppNavGraph(
                     onNavigateToFavouriteRecent = {
                         navController.safeNavigate(Routes.FAVOURITE_RECENT, ignoreDebounce = true)
                     },
-                    onOpenAppsHidden = {
-                        // TODO(Mine): connect the app-exclusion picker when its product flow is defined.
-                    },
                     onNavigateToGrantPermissions = {
                         navController.safeNavigate(
                             Routes.GRANT_PERMISSIONS,

@@ -69,6 +69,7 @@ import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionD
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.rememberAccessibilitySettingsLauncher
+import com.asianmobile.emojibattery.shimeji.ui.pet.room.PetRoomSettingsDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -84,7 +85,6 @@ fun SettingsScreen(
     onNavigateToLanguage: () -> Unit,
     onNavigateToMyPet: () -> Unit,
     onNavigateToFavouriteRecent: () -> Unit,
-    onOpenAppsHidden: () -> Unit = {},
     onNavigateToGrantPermissions: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -134,8 +134,9 @@ fun SettingsScreen(
         onMyPet = onNavigateToMyPet,
         onFavouriteRecent = onNavigateToFavouriteRecent,
         onLanguage = onNavigateToLanguage,
-        onAppsHidden = onOpenAppsHidden,
+        onAppsHidden = viewModel::openAppsHidden,
         onGrantPermission = onNavigateToGrantPermissions,
+        onSettingPets = viewModel::openPetSettings,
         onRate = { rateAppState = RateAppUiState(isDialogVisible = true) },
         onShare = { viewModel.onShareClicked(context) },
         onContact = { viewModel.onContactClicked(context) },
@@ -154,6 +155,25 @@ fun SettingsScreen(
             }
         )
     }
+
+    if (state.isAppsHiddenSheetVisible) {
+        AppsHiddenSheet(
+            state = state,
+            onToggleApp = viewModel::toggleAppHidden,
+            onRetry = viewModel::retryInstalledApps,
+            onDismiss = viewModel::closeAppsHidden
+        )
+    }
+
+    state.petSettings?.let { settings ->
+        PetRoomSettingsDialog(
+            settings = settings,
+            onSpeedChange = viewModel::updatePetSpeed,
+            onSizeChange = viewModel::updatePetSize,
+            onSave = viewModel::savePetSettings,
+            onDismiss = viewModel::closePetSettings
+        )
+    }
 }
 
 @Composable
@@ -169,6 +189,7 @@ internal fun MineContent(
     onLanguage: () -> Unit,
     onAppsHidden: () -> Unit,
     onGrantPermission: () -> Unit,
+    onSettingPets: () -> Unit,
     onRate: () -> Unit,
     onShare: () -> Unit,
     onContact: () -> Unit,
@@ -210,7 +231,6 @@ internal fun MineContent(
                     checked = state.isBatteryEnabled,
                     onCheckedChange = onBatteryToggle
                 )
-                MinePremiumBanner(onClick = onPremium)
                 Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
                 MineQuickActions(
                     onMyPet = onMyPet,
@@ -242,6 +262,12 @@ internal fun MineContent(
                             iconRes = R.drawable.ic_mine_permission,
                             title = stringResource(R.string.mine_grant_permission),
                             onClick = onGrantPermission
+                        )
+                        MineDivider()
+                        MineRow(
+                            iconRes = R.drawable.ic_mine_setting_pets,
+                            title = stringResource(R.string.mine_setting_pets),
+                            onClick = onSettingPets
                         )
                     }
 
@@ -285,29 +311,6 @@ internal fun MineContent(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun MinePremiumBanner(onClick: () -> Unit) {
-    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
-            .height(dimensionResource(SdpR.dimen._77sdp))
-            .clip(shape)
-            .background(colorResource(R.color.colors_FFEBF1))
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(R.string.mine_banner_premium),
-            color = colorResource(R.color.colors_000000),
-            fontFamily = MineRobotoMedium,
-            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp
-        )
     }
 }
 
@@ -650,6 +653,7 @@ private fun MineContentPreview() {
         onLanguage = {},
         onAppsHidden = {},
         onGrantPermission = {},
+        onSettingPets = {},
         onRate = {},
         onShare = {},
         onContact = {},

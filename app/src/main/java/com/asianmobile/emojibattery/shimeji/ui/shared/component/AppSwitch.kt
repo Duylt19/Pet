@@ -32,7 +32,8 @@ import com.intuit.sdp.R as SdpR
 fun AppSwitch(
     checked: Boolean,
     onCheckedChange: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    interactive: Boolean = true
 ) {
     val trackWidth = dimensionResource(SdpR.dimen._34sdp)
     val trackHeight = dimensionResource(SdpR.dimen._18sdp)
@@ -53,12 +54,18 @@ fun AppSwitch(
                     if (checked) R.color.colors_FB3675 else R.color.colors_C8C8C9
                 )
             )
-            .toggleable(
-                value = checked,
-                role = Role.Switch,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onValueChange = { onCheckedChange() }
+            .then(
+                if (interactive) {
+                    Modifier.toggleable(
+                        value = checked,
+                        role = Role.Switch,
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onValueChange = { onCheckedChange() }
+                    )
+                } else {
+                    Modifier
+                }
             ),
         // Centred rather than offset vertically, so the knob cannot drift off the track's axis.
         contentAlignment = Alignment.CenterStart

@@ -58,6 +58,7 @@
 | `battery_status_background_decoration_id` | Int | Background asset ID; `0` dùng màu phẳng |
 | `battery_status_show_emotion` | Boolean | Hiện emotion trang trí |
 | `battery_status_emotion_decoration_id` | Int | Emotion asset ID |
+| `battery_status_hidden_app_packages` | String set | Package của app mà user chọn để tạm ẩn Emoji Battery; lưu cục bộ trên thiết bị |
 | `battery_status_favorite_theme_ids` | String set | Favorite local |
 
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.

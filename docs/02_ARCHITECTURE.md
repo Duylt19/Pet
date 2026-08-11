@@ -128,6 +128,9 @@ ui/<domain>/<feature>/
   mới chạy frame khi user bật animation.
 - Accessibility cover là opt-in sau disclosure. Service ẩn trên keyguard, screen-off và
   landscape; không có boot receiver.
+- Danh sách exclusion do `BatterySettingsRepository.hiddenAppPackages` persist cục bộ.
+  Accessibility event chỉ cung cấp foreground package để áp rule show/hide; service vẫn không
+  retrieve window content, node tree, gesture hoặc global action.
 - `COVER_SYSTEM_BAR` là lớp phủ best-effort theo OEM, không sửa SystemUI. Release vẫn cần
   Play policy/device-matrix gate.
 

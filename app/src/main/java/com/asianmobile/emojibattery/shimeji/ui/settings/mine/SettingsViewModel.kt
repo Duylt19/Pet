@@ -8,11 +8,17 @@ import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.BuildConfig
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.data.model.MAX_PET_SLOTS
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.InstalledAppsRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
+import com.asianmobile.emojibattery.shimeji.ui.pet.room.PetRoomSettingsPolicy
+import com.asianmobile.emojibattery.shimeji.ui.pet.room.PetRoomSettingsUiState
 import com.asianmobile.emojibattery.shimeji.utils.FeedbackLauncher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +32,9 @@ import kotlinx.coroutines.withContext
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val batterySettingsRepository: BatterySettingsRepository
+    private val batterySettingsRepository: BatterySettingsRepository,
+    private val installedAppsRepository: InstalledAppsRepository,
+    private val petSettingsRepository: PetSettingsRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(
         SettingsUiState(
@@ -50,6 +58,18 @@ class SettingsViewModel @Inject constructor(
                     it.copy(
                         isBatteryEnabled = config.enabled && accessibilityEnabled,
                         isAccessibilityEnabled = accessibilityEnabled
+                    )
+                }
+            }
+        }
+        viewModelScope.launch {
+            batterySettingsRepository.hiddenAppPackages.collect { hiddenPackages ->
+                _uiState.update { state ->
+                    state.copy(
+                        hiddenAppPackages = hiddenPackages,
+                        installedApps = state.installedApps.map { app ->
+                            app.copy(isHidden = app.packageName in hiddenPackages)
+                        }
                     )
                 }
             }
@@ -85,6 +105,111 @@ class SettingsViewModel @Inject constructor(
 
     fun cancelPendingBatteryEnable() {
         enableBatteryAfterAccessibility = false
+    }
+
+    fun openAppsHidden() {
+        _uiState.update {
+            it.copy(isAppsHiddenSheetVisible = true, petSettings = null)
+        }
+        loadInstalledApps()
+    }
+
+    fun closeAppsHidden() {
+        _uiState.update { it.copy(isAppsHiddenSheetVisible = false) }
+    }
+
+    fun retryInstalledApps() {
+        loadInstalledApps()
+    }
+
+    fun toggleAppHidden(packageName: String) {
+        val app = _uiState.value.installedApps.firstOrNull {
+            it.packageName == packageName
+        } ?: return
+        val hidden = !app.isHidden
+        _uiState.update { state ->
+            state.copy(
+                installedApps = state.installedApps.map {
+                    if (it.packageName == packageName) it.copy(isHidden = hidden) else it
+                }
+            )
+        }
+        batterySettingsRepository.setAppHidden(packageName, hidden)
+    }
+
+    fun openPetSettings() {
+        val slot = petSettingsRepository.preferences.value.slot(0)
+        _uiState.update {
+            it.copy(
+                isAppsHiddenSheetVisible = false,
+                petSettings = PetRoomSettingsUiState(
+                    speedPercent = PetRoomSettingsPolicy.nearest(
+                        slot.speedPercent,
+                        PetRoomSettingsPolicy.SPEED_STEPS
+                    ),
+                    sizePercent = PetRoomSettingsPolicy.nearest(
+                        slot.sizePercent,
+                        PetRoomSettingsPolicy.SIZE_STEPS
+                    )
+                )
+            )
+        }
+    }
+
+    fun closePetSettings() {
+        _uiState.update { it.copy(petSettings = null) }
+    }
+
+    fun updatePetSpeed(percent: Int) = _uiState.update { state ->
+        state.copy(petSettings = state.petSettings?.copy(speedPercent = percent))
+    }
+
+    fun updatePetSize(percent: Int) = _uiState.update { state ->
+        state.copy(petSettings = state.petSettings?.copy(sizePercent = percent))
+    }
+
+    fun savePetSettings() {
+        val settings = _uiState.value.petSettings ?: return
+        repeat(MAX_PET_SLOTS) { slotIndex ->
+            petSettingsRepository.updateSpeedPercent(slotIndex, settings.speedPercent)
+            petSettingsRepository.updateSizePercent(slotIndex, settings.sizePercent)
+        }
+        _uiState.update { it.copy(petSettings = null) }
+    }
+
+    private fun loadInstalledApps() {
+        if (_uiState.value.isInstalledAppsLoading) return
+        _uiState.update {
+            it.copy(isInstalledAppsLoading = true, installedAppsLoadFailed = false)
+        }
+        viewModelScope.launch {
+            try {
+                val apps = installedAppsRepository.getLaunchableApps()
+                _uiState.update { state ->
+                    state.copy(
+                        isInstalledAppsLoading = false,
+                        installedAppsLoadFailed = false,
+                        installedApps = apps.map { app ->
+                            InstalledAppUiState(
+                                packageName = app.packageName,
+                                label = app.label,
+                                icon = app.icon,
+                                isHidden = app.packageName in state.hiddenAppPackages
+                            )
+                        }
+                    )
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: RuntimeException) {
+                _uiState.update { state ->
+                    state.copy(
+                        isInstalledAppsLoading = false,
+                        installedAppsLoadFailed = true
+                    )
+                }
+            }
+        }
     }
 
     fun onContactClicked(context: Context) {
