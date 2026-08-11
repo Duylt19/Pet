@@ -23,8 +23,9 @@ Splash và App Open Welcome Back theo Figma node `8088:12715`/`8088:12986`:
 
 - dùng chung wallpaper pastel riêng, Nunito Black 34/40px, gradient `#FF96B8 → #FF417E`,
   viền trắng và shadow `#FF0044` 60%;
-- Splash giữ hero thỏ + battery, progress/ad disclosure và banner SDK thật; không đóng gói
-  creative quảng cáo mẫu hoặc status bar iPhone từ Figma;
+- Splash giữ hero thỏ + battery, progress indeterminate có stroke ngoài cố định và fill
+  grow/shrink tuần hoàn, ad disclosure và banner SDK thật; không đóng gói creative quảng cáo
+  mẫu hoặc status bar iPhone từ Figma;
 - Welcome Back là Compose cover trước App Open Ad trong module `:ads`, không phải route;
   bunny GIF chạy bằng Coil và lifecycle quảng cáo hiện tại không thay đổi.
 

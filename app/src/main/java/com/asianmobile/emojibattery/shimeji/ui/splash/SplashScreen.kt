@@ -2,9 +2,16 @@ package com.asianmobile.emojibattery.shimeji.ui.splash
 
 import android.app.Activity
 import android.util.Log
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.progressSemantics
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -13,13 +20,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shadow
@@ -27,6 +34,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -56,6 +64,9 @@ import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as R_sdp
 import com.intuit.ssp.R as R_ssp
+
+private const val SPLASH_PROGRESS_DURATION_MILLIS = 1_800
+private const val SPLASH_PROGRESS_GROW_END_PHASE = 0.65f
 
 /**
  * SplashScreen handled initial ad consent and Splash Interstitial Ad.
@@ -240,25 +251,10 @@ private fun SplashLoadingFooter(
         modifier = modifier.fillMaxWidth(280f / 360f),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val progressShape = RoundedCornerShape(dimensionResource(R_sdp.dimen._77sdp))
-        Box(
+        SplashSnakeProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensionResource(R_sdp.dimen._7sdp))
-                .clip(progressShape)
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(
-                            colorResource(R.color.colors_FF417E),
-                            colorResource(R.color.colors_FF96B8),
-                        ),
-                    ),
-                )
-                .border(
-                    width = dimensionResource(R_sdp.dimen._1sdp),
-                    color = colorResource(R.color.colors_FFFFFF),
-                    shape = progressShape,
-                ),
+                .height(dimensionResource(R_sdp.dimen._7sdp)),
         )
         Text(
             text = stringResource(R.string.this_action_can_contain_ads),
@@ -270,6 +266,92 @@ private fun SplashLoadingFooter(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = dimensionResource(R_sdp.dimen._3sdp)),
+        )
+    }
+}
+
+@Composable
+private fun SplashSnakeProgressIndicator(
+    modifier: Modifier = Modifier,
+) {
+    val phase = if (LocalInspectionMode.current) {
+        SPLASH_PROGRESS_GROW_END_PHASE
+    } else {
+        val transition = rememberInfiniteTransition(label = "splashProgress")
+        val animatedPhase by transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = SPLASH_PROGRESS_DURATION_MILLIS,
+                    easing = LinearEasing,
+                ),
+                repeatMode = RepeatMode.Restart,
+            ),
+            label = "splashProgressPhase",
+        )
+        animatedPhase
+    }
+    val segment = calculateSplashProgressSegment(phase)
+    val borderColor = colorResource(R.color.colors_FFFFFF)
+    val startColor = colorResource(R.color.colors_FF417E)
+    val endColor = colorResource(R.color.colors_FF96B8)
+    val borderWidth = with(LocalDensity.current) {
+        dimensionResource(R_sdp.dimen._1sdp).toPx()
+    }
+
+    Canvas(modifier = modifier.progressSemantics()) {
+        val outerInset = borderWidth / 2f
+        val outerHeight = (size.height - borderWidth).coerceAtLeast(0f)
+        val outerWidth = (size.width - borderWidth).coerceAtLeast(0f)
+        val outerRadius = outerHeight / 2f
+        val innerInset = borderWidth * 1.5f
+        val innerHeight = (size.height - innerInset * 2f).coerceAtLeast(0f)
+        val availableWidth = (size.width - innerInset * 2f).coerceAtLeast(0f)
+        val segmentStart = innerInset + availableWidth * segment.startFraction
+        val segmentEnd = innerInset + availableWidth * segment.endFraction
+        val segmentWidth = (segmentEnd - segmentStart).coerceAtLeast(0f)
+
+        if (segmentWidth > 0f && innerHeight > 0f) {
+            drawRoundRect(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(startColor, endColor),
+                    startX = segmentStart,
+                    endX = segmentEnd,
+                ),
+                topLeft = Offset(segmentStart, innerInset),
+                size = androidx.compose.ui.geometry.Size(segmentWidth, innerHeight),
+                cornerRadius = CornerRadius(innerHeight / 2f),
+            )
+        }
+
+        drawRoundRect(
+            color = borderColor,
+            topLeft = Offset(outerInset, outerInset),
+            size = androidx.compose.ui.geometry.Size(outerWidth, outerHeight),
+            cornerRadius = CornerRadius(outerRadius),
+            style = Stroke(width = borderWidth),
+        )
+    }
+}
+
+internal data class SplashProgressSegment(
+    val startFraction: Float,
+    val endFraction: Float,
+)
+
+internal fun calculateSplashProgressSegment(phase: Float): SplashProgressSegment {
+    val normalizedPhase = phase.coerceIn(0f, 1f)
+    return if (normalizedPhase <= SPLASH_PROGRESS_GROW_END_PHASE) {
+        SplashProgressSegment(
+            startFraction = 0f,
+            endFraction = normalizedPhase / SPLASH_PROGRESS_GROW_END_PHASE,
+        )
+    } else {
+        SplashProgressSegment(
+            startFraction = (normalizedPhase - SPLASH_PROGRESS_GROW_END_PHASE) /
+                (1f - SPLASH_PROGRESS_GROW_END_PHASE),
+            endFraction = 1f,
         )
     }
 }
