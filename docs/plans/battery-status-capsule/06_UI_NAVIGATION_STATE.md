@@ -20,20 +20,8 @@ Arguments:
 
 ## Home integration
 
-Current Home bottom navigation:
-
-```text
-Pet Home (selected) | Pet Catalog | Settings
-```
-
-Target:
-
-```text
-Pet Home | Pet Catalog | Battery
-```
-
-Settings tiếp tục mở từ header gear, nơi hiện đã có lối vào. Battery Catalog có cùng header
-actions Favorites/Premium/Settings theo visual được owner duyệt.
+Home shell hiện dùng bốn tab `Discover | Battery | Pet Store | Mine`. Tài liệu kế hoạch này
+không còn định nghĩa route Pet Catalog xanh cũ.
 
 ## Screen/file contract
 

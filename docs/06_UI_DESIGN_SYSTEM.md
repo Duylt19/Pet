@@ -296,29 +296,6 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   nhầm con nằm dưới. Title bar đổi thành tên pet khi panel mở;
 - nút music phát `res/raw/bgm_pet_room.ogg` lặp, persist trạng thái và chỉ phát khi màn đang
   resume; rời màn là pause, ViewModel bị clear thì release decoder;
-- Swarm tạm ẩn khỏi navigation trong v1; `ui/home/HomeScreen` và `swarm_customization` giữ
-  nguyên code cho bản sau.
-
-My Pet mode contract (ẩn trong v1, giữ cho bản sau):
-
-- `Pet Swarm` và `Mixed Mode` là segmented control loại trừ nhau;
-- global switch điều khiển foreground overlay, không dùng để thay pet selection;
-- Mixed hiển thị lưới 3 cột × tối đa 4 hàng cho 12 slot; pet đã cấu hình giữ card hiện
-  tại, chỉ slot trống kế tiếp có thể thao tác để roster luôn liên tục;
-- slot Mixed 1–3 miễn phí; slot 4–12 có trạng thái khóa và Catalog Rewarded gate. Earned
-  callback mở đúng slot hiện tại khi ad hiển thị được; unavailable tiếp tục flow, còn
-  dismiss sớm dừng lại. Premium bypass gate;
-- Mixed dùng icon mắt trực tiếp trên từng card để hiện/ẩn ngay khi overlay đang chạy;
-- không cho ẩn pet Mixed cuối cùng, vì global switch đã đảm nhiệm trường hợp không hiện pet;
-- Swarm locked hiển thị CTA Rewarded và Premium; Premium bypass Rewarded;
-- Swarm unlocked hiển thị một pack, stepper count và Change/Remove.
-- Tap Swarm card mở `swarm_customization`; screen riêng giữ teal hierarchy của Home,
-  identity card ở đầu, setup/movement sections và CTA Done cố định. Mọi slider/toggle
-  persist và cập nhật runtime ngay, Done chỉ đóng màn chứ không phải bước commit.
-
-Mỗi card phải cho user thấy nhanh character, size, speed và trạng thái tương tác; option
-pet không được lặp ở app-wide Settings hoặc ghi vào global state.
-
 ## Resource rules
 
 - User-facing text: `strings.xml`, key `<feature>_<purpose>`.

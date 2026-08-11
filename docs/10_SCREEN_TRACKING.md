@@ -16,11 +16,7 @@
 | Search | `search` |
 | Favourite & Recent | `favourite_recent` |
 | My Pet | `my_pet` |
-| Pet catalog | `pet_catalog` |
 | Pet Store | `pet_store` |
-| Pet detail | `pet_detail` |
-| Customize Pet | `pet_customization` |
-| Edit Pet Swarm | `swarm_customization` |
 | Battery styles | `battery_catalog` |
 | Battery category | `battery_category` |
 | Customize status bar overview | `battery_editor` |

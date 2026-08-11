@@ -34,9 +34,9 @@ sang request khác.
 
 `RemoteOwnerPetCatalogRepository`:
 
-1. đọc và parse cache app-private trước để Catalog hiển thị ngay;
+1. đọc và parse cache app-private trước để Pet Store/Search/Discover hiển thị ngay;
 2. tự revalidate GitHub tối đa một lần trong 24 giờ trên mỗi device; nút refresh trong
-   Catalog cho phép user chủ động bỏ qua TTL nhưng vẫn tôn trọng thời gian chờ khi bị rate-limit;
+   repository vẫn tôn trọng thời gian chờ khi bị rate-limit;
 3. lưu `ETag` và gửi `If-None-Match`; response `304` chỉ cập nhật thời điểm validation,
    không tải lại JSON;
 4. lưu `Retry-After`/`X-RateLimit-Reset` khi GitHub trả `403`/`429` và không request lại
@@ -44,29 +44,24 @@ sang request khác.
 5. cache JSON cuối hợp lệ tại `files/pet_catalog/pets.json`, metadata refresh tại
    `files/pet_catalog/metadata.json`, fallback cache khi server/network không khả dụng;
 6. expose cùng `OwnerPetCatalogSnapshot` cho UI;
-7. tải ZIP vào `cache/pet_catalog_archives` chỉ khi user bấm `Set`;
+7. tải ZIP vào `cache/pet_catalog_archives` chỉ khi user bắt đầu unlock/download pet;
 8. stream download với giới hạn 20 MiB, kiểm tra declared size + SHA-256;
 9. chỉ đưa ZIP hợp lệ qua `LegacyShimejiPackInstaller`.
 
-Thumbnail được Coil tải lazy và dùng disk cache. Catalog không preload 1.062 thumbnail/ZIP.
+Thumbnail được Coil tải lazy và dùng disk cache. Pet Store không preload 1.062 thumbnail/ZIP.
 URL thumbnail ổn định nên memory/disk cache được tái sử dụng trên cùng device; không thêm Glide
 chỉ để tải lại cùng tài nguyên.
 
 ## UI behavior
 
-- Screen hiển thị toàn bộ 1.062 record và 269 category từ remote hoặc cached catalog.
-- Search chuẩn hóa hoa thường/dấu, khớp từng token trong name/category/creator và alias tự
-  nhiên; `WC 2026` tìm được bằng `world cup`, `football`, `soccer` hoặc `bóng đá`.
-- Category rail có `All`, tiếp theo là category nổi bật `WC 2026`, rồi các category còn lại
-  sort theo số pet và tên.
-- Top bar có refresh thủ công để QA/user lấy catalog mới ngay mà không phải xóa app data.
-- `Set` tải đúng một ZIP, verify integrity, normalize/install và chọn đúng slot.
-- Add flow chỉ tăng `petCount` sau khi Set/Import thành công; Back không tạo pet.
-- Với Mixed, Catalog cho slot 1–3 đi thẳng; slot 4–12 chỉ cho Set/Import sau khi đúng
-  slot kế tiếp nhận earned Rewarded callback, hoặc ngay khi Rewarded unavailable.
-  Premium bypass gate.
-- Pack đã cài tiếp tục mở detail/select không cần download lại.
-- Catalog/ZIP lỗi không thay renderer hoặc selection đang chạy.
+- Pet Store hiển thị catalog remote/cache theo tab/category và đánh dấu entitlement.
+- Pet chưa mở khóa đi qua Rewarded/Premium sheet; sau đó tải đúng một ZIP, verify integrity,
+  normalize/install, chạy unlock reveal và bước đặt tên. Pet mới được bật atomically ở slot
+  Mixed trống đầu tiên; nếu roster đã đầy thì chỉ ghi nhận ownership, không thay pet hiện có.
+- Pet đã cài không download lại; My Pet Room đọc roster đã sở hữu từ pack app-private.
+- Search và Discover chỉ dùng metadata/thumbnail, chạm pet sẽ mở Pet Store thay vì flow
+  Catalog/Detail cũ.
+- Catalog/ZIP lỗi không thay renderer hoặc roster đang chạy.
 
 ## On-demand legacy conversion
 

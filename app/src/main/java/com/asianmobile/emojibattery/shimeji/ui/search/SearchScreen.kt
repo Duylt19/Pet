@@ -79,7 +79,7 @@ fun SearchScreen(
     onCancel: () -> Unit,
     onOpenTheme: (Int) -> Unit,
     viewModel: SearchViewModel = hiltViewModel(),
-    onOpenPet: (String) -> Unit = {},
+    onOpenPetStore: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -100,7 +100,7 @@ fun SearchScreen(
         onOpenTheme = onOpenTheme,
         onToggleFavorite = viewModel::toggleFavorite,
         onSelectTab = viewModel::selectTab,
-        onOpenPet = onOpenPet
+        onOpenPetStore = onOpenPetStore
     )
 }
 
@@ -112,7 +112,7 @@ private fun SearchContent(
     onOpenTheme: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
     onSelectTab: (SearchTab) -> Unit = {},
-    onOpenPet: (String) -> Unit = {}
+    onOpenPetStore: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -151,7 +151,7 @@ private fun SearchContent(
                         uiState = uiState,
                         onOpenTheme = onOpenTheme,
                         onToggleFavorite = onToggleFavorite,
-                        onOpenPet = onOpenPet
+                        onOpenPetStore = onOpenPetStore
                     )
                 }
             }
@@ -324,7 +324,7 @@ private fun ResultsSection(
     uiState: SearchUiState,
     onOpenTheme: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
-    onOpenPet: (String) -> Unit
+    onOpenPetStore: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -377,7 +377,7 @@ private fun ResultsSection(
                         rowPets.forEach { pet ->
                             SearchPetCard(
                                 pet = pet,
-                                onOpen = { onOpenPet(pet.packKey) },
+                                onOpen = onOpenPetStore,
                                 modifier = Modifier.weight(1f)
                             )
                         }

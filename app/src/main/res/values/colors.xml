@@ -231,25 +231,13 @@
     <!-- Cute Pet product surfaces -->
     <color name="colors_FFF9F4">#FFF9F4</color>
     <color name="colors_FFFFFB">#FFFFFB</color>
-    <color name="colors_F7F0FF">#F7F0FF</color>
     <color name="colors_EDE4FF">#EDE4FF</color>
-    <color name="colors_7B61FF">#7B61FF</color>
-    <color name="colors_5D46D7">#5D46D7</color>
-    <color name="colors_FF7A9E">#FF7A9E</color>
-    <color name="colors_FFB84D">#FFB84D</color>
-    <color name="colors_BFEBDD">#BFEBDD</color>
     <color name="colors_2F2440">#2F2440</color>
     <color name="colors_776D84">#776D84</color>
     <color name="colors_E9DFEF">#E9DFEF</color>
-    <color name="colors_39B87A">#39B87A</color>
     <color name="colors_E45D6A">#E45D6A</color>
     <color name="colors_FFE8EF">#FFE8EF</color>
-    <color name="colors_FFF0D6">#FFF0D6</color>
-    <color name="colors_E7F7F1">#E7F7F1</color>
     <color name="colors_12B890">#12B890</color>
-    <color name="colors_D8F4EE">#D8F4EE</color>
-    <color name="colors_F4F8FC">#F4F8FC</color>
-    <color name="colors_9297A5">#9297A5</color>
 
     <!-- Emoji Battery Discover -->
     <color name="colors_FB3675">#FB3675</color>

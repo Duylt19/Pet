@@ -47,31 +47,6 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   dùng nền trắng và shimmer `#E6E6E6`; khi ads bị tắt/Premium/load fail thì slot collapse, không
   thay thế bằng ảnh creative mẫu.
 
-## Pet Swarm Rewarded unlock
-
-- My Pet preload Rewarded khi screen vào composition.
-- Khi Rewarded hiển thị được, user free chỉ unlock sau reward callback thật; đóng quảng cáo
-  sớm không unlock. Nếu SDK/ad inventory không sẵn sàng, limit hoặc show fail thì flow tiếp
-  tục ngay để lỗi quảng cáo không chặn tính năng.
-- Callback được consume đúng một lần. Sau dismiss/fail, SDK preload lượt kế tiếp.
-- Unlock được persist trên device bằng `pet_swarm_reward_unlocked`.
-- Premium được xem là unlocked ngay và không cần mở Rewarded.
-- Rewarded chỉ mở khóa mode; user vẫn chủ động chọn pet và bật global overlay.
-
-## Mixed slot Rewarded unlock
-
-- Slot 1–3 miễn phí. Slot 4–12 mở tuần tự; mỗi slot cần earned callback nếu Rewarded có
-  thể hiển thị, còn unavailable tiếp tục ngay.
-- Catalog là enforcement boundary dùng chung cho entry từ Home, Settings và deep route;
-  khi chưa mở, `Set`, import và chuẩn bị pack đều bị chặn.
-- Capacity được persist bằng `pet_mixed_reward_unlocked_slot_count`, mặc định 3 và clamp
-  trong khoảng 3–12. Xóa pet không thu hồi capacity đã mở.
-- Đóng quảng cáo sớm trước callback không mở slot. Nếu SDK/ad inventory không sẵn sàng,
-  limit hoặc show fail thì mở slot và tiếp tục flow ngay; user vẫn không thể bỏ qua slot
-  trước để mở slot sau.
-- Premium bypass toàn bộ gate. Catalog kiểm tra lại entitlement ở `ON_RESUME` để áp dụng
-  ngay sau khi user mua Premium.
-
 ## Battery style Rewarded unlock
 
 - Theme `FREE`, theme đã reward-unlock và toàn bộ theme của user Premium mở trực tiếp.

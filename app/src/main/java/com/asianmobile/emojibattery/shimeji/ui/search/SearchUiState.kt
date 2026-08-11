@@ -26,7 +26,6 @@ data class SearchUiState(
 
 data class SearchPetUiState(
     val id: Int,
-    val packKey: String,
     val name: String,
     val breed: String,
     val thumbnailPath: String?,
