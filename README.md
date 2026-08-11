@@ -13,8 +13,8 @@ settings và các quy ước kiến trúc hiện có.
 - Root Gradle project name hiện vẫn là `PrivateBrowser` (không ảnh hưởng package cài đặt).
 - Flow: Splash → Language → Intro → Permission → Discover Home.
 - Permission giải thích/request overlay special access và notification permission; user vẫn có thể Skip.
-- Discover Home tổng hợp Emoji Battery, pet/battery catalog và 4-tab navigation. Card
-  `Turn on to add a pet to your screen` bật/tắt pet nổi và chạm vào card mở My Pet Room.
+- Discover Home tổng hợp Emoji Battery, pet/battery catalog và 4-tab navigation. Discover chỉ
+  giữ toggle Emoji Battery; pet nổi được quản lý trong My Pet Room/Pet Store.
 - My Pet Room là phòng in-app: pet đã sở hữu đi lại trong phòng, sheet ba tab My Pet/Food/Room
   quản lý roster, cho ăn và đổi background. Chọn pet nào hiện trên màn hình bằng toggle
   `Pet on screen` trong panel chi tiết từng pet. Mixed/Swarm tạm ẩn khỏi navigation ở v1.

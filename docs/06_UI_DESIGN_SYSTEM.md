@@ -43,8 +43,10 @@ Discover Home contract:
 - Home shell có bốn tab Discover/Battery/Pet Store/Mine. `HomeBottomNavigation` cố định
   trên bottom banner hiện có; từng screen không tự tạo lại bottom chrome;
 - Discover, Pet Store và Mine dùng chung `HomeHeader` và `HomeEnableCard`: header `43sdp`, search
-  `25sdp`, enable card `37sdp`, switch `34×18sdp`. Không copy component rồi đổi metric riêng;
-- hero banner và promo creative trong content là presentational slot theo Figma, không gọi ads SDK;
+  `25sdp`, enable card `37sdp`, switch `34×18sdp`. Discover chỉ render Battery enable card;
+  pet switch được quản lý ở flow pet. Không copy component rồi đổi metric riêng;
+- Discover hero dùng composite `Battery Troll` PNG @3x tại tỉ lệ `328×100px`; promo creative
+  `360×50px` thấp hơn là presentational slot riêng, không gọi ads SDK;
 - Battery Themes dùng favorite state thật; Trending hiện dùng thứ tự catalog cho tới khi
   server có ranking riêng.
 

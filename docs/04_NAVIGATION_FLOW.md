@@ -9,7 +9,7 @@
 | `language_settings` | Language settings | Mở từ Settings |
 | `intro` | Intro pager | First-run |
 | `permission` | Permission | Request overlay/notification, có Continue/Skip |
-| `home` | Discover | Tab 1 của Home shell: battery toggle, catalog preview và quick actions |
+| `home` | Discover | Tab 1 của Home shell: battery toggle, Battery Troll hero và catalog preview |
 | `search` | Search | Tìm battery theme theo tên/category, chip gợi ý và lưới recommended |
 | `favourite_recent` | Favourite & Recent | Favourite battery theme đã lưu; Recent giữ empty state cho tới khi có contract MRU |
 | `grant_permissions` | Grant Permission | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Lối vào duy nhất là row trong Mine, không có interstitial; Back pop về Mine. Khác hẳn `permission` (bước onboarding) |
@@ -41,7 +41,6 @@ Home shell tabs: Discover ⇄ Battery Styles ⇄ Pet Store ⇄ Mine/Settings
 
 Discover ──Emoji Battery toggle(no access)──> Accessibility disclosure/settings ──back──> enable battery overlay
 Discover ──Battery/Theme/Emoji──> Battery Styles hoặc Customize Status Bar
-Discover ──My Pet──> My Pet
 Discover ──Search──> Search ──theme──> Customize Status Bar
 Discover ──Pet Store──> Pet Store ──Rewarded/Premium──> Download/verify/unlock (không gán slot)
 Discover ──Trending pet──> Catalog Detail

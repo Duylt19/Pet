@@ -23,10 +23,14 @@ Platform và product vertical slice đã hoàn tất. `PetOverlay.start(context)
 - Service `exported=false`, trả `START_NOT_STICKY`, không có boot receiver và không tự restart.
 - Play Console phải khai báo/review foreground-service type trước release.
 
-## Thứ tự khi bấm switch pet (Discover)
+## Ownership của switch pet
 
-`HomePetPolicy.nextCommand` là nơi duy nhất quyết định, `DiscoverViewModel.onPetToggle` chỉ thi
-hành. Thứ tự bắt buộc:
+Discover không còn render switch pet. User quản lý pet nổi từ My Pet Room hoặc Pet Store;
+`HomePetPolicy` chỉ còn phục vụ flow Home cũ và không được nối lại vào Discover.
+
+## Thứ tự khi một flow pet yêu cầu Start/Stop
+
+Thứ tự gate bắt buộc cho mọi entry point bật pet:
 
 1. đang chạy → `STOP`, không hỏi gì thêm;
 2. **chưa chọn pet nào → `CHOOSE_PET`** (toast dẫn sang My Pet Room). Phải đứng **trước** mọi
@@ -39,9 +43,9 @@ hành. Thứ tự bắt buộc:
    được;
 5. còn lại → `START`.
 
-Callback của launcher cũng phải phân biệt: overlay chỉ đi tiếp **khi đã được cấp**
-(`onOverlayPermissionResult`), nếu không user bấm back sẽ bị ném lại đúng màn system settings đó.
-Notification thì đi tiếp bất kể kết quả (`onNotificationPermissionResult`) vì pet vẫn chạy được.
+Callback của launcher cũng phải phân biệt: overlay chỉ đi tiếp **khi đã được cấp**; nếu không,
+user bấm back không được bị ném lại đúng màn system settings đó. Notification có thể đi tiếp bất
+kể kết quả vì pet vẫn chạy được.
 
 Battery-optimisation exemption **không** nằm trong luồng này: nó không bắt buộc, chỉ có ý nghĩa
 trên máy giết foreground service, và được hỏi ở màn Grant Permissions theo

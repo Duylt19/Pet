@@ -1030,10 +1030,7 @@
     <string name="discover_pro" translatable="false">PRO</string>
     <string name="discover_battery_enable_prompt">Turn on Emoji Battery to get started</string>
     <string name="discover_battery_enabled">Emoji Battery is active</string>
-    <string name="discover_quick_battery">Battery</string>
-    <string name="discover_quick_my_pet">My Pet</string>
     <string name="discover_customize_status_bar">Customize Status Bar</string>
-    <string name="discover_quick_sticker" translatable="false">Sticker</string>
     <string name="search_battery_hint">Search battery</string>
     <string name="search_cancel">Cancel</string>
     <string name="search_tag_anime" translatable="false">Anime</string>
@@ -1043,7 +1040,7 @@
     <string name="search_tag_animal">Animal</string>
     <string name="search_no_results">No matching battery themes</string>
     <string name="search_load_error">Unable to load battery themes</string>
-    <string name="discover_banner_placeholder">Banner</string>
+    <string name="discover_battery_troll_banner" translatable="false">Battery Troll – Fake Battery</string>
     <string name="discover_trending_pets">🔥 Trending Pets</string>
     <string name="discover_pet_category">Breed: %1$s</string>
     <string name="discover_battery_themes">🔋 Battery Themes</string>
@@ -1090,8 +1087,6 @@
     <string name="pet_room_add_pet">Add pet</string>
     <string name="pet_room_rooms_unavailable">Rooms are unavailable right now</string>
     <string name="pet_room_breed">Breed: %1$s</string>
-    <string name="discover_pet_enable_prompt">Turn on to add a pet to your screen</string>
-    <string name="discover_pet_enabled">Pet is on your screen</string>
     <string name="pet_room_on_screen">Pet on screen</string>
     <string name="pet_room_field_name">Pet Name:</string>
     <string name="pet_room_field_breed">Breed:</string>
@@ -1106,7 +1101,6 @@
     <string name="pet_room_remove_message">Are you sure you want to remove %1$s from your pet list?</string>
     <string name="pet_room_remove_confirm">Delete</string>
     <string name="pet_room_remove_cancel">Cancel</string>
-    <string name="discover_pet_choose_first">Pick a pet for your screen first</string>
     <string name="pet_room_settings">Pet settings</string>
     <string name="pet_room_settings_title">Setting Pet</string>
     <string name="pet_room_settings_speed">Speed: </string>
@@ -1117,7 +1111,6 @@
     <string name="pet_room_settings_save">Save</string>
     <string name="pet_room_download">Download this room</string>
     <string name="pet_room_download_failed">Could not download this room. Check your connection.</string>
-    <string name="discover_pet_choose_first_action">View</string>
     <string name="search_tab_pets">Shimeji Pets</string>
     <string name="search_tab_battery">Battery</string>
     <string name="search_results">Result search</string>

@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
-import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -18,16 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.content.ContextCompat
-import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
-import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRosterPolicy
-import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
-import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayStartResult
-import com.asianmobile.emojibattery.shimeji.ui.home.HomePetCommand
-import com.asianmobile.emojibattery.shimeji.ui.home.HomePetPolicy
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -35,8 +24,7 @@ class DiscoverViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val petCatalogRepository: OwnerPetCatalogRepository,
     private val batteryCatalogRepository: BatteryCatalogRepository,
-    private val batterySettingsRepository: BatterySettingsRepository,
-    private val petSettingsRepository: PetSettingsRepository
+    private val batterySettingsRepository: BatterySettingsRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(
         DiscoverUiState(isAccessibilityEnabled = BatteryAccessibility.isEnabled(context))
@@ -52,18 +40,13 @@ class DiscoverViewModel @Inject constructor(
             combine(
                 petCatalogRepository.snapshot,
                 batteryCatalogRepository.snapshot,
-                batterySettingsRepository.config,
-                PetOverlayRuntime.isRunning
-            ) { pets, batteryCatalog, batteryConfig, isPetRunning ->
+                batterySettingsRepository.config
+            ) { pets, batteryCatalog, batteryConfig ->
                 val accessibilityEnabled = BatteryAccessibility.isEnabled(context)
                 DiscoverUiState(
                     isLoading = pets.isLoading || batteryCatalog.isLoading,
                     isBatteryEnabled = batteryConfig.enabled && accessibilityEnabled,
                     isAccessibilityEnabled = accessibilityEnabled,
-                    isPetRunning = isPetRunning,
-                    isPetOverlayGranted = PetOverlay.canDraw(context),
-                    isNotificationGranted = isNotificationGranted(),
-                    isNotificationPermissionRequired = NOTIFICATION_PERMISSION_REQUIRED,
                     trendingPets = pets.entries.take(MAX_TRENDING_PETS).map { pet ->
                         DiscoverPetUiState(
                             packKey = pet.installedPackKey,
@@ -124,88 +107,6 @@ class DiscoverViewModel @Inject constructor(
         batterySettingsRepository.setEnabled(!_uiState.value.isBatteryEnabled)
     }
 
-    /** Discover owns the floating-pet switch while My Pet Room owns the room itself. */
-    fun onPetToggle() {
-        val state = _uiState.value
-        when (
-            HomePetPolicy.nextCommand(
-                hasChosenPet = hasChosenPet(),
-                overlayGranted = PetOverlay.canDraw(context),
-                notificationPermissionRequired = NOTIFICATION_PERMISSION_REQUIRED,
-                notificationGranted = isNotificationGranted(),
-                notificationAlreadyAsked = hasAskedForNotification,
-                isPetRunning = state.isPetRunning
-            )
-        ) {
-            HomePetCommand.CHOOSE_PET -> emitEffect(DiscoverEffect.ChooseAPetFirst)
-            HomePetCommand.OPEN_OVERLAY_SETTINGS -> emitEffect(DiscoverEffect.OpenOverlaySettings)
-            HomePetCommand.REQUEST_NOTIFICATION_PERMISSION -> {
-                hasAskedForNotification = true
-                emitEffect(DiscoverEffect.RequestNotificationPermission)
-            }
-
-            HomePetCommand.START -> startPet()
-            HomePetCommand.STOP -> PetOverlay.stop(context)
-        }
-    }
-
-    /** The runtime prompt only ever shows once, so a second ask would never reach the user. */
-    private var hasAskedForNotification = false
-
-    /** Called after the user returns from the overlay or notification permission screens. */
-    fun refreshPetPermissions() {
-        _uiState.update {
-            it.copy(
-                isPetOverlayGranted = PetOverlay.canDraw(context),
-                isNotificationGranted = isNotificationGranted()
-            )
-        }
-    }
-
-    /**
-     * Only carries on when the access was actually given. Retrying unconditionally would send a
-     * user who declined straight back to the same system screen, with no way out but to grant it.
-     */
-    fun onOverlayPermissionResult() {
-        refreshPetPermissions()
-        if (PetOverlay.canDraw(context)) onPetToggle()
-    }
-
-    /** A denied notification never blocks the overlay; the pet starts either way. */
-    fun onNotificationPermissionResult() {
-        refreshPetPermissions()
-        onPetToggle()
-    }
-
-    /**
-     * Without a pet turned on in My Pet Room the session would fall back to the built-in pack,
-     * putting a cat on screen the user never chose.
-     */
-    private fun hasChosenPet(): Boolean {
-        val preferences = petSettingsRepository.preferences.value
-        return PetOverlayRosterPolicy.hasChosenPet(
-            slotPackKeys = preferences.petSlots.map { it.packKey },
-            slotEnabled = preferences.petSlots.map { it.isEnabled },
-            petCount = preferences.petCount
-        )
-    }
-
-    private fun startPet() {
-        if (PetOverlay.start(context) == PetOverlayStartResult.PERMISSION_REQUIRED) {
-            emitEffect(DiscoverEffect.OpenOverlaySettings)
-        }
-    }
-
-    private fun emitEffect(effect: DiscoverEffect) {
-        viewModelScope.launch { _effects.send(effect) }
-    }
-
-    private fun isNotificationGranted(): Boolean = !NOTIFICATION_PERMISSION_REQUIRED ||
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
-
     fun refreshAccessibility() {
         val enabled = BatteryAccessibility.isEnabled(context)
         _uiState.update { it.copy(isAccessibilityEnabled = enabled) }
@@ -224,7 +125,6 @@ class DiscoverViewModel @Inject constructor(
     }
 
     private companion object {
-        val NOTIFICATION_PERMISSION_REQUIRED = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
         const val MAX_TRENDING_PETS = 12
         const val MAX_BATTERY_THEMES = 6
         const val MAX_STATUS_BAR_THEMES = 8

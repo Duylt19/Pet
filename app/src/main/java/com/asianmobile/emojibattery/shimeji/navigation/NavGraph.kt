@@ -278,9 +278,6 @@ fun AppNavGraph(
                     onNavigateToBattery = {
                         navigateToHomeTab(HomeTab.BATTERY)
                     },
-                    onNavigateToMyPet = {
-                        navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
-                    },
                     onNavigateToPetStore = {
                         navigateToHomeTab(HomeTab.PET_STORE)
                     },

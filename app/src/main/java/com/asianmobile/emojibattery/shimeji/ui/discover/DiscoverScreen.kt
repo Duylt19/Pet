@@ -31,8 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import android.Manifest
-import android.os.Build
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +49,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -73,8 +72,6 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
-import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
-import com.asianmobile.emojibattery.shimeji.ui.component.AppActionToast
 import com.asianmobile.emojibattery.shimeji.ui.component.CATALOG_ITEM_PREVIEW_FRACTION
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
@@ -91,7 +88,6 @@ fun DiscoverScreen(
     onNavigateToSearch: () -> Unit,
     onNavigateToPremium: () -> Unit,
     onNavigateToBattery: () -> Unit,
-    onNavigateToMyPet: () -> Unit,
     onNavigateToPetStore: () -> Unit,
     onOpenPet: (String) -> Unit,
     onOpenBatteryTheme: (Int) -> Unit,
@@ -99,26 +95,13 @@ fun DiscoverScreen(
     viewModel: DiscoverViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showAccessibilityDisclosure by remember { mutableStateOf(false) }
-    var showChoosePetToast by remember { mutableStateOf(false) }
     val accessibilityLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
         viewModel.refreshAccessibility()
     }
-    val overlayPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        viewModel.onOverlayPermissionResult()
-    }
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) {
-        viewModel.onNotificationPermissionResult()
-    }
-
     TrackScreenView(ScreenName.HOME)
 
     LaunchedEffect(viewModel) {
@@ -127,18 +110,6 @@ fun DiscoverScreen(
                 DiscoverEffect.RequestBatteryAccessibility -> {
                     showAccessibilityDisclosure = true
                 }
-
-                DiscoverEffect.OpenOverlaySettings ->
-                    overlayPermissionLauncher.launch(PetOverlay.permissionIntent(context))
-
-                DiscoverEffect.ChooseAPetFirst -> showChoosePetToast = true
-
-                DiscoverEffect.RequestNotificationPermission ->
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        notificationPermissionLauncher.launch(
-                            Manifest.permission.POST_NOTIFICATIONS
-                        )
-                    }
             }
         }
     }
@@ -146,7 +117,6 @@ fun DiscoverScreen(
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.refreshAccessibility()
-                viewModel.refreshPetPermissions()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -158,27 +128,13 @@ fun DiscoverScreen(
         onSearch = onNavigateToSearch,
         onPremium = onNavigateToPremium,
         onBatteryToggle = viewModel::onBatteryToggle,
-        onPetToggle = viewModel::onPetToggle,
         onBattery = onNavigateToBattery,
-        onMyPet = onNavigateToMyPet,
         onPetStore = onNavigateToPetStore,
         onOpenPet = onOpenPet,
         onOpenTheme = onOpenBatteryTheme,
         onToggleFavorite = viewModel::toggleFavorite,
         onCustomizeStatusBar = onCustomizeStatusBar
     )
-
-    if (showChoosePetToast) {
-        AppActionToast(
-            text = stringResource(R.string.discover_pet_choose_first),
-            action = stringResource(R.string.discover_pet_choose_first_action),
-            onDismiss = { showChoosePetToast = false },
-            onAction = {
-                showChoosePetToast = false
-                onNavigateToMyPet()
-            }
-        )
-    }
 
     if (showAccessibilityDisclosure) {
         GrantPermissionDialog(
@@ -200,9 +156,7 @@ private fun DiscoverContent(
     onSearch: () -> Unit,
     onPremium: () -> Unit,
     onBatteryToggle: () -> Unit,
-    onPetToggle: () -> Unit,
     onBattery: () -> Unit,
-    onMyPet: () -> Unit,
     onPetStore: () -> Unit,
     onOpenPet: (String) -> Unit,
     onOpenTheme: (Int) -> Unit,
@@ -248,28 +202,7 @@ private fun DiscoverContent(
                             onCheckedChange = onBatteryToggle
                         )
                     }
-                    item {
-                        HomeEnableCard(
-                            text = stringResource(
-                                if (uiState.isPetRunning) {
-                                    R.string.discover_pet_enabled
-                                } else {
-                                    R.string.discover_pet_enable_prompt
-                                }
-                            ),
-                            checked = uiState.isPetRunning,
-                            onCheckedChange = onPetToggle,
-                            onClick = onMyPet
-                        )
-                    }
-                    item {
-                        QuickActions(
-                            onBattery = onBattery,
-                            onMyPet = onMyPet,
-                            onCustomizeStatusBar = onCustomizeStatusBar
-                        )
-                    }
-                    item { HeroBanner() }
+                    item { DiscoverBatteryTrollBanner(onClick = onBattery) }
                     item {
                         Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
                         TrendingPetsSection(
@@ -407,100 +340,11 @@ internal fun HomeDiyFab(
 }
 
 @Composable
-private fun QuickActions(
-    onBattery: () -> Unit,
-    onMyPet: () -> Unit,
-    onCustomizeStatusBar: () -> Unit
-) {
-    LazyRow(
-        contentPadding = PaddingValues(
-            horizontal = dimensionResource(SdpR.dimen._12sdp),
-            vertical = dimensionResource(SdpR.dimen._6sdp)
-        ),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
-    ) {
-        item {
-            QuickActionCard(
-                title = stringResource(R.string.discover_quick_battery),
-                imageRes = R.drawable.img_home_quick_battery,
-                onClick = onBattery
-            )
-        }
-        item {
-            QuickActionCard(
-                title = stringResource(R.string.discover_quick_my_pet),
-                imageRes = R.drawable.img_home_quick_pet,
-                onClick = onMyPet
-            )
-        }
-        item {
-            QuickActionCard(
-                title = stringResource(R.string.discover_customize_status_bar),
-                imageRes = R.drawable.img_home_quick_customize,
-                onClick = onCustomizeStatusBar
-            )
-        }
-        item {
-            QuickActionCard(
-                title = stringResource(R.string.discover_quick_sticker),
-                imageRes = R.drawable.img_home_quick_sticker
-            )
-        }
-    }
-}
-
-@Composable
-private fun QuickActionCard(
-    title: String,
-    imageRes: Int,
-    onClick: (() -> Unit)? = null
-) {
-    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
-    Box(
-        modifier = Modifier
-            .size(
-                width = dimensionResource(SdpR.dimen._100sdp),
-                height = dimensionResource(SdpR.dimen._42sdp)
-            )
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .shadow(dimensionResource(SdpR.dimen._6sdp), shape)
-                .clip(shape)
-                .background(colorResource(R.color.colors_FFFFFF))
-                .run {
-                    if (onClick != null) clickable(onClick = onClick) else this
-                }
-        )
-        Text(
-            text = title,
-            color = colorResource(R.color.colors_212327),
-            fontFamily = DiscoverRobotoMedium,
-            fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
-            lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp,
-            maxLines = 2,
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .width(dimensionResource(SdpR.dimen._51sdp))
-                .padding(start = dimensionResource(SdpR.dimen._9sdp))
-        )
-        Image(
-            painter = painterResource(imageRes),
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            alignment = Alignment.CenterEnd,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(y = -dimensionResource(SdpR.dimen._2sdp))
-                .size(dimensionResource(SdpR.dimen._38sdp))
-        )
-    }
-}
-
-@Composable
-private fun HeroBanner() {
-    Box(
+internal fun DiscoverBatteryTrollBanner(onClick: () -> Unit) {
+    Image(
+        painter = painterResource(R.drawable.img_discover_battery_troll_banner),
+        contentDescription = stringResource(R.string.discover_battery_troll_banner),
+        contentScale = ContentScale.FillBounds,
         modifier = Modifier
             .fillMaxWidth()
             .padding(
@@ -509,16 +353,8 @@ private fun HeroBanner() {
             )
             .height(dimensionResource(SdpR.dimen._77sdp))
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp)))
-            .background(colorResource(R.color.colors_FFEBF1)),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(R.string.discover_banner_placeholder),
-            color = colorResource(R.color.colors_000000),
-            fontFamily = DiscoverRobotoMedium,
-            fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
-        )
-    }
+            .clickable(role = Role.Button, onClick = onClick)
+    )
 }
 
 @Composable
@@ -939,9 +775,7 @@ private fun DiscoverContentPreview() {
         onSearch = {},
         onPremium = {},
         onBatteryToggle = {},
-        onPetToggle = {},
         onBattery = {},
-        onMyPet = {},
         onPetStore = {},
         onOpenPet = {},
         onOpenTheme = {},

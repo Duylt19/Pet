@@ -7,7 +7,7 @@
 | `language_settings` | `ui/language/LanguageScreen` | Chọn language từ Settings rồi restart app shell |
 | `intro` | `ui/intro/IntroScreen` | Pager ba trang, có native ads theo config |
 | `permission` | `ui/permission/PermissionScreen` | Overlay special access + notification permission, có Continue/Skip |
-| `home` | `ui/discover/DiscoverScreen` | Tab Discover: Emoji Battery toggle, floating-pet toggle (overlay special access + notification gate), quick actions và pet/battery previews; bottom chrome do Home shell sở hữu |
+| `home` | `ui/discover/DiscoverScreen` | Tab Discover: Emoji Battery toggle, Battery Troll hero và pet/battery previews; không còn pet switch/quick-action frame; bottom chrome do Home shell sở hữu |
 | `search` | `ui/search/SearchScreen` | Figma Search: input/chip tìm kiếm, banner, lưới battery theme và native ad cố định cuối màn |
 | `favourite_recent` | `ui/favoriterecent/FavouriteRecentScreen` | Favourite battery theme thật, Recent empty pending MRU contract, header/tab/grid và native ad theo Figma |
 | `my_pet` | `ui/petroom/PetRoomScreen` | My Pet Room: scene phòng full-screen, top bar biển gỗ + music, shortcut Pet Store, sheet ba tab My Pet/Food/Room. Tab My Pet liệt kê pet đã sở hữu (pack đã cài) kèm ô `+` mở Pet Store; chạm một pet mở panel chi tiết (tên, breed, ngày nhận nuôi, toggle Pet on screen, thanh Energy); tab Food tiêu một phần ăn để hồi Energy và nút `+` quay về Pet Store; tab Room chọn background từ catalog và persist. Xoá pet bằng nút X trên card kèm dialog xác nhận; pet bị xoá mất luôn slot overlay. Pet nổi tạm tắt khi màn này mở |
