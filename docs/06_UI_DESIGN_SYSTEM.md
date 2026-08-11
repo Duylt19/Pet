@@ -127,6 +127,10 @@ Pet Store visual contract:
 - Pet/Food selector dùng bốn image-fill state riêng từ Figma (`selected`/`unselected`);
   đây là raster artwork nhiều màu nên lưu PNG @3x trong `drawable-nodpi`, không thay bằng
   emoji hoặc icon navigation;
+- pet category theo Figma node `8287:4824` là `LazyRow` cao 40px, padding ngang 16px và gap
+  20px. Category lấy động từ catalog, loại trùng không phân biệt hoa thường và giữ thứ tự server;
+  active dùng Roboto Medium 14/20 màu `#FB3675` kèm underline, inactive dùng Roboto Regular
+  `#212327`. Chọn category chỉ lọc pet grid, không làm thay đổi trạng thái unlock;
 - pet card giữ tỷ lệ `104/142`, image area `104/90`, thumbnail theo tỷ lệ item và crown
   premium 20px tại top-end;
 - food card giữ tỷ lệ `104/122`, image area `104/90`, artwork `70/104`; badge giá tại
@@ -135,6 +139,8 @@ Pet Store visual contract:
   `#C95DFF → #FB54BB`. Selected Pet Store, video và tape giữ asset vector gốc. Pet Store và
   Battery dùng chung `RewardOfferSheet` full-width; Battery có preview `110×110px` và native
   slot `336×222px` theo Figma `8145:4924`.
+  Trong lúc pet pack đang download/verify, preview pet phủ scrim 28% + progress trắng, CTA đổi
+  sang `Downloading…`, và mọi action/dismiss unlock bị khóa để không tạo request trùng.
   Reward dialog dùng immersive navigation trên chính dialog window để system navigation
   không chiếm vùng CTA; đóng dialog không thay đổi immersive policy của Home activity.
 - unlock-success overlay của Pet và Food dùng chung frame `360×800`: nền đen 50%, Lottie

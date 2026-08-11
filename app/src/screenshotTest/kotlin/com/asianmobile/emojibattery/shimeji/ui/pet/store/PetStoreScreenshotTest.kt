@@ -97,6 +97,29 @@ fun PetStoreRewardSheetScreenshotTest() {
 }
 
 @PreviewTest
+@Preview(widthDp = 360, heightDp = 300)
+@Composable
+fun PetStoreDownloadingRewardSheetScreenshotTest() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.colors_000000).copy(alpha = 0.5f)),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        RewardOfferSheetSurface {
+            PetRewardSheetContent(
+                pet = previewPets.first(),
+                isDownloading = true,
+                message = null,
+                onPremium = {},
+                onReward = {},
+                showNativeAd = false
+            )
+        }
+    }
+}
+
+@PreviewTest
 @Preview(widthDp = 360, heightDp = 800)
 @Composable
 fun PetStoreUnlockRevealScreenshotTest() {
@@ -144,6 +167,7 @@ private fun PreviewStore(tab: PetStoreTab) {
         onOpenMyPet = {},
         onToggle = {},
         onTab = {},
+        onCategory = {},
         onPet = {},
         onFood = {}
     )

@@ -9,6 +9,11 @@ import org.junit.Test
 
 class PetStorePolicyTest {
     private val pet = OwnerPetCatalogEntry(42, "Bunny", "Rabbit", null, null, false)
+    private val categorizedPets = listOf(
+        OwnerPetCatalogEntry(1, "Cattey", " Cat ", null, null, false),
+        OwnerPetCatalogEntry(2, "Bunny", "Rabbit", null, null, false),
+        OwnerPetCatalogEntry(3, "Mochi", "cat", null, null, false)
+    )
 
     @Test
     fun `only installed owner pack is unlocked`() {
@@ -21,6 +26,31 @@ class PetStorePolicyTest {
         assertEquals("Mochi", PetStorePolicy.normalizedName("  Mochi  ", pet.name))
         assertEquals("Bunny", PetStorePolicy.normalizedName("   ", pet.name))
         assertEquals(24, PetStorePolicy.normalizedName("x".repeat(40), pet.name).length)
+    }
+
+    @Test
+    fun `categories preserve catalog order and remove case insensitive duplicates`() {
+        assertEquals(listOf("Cat", "Rabbit"), PetStorePolicy.categories(categorizedPets))
+    }
+
+    @Test
+    fun `category selection retains a valid request and falls back to first category`() {
+        assertEquals(
+            "Rabbit",
+            PetStorePolicy.selectedCategory(categorizedPets, requestedCategory = "rabbit")
+        )
+        assertEquals(
+            "Cat",
+            PetStorePolicy.selectedCategory(categorizedPets, requestedCategory = "Bird")
+        )
+    }
+
+    @Test
+    fun `pet filtering follows normalized selected category`() {
+        assertEquals(
+            listOf(1, 3),
+            PetStorePolicy.petsInCategory(categorizedPets, category = "CAT").map { it.id }
+        )
     }
 
     @Test

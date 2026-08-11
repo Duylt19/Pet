@@ -13,6 +13,7 @@ data class PetStoreUiState(
     val installedPackKeys: Set<String> = emptySet(),
     val customNames: Map<Int, String> = emptyMap(),
     val selectedTab: PetStoreTab = PetStoreTab.PETS,
+    val selectedCategory: String? = null,
     val isLoading: Boolean = true,
     val isPetRunning: Boolean = false,
     val overlayGranted: Boolean = false,
@@ -64,6 +65,28 @@ internal object PetStorePolicy {
 
     fun normalizedName(input: String, fallback: String): String =
         input.trim().ifBlank { fallback.trim() }.take(24)
+
+    fun categories(pets: List<OwnerPetCatalogEntry>): List<String> = pets
+        .map { it.category.trim() }
+        .filter(String::isNotEmpty)
+        .distinctBy { it.lowercase() }
+
+    fun selectedCategory(
+        pets: List<OwnerPetCatalogEntry>,
+        requestedCategory: String?
+    ): String? {
+        val categories = categories(pets)
+        return categories.firstOrNull { it.equals(requestedCategory, ignoreCase = true) }
+            ?: categories.firstOrNull()
+    }
+
+    fun petsInCategory(
+        pets: List<OwnerPetCatalogEntry>,
+        category: String?
+    ): List<OwnerPetCatalogEntry> {
+        val selected = selectedCategory(pets, category) ?: return emptyList()
+        return pets.filter { it.category.trim().equals(selected, ignoreCase = true) }
+    }
 
     fun specialSkillAction(availableActions: Set<PetAction>): PetAction? = when {
         PetAction.SPECIAL in availableActions -> PetAction.SPECIAL
