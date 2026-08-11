@@ -196,17 +196,27 @@ private fun PetRoomContent(
         Column(modifier = Modifier.fillMaxSize()) {
             PetRoomTopBar(
                 title = uiState.detail?.name ?: stringResource(R.string.pet_room_title),
-                isMusicOn = uiState.isMusicOn,
                 onNavigateBack = onNavigateBack,
-                onToggleMusic = onToggleMusic,
+                onOpenSettings = onOpenSettings,
                 modifier = Modifier.statusBarsPadding()
             )
             Spacer(modifier = Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
             RoundIconButton(
-                iconRes = R.drawable.ic_pet_room_settings,
-                contentDescription = stringResource(R.string.pet_room_settings),
-                iconSize = SdpR.dimen._15sdp,
-                onClick = onOpenSettings,
+                iconRes = if (uiState.isMusicOn) {
+                    R.drawable.ic_pet_room_music_on
+                } else {
+                    R.drawable.ic_pet_room_music_off
+                },
+                contentDescription = stringResource(
+                    if (uiState.isMusicOn) {
+                        R.string.pet_room_music_on
+                    } else {
+                        R.string.pet_room_music_off
+                    }
+                ),
+                iconSize = SdpR.dimen._18sdp,
+                onClick = onToggleMusic,
+                borderRes = R.color.colors_FEC1D4,
                 modifier = Modifier
                     .align(Alignment.End)
                     .padding(end = dimensionResource(SdpR.dimen._12sdp))
@@ -265,9 +275,8 @@ private fun PetRoomContent(
 @Composable
 private fun PetRoomTopBar(
     title: String,
-    isMusicOn: Boolean,
     onNavigateBack: () -> Unit,
-    onToggleMusic: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -323,17 +332,10 @@ private fun PetRoomTopBar(
             }
         }
         RoundIconButton(
-            iconRes = if (isMusicOn) {
-                R.drawable.ic_pet_room_music_on
-            } else {
-                R.drawable.ic_pet_room_music_off
-            },
-            contentDescription = stringResource(
-                if (isMusicOn) R.string.pet_room_music_on else R.string.pet_room_music_off
-            ),
-            iconSize = SdpR.dimen._18sdp,
-            onClick = onToggleMusic,
-            borderRes = R.color.colors_FEC1D4
+            iconRes = R.drawable.ic_pet_room_settings,
+            contentDescription = stringResource(R.string.pet_room_settings),
+            iconSize = SdpR.dimen._15sdp,
+            onClick = onOpenSettings
         )
     }
 }

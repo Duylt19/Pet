@@ -252,9 +252,10 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
 - route `my_pet` là scene phòng full-screen, background lấy từ room catalog (`bg/BG_<id>.png`)
   và vẽ `ContentScale.Crop`; không dùng Home chrome, không có bottom navigation;
 - top bar `360×64` gồm back `32×32`, biển gỗ `178×40` (`img_pet_room_sign`) mang title, và
-  music toggle `32×32` hai state. Mọi action là nút trắng bo góc `32×32`, icon canh giữa;
-- shortcut Pet Store `50×68` nằm mép phải dưới top bar; chevron `32×32` ngay trên sheet
-  thu/mở sheet và xoay 180° khi đã thu;
+  Settings `32×32`. Music toggle `32×32` hai state nằm ngay dưới top bar ở mép phải. Mọi
+  action là nút trắng bo góc `32×32`, icon canh giữa;
+- shortcut Pet Store `50×68` nằm dưới Music ở mép phải; chevron `32×32` ngay trên sheet thu/mở
+  sheet và xoay 180° khi đã thu;
 - sheet `360×236` = tab strip `346×40` + body `360×196` nền `#F7F0E7`, viền `#8F6250`,
   radius trên 12px. Tab được chọn cao `40` radius 16 với hai lớp `#E4CCB1` (108) và viền nét
   đứt `#B69B7D` (102); tab thường cao `32` radius 12. Label Roboto Medium 14/20 `#725938`,
