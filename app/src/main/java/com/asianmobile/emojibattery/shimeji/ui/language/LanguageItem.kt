@@ -39,7 +39,7 @@ internal fun LanguageItem(
     onClick: () -> Unit
 ) {
     val itemShape = CircleShape
-    val itemShadowColor = colorResource(R.color.colors_666666).copy(alpha = 0.20f)
+    val itemShadowColor = colorResource(R.color.colors_666666).copy(alpha = 0.40f)
 
     Row(
         modifier = Modifier

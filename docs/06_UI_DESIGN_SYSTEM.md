@@ -34,7 +34,7 @@ Language theo Figma node `8421:9725`:
 - nền trắng, top bar `56px`, title Inter SemiBold 20/30 và action màu primary pink
   `#FB3675`; biến thể Settings giữ nút Back, còn onboarding không thêm Back;
 - item `328×56px`, pill trắng, flag tròn `32px`, label Roboto Medium 16/24 và radio
-  pink + tick trắng. Shadow dùng `#666666` 20% với elevation `12sdp` để tách card rõ hơn
+  pink + tick trắng. Shadow dùng `#666666` 40% với elevation `12sdp` để tách card rõ hơn
   trên nền trắng theo yêu cầu product;
 - giữ nguyên tập/thứ tự 11 locale, trạng thái ban đầu chưa chọn, confirm chỉ hiện sau khi
   user chọn và toàn bộ persistence/navigation/restart hiện có;
