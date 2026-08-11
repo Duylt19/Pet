@@ -5,8 +5,10 @@ data class GrantPermissionsUiState(
     val isOverlayGranted: Boolean = false,
     val isBatteryOptimizationIgnored: Boolean = false,
     /**
-     * Only vendors that kill foreground services see this row: on stock Android the exemption
-     * grants network and wake locks the pet overlay never uses.
+     * Only devices that kill foreground services see this row: on stock Android the exemption
+     * grants network and wake locks the pet overlay never uses. "Devices" rather than "vendors"
+     * because a resolved vendor power manager counts too, and that is measured on the device
+     * rather than guessed from its brand.
      */
     val isBatteryRowVisible: Boolean = false,
     /**

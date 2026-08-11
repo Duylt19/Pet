@@ -47,6 +47,21 @@ Battery-optimisation exemption **không** nằm trong luồng này: nó không b
 trên máy giết foreground service, và được hỏi ở màn Grant Permissions theo
 `PetBatteryOptimizationPolicy`.
 
+Row đó hiện khi **bất kỳ** tín hiệu nào sau đây đúng: đã được cấp (giữ lại để user thu hồi
+được), `isBackgroundRestricted`, standby bucket `RESTRICTED`, một lần chết process ngoài ý muốn,
+**ROM có màn power manager riêng resolve được**, hoặc brand nằm trong danh sách vendor. Thứ tự
+đó cũng là thứ tự ưu tiên của `reasonFor()`: platform nói thẳng trước, rồi cái đã ghi nhận được,
+rồi cái máy này thật sự ship, và brand cuối cùng vì nó là suy đoán duy nhất.
+
+Hai tín hiệu cuối tồn tại vì `isBackgroundRestricted` là API 28+, còn standby bucket và
+`getHistoricalProcessExitReasons` là API 30+ — dưới các mức đó không có gì đo được, mà
+`minSdk = 24`. `hasVendorPowerScreen` chạy ở mọi API và là *đo đạc* chứ không phải đoán, nên nó
+gánh phần lớn khoảng trống này; brand list chỉ còn cho ROM giấu power manager khỏi `<queries>`.
+
+Brand được so khớp **theo từ**, trên cả `Build.MANUFACTURER` lẫn `Build.BRAND`: Transsion khai
+`INFINIX MOBILITY LIMITED` / `TECNO MOBILE LIMITED`, MIUI khai manufacturer `Xiaomi` với brand
+`Redmi`/`POCO`, nên so bằng chuỗi nguyên sẽ trượt đúng những ROM danh sách này sinh ra để bắt.
+
 Nguồn platform: [Android foreground-service types](https://developer.android.com/develop/background-work/services/fgs/service-types), [launch foreground service](https://developer.android.com/develop/background-work/services/fgs/launch), [TYPE_APPLICATION_OVERLAY](https://developer.android.com/reference/android/view/WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY), [overlay special access](https://developer.android.com/reference/android/provider/Settings#canDrawOverlays(android.content.Context)).
 
 ## Runtime invariants

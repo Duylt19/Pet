@@ -42,16 +42,19 @@ data class PetBackgroundRestrictionSignals(
  * leaves foreground services alone, the exemption changes nothing and the prompt is noise.
  *
  * What does stop the overlay is a device that kills foreground services anyway. Rather than
- * guess that from the brand name, prefer evidence: a recorded kill of the overlay process, or a
- * restriction the platform will state outright. The vendor list is the last resort, for devices
- * too old to report either and for the first run before anything has been killed.
+ * guess that from the brand name, prefer evidence: a recorded kill of the overlay process, a
+ * restriction the platform will state outright, or a vendor power manager resolved on this very
+ * device. The last one carries most of the weight below API 30, where the platform reports
+ * neither kills nor standby buckets and the brand string is otherwise all there is. The vendor
+ * list is the true last resort, for the ROMs that hide their power manager from `<queries>`.
  */
 object PetBatteryOptimizationPolicy {
     /**
      * Vendors documented as killing foreground services beyond what AOSP does. Sourced from the
      * dontkillmyapp vendor list; brands sharing one ROM are listed separately because
-     * `Build.MANUFACTURER` reports the brand, not the ROM. This is a hint, not a measurement:
-     * it goes stale as vendors change, so it only decides when nothing measured applies.
+     * `Build.MANUFACTURER` and `Build.BRAND` disagree about which one they report. This is a
+     * hint, not a measurement: it goes stale as vendors change, so it only decides when nothing
+     * measured applies.
      */
     private val AGGRESSIVE_VENDORS = setOf(
         // MIUI / HyperOS
@@ -68,11 +71,26 @@ object PetBatteryOptimizationPolicy {
         "meizu",
         // Transsion: HiOS / XOS
         "tecno", "infinix", "itel",
-        "asus", "letv", "leeco"
+        "asus", "letv", "leeco", "lemobile"
     )
 
-    fun isAggressiveVendor(manufacturer: String): Boolean =
-        manufacturer.trim().lowercase() in AGGRESSIVE_VENDORS
+    /** Anything that is not a letter or a digit, so a build string splits into brand words. */
+    private val VENDOR_SEPARATORS = Regex("[^a-z0-9]+")
+
+    /**
+     * Whether either build string names a vendor on the list.
+     *
+     * Matched word by word rather than whole-string: several vendors put their legal entity in
+     * `Build.MANUFACTURER` — Transsion reports `INFINIX MOBILITY LIMITED` and `TECNO MOBILE
+     * LIMITED` — so an equality check silently misses exactly the ROMs this list exists for.
+     * Both strings are read because the pair disagrees per vendor: MIUI reports `Xiaomi` as the
+     * manufacturer and `Redmi`/`POCO` as the brand, and some ROMs invert that.
+     */
+    fun isAggressiveVendor(manufacturer: String, brand: String = ""): Boolean =
+        manufacturer.namesAggressiveVendor() || brand.namesAggressiveVendor()
+
+    private fun String.namesAggressiveVendor(): Boolean =
+        lowercase().split(VENDOR_SEPARATORS).any { it in AGGRESSIVE_VENDORS }
 
     /**
      * A kill the user did not ask for, of a service that was supposed to keep running. This is
@@ -93,14 +111,22 @@ object PetBatteryOptimizationPolicy {
             signals.isBackgroundRestricted ||
             signals.isInRestrictedStandbyBucket ||
             isUnexpectedKill(signals.lastOverlayKill) ||
+            signals.hasVendorPowerScreen ||
             signals.isAggressiveVendor
 
-    /** Why the row still needs acting on. Null once granted: there is nothing left to ask. */
+    /**
+     * Why the row still needs acting on. Null once granted: there is nothing left to ask.
+     *
+     * Ordered by how much the signal is worth: what the platform states outright, then what it
+     * recorded happening, then what this device demonstrably ships, and the brand list last —
+     * it is the only entry that is a guess.
+     */
     fun reasonFor(signals: PetBackgroundRestrictionSignals): PetExemptionReason? = when {
         signals.isAlreadyIgnoringOptimization -> null
         signals.isBackgroundRestricted -> PetExemptionReason.BACKGROUND_RESTRICTED
         isUnexpectedKill(signals.lastOverlayKill) -> PetExemptionReason.PREVIOUSLY_KILLED
         signals.isInRestrictedStandbyBucket -> PetExemptionReason.RESTRICTED_BUCKET
+        signals.hasVendorPowerScreen -> PetExemptionReason.VENDOR_POWER_MANAGER
         signals.isAggressiveVendor -> PetExemptionReason.AGGRESSIVE_VENDOR
         else -> null
     }
@@ -121,6 +147,12 @@ enum class PetExemptionReason {
 
     /** The app sits in the harshest standby bucket. */
     RESTRICTED_BUCKET,
+
+    /**
+     * This ROM ships its own power manager, resolved on the device rather than guessed from the
+     * brand. A ROM that needed one at all is a ROM that stops background work by itself.
+     */
+    VENDOR_POWER_MANAGER,
 
     /** No incident yet, but this vendor is known for them. */
     AGGRESSIVE_VENDOR

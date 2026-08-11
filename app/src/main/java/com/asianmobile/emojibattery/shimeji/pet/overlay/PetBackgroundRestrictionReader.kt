@@ -27,7 +27,10 @@ class PetBackgroundRestrictionReader @Inject constructor(
         isBackgroundRestricted = isBackgroundRestricted(),
         isInRestrictedStandbyBucket = isInRestrictedStandbyBucket(),
         lastOverlayKill = lastOverlayKill(),
-        isAggressiveVendor = PetBatteryOptimizationPolicy.isAggressiveVendor(Build.MANUFACTURER),
+        isAggressiveVendor = PetBatteryOptimizationPolicy.isAggressiveVendor(
+            Build.MANUFACTURER,
+            Build.BRAND
+        ),
         hasVendorPowerScreen = vendorPowerIntent() != null
     )
 
@@ -78,10 +81,21 @@ class PetBackgroundRestrictionReader @Inject constructor(
             ?: return@runCatching null
         manager.getHistoricalProcessExitReasons(context.packageName, 0, EXIT_HISTORY_LIMIT)
             .asSequence()
-            .filter { it.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE }
+            .filter { it.isOverlayRelevant() }
             .map { it.toKillKind() }
             .firstOrNull { it != PetProcessKillKind.OTHER }
     }.getOrNull()
+
+    /**
+     * A SIGKILL from outside counts whatever the process was doing at the time: the vendor
+     * pattern is to stop the service first and kill the process after, which records the death
+     * at cached or service importance and would be filtered away by an importance test. Every
+     * other reason has to have been at least foreground-service important, or it was not the
+     * overlay that died.
+     */
+    private fun ApplicationExitInfo.isOverlayRelevant(): Boolean =
+        reason == ApplicationExitInfo.REASON_SIGNALED ||
+            importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE
 
     private fun ApplicationExitInfo.toKillKind(): PetProcessKillKind = when (reason) {
         // SIGKILL from outside the app. A vendor power manager leaves this trace.
@@ -101,6 +115,12 @@ class PetBackgroundRestrictionReader @Inject constructor(
     private companion object {
         /** UsageStatsManager.STANDBY_BUCKET_RESTRICTED, inlined: it is API 30 and hidden below. */
         const val STANDBY_BUCKET_RESTRICTED = 45
-        const val EXIT_HISTORY_LIMIT = 5
+
+        /**
+         * Deep enough that a run of crashes or updates cannot bury the one kill worth finding.
+         * The records are already in the system's ring buffer, so asking for more costs a larger
+         * parcel and nothing else.
+         */
+        const val EXIT_HISTORY_LIMIT = 15
     }
 }

@@ -22,7 +22,10 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   creative giữa content là presentational Figma assets, không gọi ads SDK.
 - Grant Permissions dùng lại native placement `screen_permission` của màn Permission onboarding,
   ghim cố định dưới danh sách quyền chứ không cuộn theo. Không thêm placement mới vì hai màn
-  cùng một ngữ cảnh xin quyền.
+  cùng một ngữ cảnh xin quyền. Mọi row rời sang màn hệ thống đều tắt `needShowOpenAds` trong
+  `openSettings()` — quay lại sau khi vừa cấp quyền mà ăn app-open ad là trả giá cho đúng hành
+  động mình vừa yêu cầu user làm. Đặt trong helper chứ không ở từng call site để không có row
+  nào lọt.
 - Search tái sử dụng native placement `screen_home` ở đáy màn hình theo Figma; placement
   vẫn tuân theo remote key, frequency/ad-free policy và failure fallback chung của module ads.
 - Battery landing tái sử dụng native placement `screen_home` với template `HEIGHT_150` sau

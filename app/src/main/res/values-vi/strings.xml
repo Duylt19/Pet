@@ -803,4 +803,24 @@
     <string name="battery_overlay_ringer_silent">đang bật chế độ im lặng</string>
     <string name="battery_overlay_hotspot_enabled">điểm phát sóng đang bật</string>
     <string name="battery_category_back">Quay lại</string>
+    <!-- contentDescription của nút back dùng chung với My Pet Room -->
+    <string name="pet_room_back">Quay lại</string>
+    <string name="grant_permissions_nav">Cấp quyền</string>
+    <string name="grant_permissions_section_necessary">Quyền bắt buộc</string>
+    <string name="grant_permissions_section_stability">Quyền giúp chạy ổn định</string>
+    <string name="grant_permissions_section_recommend">Quyền nên bật</string>
+    <string name="grant_permissions_recommend_subtitle">Luôn kết nối với thú cưng của bạn</string>
+    <string name="grant_permissions_accessibility_title">Bật chế độ Trợ năng</string>
+    <string name="grant_permissions_accessibility_body">Cần quyền Trợ năng để hiển thị Emoji Battery bằng thao tác vuốt. Ứng dụng không thu thập dữ liệu cá nhân.</string>
+    <string name="grant_permissions_go_to_settings">Mở Cài đặt</string>
+    <string name="grant_permissions_required">Bắt buộc</string>
+    <string name="grant_permissions_allowed">Đã cấp</string>
+    <string name="grant_permissions_overlay_title">Hiển thị trên ứng dụng khác</string>
+    <string name="grant_permissions_overlay_body">Cho phép Emoji Battery hiển thị đè lên các ứng dụng khác.</string>
+    <string name="grant_permissions_battery_title">Bỏ qua tối ưu hóa pin</string>
+    <string name="grant_permissions_battery_body">Giúp Emoji Battery luôn hoạt động và tránh bị hệ thống dừng dịch vụ.</string>
+    <string name="grant_permissions_notification_title">Quyền thông báo</string>
+    <string name="grant_permissions_notification_body">Nhận nhắc nhở và cập nhật về thú cưng của bạn.</string>
+    <string name="grant_permissions_autostart_title">Cho phép tự khởi động</string>
+    <string name="grant_permissions_autostart_body">Thiết bị của bạn có danh sách riêng các ứng dụng được chạy nền. Hãy thêm Cute Pet để thú cưng không bị dừng.</string>
 </resources>

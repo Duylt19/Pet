@@ -94,6 +94,37 @@ class PetBatteryOptimizationPolicyTest {
         )
     }
 
+    /**
+     * The strongest signal available below API 30, where the platform reports neither kills nor
+     * standby buckets: a resolved power-manager component is this device, not a brand string.
+     */
+    @Test
+    fun `a ROM shipping its own power manager is asked even when the brand is unknown`() {
+        val signals = PetBackgroundRestrictionSignals(
+            hasVendorPowerScreen = true,
+            isAggressiveVendor = false
+        )
+
+        assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
+        assertEquals(
+            PetExemptionReason.VENDOR_POWER_MANAGER,
+            PetBatteryOptimizationPolicy.reasonFor(signals)
+        )
+    }
+
+    @Test
+    fun `what the device ships outranks what its brand suggests`() {
+        val signals = PetBackgroundRestrictionSignals(
+            hasVendorPowerScreen = true,
+            isAggressiveVendor = true
+        )
+
+        assertEquals(
+            PetExemptionReason.VENDOR_POWER_MANAGER,
+            PetBatteryOptimizationPolicy.reasonFor(signals)
+        )
+    }
+
     @Test
     fun `the vendor list decides only when nothing measurable applies`() {
         val signals = PetBackgroundRestrictionSignals(isAggressiveVendor = true)
@@ -114,12 +145,49 @@ class PetBatteryOptimizationPolicyTest {
             }
     }
 
+    /**
+     * The values above are the brand as a person writes it. These are what the devices actually
+     * report, legal entity and all — an equality check passes the test above and still misses
+     * every Transsion phone in the field.
+     */
+    @Test
+    fun `vendors are matched on the build strings devices really report`() {
+        listOf(
+            "INFINIX MOBILITY LIMITED",
+            "TECNO MOBILE LIMITED",
+            "ITEL MOBILE LIMITED",
+            "Xiaomi Communications Co., Ltd.",
+            "HUAWEI TECHNOLOGIES CO.,LTD",
+            "LeMobile"
+        ).forEach { manufacturer ->
+            assertTrue(
+                manufacturer,
+                PetBatteryOptimizationPolicy.isAggressiveVendor(manufacturer)
+            )
+        }
+    }
+
+    @Test
+    fun `the brand is read when the manufacturer does not name the vendor`() {
+        // MIUI reports the parent as the manufacturer and the sub-brand as the brand; some ROMs
+        // invert it, so neither string alone is enough.
+        assertTrue(PetBatteryOptimizationPolicy.isAggressiveVendor("QUALCOMM", "Redmi"))
+        assertTrue(PetBatteryOptimizationPolicy.isAggressiveVendor("Xiaomi", "POCO"))
+    }
+
     @Test
     fun `stock vendors and unknown brands are not guessed at`() {
         listOf("Google", "motorola", "Nothing", "Fairphone", "SomeNewBrand", "")
             .forEach { vendor ->
                 assertFalse(vendor, PetBatteryOptimizationPolicy.isAggressiveVendor(vendor))
             }
+    }
+
+    @Test
+    fun `a word inside a longer brand name is not a match`() {
+        // Matching is word by word, not substring: "vivo" must not fire on "Vivobook".
+        assertFalse(PetBatteryOptimizationPolicy.isAggressiveVendor("Vivobook"))
+        assertFalse(PetBatteryOptimizationPolicy.isAggressiveVendor("Google", "Pixel"))
     }
 
     @Test

@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -58,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_PERMISSION
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
+import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.ui.component.AppSwitch
@@ -95,20 +97,35 @@ fun GrantPermissionsScreen(
         viewModel.effects.collect { effect ->
             when (effect) {
                 GrantPermissionsEffect.OpenAccessibilitySettings ->
-                    settingsLauncher.launch(BatteryAccessibility.settingsIntent())
+                    settingsLauncher.openSettings(
+                        BatteryAccessibility.settingsIntent(),
+                        appDetailsIntent(context.packageName)
+                    )
 
                 GrantPermissionsEffect.OpenOverlaySettings ->
-                    settingsLauncher.launch(PetOverlay.permissionIntent(context))
+                    settingsLauncher.openSettings(
+                        PetOverlay.permissionIntent(context),
+                        Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                    )
 
                 GrantPermissionsEffect.OpenBatteryOptimizationSettings ->
-                    settingsLauncher.launch(batteryOptimizationIntent(context.packageName))
+                    settingsLauncher.openSettings(
+                        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
+                        appDetailsIntent(context.packageName)
+                    )
 
                 GrantPermissionsEffect.OpenVendorAutoStartSettings ->
                     // Resolved again at tap: the ROM may have updated since the screen loaded.
-                    viewModel.vendorAutoStartIntent()?.let(settingsLauncher::launch)
+                    // No fallback — there is no second screen that means the same thing.
+                    viewModel.vendorAutoStartIntent()?.let {
+                        settingsLauncher.openSettings(it, fallback = null)
+                    }
 
                 GrantPermissionsEffect.OpenAppNotificationSettings ->
-                    settingsLauncher.launch(appNotificationIntent(context.packageName))
+                    settingsLauncher.openSettings(
+                        appNotificationIntent(context.packageName),
+                        appDetailsIntent(context.packageName)
+                    )
 
                 GrantPermissionsEffect.RequestNotificationPermission ->
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -126,14 +143,21 @@ fun GrantPermissionsScreen(
 }
 
 /**
- * The battery-optimisation list, not the one-tap allow dialog: that dialog needs
- * REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, a Play-restricted permission this app does not qualify
- * for. Falls back to the app's own settings page on devices without the list.
+ * Every destination on this screen is a system surface the ROM owns, and none of them is
+ * guaranteed: a build can ship without the battery-optimisation list at all, and the vendor
+ * power screens resolve through the package manager while still refusing to launch because the
+ * activity is not exported. Both throw out of [launch] rather than returning a result, which
+ * would take the whole screen down over a settings page that is only ever a convenience.
+ *
+ * Leaving for a system screen also has to suppress the app-open ad, or coming back from granting
+ * a permission is answered with a full-screen ad the user did nothing to earn. Suppressing here
+ * rather than at each call site is what keeps that true for every row.
  */
-private fun batteryOptimizationIntent(packageName: String): Intent =
-    Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).takeIf {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-    } ?: appDetailsIntent(packageName)
+private fun ActivityResultLauncher<Intent>.openSettings(intent: Intent, fallback: Intent?) {
+    InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
+    if (runCatching { launch(intent) }.isSuccess) return
+    fallback?.let { runCatching { launch(it) } }
+}
 
 private fun appNotificationIntent(packageName: String): Intent =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
