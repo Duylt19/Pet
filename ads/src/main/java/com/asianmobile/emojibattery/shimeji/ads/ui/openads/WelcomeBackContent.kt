@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.colorResource
@@ -37,7 +36,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.asianmobile.emojibattery.shimeji.ads.R
 import com.intuit.sdp.R as R_sdp
 import com.intuit.ssp.R as R_ssp
@@ -107,12 +105,10 @@ private fun WelcomeBackPet(
             )
         } else {
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(R.drawable.img_welcome_back_pet)
-                    .crossfade(false)
-                    .build(),
+                model = R.drawable.img_welcome_back_pet,
                 placeholder = previewPainter,
                 error = previewPainter,
+                fallback = previewPainter,
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier

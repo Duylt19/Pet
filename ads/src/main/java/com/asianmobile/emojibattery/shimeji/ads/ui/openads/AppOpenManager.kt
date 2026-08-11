@@ -12,6 +12,15 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.findViewTreeSavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.asianmobile.emojibattery.shimeji.ads.BuildConfig
 import com.asianmobile.emojibattery.shimeji.ads.R
 import com.asianmobile.emojibattery.shimeji.ads.config.DELAY_OPEN_ADS
@@ -243,7 +252,24 @@ class AppOpenManager() : LifecycleObserver {
 
         alertDialog = Dialog(activity, R.style.Theme_CutePet_WelcomeBack)
 
+        val activityDecorView = activity.window.decorView
+        val lifecycleOwner = activityDecorView.findViewTreeLifecycleOwner()
+            ?: activity as? LifecycleOwner
+        if (lifecycleOwner == null) {
+            Log.e(TAG, "Cannot show Welcome Back without a LifecycleOwner")
+            return
+        }
+
         val view = ComposeView(activity).apply {
+            setViewTreeLifecycleOwner(lifecycleOwner)
+            setViewTreeViewModelStoreOwner(
+                activityDecorView.findViewTreeViewModelStoreOwner()
+                    ?: activity as? ViewModelStoreOwner
+            )
+            setViewTreeSavedStateRegistryOwner(
+                activityDecorView.findViewTreeSavedStateRegistryOwner()
+                    ?: activity as? SavedStateRegistryOwner
+            )
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool
             )
