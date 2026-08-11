@@ -280,8 +280,10 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   `#A54905`, pill số lượng `26×18` nền `#8D6037` viền trắng bám góc dưới phải ảnh, nút `+` là
   vòng tròn `20×20` nền `#E1CCB9` viền nét đứt `#D3BEA2`, tên món Roboto Regular 12/16;
 - room card selected dùng viền `#FB3675` 3px kèm badge check `28×28`; unselected viền `#FFECD4`
-  2px. Card pet có nút xoá `16×16` tại `(8,8)` góc trên phải và xoá phải qua dialog xác nhận
-  dựng theo `GrantPermissionDialog`;
+  2px. Room chưa cache có icon download; ngay khi tap, chỉ card đó phủ scrim tối + progress
+  indeterminate và khóa double tap cho tới khi background được cache rồi selected. Download lỗi
+  trả card về icon download và không đổi room hiện tại. Card pet có nút xoá `16×16` tại `(8,8)`
+  góc trên phải và xoá phải qua dialog xác nhận dựng theo `GrantPermissionDialog`;
 - panel chi tiết pet thay body sheet: hàng back `24` + nhãn `Pet on screen` `#FB3675` + toggle
   `44×24`; khối info `336×78` với thumbnail `78×78` (ảnh `60×60`, băng dính `44×35`) và ba dòng
   label `#8F6250` 11/16 · value `#212327` 12/16 ngăn bằng divider nét đứt; khối Energy có chip

@@ -231,23 +231,30 @@ class PetRoomViewModel @Inject constructor(
             return
         }
         if (downloadingRoomId != null) return
-        downloadingRoomId = roomId
-        refreshRooms()
+        updateDownloadingRoom(roomId)
         viewModelScope.launch {
             val path = catalogRepository.materializeAsset(room.backgroundPath)
-            downloadingRoomId = null
             if (path == null) {
+                updateDownloadingRoom(null)
                 showMessage(PetRoomMessage.ROOM_DOWNLOAD_FAILED)
-                refreshRooms()
                 return@launch
             }
             roomRepository.selectRoom(roomId)
+            downloadingRoomId = null
+            // Keep the clicked card in loading state until the downloaded background and selected
+            // border are ready together, avoiding a download-icon flash before catalog mapping.
+            applyCatalog(catalogRepository.snapshot.value, roomId)
         }
     }
 
-    private fun refreshRooms() {
-        viewModelScope.launch {
-            applyCatalog(catalogRepository.snapshot.value, roomRepository.selectedRoomId.value)
+    private fun updateDownloadingRoom(roomId: Int?) {
+        downloadingRoomId = roomId
+        _uiState.update { state ->
+            state.copy(
+                rooms = state.rooms.map { room ->
+                    room.copy(isDownloading = roomId != null && room.id == roomId)
+                }
+            )
         }
     }
 

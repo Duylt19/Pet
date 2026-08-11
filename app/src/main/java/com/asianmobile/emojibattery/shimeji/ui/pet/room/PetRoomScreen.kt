@@ -1086,7 +1086,7 @@ private fun RoomCard(room: PetRoomThumbnailUiState, onClick: () -> Unit) {
                 ),
                 shape = shape
             )
-            .clickable(onClick = onClick)
+            .clickable(enabled = !room.isDownloading, onClick = onClick)
     ) {
         room.thumbnailRes?.let { res ->
             Image(
