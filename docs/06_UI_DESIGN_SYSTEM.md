@@ -177,6 +177,15 @@ Intro onboarding theo Figma nodes `8088:13113`, `8088:13148`, `8088:13201`:
 - page 1/3 giữ placement `SCREEN_INTRO`/`SCREEN_INTRO_SECOND` cao 222; page 2 không có ad.
   Pager, analytics và completion flow không thay đổi.
 
+Overlay permission disclosure theo Figma node `8436:5998`:
+
+- `ui/shared/component/OverlayPermissionDialog.kt` là bottom sheet dùng chung trước mọi request
+  `ACTION_MANAGE_OVERLAY_PERMISSION`; scrim/Back/`Not now` chỉ đóng sheet, `Allow Access` mới mở
+  system special-access settings;
+- hero `img_overlay_permission_hero.png` được export nguyên group 158×100 để giữ phone mockup,
+  pets và bubble; title/body là text thật, action dùng shared gradient/outline buttons;
+- native `HEIGHT_222` nằm sát đáy và collapse khi placement không render.
+
 Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343` (tắt):
 
 - `ui/shared/component/AppSwitch.kt` là switch duy nhất của app; mọi toggle dùng nó, không màn nào

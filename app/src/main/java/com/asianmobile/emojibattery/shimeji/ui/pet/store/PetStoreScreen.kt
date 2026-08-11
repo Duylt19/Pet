@@ -58,6 +58,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -117,6 +118,7 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppActionToast
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.OverlayPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PinkLoveSticker
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardGradientButton
@@ -172,6 +174,7 @@ fun PetStoreScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    var showOverlayPermissionDisclosure by rememberSaveable { mutableStateOf(false) }
     TrackScreenView(ScreenName.PET_STORE)
 
     val overlayLauncher = rememberLauncherForActivityResult(
@@ -206,11 +209,7 @@ fun PetStoreScreen(
                 }
                 PetStoreEffect.OpenPremium -> onPremium()
                 PetStoreEffect.OpenOverlaySettings -> {
-                    InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
-                    runCatching { overlayLauncher.launch(PetOverlay.permissionIntent(context)) }
-                        .onFailure {
-                            overlayLauncher.launch(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
-                        }
+                    showOverlayPermissionDisclosure = true
                 }
                 PetStoreEffect.RequestNotificationPermission -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -234,6 +233,22 @@ fun PetStoreScreen(
         onPet = viewModel::selectPet,
         onFood = viewModel::selectFood
     )
+
+    if (showOverlayPermissionDisclosure) {
+        OverlayPermissionDialog(
+            onAllowAccess = {
+                showOverlayPermissionDisclosure = false
+                InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
+                runCatching { overlayLauncher.launch(PetOverlay.permissionIntent(context)) }
+                    .onFailure {
+                        overlayLauncher.launch(
+                            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                        )
+                    }
+            },
+            onNotNow = { showOverlayPermissionDisclosure = false }
+        )
+    }
 
     state.selectedPet?.let { pet ->
         PetRewardSheet(

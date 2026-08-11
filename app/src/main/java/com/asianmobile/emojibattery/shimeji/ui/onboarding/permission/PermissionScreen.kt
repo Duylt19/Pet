@@ -27,7 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -50,6 +52,7 @@ import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_PERMISSION
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.OverlayPermissionDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -64,6 +67,7 @@ fun PermissionScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    var showOverlayPermissionDisclosure by rememberSaveable { mutableStateOf(false) }
     val overlaySettingsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
@@ -86,12 +90,7 @@ fun PermissionScreen(
     PermissionScreenContent(
         uiState = uiState,
         onRequestOverlay = {
-            InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
-            runCatching {
-                overlaySettingsLauncher.launch(PetOverlay.permissionIntent(context))
-            }.onFailure {
-                overlaySettingsLauncher.launch(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
-            }
+            showOverlayPermissionDisclosure = true
         },
         onRequestNotifications = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -101,6 +100,23 @@ fun PermissionScreen(
         onContinue = onContinue,
         onSkip = onSkip
     )
+
+    if (showOverlayPermissionDisclosure) {
+        OverlayPermissionDialog(
+            onAllowAccess = {
+                showOverlayPermissionDisclosure = false
+                InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
+                runCatching {
+                    overlaySettingsLauncher.launch(PetOverlay.permissionIntent(context))
+                }.onFailure {
+                    overlaySettingsLauncher.launch(
+                        Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                    )
+                }
+            },
+            onNotNow = { showOverlayPermissionDisclosure = false }
+        )
+    }
 }
 
 @Composable

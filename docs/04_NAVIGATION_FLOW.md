@@ -113,7 +113,9 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
   banner holder để không request/reload banner khi đi từ Battery Styles sang category.
 - String argument phải encode; enum argument phải parse an toàn với fallback.
 - Không phục hồi route Private Browser cũ nếu chưa có feature spec mới.
-- Overlay permission được mở qua `Settings.ACTION_MANAGE_OVERLAY_PERMISSION`; đây là special access, không phải runtime permission dialog.
+- Overlay permission là special access, không phải runtime permission dialog. Mọi entry xin quyền
+  (onboarding Permission, Grant Permissions và switch Pet Store) phải hiện shared disclosure theo
+  Figma trước; chỉ action `Allow Access` mới mở `Settings.ACTION_MANAGE_OVERLAY_PERMISSION`.
 - Notification permission chỉ request trên API 33+; denial không ngăn FGS chạy nhưng notification có thể chỉ hiện trong system task manager.
 - Discover refresh Accessibility ở `ON_RESUME`; intent bật battery được tiếp tục sau khi user
   cấp service. My Pet refresh overlay permission ở `ON_RESUME`; nếu overlay bị thu hồi khi

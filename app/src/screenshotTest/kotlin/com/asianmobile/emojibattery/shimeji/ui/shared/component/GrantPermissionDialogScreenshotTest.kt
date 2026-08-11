@@ -31,6 +31,37 @@ fun GrantPermissionDialogAcceptedScreenshotTest() {
     AccessibilityDisclosureScreenshotContent(isConsentGranted = true)
 }
 
+@PreviewTest
+@Preview(widthDp = 360, heightDp = 800)
+@Composable
+fun OverlayPermissionDialogScreenshotTest() {
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(com.asianmobile.emojibattery.shimeji.R.color.colors_80000000))
+            .padding(top = dimensionResource(SdpR.dimen._37sdp)),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        OverlayPermissionDialogContent(
+            onAllowAccess = {},
+            onNotNow = {},
+            modifier = Modifier.heightIn(max = maxHeight),
+            nativeAdContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(dimensionResource(SdpR.dimen._171sdp))
+                        .background(
+                            colorResource(
+                                com.asianmobile.emojibattery.shimeji.R.color.colors_E6E6E6
+                            )
+                        )
+                )
+            }
+        )
+    }
+}
+
 @Composable
 private fun AccessibilityDisclosureScreenshotContent(isConsentGranted: Boolean) {
     BoxWithConstraints(
