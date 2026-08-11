@@ -136,7 +136,7 @@ internal fun PetMessageEditorDialog(
                         fontFamily = fontRegular,
                         fontSize = dimensionResource(SspR.dimen._10ssp).value.sp
                     ),
-                    cursorBrush = SolidColor(colorResource(R.color.colors_7B61FF)),
+                    cursorBrush = SolidColor(colorResource(R.color.colors_FB3675)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(

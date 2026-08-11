@@ -502,6 +502,8 @@ private fun CatalogSearch(query: String, onQueryChanged: (String) -> Unit) {
             unfocusedContainerColor = colorResource(R.color.colors_FFFFFB),
             focusedTextColor = colorResource(R.color.colors_2F2440),
             unfocusedTextColor = colorResource(R.color.colors_2F2440),
+            cursorColor = colorResource(R.color.colors_FB3675),
+            errorCursorColor = colorResource(R.color.colors_FB3675),
             focusedIndicatorColor = colorResource(R.color.colors_7B61FF),
             unfocusedIndicatorColor = colorResource(R.color.colors_E9DFEF),
             focusedLeadingIconColor = colorResource(R.color.colors_7B61FF),

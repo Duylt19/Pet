@@ -214,6 +214,15 @@ Grant Permissions contract theo Figma node `8080:9754`:
   disclosure này. Khi quyền đã bật, row Accessibility trong Grant Permissions mở thẳng Settings
   để user quản lý/tắt quyền, không hỏi consent lại.
 
+Input text contract:
+
+- mọi Compose `BasicTextField` và Material `TextField`/`OutlinedTextField` dùng cursor
+  `#FB3675`; Android theme cũng đặt `colorAccent` cùng màu để native input không rơi về accent
+  tím hoặc màu mặc định của hệ thống;
+- dialog đặt tên pet hiển thị tên gợi ý ban đầu bằng `#6F7073`; sau lần chỉnh sửa đầu tiên text
+  chuyển sang màu chính `#212327`. Placeholder rỗng dùng `#9B9C9E`, vì vậy vẫn phân biệt rõ
+  suggestion, text user nhập và placeholder.
+
 My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8191:5950`:
 
 - route `my_pet` là scene phòng full-screen, background lấy từ room catalog (`bg/BG_<id>.png`)

@@ -1250,6 +1250,10 @@ internal fun FoodUnlockRevealContent(
 @Composable
 private fun PetNameDialog(pet: OwnerPetCatalogEntry, onSave: (String) -> Unit) {
     var name by remember(pet.id) { mutableStateOf(pet.name) }
+    var isSuggestedName by remember(pet.id) { mutableStateOf(true) }
+    val inputTextColor = colorResource(
+        if (isSuggestedName) R.color.colors_6F7073 else R.color.colors_212327
+    )
     Dialog(onDismissRequest = {}, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Column(
             modifier = Modifier.fillMaxWidth(320f / 360f).clip(RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp))).background(Color.White).padding(horizontal = dimensionResource(SdpR.dimen._12sdp), vertical = dimensionResource(SdpR.dimen._18sdp)),
@@ -1260,11 +1264,27 @@ private fun PetNameDialog(pet: OwnerPetCatalogEntry, onSave: (String) -> Unit) {
             Text(stringResource(R.string.pet_store_name_title), color = colorResource(R.color.colors_212327), fontFamily = StoreRobotoSemiBold, fontSize = dimensionResource(SspR.dimen._16ssp).value.sp, textAlign = TextAlign.Center)
             OutlinedTextField(
                 value = name,
-                onValueChange = { if (it.length <= 24) name = it },
+                onValueChange = {
+                    if (it.length <= 24) {
+                        name = it
+                        isSuggestedName = false
+                    }
+                },
                 singleLine = true,
                 placeholder = { Text(stringResource(R.string.pet_store_name_hint)) },
                 shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp)),
-                colors = TextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White, focusedIndicatorColor = colorResource(R.color.colors_FB3675), unfocusedIndicatorColor = colorResource(R.color.colors_C8C8C9)),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedTextColor = inputTextColor,
+                    unfocusedTextColor = inputTextColor,
+                    cursorColor = colorResource(R.color.colors_FB3675),
+                    errorCursorColor = colorResource(R.color.colors_FB3675),
+                    focusedPlaceholderColor = colorResource(R.color.colors_9B9C9E),
+                    unfocusedPlaceholderColor = colorResource(R.color.colors_9B9C9E),
+                    focusedIndicatorColor = colorResource(R.color.colors_FB3675),
+                    unfocusedIndicatorColor = colorResource(R.color.colors_C8C8C9)
+                ),
                 modifier = Modifier.fillMaxWidth().height(dimensionResource(SdpR.dimen._42sdp))
             )
             RewardGradientButton(stringResource(R.string.pet_store_save), { onSave(name) }, Modifier.width(dimensionResource(SdpR.dimen._155sdp)), enabled = name.isNotBlank())
