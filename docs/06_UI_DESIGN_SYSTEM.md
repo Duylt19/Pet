@@ -1,8 +1,8 @@
 # 06 — UI Design System Contract
 
 Base giữ infrastructure/theme và component pattern. Product screens từ Home trở đi dùng
-visual system Cute Pet. Splash và App Open Welcome Back đã dùng wallpaper pastel Figma;
-Language, Intro, Permission và Premium vẫn giữ UI hiện tại cho tới task update riêng.
+visual system Cute Pet. Splash, App Open Welcome Back và Language đã theo Figma;
+Intro, Permission và Premium vẫn giữ UI hiện tại cho tới task update riêng.
 
 ## Cute Pet product direction
 
@@ -17,7 +17,7 @@ Language, Intro, Permission và Premium vẫn giữ UI hiện tại cho tới ta
 - Shared primitives nằm ở `ui/component/CutePetComponents.kt`; component dark cũ không được
   dùng cho product screen mới nếu không có lý do tương thích.
 
-Các màn Language, Intro, Permission và Premium cố ý không đổi trong refresh này.
+Các màn Intro, Permission và Premium cố ý chưa đổi trong refresh hiện tại.
 
 Splash và App Open Welcome Back theo Figma node `8088:12715`/`8088:12986`:
 
@@ -28,6 +28,18 @@ Splash và App Open Welcome Back theo Figma node `8088:12715`/`8088:12986`:
   mẫu hoặc status bar iPhone từ Figma;
 - Welcome Back là Compose cover trước App Open Ad trong module `:ads`, không phải route;
   bunny GIF chạy bằng Coil và lifecycle quảng cáo hiện tại không thay đổi.
+
+Language theo Figma node `8421:9725`:
+
+- nền trắng, top bar `56px`, title Inter SemiBold 20/30 và action màu primary pink
+  `#FB3675`; biến thể Settings giữ nút Back, còn onboarding không thêm Back;
+- item `328×56px`, pill trắng, flag tròn `32px`, label Roboto Medium 16/24 và radio
+  pink + tick trắng. Shadow dùng `#666666` 20% với elevation `12sdp` để tách card rõ hơn
+  trên nền trắng theo yêu cầu product;
+- giữ nguyên tập/thứ tự 11 locale, trạng thái ban đầu chưa chọn, confirm chỉ hiện sau khi
+  user chọn và toàn bộ persistence/navigation/restart hiện có;
+- native ad tiếp tục dùng placement thật `SCREEN_LANGUAGE`/`SCREEN_LANGUAGE_SECOND`, không
+  đóng gói creative quảng cáo mẫu từ Figma; loading overlay vẫn chặn tương tác trong lúc ad load.
 
 Mine visual contract theo Figma node `8080:4828`:
 
@@ -142,9 +154,9 @@ System bar:
   sáng thì phải đủ tối để đọc được icon sáng, và không màn nào còn như vậy trong thiết kế mới;
 - helper được gọi lại ở `onCreate`, `onResume` và mỗi lần đổi window focus, vì màn system
   settings, full-screen ad hay system dialog trả window về kèm appearance của chính nó;
-- **nợ đã biết**: onboarding Language và Permission (`ui/language`, `ui/permission/PermissionScreen`)
-  vẫn còn nền `#161718`, nên icon tối chìm trên hai màn đó cho tới khi UI của chúng được
-  dựng lại theo tông trắng. Splash/Welcome Back dùng wallpaper pastel và Intro dùng
+- **nợ đã biết**: onboarding Permission (`ui/permission/PermissionScreen`)
+  vẫn còn nền `#161718`, nên icon tối chìm trên màn đó cho tới khi UI được
+  dựng lại theo tông trắng. Language đã dùng nền trắng; Splash/Welcome Back dùng wallpaper pastel và Intro dùng
   `img_splash_bg` sáng nên đọc bình thường.
 
 Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343` (tắt):

@@ -49,6 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -84,7 +85,6 @@ fun LanguageScreen(
     var selectedKey by rememberSaveable {
         mutableStateOf("")
     }
-    val listState = rememberLazyListState()
     var isShowCheckedLanguage by remember { mutableStateOf(false) }
     var loadAdsComplete by remember { mutableStateOf(false) }
 
@@ -97,7 +97,6 @@ fun LanguageScreen(
     )
     var reloadCounter by remember { mutableIntStateOf(0) }
     val isSupportBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    val blurRadius = if (!loadAdsComplete && isSupportBlur) 8.dp else 0.dp
     val context = LocalContext.current
     val checkShowNative = remember {
         context.findActivity()?.let {
@@ -105,8 +104,78 @@ fun LanguageScreen(
         } ?: run { false }
     }
 
+    LanguageContent(
+        languages = languages,
+        selectedKey = selectedKey,
+        showConfirm = isShowCheckedLanguage,
+        isSettings = isSettings,
+        isLoading = !loadAdsComplete,
+        isSupportBlur = isSupportBlur,
+        onLanguageSelected = { language ->
+            if (language.key != selectedKey) {
+                viewModel.languageSelected = language
+                selectedKey = language.key
+                isShowCheckedLanguage = true
+                if (
+                    loadAdsComplete &&
+                    Utils.isNetworkAvailable(context) &&
+                    SafeRemoteConfig.getBoolean(IS_SHOW_NATIVE_LANGUAGE_SECOND) &&
+                    checkShowNative
+                ) {
+                    reloadCounter++
+                    loadAdsComplete = false
+                }
+            }
+        },
+        onConfirm = { viewModel.updateLanguage(onConfirm) },
+        onBack = onBack,
+        adContent = {
+            if (!isShowCheckedLanguage) {
+                NativeAdInternal(
+                    screenCode = SCREEN_LANGUAGE,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    loadAdsComplete = true
+                }
+            } else {
+                NativeAdInternal(
+                    screenCode = SCREEN_LANGUAGE_SECOND,
+                    modifier = Modifier.fillMaxWidth(),
+                    reloadKey = reloadCounter
+                ) {
+                    loadAdsComplete = true
+                }
+            }
+        },
+        loadingContent = {
+            LanguageLoadingContent(
+                animLoading = animLoading,
+                animLoadingProgress = animLoadingProgress,
+            )
+        },
+    )
+}
+
+@Composable
+internal fun LanguageContent(
+    languages: List<Language>,
+    selectedKey: String,
+    showConfirm: Boolean,
+    isSettings: Boolean,
+    isLoading: Boolean,
+    isSupportBlur: Boolean,
+    onLanguageSelected: (Language) -> Unit,
+    onConfirm: () -> Unit,
+    onBack: () -> Unit,
+    adContent: @Composable () -> Unit,
+    loadingContent: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val listState = rememberLazyListState()
+    val blurRadius = if (isLoading && isSupportBlur) 8.dp else 0.dp
+
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Scaffold(
@@ -114,17 +183,17 @@ fun LanguageScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(colorResource(R.color.colors_161718))
+                        .background(colorResource(R.color.colors_FFFFFF))
                         .statusBarsPadding()
                         .height(dimensionResource(R_sdp.dimen._43sdp))
-                        .padding(horizontal = dimensionResource(R_sdp.dimen._18sdp)),
+                        .padding(horizontal = dimensionResource(R_sdp.dimen._12sdp)),
                     contentAlignment = Alignment.Center
                 ) {
                     if (isSettings) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back),
-                            tint = colorResource(R.color.white),
+                            tint = colorResource(R.color.colors_FB3675),
                             modifier = Modifier
                                 .align(Alignment.CenterStart)
                                 .size(dimensionResource(R_sdp.dimen._25sdp))
@@ -136,30 +205,30 @@ fun LanguageScreen(
 
                     Text(
                         text = stringResource(R.string.language),
-                        fontFamily = FontFamily(Font(R.font.roboto_semibold)),
+                        fontFamily = FontFamily(Font(R.font.inter_semibold)),
                         fontSize = dimensionResource(id = R_ssp.dimen._15ssp).value.sp,
                         lineHeight = dimensionResource(id = R_ssp.dimen._22ssp).value.sp,
-                        color = colorResource(R.color.white)
+                        color = colorResource(R.color.colors_FB3675)
                     )
 
                     AnimatedVisibility(
-                        visible = isShowCheckedLanguage,
+                        visible = showConfirm,
                         modifier = Modifier.align(Alignment.CenterEnd)
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_checked_language),
                             contentDescription = stringResource(R.string.confirm),
-                            tint = colorResource(R.color.colors_3369FD),
+                            tint = androidx.compose.ui.graphics.Color.Unspecified,
                             modifier = Modifier
                                 .size(dimensionResource(R_sdp.dimen._22sdp))
-                                .clickable {
-                                    viewModel.updateLanguage(onConfirm)
-                                }
+                                .clip(CircleShape)
+                                .clickable(onClick = onConfirm)
+                                .padding(dimensionResource(R_sdp.dimen._2sdp))
                         )
                     }
                 }
             },
-            containerColor = colorResource(R.color.colors_161718),
+            containerColor = colorResource(R.color.colors_FFFFFF),
             modifier = Modifier
                 .fillMaxSize()
                 .blur(blurRadius)
@@ -167,7 +236,7 @@ fun LanguageScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(colorResource(R.color.colors_161718))
+                    .background(colorResource(R.color.colors_FFFFFF))
                     .padding(top = padding.calculateTopPadding())
             ) {
                 LazyColumn(
@@ -176,7 +245,7 @@ fun LanguageScreen(
                         .weight(1f)
                         .fillMaxWidth()
                         .padding(
-                            top = dimensionResource(R_sdp.dimen._6sdp),
+                            top = dimensionResource(R_sdp.dimen._2sdp),
                             start = dimensionResource(R_sdp.dimen._12sdp),
                             end = dimensionResource(R_sdp.dimen._12sdp)
                         ),
@@ -192,21 +261,7 @@ fun LanguageScreen(
                         LanguageItem(
                             language = language,
                             isSelected = selected,
-                            onClick = {
-                                if (language.key == selectedKey) return@LanguageItem
-                                viewModel.languageSelected = language
-                                selectedKey = language.key
-                                isShowCheckedLanguage = true
-                                if (
-                                    loadAdsComplete &&
-                                    Utils.isNetworkAvailable(context) &&
-                                    SafeRemoteConfig.getBoolean(IS_SHOW_NATIVE_LANGUAGE_SECOND) &&
-                                    checkShowNative
-                                ) {
-                                    reloadCounter++
-                                    loadAdsComplete = false
-                                }
-                            }
+                            onClick = { onLanguageSelected(language) }
                         )
                     }
 
@@ -215,39 +270,22 @@ fun LanguageScreen(
                     }
                 }
 
-                if (!isShowCheckedLanguage) {
-                    NativeAdInternal(
-                        screenCode = SCREEN_LANGUAGE,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        loadAdsComplete = true
-                    }
-                } else {
-                    NativeAdInternal(
-                        screenCode = SCREEN_LANGUAGE_SECOND,
-                        modifier = Modifier.fillMaxWidth(),
-                        reloadKey = reloadCounter
-                    ) {
-                        loadAdsComplete = true
-                    }
-                }
+                adContent()
             }
         }
 
-        if (!loadAdsComplete) {
+        if (isLoading) {
             val overlayColor = if (isSupportBlur) {
-                colorResource(R.color.colors_161718).copy(alpha = 0.35f)
+                colorResource(R.color.colors_FFFFFF).copy(alpha = 0.35f)
             } else {
-                colorResource(R.color.colors_161718).copy(alpha = 0.92f)
+                colorResource(R.color.colors_FFFFFF).copy(alpha = 0.92f)
             }
             Box(
                 modifier = Modifier
                     .matchParentSize()
                     .background(overlayColor)
             )
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .clickable(
@@ -255,25 +293,65 @@ fun LanguageScreen(
                         interactionSource = remember { MutableInteractionSource() }
                     ) {}
             ) {
-                LottieAnimation(
-                    composition = animLoading,
-                    progress = { animLoadingProgress },
-                    modifier = Modifier
-                        .height(dimensionResource(R_sdp.dimen._95sdp))
-                        .width(dimensionResource(R_sdp.dimen._95sdp))
-                )
-                Spacer(modifier = Modifier.height(dimensionResource(R_sdp.dimen._3sdp)))
-                Text(
-                    text = stringResource(R.string.setting_up_your_app_experience_please_wait_a_moment),
-                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                    fontSize = dimensionResource(id = R_ssp.dimen._13ssp).value.sp,
-                    color = colorResource(R.color.white),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = dimensionResource(R_sdp.dimen._30sdp))
-                )
+                loadingContent()
             }
         }
     }
+}
+
+@Composable
+private fun LanguageLoadingContent(
+    animLoading: com.airbnb.lottie.LottieComposition?,
+    animLoadingProgress: Float,
+) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        LottieAnimation(
+            composition = animLoading,
+            progress = { animLoadingProgress },
+            modifier = Modifier
+                .height(dimensionResource(R_sdp.dimen._95sdp))
+                .width(dimensionResource(R_sdp.dimen._95sdp))
+        )
+        Spacer(modifier = Modifier.height(dimensionResource(R_sdp.dimen._3sdp)))
+        Text(
+            text = stringResource(R.string.setting_up_your_app_experience_please_wait_a_moment),
+            fontFamily = FontFamily(Font(R.font.roboto_regular)),
+            fontSize = dimensionResource(id = R_ssp.dimen._13ssp).value.sp,
+            color = colorResource(R.color.colors_262626),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = dimensionResource(R_sdp.dimen._30sdp))
+        )
+    }
+}
+
+@Preview(widthDp = 360, heightDp = 800, showBackground = true)
+@Composable
+private fun LanguageContentPreview() {
+    val languages = LocalContext.current.mockData()
+    LanguageContent(
+        languages = languages,
+        selectedKey = languages.first().key,
+        showConfirm = true,
+        isSettings = false,
+        isLoading = false,
+        isSupportBlur = false,
+        onLanguageSelected = {},
+        onConfirm = {},
+        onBack = {},
+        adContent = {
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(dimensionResource(R_sdp.dimen._171sdp))
+                    .background(colorResource(R.color.colors_E5E5E5)),
+            )
+        },
+        loadingContent = {},
+    )
 }
 
 fun Context.findActivity(): Activity? {
