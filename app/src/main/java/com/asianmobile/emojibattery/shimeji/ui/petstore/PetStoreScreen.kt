@@ -64,6 +64,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -216,6 +217,7 @@ fun PetStoreScreen(
         state = state,
         onSearch = onSearch,
         onPremium = onPremium,
+        onOpenMyPet = onViewPet,
         onToggle = viewModel::togglePetOverlay,
         onTab = viewModel::selectTab,
         onPet = viewModel::selectPet,
@@ -290,6 +292,7 @@ internal fun PetStoreContent(
     state: PetStoreUiState,
     onSearch: () -> Unit,
     onPremium: () -> Unit,
+    onOpenMyPet: () -> Unit,
     onToggle: () -> Unit,
     onTab: (PetStoreTab) -> Unit,
     onPet: (OwnerPetCatalogEntry) -> Unit,
@@ -309,26 +312,11 @@ internal fun PetStoreContent(
         HomeEnableCard(
             text = stringResource(R.string.pet_store_enable_pet),
             checked = state.isPetRunning,
-            onCheckedChange = onToggle
+            onCheckedChange = onToggle,
+            bottomPadding = dimensionResource(SdpR.dimen._2sdp)
         )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
-                .height(dimensionResource(SdpR.dimen._77sdp))
-                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp)))
-                .background(colorResource(R.color.colors_FFEBF1)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = stringResource(R.string.pet_store_banner_placeholder),
-                color = colorResource(R.color.colors_212327),
-                fontFamily = StoreRobotoSemiBold,
-                fontStyle = FontStyle.Italic,
-                fontSize = dimensionResource(SspR.dimen._16ssp).value.sp
-            )
-        }
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
+        PetStoreMyPetBanner(onClick = onOpenMyPet)
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -355,6 +343,20 @@ internal fun PetStoreContent(
             }
         }
     }
+}
+
+@Composable
+internal fun PetStoreMyPetBanner(onClick: () -> Unit) {
+    Image(
+        painter = painterResource(R.drawable.img_pet_store_my_pet_banner),
+        contentDescription = stringResource(R.string.pet_store_banner_placeholder),
+        contentScale = ContentScale.FillBounds,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
+            .height(dimensionResource(SdpR.dimen._102sdp))
+            .clickable(role = Role.Button, onClick = onClick)
+    )
 }
 
 @Composable
@@ -1284,6 +1286,7 @@ private fun PetStorePreview() {
         ),
         onSearch = {},
         onPremium = {},
+        onOpenMyPet = {},
         onToggle = {},
         onTab = {},
         onPet = {},

@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import com.asianmobile.emojibattery.shimeji.R
@@ -151,17 +152,21 @@ fun HomeEnableCard(
     text: String,
     checked: Boolean,
     onCheckedChange: () -> Unit,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    bottomPadding: Dp? = null
 ) {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
     val pink = colorResource(R.color.colors_FB3675)
     val violet = colorResource(R.color.colors_C95DFF)
+    val resolvedBottomPadding = bottomPadding ?: dimensionResource(SdpR.dimen._9sdp)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                horizontal = dimensionResource(SdpR.dimen._12sdp),
-                vertical = dimensionResource(SdpR.dimen._9sdp)
+                start = dimensionResource(SdpR.dimen._12sdp),
+                top = dimensionResource(SdpR.dimen._9sdp),
+                end = dimensionResource(SdpR.dimen._12sdp),
+                bottom = resolvedBottomPadding
             )
             .height(dimensionResource(SdpR.dimen._37sdp))
             .clip(shape)

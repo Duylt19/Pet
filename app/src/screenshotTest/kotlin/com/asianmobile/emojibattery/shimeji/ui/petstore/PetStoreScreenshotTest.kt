@@ -38,6 +38,19 @@ fun PetStoreFoodTabScreenshotTest() {
 }
 
 @PreviewTest
+@Preview(widthDp = 360, heightDp = 102)
+@Composable
+fun PetStoreMyPetBannerScreenshotTest() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.colors_FFFFFF))
+    ) {
+        PetStoreMyPetBanner(onClick = {})
+    }
+}
+
+@PreviewTest
 @Preview(widthDp = 360, heightDp = 180)
 @Composable
 fun PetStoreFoodCardScreenshotTest() {
@@ -128,6 +141,7 @@ private fun PreviewStore(tab: PetStoreTab) {
         ),
         onSearch = {},
         onPremium = {},
+        onOpenMyPet = {},
         onToggle = {},
         onTab = {},
         onPet = {},
