@@ -30,6 +30,42 @@ BUNDLED_ASSET_GROUPS = {
     "emotions": ("bundled/assets/cute_emotion", "emotion", 20),
 }
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+CATEGORY_EMOJI_BY_SLUG = {
+    "trending": "🔥",
+    "wc-2026": "🏆",
+    "football": "⚽",
+    "cute": "🥰",
+    "stitch": "💙",
+    "soccer-ball": "⚽",
+    "heart": "❤️",
+    "sanrio": "🎀",
+    "animal": "🐾",
+    "pompompurin": "🍮",
+    "dog-cat": "🐶🐱",
+    "labubu": "🧸",
+    "flower": "🌸",
+    "cartoon": "📺",
+    "zootopia": "🦊",
+    "avatar": "🌊",
+    "dog": "🐶",
+    "fruit": "🍓",
+    "huntrix": "🎤⚔️",
+    "demon-slayer": "🗡️",
+    "christmas": "🎄",
+    "k-pop": "🎤",
+    "nature": "🌿",
+    "snoopy": "🐶",
+    "anime": "✨",
+    "shin-chan": "😜",
+    "love": "💕",
+    "food": "🍔",
+    "bunnies": "🐰",
+    "brainrot": "🌀",
+    "actor": "🎬",
+    "halloween": "🎃",
+    "thanksgiving": "🦃",
+    "lunar-new-year": "🧧",
+}
 
 
 class BatterySnapshotError(ValueError):
@@ -212,6 +248,14 @@ def _normalized_category(record: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _category_display_name(category: dict[str, Any]) -> str:
+    name = category["name"]
+    emoji = CATEGORY_EMOJI_BY_SLUG.get(category["slug"])
+    if emoji is None or name.startswith(emoji):
+        return name
+    return f"{emoji} {name}"
+
+
 def audit_snapshot(source_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     source_root = source_root.resolve()
     batteries_path = source_root / "api/batteries.raw.json"
@@ -234,6 +278,10 @@ def audit_snapshot(source_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     if len(category_ids) != len(set(category_ids)):
         raise BatterySnapshotError("Duplicate category IDs")
     category_by_id = {category["id"]: category for category in categories}
+    category_display_names = {
+        category["id"]: _category_display_name(category)
+        for category in categories
+    }
 
     ids: list[int] = []
     themes: list[dict[str, Any]] = []
@@ -283,7 +331,7 @@ def audit_snapshot(source_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
                 "id": battery_id,
                 "name": name,
                 "categoryId": category_id,
-                "categoryName": category_name,
+                "categoryName": category_display_names[category_id],
                 "entitlement": "PREMIUM" if is_premium else "FREE",
                 "assets": assets,
             }
@@ -296,7 +344,14 @@ def audit_snapshot(source_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     if sum(category_counts.values()) != len(themes):
         raise BatterySnapshotError("Category counts do not cover the catalog")
 
-    ordered_categories = sorted(categories, key=lambda item: (item["priority"], item["id"]))
+    display_categories = [
+        {**category, "name": category_display_names[category["id"]]}
+        for category in categories
+    ]
+    ordered_categories = sorted(
+        display_categories,
+        key=lambda item: (item["priority"], item["id"]),
+    )
     ordered_themes = sorted(themes, key=lambda item: item["id"])
     bundled_groups = {
         name: _audit_bundled_group(
@@ -322,7 +377,7 @@ def audit_snapshot(source_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     ) + sum(record["asset"]["sizeBytes"] for record in animations)
     catalog = {
         "schemaVersion": SCHEMA_VERSION,
-        "catalogVersion": f"battery-apk-1.0.2@{captured_at}",
+        "catalogVersion": f"battery-apk-1.0.2@{captured_at}+emoji-category-v1",
         "capturedAt": captured_at,
         "source": {
             "packageName": "com.anime.shimeji.petonscreen",

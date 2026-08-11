@@ -78,6 +78,9 @@ class BatteryDataSnapshotTest(unittest.TestCase):
         self.assertEqual("battery/7.png", catalog["themes"][0]["assets"]["battery"]["path"])
         self.assertEqual("emoji/7.png", catalog["themes"][0]["assets"]["emoji"]["path"])
         self.assertEqual("REVIEW_REQUIRED", catalog["source"]["distributionStatus"])
+        self.assertEqual("🥰 Cute", catalog["categories"][0]["name"])
+        self.assertEqual("🥰 Cute", catalog["themes"][0]["categoryName"])
+        self.assertTrue(catalog["catalogVersion"].endswith("+emoji-category-v1"))
         self.assertEqual(3, report["runtimeAssetCount"])
 
     def test_audit_rejects_missing_asset(self):

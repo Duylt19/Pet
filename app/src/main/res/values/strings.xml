@@ -865,7 +865,7 @@
     <string name="battery_catalog_subtitle">Choose a status capsule, then fine-tune its size and content.</string>
     <string name="battery_catalog_all">All</string>
     <string name="battery_search">Search battery styles</string>
-    <string name="battery_builtin_category">Starter</string>
+    <string name="battery_builtin_category">🌱 Starter</string>
     <string name="battery_builtin_theme">Cute Mint</string>
     <string name="battery_current_style">Current</string>
     <string name="battery_current_custom_mix">Custom mix</string>

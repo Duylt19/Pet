@@ -86,7 +86,7 @@ const val BUILT_IN_BATTERY_CATEGORY_ID = 0
 
 val BUILT_IN_BATTERY_CATEGORY = BatteryCatalogCategory(
     id = BUILT_IN_BATTERY_CATEGORY_ID,
-    name = "Starter",
+    name = "🌱 Starter",
     slug = "starter",
     priority = Int.MIN_VALUE
 )

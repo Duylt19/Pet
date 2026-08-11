@@ -8,6 +8,8 @@ Vertical slice hiện đã có trong source:
 - Catalog local chuẩn hóa, Search từ Home header, category, Free/Premium, favorite và built-in
   fallback. Landing nhóm theme thật thành carousel theo category; More mở grid ba cột của
   category bằng ID canonical. Built-in ID `0` chỉ là runtime fallback, không phải catalog item.
+- Category name được pipeline gắn emoji theo slug trong khi giữ nguyên ID/slug canonical;
+  `categoryName` của tất cả theme được sinh cùng display name để parser validation khớp.
 - Promo Customize Status Bar và DIY FAB mở editor bằng config hiện tại. Theme đang áp dụng được
   đánh dấu bằng nền/stroke hồng trong category detail; không còn card `Current` demo ở landing.
 - Theme Premium mở bottom sheet full-width có preview, `Unlimited`, `Get it free` và native ad;

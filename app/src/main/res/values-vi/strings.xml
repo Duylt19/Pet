@@ -675,7 +675,7 @@
     <string name="battery_catalog_subtitle">Chọn mẫu thanh trạng thái, sau đó tùy chỉnh kích thước và nội dung.</string>
     <string name="battery_catalog_all">Tất cả</string>
     <string name="battery_search">Tìm kiểu thanh pin</string>
-    <string name="battery_builtin_category">Khởi đầu</string>
+    <string name="battery_builtin_category">🌱 Khởi đầu</string>
     <string name="battery_builtin_theme">Xanh bạc hà</string>
     <string name="battery_current_style">Đang dùng</string>
     <string name="battery_current_custom_mix">Phối tùy chỉnh</string>

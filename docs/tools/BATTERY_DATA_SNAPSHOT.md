@@ -49,6 +49,9 @@ battery-runtime/
 Tool fail-closed nếu API snapshot sai, category/ID trùng, reference lệch, PNG invalid,
 dimension vượt giới hạn hoặc thiếu asset. Catalog không chứa CDN URL, token hay source
 filesystem path; chỉ có path runtime tương đối, byte size, SHA-256 và dimension.
+Trong output runtime, tool gắn emoji hiển thị theo category slug và áp dụng cùng
+tên cho `categories[].name` lẫn `themes[].categoryName`; ID, slug và raw snapshot
+không bị thay đổi.
 
 ## Unit test tool
 
