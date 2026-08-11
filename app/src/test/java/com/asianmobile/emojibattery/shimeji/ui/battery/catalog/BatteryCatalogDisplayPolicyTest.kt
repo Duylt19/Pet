@@ -59,7 +59,7 @@ class BatteryCatalogDisplayPolicyTest {
             batteryThemeDisplayName("battery_cartoon_03")
         )
         assertEquals("WC 2026", batteryThemeDisplayName("WC_2026"))
-        assertEquals("Trending", batteryCategoryDisplayName("🔥 Trending"))
+        assertEquals("🔥 Trending", batteryCategoryDisplayName("  🔥 Trending  "))
     }
 
     @Test

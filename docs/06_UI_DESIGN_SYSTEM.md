@@ -56,8 +56,8 @@ Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
   top-end, crown Premium ở top-start;
 - crown Premium của Pet Store, Search và Battery dùng chung `PetPremiumBadge`: nền
   `#FFEA89` 50% và crown artwork theo tỉ lệ `18/24`, không dựng badge riêng theo từng feature;
-- category header tạm dùng chung flame vector `18×18px`, không tint. Mapping icon theo category
-  được thay sau mà không đổi layout hoặc catalog schema;
+- category header dùng trực tiếp emoji ở đầu `category.name`; không ghép thêm drawable/icon riêng
+  để tránh hiển thị trùng khi catalog cập nhật tên category;
 - More mở child route có header Back/title/PRO, inline banner và grid ba cột. Card detail giữ
   tỷ lệ vuông, preview `74/101.333`, selected dùng `#FFEBF1` + stroke `#FB3675`, không hiện heart;
 - landing giữ Home bottom navigation; detail ẩn navigation nhưng giữ cùng bottom banner holder.

@@ -40,9 +40,7 @@ class BatteryCatalogDisplayPolicy {
     }
 }
 
-internal fun batteryCategoryDisplayName(rawName: String): String = rawName
-    .replace(BATTERY_CATEGORY_SYMBOL_PREFIX, "")
-    .trim()
+internal fun batteryCategoryDisplayName(rawName: String): String = rawName.trim()
 
 internal fun batteryThemeDisplayName(rawName: String): String {
     val normalized = rawName
@@ -68,4 +66,3 @@ internal fun batteryThemeDisplayName(rawName: String): String {
 private val BATTERY_CAMEL_CASE_BOUNDARY = Regex("(?<=[\\p{Ll}\\d])(?=\\p{Lu})")
 private val BATTERY_NAME_SEPARATORS = Regex("[_-]+")
 private val BATTERY_NAME_WHITESPACE = Regex("\\s+")
-private val BATTERY_CATEGORY_SYMBOL_PREFIX = Regex("^[^\\p{L}\\p{N}]+")

@@ -233,12 +233,6 @@ private fun BatterySectionHeader(title: String, onMore: () -> Unit) {
             .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(R.drawable.ic_battery_category_placeholder),
-            contentDescription = null,
-            modifier = Modifier.size(dimensionResource(SdpR.dimen._14sdp))
-        )
-        Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
         Text(
             text = title,
             color = colorResource(R.color.colors_212327),
