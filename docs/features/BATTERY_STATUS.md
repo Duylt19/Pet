@@ -207,12 +207,11 @@ Renderer chỉ animate asset đã chọn; một window duy nhất được add/u
 Trong editor, `focusedComponent` được truyền tới renderer thật. Component đang chỉnh sửa
 được đánh dấu required trong width policy để không bị ẩn do thiếu chỗ; Date vẫn tôn trọng
 `showDateTime`, nhưng khi đã bật thì thay đổi size, color, format và font cập nhật live.
-Các trường `dateTimeSizeDp`, `dateTimeColorArgb` và `dateTimeFont` là style dùng chung cho
-cả giờ và ngày; `showTime` điều khiển giờ, còn `showDateTime` chỉ điều khiển phần ngày.
-Wi‑Fi, signal, airplane, hotspot và ringer có picker 4 family icon độc lập, cập nhật live
-qua editor preview session và được persist khi Apply. Ringer lưu một family nhưng map đúng
-hai biến thể vibrate/silent. Trạng thái lỗi/off/limited tiếp tục dùng vector cảnh báo riêng
-để style tùy chọn không làm sai thông tin thiết bị.
+Date dùng `dateTimeSizeDp`, `dateTimeColorArgb`, `dateTimeFont`; Clock dùng size/màu riêng và
+Roboto Medium. `showTime` và `showDateTime` điều khiển độc lập. Airplane, hotspot, ringer và
+charge có switch riêng được persist; trạng thái OFF thắng cả preview focus và device state.
+Các family/icon data có sẵn vẫn được chọn bằng grid theo card Charge và cập nhật live qua
+editor preview session. Ringer lưu một family nhưng map đúng hai biến thể vibrate/silent.
 
 ### Ma trận trạng thái hệ thống
 

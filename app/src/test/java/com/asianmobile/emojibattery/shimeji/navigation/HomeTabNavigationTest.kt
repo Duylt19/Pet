@@ -47,4 +47,14 @@ class HomeTabNavigationTest {
         )
         assertEquals(false, showBatteryEditorBottomBanner(Routes.BATTERY_CATALOG))
     }
+
+    @Test
+    fun `status option pages replace the editor banner with one collapsible native`() {
+        val route = "${Routes.BATTERY_EDITOR_COMPONENT}/{themeId}/{page}"
+
+        assertEquals(true, showBatteryStatusOptionNative(route, "AIRPLANE"))
+        assertEquals(true, showBatteryStatusOptionNative(route, "CLOCK"))
+        assertEquals(false, showBatteryStatusOptionNative(route, "BACKGROUND_THEMES"))
+        assertEquals(false, showBatteryStatusOptionNative(Routes.BATTERY_CATALOG, "CHARGE"))
+    }
 }

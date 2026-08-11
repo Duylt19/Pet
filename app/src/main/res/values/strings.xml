@@ -771,11 +771,13 @@
     <string name="battery_data_type">Mobile data label</string>
     <string name="battery_charge_hint">The preview simulates charging while you choose an icon. The applied overlay shows it only while the device is charging.</string>
     <string name="battery_charge_style">Charging icon</string>
+    <string name="battery_charge_style_figma">Charge Style</string>
     <string name="battery_date_hint">Control date visibility and format. Typeface, size and color apply to both time and date.</string>
     <string name="battery_date_show">Show date</string>
     <string name="battery_date_size">Time and date size</string>
     <string name="battery_date_color">Time and date color</string>
-    <string name="battery_date_format">Date format</string>
+    <string name="battery_date_format">Date Format</string>
+    <string name="battery_date_style">Date Style</string>
     <string name="battery_date_font">Time and date font</string>
     <string name="battery_emotion_style">Emotion style</string>
     <string name="battery_slider_value">%1$s · %2$d dp</string>

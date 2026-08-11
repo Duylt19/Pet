@@ -78,6 +78,28 @@ class BatteryPreviewLayoutTest {
     }
 
     @Test
+    fun focusedDeviceComponents_respectTheirEditorSwitches() {
+        val cases = listOf(
+            BatteryStatusComponent.AIRPLANE to BatteryStatusConfig(showAirplane = false),
+            BatteryStatusComponent.RINGER to BatteryStatusConfig(showRinger = false),
+            BatteryStatusComponent.HOTSPOT to BatteryStatusConfig(showHotspot = false),
+            BatteryStatusComponent.CHARGE to BatteryStatusConfig(showCharge = false)
+        )
+
+        cases.forEach { (component, config) ->
+            val layout = batteryPreviewLayout(
+                config = config,
+                availableWidthDp = 320f,
+                hasEmoji = false,
+                hasEmotion = false,
+                hasAnimation = false,
+                focusedComponent = component
+            )
+            assertFalse("$component must stay hidden after its switch is off", layout.shows(component))
+        }
+    }
+
+    @Test
     fun themedEmoji_isPartOfBatteryPair_notLeadingStatusGroup() {
         val layout = batteryPreviewLayout(
             config = BatteryStatusConfig(

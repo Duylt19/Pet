@@ -22,7 +22,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
+import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
+import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_BATTERY_EDITOR_BOTTOM
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeBottomNavigation
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeTab
@@ -35,6 +38,7 @@ import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.CURRENT_BATTERY_S
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorPage
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorViewModel
+import com.asianmobile.emojibattery.shimeji.ui.battery.editor.isStatusOptionPage
 import com.asianmobile.emojibattery.shimeji.ui.settings.mine.SettingsScreen
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.intro.IntroScreen
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.language.LanguageScreen
@@ -97,6 +101,10 @@ internal fun showBatteryEditorBottomBanner(route: String?): Boolean =
     route?.startsWith("${Routes.BATTERY_EDITOR}/") == true ||
         route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true
 
+internal fun showBatteryStatusOptionNative(route: String?, page: String?): Boolean =
+    route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true &&
+        BatteryEditorPage.fromRoute(page)?.isStatusOptionPage() == true
+
 @Composable
 fun AppNavGraph(
     startDestination: String,
@@ -111,9 +119,14 @@ fun AppNavGraph(
     val shouldShowHomeBottomBanner = showHomeBottomBanner(
         currentBackStackEntry?.destination?.route
     )
-    val shouldShowBatteryEditorBottomBanner = showBatteryEditorBottomBanner(
-        currentBackStackEntry?.destination?.route
+    val currentRoute = currentBackStackEntry?.destination?.route
+    val currentEditorPage = currentBackStackEntry?.arguments?.getString("page")
+    val shouldShowBatteryStatusOptionNative = showBatteryStatusOptionNative(
+        currentRoute,
+        currentEditorPage
     )
+    val shouldShowBatteryEditorBottomBanner =
+        showBatteryEditorBottomBanner(currentRoute) && !shouldShowBatteryStatusOptionNative
 
     fun navigateToHomeTab(tab: HomeTab) {
         val route = routeForHomeTab(tab)
@@ -539,7 +552,15 @@ fun AppNavGraph(
                 onTabSelected = ::navigateToHomeTab
             )
         }
-        if (shouldShowHomeBottomBanner || shouldShowBatteryEditorBottomBanner) {
+        if (shouldShowBatteryStatusOptionNative) {
+            NativeAdInternal(
+                screenCode = SCREEN_HOME,
+                instanceKey = "battery_status_option_collapsible",
+                adTypeOverride = AdType.COLLAPSE_SMALL,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.navigationBarsPadding())
+        } else if (shouldShowHomeBottomBanner || shouldShowBatteryEditorBottomBanner) {
             BannerAd(
                 modifier = Modifier.fillMaxWidth(),
                 adPosition = if (shouldShowBatteryEditorBottomBanner) {

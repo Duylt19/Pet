@@ -57,7 +57,7 @@ Discover/My Pet ──Battery──> Battery Styles ──More──> Battery ca
 Customize Battery Bar ──Apply khi chưa có quyền──> Accessibility disclosure/settings
   └─ theme ID khởi tạo cả pet + pin; editor có thể mix hai theme khác nhau
 Customize Battery Bar ──locked pet/pin──> Rewarded hoặc Premium ──return──> chọn component
-Customize Battery Bar ──component option──> Component Editor ──Done/Back──> đúng scroll offset của overview
+Customize Battery Bar ──custom icon──> Icon Editor ──Apply/Back──> đúng draft và scroll offset của overview
 Customize Battery Bar ──Apply(service on)──> persist config + accessibility overlay
 ```
 
@@ -85,9 +85,9 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
   pop về Battery Styles; Battery Styles là top-level Home tab. Premium mở từ
   catalog hoặc picker component trong editor rồi quay lại đúng destination theo back stack;
   editor refresh entitlement và hoàn tất pending component selection khi resume.
-- Mỗi Battery component editor là một destination nằm trên overview. Nó dùng ViewModel của
-  overview để giữ nguyên draft/live preview; Back hoặc Done chỉ pop destination con, vì vậy
-  overview phục hồi đúng scroll offset và không khởi tạo lại catalog/picker.
+- Mỗi Battery component editor là một destination nằm trên overview và dùng ViewModel của
+  overview. Sáu editor Airplane/Ringer/Date/Hotspot/Charge/Clock dùng preview cố định, Apply
+  cố định và state riêng cho từng switch; Clock không còn dùng chung size/màu với Date.
 - Theme selection trong Battery Styles mở editor ngay cả khi chưa có Accessibility. Preview
   nhúng vẫn hoạt động; Apply mới hiện disclosure và chỉ bật overlay khi quyền hợp lệ.
 - Mọi action xin Accessibility trong Discover, Battery Styles, Mine, Status Bar Editor và Grant

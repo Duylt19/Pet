@@ -62,6 +62,7 @@ class BatterySettingsPolicy(
         ringerSizeDp = config.ringerSizeDp.statusSize(),
         chargeSizeDp = config.chargeSizeDp.statusSize(),
         dateTimeSizeDp = config.dateTimeSizeDp.statusSize(),
+        clockSizeDp = config.clockSizeDp.statusSize(),
         wifiIconStyleIndex = config.wifiIconStyleIndex.statusIconStyle(),
         signalIconStyleIndex = config.signalIconStyleIndex.statusIconStyle(),
         airplaneIconStyleIndex = config.airplaneIconStyleIndex.statusIconStyle(),
@@ -87,6 +88,7 @@ class BatterySettingsPolicy(
         ringerColorArgb = config.ringerColorArgb.statusColor(),
         chargeColorArgb = config.chargeColorArgb.statusColor(),
         dateTimeColorArgb = config.dateTimeColorArgb.statusColor(),
+        clockColorArgb = config.clockColorArgb.statusColor(),
         favoriteThemeIds = config.favoriteThemeIds.filterTo(mutableSetOf()) { it >= 0 },
         rewardUnlockedThemeIds = config.rewardUnlockedThemeIds
             .filterTo(mutableSetOf()) { it > BUILT_IN_BATTERY_THEME_ID }

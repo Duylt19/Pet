@@ -102,15 +102,19 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             preferences[SIGNAL_COLOR] = sanitized.signalColorArgb
             preferences[SIGNAL_ICON_STYLE_INDEX] = sanitized.signalIconStyleIndex
             preferences[AIRPLANE_SIZE_DP] = sanitized.airplaneSizeDp
+            preferences[SHOW_AIRPLANE] = sanitized.showAirplane
             preferences[AIRPLANE_COLOR] = sanitized.airplaneColorArgb
             preferences[AIRPLANE_ICON_STYLE_INDEX] = sanitized.airplaneIconStyleIndex
             preferences[HOTSPOT_SIZE_DP] = sanitized.hotspotSizeDp
+            preferences[SHOW_HOTSPOT] = sanitized.showHotspot
             preferences[HOTSPOT_COLOR] = sanitized.hotspotColorArgb
             preferences[HOTSPOT_ICON_STYLE_INDEX] = sanitized.hotspotIconStyleIndex
             preferences[RINGER_SIZE_DP] = sanitized.ringerSizeDp
+            preferences[SHOW_RINGER] = sanitized.showRinger
             preferences[RINGER_COLOR] = sanitized.ringerColorArgb
             preferences[RINGER_ICON_STYLE_INDEX] = sanitized.ringerIconStyleIndex
             preferences[CHARGE_SIZE_DP] = sanitized.chargeSizeDp
+            preferences[SHOW_CHARGE] = sanitized.showCharge
             preferences[CHARGE_ICON_INDEX] = sanitized.chargeIconIndex
             preferences[CHARGE_COLOR] = sanitized.chargeColorArgb
             preferences[SHOW_DATE_TIME] = sanitized.showDateTime
@@ -118,6 +122,8 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             preferences[DATE_TIME_SIZE_DP] = sanitized.dateTimeSizeDp
             preferences[DATE_FORMAT] = sanitized.dateFormat.name
             preferences[DATE_TIME_FONT] = sanitized.dateTimeFont.name
+            preferences[CLOCK_COLOR] = sanitized.clockColorArgb
+            preferences[CLOCK_SIZE_DP] = sanitized.clockSizeDp
             preferences[PRIVACY_RESERVE_DP] = sanitized.privacyReserveDp
             preferences[FAVORITE_THEME_IDS] =
                 sanitized.favoriteThemeIds.map(Int::toString).toSet()
@@ -211,19 +217,23 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                 signalIconStyleIndex = preferences[SIGNAL_ICON_STYLE_INDEX]
                     ?: defaults.signalIconStyleIndex,
                 airplaneSizeDp = preferences[AIRPLANE_SIZE_DP] ?: defaults.airplaneSizeDp,
+                showAirplane = preferences[SHOW_AIRPLANE] ?: defaults.showAirplane,
                 airplaneColorArgb = preferences[AIRPLANE_COLOR]
                     ?: defaults.airplaneColorArgb,
                 airplaneIconStyleIndex = preferences[AIRPLANE_ICON_STYLE_INDEX]
                     ?: defaults.airplaneIconStyleIndex,
                 hotspotSizeDp = preferences[HOTSPOT_SIZE_DP] ?: defaults.hotspotSizeDp,
+                showHotspot = preferences[SHOW_HOTSPOT] ?: defaults.showHotspot,
                 hotspotColorArgb = preferences[HOTSPOT_COLOR] ?: defaults.hotspotColorArgb,
                 hotspotIconStyleIndex = preferences[HOTSPOT_ICON_STYLE_INDEX]
                     ?: defaults.hotspotIconStyleIndex,
                 ringerSizeDp = preferences[RINGER_SIZE_DP] ?: defaults.ringerSizeDp,
+                showRinger = preferences[SHOW_RINGER] ?: defaults.showRinger,
                 ringerColorArgb = preferences[RINGER_COLOR] ?: defaults.ringerColorArgb,
                 ringerIconStyleIndex = preferences[RINGER_ICON_STYLE_INDEX]
                     ?: defaults.ringerIconStyleIndex,
                 chargeSizeDp = preferences[CHARGE_SIZE_DP] ?: defaults.chargeSizeDp,
+                showCharge = preferences[SHOW_CHARGE] ?: defaults.showCharge,
                 chargeIconIndex = preferences[CHARGE_ICON_INDEX]
                     ?: defaults.chargeIconIndex,
                 chargeColorArgb = preferences[CHARGE_COLOR] ?: defaults.chargeColorArgb,
@@ -237,6 +247,12 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                 dateTimeFont = preferences[DATE_TIME_FONT]
                     ?.let { name -> BatteryDateFont.entries.firstOrNull { it.name == name } }
                     ?: defaults.dateTimeFont,
+                clockColorArgb = preferences[CLOCK_COLOR]
+                    ?: preferences[DATE_TIME_COLOR]
+                    ?: defaults.clockColorArgb,
+                clockSizeDp = preferences[CLOCK_SIZE_DP]
+                    ?: preferences[DATE_TIME_SIZE_DP]
+                    ?: defaults.clockSizeDp,
                 privacyReserveDp = preferences[PRIVACY_RESERVE_DP]
                     ?: DEFAULT_BATTERY_PRIVACY_RESERVE_DP,
                 favoriteThemeIds = decodeFavoriteIds(preferences),
@@ -305,18 +321,22 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         val SIGNAL_ICON_STYLE_INDEX =
             intPreferencesKey("battery_status_signal_icon_style_index")
         val AIRPLANE_SIZE_DP = floatPreferencesKey("battery_status_airplane_size_dp")
+        val SHOW_AIRPLANE = booleanPreferencesKey("battery_status_show_airplane")
         val AIRPLANE_COLOR = intPreferencesKey("battery_status_airplane_color")
         val AIRPLANE_ICON_STYLE_INDEX =
             intPreferencesKey("battery_status_airplane_icon_style_index")
         val HOTSPOT_SIZE_DP = floatPreferencesKey("battery_status_hotspot_size_dp")
+        val SHOW_HOTSPOT = booleanPreferencesKey("battery_status_show_hotspot")
         val HOTSPOT_COLOR = intPreferencesKey("battery_status_hotspot_color")
         val HOTSPOT_ICON_STYLE_INDEX =
             intPreferencesKey("battery_status_hotspot_icon_style_index")
         val RINGER_SIZE_DP = floatPreferencesKey("battery_status_ringer_size_dp")
+        val SHOW_RINGER = booleanPreferencesKey("battery_status_show_ringer")
         val RINGER_COLOR = intPreferencesKey("battery_status_ringer_color")
         val RINGER_ICON_STYLE_INDEX =
             intPreferencesKey("battery_status_ringer_icon_style_index")
         val CHARGE_SIZE_DP = floatPreferencesKey("battery_status_charge_size_dp")
+        val SHOW_CHARGE = booleanPreferencesKey("battery_status_show_charge")
         val CHARGE_ICON_INDEX = intPreferencesKey("battery_status_charge_icon_index")
         val CHARGE_COLOR = intPreferencesKey("battery_status_charge_color")
         val SHOW_DATE_TIME = booleanPreferencesKey("battery_status_show_date_time")
@@ -324,6 +344,8 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         val DATE_TIME_SIZE_DP = floatPreferencesKey("battery_status_date_time_size_dp")
         val DATE_FORMAT = stringPreferencesKey("battery_status_date_format")
         val DATE_TIME_FONT = stringPreferencesKey("battery_status_date_time_font")
+        val CLOCK_COLOR = intPreferencesKey("battery_status_clock_color")
+        val CLOCK_SIZE_DP = floatPreferencesKey("battery_status_clock_size_dp")
         val PRIVACY_RESERVE_DP = floatPreferencesKey("battery_status_privacy_reserve_dp")
         val FAVORITE_THEME_IDS = stringSetPreferencesKey("battery_status_favorite_theme_ids")
         val REWARD_UNLOCKED_THEME_IDS =

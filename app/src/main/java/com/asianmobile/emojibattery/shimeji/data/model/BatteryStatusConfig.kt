@@ -35,22 +35,28 @@ data class BatteryStatusConfig(
     val signalColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
     val signalIconStyleIndex: Int = DEFAULT_BATTERY_STATUS_ICON_STYLE_INDEX,
     val airplaneSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
+    val showAirplane: Boolean = true,
     val airplaneColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
     val airplaneIconStyleIndex: Int = DEFAULT_BATTERY_STATUS_ICON_STYLE_INDEX,
     val hotspotSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
+    val showHotspot: Boolean = true,
     val hotspotColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
     val hotspotIconStyleIndex: Int = DEFAULT_BATTERY_HOTSPOT_ICON_STYLE_INDEX,
     val ringerSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
+    val showRinger: Boolean = true,
     val ringerColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
     val ringerIconStyleIndex: Int = DEFAULT_BATTERY_STATUS_ICON_STYLE_INDEX,
     val chargeSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
+    val showCharge: Boolean = true,
     val chargeIconIndex: Int = DEFAULT_BATTERY_CHARGE_ICON_INDEX,
     val chargeColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
     val showDateTime: Boolean = false,
     val dateTimeColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
     val dateTimeSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
     val dateFormat: BatteryDateFormat = BatteryDateFormat.WEEKDAY_MONTH_DAY,
-    val dateTimeFont: BatteryDateFont = BatteryDateFont.BALOO_2,
+    val dateTimeFont: BatteryDateFont = BatteryDateFont.MEDIUM,
+    val clockColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
+    val clockSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
     val privacyReserveDp: Float = DEFAULT_BATTERY_PRIVACY_RESERVE_DP,
     val favoriteThemeIds: Set<Int> = emptySet(),
     val rewardUnlockedThemeIds: Set<Int> = emptySet()
@@ -83,12 +89,12 @@ enum class BatteryDateFont(
     val displayName: String,
     val resourceName: String
 ) {
-    BALOO_2("Baloo 2", "baloo2_variable_wght"),
-    BAKBAK_ONE("Bakbak One", "bakbak_one_normal"),
-    BASIC("Basic", "basic_normal"),
-    BODONI_MODA_SC("Bodoni Moda SC", "bodoni_moda_sc_bold"),
-    BAUHAUS_93("Bauhaus 93", "bauhaus_93_normal"),
-    BEAU_RIVAGE("Beau Rivage", "beau_rivage_normal")
+    MEDIUM("Medium", "roboto_medium"),
+    BOLD("Bold", "roboto_bold"),
+    RUSSO_ONE("Russo One", "russo_one_regular"),
+    NUNITO("Nunito", "nunito_bold"),
+    COINY("Coiny", "coiny_regular"),
+    DANCING_SCRIPT("Dancing Script", "dancing_script_bold")
 }
 
 const val MIN_BATTERY_BAR_HEIGHT_DP = 8f
@@ -107,7 +113,8 @@ const val DEFAULT_BATTERY_PRIVACY_RESERVE_DP = 72f
 const val DEFAULT_BATTERY_BACKGROUND_ID = 17
 const val DEFAULT_BATTERY_EMOTION_ID = 1
 const val DEFAULT_BATTERY_ANIMATION_ASSET = "cute_1.json"
-const val DEFAULT_BATTERY_CHARGE_ICON_INDEX = 1
+// Figma's leading Charge style maps to the simple bolt stored as charge_10.
+const val DEFAULT_BATTERY_CHARGE_ICON_INDEX = 10
 const val DEFAULT_BATTERY_STATUS_ICON_STYLE_INDEX = 1
 const val DEFAULT_BATTERY_WIFI_ICON_STYLE_INDEX = 2
 const val DEFAULT_BATTERY_HOTSPOT_ICON_STYLE_INDEX = 3

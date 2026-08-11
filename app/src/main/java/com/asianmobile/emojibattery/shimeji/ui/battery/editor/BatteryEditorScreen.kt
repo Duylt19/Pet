@@ -163,7 +163,8 @@ internal enum class BatteryEditorPage {
     HOTSPOT,
     RINGER,
     CHARGE,
-    DATE_TIME;
+    DATE_TIME,
+    CLOCK;
 
     companion object {
         fun fromRoute(value: String?): BatteryEditorPage? =
@@ -374,6 +375,16 @@ private fun BatteryEditorContent(
     onApply: () -> Unit,
     onDisable: () -> Unit
 ) {
+    if (page.isStatusOptionPage()) {
+        BatteryStatusOptionFigmaScreen(
+            state = state,
+            page = page,
+            onBack = onBack,
+            onConfig = onConfig,
+            onApply = onApply
+        )
+        return
+    }
     if (page == BatteryEditorPage.OVERVIEW || page.isFigmaPickerPage()) {
         BatteryEditorFigmaContent(
             state = state,
@@ -510,6 +521,7 @@ private fun BatteryEditorContent(
                 )
                 BatteryEditorPage.CHARGE -> ChargeEditor(state.config, onConfig)
                 BatteryEditorPage.DATE_TIME -> DateTimeEditor(state.config, onConfig)
+                BatteryEditorPage.CLOCK -> DateTimeEditor(state.config, onConfig)
             }
             if (page == BatteryEditorPage.OVERVIEW) {
                 Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
@@ -550,6 +562,7 @@ private fun editorPageTitle(page: BatteryEditorPage): String = when (page) {
     BatteryEditorPage.RINGER -> stringResource(R.string.battery_component_ringer)
     BatteryEditorPage.CHARGE -> stringResource(R.string.battery_component_charge)
     BatteryEditorPage.DATE_TIME -> stringResource(R.string.battery_component_date)
+    BatteryEditorPage.CLOCK -> stringResource(R.string.battery_component_clock)
 }
 
 @Composable
@@ -1818,9 +1831,9 @@ internal fun BatteryPreview(
             if (layout.shows(BatteryStatusComponent.TIME)) {
                 Text(
                     text = stringResource(R.string.battery_preview_time),
-                    color = Color(config.dateTimeColorArgb),
-                    fontFamily = previewDateFont,
-                    fontSize = config.dateTimeSizeDp.sp,
+                    color = Color(config.clockColorArgb),
+                    fontFamily = RobotoFontFamily,
+                    fontSize = config.clockSizeDp.sp,
                     maxLines = 1
                 )
             }
@@ -1992,9 +2005,10 @@ internal fun batteryPreviewLayout(
             add(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.TIME,
-                    width = config.dateTimeSizeDp * 3.2f + gap,
+                    width = config.clockSizeDp * 3.2f + gap,
                     priority = 100,
-                    required = focusedComponent == BatteryStatusComponent.DATE
+                    required = focusedComponent == BatteryStatusComponent.DATE ||
+                        focusedComponent == BatteryStatusComponent.TIME
                 )
             )
         }
@@ -2008,7 +2022,7 @@ internal fun batteryPreviewLayout(
                 )
             )
         }
-        if (focusedComponent == BatteryStatusComponent.AIRPLANE) {
+        if (config.showAirplane && focusedComponent == BatteryStatusComponent.AIRPLANE) {
             add(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.AIRPLANE,
@@ -2018,7 +2032,7 @@ internal fun batteryPreviewLayout(
                 )
             )
         }
-        if (focusedComponent == BatteryStatusComponent.RINGER) {
+        if (config.showRinger && focusedComponent == BatteryStatusComponent.RINGER) {
             add(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.RINGER,
@@ -2047,7 +2061,7 @@ internal fun batteryPreviewLayout(
                 )
             )
         }
-        if (focusedComponent == BatteryStatusComponent.CHARGE) {
+        if (config.showCharge && focusedComponent == BatteryStatusComponent.CHARGE) {
             add(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.CHARGE,
@@ -2097,7 +2111,7 @@ internal fun batteryPreviewLayout(
                 )
             )
         }
-        if (focusedComponent == BatteryStatusComponent.HOTSPOT) {
+        if (config.showHotspot && focusedComponent == BatteryStatusComponent.HOTSPOT) {
             add(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.HOTSPOT,
@@ -2120,6 +2134,7 @@ private fun BatteryEditorPage.previewComponent(): BatteryStatusComponent? = when
     BatteryEditorPage.RINGER -> BatteryStatusComponent.RINGER
     BatteryEditorPage.CHARGE -> BatteryStatusComponent.CHARGE
     BatteryEditorPage.DATE_TIME -> BatteryStatusComponent.DATE
+    BatteryEditorPage.CLOCK -> BatteryStatusComponent.TIME
     else -> null
 }
 
@@ -2148,6 +2163,7 @@ private fun BatteryEditorPage.analyticsScreen(): ScreenName = when (this) {
     BatteryEditorPage.RINGER -> ScreenName.BATTERY_RINGER_EDITOR
     BatteryEditorPage.CHARGE -> ScreenName.BATTERY_CHARGE_EDITOR
     BatteryEditorPage.DATE_TIME -> ScreenName.BATTERY_DATE_TIME_EDITOR
+    BatteryEditorPage.CLOCK -> ScreenName.BATTERY_DATE_TIME_EDITOR
 }
 
 @Composable

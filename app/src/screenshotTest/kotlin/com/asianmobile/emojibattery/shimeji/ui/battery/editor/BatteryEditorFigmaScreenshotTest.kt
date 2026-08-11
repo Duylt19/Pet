@@ -46,6 +46,36 @@ fun BatteryEditorThemePickerScreenshotTest() {
 }
 
 @PreviewTest
+@Preview(name = "Status bar Airplane option", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryAirplaneOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.AIRPLANE)
+
+@PreviewTest
+@Preview(name = "Status bar Ringer option", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryRingerOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.RINGER)
+
+@PreviewTest
+@Preview(name = "Status bar Date option", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryDateOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.DATE_TIME)
+
+@PreviewTest
+@Preview(name = "Status bar Hotspot option", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryHotspotOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.HOTSPOT)
+
+@PreviewTest
+@Preview(name = "Status bar Charge option", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryChargeOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.CHARGE)
+
+@PreviewTest
+@Preview(name = "Status bar Clock option", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryClockOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.CLOCK)
+
+@PreviewTest
 @Preview(name = "Status bar color picker", widthDp = 360, heightDp = 491)
 @Composable
 fun BatteryEditorColorPickerScreenshotTest() {
@@ -137,6 +167,42 @@ private fun PreviewEditorPage(page: BatteryEditorPage) {
             contentAlignment = Alignment.Center
         ) {
             Text("AD")
+        }
+    }
+}
+
+@Composable
+private fun PreviewStatusOptionPage(page: BatteryEditorPage) {
+    val baseState = previewEditorState()
+    val optionState = baseState.copy(
+        config = baseState.config.copy(
+            showDateTime = true,
+            dateTimeColorArgb = 0xFF000000.toInt(),
+            clockColorArgb = 0xFF000000.toInt(),
+            airplaneColorArgb = 0xFF000000.toInt(),
+            hotspotColorArgb = 0xFF000000.toInt(),
+            ringerColorArgb = 0xFF000000.toInt(),
+            chargeColorArgb = 0xFF000000.toInt()
+        )
+    )
+    Column(Modifier.fillMaxSize()) {
+        Box(Modifier.weight(1f)) {
+            BatteryStatusOptionFigmaScreen(
+                state = optionState,
+                page = page,
+                onBack = {},
+                onConfig = {},
+                onApply = {}
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("COLLAPSIBLE AD")
         }
     }
 }
