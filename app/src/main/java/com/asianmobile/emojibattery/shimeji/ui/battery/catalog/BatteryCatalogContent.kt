@@ -373,7 +373,6 @@ internal fun BatteryCategoryContent(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(dimensionResource(SdpR.dimen._38sdp))
                             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._3sdp))),
                         contentAlignment = Alignment.Center
                     ) {
@@ -714,7 +713,8 @@ internal fun BatteryAdPreviewSlot(modifier: Modifier = Modifier) {
 internal fun BatteryInlineBannerPreviewSlot() {
     Box(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._38sdp))
             .background(colorResource(R.color.colors_FFEBF1))
     )
 }

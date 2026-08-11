@@ -59,7 +59,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ui.theme.RobotoFontFamily
+import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_SEARCH_INLINE
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
+import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ui.component.CATALOG_ITEM_PREVIEW_FRACTION
 import com.asianmobile.emojibattery.shimeji.ui.component.PetPremiumBadge
@@ -334,14 +336,7 @@ private fun ResultsSection(
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
     ) {
         SearchSectionTitle(text = stringResource(R.string.search_results))
-        Image(
-            painter = painterResource(R.drawable.img_home_promo_banner),
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._38sdp))
-        )
+        BannerAd(adPosition = BANNER_SEARCH_INLINE)
         when {
             uiState.isLoading && uiState.isEmpty -> {
                 SearchMessage {

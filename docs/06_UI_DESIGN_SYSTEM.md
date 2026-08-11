@@ -71,8 +71,8 @@ Discover Home contract:
 - Discover, Pet Store và Mine dùng chung `HomeHeader` và `HomeEnableCard`: header `43sdp`, search
   `25sdp`, enable card `37sdp`, switch `34×18sdp`. Discover chỉ render Battery enable card;
   pet switch được quản lý ở flow pet. Không copy component rồi đổi metric riêng;
-- Discover hero dùng composite `Battery Troll` PNG @3x tại tỉ lệ `328×100px`; promo creative
-  `360×50px` thấp hơn là presentational slot riêng, không gọi ads SDK;
+- Discover hero dùng composite `Battery Troll` PNG @3x tại tỉ lệ `328×100px`; banner thấp hơn
+  dùng placement SDK thật `discover_inline`, không đóng gói creative quảng cáo mẫu;
 - Battery Themes dùng favorite state thật; Trending hiện dùng thứ tự catalog cho tới khi
   server có ranking riêng.
 
@@ -88,7 +88,7 @@ Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
   reward; entitlement được đọc lại khi Search resume;
 - category header dùng trực tiếp emoji ở đầu `category.name`; không ghép thêm drawable/icon riêng
   để tránh hiển thị trùng khi catalog cập nhật tên category;
-- More mở child route có header Back/title/PRO, inline banner và grid ba cột. Card detail giữ
+- More mở child route có header Back/title/PRO, inline banner SDK thật và grid ba cột. Card detail giữ
   tỷ lệ vuông, preview `74/101.333`, selected dùng `#FFEBF1` + stroke `#FB3675`, không hiện heart;
 - landing giữ Home bottom navigation; detail ẩn navigation nhưng giữ cùng bottom banner holder.
   DIY FAB và Lottie star bling dùng lại component Discover.

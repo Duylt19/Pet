@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -186,7 +187,14 @@ fun BannerAd(
                     if (adView.parent != bannerContainer) {
                         (adView.parent as? ViewGroup)?.removeView(adView)
                         bannerContainer.removeAllViews()
-                        bannerContainer.addView(adView)
+                        bannerContainer.addView(
+                            adView,
+                            FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                Gravity.CENTER
+                            )
+                        )
                     }
                 } else if (adViewModel.isAdFailed) {
                     shimmerLayout.stopShimmer()

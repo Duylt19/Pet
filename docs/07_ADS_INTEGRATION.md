@@ -21,8 +21,8 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   khi chuyển giữa Discover, Battery, Pet Store và Mine nên không request/reload lại theo tab.
   Battery category ẩn bottom navigation nhưng vẫn giữ cùng holder/banner key khi mở từ Battery.
   Banner chỉ dispose khi đi khỏi toàn bộ nhóm này. Settings khi chạy trong shell
-  không render thêm native ad để tránh hai placement xếp chồng. Hero placeholder và promo
-  creative giữa content là presentational Figma assets, không gọi ads SDK.
+  không render thêm native ad để tránh hai placement xếp chồng. Hero Battery Troll là asset
+  presentational; slot promo thấp hơn dùng banner SDK `discover_inline`.
 - Grant Permissions dùng lại native placement `screen_permission` của màn Permission onboarding,
   ghim cố định dưới danh sách quyền chứ không cuộn theo. Không thêm placement mới vì hai màn
   cùng một ngữ cảnh xin quyền. Mọi row rời sang màn hệ thống đều tắt `needShowOpenAds` trong
@@ -33,16 +33,19 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   `AdType.HEIGHT_222` và `instanceKey=accessibility_disclosure`. Native nằm sát đáy sheet theo
   Figma; nếu placement không load/đã Premium thì slot collapse. Mọi launcher Accessibility dùng
   cùng contract tắt App Open Ad trước khi rời app.
-- Search tái sử dụng native placement `screen_home` ở đáy màn hình theo Figma; placement
-  vẫn tuân theo remote key, frequency/ad-free policy và failure fallback chung của module ads.
+- Search tái sử dụng native placement `screen_home` ở đáy màn hình và banner SDK
+  `search_inline` trong content theo Figma; cả hai vẫn tuân theo remote key, frequency/ad-free
+  policy và failure fallback chung của module ads.
 - Battery landing tái sử dụng native placement `screen_home` với template `HEIGHT_150` sau
   section đầu tiên. Category detail có banner inline `battery_category_inline`; creative do SDK
   tải, không đóng gói ảnh quảng cáo mẫu trong Figma. Bottom banner vẫn là holder của shell.
 - Customize Status Bar và các child library dùng một holder shell riêng với key
   `battery_editor_bottom`, nằm ngoài NavHost content để overview → Battery/Emoji/Theme không
   tự tạo hoặc reload banner.
-- Banner holder dùng nền trắng và shimmer `#E6E6E6` để phần dư quanh creative 320×50
-  hòa vào surface 360px của Figma thay vì lộ dải nền tối.
+- Các banner inline `discover_inline`, `search_inline` và `battery_category_inline` có ViewModel
+  key riêng để không dùng chung ad object với banner shell. Holder căn giữa creative SDK 320×50,
+  dùng nền trắng và shimmer `#E6E6E6`; khi ads bị tắt/Premium/load fail thì slot collapse, không
+  thay thế bằng ảnh creative mẫu.
 
 ## Pet Swarm Rewarded unlock
 

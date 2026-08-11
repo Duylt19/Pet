@@ -68,6 +68,8 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_DISCOVER_INLINE
+import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.component.CATALOG_ITEM_PREVIEW_FRACTION
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
@@ -219,14 +221,12 @@ private fun DiscoverContent(
                     }
                     item {
                         Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
-                        Image(
-                            painter = painterResource(R.drawable.img_home_promo_banner),
-                            contentDescription = null,
-                            contentScale = ContentScale.FillWidth,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(dimensionResource(SdpR.dimen._38sdp))
-                        )
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            BannerAd(adPosition = BANNER_DISCOVER_INLINE)
+                        }
                     }
                     item {
                         Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
