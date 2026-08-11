@@ -59,7 +59,7 @@ ui/battery/assets/
 └── StatusAssetCatalogUiState.kt
 ```
 
-Shared UI nằm trong `ui/battery/component` trước; chỉ move sang `ui/component` khi có
+Shared UI nằm trong `ui/battery/component` trước; chỉ move sang `ui/shared/component` khi có
 consumer ngoài battery feature.
 
 ## Battery Catalog

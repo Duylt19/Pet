@@ -32,9 +32,9 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.emojibattery.shimeji.ads.utils.AdOverlayState
 import com.asianmobile.emojibattery.shimeji.navigation.AppNavGraph
 import com.asianmobile.emojibattery.shimeji.navigation.Routes
-import com.asianmobile.emojibattery.shimeji.ui.component.ExitDialog
-import com.asianmobile.emojibattery.shimeji.ui.main.MainViewModel
-import com.asianmobile.emojibattery.shimeji.ui.theme.BaseAppTheme
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.ExitDialog
+import com.asianmobile.emojibattery.shimeji.ui.app.MainViewModel
+import com.asianmobile.emojibattery.shimeji.ui.shared.theme.BaseAppTheme
 import com.asianmobile.emojibattery.shimeji.utils.LanguageUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch

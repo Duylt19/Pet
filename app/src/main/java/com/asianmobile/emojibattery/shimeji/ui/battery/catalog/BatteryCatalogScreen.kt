@@ -22,8 +22,8 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
-import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
-import com.asianmobile.emojibattery.shimeji.ui.component.rememberAccessibilitySettingsLauncher
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.rememberAccessibilitySettingsLauncher
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 

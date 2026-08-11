@@ -46,27 +46,28 @@ com.asianmobile.emojibattery.shimeji/
 │   ├── overlay/                # Accessibility window, renderer và platform capability
 │   └── settings/               # Pure config sanitization policy
 ├── ui/
-│   ├── battery/                # Catalog + editor Screen/ViewModel/UiState
-│   ├── component/              # Shared stateless UI
-│   ├── splash/
-│   ├── language/
-│   ├── intro/
-│   ├── permission/
-│   ├── discover/               # Discover Home + catalog summaries
-│   ├── home/                   # My Pet mode + settings
-│   ├── catalog/                # Pack catalog/detail/import/select
+│   ├── app/                    # App-level presentation state
+│   ├── onboarding/             # Splash, Language, Intro, Permission
+│   ├── home/                   # Discover; legacy Home không còn route tách riêng
+│   ├── battery/                # Catalog, Favourite/Recent, Editor
+│   ├── pet/                    # Catalog, Store, Room, Customization, Swarm
+│   ├── settings/               # Mine và permission management
+│   ├── search/
 │   ├── premium/
-│   ├── main/
-│   └── theme/
+│   └── shared/                 # Component và theme dùng chung
 └── utils/                      # Platform/helper cross-feature nhỏ
 ```
+
+Xem [UI_STRUCTURE.md](UI_STRUCTURE.md) để tra route ↔ package và ownership của từng
+flow. Cây package presentation phải phản ánh domain sản phẩm, không phản ánh thứ tự
+lịch sử mà file được tạo.
 
 ## Feature template
 
 Mỗi screen mới mặc định:
 
 ```text
-ui/feature/
+ui/<domain>/<feature>/
 ├── FeatureScreen.kt
 ├── FeatureViewModel.kt
 └── FeatureUiState.kt
@@ -75,7 +76,10 @@ ui/feature/
 - Screen collect `StateFlow` lifecycle-aware, render state, gửi callback/action.
 - ViewModel chứa orchestration/business logic, dùng `viewModelScope`.
 - UiState immutable và đủ biểu diễn loading/content/empty/error.
-- Component tái sử dụng trong feature đặt cùng package; dùng `ui/component` chỉ khi thật sự cross-feature.
+- Component tái sử dụng trong feature đặt cùng package; dùng
+  `ui/shared/component` chỉ khi thật sự cross-feature.
+- Test source và screenshot test phải mirror package của source để tìm feature nhanh và
+  tiếp tục truy cập được các policy/composable `internal`.
 
 ## Data boundary
 

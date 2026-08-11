@@ -84,7 +84,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.ui.theme.RobotoFontFamily
+import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.ads.utils.Utils
 import com.asianmobile.emojibattery.shimeji.constant.BASE_MONTHLY_COST_ID

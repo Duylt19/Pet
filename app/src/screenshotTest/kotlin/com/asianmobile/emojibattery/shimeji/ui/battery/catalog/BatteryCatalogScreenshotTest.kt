@@ -10,7 +10,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.ui.component.RewardOfferSheetSurface
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOfferSheetSurface
 
 @PreviewTest
 @Preview(name = "Battery catalog", widthDp = 360, heightDp = 800)

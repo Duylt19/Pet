@@ -59,15 +59,15 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
-import com.asianmobile.emojibattery.shimeji.ui.component.CATALOG_ITEM_PREVIEW_FRACTION
-import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
-import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
-import com.asianmobile.emojibattery.shimeji.ui.component.HomePremiumButton
-import com.asianmobile.emojibattery.shimeji.ui.component.PetPremiumBadge
-import com.asianmobile.emojibattery.shimeji.ui.component.RewardGradientButton
-import com.asianmobile.emojibattery.shimeji.ui.component.RewardOfferSheet
-import com.asianmobile.emojibattery.shimeji.ui.component.RewardOutlineButton
-import com.asianmobile.emojibattery.shimeji.ui.discover.HomeDiyFab
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeHeader
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomePremiumButton
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardGradientButton
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOfferSheet
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOutlineButton
+import com.asianmobile.emojibattery.shimeji.ui.home.discover.HomeDiyFab
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 

@@ -1,0 +1,91 @@
+package com.asianmobile.emojibattery.shimeji.ui.onboarding.language
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import com.asianmobile.emojibattery.shimeji.R
+import com.intuit.sdp.R as R_dimen
+import com.intuit.ssp.R as R_dimen_ssp
+
+/**
+ * Copyright © 2026 Asian Mobile Co.,Ltd
+ * Created by am_viennv on 3/11/2026
+ */
+@Composable
+internal fun LanguageItem(
+    language: Language,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val itemShape = CircleShape
+    val itemShadowColor = colorResource(R.color.colors_666666).copy(alpha = 0.40f)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(R_dimen.dimen._43sdp))
+            .shadow(
+                elevation = dimensionResource(R_dimen.dimen._12sdp),
+                shape = itemShape,
+                ambientColor = itemShadowColor,
+                spotColor = itemShadowColor,
+            )
+            .clip(itemShape)
+            .background(colorResource(R.color.colors_FFFFFF))
+            .clickable(onClick = onClick)
+            .padding(dimensionResource(R_dimen.dimen._9sdp)),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Image(
+            painter = painterResource(language.flag),
+            contentDescription = language.name,
+            modifier = Modifier
+                .size(dimensionResource(R_dimen.dimen._25sdp))
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop
+        )
+
+        Text(
+            text = language.name,
+            fontFamily = FontFamily(Font(R.font.roboto_medium)),
+            fontSize = dimensionResource(id = R_dimen_ssp.dimen._12ssp).value.sp,
+            lineHeight = dimensionResource(id = R_dimen_ssp.dimen._18ssp).value.sp,
+            color = colorResource(R.color.colors_262626),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .padding(start = dimensionResource(R_dimen.dimen._9sdp))
+                .weight(1f),
+        )
+
+        Icon(
+            painter = painterResource(
+                id = if (isSelected) R.drawable.ic_radio_selected else R.drawable.ic_radio_unselected
+            ),
+            contentDescription = null,
+            tint = androidx.compose.ui.graphics.Color.Unspecified,
+            modifier = Modifier.size(dimensionResource(R_dimen.dimen._18sdp)),
+        )
+    }
+}

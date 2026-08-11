@@ -1,6 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.navigation
 
-import com.asianmobile.emojibattery.shimeji.ui.component.HomeTab
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeTab
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

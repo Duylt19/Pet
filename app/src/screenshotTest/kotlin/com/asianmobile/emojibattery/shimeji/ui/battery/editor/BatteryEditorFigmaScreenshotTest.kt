@@ -22,7 +22,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
-import com.asianmobile.emojibattery.shimeji.ui.component.RewardOfferSheetSurface
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOfferSheetSurface
 
 @PreviewTest
 @Preview(name = "Status bar editor expanded", widthDp = 360, heightDp = 800)

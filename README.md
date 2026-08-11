@@ -71,23 +71,24 @@ app/src/main/java/com/asianmobile/emojibattery/shimeji/
 │   ├── overlay/                # Accessibility status-cover window/renderer
 │   └── settings/               # Battery config sanitization
 ├── ui/
-│   ├── component/
-│   ├── splash/
-│   ├── language/
-│   ├── intro/
-│   ├── permission/
-│   ├── home/
-│   ├── catalog/
-│   ├── battery/
+│   ├── app/                     # MainViewModel/app-level presentation
+│   ├── onboarding/              # splash → language → intro → permission
+│   ├── home/                    # Discover + legacy Home không còn route
+│   ├── battery/                 # catalog → favourite/recent → editor
+│   ├── pet/                     # catalog/store/room/customization/swarm
+│   ├── settings/                # Mine + permission management
+│   ├── search/
 │   ├── premium/
-│   ├── main/
-│   └── theme/
+│   └── shared/                  # reusable component + app theme
 └── utils/
 ```
 
+Bản đồ package và route chi tiết: [UI structure](docs/UI_STRUCTURE.md).
+
 ## Thêm feature mới
 
-1. Tạo `ui/<feature>/<Feature>Screen.kt`, `<Feature>ViewModel.kt`, `<Feature>UiState.kt`.
+1. Chọn domain trước, sau đó tạo
+   `ui/<domain>/<feature>/<Feature>Screen.kt`, `<Feature>ViewModel.kt`, `<Feature>UiState.kt`.
 2. Định nghĩa model/repository/use case trong `data/` nếu feature có dữ liệu hoặc nghiệp vụ riêng.
 3. Bind/provide dependency trong `di/`; không khởi tạo repository/service trực tiếp trong Composable.
 4. Thêm route vào `Routes` và destination vào `AppNavGraph`.

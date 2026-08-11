@@ -84,7 +84,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.ui.theme.RobotoFontFamily
+import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
@@ -106,10 +106,10 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_STYLE_INDEX
-import com.asianmobile.emojibattery.shimeji.ui.component.AppSwitch
-import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTopBar
-import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
-import com.asianmobile.emojibattery.shimeji.ui.component.rememberAccessibilitySettingsLauncher
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.CutePetTopBar
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.rememberAccessibilitySettingsLauncher
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockSheet
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView

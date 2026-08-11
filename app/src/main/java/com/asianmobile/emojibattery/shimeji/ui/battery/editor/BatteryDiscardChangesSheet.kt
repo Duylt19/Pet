@@ -19,9 +19,9 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
-import com.asianmobile.emojibattery.shimeji.ui.component.RewardGradientButton
-import com.asianmobile.emojibattery.shimeji.ui.component.RewardOfferSheet
-import com.asianmobile.emojibattery.shimeji.ui.component.RewardOutlineButton
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardGradientButton
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOfferSheet
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOutlineButton
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 

@@ -14,7 +14,7 @@ Intro, Permission và Premium vẫn giữ UI hiện tại cho tới task update 
   dashboard cho product screens.
 - Discover là landing tổng hợp; My Pet là pet room và session control; Catalog ưu tiên
   discovery bằng grid; Mine là app/support hub; Customize biểu diễn một hồ sơ pet độc lập.
-- Shared primitives nằm ở `ui/component/CutePetComponents.kt`; component dark cũ không được
+- Shared primitives nằm ở `ui/shared/component/CutePetComponents.kt`; component dark cũ không được
   dùng cho product screen mới nếu không có lý do tương thích.
 
 Các màn Intro, Permission và Premium cố ý chưa đổi trong refresh hiện tại.
@@ -157,14 +157,14 @@ System bar:
   sáng thì phải đủ tối để đọc được icon sáng, và không màn nào còn như vậy trong thiết kế mới;
 - helper được gọi lại ở `onCreate`, `onResume` và mỗi lần đổi window focus, vì màn system
   settings, full-screen ad hay system dialog trả window về kèm appearance của chính nó;
-- **nợ đã biết**: onboarding Permission (`ui/permission/PermissionScreen`)
+- **nợ đã biết**: onboarding Permission (`ui/onboarding/permission/PermissionScreen`)
   vẫn còn nền `#161718`, nên icon tối chìm trên màn đó cho tới khi UI được
   dựng lại theo tông trắng. Language đã dùng nền trắng; Splash/Welcome Back dùng wallpaper pastel và Intro dùng
   `img_splash_bg` sáng nên đọc bình thường.
 
 Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343` (tắt):
 
-- `ui/component/AppSwitch.kt` là switch duy nhất của app; mọi toggle dùng nó, không màn nào
+- `ui/shared/component/AppSwitch.kt` là switch duy nhất của app; mọi toggle dùng nó, không màn nào
   tự vẽ bản riêng. Track `44×24` radius 12, núm `20×20` thụt vào `2`, núm **luôn trắng**;
   chỉ track đổi màu: bật `#FB3675`, tắt `#C8C8C9`;
 - inset của núm phải **tính ra từ `(trackHeight - knobSize) / 2`**, không được khai báo thành
@@ -315,7 +315,7 @@ pet không được lặp ở app-wide Settings hoặc ghi vào global state.
   trợ hoặc quá phức tạp để render ổn định trên Android; bitmap fallback phải export `PNG @3x`.
 - Bitmap Figma đặt trong `drawable-nodpi` và luôn có kích thước hiển thị rõ trong Compose để
   Android không dùng kích thước pixel gốc làm layout size.
-- Typography mặc định toàn app dùng `RobotoFontFamily` từ `ui/theme/Type.kt`, gồm Regular
+- Typography mặc định toàn app dùng `RobotoFontFamily` từ `ui/shared/theme/Type.kt`, gồm Regular
   400, Medium 500, SemiBold 600 và Bold 700; mọi Material 3 text role đều phải kế thừa family
   này. Chỉ giữ font riêng cho artwork/promo đã được Figma chỉ định và lựa chọn font ngày giờ
   do user cấu hình. Native-ad typography tiếp tục thuộc design contract riêng của module ads.
@@ -343,7 +343,7 @@ Dùng `dimensionResource` từ `com.intuit.sdp`/`com.intuit.ssp` cho nhóm kích
 
 - Screen: collect state, effect và wiring action.
 - Section/component: stateless nếu có thể.
-- Shared component chỉ đặt ở `ui/component` khi có ít nhất hai consumer hoặc có contract reusable rõ.
+- Shared component chỉ đặt ở `ui/shared/component` khi có ít nhất hai consumer hoặc có contract reusable rõ.
 - Shared Home chrome (`HomeHeader`, `HomeEnableCard`, `HomeBottomNavigation`) do shell/feature
   gọi theo đúng ownership: screen sở hữu header/card, `AppNavGraph` sở hữu bottom navigation.
 - Feature-only component giữ cạnh feature để tránh global component folder phình to.

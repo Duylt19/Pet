@@ -10,10 +10,11 @@
 
 1. [Project overview](01_PROJECT_OVERVIEW.md)
 2. [Architecture contract](02_ARCHITECTURE.md)
-3. [Navigation flow](04_NAVIGATION_FLOW.md)
-4. [Agent coding guidelines](08_AGENT_CODING_GUIDELINES.md)
-5. [Current screens](screens/README.md)
-6. Tài liệu chuyên đề liên quan task
+3. [UI structure](UI_STRUCTURE.md)
+4. [Navigation flow](04_NAVIGATION_FLOW.md)
+5. [Agent coding guidelines](08_AGENT_CODING_GUIDELINES.md)
+6. [Current screens](screens/README.md)
+7. Tài liệu chuyên đề liên quan task
 
 ## Foundation
 
@@ -22,6 +23,7 @@
 | [PACKAGE_IDENTITY.md](PACKAGE_IDENTITY.md) | Package canonical, source roots và legacy identifier |
 | [01_PROJECT_OVERVIEW.md](01_PROJECT_OVERVIEW.md) | Identity và phạm vi sản phẩm |
 | [02_ARCHITECTURE.md](02_ARCHITECTURE.md) | Module, layer, feature template |
+| [UI_STRUCTURE.md](UI_STRUCTURE.md) | Cây package UI, ownership và route map |
 | [03_TECH_STACK.md](03_TECH_STACK.md) | Stack/dependency hiện tại |
 | [04_NAVIGATION_FLOW.md](04_NAVIGATION_FLOW.md) | Routes và back stack |
 | [05_DATA_MODEL.md](05_DATA_MODEL.md) | DataStore/model/repository còn lại |

@@ -1,0 +1,567 @@
+package com.asianmobile.emojibattery.shimeji.ui.settings.permissions
+
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_PERMISSION
+import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
+import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
+import com.asianmobile.emojibattery.shimeji.utils.ScreenName
+import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
+import com.intuit.sdp.R as SdpR
+import com.intuit.ssp.R as SspR
+
+@Composable
+fun GrantPermissionsScreen(
+    onNavigateBack: () -> Unit = {},
+    viewModel: GrantPermissionsViewModel = hiltViewModel()
+) {
+    TrackScreenView(ScreenName.GRANT_PERMISSIONS)
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var showAccessibilityDisclosure by rememberSaveable { mutableStateOf(false) }
+
+    val settingsLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { viewModel.refresh() }
+    val notificationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { viewModel.refresh() }
+
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refresh()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                GrantPermissionsEffect.ShowAccessibilityDisclosure -> {
+                    showAccessibilityDisclosure = true
+                }
+
+                GrantPermissionsEffect.OpenAccessibilitySettings ->
+                    settingsLauncher.openSettings(
+                        BatteryAccessibility.settingsIntent(),
+                        appDetailsIntent(context.packageName)
+                    )
+
+                GrantPermissionsEffect.OpenOverlaySettings ->
+                    settingsLauncher.openSettings(
+                        PetOverlay.permissionIntent(context),
+                        Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                    )
+
+                GrantPermissionsEffect.OpenBatteryOptimizationSettings ->
+                    settingsLauncher.openSettings(
+                        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
+                        appDetailsIntent(context.packageName)
+                    )
+
+                GrantPermissionsEffect.OpenVendorAutoStartSettings ->
+                    // Resolved again at tap: the ROM may have updated since the screen loaded.
+                    // No fallback — there is no second screen that means the same thing.
+                    viewModel.vendorAutoStartIntent()?.let {
+                        settingsLauncher.openSettings(it, fallback = null)
+                    }
+
+                GrantPermissionsEffect.OpenAppNotificationSettings ->
+                    settingsLauncher.openSettings(
+                        appNotificationIntent(context.packageName),
+                        appDetailsIntent(context.packageName)
+                    )
+
+                GrantPermissionsEffect.RequestNotificationPermission ->
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+            }
+        }
+    }
+
+    GrantPermissionsContent(
+        uiState = uiState,
+        onNavigateBack = onNavigateBack,
+        onTargetClicked = viewModel::onTargetClicked
+    )
+
+    if (showAccessibilityDisclosure) {
+        GrantPermissionDialog(
+            onGrantPermission = {
+                showAccessibilityDisclosure = false
+                settingsLauncher.openSettings(
+                    BatteryAccessibility.settingsIntent(),
+                    appDetailsIntent(context.packageName)
+                )
+            },
+            onMaybeLater = { showAccessibilityDisclosure = false }
+        )
+    }
+}
+
+/**
+ * Every destination on this screen is a system surface the ROM owns, and none of them is
+ * guaranteed: a build can ship without the battery-optimisation list at all, and the vendor
+ * power screens resolve through the package manager while still refusing to launch because the
+ * activity is not exported. Both throw out of [launch] rather than returning a result, which
+ * would take the whole screen down over a settings page that is only ever a convenience.
+ *
+ * Leaving for a system screen also has to suppress the app-open ad, or coming back from granting
+ * a permission is answered with a full-screen ad the user did nothing to earn. Suppressing here
+ * rather than at each call site is what keeps that true for every row.
+ */
+private fun ActivityResultLauncher<Intent>.openSettings(intent: Intent, fallback: Intent?) {
+    InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
+    if (runCatching { launch(intent) }.isSuccess) return
+    fallback?.let { runCatching { launch(it) } }
+}
+
+private fun appNotificationIntent(packageName: String): Intent =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+    } else {
+        appDetailsIntent(packageName)
+    }
+
+private fun appDetailsIntent(packageName: String): Intent = Intent(
+    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+    Uri.fromParts("package", packageName, null)
+)
+
+@Composable
+internal fun GrantPermissionsContent(
+    uiState: GrantPermissionsUiState,
+    onNavigateBack: () -> Unit,
+    onTargetClicked: (GrantPermissionsTarget) -> Unit
+) {
+    // The design keeps this screen on a plain white sheet: the shared wallpaper is switched off
+    // so the white cards read against it via their shadow rather than a colour change.
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.colors_FFFFFF))
+            .statusBarsPadding()
+    ) {
+        GrantPermissionsHeader(onNavigateBack = onNavigateBack)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            contentPadding = PaddingValues(
+                start = dimensionResource(SdpR.dimen._12sdp),
+                end = dimensionResource(SdpR.dimen._12sdp),
+                top = dimensionResource(SdpR.dimen._6sdp),
+                bottom = dimensionResource(SdpR.dimen._12sdp)
+            ),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+        ) {
+            item {
+                SectionHeading(
+                    step = "1",
+                    titleRes = R.string.grant_permissions_section_necessary
+                )
+            }
+            item {
+                AccessibilityCard(
+                    isEnabled = uiState.isAccessibilityEnabled,
+                    onClick = { onTargetClicked(GrantPermissionsTarget.ACCESSIBILITY) }
+                )
+            }
+            item {
+                SectionHeading(
+                    step = "2",
+                    titleRes = R.string.grant_permissions_section_stability,
+                    modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._5sdp))
+                )
+            }
+            item {
+                PermissionCard(
+                    iconRes = R.drawable.img_permission_overlay,
+                    titleRes = R.string.grant_permissions_overlay_title,
+                    bodyRes = R.string.grant_permissions_overlay_body,
+                    checked = uiState.isOverlayGranted,
+                    onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
+                )
+            }
+            if (uiState.isBatteryRowVisible) {
+                item {
+                    PermissionCard(
+                        iconRes = R.drawable.img_permission_battery,
+                        titleRes = R.string.grant_permissions_battery_title,
+                        bodyRes = R.string.grant_permissions_battery_body,
+                        checked = uiState.isBatteryOptimizationIgnored,
+                        onClick = {
+                            onTargetClicked(GrantPermissionsTarget.BATTERY_OPTIMIZATION)
+                        }
+                    )
+                }
+            }
+            if (uiState.isAutoStartRowVisible) {
+                item {
+                    PermissionCard(
+                        iconRes = R.drawable.img_permission_battery,
+                        titleRes = R.string.grant_permissions_autostart_title,
+                        bodyRes = R.string.grant_permissions_autostart_body,
+                        checked = null,
+                        onClick = { onTargetClicked(GrantPermissionsTarget.VENDOR_AUTO_START) }
+                    )
+                }
+            }
+            if (uiState.isNotificationRowVisible) {
+                item {
+                    SectionHeading(
+                        step = "3",
+                        titleRes = R.string.grant_permissions_section_recommend,
+                        subtitleRes = R.string.grant_permissions_recommend_subtitle,
+                        modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._5sdp))
+                    )
+                }
+                item {
+                    PermissionCard(
+                        iconRes = R.drawable.img_permission_notification,
+                        titleRes = R.string.grant_permissions_notification_title,
+                        bodyRes = R.string.grant_permissions_notification_body,
+                        checked = uiState.isNotificationGranted,
+                        onClick = { onTargetClicked(GrantPermissionsTarget.NOTIFICATION) }
+                    )
+                }
+            }
+        }
+        // Pinned below the list rather than the last row of it, so the ad stays put while
+        // the permissions scroll.
+        NativeAdInternal(
+            screenCode = SCREEN_PERMISSION,
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+        )
+    }
+}
+
+/**
+ * DROP_SHADOW r=9 a=0.17 on every white card in the design. Compose spreads a shadow downwards
+ * from its elevation rather than blurring evenly, so matching the alpha alone leaves a white card
+ * on a white sheet with no visible edge — the elevation and alpha are raised until the card reads.
+ */
+@Composable
+private fun Modifier.cardSurface(): Modifier {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
+    val shadowColor = colorResource(R.color.colors_212327).copy(alpha = 0.30f)
+    return this
+        .shadow(
+            elevation = dimensionResource(SdpR.dimen._8sdp),
+            shape = shape,
+            ambientColor = shadowColor,
+            spotColor = shadowColor
+        )
+        .clip(shape)
+        .background(colorResource(R.color.colors_FFFFFF))
+}
+
+@Composable
+private fun GrantPermissionsHeader(onNavigateBack: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._43sdp))
+            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_pet_room_back),
+            contentDescription = stringResource(R.string.pet_room_back),
+            tint = colorResource(R.color.colors_212327),
+            modifier = Modifier
+                .size(dimensionResource(SdpR.dimen._21sdp))
+                .clip(CircleShape)
+                .clickable(role = Role.Button, onClick = onNavigateBack)
+        )
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._9sdp)))
+        Text(
+            text = stringResource(R.string.grant_permissions_nav),
+            color = colorResource(R.color.colors_212327),
+            fontWeight = FontWeight.SemiBold,
+            fontSize = dimensionResource(SspR.dimen._15ssp).value.sp
+        )
+    }
+}
+
+@Composable
+private fun SectionHeading(
+    step: String,
+    titleRes: Int,
+    modifier: Modifier = Modifier,
+    subtitleRes: Int? = null
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(dimensionResource(SdpR.dimen._18sdp))
+                    .clip(CircleShape)
+                    .background(colorResource(R.color.colors_FB3675)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = step,
+                    color = colorResource(R.color.colors_FFFFFF),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = dimensionResource(SspR.dimen._12ssp).value.sp
+                )
+            }
+            Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
+            Text(
+                text = stringResource(titleRes),
+                color = colorResource(R.color.colors_212327),
+                fontWeight = FontWeight.Medium,
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
+            )
+        }
+        subtitleRes?.let {
+            Text(
+                text = stringResource(it),
+                color = colorResource(R.color.colors_6F7073),
+                fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+                modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._6sdp))
+            )
+        }
+    }
+}
+
+@Composable
+private fun AccessibilityCard(isEnabled: Boolean, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .cardSurface()
+            .padding(dimensionResource(SdpR.dimen._12sdp)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
+    ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Image(
+                painter = painterResource(R.drawable.img_permission_accessibility),
+                contentDescription = null,
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._26sdp))
+            )
+            Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.grant_permissions_accessibility_title),
+                        color = colorResource(R.color.colors_212327),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatusPill(isEnabled = isEnabled)
+                }
+                Text(
+                    text = stringResource(R.string.grant_permissions_accessibility_body),
+                    color = colorResource(R.color.colors_6F7073),
+                    fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+                    modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._3sdp))
+                )
+            }
+        }
+        Image(
+            painter = painterResource(R.drawable.img_permission_accessibility_steps),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            // The phone previews overflow their frame by 4px, so the art is exported at the
+            // render bounds (296x96) rather than the layout bounds, and drawn at that ratio.
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(STEPS_ART_RATIO)
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._31sdp))
+                .clip(CircleShape)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            colorResource(R.color.colors_C95DFF),
+                            colorResource(R.color.colors_FB54BB)
+                        )
+                    )
+                )
+                .clickable(role = Role.Button, onClick = onClick),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.grant_permissions_go_to_settings),
+                color = colorResource(R.color.colors_FFFFFF),
+                fontWeight = FontWeight.Medium,
+                fontSize = dimensionResource(SspR.dimen._12ssp).value.sp
+            )
+        }
+    }
+}
+
+private const val STEPS_ART_RATIO = 296f / 96f
+
+@Composable
+private fun StatusPill(isEnabled: Boolean) {
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(
+                colorResource(
+                    if (isEnabled) R.color.colors_E6F9EF else R.color.colors_FFECEC
+                )
+            )
+            .padding(
+                horizontal = dimensionResource(SdpR.dimen._8sdp),
+                vertical = dimensionResource(SdpR.dimen._3sdp)
+            )
+    ) {
+        Text(
+            text = stringResource(
+                if (isEnabled) {
+                    R.string.grant_permissions_allowed
+                } else {
+                    R.string.grant_permissions_required
+                }
+            ),
+            color = colorResource(
+                if (isEnabled) R.color.colors_00C062 else R.color.colors_F04438
+            ),
+            fontWeight = FontWeight.Medium,
+            fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+private fun PermissionCard(
+    iconRes: Int,
+    titleRes: Int,
+    bodyRes: Int,
+    /** Null when no API reports the state, which is drawn as an action rather than a toggle. */
+    checked: Boolean?,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .cardSurface()
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(dimensionResource(SdpR.dimen._12sdp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._26sdp))
+        )
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(titleRes),
+                color = colorResource(R.color.colors_212327),
+                fontWeight = FontWeight.Medium,
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = stringResource(bodyRes),
+                color = colorResource(R.color.colors_6F7073),
+                fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+                modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._3sdp))
+            )
+        }
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
+        if (checked == null) {
+            Icon(
+                painter = painterResource(R.drawable.ic_arrow_right),
+                contentDescription = null,
+                tint = colorResource(R.color.colors_C8C8C9),
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
+            )
+        } else {
+            AppSwitch(checked = checked, onCheckedChange = onClick)
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+private fun GrantPermissionsPreview() {
+    GrantPermissionsContent(
+        uiState = GrantPermissionsUiState(
+            isAccessibilityEnabled = true,
+            isNotificationRowVisible = true
+        ),
+        onNavigateBack = {},
+        onTargetClicked = {}
+    )
+}
