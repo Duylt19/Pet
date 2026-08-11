@@ -1,13 +1,16 @@
 package com.asianmobile.emojibattery.shimeji.ui.search
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,6 +21,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val catalogRepository: BatteryCatalogRepository,
     private val settingsRepository: BatterySettingsRepository,
     private val petCatalogRepository: OwnerPetCatalogRepository,
@@ -25,16 +29,21 @@ class SearchViewModel @Inject constructor(
 ) : ViewModel() {
     private val query = MutableStateFlow("")
     private val selectedTab = MutableStateFlow(SearchTab.PETS)
+    private val isPremium = MutableStateFlow(SharedPreferencesUtils.getIsPremium(context))
 
     val uiState: StateFlow<SearchUiState> = combine(
         catalogRepository.snapshot,
         settingsRepository.config,
         query,
         selectedTab,
-        combine(petCatalogRepository.snapshot, petPackRepository.packs) { pets, packs ->
-            pets to packs.mapTo(mutableSetOf(), PetPack::key)
+        combine(
+            petCatalogRepository.snapshot,
+            petPackRepository.packs,
+            isPremium
+        ) { pets, packs, premium ->
+            Triple(pets, packs.mapTo(mutableSetOf(), PetPack::key), premium)
         }
-    ) { catalog, config, currentQuery, tab, (petCatalog, installedKeys) ->
+    ) { catalog, config, currentQuery, tab, (petCatalog, installedKeys, premium) ->
         val themes = catalog.themes
             .asSequence()
             .filter { it.assetsReady }
@@ -44,7 +53,12 @@ class SearchViewModel @Inject constructor(
                     name = theme.name,
                     category = theme.categoryName,
                     thumbnailPath = theme.thumbnailPath,
-                    isFavorite = theme.id in config.favoriteThemeIds
+                    isFavorite = theme.id in config.favoriteThemeIds,
+                    isLocked = isSearchThemeLocked(
+                        theme = theme,
+                        isPremium = premium,
+                        rewardUnlockedThemeIds = config.rewardUnlockedThemeIds
+                    )
                 )
             }
             .toList()
@@ -85,6 +99,10 @@ class SearchViewModel @Inject constructor(
 
     fun selectTab(tab: SearchTab) {
         selectedTab.value = tab
+    }
+
+    fun refreshEntitlement() {
+        isPremium.value = SharedPreferencesUtils.getIsPremium(context)
     }
 
     fun toggleFavorite(themeId: Int) {

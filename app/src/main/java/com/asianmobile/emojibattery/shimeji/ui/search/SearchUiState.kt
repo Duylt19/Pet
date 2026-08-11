@@ -1,5 +1,8 @@
 package com.asianmobile.emojibattery.shimeji.ui.search
 
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
+
 enum class SearchTab {
     PETS,
     BATTERY
@@ -36,8 +39,16 @@ data class SearchThemeUiState(
     val name: String,
     val category: String,
     val thumbnailPath: String?,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val isLocked: Boolean = false
 )
+
+internal fun isSearchThemeLocked(
+    theme: BatteryThemeEntry,
+    isPremium: Boolean,
+    rewardUnlockedThemeIds: Set<Int>
+): Boolean = theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
+    !isPremium && theme.id !in rewardUnlockedThemeIds
 
 internal fun filterSearchPets(
     pets: List<SearchPetUiState>,

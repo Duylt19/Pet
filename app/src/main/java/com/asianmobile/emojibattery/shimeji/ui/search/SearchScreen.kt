@@ -31,6 +31,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +52,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
@@ -76,6 +80,15 @@ fun SearchScreen(
     onOpenPet: (String) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshEntitlement()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     TrackScreenView(ScreenName.SEARCH)
     SearchContent(
@@ -492,7 +505,7 @@ private fun SearchSectionTitle(text: String) {
 }
 
 @Composable
-private fun SearchThemeCard(
+internal fun SearchThemeCard(
     theme: SearchThemeUiState,
     onOpen: () -> Unit,
     onFavorite: () -> Unit,
@@ -519,6 +532,14 @@ private fun SearchThemeCard(
                 .align(Alignment.Center)
                 .fillMaxSize(CATALOG_ITEM_PREVIEW_FRACTION)
         )
+        if (theme.isLocked) {
+            PetPremiumBadge(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(dimensionResource(SdpR.dimen._6sdp))
+                    .size(dimensionResource(SdpR.dimen._18sdp))
+            )
+        }
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -575,7 +596,8 @@ private fun SearchContentPreview() {
                     name = "Theme ${index + 1}",
                     category = "Cute",
                     thumbnailPath = null,
-                    isFavorite = index == 0
+                    isFavorite = index == 0,
+                    isLocked = index % 2 == 0
                 )
             }
         ),
