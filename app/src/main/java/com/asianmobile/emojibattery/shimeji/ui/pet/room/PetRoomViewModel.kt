@@ -85,9 +85,12 @@ class PetRoomViewModel @Inject constructor(
             combine(
                 ownerCatalogRepository.snapshot,
                 petPackRepository.packs,
-                petStoreRepository.customNames
-            ) { catalog, packs, names ->
-                PetRoomRosterPolicy.roster(
+                petStoreRepository.customNames,
+                petSettingsRepository.preferences
+            ) { catalog, packs, names, preferences ->
+                val roomSlotKeys = preferences.roomSlotKeys()
+                val enabledSlots = preferences.petSlots.map { it.isEnabled }
+                val roster = PetRoomRosterPolicy.roster(
                     catalogEntries = catalog.entries.map { entry ->
                         PetRoomRosterSource(
                             petId = entry.id,
@@ -99,7 +102,16 @@ class PetRoomViewModel @Inject constructor(
                     },
                     installedPackKeys = packs.mapTo(mutableSetOf(), PetPack::key),
                     customNames = names
-                ) to packs
+                ).map { pet ->
+                    pet.copy(
+                        isOnScreen = PetRoomOnScreenPolicy.isOnScreen(
+                            slotPackKeys = roomSlotKeys,
+                            slotEnabled = enabledSlots,
+                            packKey = pet.packKey
+                        )
+                    )
+                }
+                roster to packs
             }.collect { (roster, packs) ->
                 rememberAdoptions(roster)
                 _uiState.update {
@@ -265,11 +277,7 @@ class PetRoomViewModel @Inject constructor(
             )
         ) {
             is PetRoomOnScreenAction.Assign -> {
-                petSettingsRepository.updateSelectedPack(action.slotIndex, detail.packKey)
-                petSettingsRepository.updateSlotEnabled(action.slotIndex, true)
-                if (preferences.petCount <= action.slotIndex) {
-                    petSettingsRepository.updatePetCount(action.slotIndex + 1)
-                }
+                petSettingsRepository.enablePackInFirstFreeSlot(detail.packKey)
             }
 
             is PetRoomOnScreenAction.SetEnabled ->

@@ -247,7 +247,7 @@ Input text contract:
   chuyển sang màu chính `#212327`. Placeholder rỗng dùng `#9B9C9E`, vì vậy vẫn phân biệt rõ
   suggestion, text user nhập và placeholder.
 
-My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8191:5950`:
+My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `8191:5950`:
 
 - route `my_pet` là scene phòng full-screen, background lấy từ room catalog (`bg/BG_<id>.png`)
   và vẽ `ContentScale.Crop`; không dùng Home chrome, không có bottom navigation;
@@ -261,6 +261,8 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8191:5950`:
   icon 18px cùng màu;
 - card grid ba cột: card room/food `104×122`, card pet `104×106` nền `#FFFEF9` viền `#FFECD4`
   2px radius 16; ô add `104×106` nền `#FFECD4` viền `#8F6250` với vòng tròn nét đứt `#D3BEA2`;
+- pet có switch `Pet on screen` đang ON hiển thị pill `Active` ở góc trên trái card: nền
+  `#FFF1B2`, chữ Roboto Medium 8/12 `#A54905`, padding ngang 6px/dọc 2px và offset 6px;
 - pet đã sở hữu đi lại trong scene bằng `PetRoomWander`, không dùng `PetEngine`: engine overlay
   dựng cho góc nhìn ngang nên trọng lực dồn mọi pet về một đường sàn. Phòng nhìn từ phía trước
   nên sàn là hình thang phối cảnh `0.50–0.72` chiều cao scene, mép sau hẹp hơn 14%; pet chọn một

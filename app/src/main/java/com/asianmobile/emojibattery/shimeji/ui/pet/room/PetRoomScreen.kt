@@ -659,6 +659,21 @@ private fun PetCard(
                     .clip(CircleShape)
                     .clickable(onClick = onRemove)
             )
+            if (pet.isOnScreen) {
+                Text(
+                    text = stringResource(R.string.pet_room_active),
+                    color = colorResource(R.color.colors_A54905),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = dimensionResource(SspR.dimen._6ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._9ssp).value.sp,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = unit * 6f, top = unit * 6f)
+                        .clip(CircleShape)
+                        .background(colorResource(R.color.colors_FFF1B2))
+                        .padding(horizontal = unit * 6f, vertical = unit * 2f)
+                )
+            }
         }
         Column(
             modifier = Modifier
@@ -1231,5 +1246,22 @@ private fun PetRoomScreenPreview() {
         onToggleSheet = {},
         onSelectTab = {},
         onSelectRoom = {}
+    )
+}
+
+@Preview(showBackground = true, widthDp = 105, heightDp = 109)
+@Composable
+private fun ActivePetCardPreview() {
+    PetCard(
+        pet = PetRoomPetUiState(
+            petId = 1,
+            packKey = "preview.pet",
+            name = "Cattey",
+            breed = "Cat",
+            thumbnailPath = null,
+            isOnScreen = true
+        ),
+        onClick = {},
+        onRemove = {}
     )
 }

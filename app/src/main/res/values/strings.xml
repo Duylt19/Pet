@@ -1076,6 +1076,7 @@
     <string name="pet_room_rooms_unavailable">Rooms are unavailable right now</string>
     <string name="pet_room_breed">Breed: %1$s</string>
     <string name="pet_room_on_screen">Pet on screen</string>
+    <string name="pet_room_active">Active</string>
     <string name="pet_room_field_name">Pet Name:</string>
     <string name="pet_room_field_breed">Breed:</string>
     <string name="pet_room_field_adopted">Adopted On:</string>

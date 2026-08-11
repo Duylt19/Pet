@@ -101,8 +101,10 @@ không được restore sau process death/reboot.
 - `PetPackRepository.packs/selectedPacks` là `StateFlow`; selection thiếu slot được materialize một lần từ slot 1 thành 12 giá trị độc lập, và built-in Orange Cat luôn là fallback khi key không còn hợp lệ.
 - Installed source chỉ trỏ tới app-private directory sau khi secure installer validate và atomic promote.
 - Pet Store coi `installedPackKey` xuất hiện trong `PetPackRepository.packs` là đã mở khóa.
-  Download Store không gọi `select`, nên không thay đổi Mixed/Swarm. Food hiện chỉ có model
-  presentation; inventory/coin persistence được bổ sung cùng flow My Pet.
+  Sau khi install thành công, repository ghi atomically pack key, `slotEnabled=true` và
+  `petCount` vào slot Mixed trống đầu tiên để pet mới mặc định hiện trên màn hình. Roster đầy
+  thì không evict selection hiện có; Swarm không thay đổi. Food hiện chỉ có model presentation;
+  inventory/coin persistence được bổ sung cùng flow My Pet.
 - Pack của controller là snapshot theo từng rebuild. Khi selected key/count thay đổi,
   service preload visual rồi thay controller ngay trong foreground session; invalid/missing
   key vẫn fallback built-in và không đưa file chưa validate vào renderer.

@@ -94,6 +94,28 @@ class PetSettingsPolicy {
         }
     }
 
+    /**
+     * Reuses the pack's current Mixed slot or allocates the first slot outside the configured
+     * roster. A configured pet is never evicted just to make a newly owned pet visible.
+     */
+    fun enabledPackTargetSlot(
+        slots: List<PetSlotPreferences>,
+        petCount: Int,
+        packKey: String
+    ): Int? {
+        val normalizedKey = packKey.trim()
+        if (normalizedKey.isEmpty()) return null
+        val configuredCount = petCount.coerceIn(0, slots.size)
+        val existingSlot = slots.take(configuredCount)
+            .indexOfFirst { it.packKey == normalizedKey }
+        if (existingSlot >= 0) return existingSlot
+        return slots.indices.firstOrNull { slotIndex ->
+            slotIndex >= configuredCount ||
+                slots[slotIndex].packKey.isBlank() ||
+                slots[slotIndex].packKey == DEFAULT_SELECTED_PACK_KEY
+        }
+    }
+
     fun sanitizeSizePercent(value: Int): Int =
         nearestStep(value, MIN_SIZE_PERCENT, MAX_SIZE_PERCENT, SIZE_STEP_PERCENT)
 

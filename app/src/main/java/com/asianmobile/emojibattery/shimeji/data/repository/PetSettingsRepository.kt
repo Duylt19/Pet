@@ -13,6 +13,7 @@ interface PetSettingsRepository {
 
     fun updateSelectedPack(slotIndex: Int, key: String)
     fun updateSelectedPacks(keys: List<String>)
+    fun enablePackInFirstFreeSlot(key: String)
     fun updatePetCount(count: Int)
     fun unlockMixedSlotByReward(slotIndex: Int)
     fun updateDisplayMode(mode: PetDisplayMode)

@@ -63,7 +63,8 @@ data class PetRoomPetUiState(
     val packKey: String,
     val name: String,
     val breed: String,
-    val thumbnailPath: String?
+    val thumbnailPath: String?,
+    val isOnScreen: Boolean = false
 )
 
 data class PetRoomThumbnailUiState(

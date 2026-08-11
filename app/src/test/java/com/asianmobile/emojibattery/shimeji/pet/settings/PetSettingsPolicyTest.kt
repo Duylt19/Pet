@@ -85,6 +85,50 @@ class PetSettingsPolicyTest {
     }
 
     @Test
+    fun `owned pet reuses its configured mixed slot`() {
+        val slots = listOf(
+            PetSlotPreferences(packKey = "pack.one", isEnabled = false),
+            PetSlotPreferences(packKey = "pack.two")
+        )
+
+        assertEquals(
+            0,
+            policy.enabledPackTargetSlot(slots, petCount = 2, packKey = "pack.one")
+        )
+    }
+
+    @Test
+    fun `newly owned pet uses first slot outside configured roster`() {
+        val slots = listOf(
+            PetSlotPreferences(packKey = "pack.one"),
+            PetSlotPreferences(packKey = "pack.one"),
+            PetSlotPreferences(packKey = "pack.one")
+        )
+
+        assertEquals(
+            1,
+            policy.enabledPackTargetSlot(slots, petCount = 1, packKey = "pack.two")
+        )
+    }
+
+    @Test
+    fun `newly owned pet does not evict a full configured roster`() {
+        val slots = listOf(
+            PetSlotPreferences(packKey = "pack.one"),
+            PetSlotPreferences(packKey = "pack.two")
+        )
+
+        assertEquals(
+            null,
+            policy.enabledPackTargetSlot(slots, petCount = 2, packKey = "pack.three")
+        )
+        assertEquals(
+            null,
+            policy.enabledPackTargetSlot(slots, petCount = 1, packKey = " ")
+        )
+    }
+
+    @Test
     fun `swarm variation is deterministic bounded and optional`() {
         val varied = List(8) { index ->
             policy.swarmVariationPercent(

@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetFoodRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetStoreRepository
 import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
@@ -34,7 +35,8 @@ class PetStoreViewModel @Inject constructor(
     private val ownerCatalogRepository: OwnerPetCatalogRepository,
     private val petPackRepository: PetPackRepository,
     private val petStoreRepository: PetStoreRepository,
-    private val petFoodRepository: PetFoodRepository
+    private val petFoodRepository: PetFoodRepository,
+    private val petSettingsRepository: PetSettingsRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PetStoreUiState())
     val uiState: StateFlow<PetStoreUiState> = _uiState.asStateFlow()
@@ -117,8 +119,8 @@ class PetStoreViewModel @Inject constructor(
             _uiState.update { it.copy(downloadingPetId = pet.id, message = null) }
             when (val result = ownerCatalogRepository.preparePack(pet.id)) {
                 is PetPackInstallResult.Installed -> {
-                    // Refresh without preferredKey: Store unlock never changes a Mixed/Swarm slot.
                     petPackRepository.refresh()
+                    petSettingsRepository.enablePackInFirstFreeSlot(pet.installedPackKey)
                     val installedPack = petPackRepository.find(pet.installedPackKey)
                     _uiState.update {
                         it.copy(

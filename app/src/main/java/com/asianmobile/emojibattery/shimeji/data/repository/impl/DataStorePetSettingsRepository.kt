@@ -104,6 +104,31 @@ class DataStorePetSettingsRepository @Inject constructor(
         )
     }
 
+    override fun enablePackInFirstFreeSlot(key: String) {
+        val normalizedKey = key.trim()
+        if (normalizedKey.isEmpty()) return
+        edit { preferences ->
+            val current = decode(preferences)
+            val slotIndex = policy.enabledPackTargetSlot(
+                slots = current.petSlots,
+                petCount = current.petCount,
+                packKey = normalizedKey
+            ) ?: return@edit
+            val slots = current.petSlots.toMutableList()
+            slots[slotIndex] = slots[slotIndex].copy(
+                packKey = normalizedKey,
+                isEnabled = true
+            )
+            writePetSlots(preferences, slots)
+            if (current.petCount <= slotIndex) {
+                preferences[PET_COUNT] = policy.sanitizePetCount(
+                    value = slotIndex + 1,
+                    maxPets = performanceBudget.maxPets
+                )
+            }
+        }
+    }
+
     override fun updatePetCount(count: Int) = edit { preferences ->
         preferences[PET_COUNT] = policy.sanitizePetCount(count, performanceBudget.maxPets)
     }

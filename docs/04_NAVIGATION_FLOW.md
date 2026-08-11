@@ -42,7 +42,7 @@ Home shell tabs: Discover ⇄ Battery Styles ⇄ Pet Store ⇄ Mine/Settings
 Discover ──Emoji Battery toggle(no access)──> Accessibility disclosure/settings ──back──> enable battery overlay
 Discover ──Battery/Theme/Emoji──> Battery Styles hoặc Customize Status Bar
 Discover ──Search──> Search ──theme──> Customize Status Bar
-Discover ──Pet Store──> Pet Store ──Rewarded/Premium──> Download/verify/unlock (không gán slot)
+Discover ──Pet Store──> Pet Store ──Rewarded/Premium──> Download/verify/unlock ──> bật ở slot Mixed trống đầu tiên
 Discover ──Trending pet──> Catalog Detail
 Discover ──Mine──> Mine
 My Pet ──Start(no overlay)──> System Overlay Settings ──back──> My Pet
@@ -76,7 +76,9 @@ Customize Battery Bar ──Apply(service on)──> persist config + accessibil
 
 Sau khi pet được verify/cài thành công, Pet Store hiển thị unlock-success overlay và chạy
 clip movement `SPECIAL` của chính pack vừa cài (`SPECIAL_2`/thumbnail là fallback), rồi mới
-chuyển sang bước đặt tên khi user chạm Continue. Flow này không tự gán pet vào Mixed/Swarm.
+chuyển sang bước đặt tên khi user chạm Continue. Pet mới được bật atomically ở slot Mixed
+trống đầu tiên để switch `Pet on screen` mặc định ON; flow không đổi cấu hình Swarm và không
+thay pet khác nếu toàn bộ roster Mixed đã đầy.
 
 ## Back stack
 
@@ -88,8 +90,9 @@ chuyển sang bước đặt tên khi user chạm Continue. Flow này không t�
   My Pet không thay thế root Discover.
 - Search `Cancel`/Back pop về Discover; chọn theme mở Battery Editor và Back quay lại Search.
 - Pet Store là top-level tab; chọn Discover chuyển tab về root thay vì tạo thêm route.
-  Pet tải từ Store chỉ được cài/mở khóa, không thay selection của Mixed/Swarm. `View` sau
-  khi đặt tên mở My Pet như một destination con.
+  Pet tải từ Store được cài/mở khóa và bật ở slot Mixed trống đầu tiên. Nếu roster đã đầy,
+  ownership vẫn được giữ nhưng không thay selection hiện có. `View` sau khi đặt tên mở My Pet
+  như một destination con; Pet Store không đổi cấu hình Swarm.
 - Customize Pet pop về destination đã mở nó. Pet Detail pop về Catalog; Catalog pop về màn đã mở
   nó. Xác nhận pack trong Detail cũng quay lại Catalog để user thấy selection mới. Add chỉ
   tăng `petCount` sau Set/Import thành công; Back khỏi Catalog không tạo pet.
