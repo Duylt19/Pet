@@ -34,6 +34,7 @@ enum class GrantPermissionsTarget {
 }
 
 sealed interface GrantPermissionsEffect {
+    data object ShowAccessibilityDisclosure : GrantPermissionsEffect
     data object OpenAccessibilitySettings : GrantPermissionsEffect
     data object OpenOverlaySettings : GrantPermissionsEffect
 
@@ -52,3 +53,10 @@ sealed interface GrantPermissionsEffect {
     data object RequestNotificationPermission : GrantPermissionsEffect
     data object OpenAppNotificationSettings : GrantPermissionsEffect
 }
+
+internal fun accessibilityTargetEffect(isAccessibilityEnabled: Boolean): GrantPermissionsEffect =
+    if (isAccessibilityEnabled) {
+        GrantPermissionsEffect.OpenAccessibilitySettings
+    } else {
+        GrantPermissionsEffect.ShowAccessibilityDisclosure
+    }

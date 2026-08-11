@@ -60,7 +60,7 @@ internal fun RewardOfferSheet(
             decorFitsSystemWindows = false
         )
     ) {
-        HideRewardSheetNavigationBar()
+        HideDialogNavigationBar()
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -118,6 +118,7 @@ internal fun RewardGradientButton(
     onClick: () -> Unit,
     modifier: Modifier,
     enabled: Boolean = true,
+    retainEnabledStyleWhenDisabled: Boolean = false,
     iconRes: Int? = null
 ) {
     val enabledGradient = Brush.horizontalGradient(
@@ -127,7 +128,7 @@ internal fun RewardGradientButton(
         )
     )
     val disabledColor = colorResource(R.color.colors_C8C8C9)
-    val background = if (enabled) {
+    val background = if (enabled || retainEnabledStyleWhenDisabled) {
         enabledGradient
     } else {
         Brush.horizontalGradient(listOf(disabledColor, disabledColor))
@@ -217,7 +218,7 @@ private fun RewardButtonContent(
 
 @Composable
 @Suppress("DEPRECATION")
-private fun HideRewardSheetNavigationBar() {
+internal fun HideDialogNavigationBar() {
     val view = LocalView.current
     DisposableEffect(view) {
         val window = (view.parent as? DialogWindowProvider)?.window

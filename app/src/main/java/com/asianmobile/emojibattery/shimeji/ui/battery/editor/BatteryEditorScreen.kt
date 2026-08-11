@@ -3,8 +3,6 @@ package com.asianmobile.emojibattery.shimeji.ui.battery.editor
 import android.app.Activity
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -110,6 +108,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_STYLE_INDEX
 import com.asianmobile.emojibattery.shimeji.ui.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.component.CutePetTopBar
+import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
+import com.asianmobile.emojibattery.shimeji.ui.component.rememberAccessibilitySettingsLauncher
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockSheet
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -196,9 +196,7 @@ internal fun BatteryEditorScreen(
     var accessibilityEnabled by remember {
         mutableStateOf(BatteryAccessibility.isEnabled(context))
     }
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
+    val openAccessibilitySettings = rememberAccessibilitySettingsLauncher {
         accessibilityEnabled = BatteryAccessibility.isEnabled(context)
         if (accessibilityEnabled) viewModel.apply()
     }
@@ -331,27 +329,12 @@ internal fun BatteryEditorScreen(
     }
 
     if (showDisclosure) {
-        AlertDialog(
-            onDismissRequest = { showDisclosure = false },
-            title = { Text(stringResource(R.string.battery_accessibility_title)) },
-            text = { Text(stringResource(R.string.battery_accessibility_disclosure)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDisclosure = false
-                        (context as? Activity)?.let {
-                            launcher.launch(BatteryAccessibility.settingsIntent())
-                        }
-                    }
-                ) {
-                    Text(stringResource(R.string.battery_open_accessibility_settings))
-                }
+        GrantPermissionDialog(
+            onGrantPermission = {
+                showDisclosure = false
+                openAccessibilitySettings()
             },
-            dismissButton = {
-                TextButton(onClick = { showDisclosure = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            onMaybeLater = { showDisclosure = false }
         )
     }
 

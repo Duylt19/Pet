@@ -1,7 +1,5 @@
 package com.asianmobile.emojibattery.shimeji.ui.discover
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -70,11 +68,11 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.component.CATALOG_ITEM_PREVIEW_FRACTION
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
+import com.asianmobile.emojibattery.shimeji.ui.component.rememberAccessibilitySettingsLauncher
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -97,9 +95,7 @@ fun DiscoverScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     var showAccessibilityDisclosure by remember { mutableStateOf(false) }
-    val accessibilityLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
+    val openAccessibilitySettings = rememberAccessibilitySettingsLauncher {
         viewModel.refreshAccessibility()
     }
     TrackScreenView(ScreenName.HOME)
@@ -140,7 +136,7 @@ fun DiscoverScreen(
         GrantPermissionDialog(
             onGrantPermission = {
                 showAccessibilityDisclosure = false
-                accessibilityLauncher.launch(BatteryAccessibility.settingsIntent())
+                openAccessibilitySettings()
             },
             onMaybeLater = {
                 showAccessibilityDisclosure = false

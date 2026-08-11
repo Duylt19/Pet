@@ -29,6 +29,10 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   `openSettings()` — quay lại sau khi vừa cấp quyền mà ăn app-open ad là trả giá cho đúng hành
   động mình vừa yêu cầu user làm. Đặt trong helper chứ không ở từng call site để không có row
   nào lọt.
+- Accessibility disclosure trên mọi feature cũng dùng placement `screen_permission` với
+  `AdType.HEIGHT_222` và `instanceKey=accessibility_disclosure`. Native nằm sát đáy sheet theo
+  Figma; nếu placement không load/đã Premium thì slot collapse. Mọi launcher Accessibility dùng
+  cùng contract tắt App Open Ad trước khi rời app.
 - Search tái sử dụng native placement `screen_home` ở đáy màn hình theo Figma; placement
   vẫn tuân theo remote key, frequency/ad-free policy và failure fallback chung của module ads.
 - Battery landing tái sử dụng native placement `screen_home` với template `HEIGHT_150` sau

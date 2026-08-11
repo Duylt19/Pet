@@ -60,7 +60,8 @@ Mine ──My Pet──> My Pet
 Mine ──Favourite & Recent──> Favourite & Recent ──favourite theme──> Customize Status Bar
 Mine ──Language──> Language Settings
 Mine ──Emoji Battery toggle──> Accessibility disclosure/settings
-Mine ──Grant Permission──> Grant Permissions ──mỗi mục──> system surface tương ứng ──back──> đọc lại trạng thái
+Mine ──Grant Permission──> Grant Permissions ──Accessibility chưa cấp──> consent disclosure ──Settings
+                                      └─ quyền đã cấp/permission khác ──> system surface tương ứng ──back──> đọc lại trạng thái
 Mine ──Rate/Share/Contact/Privacy──> action tương ứng
 Catalog ──already prepared pack──> Detail ──Use for Pet──> Catalog
 Discover/My Pet ──Settings──> Mine ──Language──> Language Settings
@@ -105,6 +106,9 @@ chuyển sang bước đặt tên khi user chạm Continue. Flow này không t�
   overview phục hồi đúng scroll offset và không khởi tạo lại catalog/picker.
 - Theme selection trong Battery Styles mở editor ngay cả khi chưa có Accessibility. Preview
   nhúng vẫn hoạt động; Apply mới hiện disclosure và chỉ bật overlay khi quyền hợp lệ.
+- Mọi action xin Accessibility trong Discover, Battery Styles, Mine, Status Bar Editor và Grant
+  Permissions dùng cùng bottom-sheet disclosure. `Allow` không mở Settings cho tới khi checkbox
+  consent được chọn; launcher tắt App Open Ad trước khi rời app và trạng thái được đọc lại khi về.
 - Catalog là boundary authoritative cho Mixed slot Rewarded dù được mở từ Home, Settings
   hay deep route. Chỉ slot kế tiếp được mở; đóng/fail ad không tăng capacity. Premium
   bypass gate và entitlement được refresh khi Catalog resume.

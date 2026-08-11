@@ -204,8 +204,14 @@ Grant Permissions contract theo Figma node `8080:9754`:
   Đây là ask tách biệt với battery exemption: cấp cái này không cấp cái kia, nên row vẫn hiện
   ngay cả khi user đã cấp exemption. Không API nào đọc được trạng thái allowlist, nên row dùng
   mũi tên thay switch và intent được resolve lại đúng lúc chạm;
-- dialog accessibility (`GrantPermissionDialog`) dùng shield gradient `#FF5D7D → #FB54BB`,
-  title 20/28 và hai nút bằng nhau `Cancel` `#F2F2F2` / `Allow` `#FB3675`.
+- disclosure Accessibility (`GrantPermissionDialog`) theo Figma `8437:7570` và `8437:9099`
+  là bottom sheet full-width bo hai góc trên 24px, scrim 50%, handle `32×4`, title Roboto
+  SemiBold 18/26 và body Roboto Regular 14/20. Nội dung dài là phần duy nhất được cuộn; hàng
+  consent, nút `Allow`/`Close` và native ad luôn cố định. Checkbox dùng đúng hai vector của rate
+  flow; `Allow` chỉ chuyển sang Android Accessibility Settings sau khi user đã tick consent;
+- toàn bộ Discover, Battery Catalog, Mine, Status Bar Editor và Grant Permissions dùng chung
+  disclosure này. Khi quyền đã bật, row Accessibility trong Grant Permissions mở thẳng Settings
+  để user quản lý/tắt quyền, không hỏi consent lại.
 
 My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8191:5950`:
 

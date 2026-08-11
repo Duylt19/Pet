@@ -769,11 +769,6 @@
     <string name="battery_slider_value">%1$s · %2$d dp</string>
     <string name="battery_apply">Áp dụng</string>
     <string name="battery_disable">Tắt thanh pin</string>
-    <string name="battery_accessibility_title">Cho phép hiển thị thanh trạng thái pin?</string>
-    <string name="battery_accessibility_preview_title">Bật xem trước thanh trạng thái</string>
-    <string name="battery_accessibility_preview_disclosure">Bạn cần bật quyền Hỗ trợ tiếp cận trước khi chỉnh sửa để mọi thay đổi về pet, pin và thành phần được xem trực tiếp trên thanh trạng thái. Cute Pet chỉ vẽ lớp phủ không tương tác này, không đọc hoặc điều khiển nội dung màn hình.</string>
-    <string name="battery_accessibility_disclosure">Cute Pet chỉ dùng dịch vụ Hỗ trợ tiếp cận để vẽ thanh pin không tương tác mà bạn đã chọn lên trên ứng dụng khác. Dịch vụ không đọc chữ trên màn hình, chạm nút, nhập liệu, cuộn hay thực hiện thao tác thay bạn. Android vẫn có thể hiện cảnh báo tiêu chuẩn vì quyền Hỗ trợ tiếp cận rất mạnh. Bạn có thể tắt quyền bất cứ lúc nào trong phần cài đặt Hỗ trợ tiếp cận.</string>
-    <string name="battery_open_accessibility_settings">Mở cài đặt Hỗ trợ tiếp cận</string>
     <string name="battery_accessibility_required">Cần bật Hỗ trợ tiếp cận để thanh này luôn hiển thị trên ứng dụng khác.</string>
     <string name="battery_accessibility_ready">Đã bật Hỗ trợ tiếp cận. Thay đổi sẽ được áp dụng vào lớp phủ.</string>
     <string name="battery_accessibility_service_label">Thanh trạng thái pin Cute Pet</string>
@@ -806,6 +801,17 @@
     <!-- contentDescription của nút back dùng chung với My Pet Room -->
     <string name="pet_room_back">Quay lại</string>
     <string name="grant_permissions_nav">Cấp quyền</string>
+    <string name="accessibility_disclosure_title">Quyền truy cập Dịch vụ Trợ năng</string>
+    <string name="accessibility_disclosure_intro">Ứng dụng cần quyền Dịch vụ Trợ năng để bật các tính năng tùy chỉnh pin và thanh trạng thái.</string>
+    <string name="accessibility_disclosure_use_heading">Dịch vụ Trợ năng được dùng để:</string>
+    <string name="accessibility_disclosure_use_items">• Xác định và căn chỉnh các thành phần giao diện hệ thống (như thanh trạng thái)\n• Hiển thị chính xác biểu tượng pin tùy chỉnh và lớp phủ trực quan trên màn hình\n• Duy trì giao diện nhất quán trên các thiết bị Android khác nhau</string>
+    <string name="accessibility_disclosure_visual_only">Quyền này chỉ được dùng cho mục đích tùy chỉnh giao diện.</string>
+    <string name="accessibility_disclosure_no_access_heading">Chúng tôi KHÔNG:</string>
+    <string name="accessibility_disclosure_no_access_items">• Thu thập dữ liệu cá nhân hoặc dữ liệu nhạy cảm\n• Đọc tin nhắn, thông báo hoặc mật khẩu của bạn\n• Theo dõi hoạt động trên thiết bị</string>
+    <string name="accessibility_disclosure_conclusion">Tính năng này cần sự đồng ý rõ ràng của bạn và có thể dễ dàng tắt bất cứ lúc nào trong phần cài đặt thiết bị.</string>
+    <string name="accessibility_disclosure_consent">Tôi đã đọc và đồng ý với điều khoản dịch vụ</string>
+    <string name="accessibility_disclosure_allow">Cho phép</string>
+    <string name="accessibility_disclosure_close">Đóng</string>
     <string name="grant_permissions_section_necessary">Quyền bắt buộc</string>
     <string name="grant_permissions_section_stability">Quyền giúp chạy ổn định</string>
     <string name="grant_permissions_section_recommend">Quyền nên bật</string>

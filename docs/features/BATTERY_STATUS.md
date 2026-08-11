@@ -165,6 +165,11 @@ Các guardrail bắt buộc:
 - Không gọi global action, gesture dispatch, click, type hoặc scroll.
 - `onAccessibilityEvent` bỏ qua event; metadata không đăng ký event type.
 - Window `FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE`, không chặn thao tác.
+- Trước lần chuyển sang Accessibility Settings để cấp quyền, mọi entry point hiển thị cùng
+  disclosure theo Figma `8437:7570`/`8437:9099`: giải thích phạm vi sử dụng, cam kết dữ liệu,
+  checkbox explicit consent, Allow/Close và native permission placement. Allow bị chặn cho tới
+  khi consent được chọn; quyền đã bật thì màn Grant Permissions cho phép mở thẳng Settings để
+  quản lý hoặc tắt service.
 - Content dùng toàn bộ chiều ngang overlay; `rightPaddingDp` là khoảng cách mép phải do
   user kiểm soát.
 - Chỉ mở Settings sau disclosure chủ động; không tự bật service.

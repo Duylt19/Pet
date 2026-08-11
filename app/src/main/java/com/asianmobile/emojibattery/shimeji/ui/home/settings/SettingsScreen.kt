@@ -3,8 +3,6 @@ package com.asianmobile.emojibattery.shimeji.ui.home.settings
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -67,10 +65,10 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ui.theme.RobotoFontFamily
-import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.component.HomeHeader
+import com.asianmobile.emojibattery.shimeji.ui.component.rememberAccessibilitySettingsLauncher
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -98,9 +96,7 @@ fun SettingsScreen(
     var rateAppState by remember { mutableStateOf(RateAppUiState()) }
     var showPermissionDisclosure by remember { mutableStateOf(false) }
 
-    val accessibilityLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
+    val openAccessibilitySettings = rememberAccessibilitySettingsLauncher {
         viewModel.refreshAccessibility()
     }
 
@@ -150,7 +146,7 @@ fun SettingsScreen(
         GrantPermissionDialog(
             onGrantPermission = {
                 showPermissionDisclosure = false
-                accessibilityLauncher.launch(BatteryAccessibility.settingsIntent())
+                openAccessibilitySettings()
             },
             onMaybeLater = {
                 showPermissionDisclosure = false

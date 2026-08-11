@@ -35,6 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,6 +66,7 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.ui.component.AppSwitch
+import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -77,6 +81,7 @@ fun GrantPermissionsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    var showAccessibilityDisclosure by rememberSaveable { mutableStateOf(false) }
 
     val settingsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -96,6 +101,10 @@ fun GrantPermissionsScreen(
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
+                GrantPermissionsEffect.ShowAccessibilityDisclosure -> {
+                    showAccessibilityDisclosure = true
+                }
+
                 GrantPermissionsEffect.OpenAccessibilitySettings ->
                     settingsLauncher.openSettings(
                         BatteryAccessibility.settingsIntent(),
@@ -140,6 +149,19 @@ fun GrantPermissionsScreen(
         onNavigateBack = onNavigateBack,
         onTargetClicked = viewModel::onTargetClicked
     )
+
+    if (showAccessibilityDisclosure) {
+        GrantPermissionDialog(
+            onGrantPermission = {
+                showAccessibilityDisclosure = false
+                settingsLauncher.openSettings(
+                    BatteryAccessibility.settingsIntent(),
+                    appDetailsIntent(context.packageName)
+                )
+            },
+            onMaybeLater = { showAccessibilityDisclosure = false }
+        )
+    }
 }
 
 /**

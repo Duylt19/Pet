@@ -1,8 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.ui.battery.catalog
 
 import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -23,9 +21,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
-import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.ui.component.GrantPermissionDialog
+import com.asianmobile.emojibattery.shimeji.ui.component.rememberAccessibilitySettingsLauncher
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 
@@ -72,9 +70,7 @@ internal fun BatteryCatalogFlowHost(
     val lifecycleOwner = LocalLifecycleOwner.current
     var showAccessibilityDisclosure by rememberSaveable { mutableStateOf(false) }
 
-    val accessibilityLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
+    val openAccessibilitySettings = rememberAccessibilitySettingsLauncher {
         viewModel.refreshAccessibility()
     }
     val requiresRewardAd = !state.isPremium && state.themes.any { theme ->
@@ -129,7 +125,7 @@ internal fun BatteryCatalogFlowHost(
         GrantPermissionDialog(
             onGrantPermission = {
                 showAccessibilityDisclosure = false
-                accessibilityLauncher.launch(BatteryAccessibility.settingsIntent())
+                openAccessibilitySettings()
             },
             onMaybeLater = {
                 showAccessibilityDisclosure = false

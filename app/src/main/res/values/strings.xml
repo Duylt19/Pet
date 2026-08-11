@@ -990,11 +990,6 @@
     <string name="battery_preview_date" translatable="false">Thu 30</string>
     <string name="battery_preview_signal" translatable="false">▂▄▆</string>
     <string name="battery_preview_wifi" translatable="false">⌁</string>
-    <string name="battery_accessibility_title">Allow the battery status bar?</string>
-    <string name="battery_accessibility_preview_title">Turn on status bar preview</string>
-    <string name="battery_accessibility_preview_disclosure">Accessibility access must be enabled before editing so every pet, battery and component change can be previewed directly on the status bar. Cute Pet only draws this non-interactive overlay and does not read or control screen content.</string>
-    <string name="battery_accessibility_disclosure">Cute Pet uses an Accessibility service only to draw your chosen, non-interactive battery capsule above other apps. The service does not read screen text, tap controls, type, scroll, or perform actions for you. Android may still show a standard warning because Accessibility access is powerful. You can turn it off at any time in Accessibility settings.</string>
-    <string name="battery_open_accessibility_settings">Open Accessibility settings</string>
     <string name="battery_accessibility_required">Accessibility access is required to keep this bar visible above other apps.</string>
     <string name="battery_accessibility_ready">Accessibility access is on. Changes will apply to the overlay.</string>
     <string name="battery_accessibility_service_label">Cute Pet battery status</string>
@@ -1114,10 +1109,17 @@
     <string name="search_tab_pets">Shimeji Pets</string>
     <string name="search_tab_battery">Battery</string>
     <string name="search_results">Result search</string>
-    <string name="permission_dialog_accessibility_title">Turn on accessibility mode</string>
-    <string name="permission_dialog_accessibility_message">Enable accessibility to display Cute Pet over all apps. Emoji Battery does not collect or share personal information.</string>
-    <string name="permission_dialog_cancel">Cancel</string>
-    <string name="permission_dialog_allow">Allow</string>
+    <string name="accessibility_disclosure_title">Accessibility Service Access</string>
+    <string name="accessibility_disclosure_intro">This app needs Accessibility Service permission to enable your custom battery and status bar features.</string>
+    <string name="accessibility_disclosure_use_heading">The Accessibility Service is used to:</string>
+    <string name="accessibility_disclosure_use_items">• Identify and align system UI elements (like the status bar)\n• Properly display custom battery icons and visual overlays on your screen\n• Maintain a consistent look across different Android devices</string>
+    <string name="accessibility_disclosure_visual_only">This permission is strictly used for visual customization only.</string>
+    <string name="accessibility_disclosure_no_access_heading">We DO NOT:</string>
+    <string name="accessibility_disclosure_no_access_items">• Collect any personal or sensitive data\n• Read your messages, notifications, or passwords\n• Track your device activity</string>
+    <string name="accessibility_disclosure_conclusion">This feature requires your explicit consent and can be easily disabled anytime in your device settings.</string>
+    <string name="accessibility_disclosure_consent">I have read and agree to the terms of service</string>
+    <string name="accessibility_disclosure_allow">Allow</string>
+    <string name="accessibility_disclosure_close">Close</string>
     <string name="grant_permissions_nav">Grant Permission</string>
     <string name="grant_permissions_section_necessary">Necessary Permission</string>
     <string name="grant_permissions_section_stability">Enhanced Stability Permissions</string>

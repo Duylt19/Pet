@@ -58,7 +58,7 @@ class GrantPermissionsViewModel @Inject constructor(
         val state = _uiState.value
         val effect = when (target) {
             GrantPermissionsTarget.ACCESSIBILITY ->
-                GrantPermissionsEffect.OpenAccessibilitySettings
+                accessibilityTargetEffect(state.isAccessibilityEnabled)
 
             GrantPermissionsTarget.OVERLAY ->
                 GrantPermissionsEffect.OpenOverlaySettings.takeUnless { state.isOverlayGranted }
