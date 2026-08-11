@@ -12,6 +12,9 @@
 
     <style name="Theme.Launcher" parent="Theme.PrivateBrowser">
         <item name="android:windowBackground">@drawable/bg_cold_start</item>
+        <item name="android:isLightTheme">true</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 
 </resources>

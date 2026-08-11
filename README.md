@@ -30,8 +30,9 @@ settings và các quy ước kiến trúc hiện có.
   Catalog 898 theme, 20 nền, 20 emotion và 26 animation tải từ cùng private GitHub static
   server với Pet; JSON cache/revalidate và asset được tải, verify SHA-256 theo nhu cầu.
   Debug vẫn giữ packaged snapshot fallback, còn release chỉ nhận catalog `APPROVED`.
-- Discover Home, My Pet Room và Pet Store dùng pink/white Figma direction; Catalog, Settings
-  và Customize tiếp tục dùng cozy light design hiện tại; onboarding/Premium giữ visual hiện tại.
+- Discover Home, My Pet Room, Pet Store và Splash/App Open Welcome Back dùng pink/white
+  Figma direction; Catalog, Settings và Customize tiếp tục dùng cozy light design hiện tại;
+  Language/Intro/Permission/Premium giữ visual hiện tại.
 - Browser, search engine, clear browsing data, storage permission, download, media, Room và service cũ đã bị xóa.
 
 ## Kiến trúc bắt buộc

@@ -3,13 +3,14 @@ package com.asianmobile.emojibattery.shimeji.ads.ui.openads
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
-import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.graphics.drawable.toDrawable
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.LifecycleObserver
 import com.asianmobile.emojibattery.shimeji.ads.BuildConfig
 import com.asianmobile.emojibattery.shimeji.ads.R
@@ -240,17 +241,25 @@ class AppOpenManager() : LifecycleObserver {
     private fun showProgressDialog(activity: Activity) {
         if (activity.isFinishing || activity.isDestroyed) return
 
-        alertDialog = Dialog(activity, android.R.style.Theme_Black_NoTitleBar)
+        alertDialog = Dialog(activity, R.style.Theme_CutePet_WelcomeBack)
 
-        val view = LayoutInflater.from(activity)
-            .inflate(R.layout.dialog_welcome_back, null)
+        val view = ComposeView(activity).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool
+            )
+            setContent { WelcomeBackContent() }
+        }
 
         alertDialog.setContentView(view)
         alertDialog.setCanceledOnTouchOutside(false)
         alertDialog.setCancelable(false)
 
         alertDialog.window?.apply {
-            setBackgroundDrawable(Color.BLACK.toDrawable())
+            WindowCompat.setDecorFitsSystemWindows(this, false)
+            WindowInsetsControllerCompat(this, decorView).apply {
+                isAppearanceLightStatusBars = true
+                isAppearanceLightNavigationBars = true
+            }
             setLayout(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -258,6 +267,10 @@ class AppOpenManager() : LifecycleObserver {
         }
         if (activity.isFinishing || activity.isDestroyed) return
         alertDialog.show()
+        alertDialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
     }
 
     private fun dismissProgressDialog(activity: Activity) {

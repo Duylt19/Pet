@@ -76,6 +76,8 @@ dependencies {
     api(libs.firebase.crashlytics)
     api(libs.firebase.analytics)
     implementation(libs.lottie)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
 
     // Sdp
     implementation(libs.sdp.android)

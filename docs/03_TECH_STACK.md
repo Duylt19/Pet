@@ -8,6 +8,7 @@
 | Android | compile/target SDK 36, min SDK 24 | Platform baseline |
 | UI | Jetpack Compose, Material 3 | Declarative UI |
 | Product typography | Roboto v3.016 (OFL 1.1) | Local Regular 400, Medium 500, SemiBold 600 và Bold 700, cùng upstream `googlefonts/roboto-3-classic` |
+| Onboarding display typography | Nunito Black 900 (OFL 1.1) | Splash và App Open Welcome Back title theo Figma |
 | UI screenshot test | Compose Preview Screenshot Testing | Host-side Layoutlib golden test, không cần emulator |
 | App architecture | Single-Activity, MVVM | App shell và feature state |
 | Navigation | Navigation Compose | Route graph/back stack |
@@ -17,7 +18,7 @@
 | Image | Coil Compose + Coil GIF decoders | Image loading và animated GIF resource trên API 24+ |
 | Pet catalog network | `HttpURLConnection`, Coil OkHttp transport | Private GitHub raw JSON/ZIP/thumbnail với token Remote Config |
 | Room catalog network | `HttpURLConnection` | `json/rooms.json` + background/thumbnail từ cùng private server; room `1` đóng gói sẵn trong APK làm fallback offline |
-| Animation | Lottie Compose | Splash/onboarding animation |
+| Animation | Lottie Compose | Intro/onboarding animation; Welcome Back dùng GIF qua Coil |
 | Monetization | `:ads`, Google BillingClient | Ads và premium |
 | Observability | Firebase Analytics/Crashlytics/Remote Config | Tracking/config/crash |
 | Responsive sizing | Intuit SDP/SSP | Mapping design hiện tại |

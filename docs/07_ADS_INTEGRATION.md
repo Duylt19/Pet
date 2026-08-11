@@ -7,6 +7,9 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 ## Base behavior còn giữ
 
 - Splash khởi tạo consent/config liên quan.
+- App Open Ad dùng Welcome Back pastel cover trong lúc chuyển sang quảng cáo. Đây là transient
+  Compose content thuộc `:ads`, không phải navigation destination; Premium/ad-suppression và
+  lifecycle show/dismiss hiện tại vẫn là boundary authoritative.
 - Intro có native placement theo config hiện có.
 - Navigation có `navigateWithAd()` cho interstitial-aware transition.
 - MainActivity quản lý App Open Ads theo lifecycle.

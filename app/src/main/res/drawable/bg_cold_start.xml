@@ -2,14 +2,18 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item>
-        <shape>
-            <solid android:color="@color/white" />
-        </shape>
+        <bitmap
+            android:gravity="fill"
+            android:src="@drawable/img_onboarding_wallpaper" />
     </item>
 
     <item
-        android:width="@dimen/_130sdp"
-        android:height="@dimen/_130sdp"
-        android:drawable="@drawable/img_logo"
-        android:gravity="center" />
+        android:width="@dimen/_220sdp"
+        android:height="@dimen/_214sdp"
+        android:top="@dimen/_101sdp"
+        android:gravity="top|center_horizontal">
+        <bitmap
+            android:gravity="fill"
+            android:src="@drawable/img_splash_battery_pet" />
+    </item>
 </layer-list>

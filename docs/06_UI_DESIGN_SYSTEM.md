@@ -1,7 +1,8 @@
 # 06 — UI Design System Contract
 
 Base giữ infrastructure/theme và component pattern. Product screens từ Home trở đi dùng
-visual system Cute Pet; onboarding và Premium vẫn giữ UI hiện tại cho tới task update riêng.
+visual system Cute Pet. Splash và App Open Welcome Back đã dùng wallpaper pastel Figma;
+Language, Intro, Permission và Premium vẫn giữ UI hiện tại cho tới task update riêng.
 
 ## Cute Pet product direction
 
@@ -16,7 +17,16 @@ visual system Cute Pet; onboarding và Premium vẫn giữ UI hiện tại cho t
 - Shared primitives nằm ở `ui/component/CutePetComponents.kt`; component dark cũ không được
   dùng cho product screen mới nếu không có lý do tương thích.
 
-Các màn Splash, Language, Intro, Permission và Premium cố ý không đổi trong refresh này.
+Các màn Language, Intro, Permission và Premium cố ý không đổi trong refresh này.
+
+Splash và App Open Welcome Back theo Figma node `8088:12715`/`8088:12986`:
+
+- dùng chung wallpaper pastel riêng, Nunito Black 34/40px, gradient `#FF96B8 → #FF417E`,
+  viền trắng và shadow `#FF0044` 60%;
+- Splash giữ hero thỏ + battery, progress/ad disclosure và banner SDK thật; không đóng gói
+  creative quảng cáo mẫu hoặc status bar iPhone từ Figma;
+- Welcome Back là Compose cover trước App Open Ad trong module `:ads`, không phải route;
+  bunny GIF chạy bằng Coil và lifecycle quảng cáo hiện tại không thay đổi.
 
 Mine visual contract theo Figma node `8080:4828`:
 
@@ -128,7 +138,8 @@ System bar:
   settings, full-screen ad hay system dialog trả window về kèm appearance của chính nó;
 - **nợ đã biết**: onboarding Language và Permission (`ui/language`, `ui/permission/PermissionScreen`)
   vẫn còn nền `#161718`, nên icon tối chìm trên hai màn đó cho tới khi UI của chúng được
-  dựng lại theo tông trắng. Splash và Intro dùng `img_splash_bg` sáng nên đọc bình thường.
+  dựng lại theo tông trắng. Splash/Welcome Back dùng wallpaper pastel và Intro dùng
+  `img_splash_bg` sáng nên đọc bình thường.
 
 Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343` (tắt):
 

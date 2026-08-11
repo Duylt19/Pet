@@ -2,7 +2,7 @@
 
 | Route | Package/screen | Contract hiện tại |
 |---|---|---|
-| `splash` | `ui/splash/SplashScreen` | Startup/ads/billing animation và điều hướng bước tiếp theo |
+| `splash` | `ui/splash/SplashScreen` | Figma pastel startup, billing/consent/banner và điều hướng bước tiếp theo |
 | `language` | `ui/language/LanguageScreen` | Chọn language trong onboarding |
 | `language_settings` | `ui/language/LanguageScreen` | Chọn language từ Settings rồi restart app shell |
 | `intro` | `ui/intro/IntroScreen` | Pager ba trang, có native ads theo config |
@@ -29,8 +29,8 @@
 - Discover, Battery, Battery category và Mine dùng wallpaper trắng với gradient pastel, primary pink `#FB3675`, Roboto,
   horizontal catalog rows và rounded cards theo Figma node `8015:1035`. My Pet và các màn
   product cũ tiếp tục dùng cozy palette hiện tại cho tới task refresh riêng.
-- Splash, Language/Language Settings, Intro, Permission và Premium giữ nguyên visual hiện
-  tại theo quyết định owner; chúng sẽ được update trong các task riêng.
+- Splash và App Open Welcome Back đã theo Figma pastel. Language/Language Settings, Intro,
+  Permission và Premium giữ nguyên visual hiện tại; chúng sẽ được update trong các task riêng.
 
 ## Screen implementation contract
 
