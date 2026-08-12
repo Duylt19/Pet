@@ -6,4 +6,5 @@
     android:canRetrieveWindowContent="false"
     android:description="@string/battery_accessibility_service_description"
     android:isAccessibilityTool="false"
+    android:summary="@string/battery_accessibility_service_summary"
     android:notificationTimeout="100" />

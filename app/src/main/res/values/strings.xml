@@ -796,6 +796,8 @@
     <string name="battery_accessibility_ready">Accessibility access is on. Changes will apply to the overlay.</string>
     <string name="battery_accessibility_service_label">Cute Pet battery status</string>
     <string name="battery_accessibility_service_description">Displays the selected battery capsule and checks the foreground app package locally to apply your hidden-app list. It does not read screen content or control other apps.</string>
+    <!-- Shown next to the on/off state in the system Accessibility list, so it has to say why the service must be turned on and what it never touches. -->
+    <string name="battery_accessibility_service_summary">Turn this on so Cute Pet can draw your chosen battery bar over the status bar. It only checks which app is in the foreground, to hide the bar in the apps you pick. It does not read screen content, and no personal data is collected or shared.</string>
     <string name="battery_overlay_description">Battery status, %1$d percent</string>
     <string name="battery_overlay_percentage">%1$d%%</string>
     <string name="battery_overlay_unavailable_short">--</string>

@@ -656,7 +656,8 @@
     <string name="battery_accessibility_required">Cần bật Hỗ trợ tiếp cận để thanh này luôn hiển thị trên ứng dụng khác.</string>
     <string name="battery_accessibility_ready">Đã bật Hỗ trợ tiếp cận. Thay đổi sẽ được áp dụng vào lớp phủ.</string>
     <string name="battery_accessibility_service_label">Thanh trạng thái pin Cute Pet</string>
-    <string name="battery_accessibility_service_description">Hiển thị thanh pin đã chọn trong Cute Pet. Dịch vụ không đọc nội dung màn hình hoặc điều khiển ứng dụng khác.</string>
+    <string name="battery_accessibility_service_description">Hiển thị thanh pin đã chọn trong Cute Pet và kiểm tra cục bộ ứng dụng đang chạy ở nền trước để áp dụng danh sách ứng dụng bạn muốn ẩn. Dịch vụ không đọc nội dung màn hình hoặc điều khiển ứng dụng khác.</string>
+    <string name="battery_accessibility_service_summary">Bật để Cute Pet vẽ thanh pin bạn đã chọn đè lên thanh trạng thái. Dịch vụ chỉ kiểm tra ứng dụng nào đang chạy ở nền trước để ẩn thanh pin trong các ứng dụng bạn chọn. Dịch vụ không đọc nội dung màn hình và không thu thập hay chia sẻ dữ liệu cá nhân.</string>
     <string name="battery_overlay_description">Trạng thái pin, %1$d phần trăm</string>
     <string name="battery_overlay_percentage">%1$d%%</string>
     <string name="battery_overlay_unavailable_short">--</string>

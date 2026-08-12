@@ -184,7 +184,12 @@ Các guardrail bắt buộc:
 
 - `canRetrieveWindowContent=false`; service không đọc node/text.
 - Không gọi global action, gesture dispatch, click, type hoặc scroll.
-- `onAccessibilityEvent` bỏ qua event; metadata không đăng ký event type.
+- Metadata chỉ đăng ký `typeWindowStateChanged`; `onAccessibilityEvent` chỉ lấy
+  `event.packageName` để áp dụng hidden-app list, không đọc gì khác từ event.
+- Metadata khai cả `android:summary` lẫn `android:description`. Android hiển thị `summary`
+  ngay dưới tên service trong danh sách Accessibility (ghép `"trạng thái/summary"`), còn
+  `description` chỉ hiện ở màn chi tiết của service. Thiếu `summary` thì mục của app trong
+  danh sách chỉ có mỗi chữ "Đang tắt", không giải thích được vì sao cần bật.
 - Window `FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE`, không chặn thao tác.
 - Trước lần chuyển sang Accessibility Settings để cấp quyền, mọi entry point hiển thị cùng
   disclosure theo Figma `8437:7570`/`8437:9099`: giải thích phạm vi sử dụng, cam kết dữ liệu,
