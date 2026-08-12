@@ -660,6 +660,10 @@
     <string name="battery_accessibility_recovery_unknown">Thanh pin đã tắt vì quyền Trợ năng không còn được cấp.</string>
     <string name="battery_accessibility_recovery_action">Bật lại</string>
     <string name="battery_accessibility_recovery_dismiss">Bỏ qua</string>
+    <string name="battery_overlay_notification_title">Emoji Battery đang bật</string>
+    <string name="battery_overlay_notification_text">Thanh pin đang hiển thị trên màn hình. Chạm để đổi hoặc tắt.</string>
+    <string name="battery_overlay_notification_channel_name">Thanh pin</string>
+    <string name="battery_overlay_notification_channel_description">Chỉ hiện khi thanh pin của bạn đang bật.</string>
     <string name="battery_accessibility_service_label">Thanh trạng thái pin Cute Pet</string>
     <string name="battery_accessibility_service_description">Hiển thị thanh pin đã chọn trong Cute Pet và kiểm tra cục bộ ứng dụng đang chạy ở nền trước để áp dụng danh sách ứng dụng bạn muốn ẩn. Dịch vụ không đọc nội dung màn hình hoặc điều khiển ứng dụng khác.</string>
     <string name="battery_accessibility_service_summary">Bật để Cute Pet vẽ thanh pin bạn đã chọn đè lên thanh trạng thái. Dịch vụ chỉ kiểm tra ứng dụng nào đang chạy ở nền trước để ẩn thanh pin trong các ứng dụng bạn chọn. Dịch vụ không đọc nội dung màn hình và không thu thập hay chia sẻ dữ liệu cá nhân.</string>

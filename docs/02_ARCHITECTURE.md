@@ -127,7 +127,10 @@ ui/<domain>/<feature>/
   render pin/time/date/network/airplane/ringer/hotspot. Network dùng callback, GIF/Lottie
   mới chạy frame khi user bật animation.
 - Accessibility cover là opt-in sau disclosure. Service ẩn trên keyguard, screen-off và
-  landscape; không có boot receiver.
+  landscape; không có boot receiver — service còn trong enabled list thì hệ thống tự bind lại
+  lúc boot.
+- Cùng service đó tự `startForeground()` (`specialUse`) khi thanh pin đang bật, để force-stop
+  không cướp mất quyền Accessibility. Điều kiện là config đã lưu chứ không phải window đang gắn.
 - Danh sách exclusion do `BatterySettingsRepository.hiddenAppPackages` persist cục bộ.
   Accessibility event chỉ cung cấp foreground package để áp rule show/hide; service vẫn không
   retrieve window content, node tree, gesture hoặc global action.

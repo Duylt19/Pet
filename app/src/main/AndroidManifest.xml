@@ -98,11 +98,19 @@
                 android:value="User-started animated pet displayed in a small interactive overlay while using other apps" />
         </service>
 
+        <!-- The service promotes itself while the bar is on. Android drops an accessibility
+             service from the enabled list when the package is force-stopped, and several ROMs
+             force-stop on "clear recents"; foreground importance is what keeps the process out
+             of that path. Same service, same process — nothing extra to keep in sync. -->
         <service
             android:name=".battery.overlay.StatusBarAccessibilityService"
             android:exported="true"
+            android:foregroundServiceType="specialUse"
             android:label="@string/battery_accessibility_service_label"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="User-enabled battery status bar drawn over the system status bar for as long as the user leaves it on" />
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>

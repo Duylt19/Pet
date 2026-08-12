@@ -4,10 +4,15 @@ package com.asianmobile.emojibattery.shimeji.battery.overlay
 
 import android.accessibilityservice.AccessibilityService
 import android.app.KeyguardManager
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ServiceInfo
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -28,7 +33,11 @@ import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import com.asianmobile.emojibattery.shimeji.BuildConfig
+import com.asianmobile.emojibattery.shimeji.MainActivity
+import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.airbnb.lottie.LottieCompositionFactory
@@ -80,6 +89,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private var powerState = BatteryPowerState()
     private var receiverRegistered = false
     private var networkCallbackRegistered = false
+    private var isForeground = false
     private val networkCapabilities = mutableMapOf<Network, NetworkCapabilities>()
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
@@ -146,6 +156,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        createNotificationChannel()
         if (!receiverRegistered) registerSystemReceiver()
         registerNetworkCallback()
         mobileDataJob?.cancel()
@@ -219,6 +230,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
 
     override fun onDestroy() {
         removeOverlay()
+        demoteFromForeground()
         observeJob?.cancel()
         mobileDataJob?.cancel()
         if (receiverRegistered) {
@@ -250,7 +262,82 @@ class StatusBarAccessibilityService : AccessibilityService() {
         super.onDestroy()
     }
 
+    /**
+     * Tracks the *configured* bar rather than the attached window. [updateOverlay] detaches on a
+     * locked screen, an excluded app or landscape, and every one of those is a moment the process
+     * must stay pinned: dropping foreground importance there hands the ROM exactly the window it
+     * needs to reclaim the process, which would cost the Accessibility permission itself.
+     */
+    private fun syncForegroundState() {
+        val shouldRun = BuildConfig.BATTERY_STATUS_ENABLED && currentConfig.enabled
+        when {
+            shouldRun && !isForeground -> promoteToForeground()
+            !shouldRun && isForeground -> demoteFromForeground()
+        }
+    }
+
+    private fun promoteToForeground() {
+        val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+        } else {
+            0
+        }
+        // A refused promotion must not take the overlay down with it: the bar still draws from the
+        // accessibility window, it just loses the protection against being reclaimed.
+        isForeground = runCatching {
+            ServiceCompat.startForeground(this, NOTIFICATION_ID, createNotification(), type)
+        }.onFailure {
+            Log.w(TAG, "Unable to promote the battery overlay to the foreground", it)
+        }.isSuccess
+    }
+
+    private fun demoteFromForeground() {
+        if (!isForeground) return
+        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        isForeground = false
+    }
+
+    private fun createNotification(): Notification = NotificationCompat.Builder(
+        this,
+        NOTIFICATION_CHANNEL_ID
+    )
+        .setSmallIcon(R.drawable.ic_notification_pet)
+        .setContentTitle(getString(R.string.battery_overlay_notification_title))
+        .setContentText(getString(R.string.battery_overlay_notification_text))
+        .setContentIntent(
+            PendingIntent.getActivity(
+                this,
+                CONTENT_REQUEST_CODE,
+                Intent(this, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                },
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        )
+        .setOngoing(true)
+        .setOnlyAlertOnce(true)
+        .setCategory(NotificationCompat.CATEGORY_SERVICE)
+        .setPriority(NotificationCompat.PRIORITY_LOW)
+        .build()
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val channel = NotificationChannel(
+            NOTIFICATION_CHANNEL_ID,
+            getString(R.string.battery_overlay_notification_channel_name),
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = getString(R.string.battery_overlay_notification_channel_description)
+            setShowBadge(false)
+        }
+        getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+    }
+
     private fun updateOverlay() {
+        // Here rather than at the config collector so a promotion the platform refused — the app
+        // was in the background when the service rebound, say — gets another chance on the next
+        // window change or screen unlock instead of staying unprotected until the user retoggles.
+        syncForegroundState()
         val keyguardManager = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
         val powerManager = getSystemService(POWER_SERVICE) as PowerManager
         if (!BuildConfig.BATTERY_STATUS_ENABLED ||
@@ -636,6 +723,9 @@ class StatusBarAccessibilityService : AccessibilityService() {
         const val WIFI_STATE_EXTRA = "wifi_state"
         const val WIFI_AP_STATE_DISABLED = 11
         const val ASSET_RETRY_DELAY_MS = 5_000L
+        const val NOTIFICATION_CHANNEL_ID = "battery_status_overlay"
+        const val NOTIFICATION_ID = 2001
+        const val CONTENT_REQUEST_CODE = 2002
     }
 }
 

@@ -97,7 +97,9 @@ changing controller/engine behaviour.
 ### Battery status (`battery/`)
 
 Opt-in status-bar cover drawn by `StatusBarAccessibilityService` into a
-`TYPE_ACCESSIBILITY_OVERLAY`; no node retrieval or automation. Gated by
+`TYPE_ACCESSIBILITY_OVERLAY`; no node retrieval or automation. That same service promotes itself
+to a `specialUse` foreground service while the bar is configured on, because a force-stop strips
+the Accessibility permission itself. Gated by
 `BuildConfig.BATTERY_STATUS_ENABLED` (true in debug, false in release). Debug builds package an
 audited catalog from `private_data/battery-apk-1.0.2/` via the `auditDebugBatterySnapshot` /
 `prepareDebugBatteryAssets` / `prepareDebugBatteryResources` Gradle tasks (they need `python3`

@@ -201,6 +201,25 @@ Các guardrail bắt buộc:
 - Chỉ mở Settings sau disclosure chủ động; không tự bật service.
 - User có thể tắt service bất cứ lúc nào trong Android Settings.
 
+### Giữ process sống
+
+`StatusBarAccessibilityService` khai `android:foregroundServiceType="specialUse"` và tự
+`startForeground()` **chính nó** khi thanh pin đang bật. Đây là cách rẻ nhất để tránh force-stop:
+cùng service, cùng process, không đẻ thêm service hay `android:process` riêng — nên DataStore
+vẫn một tiến trình và không phải đổi sang store đa tiến trình.
+
+- Điều kiện là `BuildConfig.BATTERY_STATUS_ENABLED && config.enabled`, tức **ý định đã lưu**, chứ
+  không phải cửa sổ có đang gắn hay không. `updateOverlay()` gỡ overlay khi khoá màn hình, khi ở
+  app bị loại trừ hoặc khi xoay ngang — đúng những lúc ROM đi dọn process. Hạ foreground ở đó là
+  tự mở cửa cho nó.
+- `syncForegroundState()` được gọi đầu `updateOverlay()` chứ không phải ở collector config, để lần
+  promote bị platform từ chối (service rebind lúc app đang ở background) còn được thử lại ở window
+  change hoặc lần mở khoá kế tiếp.
+- Promote được bọc `runCatching`: bị từ chối thì thanh pin vẫn vẽ bình thường từ cửa sổ
+  accessibility, chỉ mất lớp bảo vệ khỏi bị reclaim. Không được để nó kéo overlay chết theo.
+- Notification dùng channel riêng `battery_status_overlay`, `IMPORTANCE_LOW`, và chỉ tồn tại khi
+  thanh pin bật. Tắt thanh pin là `stopForeground(STOP_FOREGROUND_REMOVE)`.
+
 ### Khi quyền bị thu hồi ngoài ý muốn
 
 Android **xoá** service khỏi `enabled_accessibility_services` mỗi khi package bị force-stop —
