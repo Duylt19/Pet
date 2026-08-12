@@ -142,7 +142,7 @@ fun BatteryEmotionGroupsScreenshotTest() = PreviewEmotionPage(groupKey = null)
 fun BatteryEmotionDetailScreenshotTest() = PreviewEmotionPage(groupKey = "emoji")
 
 @PreviewTest
-@Preview(name = "Status bar color picker", widthDp = 360, heightDp = 491)
+@Preview(name = "Status bar color picker", widthDp = 360, heightDp = 457)
 @Composable
 fun BatteryEditorColorPickerScreenshotTest() {
     Box(

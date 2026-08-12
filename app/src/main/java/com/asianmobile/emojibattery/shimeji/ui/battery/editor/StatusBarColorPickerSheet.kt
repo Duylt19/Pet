@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -150,7 +149,6 @@ internal fun StatusBarColorPickerSurface(
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
     ) {
         ColorPickerHeader(onDismiss)
-        ColorPickerTabs()
         SaturationBrightnessPicker(
             hue = hue,
             saturation = saturation,
@@ -199,72 +197,12 @@ private fun ColorPickerHeader(onDismiss: () -> Unit) {
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_close_x),
-                contentDescription = null,
+                contentDescription = stringResource(R.string.battery_color_picker_close),
                 tint = colorResource(R.color.colors_9B9C9E),
                 modifier = Modifier.size(dimensionResource(SdpR.dimen._12sdp))
             )
         }
     }
-}
-
-@Composable
-private fun ColorPickerTabs() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._25sdp))
-            .clip(CircleShape)
-            .background(colorResource(R.color.colors_F6F6F6))
-            .padding(dimensionResource(SdpR.dimen._2sdp)),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxSize()
-                .shadow(
-                    elevation = dimensionResource(SdpR.dimen._3sdp),
-                    shape = CircleShape,
-                    ambientColor = colorResource(R.color.colors_1A000000),
-                    spotColor = colorResource(R.color.colors_1A000000)
-                )
-                .clip(CircleShape)
-                .background(colorResource(R.color.colors_FFEBF1))
-                .border(
-                    dimensionResource(SdpR.dimen._1sdp),
-                    colorResource(R.color.colors_FB3675),
-                    CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            PickerTabText(
-                text = stringResource(R.string.battery_color_picker_grid),
-                color = colorResource(R.color.colors_FB3675)
-            )
-        }
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            PickerTabText(
-                text = stringResource(R.string.battery_color_picker_sliders),
-                color = colorResource(R.color.colors_6F7073)
-            )
-        }
-    }
-}
-
-@Composable
-private fun PickerTabText(text: String, color: Color) {
-    Text(
-        text = text,
-        color = color,
-        fontFamily = ColorPickerRobotoMedium,
-        fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-        lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp
-    )
 }
 
 @Composable

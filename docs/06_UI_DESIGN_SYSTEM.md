@@ -148,8 +148,9 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
 - Emotion pack và detail dùng cùng native collapsible holder ở app shell. Lần đầu vào flow sẽ
   request/bind native; chuyển pack → detail giữ nguyên Activity-scoped key nên không reload ad.
 - Template có đủ Battery, Emoji và Animation; header dùng icon Figma 16px và chevron vector
-  14px. Color có custom wheel, bảy preset và ba theme preview; custom wheel mở HSV/opacity
-  sheet, cập nhật trực tiếp cùng draft/live-preview policy;
+  14px. Color có custom wheel, bảy preset và ba theme preview; custom wheel mở trực tiếp một
+  chế độ HSV/opacity duy nhất, không dùng segmented Grid/Sliders, và cập nhật liên tục cùng
+  draft/live-preview policy;
 - Picker Battery/Emoji chỉ hiển thị theme catalog thật; built-in ID `0` là fallback renderer
   và không tạo card placeholder. Mặc định chọn theme ID `1`; placeholder tải/lỗi dùng icon
   Battery/Emoji có độ tương phản đúng tông thay vì asset xám/trắng cũ;
