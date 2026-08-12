@@ -29,6 +29,14 @@ class RoomCatalogParserTest {
     }
 
     @Test
+    fun `parses WebP room assets`() {
+        val document = parser.parse(catalog().replace(".png", ".webp"))
+
+        assertEquals("bg/BG_4.webp", document.rooms.last().background.path)
+        assertEquals("thumb/BG_4.webp", document.rooms.last().thumbnail.path)
+    }
+
+    @Test
     fun `reports a review required catalog as unapproved`() {
         val json = mutate { root ->
             root.getJSONObject("source").put("distributionStatus", "REVIEW_REQUIRED")

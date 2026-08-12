@@ -109,7 +109,10 @@ class OwnerPetCatalogParser {
                 }
             }
             record.thumbnail?.let { thumbnail ->
-                if (thumbnail.path != "thumb/${record.id}.png") {
+                if (!THUMBNAIL_PATH.matches(thumbnail.path) ||
+                    thumbnail.path.substringAfterLast('/').substringBeforeLast('.') !=
+                    record.id.toString()
+                ) {
                     throw OwnerPetCatalogParseException(
                         "Owner pet ${record.id} has a mismatched thumbnail path"
                     )
@@ -158,6 +161,7 @@ class OwnerPetCatalogParser {
     private companion object {
         const val SERVER_SCHEMA_VERSION = 1
         val SHA_256 = Regex("[0-9a-f]{64}")
+        val THUMBNAIL_PATH = Regex("thumb/[0-9]+\\.(?:png|webp)")
     }
 }
 

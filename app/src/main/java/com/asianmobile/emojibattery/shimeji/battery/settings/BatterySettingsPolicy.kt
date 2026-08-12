@@ -20,6 +20,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_S
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_EMOTION_ID
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_BACKGROUND_ID
 import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_STATUS_ICON_STYLE_INDEX
+import com.asianmobile.emojibattery.shimeji.data.model.normalizeSelectableBatteryThemeId
 
 class BatterySettingsPolicy(
     private val barHeightRange: BatteryStatusBarHeightRange =
@@ -29,11 +30,11 @@ class BatterySettingsPolicy(
         // The shipped product deliberately supports the status-bar replacement flow only.
         // Migrating legacy BELOW values prevents an Accessibility overlay from covering app UI.
         displayMode = BatteryStatusDisplayMode.COVER_SYSTEM_BAR,
-        selectedThemeId = config.selectedThemeId.coerceAtLeast(BUILT_IN_BATTERY_THEME_ID),
-        selectedBatteryThemeId = config.selectedBatteryThemeId
-            .coerceAtLeast(BUILT_IN_BATTERY_THEME_ID),
-        selectedEmojiThemeId = config.selectedEmojiThemeId
-            .coerceAtLeast(BUILT_IN_BATTERY_THEME_ID),
+        selectedThemeId = normalizeSelectableBatteryThemeId(config.selectedThemeId),
+        selectedBatteryThemeId = normalizeSelectableBatteryThemeId(
+            config.selectedBatteryThemeId
+        ),
+        selectedEmojiThemeId = normalizeSelectableBatteryThemeId(config.selectedEmojiThemeId),
         backgroundDecorationId = config.backgroundDecorationId.coerceIn(
             0,
             MAX_BATTERY_BACKGROUND_ID

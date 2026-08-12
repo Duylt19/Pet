@@ -5,6 +5,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFont
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFormat
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusDisplayMode
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_THEME_ID
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -110,5 +111,21 @@ class BatteryDraftCodecTest {
         )
 
         assertNull(restored)
+    }
+
+    @Test
+    fun codec_migrates_rendererFallbackThemeToFirstSelectableTheme() {
+        val restored = BatteryDraftCodec.decode(
+            """{
+                "schema":5,
+                "selectedThemeId":0,
+                "selectedBatteryThemeId":0,
+                "selectedEmojiThemeId":0
+            }""".trimIndent()
+        )
+
+        assertEquals(DEFAULT_BATTERY_THEME_ID, restored?.selectedThemeId)
+        assertEquals(DEFAULT_BATTERY_THEME_ID, restored?.selectedBatteryThemeId)
+        assertEquals(DEFAULT_BATTERY_THEME_ID, restored?.selectedEmojiThemeId)
     }
 }

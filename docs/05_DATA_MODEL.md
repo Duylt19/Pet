@@ -43,7 +43,7 @@
 | `pet_position_reset_revision` | Int | Legacy global fallback cho migration |
 | `battery_status_enabled` | Boolean | User đã Apply battery overlay |
 | `battery_status_has_applied` | Boolean | Đã từng Apply; điều khiển card Current độc lập với trạng thái bật/tắt |
-| `battery_status_selected_theme_id` | Int | Style gốc/legacy theme ID; `0` là built-in |
+| `battery_status_selected_theme_id` | Int | Style gốc/legacy theme ID; mặc định user-visible là `1`, `0` chỉ là renderer fallback |
 | `battery_status_selected_battery_theme_id` | Int | Theme ID cung cấp asset pin |
 | `battery_status_selected_emoji_theme_id` | Int | Theme ID cung cấp asset pet/emoji |
 | `battery_status_display_mode` | String enum | Cover hoặc below-system-bar |
@@ -141,20 +141,25 @@ không được restore sau process death/reboot.
 - `BatteryCatalogSnapshot` gồm category/theme, 38 background, 20 emotion server trong
   nhóm Classic + 80 emotion server thuộc tám pack mới, 26 animation,
   entitlement, remote/cache/local asset path, distribution status và typed error;
-  built-in theme ID `0` luôn có.
-- Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và dimension cho
-  PNG/GIF/Lottie.
+  built-in theme ID `0` luôn có như fallback runtime nhưng không xuất hiện trong picker.
+- Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và dimension. Ảnh tĩnh
+  Battery chấp nhận pixel-exact lossless WebP hoặc PNG; GIF/Lottie giữ nguyên.
   `HybridBatteryCatalogRepository` đọc cache trước, revalidate private GitHub catalog
   theo TTL/ETag/backoff, materialize asset theo nhu cầu và chặn path escape,
   size/hash mismatch hoặc release catalog chưa `APPROVED`.
+- GIF trong picker được Coil stream/cache theo viewport. Lottie remote được materialize và
+  kiểm tra hash vào cache Battery catalog trước khi parse; UI dùng asset Animation mặc định
+  trong lúc tải hoặc khi composition lỗi nên không tạo item trắng.
 - Emotion legacy giữ nguyên ID `1..20` để DataStore hiện có không đổi nghĩa. Emotion mới là
   asset server ổn định với ID `21..100`, mỗi pack 10 item theo thứ tự Emoji, Cony,
   Kiiroitori, Molang, Mochi, Tobi, Keroppi và Pochacco. Group chỉ là taxonomy UI;
   persistence tiếp tục lưu leaf `emotionDecorationId`, không lưu group đang browse. Picker
-  chỉ tải PNG preview 72px; khi chọn mới tải full PNG, kiểm tra size/SHA-256 và cache app-private.
+  chỉ tải preview nhẹ; khi chọn mới tải full lossless WebP/PNG, kiểm tra size/SHA-256 và
+  cache app-private.
   Background nhóm cũng đọc từ server; release APK không đóng gói 100 emotion này.
 - Background v2 ưu tiên 18 frame Figma ở ID `1..18`; 20 nền cũ được re-index thành
-  `19..38`. Picker chỉ tải `background_preview`, còn full PNG chỉ materialize sau khi chọn.
+  `19..38`. Picker chỉ tải `background_preview`, còn full lossless WebP/PNG chỉ materialize
+  sau khi chọn.
   ID `1` có bản giống byte trong `drawable-nodpi` để fresh install và fallback offline vẫn
   có nền mặc định. Vì catalog còn ở debug v1, key DataStore và draft schema được tăng version
   để reset lựa chọn cũ thay vì âm thầm đổi nghĩa ID.
@@ -168,6 +173,10 @@ không được restore sau process death/reboot.
 - Catalog theme là cặp mặc định. Khi mở editor từ một theme, `selectedThemeId`,
   `selectedBatteryThemeId` và `selectedEmojiThemeId` cùng nhận ID đó. Sau đó hai component
   ID được chỉnh độc lập; runtime vẽ pet chồng lên pin tại cùng trailing anchor.
+- Fresh config chọn theme server ID `1` cho cả Battery và Emoji. DataStore/draft debug cũ
+  lưu ID `0` được normalize sang `1`; khi catalog chưa sẵn sàng renderer vẫn dùng built-in
+  ID `0` nội bộ. Emotion, Animation, nhãn Mobile Data và Hotspot mặc định tắt để status bar
+  ban đầu không bị chồng nhiều decoration.
 - Migration không cần DataStore transaction riêng: nếu hai key component chưa tồn tại,
   repository dùng `battery_status_selected_theme_id` cho cả hai. Draft schema 1 cũng được
   decode theo quy tắc này; schema 2 persist rõ hai ID, schema 3 thêm các status icon style
@@ -194,7 +203,7 @@ không được restore sau process death/reboot.
   SHA-256 và dimension. `RemotePetRoomCatalogRepository` đọc cache trước, revalidate theo
   cùng `PetCatalogRefreshPolicy` (TTL 24h + ETag + rate-limit backoff) như pet/battery,
   materialize asset theo nhu cầu và verify size/SHA-256 trước khi dùng.
-- Mỗi room có đúng hai asset: `bg/BG_<id>.png` full-resolution và `thumb/BG_<id>.png` bản
+- Mỗi room có đúng hai asset: `bg/BG_<id>.webp` full-resolution và `thumb/BG_<id>.webp` bản
   preview nhẹ. `RoomCatalogParser` từ chối catalog nếu thumbnail không nhỏ và nhẹ hơn
   background, nên grid Room không thể vô tình tải ảnh full-size. Release chỉ chấp nhận
   catalog `APPROVED`; debug chấp nhận cả `REVIEW_REQUIRED`.

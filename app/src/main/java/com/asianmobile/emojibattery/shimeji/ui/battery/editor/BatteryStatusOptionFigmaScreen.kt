@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -32,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -41,15 +41,12 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryConnectivityState
@@ -60,6 +57,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFont
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFormat
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
@@ -87,7 +85,7 @@ internal fun BatteryStatusOptionFigmaScreen(
     page: BatteryEditorPage,
     onBack: () -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
-    onApply: () -> Unit,
+    onDone: () -> Unit,
     showEmbeddedPreview: Boolean = true
 ) {
     val config = state.config
@@ -150,20 +148,18 @@ internal fun BatteryStatusOptionFigmaScreen(
                     }
                 }
                 when (page) {
-                    BatteryEditorPage.ANIMATION -> item {
-                        AnimationStyleSection(
-                            animations = state.animations,
-                            selectedName = config.animationAssetName,
-                            onSelected = { animation ->
-                                onConfig(
-                                    config.copy(
-                                        showAnimation = true,
-                                        animationAssetName = animation.name
-                                    )
+                    BatteryEditorPage.ANIMATION -> animationStyleItems(
+                        animations = state.animations,
+                        selectedName = config.animationAssetName,
+                        onSelected = { animation ->
+                            onConfig(
+                                config.copy(
+                                    showAnimation = true,
+                                    animationAssetName = animation.name
                                 )
-                            }
-                        )
-                    }
+                            )
+                        }
+                    )
                     BatteryEditorPage.WIFI -> item {
                         StatusOptionStyleSection(
                             title = stringResource(R.string.battery_status_icon_style),
@@ -230,7 +226,7 @@ internal fun BatteryStatusOptionFigmaScreen(
                     else -> Unit
                 }
             }
-            StatusOptionApplyPanel(onClick = onApply)
+            BatteryEditorDonePanel(onDone = onDone)
         }
     }
 
@@ -280,35 +276,9 @@ private fun StatusOptionTopBar(
             lineHeight = dimensionResource(SspR.dimen._22ssp).value.sp
         )
         Spacer(Modifier.weight(1f))
-        StatusOptionSwitch(checked, onCheckedChange)
-    }
-}
-
-@Composable
-private fun StatusOptionSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    val trackWidth = dimensionResource(SdpR.dimen._40sdp)
-    val trackHeight = dimensionResource(SdpR.dimen._22sdp)
-    val thumbSize = dimensionResource(SdpR.dimen._17sdp)
-    val inset = (trackHeight - thumbSize) / 2
-    Box(
-        modifier = Modifier
-            .size(trackWidth, trackHeight)
-            .clip(CircleShape)
-            .background(
-                colorResource(if (checked) R.color.colors_FB3675 else R.color.colors_F1E0FF)
-            )
-            .semantics { role = Role.Switch }
-            .clickable { onCheckedChange(!checked) },
-        contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart
-    ) {
-        Box(
-            Modifier
-                .padding(horizontal = inset)
-                .size(thumbSize)
-                .clip(CircleShape)
-                .background(
-                    colorResource(if (checked) R.color.colors_FFFFFF else R.color.colors_B06EFF)
-                )
+        AppSwitch(
+            checked = checked,
+            onCheckedChange = { onCheckedChange(!checked) }
         )
     }
 }
@@ -379,52 +349,56 @@ private fun OptionSectionTitle(value: String) {
     )
 }
 
-@Composable
-private fun AnimationStyleSection(
+private fun LazyListScope.animationStyleItems(
     animations: List<BatteryAnimationEntry>,
     selectedName: String,
     onSelected: (BatteryAnimationEntry) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))) {
+    item(key = "animation_style_title") {
         OptionSectionTitle(stringResource(R.string.battery_animation_style))
-        animations.chunked(4).forEach { rowAnimations ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
-            ) {
-                rowAnimations.forEach { animation ->
-                    val active = animation.name == selectedName
-                    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .aspectRatio(1f)
-                            .clip(shape)
-                            .background(
-                                colorResource(
-                                    if (active) R.color.colors_FFEBF1 else R.color.colors_FFFFFF
-                                )
+    }
+    val rows = animations.chunked(4)
+    items(
+        count = rows.size,
+        key = { rowIndex -> "animation_row_${rows[rowIndex].first().id}" }
+    ) { rowIndex ->
+        val rowAnimations = rows[rowIndex]
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+        ) {
+            rowAnimations.forEach { animation ->
+                val active = animation.name == selectedName
+                val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .aspectRatio(1f)
+                        .clip(shape)
+                        .background(
+                            colorResource(
+                                if (active) R.color.colors_FFEBF1 else R.color.colors_FFFFFF
                             )
-                            .border(
-                                dimensionResource(SdpR.dimen._1sdp),
-                                colorResource(
-                                    if (active) R.color.colors_FB3675 else R.color.colors_DEDEDF
-                                ),
-                                shape
-                            )
-                            .semantics { selected = active }
-                            .clickable { onSelected(animation) }
-                            .padding(dimensionResource(SdpR.dimen._6sdp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        BatteryAnimationAsset(
-                            animation = animation,
-                            modifier = Modifier.fillMaxSize()
                         )
-                    }
+                        .border(
+                            dimensionResource(SdpR.dimen._1sdp),
+                            colorResource(
+                                if (active) R.color.colors_FB3675 else R.color.colors_DEDEDF
+                            ),
+                            shape
+                        )
+                        .semantics { selected = active }
+                        .clickable { onSelected(animation) }
+                        .padding(dimensionResource(SdpR.dimen._6sdp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    BatteryAnimationAsset(
+                        animation = animation,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
-                repeat(4 - rowAnimations.size) { Spacer(Modifier.weight(1f)) }
             }
+            repeat(4 - rowAnimations.size) { Spacer(Modifier.weight(1f)) }
         }
     }
 }
@@ -648,55 +622,6 @@ private fun optionFontWeight(font: BatteryDateFont): FontWeight = when (font) {
     BatteryDateFont.DANCING_SCRIPT -> FontWeight.Bold
     BatteryDateFont.RUSSO_ONE,
     BatteryDateFont.COINY -> FontWeight.Normal
-}
-
-@Composable
-private fun StatusOptionApplyPanel(onClick: () -> Unit) {
-    val shape = RoundedCornerShape(
-        topStart = dimensionResource(SdpR.dimen._18sdp),
-        topEnd = dimensionResource(SdpR.dimen._18sdp)
-    )
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(dimensionResource(SdpR.dimen._4sdp), shape)
-            .clip(shape)
-            .background(colorResource(R.color.colors_FFFFFF))
-            .padding(
-                start = dimensionResource(SdpR.dimen._12sdp),
-                top = dimensionResource(SdpR.dimen._18sdp),
-                end = dimensionResource(SdpR.dimen._12sdp),
-                bottom = dimensionResource(SdpR.dimen._9sdp)
-            )
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._37sdp))
-                .clip(CircleShape)
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(
-                            colorResource(R.color.colors_C95DFF),
-                            colorResource(R.color.colors_FB54BB)
-                        )
-                    )
-                )
-                .semantics { role = Role.Button }
-                .clickable(onClick = onClick),
-            contentAlignment = Alignment.Center
-        ) {
-            androidx.compose.material3.Text(
-                text = stringResource(R.string.battery_apply),
-                color = colorResource(R.color.colors_FFFFFF),
-                fontFamily = RobotoFontFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
-                lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
 }
 
 private data class StatusOptionSpec(

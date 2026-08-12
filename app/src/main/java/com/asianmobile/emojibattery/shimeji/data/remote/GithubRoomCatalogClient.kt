@@ -103,8 +103,13 @@ class GithubRoomCatalogClient @Inject constructor(
     )
 
     /** The already-downloaded file for this asset, or null when it still has to be fetched. */
-    fun cachedAsset(expectedSizeBytes: Long, expectedSha256: String): File? {
-        val file = File(assetDirectory, "$expectedSha256.png")
+    fun cachedAsset(
+        relativePath: String,
+        expectedSizeBytes: Long,
+        expectedSha256: String
+    ): File? {
+        val extension = safeExtension(relativePath) ?: return null
+        val file = File(assetDirectory, "$expectedSha256.$extension")
         return file.takeIf { it.isFile && verify(it, expectedSizeBytes, expectedSha256) }
     }
 
@@ -115,8 +120,8 @@ class GithubRoomCatalogClient @Inject constructor(
         expectedSha256: String
     ): File? {
         if (expectedSizeBytes !in 1..MAX_ASSET_BYTES) return null
-        if (!SAFE_PATH.matches(relativePath)) return null
-        val finalFile = File(assetDirectory, "$expectedSha256.png")
+        val extension = safeExtension(relativePath) ?: return null
+        val finalFile = File(assetDirectory, "$expectedSha256.$extension")
         if (finalFile.isFile && verify(finalFile, expectedSizeBytes, expectedSha256)) {
             return finalFile
         }
@@ -168,6 +173,11 @@ class GithubRoomCatalogClient @Inject constructor(
             }
         }
         return digest.digest().toHex() == expectedSha256
+    }
+
+    private fun safeExtension(relativePath: String): String? {
+        if (!SAFE_PATH.matches(relativePath)) return null
+        return relativePath.substringAfterLast('.').takeIf(SAFE_EXTENSION::matches)
     }
 
     private fun readMetadata(): RoomCatalogCacheMetadata = runCatching {
@@ -246,7 +256,8 @@ class GithubRoomCatalogClient @Inject constructor(
         const val ETAG_JSON_KEY = "etag"
         const val LAST_VALIDATED_AT_JSON_KEY = "lastValidatedAtEpochMillis"
         const val RETRY_AFTER_JSON_KEY = "retryAfterEpochMillis"
-        val SAFE_PATH = Regex("(?:bg|thumb)/BG_[0-9]{1,4}\\.png")
+        val SAFE_PATH = Regex("(?:bg|thumb)/BG_[0-9]{1,4}\\.(?:png|webp)")
+        val SAFE_EXTENSION = Regex("(?:png|webp)")
     }
 }
 

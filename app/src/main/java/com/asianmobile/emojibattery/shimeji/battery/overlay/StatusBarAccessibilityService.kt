@@ -392,9 +392,15 @@ class StatusBarAccessibilityService : AccessibilityService() {
         if (loadedAssetKey == assetKey) {
             view.render(
                 currentConfig,
-                previewDeviceState(),
+                BatteryPreviewSystemStatePolicy.deviceState(
+                    deviceState,
+                    currentPreviewFocus
+                ),
                 currentPreviewFocus,
-                previewPowerState(),
+                BatteryPreviewSystemStatePolicy.powerState(
+                    powerState,
+                    currentPreviewFocus
+                ),
                 emojiBitmap,
                 batteryBitmap,
                 backgroundBitmap,
@@ -468,9 +474,15 @@ class StatusBarAccessibilityService : AccessibilityService() {
             loadedAssetKey = assetKey
             view.render(
                 currentConfig,
-                previewDeviceState(),
+                BatteryPreviewSystemStatePolicy.deviceState(
+                    deviceState,
+                    currentPreviewFocus
+                ),
                 currentPreviewFocus,
-                previewPowerState(),
+                BatteryPreviewSystemStatePolicy.powerState(
+                    powerState,
+                    currentPreviewFocus
+                ),
                 emojiBitmap,
                 batteryBitmap,
                 backgroundBitmap,
@@ -492,38 +504,6 @@ class StatusBarAccessibilityService : AccessibilityService() {
         overlayView = null
         layoutParams = null
     }
-
-    private fun previewDeviceState(): BatteryDeviceState = when (currentPreviewFocus) {
-        BatteryStatusComponent.AIRPLANE -> deviceState.copy(
-            airplaneMode = true,
-            cellular = BatteryConnectivityState.DISABLED
-        )
-        BatteryStatusComponent.RINGER -> deviceState.copy(
-            ringer = BatterySystemStatusPolicy.ringerForPreview(deviceState.ringer)
-        )
-        BatteryStatusComponent.HOTSPOT -> deviceState.copy(
-            hotspot = BatteryHotspotState.ENABLED
-        )
-        BatteryStatusComponent.CELLULAR -> deviceState.copy(
-            cellular = BatteryConnectivityState.CONNECTED,
-            mobileDataBadge = deviceState.mobileDataBadge ?: BatteryMobileDataBadge.G5,
-            airplaneMode = false
-        )
-        BatteryStatusComponent.WIFI -> deviceState.copy(
-            wifi = BatteryConnectivityState.CONNECTED
-        )
-        else -> deviceState
-    }
-
-    private fun previewPowerState(): BatteryPowerState =
-        if (currentPreviewFocus == BatteryStatusComponent.CHARGE && !powerState.isCharging) {
-            powerState.copy(
-                chargeState = BatteryChargeState.CHARGING,
-                plugType = BatteryPlugType.AC
-            )
-        } else {
-            powerState
-        }
 
     private fun createLayoutParams(config: BatteryStatusConfig): WindowManager.LayoutParams {
         val density = resources.displayMetrics.density

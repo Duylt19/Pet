@@ -16,6 +16,10 @@
 6. [Current screens](screens/README.md)
 7. Tài liệu chuyên đề liên quan task
 
+Khi cập nhật catalog hoặc asset server, bắt đầu từ
+[`data/README.md`](data/README.md). Bộ tài liệu này mô tả kết nối, fetch/cache/download,
+contract từng loại data, migration, publish và rollback.
+
 ## Foundation
 
 | File | Nội dung |
@@ -56,9 +60,9 @@ qua `raw.githubusercontent.com` nhánh `master`.
 
 | Catalog | Config phía app | File phía server |
 |---|---|---|
-| Pet | `PetServerConfig` | `json/pets.json`, `data/<id>.zip`, `thumb/<id>.png` |
+| Pet | `PetServerConfig` | `json/pets.json`, `data/<id>.zip`, `thumb/<id>.webp` |
 | Battery | `BatteryServerConfig` | `json/batteries.json`, `battery/**` |
-| Room | `RoomServerConfig` | `json/rooms.json`, `room/bg|thumb/BG_<id>.png` |
+| Room | `RoomServerConfig` | `json/rooms.json`, `room/bg|thumb/BG_<id>.webp` |
 
 Repo private nên mọi request gửi `Authorization: Bearer <token>`; token lấy từ Remote Config key
 `github_token_pet_server` và default trong source luôn rỗng. Đọc cache-first, revalidate TTL 24h

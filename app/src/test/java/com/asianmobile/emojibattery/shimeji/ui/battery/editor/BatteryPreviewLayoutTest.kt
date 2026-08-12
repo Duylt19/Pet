@@ -2,6 +2,11 @@ package com.asianmobile.emojibattery.shimeji.ui.battery.editor
 
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutResult
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryChargeState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryDeviceState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryHotspotState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPowerState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryRingerState
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -9,6 +14,48 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BatteryPreviewLayoutTest {
+    @Test
+    fun overviewPreview_reflectsRealConditionalSystemStates() {
+        val layout = batteryPreviewLayout(
+            config = BatteryStatusConfig(
+                showAirplane = true,
+                showRinger = true,
+                showHotspot = true,
+                showCharge = true
+            ),
+            availableWidthDp = 400f,
+            hasEmoji = false,
+            hasEmotion = false,
+            hasAnimation = false,
+            deviceState = BatteryDeviceState(
+                airplaneMode = true,
+                ringer = BatteryRingerState.VIBRATE,
+                hotspot = BatteryHotspotState.ENABLED
+            ),
+            powerState = BatteryPowerState(chargeState = BatteryChargeState.CHARGING)
+        )
+
+        assertTrue(layout.shows(BatteryStatusComponent.AIRPLANE))
+        assertTrue(layout.shows(BatteryStatusComponent.RINGER))
+        assertTrue(layout.shows(BatteryStatusComponent.HOTSPOT))
+        assertTrue(layout.shows(BatteryStatusComponent.CHARGE))
+        assertFalse(layout.shows(BatteryStatusComponent.CELLULAR))
+    }
+
+    @Test
+    fun overviewPreview_hidesChargeWhenSwitchIsOffEvenWhileCharging() {
+        val layout = batteryPreviewLayout(
+            config = BatteryStatusConfig(showCharge = false),
+            availableWidthDp = 320f,
+            hasEmoji = false,
+            hasEmotion = false,
+            hasAnimation = false,
+            powerState = BatteryPowerState(chargeState = BatteryChargeState.CHARGING)
+        )
+
+        assertFalse(layout.shows(BatteryStatusComponent.CHARGE))
+    }
+
     @Test
     fun focusedStatusComponent_remainsVisibleInConstrainedPreview() {
         val focusedComponents = listOf(
@@ -27,7 +74,10 @@ class BatteryPreviewLayoutTest {
             val layout = batteryPreviewLayout(
                 config = BatteryStatusConfig(
                     showDateTime = true,
-                    showAnimation = true
+                    showAnimation = true,
+                    showEmotion = true,
+                    showData = true,
+                    showHotspot = true
                 ),
                 availableWidthDp = 120f,
                 hasEmoji = true,

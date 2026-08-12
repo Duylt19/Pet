@@ -3,6 +3,7 @@ package com.asianmobile.emojibattery.shimeji.battery.settings
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BACKGROUND_COLOR
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_THEME_ID
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -14,6 +15,13 @@ class BatterySettingsPolicyTest {
     fun defaultConfig_usesWifiStyleTwoAndHotspotStyleThree() {
         val defaults = BatteryStatusConfig()
 
+        assertEquals(DEFAULT_BATTERY_THEME_ID, defaults.selectedThemeId)
+        assertEquals(DEFAULT_BATTERY_THEME_ID, defaults.selectedBatteryThemeId)
+        assertEquals(DEFAULT_BATTERY_THEME_ID, defaults.selectedEmojiThemeId)
+        assertEquals(false, defaults.showEmotion)
+        assertEquals(false, defaults.showAnimation)
+        assertEquals(false, defaults.showData)
+        assertEquals(false, defaults.showHotspot)
         assertEquals(2, defaults.wifiIconStyleIndex)
         assertEquals(3, defaults.hotspotIconStyleIndex)
         assertEquals(1, defaults.signalIconStyleIndex)
@@ -51,9 +59,9 @@ class BatterySettingsPolicyTest {
             )
         )
 
-        assertEquals(0, sanitized.selectedThemeId)
-        assertEquals(0, sanitized.selectedBatteryThemeId)
-        assertEquals(0, sanitized.selectedEmojiThemeId)
+        assertEquals(DEFAULT_BATTERY_THEME_ID, sanitized.selectedThemeId)
+        assertEquals(DEFAULT_BATTERY_THEME_ID, sanitized.selectedBatteryThemeId)
+        assertEquals(DEFAULT_BATTERY_THEME_ID, sanitized.selectedEmojiThemeId)
         assertEquals(BatteryStatusDisplayMode.COVER_SYSTEM_BAR, sanitized.displayMode)
         assertEquals(38, sanitized.backgroundDecorationId)
         assertEquals(0, sanitized.emotionDecorationId)

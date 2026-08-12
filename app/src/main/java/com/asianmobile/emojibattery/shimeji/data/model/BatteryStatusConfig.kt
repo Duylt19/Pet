@@ -3,16 +3,16 @@ package com.asianmobile.emojibattery.shimeji.data.model
 data class BatteryStatusConfig(
     val enabled: Boolean = false,
     val hasApplied: Boolean = false,
-    val selectedThemeId: Int = BUILT_IN_BATTERY_THEME_ID,
+    val selectedThemeId: Int = DEFAULT_BATTERY_THEME_ID,
     val selectedBatteryThemeId: Int = selectedThemeId,
     val selectedEmojiThemeId: Int = selectedThemeId,
     val displayMode: BatteryStatusDisplayMode = BatteryStatusDisplayMode.COVER_SYSTEM_BAR,
     val showTime: Boolean = true,
     val showPercentage: Boolean = true,
     val backgroundDecorationId: Int = DEFAULT_BATTERY_BACKGROUND_ID,
-    val showEmotion: Boolean = true,
+    val showEmotion: Boolean = false,
     val emotionDecorationId: Int = DEFAULT_BATTERY_EMOTION_ID,
-    val showAnimation: Boolean = true,
+    val showAnimation: Boolean = false,
     val animationAssetName: String = DEFAULT_BATTERY_ANIMATION_ASSET,
     val barHeightDp: Float = DEFAULT_BATTERY_BAR_HEIGHT_DP,
     val horizontalPaddingDp: Float = DEFAULT_BATTERY_HORIZONTAL_PADDING_DP,
@@ -30,7 +30,7 @@ data class BatteryStatusConfig(
     val wifiColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
     val wifiIconStyleIndex: Int = DEFAULT_BATTERY_WIFI_ICON_STYLE_INDEX,
     val dataType: BatteryDataType = BatteryDataType.G2,
-    val showData: Boolean = true,
+    val showData: Boolean = false,
     val dataSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
     val dataColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
     val showSignal: Boolean = true,
@@ -42,7 +42,7 @@ data class BatteryStatusConfig(
     val airplaneColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
     val airplaneIconStyleIndex: Int = DEFAULT_BATTERY_STATUS_ICON_STYLE_INDEX,
     val hotspotSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
-    val showHotspot: Boolean = true,
+    val showHotspot: Boolean = false,
     val hotspotColorArgb: Int = DEFAULT_BATTERY_STATUS_ICON_COLOR,
     val hotspotIconStyleIndex: Int = DEFAULT_BATTERY_HOTSPOT_ICON_STYLE_INDEX,
     val ringerSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
@@ -114,6 +114,8 @@ const val DEFAULT_BATTERY_STATUS_ICON_SIZE_DP = 16f
 const val DEFAULT_BATTERY_TIME_SIZE_DP = 16f
 const val DEFAULT_BATTERY_PRIVACY_RESERVE_DP = 72f
 const val DEFAULT_BATTERY_BACKGROUND_ID = 1
+// ID 0 is a renderer-only fallback. Theme 1 is the first user-visible server theme.
+const val DEFAULT_BATTERY_THEME_ID = 1
 const val MAX_BATTERY_BACKGROUND_ID = 38
 const val DEFAULT_BATTERY_EMOTION_ID = 1
 const val MAX_BATTERY_EMOTION_ID = 100
@@ -128,3 +130,6 @@ const val MAX_BATTERY_STATUS_ICON_STYLE_INDEX = 4
 const val DEFAULT_BATTERY_BACKGROUND_COLOR = 0xFFE0F7F1.toInt()
 const val DEFAULT_BATTERY_FOREGROUND_COLOR = 0xFF111827.toInt()
 const val DEFAULT_BATTERY_STATUS_ICON_COLOR = 0xFF000000.toInt()
+
+fun normalizeSelectableBatteryThemeId(themeId: Int): Int =
+    themeId.coerceAtLeast(DEFAULT_BATTERY_THEME_ID)

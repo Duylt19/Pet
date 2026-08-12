@@ -59,6 +59,48 @@ data class BatteryDeviceState(
     val mobileDataBadge: BatteryMobileDataBadge? = null
 )
 
+data class BatteryPreviewSystemState(
+    val deviceState: BatteryDeviceState = BatteryDeviceState(),
+    val powerState: BatteryPowerState = BatteryPowerState()
+)
+
+internal object BatteryPreviewSystemStatePolicy {
+    fun deviceState(
+        actual: BatteryDeviceState,
+        focusedComponent: BatteryStatusComponent?
+    ): BatteryDeviceState = when (focusedComponent) {
+        BatteryStatusComponent.AIRPLANE -> actual.copy(
+            airplaneMode = true,
+            cellular = BatteryConnectivityState.DISABLED
+        )
+        BatteryStatusComponent.RINGER -> actual.copy(
+            ringer = BatterySystemStatusPolicy.ringerForPreview(actual.ringer)
+        )
+        BatteryStatusComponent.HOTSPOT -> actual.copy(hotspot = BatteryHotspotState.ENABLED)
+        BatteryStatusComponent.CELLULAR -> actual.copy(
+            cellular = BatteryConnectivityState.CONNECTED,
+            mobileDataBadge = actual.mobileDataBadge ?: BatteryMobileDataBadge.G5,
+            airplaneMode = false
+        )
+        BatteryStatusComponent.WIFI -> actual.copy(wifi = BatteryConnectivityState.CONNECTED)
+        else -> actual
+    }
+
+    fun powerState(
+        actual: BatteryPowerState,
+        focusedComponent: BatteryStatusComponent?
+    ): BatteryPowerState = if (
+        focusedComponent == BatteryStatusComponent.CHARGE && !actual.isCharging
+    ) {
+        actual.copy(
+            chargeState = BatteryChargeState.CHARGING,
+            plugType = BatteryPlugType.AC
+        )
+    } else {
+        actual
+    }
+}
+
 data class BatteryNetworkObservation(
     val isWifi: Boolean,
     val isCellular: Boolean,
