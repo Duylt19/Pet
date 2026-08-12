@@ -69,6 +69,7 @@ class BatteryEditorViewModel @Inject constructor(
     private var previewStopJob: Job? = null
     private var focusedComponent: BatteryStatusComponent? = null
     private var assetSelectionRequestId = 0L
+    private var backgroundSelectionRequestId = 0L
     private var emotionSelectionRequestId = 0L
     private val _uiState = MutableStateFlow(
         BatteryEditorUiState(
@@ -141,8 +142,47 @@ class BatteryEditorViewModel @Inject constructor(
     fun setBatterySize(value: Float) = update { copy(batterySizeDp = value) }
     fun setBackgroundColor(value: Int) = update { copy(backgroundColorArgb = value) }
     fun setForegroundColor(value: Int) = update { copy(foregroundColorArgb = value) }
-    fun setBackgroundDecoration(value: Int) =
-        update { copy(backgroundDecorationId = value) }
+    fun selectBackground(background: BatteryDecorationEntry) {
+        val state = _uiState.value
+        if (state.backgroundSelectionInProgress != null) return
+        if (state.config.backgroundDecorationId == background.id) return
+        val requestId = ++backgroundSelectionRequestId
+        _uiState.update {
+            it.copy(backgroundSelectionInProgress = background.id, message = null)
+        }
+        viewModelScope.launch {
+            val materializedPath = catalogRepository.materializeAsset(background.assetPath)
+            if (requestId != backgroundSelectionRequestId) return@launch
+            if (materializedPath != null) {
+                update { copy(backgroundDecorationId = background.id) }
+                _uiState.update {
+                    it.copy(
+                        backgrounds = it.backgrounds.map { entry ->
+                            if (entry.id == background.id) {
+                                entry.copy(assetPath = materializedPath)
+                            } else entry
+                        },
+                        backgroundSelectionInProgress = null,
+                        message = null
+                    )
+                }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        backgroundSelectionInProgress = null,
+                        message = BatteryEditorMessage.ASSET_DOWNLOAD_FAILED
+                    )
+                }
+            }
+        }
+    }
+    fun setBackgroundDecoration(value: Int) {
+        if (value == 0) {
+            update { copy(backgroundDecorationId = 0) }
+            return
+        }
+        _uiState.value.backgrounds.firstOrNull { it.id == value }?.let(::selectBackground)
+    }
     fun setShowEmotion(value: Boolean) = update { copy(showEmotion = value) }
     fun selectEmotion(emotion: BatteryDecorationEntry) {
         val state = _uiState.value

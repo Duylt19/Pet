@@ -91,7 +91,7 @@ object BatteryDraftCodec {
         if (value.isNullOrBlank()) return null
         return runCatching {
             val json = JSONObject(value)
-            if (json.optInt(KEY_SCHEMA, 0) !in 1..SCHEMA_VERSION) return@runCatching null
+            if (json.optInt(KEY_SCHEMA, 0) != SCHEMA_VERSION) return@runCatching null
             val selectedThemeId = json.int("selectedThemeId", fallback.selectedThemeId)
             fallback.copy(
                 enabled = json.boolean("enabled", fallback.enabled),
@@ -254,5 +254,5 @@ object BatteryDraftCodec {
     }
 
     private const val KEY_SCHEMA = "schema"
-    private const val SCHEMA_VERSION = 4
+    private const val SCHEMA_VERSION = 5
 }

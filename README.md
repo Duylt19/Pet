@@ -29,7 +29,7 @@ settings và các quy ước kiến trúc hiện có.
 - Mine là hub app/support; pet đã sở hữu và trạng thái hiện trên màn hình được quản lý trong
   My Pet Room, không còn flow Catalog/Detail/Customize màu xanh cũ.
 - Battery tab mở catalog/editor và một Accessibility status-cover overlay opt-in.
-  Catalog 898 theme, 20 nền, 20 emotion và 26 animation tải từ cùng private GitHub static
+  Catalog 898 theme, 38 nền, 100 emotion và 26 animation tải từ cùng private GitHub static
   server với Pet; JSON cache/revalidate và asset được tải, verify SHA-256 theo nhu cầu.
   Debug vẫn giữ packaged snapshot fallback, còn release chỉ nhận catalog `APPROVED`.
 - Discover Home, My Pet Room, Pet Store và Splash/App Open Welcome Back dùng pink/white

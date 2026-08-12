@@ -126,7 +126,7 @@ class BatteryCatalogParser {
                 }
             }
         }
-        val backgrounds = parseDecorations(root, "backgrounds", "background")
+        val backgrounds = parseBackgrounds(root)
         val emotions = parseEmotions(root)
         val emotionGroups = parseEmotionGroups(root, emotions)
         val animations = parseAnimations(root)
@@ -174,6 +174,38 @@ class BatteryCatalogParser {
             throw BatteryCatalogParseException("Duplicate Battery decoration IDs in $key")
         }
         return records.sortedBy(BatteryDecorationRecord::id)
+    }
+
+    private fun parseBackgrounds(root: JSONObject): List<BatteryDecorationRecord> {
+        val records = root.optJSONArray("backgrounds")?.mapObjects { item, index ->
+            val id = item.getInt("id")
+            val name = item.getString("name").trim()
+            val order = if (item.has("order")) item.getInt("order") else id - 1
+            BatteryDecorationRecord(
+                id = id,
+                name = name,
+                asset = item.getJSONObject("asset")
+                    .toAsset("background/$name.png", index),
+                preview = item.optJSONObject("preview")
+                    ?.toAsset("background_preview/$name.png", index),
+                order = order
+            ).also {
+                if (id <= 0 || name.isBlank() || order < 0) {
+                    throw BatteryCatalogParseException(
+                        "Invalid Battery background at index $index"
+                    )
+                }
+            }
+        }.orEmpty()
+        if (records.map(BatteryDecorationRecord::id).distinct().size != records.size) {
+            throw BatteryCatalogParseException("Duplicate Battery background IDs")
+        }
+        if (root.optInt("backgroundCount", records.size) != records.size) {
+            throw BatteryCatalogParseException("Battery background count does not match")
+        }
+        return records.sortedWith(
+            compareBy(BatteryDecorationRecord::order, BatteryDecorationRecord::id)
+        )
     }
 
     private fun parseEmotions(root: JSONObject): List<BatteryDecorationRecord> {

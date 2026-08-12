@@ -317,7 +317,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         val SHOW_TIME = booleanPreferencesKey("battery_status_show_time")
         val SHOW_PERCENTAGE = booleanPreferencesKey("battery_status_show_percentage")
         val BACKGROUND_DECORATION_ID =
-            intPreferencesKey("battery_status_background_decoration_id")
+            intPreferencesKey("battery_status_background_decoration_id_v2")
         val SHOW_EMOTION = booleanPreferencesKey("battery_status_show_emotion")
         val EMOTION_DECORATION_ID =
             intPreferencesKey("battery_status_emotion_decoration_id")

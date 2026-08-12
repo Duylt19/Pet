@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
@@ -146,7 +147,8 @@ internal fun BatteryEditorFigmaContent(
                 if (isOverview) {
                     StatusBarApplyPanel(
                         enabled = state.isThemeAvailable &&
-                            state.assetSelectionInProgress == null,
+                            state.assetSelectionInProgress == null &&
+                            state.backgroundSelectionInProgress == null,
                         onApply = onApply
                     )
                 }
@@ -346,6 +348,7 @@ private fun StatusBarOverview(
                     BackgroundThemeRow(
                         backgrounds = state.backgrounds,
                         selectedId = state.config.backgroundDecorationId,
+                        loadingId = state.backgroundSelectionInProgress,
                         onSelected = onBackgroundDecoration
                     )
                 }
@@ -788,6 +791,7 @@ private fun StatusBarColorPalette(
 private fun BackgroundThemeRow(
     backgrounds: List<BatteryDecorationEntry>,
     selectedId: Int,
+    loadingId: Int?,
     onSelected: (Int) -> Unit
 ) {
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
@@ -799,6 +803,7 @@ private fun BackgroundThemeRow(
             BackgroundThemeOption(
                 background = background,
                 selected = selectedId == background.id,
+                loading = loadingId == background.id,
                 modifier = Modifier
                     .width(dimensionResource(SdpR.dimen._77sdp))
                     .height(dimensionResource(SdpR.dimen._38sdp)),
@@ -1037,6 +1042,7 @@ private fun StatusBarPicker(
                             .height(dimensionResource(SdpR.dimen._46sdp)),
                         showSelectionBorder = true,
                         locked = locked,
+                        loading = state.backgroundSelectionInProgress == background.id,
                         onClick = {
                             if (locked) onPremium() else onBackgroundDecoration(background.id)
                         }
@@ -1141,6 +1147,7 @@ private fun BackgroundThemeOption(
     modifier: Modifier,
     showSelectionBorder: Boolean = true,
     locked: Boolean = false,
+    loading: Boolean = false,
     onClick: () -> Unit
 ) {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
@@ -1158,11 +1165,11 @@ private fun BackgroundThemeOption(
                 shape
             )
             .semantics { this.selected = selected }
-            .clickable(onClick = onClick)
+            .clickable(enabled = !loading, onClick = onClick)
     ) {
         if (background.assetPath.isNotBlank()) {
             AsyncImage(
-                model = background.assetPath,
+                model = background.pickerPath,
                 contentDescription = background.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -1173,6 +1180,15 @@ private fun BackgroundThemeOption(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(dimensionResource(SdpR.dimen._5sdp))
+                    .size(dimensionResource(SdpR.dimen._18sdp))
+            )
+        }
+        if (loading) {
+            CircularProgressIndicator(
+                color = colorResource(R.color.colors_FB3675),
+                strokeWidth = dimensionResource(SdpR.dimen._2sdp),
+                modifier = Modifier
+                    .align(Alignment.Center)
                     .size(dimensionResource(SdpR.dimen._18sdp))
             )
         }

@@ -89,7 +89,9 @@ raw.githubusercontent.com/.../master/
     ├── thumb/<id>.png
     ├── battery/<id>.png
     ├── emoji/<id>.png
+    ├── background/status_background_<id>.png
     ├── background/template_color_<id>.png
+    ├── background_preview/<name>.png
     ├── emotion/emotion_<id>.png
     └── animation/<name>.gif|json
 ```
@@ -104,6 +106,12 @@ UI/runtime bổ sung 80 PNG @3x đã export từ Figma trên private project ser
 `21..100`; bảy background pack cũng nằm trong Battery catalog server. APK chỉ đọc preview
 nhẹ và tải full asset theo lựa chọn của user.
 Repository ghép Classic trước tám nhóm bundled, không thay thế dữ liệu legacy.
+
+Background catalog v2 có 38 item: 18 frame Figma mới dùng ID `1..18` và luôn đứng trước,
+20 nền cũ dùng ID `19..38`. Grid tải preview nhẹ; full PNG chỉ được download/verify khi
+chọn. Frame ID `1` còn được đóng gói ở
+`drawable-nodpi/img_battery_background_default.png`, nên default vẫn hiển thị khi offline.
+ID `0` tiếp tục là nền màu phẳng.
 
 Trong Customize, card Pet luôn load trực tiếp `emojiPath` và card Pin luôn load trực tiếp
 `batteryPath` qua Coil. Thumbnail tổng hợp của catalog không được dùng làm placeholder cho

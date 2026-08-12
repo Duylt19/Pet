@@ -84,14 +84,14 @@ class BatteryDraftCodecTest {
     }
 
     @Test
-    fun codec_uses_fallback_for_unknown_enum_from_older_state() {
+    fun codec_uses_fallback_for_unknown_enum_from_current_state() {
         val fallback = BatteryStatusConfig(
             hasApplied = true,
             dataType = BatteryDataType.G4,
             wifiIconStyleIndex = 4
         )
         val restored = BatteryDraftCodec.decode(
-            """{"schema":1,"dataType":"NOT_A_NETWORK"}""",
+            """{"schema":5,"dataType":"NOT_A_NETWORK"}""",
             fallback
         )
 
@@ -101,12 +101,11 @@ class BatteryDraftCodecTest {
     }
 
     @Test
-    fun codec_migrates_legacy_theme_to_both_components() {
+    fun codec_rejects_legacy_state_after_background_id_refactor() {
         val restored = BatteryDraftCodec.decode(
             """{"schema":1,"selectedThemeId":42}"""
         )
 
-        assertEquals(42, restored?.selectedBatteryThemeId)
-        assertEquals(42, restored?.selectedEmojiThemeId)
+        assertNull(restored)
     }
 }

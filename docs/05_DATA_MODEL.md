@@ -55,7 +55,7 @@
 | `battery_status_charge_icon_index` | Int | Charge vector 1–12 |
 | `battery_status_{wifi,signal,airplane,hotspot,ringer}_icon_style_index` | Int | Family icon 1–4 của từng status component |
 | `battery_status_date_format`, `battery_status_date_time_font` | String enum | Định dạng và bundled font ngày |
-| `battery_status_background_decoration_id` | Int | Background asset ID; `0` dùng màu phẳng |
+| `battery_status_background_decoration_id_v2` | Int | Background v2 ID; `0` dùng màu phẳng, mặc định `1` |
 | `battery_status_show_emotion` | Boolean | Hiện emotion trang trí |
 | `battery_status_emotion_decoration_id` | Int | Emotion asset ID |
 | `battery_status_hidden_app_packages` | String set | Package của app mà user chọn để tạm ẩn Emoji Battery; lưu cục bộ trên thiết bị |
@@ -138,7 +138,7 @@ không được restore sau process death/reboot.
 
 ## Battery catalog và config
 
-- `BatteryCatalogSnapshot` gồm category/theme, 20 background, 20 emotion server trong
+- `BatteryCatalogSnapshot` gồm category/theme, 38 background, 20 emotion server trong
   nhóm Classic + 80 emotion server thuộc tám pack mới, 26 animation,
   entitlement, remote/cache/local asset path, distribution status và typed error;
   built-in theme ID `0` luôn có.
@@ -153,6 +153,11 @@ không được restore sau process death/reboot.
   persistence tiếp tục lưu leaf `emotionDecorationId`, không lưu group đang browse. Picker
   chỉ tải PNG preview 72px; khi chọn mới tải full PNG, kiểm tra size/SHA-256 và cache app-private.
   Background nhóm cũng đọc từ server; release APK không đóng gói 100 emotion này.
+- Background v2 ưu tiên 18 frame Figma ở ID `1..18`; 20 nền cũ được re-index thành
+  `19..38`. Picker chỉ tải `background_preview`, còn full PNG chỉ materialize sau khi chọn.
+  ID `1` có bản giống byte trong `drawable-nodpi` để fresh install và fallback offline vẫn
+  có nền mặc định. Vì catalog còn ở debug v1, key DataStore và draft schema được tăng version
+  để reset lựa chọn cũ thay vì âm thầm đổi nghĩa ID.
 - `BatteryStatusConfig` là persistent source of truth. `BatterySettingsPolicy` clamp
   geometry/color/favorite/reward unlock trước khi ghi và sau khi decode DataStore.
 - Wi‑Fi, signal, airplane, hotspot và ringer mỗi nhóm persist `iconStyleIndex` độc lập
