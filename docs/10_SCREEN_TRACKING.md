@@ -12,6 +12,7 @@
 | Intro page 3 | `intro_page_3` |
 | Permission | `permission` |
 | Grant Permissions | `grant_permissions` |
+| Accessibility How to use | `accessibility_how_to_use` |
 | Discover Home | `home` |
 | Search | `search` |
 | Favourite & Recent | `favourite_recent` |

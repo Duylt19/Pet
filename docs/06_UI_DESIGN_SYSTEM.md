@@ -298,7 +298,7 @@ Grant Permissions contract theo Figma node `8080:9754`:
   SemiBold 18/26 và body Roboto Regular 14/20. Nội dung dài là phần duy nhất được cuộn; hàng
   consent, nút `Allow`/`Close` và native ad luôn cố định. Checkbox dùng đúng hai vector của rate
   flow; Back, scrim và `Close` đóng ngay, còn swipe phải kéo tối thiểu 25% chiều cao sheet;
-  `Allow` chỉ chuyển sang Android Accessibility Settings sau khi user đã tick consent;
+  `Allow` chỉ chuyển sang màn `Accessibility How to use` sau khi user đã tick consent;
 - state `Allow` theo Figma `8437:7772`/`8437:9110`: enabled dùng gradient
   `#C95DFF → #FB54BB` opacity 100%; disabled giữ nguyên gradient/chữ trắng với opacity 30%.
   Disabled vẫn nhận tap để hiện toast yêu cầu đồng ý điều khoản, nhưng không mở Accessibility
@@ -306,6 +306,10 @@ Grant Permissions contract theo Figma node `8080:9754`:
 - toàn bộ Discover, Battery Catalog, Mine, Status Bar Editor và Grant Permissions dùng chung
   disclosure này. Khi quyền đã bật, row Accessibility trong Grant Permissions mở thẳng Settings
   để user quản lý/tắt quyền, không hỏi consent lại.
+- màn `Accessibility How to use` theo Figma `8442:9525`: wallpaper pastel riêng, bốn bước với
+  ảnh thao tác export theo từng group, số thứ tự hồng, keyword hồng và CTA gradient
+  `#C95DFF → #FB54BB` ghim đáy. App bar dùng cùng `exitUntilCollapsed` contract của Customize
+  Status Bar. CTA mở Settings; chỉ khi service đã bật mới pop về source để source tiếp tục action.
 
 Input text contract:
 

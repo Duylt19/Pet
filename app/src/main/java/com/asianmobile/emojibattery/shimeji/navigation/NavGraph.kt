@@ -15,6 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -44,6 +46,7 @@ import com.asianmobile.emojibattery.shimeji.ui.onboarding.intro.IntroScreen
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.language.LanguageScreen
 import com.asianmobile.emojibattery.shimeji.ui.app.MainViewModel
 import com.asianmobile.emojibattery.shimeji.ui.app.destinationAfterIntro
+import com.asianmobile.emojibattery.shimeji.ui.settings.permissions.AccessibilityHowToUseScreen
 import com.asianmobile.emojibattery.shimeji.ui.settings.permissions.GrantPermissionsScreen
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.permission.PermissionScreen
 import com.asianmobile.emojibattery.shimeji.ui.premium.PremiumScreen
@@ -63,6 +66,7 @@ object Routes {
     const val SEARCH = "search"
     const val FAVOURITE_RECENT = "favourite_recent"
     const val GRANT_PERMISSIONS = "grant_permissions"
+    const val ACCESSIBILITY_HOW_TO_USE = "accessibility_how_to_use"
     const val MY_PET = "my_pet"
     const val PET_STORE = "pet_store"
     const val SETTINGS = "settings"
@@ -82,6 +86,19 @@ object Routes {
 }
 
 private const val HOME_BOTTOM_BANNER_POSITION = "home_mode_bottom"
+private const val ACCESSIBILITY_HOW_TO_USE_RESULT = "accessibility_how_to_use_result"
+
+@Composable
+private fun NavBackStackEntry.accessibilityHowToUseResult(): Boolean? {
+    val result by remember(this) {
+        savedStateHandle.getStateFlow<Boolean?>(ACCESSIBILITY_HOW_TO_USE_RESULT, null)
+    }.collectAsStateWithLifecycle()
+    return result
+}
+
+private fun NavBackStackEntry.consumeAccessibilityHowToUseResult() {
+    savedStateHandle[ACCESSIBILITY_HOW_TO_USE_RESULT] = null
+}
 
 internal fun homeTabForRoute(route: String?): HomeTab? = when (route) {
     Routes.HOME -> HomeTab.DISCOVER
@@ -169,6 +186,13 @@ fun AppNavGraph(
                 "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
                 ignoreDebounce = true
             )
+        }
+    }
+
+    fun navigateToAccessibilityHowToUse(source: NavBackStackEntry) {
+        source.consumeAccessibilityHowToUseResult()
+        navController.safeNavigate(Routes.ACCESSIBILITY_HOW_TO_USE, ignoreDebounce = true) {
+            launchSingleTop = true
         }
     }
 
@@ -271,7 +295,7 @@ fun AppNavGraph(
                 )
             }
 
-            composable(Routes.HOME) {
+            composable(Routes.HOME) { backStackEntry ->
                 DiscoverScreen(
                     onNavigateToSearch = {
                         navController.safeNavigate(Routes.SEARCH, ignoreDebounce = true)
@@ -296,13 +320,39 @@ fun AppNavGraph(
                             Routes.batteryEditor(CURRENT_BATTERY_STYLE_ID),
                             ignoreDebounce = true
                         )
+                    },
+                    accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
+                    onAccessibilityHowToUseResultConsumed =
+                        backStackEntry::consumeAccessibilityHowToUseResult,
+                    onNavigateToAccessibilityHowToUse = {
+                        navigateToAccessibilityHowToUse(backStackEntry)
                     }
                 )
             }
 
-            composable(Routes.GRANT_PERMISSIONS) {
+            composable(Routes.GRANT_PERMISSIONS) { backStackEntry ->
                 GrantPermissionsScreen(
-                    onNavigateBack = { navController.safePopBackStack() }
+                    onNavigateBack = { navController.safePopBackStack() },
+                    accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
+                    onAccessibilityHowToUseResultConsumed =
+                        backStackEntry::consumeAccessibilityHowToUseResult,
+                    onNavigateToAccessibilityHowToUse = {
+                        navigateToAccessibilityHowToUse(backStackEntry)
+                    }
+                )
+            }
+
+            composable(Routes.ACCESSIBILITY_HOW_TO_USE) {
+                fun returnToSource(permissionGranted: Boolean) {
+                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                        ACCESSIBILITY_HOW_TO_USE_RESULT,
+                        permissionGranted
+                    )
+                    navController.safePopBackStack(ignoreDebounce = true)
+                }
+                AccessibilityHowToUseScreen(
+                    onNavigateBack = { returnToSource(false) },
+                    onPermissionGranted = { returnToSource(true) }
                 )
             }
 
@@ -361,7 +411,7 @@ fun AppNavGraph(
                 )
             }
 
-            composable(Routes.BATTERY_CATALOG) {
+            composable(Routes.BATTERY_CATALOG) { backStackEntry ->
                 BatteryCatalogScreen(
                     onSearch = {
                         navController.safeNavigate(Routes.SEARCH, ignoreDebounce = true)
@@ -383,6 +433,12 @@ fun AppNavGraph(
                             "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
                             ignoreDebounce = true
                         )
+                    },
+                    accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
+                    onAccessibilityHowToUseResultConsumed =
+                        backStackEntry::consumeAccessibilityHowToUseResult,
+                    onNavigateToAccessibilityHowToUse = {
+                        navigateToAccessibilityHowToUse(backStackEntry)
                     }
                 )
             }
@@ -412,6 +468,12 @@ fun AppNavGraph(
                             ignoreDebounce = true
                         )
                     },
+                    accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
+                    onAccessibilityHowToUseResultConsumed =
+                        backStackEntry::consumeAccessibilityHowToUseResult,
+                    onNavigateToAccessibilityHowToUse = {
+                        navigateToAccessibilityHowToUse(backStackEntry)
+                    },
                     viewModel = catalogViewModel
                 )
             }
@@ -435,6 +497,12 @@ fun AppNavGraph(
                             "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
                             ignoreDebounce = true
                         )
+                    },
+                    accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
+                    onAccessibilityHowToUseResultConsumed =
+                        backStackEntry::consumeAccessibilityHowToUseResult,
+                    onNavigateToAccessibilityHowToUse = {
+                        navigateToAccessibilityHowToUse(backStackEntry)
                     }
                 )
             }
@@ -471,6 +539,12 @@ fun AppNavGraph(
                             ignoreDebounce = true
                         )
                     },
+                    accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
+                    onAccessibilityHowToUseResultConsumed =
+                        backStackEntry::consumeAccessibilityHowToUseResult,
+                    onNavigateToAccessibilityHowToUse = {
+                        navigateToAccessibilityHowToUse(backStackEntry)
+                    },
                     viewModel = editorViewModel
                 )
             }
@@ -496,11 +570,17 @@ fun AppNavGraph(
                             ignoreDebounce = true
                         )
                     },
+                    accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
+                    onAccessibilityHowToUseResultConsumed =
+                        backStackEntry::consumeAccessibilityHowToUseResult,
+                    onNavigateToAccessibilityHowToUse = {
+                        navigateToAccessibilityHowToUse(backStackEntry)
+                    },
                     viewModel = hiltViewModel<BatteryEditorViewModel>(overviewEntry)
                 )
             }
 
-            composable(Routes.SETTINGS) {
+            composable(Routes.SETTINGS) { backStackEntry ->
                 SettingsScreen(
                     onSearch = {
                         navController.safeNavigate(Routes.SEARCH, ignoreDebounce = true)
@@ -526,6 +606,12 @@ fun AppNavGraph(
                             // quick double tap stacks two identical screens to back out of.
                             launchSingleTop = true
                         }
+                    },
+                    accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
+                    onAccessibilityHowToUseResultConsumed =
+                        backStackEntry::consumeAccessibilityHowToUseResult,
+                    onNavigateToAccessibilityHowToUse = {
+                        navigateToAccessibilityHowToUse(backStackEntry)
                     }
                 )
             }

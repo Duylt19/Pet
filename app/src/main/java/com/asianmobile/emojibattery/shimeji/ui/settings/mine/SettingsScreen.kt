@@ -68,7 +68,6 @@ import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeHeader
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.rememberAccessibilitySettingsLauncher
 import com.asianmobile.emojibattery.shimeji.ui.pet.room.PetRoomSettingsDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -87,6 +86,9 @@ fun SettingsScreen(
     onNavigateToMyPet: () -> Unit,
     onNavigateToFavouriteRecent: () -> Unit,
     onNavigateToGrantPermissions: () -> Unit = {},
+    accessibilityHowToUseResult: Boolean? = null,
+    onAccessibilityHowToUseResultConsumed: () -> Unit = {},
+    onNavigateToAccessibilityHowToUse: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     TrackScreenView(ScreenName.SETTINGS)
@@ -97,8 +99,15 @@ fun SettingsScreen(
     var rateAppState by remember { mutableStateOf(RateAppUiState()) }
     var showPermissionDisclosure by remember { mutableStateOf(false) }
 
-    val openAccessibilitySettings = rememberAccessibilitySettingsLauncher {
-        viewModel.refreshAccessibility()
+    LaunchedEffect(accessibilityHowToUseResult) {
+        accessibilityHowToUseResult?.let { permissionGranted ->
+            if (permissionGranted) {
+                viewModel.refreshAccessibility()
+            } else {
+                viewModel.cancelPendingBatteryEnable()
+            }
+            onAccessibilityHowToUseResultConsumed()
+        }
     }
 
     LaunchedEffect(viewModel) {
@@ -148,7 +157,7 @@ fun SettingsScreen(
         GrantPermissionDialog(
             onGrantPermission = {
                 showPermissionDisclosure = false
-                openAccessibilitySettings()
+                onNavigateToAccessibilityHowToUse()
             },
             onMaybeLater = {
                 showPermissionDisclosure = false

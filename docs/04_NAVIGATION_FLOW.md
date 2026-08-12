@@ -13,6 +13,7 @@
 | `search` | Search | Tìm pet hoặc battery theme; pet mở Pet Store, theme mở Status Bar Editor |
 | `favourite_recent` | Favourite & Recent | Favourite battery theme đã lưu; Recent giữ empty state cho tới khi có contract MRU |
 | `grant_permissions` | Grant Permission | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Route/screen được giữ nhưng row vào từ Mine đang tạm ẩn; Back vẫn pop về màn trước khi route được mở trực tiếp. Khác hẳn `permission` (bước onboarding) |
+| `accessibility_how_to_use` | Accessibility How to use | Hướng dẫn bốn bước sau consent và trước Android Accessibility Settings; app bar `exitUntilCollapsed`, CTA cố định dưới đáy |
 | `my_pet` | My Pet Room | Scene phòng in-app + sheet ba tab; Back pop về màn trước, shortcut mở tab Pet Store |
 | `pet_store` | Pet Store | Tab 3 của Home shell: duyệt pet/food, Rewarded/Premium gate, download/verify chỉ để mở khóa |
 | `settings` | Mine | Tab 4 của Home shell: Emoji Battery toggle, shortcuts, app-exclusion sheet, shared pet-settings dialog và app/support hub |
@@ -37,7 +38,7 @@ Permission (tạm inactive) ──continue/skip──> Discover Home
 
 Home shell tabs: Discover ⇄ Battery Styles ⇄ Pet Store ⇄ Mine/Settings
 
-Discover ──Emoji Battery toggle(no access)──> Accessibility disclosure/settings ──back──> enable battery overlay
+Discover ──Emoji Battery toggle(no access)──> Accessibility disclosure ──How to use──> Settings ──back──> enable battery overlay
 Discover ──Battery/Theme/Emoji──> Battery Styles hoặc Customize Status Bar
 Discover ──Search──> Search ──theme──> Customize Status Bar
 Search ──pet──> Pet Store
@@ -49,16 +50,16 @@ My Pet ──Add/Food+──> Pet Store
 Mine ──My Pet──> My Pet
 Mine ──Favourite & Recent──> Favourite & Recent ──favourite theme──> Customize Status Bar
 Mine ──Language──> Language Settings
-Mine ──Emoji Battery toggle──> Accessibility disclosure/settings
+Mine ──Emoji Battery toggle──> Accessibility disclosure ──How to use──> Settings
 Mine ──Apps that hide icons──> modal picker ──switch app──> persist local package exclusion
 Mine ──Setting Pets──> shared speed/size dialog ──Save──> apply cho toàn bộ pet slots
-Grant Permissions (route giữ lại, entry Mine tạm ẩn) ──Accessibility chưa cấp──> consent disclosure ──Settings
+Grant Permissions (route giữ lại, entry Mine tạm ẩn) ──Accessibility chưa cấp──> consent disclosure ──How to use──> Settings
                                       └─ quyền đã cấp/permission khác ──> system surface tương ứng ──back──> đọc lại trạng thái
 Mine ──Rate/Share/Contact/Privacy──> action tương ứng
 Discover/My Pet ──Settings──> Mine ──Language──> Language Settings
 Discover/My Pet ──Premium──> Premium(in-app)
 Discover/My Pet ──Battery──> Battery Styles ──More──> Battery category ──theme──> Customize Battery Bar
-Customize Battery Bar ──Apply khi chưa có quyền──> Accessibility disclosure/settings
+Customize Battery Bar ──Apply khi chưa có quyền──> Accessibility disclosure ──How to use──> Settings
   └─ theme ID khởi tạo cả pet + pin; editor có thể mix hai theme khác nhau
 Customize Battery Bar ──locked pet/pin──> Rewarded hoặc Premium ──return──> chọn component
 Customize Battery Bar ──custom icon──> Icon Editor ──Done/Back──> đúng draft và scroll offset của overview
@@ -104,7 +105,9 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
   rollback về checkpoint lúc mở màn. Chỉ Apply tại overview mới hiện disclosure và persist.
 - Mọi action xin Accessibility trong Discover, Battery Styles, Mine, Status Bar Editor và Grant
   Permissions dùng cùng bottom-sheet disclosure. `Allow` không mở Settings cho tới khi checkbox
-  consent được chọn; launcher tắt App Open Ad trước khi rời app và trạng thái được đọc lại khi về.
+  consent được chọn, sau đó đi qua `accessibility_how_to_use`. CTA tại màn hướng dẫn mới mở
+  Android Settings; launcher tắt App Open Ad trước khi rời app. Cấp quyền thành công tự pop về
+  đúng source và tiếp tục intent đang chờ; nếu chưa cấp thì giữ màn hướng dẫn để retry.
 - Premium onboarding close/success đi thẳng Home trong thời gian bước Permission bị tắt.
 - Premium splash-return close/success đi Home.
 - Language settings restart activity với `skip_splash=true` sau confirm.
@@ -127,9 +130,10 @@ route, popUpTo behavior, process-death behavior và docs này.
   banner holder để không request/reload banner khi đi từ Battery Styles sang category.
 - String argument phải encode; enum argument phải parse an toàn với fallback.
 - Không phục hồi route Private Browser cũ nếu chưa có feature spec mới.
-- Mọi hand-off sang Accessibility Settings đi qua `launchFirstAvailable`: deep link tới trang của
-  service (`ACCESSIBILITY_DETAILS_SETTINGS`, không phải public API) rồi mới tới danh sách chung và
-  app details. Không màn hình nào được `launch` một intent settings trần — ROM thiếu màn đó sẽ ném
+- Mọi hand-off sang Accessibility Settings để cấp quyền đi qua màn How to use rồi dùng
+  `launchFirstAvailable`: danh sách Accessibility trước để khớp bốn bước hướng dẫn, rồi mới
+  fallback tới trang service (`ACCESSIBILITY_DETAILS_SETTINGS`, không phải public API).
+  Không màn hình nào được `launch` một intent settings trần — ROM thiếu màn đó sẽ ném
   `ActivityNotFoundException` và hạ cả screen.
 - Overlay permission là special access, không phải runtime permission dialog. Mọi entry xin quyền
   (onboarding Permission, Grant Permissions và switch Pet Store) phải hiện shared disclosure theo

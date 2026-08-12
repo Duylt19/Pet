@@ -28,6 +28,7 @@ class ScreenNameTest {
             "intro_page_3",
             "permission",
             "grant_permissions",
+            "accessibility_how_to_use",
             "home",
             "search",
             "favourite_recent",

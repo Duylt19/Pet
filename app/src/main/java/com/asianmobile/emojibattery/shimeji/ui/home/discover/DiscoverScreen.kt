@@ -76,7 +76,6 @@ import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionD
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeHeader
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.rememberAccessibilitySettingsLauncher
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -93,15 +92,26 @@ fun DiscoverScreen(
     onNavigateToPetStore: () -> Unit,
     onOpenBatteryTheme: (Int) -> Unit,
     onCustomizeStatusBar: () -> Unit,
+    accessibilityHowToUseResult: Boolean? = null,
+    onAccessibilityHowToUseResultConsumed: () -> Unit = {},
+    onNavigateToAccessibilityHowToUse: () -> Unit = {},
     viewModel: DiscoverViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     var showAccessibilityDisclosure by remember { mutableStateOf(false) }
-    val openAccessibilitySettings = rememberAccessibilitySettingsLauncher {
-        viewModel.refreshAccessibility()
-    }
     TrackScreenView(ScreenName.HOME)
+
+    LaunchedEffect(accessibilityHowToUseResult) {
+        accessibilityHowToUseResult?.let { permissionGranted ->
+            if (permissionGranted) {
+                viewModel.refreshAccessibility()
+            } else {
+                viewModel.cancelPendingBatteryEnable()
+            }
+            onAccessibilityHowToUseResultConsumed()
+        }
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -139,7 +149,7 @@ fun DiscoverScreen(
         GrantPermissionDialog(
             onGrantPermission = {
                 showAccessibilityDisclosure = false
-                openAccessibilitySettings()
+                onNavigateToAccessibilityHowToUse()
             },
             onMaybeLater = {
                 showAccessibilityDisclosure = false

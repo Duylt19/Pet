@@ -205,8 +205,9 @@ Các guardrail bắt buộc:
 - Trước lần chuyển sang Accessibility Settings để cấp quyền, mọi entry point hiển thị cùng
   disclosure theo Figma `8437:7570`/`8437:9099`: giải thích phạm vi sử dụng, cam kết dữ liệu,
   checkbox explicit consent, Allow/Close và native permission placement. Allow bị chặn cho tới
-  khi consent được chọn; quyền đã bật thì màn Grant Permissions cho phép mở thẳng Settings để
-  quản lý hoặc tắt service.
+  khi consent được chọn; sau đó màn How to use Figma `8442:9525` hướng dẫn bốn bước trước khi CTA
+  mở Settings. Quyền đã bật thì màn Grant Permissions cho phép mở thẳng Settings để quản lý hoặc
+  tắt service.
 - Content dùng toàn bộ chiều ngang overlay; `rightPaddingDp` là khoảng cách mép phải do
   user kiểm soát.
 - Chỉ mở Settings sau disclosure chủ động; không tự bật service.

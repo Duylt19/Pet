@@ -77,6 +77,9 @@ import com.intuit.ssp.R as SspR
 @Composable
 fun GrantPermissionsScreen(
     onNavigateBack: () -> Unit = {},
+    accessibilityHowToUseResult: Boolean? = null,
+    onAccessibilityHowToUseResultConsumed: () -> Unit = {},
+    onNavigateToAccessibilityHowToUse: () -> Unit = {},
     viewModel: GrantPermissionsViewModel = hiltViewModel()
 ) {
     TrackScreenView(ScreenName.GRANT_PERMISSIONS)
@@ -92,6 +95,13 @@ fun GrantPermissionsScreen(
     val notificationLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { viewModel.refresh() }
+
+    LaunchedEffect(accessibilityHowToUseResult) {
+        if (accessibilityHowToUseResult != null) {
+            viewModel.refresh()
+            onAccessibilityHowToUseResultConsumed()
+        }
+    }
 
     DisposableEffect(lifecycleOwner, viewModel) {
         val observer = LifecycleEventObserver { _, event ->
@@ -156,11 +166,7 @@ fun GrantPermissionsScreen(
         GrantPermissionDialog(
             onGrantPermission = {
                 showAccessibilityDisclosure = false
-                settingsLauncher.openSettings(
-                    BatteryAccessibility.detailsSettingsIntent(context),
-                    BatteryAccessibility.settingsIntent(),
-                    appDetailsIntent(context.packageName)
-                )
+                onNavigateToAccessibilityHowToUse()
             },
             onMaybeLater = { showAccessibilityDisclosure = false }
         )

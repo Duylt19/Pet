@@ -17,6 +17,9 @@ fun BatteryCategoryScreen(
     onBack: () -> Unit,
     onNavigateToPremium: () -> Unit,
     onOpenTheme: (Int) -> Unit,
+    accessibilityHowToUseResult: Boolean? = null,
+    onAccessibilityHowToUseResultConsumed: () -> Unit = {},
+    onNavigateToAccessibilityHowToUse: () -> Unit = {},
     viewModel: BatteryCatalogViewModel
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -29,7 +32,10 @@ fun BatteryCategoryScreen(
         state = state,
         viewModel = viewModel,
         onOpenTheme = onOpenTheme,
-        onNavigateToPremium = onNavigateToPremium
+        onNavigateToPremium = onNavigateToPremium,
+        accessibilityHowToUseResult = accessibilityHowToUseResult,
+        onAccessibilityHowToUseResultConsumed = onAccessibilityHowToUseResultConsumed,
+        onNavigateToAccessibilityHowToUse = onNavigateToAccessibilityHowToUse
     ) {
         BatteryCategoryContent(
             category = category,

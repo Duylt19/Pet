@@ -49,7 +49,7 @@ feature phải di chuyển test cùng lúc.
 | Pet Store tab | `pet_store` | `ui/pet/store` |
 | My Pet Room | `my_pet` | `ui/pet/room` |
 | Mine tab | `settings` | `ui/settings/mine` |
-| Permission manager | `grant_permissions` | `ui/settings/permissions` |
+| Permission manager | `grant_permissions`, `accessibility_how_to_use` | `ui/settings/permissions` |
 | Search | `search` | `ui/search` |
 | Premium | `premium/*` | `ui/premium` |
 

@@ -112,7 +112,6 @@ import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_S
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CutePetTopBar
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.rememberAccessibilitySettingsLauncher
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockSheet
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -186,6 +185,9 @@ internal fun BatteryEditorScreen(
     onOpenPage: (BatteryEditorPage) -> Unit = {},
     onOpenEmotionGroup: (String) -> Unit = {},
     onNavigateToPremium: () -> Unit,
+    accessibilityHowToUseResult: Boolean? = null,
+    onAccessibilityHowToUseResultConsumed: () -> Unit = {},
+    onNavigateToAccessibilityHowToUse: () -> Unit = {},
     viewModel: BatteryEditorViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -211,10 +213,6 @@ internal fun BatteryEditorScreen(
         accessibilityEnabled = accessibilityEnabled,
         statusBarEnabled = state.config.enabled
     )
-    val openAccessibilitySettings = rememberAccessibilitySettingsLauncher {
-        accessibilityEnabled = BatteryAccessibility.isEnabled(context)
-        if (accessibilityEnabled) viewModel.apply()
-    }
     val requiresRewardAd = !state.isPremium && state.themes.any { theme ->
         theme.assetsReady &&
             theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
@@ -222,6 +220,13 @@ internal fun BatteryEditorScreen(
     }
 
     TrackScreenView(page.analyticsScreen())
+    LaunchedEffect(accessibilityHowToUseResult) {
+        accessibilityHowToUseResult?.let { permissionGranted ->
+            accessibilityEnabled = BatteryAccessibility.isEnabled(context)
+            if (permissionGranted && accessibilityEnabled) viewModel.apply()
+            onAccessibilityHowToUseResultConsumed()
+        }
+    }
     LaunchedEffect(context, requiresRewardAd) {
         if (requiresRewardAd) {
             RewardedVideoAds.getInstance().loadRewardedVideo(context.applicationContext)
@@ -367,7 +372,7 @@ internal fun BatteryEditorScreen(
         GrantPermissionDialog(
             onGrantPermission = {
                 showDisclosure = false
-                openAccessibilitySettings()
+                onNavigateToAccessibilityHowToUse()
             },
             onMaybeLater = { showDisclosure = false }
         )

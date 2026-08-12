@@ -13,7 +13,8 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 
 /**
- * Keeps every Accessibility grant entry point on the same system-settings handoff contract.
+ * Opens the Accessibility list first so the four in-app How-to-use steps match the ROM handoff.
+ * The service details screen remains a fallback for devices without the general list surface.
  * Returning from a settings surface is user-driven, so App Open Ads must not interrupt it.
  */
 @Composable
@@ -32,8 +33,8 @@ fun rememberAccessibilitySettingsLauncher(
         {
             InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
             launcher.launchFirstAvailable(
-                BatteryAccessibility.detailsSettingsIntent(context),
-                BatteryAccessibility.settingsIntent()
+                BatteryAccessibility.settingsIntent(),
+                BatteryAccessibility.detailsSettingsIntent(context)
             )
         }
     }

@@ -23,7 +23,6 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.rememberAccessibilitySettingsLauncher
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 
@@ -33,6 +32,9 @@ fun BatteryCatalogScreen(
     onNavigateToPremium: () -> Unit,
     onOpenCategory: (Int) -> Unit,
     onOpenTheme: (Int) -> Unit,
+    accessibilityHowToUseResult: Boolean? = null,
+    onAccessibilityHowToUseResultConsumed: () -> Unit = {},
+    onNavigateToAccessibilityHowToUse: () -> Unit = {},
     viewModel: BatteryCatalogViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -42,7 +44,10 @@ fun BatteryCatalogScreen(
         state = state,
         viewModel = viewModel,
         onOpenTheme = onOpenTheme,
-        onNavigateToPremium = onNavigateToPremium
+        onNavigateToPremium = onNavigateToPremium,
+        accessibilityHowToUseResult = accessibilityHowToUseResult,
+        onAccessibilityHowToUseResultConsumed = onAccessibilityHowToUseResultConsumed,
+        onNavigateToAccessibilityHowToUse = onNavigateToAccessibilityHowToUse
     ) {
         BatteryCatalogContent(
             state = state,
@@ -64,15 +69,15 @@ internal fun BatteryCatalogFlowHost(
     viewModel: BatteryCatalogViewModel,
     onOpenTheme: (Int) -> Unit,
     onNavigateToPremium: () -> Unit,
+    accessibilityHowToUseResult: Boolean? = null,
+    onAccessibilityHowToUseResultConsumed: () -> Unit = {},
+    onNavigateToAccessibilityHowToUse: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showAccessibilityDisclosure by rememberSaveable { mutableStateOf(false) }
 
-    val openAccessibilitySettings = rememberAccessibilitySettingsLauncher {
-        viewModel.refreshAccessibility()
-    }
     val requiresRewardAd = !state.isPremium && state.themes.any { theme ->
         theme.assetsReady &&
             theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
@@ -82,6 +87,16 @@ internal fun BatteryCatalogFlowHost(
     LaunchedEffect(context, requiresRewardAd) {
         if (requiresRewardAd) {
             RewardedVideoAds.getInstance().loadRewardedVideo(context.applicationContext)
+        }
+    }
+    LaunchedEffect(accessibilityHowToUseResult) {
+        accessibilityHowToUseResult?.let { permissionGranted ->
+            if (permissionGranted) {
+                viewModel.refreshAccessibility()
+            } else {
+                viewModel.cancelPendingBatteryEnable()
+            }
+            onAccessibilityHowToUseResultConsumed()
         }
     }
     LaunchedEffect(viewModel) {
@@ -125,7 +140,7 @@ internal fun BatteryCatalogFlowHost(
         GrantPermissionDialog(
             onGrantPermission = {
                 showAccessibilityDisclosure = false
-                openAccessibilitySettings()
+                onNavigateToAccessibilityHowToUse()
             },
             onMaybeLater = {
                 showAccessibilityDisclosure = false
