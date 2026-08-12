@@ -617,20 +617,25 @@ private fun BatteryThemesSection(
             onMore = onMore,
             underline = true
         )
-        val slots = List(BATTERY_THEME_SLOT_COUNT) { index -> themes.getOrNull(index) }
-        slots.chunked(BATTERY_THEME_COLUMN_COUNT).forEachIndexed { rowIndex, row ->
-            if (rowIndex > 0) Spacer(Modifier.height(dimensionResource(SdpR.dimen._3sdp)))
-            Row(
-                modifier = Modifier.padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
-            ) {
-                row.forEach { theme ->
-                    BatteryThemeCard(
-                        theme = theme,
-                        onOpen = { theme?.let { onOpenTheme(it.id) } },
-                        onFavorite = { theme?.let { onToggleFavorite(it.id) } },
-                        modifier = Modifier.weight(1f)
-                    )
+        val columns = if (themes.isEmpty()) {
+            List(BATTERY_THEME_PLACEHOLDER_COUNT) { null }.chunked(PREVIEW_COLUMN_ITEM_COUNT)
+        } else {
+            themes.map { it as DiscoverThemeUiState? }.chunked(PREVIEW_COLUMN_ITEM_COUNT)
+        }
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._12sdp)),
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+        ) {
+            items(columns) { column ->
+                Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
+                    column.forEach { theme ->
+                        BatteryThemeCard(
+                            theme = theme,
+                            onOpen = { theme?.let { onOpenTheme(it.id) } },
+                            onFavorite = { theme?.let { onToggleFavorite(it.id) } },
+                            modifier = Modifier.size(dimensionResource(SdpR.dimen._85sdp))
+                        )
+                    }
                 }
             }
         }
@@ -727,9 +732,9 @@ private fun StatusBarThemesSection(
             onMore = onMore
         )
         val columns = if (assets.isEmpty()) {
-            List(4) { null }.chunked(2)
+            List(4) { null }.chunked(PREVIEW_COLUMN_ITEM_COUNT)
         } else {
-            assets.map { it as DiscoverAssetUiState? }.chunked(2)
+            assets.map { it as DiscoverAssetUiState? }.chunked(PREVIEW_COLUMN_ITEM_COUNT)
         }
         LazyRow(
             contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._12sdp)),
@@ -805,7 +810,7 @@ private fun ComponentAssetsSection(
             contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._12sdp)),
             horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
         ) {
-            items(display.chunked(2)) { column ->
+            items(display.chunked(PREVIEW_COLUMN_ITEM_COUNT)) { column ->
                 Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
                     column.forEach { asset ->
                         ComponentAssetCard(
@@ -979,5 +984,5 @@ private fun DiscoverContentPreview() {
     )
 }
 
-private const val BATTERY_THEME_SLOT_COUNT = 6
-private const val BATTERY_THEME_COLUMN_COUNT = 3
+private const val BATTERY_THEME_PLACEHOLDER_COUNT = 6
+private const val PREVIEW_COLUMN_ITEM_COUNT = 2

@@ -102,6 +102,9 @@ Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
   `#FFEA89` 50% và crown artwork theo tỉ lệ `18/24`, không dựng badge riêng theo từng feature.
   Search hiện crown khi theme có entitlement Premium, user chưa Premium và ID chưa được mở bằng
   reward; entitlement được đọc lại khi Search resume;
+- mỗi nhóm catalog trên Discover lấy tối đa 16 preview. Shimeji Pets dùng một hàng ngang;
+  Battery, Status Bar, Emoji và Battery component dùng các cột hai item trong `LazyRow`, vì vậy
+  danh sách luôn có thể kéo ngang mà không dựng hoặc tải trước toàn bộ catalog;
 - category header dùng trực tiếp emoji ở đầu `category.name`; không ghép thêm drawable/icon riêng
   để tránh hiển thị trùng khi catalog cập nhật tên category;
 - More mở child route có header Back/title/PRO, inline banner SDK thật và grid ba cột. Card detail giữ

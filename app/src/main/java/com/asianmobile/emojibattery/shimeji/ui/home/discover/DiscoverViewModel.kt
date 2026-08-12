@@ -72,7 +72,7 @@ class DiscoverViewModel @Inject constructor(
                         batteryConfig.enabled,
                         accessibilityEnabled
                     ),
-                    trendingPets = pets.entries.take(MAX_TRENDING_PETS).map { pet ->
+                    trendingPets = pets.entries.take(MAX_DISCOVER_PREVIEW_ITEMS).map { pet ->
                         DiscoverPetUiState(
                             packKey = pet.installedPackKey,
                             name = pet.name,
@@ -82,7 +82,7 @@ class DiscoverViewModel @Inject constructor(
                     },
                     batteryThemes = batteryCatalog.themes
                         .filter { it.assetsReady }
-                        .take(MAX_BATTERY_THEMES)
+                        .take(MAX_DISCOVER_PREVIEW_ITEMS)
                         .map { theme ->
                             DiscoverThemeUiState(
                                 id = theme.id,
@@ -92,7 +92,7 @@ class DiscoverViewModel @Inject constructor(
                             )
                         },
                     statusBarThemes = batteryCatalog.backgrounds
-                        .take(MAX_STATUS_BAR_THEMES)
+                        .take(MAX_DISCOVER_PREVIEW_ITEMS)
                         .map { asset ->
                             DiscoverAssetUiState(asset.id, asset.name, asset.assetPath)
                         },
@@ -102,14 +102,14 @@ class DiscoverViewModel @Inject constructor(
                                 DiscoverAssetUiState(theme.id, theme.name, path)
                             }
                         }
-                        .take(MAX_COMPONENT_ASSETS),
+                        .take(MAX_DISCOVER_PREVIEW_ITEMS),
                     batteryIcons = batteryCatalog.themes
                         .mapNotNull { theme ->
                             theme.batteryPath?.let { path ->
                                 DiscoverAssetUiState(theme.id, theme.name, path)
                             }
                         }
-                        .take(MAX_COMPONENT_ASSETS)
+                        .take(MAX_DISCOVER_PREVIEW_ITEMS)
                 )
             }.collect { state ->
                 _uiState.value = state
@@ -178,9 +178,6 @@ class DiscoverViewModel @Inject constructor(
     }
 
     private companion object {
-        const val MAX_TRENDING_PETS = 12
-        const val MAX_BATTERY_THEMES = 6
-        const val MAX_STATUS_BAR_THEMES = 8
-        const val MAX_COMPONENT_ASSETS = 12
+        const val MAX_DISCOVER_PREVIEW_ITEMS = 16
     }
 }
