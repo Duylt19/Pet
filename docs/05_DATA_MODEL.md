@@ -8,7 +8,7 @@
 |---|---|---|
 | `is_language_completed` | Boolean | Hoàn thành chọn language onboarding |
 | `is_intro_completed` | Boolean | Hoàn thành intro |
-| `is_permission_completed` | Boolean | Hoàn thành/skip permission step |
+| `is_permission_completed` | Boolean | Hoàn thành/skip Permission; key được giữ nguyên nhưng tạm không tham gia onboarding khi `IS_FIRST_PERMISSION_ONBOARDING_ENABLED=false` |
 | `key_language` | String | Language code |
 | `country_language` | String | Region code |
 | `pet_selected_pack_keys` | String | 12 pack key độc lập theo slot, newline-delimited |
@@ -58,6 +58,7 @@
 | `battery_status_background_decoration_id` | Int | Background asset ID; `0` dùng màu phẳng |
 | `battery_status_show_emotion` | Boolean | Hiện emotion trang trí |
 | `battery_status_emotion_decoration_id` | Int | Emotion asset ID |
+| `battery_status_hidden_app_packages` | String set | Package của app mà user chọn để tạm ẩn Emoji Battery; lưu cục bộ trên thiết bị |
 | `battery_status_favorite_theme_ids` | String set | Favorite local |
 
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.

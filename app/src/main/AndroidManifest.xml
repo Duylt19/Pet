@@ -14,6 +14,10 @@
          exemption. Declared so resolveActivity can tell whether this device has one;
          the app never reads or writes their data. -->
     <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
         <package android:name="com.miui.securitycenter" />
         <package android:name="com.miui.powerkeeper" />
         <package android:name="com.huawei.systemmanager" />

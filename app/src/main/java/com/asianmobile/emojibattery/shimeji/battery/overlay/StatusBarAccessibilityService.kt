@@ -62,6 +62,8 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private var currentBatteryTheme: BatteryThemeEntry? = null
     private var currentEmojiTheme: BatteryThemeEntry? = null
     private var currentPreviewFocus: BatteryStatusComponent? = null
+    private var currentForegroundPackage: String? = null
+    private var hiddenAppPackages: Set<String> = emptySet()
     private var currentBackgroundPath: String? = null
     private var currentEmotionPath: String? = null
     private var currentAnimationPath: String? = null
@@ -149,8 +151,9 @@ class StatusBarAccessibilityService : AccessibilityService() {
             combine(
                 settingsRepository.config,
                 catalogRepository.snapshot,
-                editorPreviewSession.preview
-            ) { storedConfig, catalog, preview ->
+                editorPreviewSession.preview,
+                settingsRepository.hiddenAppPackages
+            ) { storedConfig, catalog, preview, excludedPackages ->
                 val previewSource = resolveBatteryOverlayPreviewSource(storedConfig, preview)
                 val config = previewSource.config
                 BatteryOverlaySources(
@@ -170,7 +173,8 @@ class StatusBarAccessibilityService : AccessibilityService() {
                     animationPath = catalog.animations
                         .firstOrNull { it.name == config.animationAssetName }
                         ?.assetPath,
-                    previewFocus = previewSource.focusedComponent
+                    previewFocus = previewSource.focusedComponent,
+                    hiddenAppPackages = excludedPackages
                 )
             }.collect { sources ->
                 currentConfig = sources.config
@@ -180,12 +184,19 @@ class StatusBarAccessibilityService : AccessibilityService() {
                 currentBackgroundPath = sources.backgroundPath
                 currentEmotionPath = sources.emotionPath
                 currentAnimationPath = sources.animationPath
+                hiddenAppPackages = sources.hiddenAppPackages
                 updateOverlay()
             }
         }
     }
 
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) = Unit
+    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
+        val packageName = event.packageName?.toString()?.trim().orEmpty()
+        if (packageName.isEmpty() || packageName == currentForegroundPackage) return
+        currentForegroundPackage = packageName
+        updateOverlay()
+    }
 
     override fun onInterrupt() = Unit
 
@@ -233,6 +244,10 @@ class StatusBarAccessibilityService : AccessibilityService() {
             !currentConfig.enabled ||
             !powerManager.isInteractive ||
             keyguardManager.isKeyguardLocked ||
+            BatteryAppExclusionPolicy.shouldHide(
+                foregroundPackage = currentForegroundPackage,
+                hiddenAppPackages = hiddenAppPackages
+            ) ||
             resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT
         ) {
             removeOverlay()
@@ -612,7 +627,8 @@ private data class BatteryOverlaySources(
     val backgroundPath: String?,
     val emotionPath: String?,
     val animationPath: String?,
-    val previewFocus: BatteryStatusComponent?
+    val previewFocus: BatteryStatusComponent?,
+    val hiddenAppPackages: Set<String>
 )
 
 private data class DecodedBatteryAssets(

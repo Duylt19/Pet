@@ -24,6 +24,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,9 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -119,6 +123,8 @@ internal fun RewardGradientButton(
     modifier: Modifier,
     enabled: Boolean = true,
     retainEnabledStyleWhenDisabled: Boolean = false,
+    disabledContentAlpha: Float = 1f,
+    onDisabledClick: (() -> Unit)? = null,
     iconRes: Int? = null
 ) {
     val enabledGradient = Brush.horizontalGradient(
@@ -136,9 +142,18 @@ internal fun RewardGradientButton(
     Box(
         modifier = modifier
             .height(dimensionResource(SdpR.dimen._38sdp))
+            .alpha(if (enabled) 1f else disabledContentAlpha)
             .clip(CircleShape)
             .background(background)
-            .clickable(enabled = enabled, onClick = onClick),
+            .clickable(
+                enabled = enabled || onDisabledClick != null,
+                role = Role.Button
+            ) {
+                if (enabled) onClick() else onDisabledClick?.invoke()
+            }
+            .semantics {
+                if (!enabled) disabled()
+            },
         contentAlignment = Alignment.Center
     ) {
         RewardButtonContent(

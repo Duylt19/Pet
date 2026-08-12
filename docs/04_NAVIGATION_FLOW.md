@@ -8,14 +8,14 @@
 | `language` | Language onboarding | First-run |
 | `language_settings` | Language settings | Mở từ Settings |
 | `intro` | Intro pager | First-run |
-| `permission` | Permission | Request overlay/notification, có Continue/Skip |
+| `permission` | Permission | Route/class được giữ nhưng tạm không nằm trong onboarding; request overlay/notification, có Continue/Skip |
 | `home` | Discover | Tab 1 của Home shell: battery toggle, Battery Troll hero và catalog preview |
 | `search` | Search | Tìm pet hoặc battery theme; pet mở Pet Store, theme mở Status Bar Editor |
 | `favourite_recent` | Favourite & Recent | Favourite battery theme đã lưu; Recent giữ empty state cho tới khi có contract MRU |
-| `grant_permissions` | Grant Permission | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Lối vào duy nhất là row trong Mine, không có interstitial; Back pop về Mine. Khác hẳn `permission` (bước onboarding) |
+| `grant_permissions` | Grant Permission | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Route/screen được giữ nhưng row vào từ Mine đang tạm ẩn; Back vẫn pop về màn trước khi route được mở trực tiếp. Khác hẳn `permission` (bước onboarding) |
 | `my_pet` | My Pet Room | Scene phòng in-app + sheet ba tab; Back pop về màn trước, shortcut mở tab Pet Store |
 | `pet_store` | Pet Store | Tab 3 của Home shell: duyệt pet/food, Rewarded/Premium gate, download/verify chỉ để mở khóa |
-| `settings` | Mine | Tab 4 của Home shell: Emoji Battery toggle, shortcuts và app/support hub |
+| `settings` | Mine | Tab 4 của Home shell: Emoji Battery toggle, shortcuts, app-exclusion sheet, shared pet-settings dialog và app/support hub |
 | `battery_catalog` | Battery Styles | Tab 2 của Home shell: catalog local + category/favorite/Premium gate; editor luôn mở được với preview nhúng |
 | `battery_category/{categoryId}` | Battery category | Child destination từ action More: grid ba cột của category, Back về đúng vị trí Battery Styles |
 | `battery_editor/{themeId}` | Customize Status Bar | Overview khởi tạo cặp pet+pin, cho phép đổi hai phần độc lập, giữ draft và live preview qua Accessibility |
@@ -29,9 +29,10 @@ Splash
   └─ next onboarding step hoặc Home
 
 Language ──confirm──> Intro
-Intro ──finish──> Premium(onboarding, optional) ──close──> Permission
-Intro ──finish──> Permission
-Permission ──continue/skip──> Discover Home
+Intro ──finish──> Premium(onboarding, optional) ──close──> Discover Home
+Intro ──finish──> Discover Home
+
+Permission (tạm inactive) ──continue/skip──> Discover Home
 
 Home shell tabs: Discover ⇄ Battery Styles ⇄ Pet Store ⇄ Mine/Settings
 
@@ -48,7 +49,9 @@ Mine ──My Pet──> My Pet
 Mine ──Favourite & Recent──> Favourite & Recent ──favourite theme──> Customize Status Bar
 Mine ──Language──> Language Settings
 Mine ──Emoji Battery toggle──> Accessibility disclosure/settings
-Mine ──Grant Permission──> Grant Permissions ──Accessibility chưa cấp──> consent disclosure ──Settings
+Mine ──Apps that hide icons──> modal picker ──switch app──> persist local package exclusion
+Mine ──Setting Pets──> shared speed/size dialog ──Save──> apply cho toàn bộ pet slots
+Grant Permissions (route giữ lại, entry Mine tạm ẩn) ──Accessibility chưa cấp──> consent disclosure ──Settings
                                       └─ quyền đã cấp/permission khác ──> system surface tương ứng ──back──> đọc lại trạng thái
 Mine ──Rate/Share/Contact/Privacy──> action tương ứng
 Discover/My Pet ──Settings──> Mine ──Language──> Language Settings
@@ -69,7 +72,8 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
 
 ## Back stack
 
-- Splash, Language, Intro và Permission được remove khỏi stack sau khi hoàn tất bước tương ứng.
+- Splash, Language và Intro được remove khỏi stack sau khi hoàn tất bước tương ứng. Permission
+  vẫn có destination đầy đủ nhưng tạm không được đưa vào first-run stack.
 - Discover là root sau onboarding. Battery Styles, Pet Store và Settings là top-level tab
   của cùng Home shell. Mỗi lần đổi tab dùng `saveState/restoreState` và `launchSingleTop`,
   vì vậy ViewModel, scroll và navigation state của tab được giữ lại.
@@ -93,13 +97,17 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
 - Mọi action xin Accessibility trong Discover, Battery Styles, Mine, Status Bar Editor và Grant
   Permissions dùng cùng bottom-sheet disclosure. `Allow` không mở Settings cho tới khi checkbox
   consent được chọn; launcher tắt App Open Ad trước khi rời app và trạng thái được đọc lại khi về.
-- Premium onboarding close/success đi tiếp Permission.
+- Premium onboarding close/success đi thẳng Home trong thời gian bước Permission bị tắt.
 - Premium splash-return close/success đi Home.
 - Language settings restart activity với `skip_splash=true` sau confirm.
 
 ## Onboarding state
 
-`MainViewModel` kết hợp các Flow trong `DataStoreManager` để xác định màn tiếp theo. Khi thêm một onboarding step mới phải cập nhật state, route, popUpTo behavior, process-death behavior và docs này.
+`MainViewModel` kết hợp các Flow trong `DataStoreManager` để xác định màn tiếp theo.
+`IS_FIRST_PERMISSION_ONBOARDING_ENABLED=false` tạm bỏ Permission khỏi quyết định này và
+`destinationAfterIntro()` dùng cùng policy cho cả Intro/Premium. Không ghi completion giả khi
+skip để có thể bật lại đúng trạng thái cũ. Khi thêm/bật lại onboarding step phải cập nhật state,
+route, popUpTo behavior, process-death behavior và docs này.
 
 ## Navigation rules
 
@@ -111,7 +119,9 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
   banner holder để không request/reload banner khi đi từ Battery Styles sang category.
 - String argument phải encode; enum argument phải parse an toàn với fallback.
 - Không phục hồi route Private Browser cũ nếu chưa có feature spec mới.
-- Overlay permission được mở qua `Settings.ACTION_MANAGE_OVERLAY_PERMISSION`; đây là special access, không phải runtime permission dialog.
+- Overlay permission là special access, không phải runtime permission dialog. Mọi entry xin quyền
+  (onboarding Permission, Grant Permissions và switch Pet Store) phải hiện shared disclosure theo
+  Figma trước; chỉ action `Allow Access` mới mở `Settings.ACTION_MANAGE_OVERLAY_PERMISSION`.
 - Notification permission chỉ request trên API 33+; denial không ngăn FGS chạy nhưng notification có thể chỉ hiện trong system task manager.
 - Discover refresh Accessibility ở `ON_RESUME`; intent bật battery được tiếp tục sau khi user
   cấp service. My Pet refresh overlay permission ở `ON_RESUME`; nếu overlay bị thu hồi khi

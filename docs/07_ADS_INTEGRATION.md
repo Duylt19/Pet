@@ -33,6 +33,9 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   `AdType.HEIGHT_222` và `instanceKey=accessibility_disclosure`. Native nằm sát đáy sheet theo
   Figma; nếu placement không load/đã Premium thì slot collapse. Mọi launcher Accessibility dùng
   cùng contract tắt App Open Ad trước khi rời app.
+- Overlay disclosure dùng cùng placement `screen_permission`, template `AdType.HEIGHT_222` và
+  `instanceKey=overlay_permission_disclosure`. Sheet dùng chung cho onboarding Permission, Grant
+  Permissions và switch Pet Store; native collapse theo policy chung khi không có ad/Premium.
 - Search tái sử dụng native placement `screen_home` ở đáy màn hình và banner SDK
   `search_inline` trong content theo Figma; cả hai vẫn tuân theo remote key, frequency/ad-free
   policy và failure fallback chung của module ads.

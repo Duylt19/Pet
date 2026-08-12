@@ -65,6 +65,10 @@ class PetStoreViewModel @Inject constructor(
                         pets = source.pets,
                         installedPackKeys = source.installedKeys,
                         customNames = source.names,
+                        selectedCategory = PetStorePolicy.selectedCategory(
+                            pets = source.pets,
+                            requestedCategory = it.selectedCategory
+                        ),
                         isLoading = source.isLoading,
                         isPetRunning = source.isRunning
                     )
@@ -75,6 +79,11 @@ class PetStoreViewModel @Inject constructor(
     }
 
     fun selectTab(tab: PetStoreTab) = _uiState.update { it.copy(selectedTab = tab) }
+
+    fun selectCategory(category: String) = _uiState.update { state ->
+        val selected = PetStorePolicy.selectedCategory(state.pets, category)
+        if (selected == null) state else state.copy(selectedCategory = selected)
+    }
 
     fun selectPet(pet: com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry) {
         if (PetStorePolicy.isUnlocked(pet, _uiState.value.installedPackKeys)) {

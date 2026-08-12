@@ -2,7 +2,8 @@
 
 Base giữ infrastructure/theme và component pattern. Product screens từ Home trở đi dùng
 visual system Cute Pet. Splash, App Open Welcome Back và Language đã theo Figma;
-Intro, Permission và Premium vẫn giữ UI hiện tại cho tới task update riêng.
+Intro và Premium vẫn giữ UI hiện tại. Permission giữ nguyên UI/source nhưng tạm không nằm trong
+flow onboarding cho tới khi policy first-permission được bật lại.
 
 ## Cute Pet product direction
 
@@ -17,7 +18,7 @@ Intro, Permission và Premium vẫn giữ UI hiện tại cho tới task update 
 - Shared primitives nằm ở `ui/shared/component/CutePetComponents.kt`; component dark cũ không được
   dùng cho product screen mới nếu không có lý do tương thích.
 
-Các màn Intro, Permission và Premium cố ý chưa đổi trong refresh hiện tại.
+Intro và Premium cố ý chưa đổi trong refresh hiện tại. Permission hiện là destination inactive.
 
 Splash và App Open Welcome Back theo Figma node `8088:12715`/`8088:12986`:
 
@@ -127,6 +128,10 @@ Pet Store visual contract:
 - Pet/Food selector dùng bốn image-fill state riêng từ Figma (`selected`/`unselected`);
   đây là raster artwork nhiều màu nên lưu PNG @3x trong `drawable-nodpi`, không thay bằng
   emoji hoặc icon navigation;
+- pet category theo Figma node `8287:4824` là `LazyRow` cao 40px, padding ngang 16px và gap
+  20px. Category lấy động từ catalog, loại trùng không phân biệt hoa thường và giữ thứ tự server;
+  active dùng Roboto Medium 14/20 màu `#FB3675` kèm underline, inactive dùng Roboto Regular
+  `#212327`. Chọn category chỉ lọc pet grid, không làm thay đổi trạng thái unlock;
 - pet card giữ tỷ lệ `104/142`, image area `104/90`, thumbnail theo tỷ lệ item và crown
   premium 20px tại top-end;
 - food card giữ tỷ lệ `104/122`, image area `104/90`, artwork `70/104`; badge giá tại
@@ -135,6 +140,8 @@ Pet Store visual contract:
   `#C95DFF → #FB54BB`. Selected Pet Store, video và tape giữ asset vector gốc. Pet Store và
   Battery dùng chung `RewardOfferSheet` full-width; Battery có preview `110×110px` và native
   slot `336×222px` theo Figma `8145:4924`.
+  Trong lúc pet pack đang download/verify, preview pet phủ scrim 28% + progress trắng, CTA đổi
+  sang `Downloading…`, và mọi action/dismiss unlock bị khóa để không tạo request trùng.
   Reward dialog dùng immersive navigation trên chính dialog window để system navigation
   không chiếm vùng CTA; đóng dialog không thay đổi immersive policy của Home activity.
 - unlock-success overlay của Pet và Food dùng chung frame `360×800`: nền đen 50%, Lottie
@@ -171,6 +178,15 @@ Intro onboarding theo Figma nodes `8088:13113`, `8088:13148`, `8088:13201`:
 - page 1/3 giữ placement `SCREEN_INTRO`/`SCREEN_INTRO_SECOND` cao 222; page 2 không có ad.
   Pager, analytics và completion flow không thay đổi.
 
+Overlay permission disclosure theo Figma node `8436:5998`:
+
+- `ui/shared/component/OverlayPermissionDialog.kt` là bottom sheet dùng chung trước mọi request
+  `ACTION_MANAGE_OVERLAY_PERMISSION`; scrim/Back/`Not now` chỉ đóng sheet, `Allow Access` mới mở
+  system special-access settings;
+- hero `img_overlay_permission_hero.png` được export nguyên group 158×100 để giữ phone mockup,
+  pets và bubble; title/body là text thật, action dùng shared gradient/outline buttons;
+- native `HEIGHT_222` nằm sát đáy và collapse khi placement không render.
+
 Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343` (tắt):
 
 - `ui/shared/component/AppSwitch.kt` là switch duy nhất của app; mọi toggle dùng nó, không màn nào
@@ -187,7 +203,7 @@ Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343`
 
 Grant Permissions contract theo Figma node `8080:9754`:
 
-- route `grant_permissions` mở từ Mine. Nền **trắng phẳng** — lớp wallpaper trong design bị tắt,
+- route `grant_permissions` được giữ nhưng option mở từ Mine đang tạm ẩn. Nền **trắng phẳng** — lớp wallpaper trong design bị tắt,
   card trắng nổi lên bằng shadow chứ không bằng đổi màu nền;
 - top nav `360×56` có back 28 và **một** title duy nhất `Grant Permission` Roboto 600 20/28.
   Node PRO pill và heading lớn `Grant Permissions` đều là layer ẩn trong Figma nên không dựng;
@@ -234,6 +250,10 @@ Grant Permissions contract theo Figma node `8080:9754`:
   SemiBold 18/26 và body Roboto Regular 14/20. Nội dung dài là phần duy nhất được cuộn; hàng
   consent, nút `Allow`/`Close` và native ad luôn cố định. Checkbox dùng đúng hai vector của rate
   flow; `Allow` chỉ chuyển sang Android Accessibility Settings sau khi user đã tick consent;
+- state `Allow` theo Figma `8437:7772`/`8437:9110`: enabled dùng gradient
+  `#C95DFF → #FB54BB` opacity 100%; disabled giữ nguyên gradient/chữ trắng với opacity 30%.
+  Disabled vẫn nhận tap để hiện toast yêu cầu đồng ý điều khoản, nhưng không mở Accessibility
+  Settings;
 - toàn bộ Discover, Battery Catalog, Mine, Status Bar Editor và Grant Permissions dùng chung
   disclosure này. Khi quyền đã bật, row Accessibility trong Grant Permissions mở thẳng Settings
   để user quản lý/tắt quyền, không hỏi consent lại.

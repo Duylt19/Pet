@@ -67,6 +67,7 @@ import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.OverlayPermissionDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -82,6 +83,7 @@ fun GrantPermissionsScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showAccessibilityDisclosure by rememberSaveable { mutableStateOf(false) }
+    var showOverlayPermissionDisclosure by rememberSaveable { mutableStateOf(false) }
 
     val settingsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -111,11 +113,9 @@ fun GrantPermissionsScreen(
                         appDetailsIntent(context.packageName)
                     )
 
-                GrantPermissionsEffect.OpenOverlaySettings ->
-                    settingsLauncher.openSettings(
-                        PetOverlay.permissionIntent(context),
-                        Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-                    )
+                GrantPermissionsEffect.OpenOverlaySettings -> {
+                    showOverlayPermissionDisclosure = true
+                }
 
                 GrantPermissionsEffect.OpenBatteryOptimizationSettings ->
                     settingsLauncher.openSettings(
@@ -160,6 +160,19 @@ fun GrantPermissionsScreen(
                 )
             },
             onMaybeLater = { showAccessibilityDisclosure = false }
+        )
+    }
+
+    if (showOverlayPermissionDisclosure) {
+        OverlayPermissionDialog(
+            onAllowAccess = {
+                showOverlayPermissionDisclosure = false
+                settingsLauncher.openSettings(
+                    PetOverlay.permissionIntent(context),
+                    Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                )
+            },
+            onNotNow = { showOverlayPermissionDisclosure = false }
         )
     }
 }

@@ -11,8 +11,10 @@ settings và các quy ước kiến trúc hiện có.
 - App display name: `Cute Pet`.
 - Namespace/application ID: `com.asianmobile.emojibattery.shimeji`.
 - Root Gradle project name hiện vẫn là `PrivateBrowser` (không ảnh hưởng package cài đặt).
-- Flow: Splash → Language → Intro → Permission → Discover Home.
-- Permission giải thích/request overlay special access và notification permission; user vẫn có thể Skip.
+- Flow tạm thời: Splash → Language → Intro → Discover Home; bước Permission onboarding đang
+  bị tắt bằng policy nhưng toàn bộ route/class vẫn được giữ để bật lại.
+- Permission giải thích/request overlay special access và notification permission; user vẫn có
+  thể Skip khi bước này được bật lại.
 - Discover Home tổng hợp Emoji Battery, pet/battery catalog và 4-tab navigation. Discover chỉ
   giữ toggle Emoji Battery; pet nổi được quản lý trong My Pet Room/Pet Store.
 - My Pet Room là phòng in-app: pet đã sở hữu đi lại trong phòng, sheet ba tab My Pet/Food/Room
@@ -31,7 +33,8 @@ settings và các quy ước kiến trúc hiện có.
   server với Pet; JSON cache/revalidate và asset được tải, verify SHA-256 theo nhu cầu.
   Debug vẫn giữ packaged snapshot fallback, còn release chỉ nhận catalog `APPROVED`.
 - Discover Home, My Pet Room, Pet Store và Splash/App Open Welcome Back dùng pink/white
-  Figma direction; Language/Intro/Permission/Premium giữ visual hiện tại.
+  Figma direction; Language/Intro/Premium giữ visual hiện tại. Permission giữ nguyên source/UI
+  nhưng hiện không nằm trong flow onboarding.
 - Browser, search engine, clear browsing data, storage permission, download, media, Room và service cũ đã bị xóa.
 
 ## Kiến trúc bắt buộc

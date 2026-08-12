@@ -8,6 +8,12 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -21,6 +27,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +42,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items as rowItems
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -49,10 +58,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -107,6 +118,7 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppActionToast
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.OverlayPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PinkLoveSticker
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardGradientButton
@@ -162,6 +174,7 @@ fun PetStoreScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    var showOverlayPermissionDisclosure by rememberSaveable { mutableStateOf(false) }
     TrackScreenView(ScreenName.PET_STORE)
 
     val overlayLauncher = rememberLauncherForActivityResult(
@@ -196,11 +209,7 @@ fun PetStoreScreen(
                 }
                 PetStoreEffect.OpenPremium -> onPremium()
                 PetStoreEffect.OpenOverlaySettings -> {
-                    InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
-                    runCatching { overlayLauncher.launch(PetOverlay.permissionIntent(context)) }
-                        .onFailure {
-                            overlayLauncher.launch(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
-                        }
+                    showOverlayPermissionDisclosure = true
                 }
                 PetStoreEffect.RequestNotificationPermission -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -220,9 +229,26 @@ fun PetStoreScreen(
         onOpenMyPet = onViewPet,
         onToggle = viewModel::togglePetOverlay,
         onTab = viewModel::selectTab,
+        onCategory = viewModel::selectCategory,
         onPet = viewModel::selectPet,
         onFood = viewModel::selectFood
     )
+
+    if (showOverlayPermissionDisclosure) {
+        OverlayPermissionDialog(
+            onAllowAccess = {
+                showOverlayPermissionDisclosure = false
+                InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
+                runCatching { overlayLauncher.launch(PetOverlay.permissionIntent(context)) }
+                    .onFailure {
+                        overlayLauncher.launch(
+                            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                        )
+                    }
+            },
+            onNotNow = { showOverlayPermissionDisclosure = false }
+        )
+    }
 
     state.selectedPet?.let { pet ->
         PetRewardSheet(
@@ -295,6 +321,7 @@ internal fun PetStoreContent(
     onOpenMyPet: () -> Unit,
     onToggle: () -> Unit,
     onTab: (PetStoreTab) -> Unit,
+    onCategory: (String) -> Unit,
     onPet: (OwnerPetCatalogEntry) -> Unit,
     onFood: (PetStoreFood) -> Unit
 ) {
@@ -338,7 +365,26 @@ internal fun PetStoreContent(
         ) {
             StoreTabs(state.selectedTab, onTab)
             when (state.selectedTab) {
-                PetStoreTab.PETS -> PetGrid(state, onPet)
+                PetStoreTab.PETS -> {
+                    val categories = PetStorePolicy.categories(state.pets)
+                    val selectedCategory = PetStorePolicy.selectedCategory(
+                        pets = state.pets,
+                        requestedCategory = state.selectedCategory
+                    )
+                    PetCategoryTabs(
+                        categories = categories,
+                        selectedCategory = selectedCategory,
+                        onCategory = onCategory
+                    )
+                    PetGrid(
+                        state = state,
+                        pets = PetStorePolicy.petsInCategory(
+                            pets = state.pets,
+                            category = selectedCategory
+                        ),
+                        onPet = onPet
+                    )
+                }
                 PetStoreTab.FOOD -> FoodGrid(onFood)
             }
         }
@@ -442,7 +488,66 @@ private fun StoreTab(
 }
 
 @Composable
-private fun PetGrid(state: PetStoreUiState, onPet: (OwnerPetCatalogEntry) -> Unit) {
+private fun PetCategoryTabs(
+    categories: List<String>,
+    selectedCategory: String?,
+    onCategory: (String) -> Unit
+) {
+    if (categories.isEmpty()) return
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._32sdp)),
+        contentPadding = PaddingValues(
+            start = dimensionResource(SdpR.dimen._12sdp),
+            end = dimensionResource(SdpR.dimen._12sdp),
+            bottom = dimensionResource(SdpR.dimen._12sdp)
+        ),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._15sdp))
+    ) {
+        rowItems(categories, key = { it.lowercase() }) { category ->
+            val isSelected = category.equals(selectedCategory, ignoreCase = true)
+            Column(
+                modifier = Modifier
+                    .width(IntrinsicSize.Min)
+                    .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._2sdp)))
+                    .clickable(enabled = !isSelected) { onCategory(category) },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = category,
+                    color = colorResource(
+                        if (isSelected) R.color.colors_FB3675 else R.color.colors_212327
+                    ),
+                    fontFamily = if (isSelected) StoreRobotoMedium else StoreRoboto,
+                    fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+                    maxLines = 1,
+                    modifier = Modifier.padding(
+                        horizontal = dimensionResource(SdpR.dimen._1sdp)
+                    )
+                )
+                Spacer(Modifier.height(dimensionResource(SdpR.dimen._3sdp)))
+                if (isSelected) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(dimensionResource(SdpR.dimen._2sdp))
+                            .clip(CircleShape)
+                            .background(colorResource(R.color.colors_FB3675))
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PetGrid(
+    state: PetStoreUiState,
+    pets: List<OwnerPetCatalogEntry>,
+    onPet: (OwnerPetCatalogEntry) -> Unit
+) {
     if (state.isLoading && state.pets.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = colorResource(R.color.colors_FB3675))
@@ -456,7 +561,7 @@ private fun PetGrid(state: PetStoreUiState, onPet: (OwnerPetCatalogEntry) -> Uni
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
     ) {
-        items(state.pets, key = OwnerPetCatalogEntry::id) { pet ->
+        items(pets, key = OwnerPetCatalogEntry::id) { pet ->
             PetCard(
                 pet = pet,
                 displayName = state.customNames[pet.id] ?: pet.name,
@@ -537,13 +642,7 @@ private fun PetCard(
                 )
             }
             if (isDownloading) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(dimensionResource(SdpR.dimen._18sdp)),
-                    color = colorResource(R.color.colors_FB3675),
-                    strokeWidth = dimensionResource(SdpR.dimen._2sdp)
-                )
+                PetDownloadingOverlay(modifier = Modifier.fillMaxSize())
             }
         }
         Column(
@@ -574,6 +673,34 @@ private fun PetCard(
                 overflow = TextOverflow.Ellipsis
             )
         }
+    }
+}
+
+@Composable
+private fun BoxScope.PetDownloadingOverlay(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition(label = "pet-download")
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 850, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "pet-download-rotation"
+    )
+    Box(
+        modifier = modifier
+            .background(colorResource(R.color.colors_000000).copy(alpha = 0.28f)),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            progress = { 0.72f },
+            modifier = Modifier
+                .size(dimensionResource(SdpR.dimen._22sdp))
+                .rotate(rotation),
+            color = colorResource(R.color.colors_FFFFFF),
+            strokeWidth = dimensionResource(SdpR.dimen._2sdp)
+        )
     }
 }
 
@@ -736,7 +863,7 @@ internal fun ColumnScope.PetRewardSheetContent(
     onReward: () -> Unit,
     showNativeAd: Boolean
 ) {
-    RewardPetPreview(pet)
+    RewardPetPreview(pet = pet, isDownloading = isDownloading)
     Text(
         text = stringResource(R.string.pet_store_unlock_title),
         color = colorResource(R.color.colors_212327),
@@ -838,7 +965,10 @@ private fun HideDialogNavigationBar() {
 }
 
 @Composable
-private fun RewardPetPreview(pet: OwnerPetCatalogEntry) {
+private fun RewardPetPreview(
+    pet: OwnerPetCatalogEntry,
+    isDownloading: Boolean
+) {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
     Box(
         modifier = Modifier
@@ -928,6 +1058,13 @@ private fun RewardPetPreview(pet: OwnerPetCatalogEntry) {
                 .fillMaxWidth(REWARD_TAPE_WIDTH_PX / REWARD_PET_CARD_WIDTH_PX)
                 .aspectRatio(REWARD_TAPE_WIDTH_PX / REWARD_TAPE_HEIGHT_PX)
         )
+        if (isDownloading) {
+            PetDownloadingOverlay(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(shape)
+            )
+        }
     }
 }
 
@@ -1309,6 +1446,7 @@ private fun PetStorePreview() {
         onOpenMyPet = {},
         onToggle = {},
         onTab = {},
+        onCategory = {},
         onPet = {},
         onFood = {}
     )

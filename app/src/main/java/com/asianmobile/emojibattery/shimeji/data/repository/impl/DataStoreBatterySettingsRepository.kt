@@ -63,6 +63,22 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             initialValue = BatteryStatusConfig(barHeightDp = barHeightRange.defaultDp)
         )
 
+    override val hiddenAppPackages: StateFlow<Set<String>> = context.dataStore.data
+        .catch { error ->
+            if (error is IOException) emit(emptyPreferences()) else throw error
+        }
+        .map { preferences ->
+            preferences[HIDDEN_APP_PACKAGES]
+                .orEmpty()
+                .map(String::trim)
+                .filterTo(mutableSetOf(), String::isNotEmpty)
+        }
+        .stateIn(
+            scope = scope,
+            started = SharingStarted.Eagerly,
+            initialValue = emptySet()
+        )
+
     override fun applyConfig(config: BatteryStatusConfig) {
         val sanitized = policy.sanitize(config).copy(hasApplied = true)
         edit { preferences ->
@@ -128,6 +144,16 @@ class DataStoreBatterySettingsRepository @Inject constructor(
 
     override fun setEnabled(enabled: Boolean) = edit { preferences ->
         preferences[ENABLED] = enabled
+    }
+
+    override fun setAppHidden(packageName: String, hidden: Boolean) {
+        val normalizedPackage = packageName.trim()
+        if (normalizedPackage.isEmpty()) return
+        edit { preferences ->
+            val packages = preferences[HIDDEN_APP_PACKAGES].orEmpty().toMutableSet()
+            if (hidden) packages += normalizedPackage else packages -= normalizedPackage
+            preferences[HIDDEN_APP_PACKAGES] = packages
+        }
     }
 
     override fun toggleFavorite(themeId: Int) {
@@ -328,6 +354,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         val FAVORITE_THEME_IDS = stringSetPreferencesKey("battery_status_favorite_theme_ids")
         val REWARD_UNLOCKED_THEME_IDS =
             stringSetPreferencesKey("battery_status_reward_unlocked_theme_ids")
+        val HIDDEN_APP_PACKAGES = stringSetPreferencesKey("battery_status_hidden_app_packages")
     }
 }
 
