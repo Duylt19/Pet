@@ -92,6 +92,9 @@ Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
   để tránh hiển thị trùng khi catalog cập nhật tên category;
 - More mở child route có header Back/title/PRO, inline banner SDK thật và grid ba cột. Card detail giữ
   tỷ lệ vuông, preview `74/101.333`, selected dùng `#FFEBF1` + stroke `#FB3675`, không hiện heart;
+- inline banner chỉ giữ grid item khi placement đủ điều kiện và chưa load fail. Khi SDK/config/
+  ad-free policy không cho hiển thị hoặc load fail, xóa cả holder lẫn grid item để card đầu tiên
+  dồn lên ngay dưới header, không để lại vùng trắng;
 - landing giữ Home bottom navigation; detail ẩn navigation nhưng giữ cùng bottom banner holder.
   DIY FAB và Lottie star bling dùng lại component Discover.
 

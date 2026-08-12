@@ -52,9 +52,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
-import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_BATTERY_CATEGORY_INLINE
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
-import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
@@ -330,9 +328,8 @@ internal fun BatteryCategoryContent(
     onBack: () -> Unit,
     onPremium: () -> Unit,
     onTheme: (BatteryThemeEntry) -> Unit,
-    inlineBannerContent: @Composable () -> Unit = {
-        BannerAd(adPosition = BANNER_BATTERY_CATEGORY_INLINE)
-    }
+    isInlineBannerVisible: Boolean,
+    inlineBannerContent: @Composable () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -366,17 +363,23 @@ internal fun BatteryCategoryContent(
                     dimensionResource(SdpR.dimen._12sdp)
                 )
             ) {
-                item(
-                    key = "battery_category_inline_banner",
-                    span = { GridItemSpan(maxLineSpan) }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._3sdp))),
-                        contentAlignment = Alignment.Center
+                if (isInlineBannerVisible) {
+                    item(
+                        key = "battery_category_inline_banner",
+                        span = { GridItemSpan(maxLineSpan) }
                     ) {
-                        inlineBannerContent()
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(
+                                    RoundedCornerShape(
+                                        dimensionResource(SdpR.dimen._3sdp)
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            inlineBannerContent()
+                        }
                     }
                 }
                 items(themes, key = BatteryThemeEntry::id) { theme ->
@@ -810,6 +813,7 @@ private fun BatteryCategoryContentPreview() {
         onBack = {},
         onPremium = {},
         onTheme = {},
+        isInlineBannerVisible = true,
         inlineBannerContent = { BatteryInlineBannerPreviewSlot() }
     )
 }

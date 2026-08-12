@@ -56,15 +56,19 @@ import com.google.android.libraries.ads.mobile.sdk.common.LoadAdError
 @Composable
 fun BannerAd(
     modifier: Modifier = Modifier,
-    adPosition: String = BOTTOM_POSITION
+    adPosition: String = BOTTOM_POSITION,
+    onVisibilityChanged: (Boolean) -> Unit = {}
 ) {
-    if (!MobileAds.isInitialized) return
     val context = LocalContext.current
     // In dialog destinations, LocalContext may not be an Activity.
     // Fall back to the View's context which always traces back to the host Activity.
     val activity = context.findActivity()
         ?: LocalView.current.context.findActivity()
-        ?: return
+
+    if (activity == null || !MobileAds.isInitialized) {
+        LaunchedEffect(Unit) { onVisibilityChanged(false) }
+        return
+    }
 
     val preferences = remember(activity) {
         activity.applicationContext.getSharedPreferences(
@@ -88,10 +92,22 @@ fun BannerAd(
         }
     }
 
-    if (Utils.checkLimitAd(adClickCount)) return
-    if (!SharedPreferencesUtils.getIsEnableAds(activity)) return
-    if (!SafeRemoteConfig.getBoolean(IS_SHOW_BANNER_ADS)) return
+    val isEligible = !Utils.checkLimitAd(adClickCount) &&
+        SharedPreferencesUtils.getIsEnableAds(activity) &&
+        SafeRemoteConfig.getBoolean(IS_SHOW_BANNER_ADS)
+    if (!isEligible) {
+        LaunchedEffect(Unit) { onVisibilityChanged(false) }
+        return
+    }
     val adViewModel: BannerAdViewModel = viewModel(key = "BannerAdViewModel_$adPosition")
+    val shouldDisplaySlot = shouldDisplayBannerSlot(
+        isEligible = isEligible,
+        isAdFailed = adViewModel.isAdFailed
+    )
+    LaunchedEffect(shouldDisplaySlot) {
+        onVisibilityChanged(shouldDisplaySlot)
+    }
+    if (!shouldDisplaySlot) return
 
     // Actual banner ad
     LaunchedEffect(adPosition) {
@@ -211,6 +227,9 @@ fun BannerAd(
         )
     }
 }
+
+internal fun shouldDisplayBannerSlot(isEligible: Boolean, isAdFailed: Boolean): Boolean =
+    isEligible && !isAdFailed
 
 class BannerAdViewModel : ViewModel() {
     var adView by mutableStateOf<AdView?>(null)

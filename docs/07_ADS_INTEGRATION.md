@@ -78,6 +78,8 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Battery Rewarded là unlock trigger đã được owner duyệt. Editor có bottom banner đã được
   Figma chỉ định; reward sheet và discard-changes sheet dùng native `HEIGHT_222`, mỗi sheet có
   `instanceKey` riêng để không dùng chung ad object với placement khác trong cùng back stack.
+- Banner wrapper phát trạng thái visibility cho placement inline cần layout động. Battery More
+  xóa toàn bộ grid item khi banner không đủ điều kiện hoặc load fail; không giữ placeholder 50dp.
 - Screen code phải là constant trong ads config, không hardcode rải rác.
 - Premium user/ad-free policy phải được kiểm tra ở integration boundary chung.
 - Khi xóa screen, xóa placement/config không còn consumer.
