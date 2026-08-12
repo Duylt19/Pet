@@ -81,6 +81,9 @@ Discover Home contract:
   `Status bar themes` tiếp tục nằm ngay sau banner, đúng hierarchy node Figma `8015:1035`;
 - Battery Themes dùng favorite state thật; Trending hiện dùng thứ tự catalog cho tới khi
   server có ranking riêng.
+- Search field theo Figma `8287:6560`: khi query khác rỗng hiện clear icon 16px ở trailing;
+  clear chỉ xoá query và giữ focus, còn tap ngắn ngoài toàn bộ field mới clear focus + ẩn IME.
+  Gesture cuộn không được xem là outside tap.
 
 Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
 
