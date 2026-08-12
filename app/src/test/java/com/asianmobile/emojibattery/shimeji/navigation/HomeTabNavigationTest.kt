@@ -26,6 +26,16 @@ class HomeTabNavigationTest {
     }
 
     @Test
+    fun `overlay disclosure routes through the focused grant permissions screen`() {
+        assertEquals(
+            "${Routes.GRANT_PERMISSIONS}?" +
+                "${Routes.GRANT_PERMISSIONS_REQUIRED_TARGET}=" +
+                Routes.GRANT_PERMISSIONS_OVERLAY_TARGET,
+            Routes.grantPermissionsForOverlay()
+        )
+    }
+
+    @Test
     fun `battery category keeps the shared banner without showing as a home tab`() {
         assertEquals("${Routes.BATTERY_CATEGORY}/17", Routes.batteryCategory(17))
         assertEquals(true, showHomeBottomBanner(Routes.BATTERY_CATALOG))

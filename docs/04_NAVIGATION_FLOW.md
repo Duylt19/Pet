@@ -12,7 +12,7 @@
 | `home` | Discover | Tab 1 của Home shell: battery toggle, Battery Troll hero và catalog preview |
 | `search` | Search | Tìm pet hoặc battery theme; pet mở Shimeji Pets, theme mở Status Bar Editor |
 | `favourite_recent` | Favourite & Recent | Favourite battery theme đã lưu; Recent giữ empty state cho tới khi có contract MRU |
-| `grant_permissions` | Grant Permission | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Route/screen được giữ nhưng row vào từ Mine đang tạm ẩn; Back vẫn pop về màn trước khi route được mở trực tiếp. Khác hẳn `permission` (bước onboarding) |
+| `grant_permissions?requiredTarget={accessibility\|overlay}` | Grant Permissions | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Mặc định ưu tiên Accessibility; `overlay` là entry sau shared Draw over apps disclosure. Route/screen được giữ nhưng row vào từ Mine đang tạm ẩn; Back pop về đúng feature source. Khác hẳn `permission` (bước onboarding) |
 | `accessibility_how_to_use` | Accessibility How to use | Hướng dẫn bốn bước sau consent và trước Android Accessibility Settings; app bar `exitUntilCollapsed`, CTA cố định dưới đáy |
 | `my_pet` | My Pet Room | Scene phòng in-app + sheet ba tab; Back pop về màn trước, shortcut mở tab Shimeji Pets |
 | `pet_store` | Shimeji Pets | Tab 3 của Home shell: duyệt pet/food, Rewarded/Premium gate, download/verify chỉ để mở khóa |
@@ -137,8 +137,11 @@ route, popUpTo behavior, process-death behavior và docs này.
   Không màn hình nào được `launch` một intent settings trần — ROM thiếu màn đó sẽ ném
   `ActivityNotFoundException` và hạ cả screen.
 - Overlay permission là special access, không phải runtime permission dialog. Mọi entry xin quyền
-  (onboarding Permission, Grant Permissions và switch Pet Store) phải hiện shared disclosure theo
-  Figma trước; chỉ action `Allow Access` mới mở `Settings.ACTION_MANAGE_OVERLAY_PERMISSION`.
+  (onboarding Permission, Discover/Pet Store và Grant Permissions) phải hiện shared disclosure theo
+  Figma trước. `Allow Access` từ feature source điều hướng tới
+  `grant_permissions?requiredTarget=overlay`; CTA của card bắt buộc trên màn này mới mở
+  `Settings.ACTION_MANAGE_OVERLAY_PERMISSION`. Nếu user đã ở Grant Permissions (đi từ Mine),
+  disclosure của row overlay mở system special access trực tiếp để không tự stack lại cùng route.
 - Notification permission chỉ request trên API 33+; denial không ngăn FGS chạy nhưng notification có thể chỉ hiện trong system task manager.
 - Discover refresh Accessibility ở `ON_RESUME`; intent bật battery được tiếp tục sau khi user
   cấp service. My Pet refresh overlay permission ở `ON_RESUME`; nếu overlay bị thu hồi khi

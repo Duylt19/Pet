@@ -48,6 +48,7 @@ import com.asianmobile.emojibattery.shimeji.ui.app.MainViewModel
 import com.asianmobile.emojibattery.shimeji.ui.app.destinationAfterIntro
 import com.asianmobile.emojibattery.shimeji.ui.settings.permissions.AccessibilityHowToUseScreen
 import com.asianmobile.emojibattery.shimeji.ui.settings.permissions.GrantPermissionsScreen
+import com.asianmobile.emojibattery.shimeji.ui.settings.permissions.GrantPermissionsTarget
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.permission.PermissionScreen
 import com.asianmobile.emojibattery.shimeji.ui.premium.PremiumScreen
 import com.asianmobile.emojibattery.shimeji.ui.pet.room.PetRoomScreen
@@ -66,6 +67,8 @@ object Routes {
     const val SEARCH = "search"
     const val FAVOURITE_RECENT = "favourite_recent"
     const val GRANT_PERMISSIONS = "grant_permissions"
+    const val GRANT_PERMISSIONS_REQUIRED_TARGET = "requiredTarget"
+    const val GRANT_PERMISSIONS_OVERLAY_TARGET = "overlay"
     const val ACCESSIBILITY_HOW_TO_USE = "accessibility_how_to_use"
     const val MY_PET = "my_pet"
     const val PET_STORE = "pet_store"
@@ -78,6 +81,9 @@ object Routes {
     const val PREMIUM = "premium"
 
     fun batteryEditor(themeId: Int): String = "$BATTERY_EDITOR/$themeId"
+    fun grantPermissionsForOverlay(): String =
+        "$GRANT_PERMISSIONS?$GRANT_PERMISSIONS_REQUIRED_TARGET=" +
+            GRANT_PERMISSIONS_OVERLAY_TARGET
     fun batteryCategory(categoryId: Int): String = "$BATTERY_CATEGORY/$categoryId"
     fun batteryEditorComponent(themeId: Int, page: String): String =
         "$BATTERY_EDITOR_COMPONENT/$themeId/$page"
@@ -196,6 +202,12 @@ fun AppNavGraph(
         }
     }
 
+    fun navigateToOverlayGrantPermissions() {
+        navController.safeNavigate(Routes.grantPermissionsForOverlay(), ignoreDebounce = true) {
+            launchSingleTop = true
+        }
+    }
+
     LaunchedEffect(navController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             onDestinationChanged(destination.route)
@@ -291,7 +303,8 @@ fun AppNavGraph(
                 }
                 PermissionScreen(
                     onContinue = navigateHome,
-                    onSkip = navigateHome
+                    onSkip = navigateHome,
+                    onNavigateToGrantPermissions = ::navigateToOverlayGrantPermissions
                 )
             }
 
@@ -312,6 +325,7 @@ fun AppNavGraph(
                     onNavigateToMyPet = {
                         navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
                     },
+                    onNavigateToGrantPermissions = ::navigateToOverlayGrantPermissions,
                     onOpenBatteryTheme = { themeId ->
                         navController.safeNavigate(
                             Routes.batteryEditor(themeId),
@@ -333,9 +347,28 @@ fun AppNavGraph(
                 )
             }
 
-            composable(Routes.GRANT_PERMISSIONS) { backStackEntry ->
+            composable(
+                route = "${Routes.GRANT_PERMISSIONS}?" +
+                    "${Routes.GRANT_PERMISSIONS_REQUIRED_TARGET}=" +
+                    "{${Routes.GRANT_PERMISSIONS_REQUIRED_TARGET}}",
+                arguments = listOf(
+                    navArgument(Routes.GRANT_PERMISSIONS_REQUIRED_TARGET) {
+                        type = NavType.StringType
+                        defaultValue = GrantPermissionsTarget.ACCESSIBILITY.name.lowercase()
+                    }
+                )
+            ) { backStackEntry ->
+                val requiredTarget = when (
+                    backStackEntry.arguments?.getString(
+                        Routes.GRANT_PERMISSIONS_REQUIRED_TARGET
+                    )
+                ) {
+                    Routes.GRANT_PERMISSIONS_OVERLAY_TARGET -> GrantPermissionsTarget.OVERLAY
+                    else -> GrantPermissionsTarget.ACCESSIBILITY
+                }
                 GrantPermissionsScreen(
                     onNavigateBack = { navController.safePopBackStack() },
+                    requiredTarget = requiredTarget,
                     accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
                     onAccessibilityHowToUseResultConsumed =
                         backStackEntry::consumeAccessibilityHowToUseResult,
@@ -397,7 +430,8 @@ fun AppNavGraph(
                     },
                     onViewPet = {
                         navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
-                    }
+                    },
+                    onNavigateToGrantPermissions = ::navigateToOverlayGrantPermissions
                 )
             }
 

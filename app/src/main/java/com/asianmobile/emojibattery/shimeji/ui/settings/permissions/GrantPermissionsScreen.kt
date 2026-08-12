@@ -24,13 +24,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +46,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -77,6 +82,7 @@ import com.intuit.ssp.R as SspR
 @Composable
 fun GrantPermissionsScreen(
     onNavigateBack: () -> Unit = {},
+    requiredTarget: GrantPermissionsTarget = GrantPermissionsTarget.ACCESSIBILITY,
     accessibilityHowToUseResult: Boolean? = null,
     onAccessibilityHowToUseResultConsumed: () -> Unit = {},
     onNavigateToAccessibilityHowToUse: () -> Unit = {},
@@ -126,7 +132,14 @@ fun GrantPermissionsScreen(
                     )
 
                 GrantPermissionsEffect.OpenOverlaySettings -> {
-                    showOverlayPermissionDisclosure = true
+                    if (requiredTarget == GrantPermissionsTarget.OVERLAY) {
+                        settingsLauncher.openSettings(
+                            PetOverlay.permissionIntent(context),
+                            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                        )
+                    } else {
+                        showOverlayPermissionDisclosure = true
+                    }
                 }
 
                 GrantPermissionsEffect.OpenBatteryOptimizationSettings ->
@@ -158,6 +171,7 @@ fun GrantPermissionsScreen(
 
     GrantPermissionsContent(
         uiState = uiState,
+        requiredTarget = requiredTarget,
         onNavigateBack = onNavigateBack,
         onTargetClicked = viewModel::onTargetClicked
     )
@@ -212,30 +226,49 @@ private fun appDetailsIntent(packageName: String): Intent = Intent(
     Uri.fromParts("package", packageName, null)
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun GrantPermissionsContent(
     uiState: GrantPermissionsUiState,
+    requiredTarget: GrantPermissionsTarget = GrantPermissionsTarget.ACCESSIBILITY,
     onNavigateBack: () -> Unit,
     onTargetClicked: (GrantPermissionsTarget) -> Unit
 ) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
     // The design keeps this screen on a plain white sheet: the shared wallpaper is switched off
     // so the white cards read against it via their shadow rather than a colour change.
-    Column(
+    Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.colors_FFFFFF))
-            .statusBarsPadding()
-    ) {
-        GrantPermissionsHeader(onNavigateBack = onNavigateBack)
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = colorResource(R.color.colors_FFFFFF),
+        topBar = {
+            GrantPermissionsTopBar(
+                collapsedFraction = scrollBehavior.state.collapsedFraction,
+                onNavigateBack = onNavigateBack,
+                scrollBehavior = scrollBehavior
+            )
+        },
+        bottomBar = {
+            // Pinned outside the list so it stays put while the permission cards scroll.
+            NativeAdInternal(
+                screenCode = SCREEN_PERMISSION,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+            )
+        }
+    ) { innerPadding ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 start = dimensionResource(SdpR.dimen._12sdp),
                 end = dimensionResource(SdpR.dimen._12sdp),
-                top = dimensionResource(SdpR.dimen._6sdp),
-                bottom = dimensionResource(SdpR.dimen._12sdp)
+                top = innerPadding.calculateTopPadding() +
+                    dimensionResource(SdpR.dimen._6sdp),
+                bottom = innerPadding.calculateBottomPadding() +
+                    dimensionResource(SdpR.dimen._12sdp)
             ),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
         ) {
@@ -246,9 +279,13 @@ internal fun GrantPermissionsContent(
                 )
             }
             item {
-                AccessibilityCard(
-                    isEnabled = uiState.isAccessibilityEnabled,
-                    onClick = { onTargetClicked(GrantPermissionsTarget.ACCESSIBILITY) }
+                RequiredPermissionCard(
+                    requiredTarget = requiredTarget,
+                    isEnabled = when (requiredTarget) {
+                        GrantPermissionsTarget.OVERLAY -> uiState.isOverlayGranted
+                        else -> uiState.isAccessibilityEnabled
+                    },
+                    onClick = { onTargetClicked(requiredTarget) }
                 )
             }
             item {
@@ -311,14 +348,6 @@ internal fun GrantPermissionsContent(
                 }
             }
         }
-        // Pinned below the list rather than the last row of it, so the ad stays put while
-        // the permissions scroll.
-        NativeAdInternal(
-            screenCode = SCREEN_PERMISSION,
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-        )
     }
 }
 
@@ -342,32 +371,55 @@ private fun Modifier.cardSurface(): Modifier {
         .background(colorResource(R.color.colors_FFFFFF))
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun GrantPermissionsHeader(onNavigateBack: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._43sdp))
-            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_pet_room_back),
-            contentDescription = stringResource(R.string.pet_room_back),
-            tint = colorResource(R.color.colors_212327),
-            modifier = Modifier
-                .size(dimensionResource(SdpR.dimen._21sdp))
-                .clip(CircleShape)
-                .clickable(role = Role.Button, onClick = onNavigateBack)
-        )
-        Spacer(Modifier.width(dimensionResource(SdpR.dimen._9sdp)))
-        Text(
-            text = stringResource(R.string.grant_permissions_nav),
-            color = colorResource(R.color.colors_212327),
-            fontWeight = FontWeight.SemiBold,
-            fontSize = dimensionResource(SspR.dimen._15ssp).value.sp
-        )
-    }
+private fun GrantPermissionsTopBar(
+    collapsedFraction: Float,
+    onNavigateBack: () -> Unit,
+    scrollBehavior: androidx.compose.material3.TopAppBarScrollBehavior
+) {
+    val expandedTitleSize = dimensionResource(SspR.dimen._18ssp).value.sp
+    val collapsedTitleSize = dimensionResource(SspR.dimen._14ssp).value.sp
+    val titleSize = (
+        expandedTitleSize.value +
+            (collapsedTitleSize.value - expandedTitleSize.value) * collapsedFraction
+        ).sp
+
+    LargeTopAppBar(
+        title = {
+            Text(
+                text = stringResource(R.string.grant_permissions_nav),
+                color = colorResource(R.color.colors_212327),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = titleSize,
+                lineHeight = dimensionResource(SspR.dimen._24ssp).value.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        navigationIcon = {
+            Box(
+                modifier = Modifier
+                    .size(dimensionResource(SdpR.dimen._43sdp))
+                    .clickable(role = Role.Button, onClick = onNavigateBack),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_pet_room_back),
+                    contentDescription = stringResource(R.string.pet_room_back),
+                    tint = colorResource(R.color.colors_212327),
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._21sdp))
+                )
+            }
+        },
+        collapsedHeight = dimensionResource(SdpR.dimen._43sdp),
+        expandedHeight = dimensionResource(SdpR.dimen._77sdp),
+        colors = TopAppBarDefaults.largeTopAppBarColors(
+            containerColor = Color.Transparent,
+            scrolledContainerColor = colorResource(R.color.colors_FFFFFF)
+        ),
+        scrollBehavior = scrollBehavior
+    )
 }
 
 @Composable
@@ -413,7 +465,12 @@ private fun SectionHeading(
 }
 
 @Composable
-private fun AccessibilityCard(isEnabled: Boolean, onClick: () -> Unit) {
+private fun RequiredPermissionCard(
+    requiredTarget: GrantPermissionsTarget,
+    isEnabled: Boolean,
+    onClick: () -> Unit
+) {
+    val isOverlayRequired = requiredTarget == GrantPermissionsTarget.OVERLAY
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -431,7 +488,13 @@ private fun AccessibilityCard(isEnabled: Boolean, onClick: () -> Unit) {
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = stringResource(R.string.grant_permissions_accessibility_title),
+                        text = stringResource(
+                            if (isOverlayRequired) {
+                                R.string.grant_permissions_overlay_required_title
+                            } else {
+                                R.string.grant_permissions_accessibility_title
+                            }
+                        ),
                         color = colorResource(R.color.colors_212327),
                         fontWeight = FontWeight.Medium,
                         fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
@@ -440,23 +503,41 @@ private fun AccessibilityCard(isEnabled: Boolean, onClick: () -> Unit) {
                     StatusPill(isEnabled = isEnabled)
                 }
                 Text(
-                    text = stringResource(R.string.grant_permissions_accessibility_body),
+                    text = stringResource(
+                        if (isOverlayRequired) {
+                            R.string.grant_permissions_overlay_required_body
+                        } else {
+                            R.string.grant_permissions_accessibility_body
+                        }
+                    ),
                     color = colorResource(R.color.colors_6F7073),
                     fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
                     modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._3sdp))
                 )
             }
         }
-        Image(
-            painter = painterResource(R.drawable.img_permission_accessibility_steps),
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            // The phone previews overflow their frame by 4px, so the art is exported at the
-            // render bounds (296x96) rather than the layout bounds, and drawn at that ratio.
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(STEPS_ART_RATIO)
-        )
+        if (isOverlayRequired) {
+            Image(
+                painter = painterResource(R.drawable.img_overlay_permission_hero),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(
+                    width = dimensionResource(SdpR.dimen._122sdp),
+                    height = dimensionResource(SdpR.dimen._77sdp)
+                )
+            )
+        } else {
+            Image(
+                painter = painterResource(R.drawable.img_permission_accessibility_steps),
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                // The phone previews overflow their frame by 4px, so the art is exported at the
+                // render bounds (296x96) rather than the layout bounds, and drawn at that ratio.
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(STEPS_ART_RATIO)
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -579,6 +660,7 @@ private fun GrantPermissionsPreview() {
             isAccessibilityEnabled = true,
             isNotificationRowVisible = true
         ),
+        requiredTarget = GrantPermissionsTarget.ACCESSIBILITY,
         onNavigateBack = {},
         onTargetClicked = {}
     )

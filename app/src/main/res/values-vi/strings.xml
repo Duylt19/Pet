@@ -725,16 +725,18 @@
     <string name="grant_permissions_section_recommend">Quyền nên bật</string>
     <string name="grant_permissions_recommend_subtitle">Luôn kết nối với thú cưng của bạn</string>
     <string name="grant_permissions_accessibility_title">Bật chế độ Trợ năng</string>
-    <string name="grant_permissions_accessibility_body">Cần quyền Trợ năng để hiển thị Emoji Battery bằng thao tác vuốt. Ứng dụng không thu thập dữ liệu cá nhân.</string>
+    <string name="grant_permissions_accessibility_body">Cho phép bộ điều khiển pin và thanh trạng thái tùy chỉnh phản hồi các thao tác được hỗ trợ và căn chỉnh theo giao diện hệ thống.</string>
+    <string name="grant_permissions_overlay_required_title">Cho phép thú cưng hiện trên màn hình</string>
+    <string name="grant_permissions_overlay_required_body">Cho phép Cute Pet giữ thú cưng đang bật luôn hiển thị khi bạn sử dụng ứng dụng khác.</string>
     <string name="grant_permissions_go_to_settings">Mở Cài đặt</string>
     <string name="grant_permissions_required">Bắt buộc</string>
     <string name="grant_permissions_allowed">Đã cấp</string>
     <string name="grant_permissions_overlay_title">Hiển thị trên ứng dụng khác</string>
-    <string name="grant_permissions_overlay_body">Cho phép Emoji Battery hiển thị đè lên các ứng dụng khác.</string>
+    <string name="grant_permissions_overlay_body">Hiển thị thú cưng và pin tùy chỉnh phía trên ứng dụng khác khi các tính năng này đang bật.</string>
     <string name="grant_permissions_battery_title">Bỏ qua tối ưu hóa pin</string>
-    <string name="grant_permissions_battery_body">Giúp Emoji Battery luôn hoạt động và tránh bị hệ thống dừng dịch vụ.</string>
+    <string name="grant_permissions_battery_body">Giúp lớp phủ thú cưng tiếp tục hoạt động trên các thiết bị thường xuyên dừng dịch vụ chạy nền.</string>
     <string name="grant_permissions_notification_title">Quyền thông báo</string>
-    <string name="grant_permissions_notification_body">Nhận nhắc nhở và cập nhật về thú cưng của bạn.</string>
+    <string name="grant_permissions_notification_body">Cho phép Cute Pet hiển thị nhắc nhở về thú cưng và thông báo của dịch vụ đang chạy.</string>
     <string name="grant_permissions_autostart_title">Cho phép tự khởi động</string>
     <string name="grant_permissions_autostart_body">Thiết bị của bạn có danh sách riêng các ứng dụng được chạy nền. Hãy thêm Cute Pet để thú cưng không bị dừng.</string>
 </resources>

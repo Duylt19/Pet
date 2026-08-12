@@ -2,10 +2,8 @@ package com.asianmobile.emojibattery.shimeji.ui.pet.store
 
 import android.Manifest
 import android.app.Activity
-import android.content.Intent
 import android.graphics.Color as AndroidColor
 import android.os.Build
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.LinearEasing
@@ -106,12 +104,10 @@ import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
-import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetAction
-import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetBitmapCache
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
@@ -169,6 +165,7 @@ fun PetStoreScreen(
     onSearch: () -> Unit,
     onPremium: () -> Unit,
     onViewPet: () -> Unit,
+    onNavigateToGrantPermissions: () -> Unit,
     viewModel: PetStoreViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -178,7 +175,8 @@ fun PetStoreScreen(
         state = state,
         viewModel = viewModel,
         onPremium = onPremium,
-        onViewPet = onViewPet
+        onViewPet = onViewPet,
+        onNavigateToGrantPermissions = onNavigateToGrantPermissions
     ) {
         PetStoreContent(
             state = state,
@@ -204,15 +202,13 @@ internal fun PetStoreFlowHost(
     viewModel: PetStoreViewModel,
     onPremium: () -> Unit,
     onViewPet: () -> Unit,
+    onNavigateToGrantPermissions: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showOverlayPermissionDisclosure by rememberSaveable { mutableStateOf(false) }
 
-    val overlayLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { viewModel.refreshPermissions() }
     val notificationLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { viewModel.onNotificationPermissionResult() }
@@ -261,13 +257,7 @@ internal fun PetStoreFlowHost(
         OverlayPermissionDialog(
             onAllowAccess = {
                 showOverlayPermissionDisclosure = false
-                InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
-                runCatching { overlayLauncher.launch(PetOverlay.permissionIntent(context)) }
-                    .onFailure {
-                        overlayLauncher.launch(
-                            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-                        )
-                    }
+                onNavigateToGrantPermissions()
             },
             onNotNow = { showOverlayPermissionDisclosure = false }
         )

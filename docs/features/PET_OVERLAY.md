@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Platform và product vertical slice đã hoàn tất. `PetOverlay.start(context)` chỉ start khi `Settings.canDrawOverlays(context)` trả `true`; mọi request access phải qua shared overlay disclosure trước khi mở system settings, còn My Pet/Pet Store điều khiển Start/Stop.
+Platform và product vertical slice đã hoàn tất. `PetOverlay.start(context)` chỉ start khi `Settings.canDrawOverlays(context)` trả `true`; mọi request access phải qua shared overlay disclosure rồi biến thể overlay của Grant Permissions trước khi mở system settings, còn My Pet/Pet Store điều khiển Start/Stop.
 
 ## Thành phần
 

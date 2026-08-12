@@ -236,8 +236,10 @@ Intro onboarding theo Figma nodes `8088:13113`, `8088:13148`, `8088:13201`:
 Overlay permission disclosure theo Figma node `8436:5998`:
 
 - `ui/shared/component/OverlayPermissionDialog.kt` là bottom sheet dùng chung trước mọi request
-  `ACTION_MANAGE_OVERLAY_PERMISSION`; scrim/Back/`Not now` chỉ đóng sheet, `Allow Access` mới mở
-  system special-access settings. Swipe chỉ dismiss sau khi kéo tối thiểu 25% chiều cao sheet;
+  `ACTION_MANAGE_OVERLAY_PERMISSION`; scrim/Back/`Not now` chỉ đóng sheet. `Allow Access` từ
+  onboarding/Discover/Pet Store mở biến thể overlay của Grant Permissions; CTA `Go to Settings`
+  tại đó mới mở system special-access settings. Swipe chỉ dismiss sau khi kéo tối thiểu 25% chiều
+  cao sheet;
 - hero `img_overlay_permission_hero.png` được export nguyên group 158×100 để giữ phone mockup,
   pets và bubble; title/body là text thật, action dùng shared gradient/outline buttons;
 - native `HEIGHT_222` nằm sát đáy và collapse khi placement không render.
@@ -256,12 +258,13 @@ Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343`
   phủ gì nên đã lệch design mà không ai phát hiện. Kiểm tra bằng cách đo lề núm trong golden:
   lề trên phải bằng lề dưới, và lề trái khi tắt phải bằng lề phải khi bật.
 
-Grant Permissions contract theo Figma node `8080:9754`:
+Grant Permissions contract theo Figma node `8080:9754` và biến thể overlay `8591:7213`:
 
 - route `grant_permissions` được giữ nhưng option mở từ Mine đang tạm ẩn. Nền **trắng phẳng** — lớp wallpaper trong design bị tắt,
   card trắng nổi lên bằng shadow chứ không bằng đổi màu nền;
-- top nav `360×56` có back 28 và **một** title duy nhất `Grant Permission` Roboto 600 20/28.
-  Node PRO pill và heading lớn `Grant Permissions` đều là layer ẩn trong Figma nên không dựng;
+- app bar dùng `LargeTopAppBar` và `exitUntilCollapsed`: trạng thái mở có back + title lớn
+  `Grant Permissions`, khi list cuộn thì title thu về toolbar một dòng giống Customize Status
+  Bar/Accessibility How to use; native ad vẫn ghim đáy, ngoài list;
 - ba nhóm đánh số bằng chip tròn `24×24` nền `#FB3675` (số Roboto 500 16/24), cách chip 8px:
   Necessary, Enhanced Stability, Recommend. Khoảng cách heading → card và card → card là 12px,
   giữa hai nhóm là 20px;
@@ -270,7 +273,10 @@ Grant Permissions contract theo Figma node `8080:9754`:
   thì card trắng trên nền trắng gần như mất viền — dùng `shadow(_8sdp, #212327 alpha 0.30)`
   để bóng đọc được; icon quyền `34×34` radius 10 với gradient riêng
   từng quyền, cách text 8px, text cách switch 8px;
-- card accessibility có badge `Required` `#FFECEC`/`#F04438` hoặc `Allowed`
+- card bắt buộc đổi theo entry point. Mine dùng Accessibility và minh hoạ hai bước; flow sau
+  disclosure Draw over apps dùng title/description overlay cùng artwork
+  `img_overlay_permission_hero.png` `158×100`. Badge `Required` dùng
+  `#FFECEC`/`#F04438`, `Allowed` dùng
   `#E6F9EF`/`#00C062` (Roboto 500 10/14, padding 10×4), minh hoạ hai bước và CTA
   `Go to Settings` gradient `#C95DFF → #FB54BB` cao 40; các card còn lại dùng `AppSwitch`
   chung với Home;

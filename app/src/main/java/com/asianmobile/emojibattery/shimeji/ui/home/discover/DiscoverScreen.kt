@@ -100,6 +100,7 @@ fun DiscoverScreen(
     onNavigateToBattery: () -> Unit,
     onNavigateToPetStore: () -> Unit,
     onNavigateToMyPet: () -> Unit,
+    onNavigateToGrantPermissions: () -> Unit,
     onOpenBatteryTheme: (Int) -> Unit,
     onCustomizeStatusBar: () -> Unit,
     accessibilityHowToUseResult: Boolean? = null,
@@ -164,7 +165,8 @@ fun DiscoverScreen(
             state = petStoreState,
             viewModel = petStoreViewModel,
             onPremium = onNavigateToPremium,
-            onViewPet = onNavigateToMyPet
+            onViewPet = onNavigateToMyPet,
+            onNavigateToGrantPermissions = onNavigateToGrantPermissions
         ) {
             DiscoverContent(
                 uiState = presentedState,

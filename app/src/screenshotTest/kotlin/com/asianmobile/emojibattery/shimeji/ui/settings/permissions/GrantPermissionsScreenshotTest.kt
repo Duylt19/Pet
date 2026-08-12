@@ -18,6 +18,27 @@ fun GrantPermissionsScreenshotTest() {
             isNotificationGranted = false,
             isNotificationRowVisible = true
         ),
+        requiredTarget = GrantPermissionsTarget.ACCESSIBILITY,
+        onNavigateBack = {},
+        onTargetClicked = {}
+    )
+}
+
+@PreviewTest
+@Preview(widthDp = 360, heightDp = 1000)
+@Composable
+fun OverlayGrantPermissionsScreenshotTest() {
+    GrantPermissionsContent(
+        uiState = GrantPermissionsUiState(
+            isAccessibilityEnabled = false,
+            isOverlayGranted = false,
+            isBatteryOptimizationIgnored = false,
+            isBatteryRowVisible = true,
+            isAutoStartRowVisible = true,
+            isNotificationGranted = false,
+            isNotificationRowVisible = true
+        ),
+        requiredTarget = GrantPermissionsTarget.OVERLAY,
         onNavigateBack = {},
         onTargetClicked = {}
     )

@@ -1,9 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.ui.onboarding.permission
 
 import android.Manifest
-import android.content.Intent
 import android.os.Build
-import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,7 +30,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -50,8 +47,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_PERMISSION
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
-import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
-import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.OverlayPermissionDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -62,17 +57,12 @@ import com.intuit.ssp.R as SspR
 fun PermissionScreen(
     onContinue: () -> Unit,
     onSkip: () -> Unit,
+    onNavigateToGrantPermissions: () -> Unit,
     viewModel: PermissionViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showOverlayPermissionDisclosure by rememberSaveable { mutableStateOf(false) }
-    val overlaySettingsLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        viewModel.refreshPermissions()
-    }
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) {
@@ -105,14 +95,7 @@ fun PermissionScreen(
         OverlayPermissionDialog(
             onAllowAccess = {
                 showOverlayPermissionDisclosure = false
-                InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
-                runCatching {
-                    overlaySettingsLauncher.launch(PetOverlay.permissionIntent(context))
-                }.onFailure {
-                    overlaySettingsLauncher.launch(
-                        Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-                    )
-                }
+                onNavigateToGrantPermissions()
             },
             onNotNow = { showOverlayPermissionDisclosure = false }
         )
