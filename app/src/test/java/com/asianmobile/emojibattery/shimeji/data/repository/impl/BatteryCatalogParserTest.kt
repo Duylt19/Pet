@@ -41,6 +41,41 @@ class BatteryCatalogParserTest {
     }
 
     @Test
+    fun parse_accepts_lossless_webp_for_static_battery_images() {
+        val document = parser.parse(
+            validCatalog()
+                .replace("thumb/7.png", "thumb/7.webp")
+                .replace("battery/7.png", "battery/7.webp")
+                .replace("emoji/7.png", "emoji/7.webp")
+                .replace(
+                    "background/template_color_01.png",
+                    "background/template_color_01.webp"
+                )
+                .replace(
+                    "background_preview/template_color_01.png",
+                    "background_preview/template_color_01.webp"
+                )
+                .replace("emotion/emotion_01.png", "emotion/emotion_01.webp")
+        )
+
+        assertEquals("thumb/7.webp", document.themes.single().thumbnail.path)
+        assertEquals("battery/7.webp", document.themes.single().battery.path)
+        assertEquals("emoji/7.webp", document.themes.single().emoji.path)
+        assertEquals(
+            "background/template_color_01.webp",
+            document.backgrounds.single().asset.path
+        )
+        assertEquals("emotion/emotion_01.webp", document.emotions.single().asset.path)
+    }
+
+    @Test
+    fun parse_rejects_unsupported_static_image_extension() {
+        assertThrows(BatteryCatalogParseException::class.java) {
+            parser.parse(validCatalog().replace("battery/7.png", "battery/7.jpg"))
+        }
+    }
+
+    @Test
     fun parse_rejects_unknown_category() {
         assertThrows(BatteryCatalogParseException::class.java) {
             parser.parse(validCatalog().replace("\"categoryId\": 3", "\"categoryId\": 4"))

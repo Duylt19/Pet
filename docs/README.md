@@ -16,6 +16,10 @@
 6. [Current screens](screens/README.md)
 7. Tài liệu chuyên đề liên quan task
 
+Khi cập nhật catalog hoặc asset server, bắt đầu từ
+[`data/README.md`](data/README.md). Bộ tài liệu này mô tả kết nối, fetch/cache/download,
+contract từng loại data, migration, publish và rollback.
+
 ## Foundation
 
 | File | Nội dung |

@@ -142,8 +142,8 @@ không được restore sau process death/reboot.
   nhóm Classic + 80 emotion server thuộc tám pack mới, 26 animation,
   entitlement, remote/cache/local asset path, distribution status và typed error;
   built-in theme ID `0` luôn có như fallback runtime nhưng không xuất hiện trong picker.
-- Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và dimension cho
-  PNG/GIF/Lottie.
+- Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và dimension. Ảnh tĩnh
+  Battery chấp nhận pixel-exact lossless WebP hoặc PNG; GIF/Lottie giữ nguyên.
   `HybridBatteryCatalogRepository` đọc cache trước, revalidate private GitHub catalog
   theo TTL/ETag/backoff, materialize asset theo nhu cầu và chặn path escape,
   size/hash mismatch hoặc release catalog chưa `APPROVED`.
@@ -154,10 +154,12 @@ không được restore sau process death/reboot.
   asset server ổn định với ID `21..100`, mỗi pack 10 item theo thứ tự Emoji, Cony,
   Kiiroitori, Molang, Mochi, Tobi, Keroppi và Pochacco. Group chỉ là taxonomy UI;
   persistence tiếp tục lưu leaf `emotionDecorationId`, không lưu group đang browse. Picker
-  chỉ tải PNG preview 72px; khi chọn mới tải full PNG, kiểm tra size/SHA-256 và cache app-private.
+  chỉ tải preview nhẹ; khi chọn mới tải full lossless WebP/PNG, kiểm tra size/SHA-256 và
+  cache app-private.
   Background nhóm cũng đọc từ server; release APK không đóng gói 100 emotion này.
 - Background v2 ưu tiên 18 frame Figma ở ID `1..18`; 20 nền cũ được re-index thành
-  `19..38`. Picker chỉ tải `background_preview`, còn full PNG chỉ materialize sau khi chọn.
+  `19..38`. Picker chỉ tải `background_preview`, còn full lossless WebP/PNG chỉ materialize
+  sau khi chọn.
   ID `1` có bản giống byte trong `drawable-nodpi` để fresh install và fallback offline vẫn
   có nền mặc định. Vì catalog còn ở debug v1, key DataStore và draft schema được tăng version
   để reset lựa chọn cũ thay vì âm thầm đổi nghĩa ID.
