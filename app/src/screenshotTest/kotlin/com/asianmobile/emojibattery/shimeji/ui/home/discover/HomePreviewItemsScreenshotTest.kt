@@ -37,7 +37,8 @@ fun HomePreviewItemsScreenshotTest() {
                     packKey = "preview-pet",
                     name = "Pink Bunny",
                     category = "Cute",
-                    thumbnailPath = null
+                    thumbnailPath = null,
+                    isLocked = true
                 ),
                 onClick = {}
             )
@@ -46,7 +47,8 @@ fun HomePreviewItemsScreenshotTest() {
                     id = 1,
                     name = "Pink Battery",
                     thumbnailPath = null,
-                    isFavorite = true
+                    isFavorite = true,
+                    isLocked = true
                 ),
                 onOpen = {},
                 onFavorite = {},
@@ -55,7 +57,12 @@ fun HomePreviewItemsScreenshotTest() {
         }
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             ComponentAssetCard(
-                asset = null,
+                asset = DiscoverAssetUiState(
+                    id = 1,
+                    name = "Premium Emoji",
+                    assetPath = "",
+                    isLocked = true
+                ),
                 fallbackRes = R.drawable.img_home_brand_bunny,
                 onClick = {}
             )

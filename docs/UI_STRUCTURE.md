@@ -46,7 +46,7 @@ feature phải di chuyển test cùng lúc.
 | Battery tab/detail | `battery_catalog`, `battery_category/{id}` | `ui/battery/catalog` |
 | Battery collection | `favourite_recent` | `ui/battery/favoriterecent` |
 | Status bar editor | `battery_editor/*` | `ui/battery/editor` |
-| Pet Store tab | `pet_store` | `ui/pet/store` |
+| Shimeji Pets tab | `pet_store` | `ui/pet/store` |
 | My Pet Room | `my_pet` | `ui/pet/room` |
 | Mine tab | `settings` | `ui/settings/mine` |
 | Permission manager | `grant_permissions` | `ui/settings/permissions` |
@@ -68,7 +68,7 @@ feature phải di chuyển test cùng lúc.
 Bốn tab top-level vẫn thuộc các domain riêng:
 
 ```text
-Discover              Battery              Pet Store             Mine
+Discover              Battery              Shimeji Pets          Mine
 ui/home/discover      ui/battery/catalog   ui/pet/store          ui/settings/mine
         \_____________________ AppNavGraph Home shell _____________________/
                          bottom navigation + banner ad

@@ -285,6 +285,9 @@ fun AppNavGraph(
                     onNavigateToPetStore = {
                         navigateToHomeTab(HomeTab.PET_STORE)
                     },
+                    onNavigateToMyPet = {
+                        navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
+                    },
                     onOpenBatteryTheme = { themeId ->
                         navController.safeNavigate(
                             Routes.batteryEditor(themeId),

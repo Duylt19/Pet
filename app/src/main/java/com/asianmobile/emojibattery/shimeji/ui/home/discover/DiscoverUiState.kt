@@ -22,20 +22,23 @@ data class DiscoverPetUiState(
     val packKey: String,
     val name: String,
     val category: String,
-    val thumbnailPath: String?
+    val thumbnailPath: String?,
+    val isLocked: Boolean = false
 )
 
 data class DiscoverThemeUiState(
     val id: Int,
     val name: String,
     val thumbnailPath: String?,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val isLocked: Boolean = false
 )
 
 data class DiscoverAssetUiState(
     val id: Int,
     val name: String,
-    val assetPath: String
+    val assetPath: String,
+    val isLocked: Boolean = false
 )
 
 sealed interface DiscoverEffect {

@@ -69,10 +69,10 @@ Discover Home contract:
 - toggle chính điều khiển `BatteryStatusConfig.enabled`, có disclosure và Accessibility gate;
   Discover và Battery cùng tính trạng thái switch từ config đã lưu + trạng thái Accessibility
   hiện tại mỗi lần app resume, nên việc cấp hoặc thu hồi quyền không làm hai tab lệch nhau;
-- Home shell có bốn tab Discover/Battery/Pet Store/Mine. `HomeBottomNavigation` cố định
+- Home shell có bốn tab Discover/Battery/Shimeji Pets/Mine. `HomeBottomNavigation` cố định
   trên bottom banner hiện có; từng screen không tự tạo lại bottom chrome. Battery selected dùng
   glyph filled 24×24 export từ frame Figma `8017:3666`, không tái sử dụng icon outline unselected;
-- Discover, Pet Store và Mine dùng chung `HomeHeader` và `HomeEnableCard`: header `43sdp`, search
+- Discover, Shimeji Pets và Mine dùng chung `HomeHeader` và `HomeEnableCard`: header `43sdp`, search
   `25sdp`, enable card `37sdp`, switch `34×18sdp`. Discover chỉ render Battery enable card;
   pet switch được quản lý ở flow pet. Không copy component rồi đổi metric riêng;
 - Discover hero dùng composite `Battery Troll` PNG @3x tại tỉ lệ `328×100px`; banner thấp hơn
@@ -98,7 +98,7 @@ Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
   dạng carousel và card `110×110px`; preview runtime dùng chung tỉ lệ `65%` và
   `ContentScale.Fit` của Discover vì asset dữ liệu thật có bounds khác mock Figma, favorite ở
   top-end, crown Premium ở top-start;
-- crown Premium của Pet Store, Search và Battery dùng chung `PetPremiumBadge`: nền
+- crown Premium của Discover, Shimeji Pets, Search và Battery dùng chung `PetPremiumBadge`: nền
   `#FFEA89` 50% và crown artwork theo tỉ lệ `18/24`, không dựng badge riêng theo từng feature.
   Search hiện crown khi theme có entitlement Premium, user chưa Premium và ID chưa được mở bằng
   reward; entitlement được đọc lại khi Search resume;

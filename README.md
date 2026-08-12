@@ -16,11 +16,11 @@ settings và các quy ước kiến trúc hiện có.
 - Permission giải thích/request overlay special access và notification permission; user vẫn có
   thể Skip khi bước này được bật lại.
 - Discover Home tổng hợp Emoji Battery, pet/battery catalog và 4-tab navigation. Discover chỉ
-  giữ toggle Emoji Battery; pet nổi được quản lý trong My Pet Room/Pet Store.
+  giữ toggle Emoji Battery; pet nổi được quản lý trong My Pet Room/Shimeji Pets.
 - My Pet Room là phòng in-app: pet đã sở hữu đi lại trong phòng, sheet ba tab My Pet/Food/Room
   quản lý roster, cho ăn và đổi background. Chọn pet nào hiện trên màn hình bằng toggle
   `Pet on screen` trong panel chi tiết từng pet.
-- Pet Store tải 1.062 owner pet (gồm 36 pack WC 2026
+- Shimeji Pets tải 1.062 owner pet (gồm 36 pack WC 2026
   với 864 frame gốc)
   từ private GitHub
   static server, đọc cache trước và revalidate theo TTL 24 giờ + ETag/rate-limit backoff,
@@ -32,7 +32,7 @@ settings và các quy ước kiến trúc hiện có.
   Catalog 898 theme, 38 nền, 100 emotion và 26 animation tải từ cùng private GitHub static
   server với Pet; JSON cache/revalidate và asset được tải, verify SHA-256 theo nhu cầu.
   Debug vẫn giữ packaged snapshot fallback, còn release chỉ nhận catalog `APPROVED`.
-- Discover Home, My Pet Room, Pet Store và Splash/App Open Welcome Back dùng pink/white
+- Discover Home, My Pet Room, Shimeji Pets và Splash/App Open Welcome Back dùng pink/white
   Figma direction; Language/Intro/Premium giữ visual hiện tại. Permission giữ nguyên source/UI
   nhưng hiện không nằm trong flow onboarding.
 - Browser, search engine, clear browsing data, storage permission, download, media, Room và service cũ đã bị xóa.
@@ -77,7 +77,7 @@ app/src/main/java/com/asianmobile/emojibattery/shimeji/
 │   ├── onboarding/              # splash → language → intro → permission
 │   ├── home/                    # Discover
 │   ├── battery/                 # catalog → favourite/recent → editor
-│   ├── pet/                     # Pet Store + My Pet Room
+│   ├── pet/                     # Shimeji Pets + My Pet Room
 │   ├── settings/                # Mine + permission management
 │   ├── search/
 │   ├── premium/

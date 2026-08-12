@@ -72,10 +72,19 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_DISCOVER_INLINE
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibilityRecovery
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogFlowHost
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogUiState
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogViewModel
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryThemeAccess
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryThemeAccessPolicy
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFlowHost
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreUiState
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreViewModel
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeHeader
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.rememberAccessibilitySettingsLauncher
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -91,11 +100,16 @@ fun DiscoverScreen(
     onNavigateToPremium: () -> Unit,
     onNavigateToBattery: () -> Unit,
     onNavigateToPetStore: () -> Unit,
+    onNavigateToMyPet: () -> Unit,
     onOpenBatteryTheme: (Int) -> Unit,
     onCustomizeStatusBar: () -> Unit,
-    viewModel: DiscoverViewModel = hiltViewModel()
+    viewModel: DiscoverViewModel = hiltViewModel(),
+    batteryCatalogViewModel: BatteryCatalogViewModel = hiltViewModel(),
+    petStoreViewModel: PetStoreViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val batteryCatalogState by batteryCatalogViewModel.uiState.collectAsStateWithLifecycle()
+    val petStoreState by petStoreViewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     var showAccessibilityDisclosure by remember { mutableStateOf(false) }
     val openAccessibilitySettings = rememberAccessibilitySettingsLauncher {
@@ -122,18 +136,44 @@ fun DiscoverScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    DiscoverContent(
-        uiState = uiState,
-        onSearch = onNavigateToSearch,
-        onPremium = onNavigateToPremium,
-        onBatteryToggle = viewModel::onBatteryToggle,
-        onBattery = onNavigateToBattery,
-        onPetStore = onNavigateToPetStore,
+    val presentedState = remember(uiState, batteryCatalogState, petStoreState) {
+        discoverPresentationState(uiState, batteryCatalogState, petStoreState)
+    }
+    val requestTheme: (Int) -> Unit = { themeId ->
+        batteryCatalogState.themes.firstOrNull { it.id == themeId }
+            ?.let(batteryCatalogViewModel::requestTheme)
+    }
+
+    BatteryCatalogFlowHost(
+        state = batteryCatalogState,
+        viewModel = batteryCatalogViewModel,
         onOpenTheme = onOpenBatteryTheme,
-        onToggleFavorite = viewModel::toggleFavorite,
-        onCustomizeStatusBar = onCustomizeStatusBar,
-        onDismissRecovery = viewModel::dismissAccessibilityRecovery
-    )
+        onNavigateToPremium = onNavigateToPremium
+    ) {
+        PetStoreFlowHost(
+            state = petStoreState,
+            viewModel = petStoreViewModel,
+            onPremium = onNavigateToPremium,
+            onViewPet = onNavigateToMyPet
+        ) {
+            DiscoverContent(
+                uiState = presentedState,
+                onSearch = onNavigateToSearch,
+                onPremium = onNavigateToPremium,
+                onBatteryToggle = viewModel::onBatteryToggle,
+                onBattery = onNavigateToBattery,
+                onPetStore = onNavigateToPetStore,
+                onOpenPet = { packKey ->
+                    petStoreState.pets.firstOrNull { it.installedPackKey == packKey }
+                        ?.let(petStoreViewModel::selectPet)
+                },
+                onOpenTheme = requestTheme,
+                onToggleFavorite = viewModel::toggleFavorite,
+                onCustomizeStatusBar = onCustomizeStatusBar,
+                onDismissRecovery = viewModel::dismissAccessibilityRecovery
+            )
+        }
+    }
 
     if (showAccessibilityDisclosure) {
         GrantPermissionDialog(
@@ -147,6 +187,37 @@ fun DiscoverScreen(
             }
         )
     }
+}
+
+internal fun discoverPresentationState(
+    state: DiscoverUiState,
+    batteryState: BatteryCatalogUiState,
+    petState: PetStoreUiState
+): DiscoverUiState {
+    val accessPolicy = BatteryThemeAccessPolicy()
+    val themeById = batteryState.themes.associateBy { it.id }
+    fun isThemeLocked(themeId: Int): Boolean = themeById[themeId]?.let { theme ->
+        accessPolicy.resolve(
+            theme = theme,
+            isPremium = batteryState.isPremium,
+            rewardUnlockedThemeIds = batteryState.rewardUnlockedThemeIds
+        ) == BatteryThemeAccess.REWARD_OR_PREMIUM
+    } == true
+
+    return state.copy(
+        trendingPets = state.trendingPets.map { pet ->
+            pet.copy(isLocked = pet.packKey !in petState.installedPackKeys)
+        },
+        batteryThemes = state.batteryThemes.map { theme ->
+            theme.copy(isLocked = isThemeLocked(theme.id))
+        },
+        emojiThemes = state.emojiThemes.map { asset ->
+            asset.copy(isLocked = isThemeLocked(asset.id))
+        },
+        batteryIcons = state.batteryIcons.map { asset ->
+            asset.copy(isLocked = isThemeLocked(asset.id))
+        }
+    )
 }
 
 /**
@@ -231,6 +302,7 @@ private fun DiscoverContent(
     onBatteryToggle: () -> Unit,
     onBattery: () -> Unit,
     onPetStore: () -> Unit,
+    onOpenPet: (String) -> Unit,
     onOpenTheme: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
     onCustomizeStatusBar: () -> Unit,
@@ -300,7 +372,7 @@ private fun DiscoverContent(
                             pets = uiState.trendingPets,
                             isLoading = uiState.isLoading,
                             onMore = onPetStore,
-                            onOpenPet = { onPetStore() }
+                            onOpenPet = onOpenPet
                         )
                     }
                     item {
@@ -328,7 +400,7 @@ private fun DiscoverContent(
                             assets = uiState.emojiThemes,
                             fallbackRes = R.drawable.img_home_brand_bunny,
                             onMore = onBattery,
-                            onOpen = onBattery
+                            onOpen = { asset -> onOpenTheme(asset.id) }
                         )
                     }
                     item {
@@ -339,7 +411,7 @@ private fun DiscoverContent(
                             assets = uiState.batteryIcons,
                             fallbackRes = R.drawable.ic_home_battery,
                             onMore = onBattery,
-                            onOpen = onBattery
+                            onOpen = { asset -> onOpenTheme(asset.id) }
                         )
                     }
                 }
@@ -503,6 +575,14 @@ internal fun TrendingPetCard(pet: DiscoverPetUiState, onClick: () -> Unit) {
                 contentDescription = pet.name,
                 modifier = Modifier.fillMaxSize(CATALOG_ITEM_PREVIEW_FRACTION)
             )
+            if (pet.isLocked) {
+                PetPremiumBadge(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(dimensionResource(SdpR.dimen._5sdp))
+                        .size(dimensionResource(SdpR.dimen._18sdp))
+                )
+            }
         }
         Text(
             text = pet.name,
@@ -587,6 +667,14 @@ internal fun BatteryThemeCard(
                     .size(dimensionResource(SdpR.dimen._24sdp))
             }
         )
+        if (theme?.isLocked == true) {
+            PetPremiumBadge(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(dimensionResource(SdpR.dimen._5sdp))
+                    .size(dimensionResource(SdpR.dimen._18sdp))
+            )
+        }
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -704,7 +792,7 @@ private fun ComponentAssetsSection(
     assets: List<DiscoverAssetUiState>,
     fallbackRes: Int,
     onMore: () -> Unit,
-    onOpen: () -> Unit
+    onOpen: (DiscoverAssetUiState) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
         SectionHeader(title = title, titleIcon = titleIcon, onMore = onMore)
@@ -720,7 +808,11 @@ private fun ComponentAssetsSection(
             items(display.chunked(2)) { column ->
                 Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
                     column.forEach { asset ->
-                        ComponentAssetCard(asset = asset, fallbackRes = fallbackRes, onClick = onOpen)
+                        ComponentAssetCard(
+                            asset = asset,
+                            fallbackRes = fallbackRes,
+                            onClick = { asset?.let(onOpen) }
+                        )
                     }
                 }
             }
@@ -750,6 +842,14 @@ internal fun ComponentAssetCard(
             contentDescription = asset?.name,
             modifier = Modifier.fillMaxSize(CATALOG_ITEM_PREVIEW_FRACTION)
         )
+        if (asset?.isLocked == true) {
+            PetPremiumBadge(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(dimensionResource(SdpR.dimen._5sdp))
+                    .size(dimensionResource(SdpR.dimen._18sdp))
+            )
+        }
     }
 }
 
@@ -871,6 +971,7 @@ private fun DiscoverContentPreview() {
         onBatteryToggle = {},
         onBattery = {},
         onPetStore = {},
+        onOpenPet = {},
         onOpenTheme = {},
         onToggleFavorite = {},
         onCustomizeStatusBar = {},

@@ -59,8 +59,8 @@ chỉ để tải lại cùng tài nguyên.
   normalize/install, chạy unlock reveal và bước đặt tên. Pet mới được bật atomically ở slot
   Mixed trống đầu tiên; nếu roster đã đầy thì chỉ ghi nhận ownership, không thay pet hiện có.
 - Pet đã cài không download lại; My Pet Room đọc roster đã sở hữu từ pack app-private.
-- Search và Discover chỉ dùng metadata/thumbnail, chạm pet sẽ mở Pet Store thay vì flow
-  Catalog/Detail cũ.
+- Search chỉ dùng metadata/thumbnail và mở tab Shimeji Pets. Discover dùng metadata/thumbnail
+  nhưng chạm pet sẽ chạy cùng reward/download/reveal flow của `PetStoreViewModel` ngay tại Home.
 - Catalog/ZIP lỗi không thay renderer hoặc roster đang chạy.
 
 ## On-demand legacy conversion
