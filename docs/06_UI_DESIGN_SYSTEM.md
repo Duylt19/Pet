@@ -112,6 +112,8 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   background catalog runtime. Wallpaper của overview và mọi child phủ toàn viewport bằng crop
   căn top; không để lộ nền app legacy màu tối ở đáy trên thiết bị có tỷ lệ màn hình cao hơn
   frame Figma 360×800. Tất cả child giữ chung draft và Back không tự Apply;
+- Hàng Theme ở overview hiển thị trước năm background. Nếu background đang chọn nằm ngoài năm
+  item đầu, hàng giữ bốn item đầu và đưa item đang chọn vào vị trí thứ năm;
 - Background Color và Theme là hai mode loại trừ nhau: chọn Color đặt decoration ID về `0` và
   chỉ hiện viền selected ở palette; chọn Theme chỉ hiện selected ở theme, không tiếp tục tô màu
   nền phía dưới asset;

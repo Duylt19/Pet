@@ -819,10 +819,10 @@ internal fun statusBarBackgroundPreviewItems(
     backgrounds: List<BatteryDecorationEntry>,
     selectedId: Int
 ): List<BatteryDecorationEntry> {
-    val initial = backgrounds.take(FIGMA_INLINE_BACKGROUND_COUNT)
+    val initial = backgrounds.take(INLINE_BACKGROUND_PREVIEW_COUNT)
     if (initial.any { it.id == selectedId }) return initial
     val selected = backgrounds.firstOrNull { it.id == selectedId } ?: return initial
-    return backgrounds.take(FIGMA_INLINE_BACKGROUND_COUNT - 1) + selected
+    return backgrounds.take(INLINE_BACKGROUND_PREVIEW_COUNT - 1) + selected
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1207,5 +1207,5 @@ private enum class StatusBarColorTarget {
 
 private const val PICKER_ART_FRACTION = 0.7303f
 private const val FIGMA_FREE_BACKGROUND_COUNT = 5
-private const val FIGMA_INLINE_BACKGROUND_COUNT = 3
+private const val INLINE_BACKGROUND_PREVIEW_COUNT = 5
 private const val ANDROID_ASSET_URI_PREFIX = "file:///android_asset/"
