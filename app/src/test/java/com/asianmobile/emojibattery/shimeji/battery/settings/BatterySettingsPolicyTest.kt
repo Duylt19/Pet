@@ -55,7 +55,7 @@ class BatterySettingsPolicyTest {
         assertEquals(0, sanitized.selectedBatteryThemeId)
         assertEquals(0, sanitized.selectedEmojiThemeId)
         assertEquals(BatteryStatusDisplayMode.COVER_SYSTEM_BAR, sanitized.displayMode)
-        assertEquals(20, sanitized.backgroundDecorationId)
+        assertEquals(38, sanitized.backgroundDecorationId)
         assertEquals(0, sanitized.emotionDecorationId)
         assertEquals(72f, sanitized.barHeightDp)
         assertEquals(0f, sanitized.horizontalPaddingDp)

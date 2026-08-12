@@ -18,7 +18,8 @@ Vertical slice hiện đã có trong source:
 - Chọn một theme trong catalog khởi tạo đúng cặp pet + pin của theme đó. Editor có hai
   picker category độc lập để mix pet của theme A với pin của theme B; entitlement
   Rewarded/Premium được kiểm tra cho từng lựa chọn.
-- Editor dùng Material app bar `exitUntilCollapsed`, preview nhúng luôn hiển thị và các
+- Editor dùng Material app bar `exitUntilCollapsed`; preview nhúng chỉ hiển thị khi Accessibility
+  chưa cấp hoặc feature đang tắt. Khi status bar thật đã hoạt động, preview nhúng được ẩn. Các
   library Battery/Emoji/Theme là child destination dùng chung ViewModel/draft. Battery/Emoji
   dùng grid ba cột; Theme dùng grid hai cột từ catalog runtime.
 - Overview có đủ picker Battery/Emoji/Animation, Color/Theme và color picker HSV + opacity.
@@ -69,7 +70,7 @@ Home → Battery styles → chọn theme → Customize status bar
                                       ├─ đổi pet, pin, animation, nền và màu trong draft
                                       ├─ feature đang bật → live preview trên status bar
                                       ├─ feature đang tắt → chỉ preview nhúng
-                                      ├─ destination editor con → Done/Back → overview giữ scroll
+                                      ├─ child Apply → commit draft; child Back → rollback checkpoint
                                       └─ Apply → nếu thiếu quyền thì disclosure → persist + render
 ```
 
@@ -89,7 +90,9 @@ raw.githubusercontent.com/.../master/
     ├── thumb/<id>.png
     ├── battery/<id>.png
     ├── emoji/<id>.png
+    ├── background/status_background_<id>.png
     ├── background/template_color_<id>.png
+    ├── background_preview/<name>.png
     ├── emotion/emotion_<id>.png
     └── animation/<name>.gif|json
 ```
@@ -100,9 +103,16 @@ backoff giống Pet. Thumbnail/preview dùng URL GitHub qua Coil; asset renderer
 Firebase Remote Config key `github_token_pet_server`, không hardcode trong source.
 
 Nhánh `emotion/` trong snapshot remote là nhóm Classic 20 item và tiếp tục giữ ID `1..20`.
-UI/runtime bổ sung 80 PNG @3x đã export từ Figma trong `assets/battery_emotions/<group>/`
-với ID `21..100`; bảy background pack nằm tại `assets/battery_emotions/backgrounds/`.
+UI/runtime bổ sung 80 PNG @3x đã export từ Figma trên private project server với ID
+`21..100`; bảy background pack cũng nằm trong Battery catalog server. APK chỉ đọc preview
+nhẹ và tải full asset theo lựa chọn của user.
 Repository ghép Classic trước tám nhóm bundled, không thay thế dữ liệu legacy.
+
+Background catalog v2 có 38 item: 18 frame Figma mới dùng ID `1..18` và luôn đứng trước,
+20 nền cũ dùng ID `19..38`. Grid tải preview nhẹ; full PNG chỉ được download/verify khi
+chọn. Frame ID `1` còn được đóng gói ở
+`drawable-nodpi/img_battery_background_default.png`, nên default vẫn hiển thị khi offline.
+ID `0` tiếp tục là nền màu phẳng.
 
 Trong Customize, card Pet luôn load trực tiếp `emojiPath` và card Pin luôn load trực tiếp
 `batteryPath` qua Coil. Thumbnail tổng hợp của catalog không được dùng làm placeholder cho
@@ -150,9 +160,10 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `emojiSizeDp`, `batterySizeDp`, `percentSizeDp` | Kích thước asset/pin |
 | `backgroundColorArgb`, `foregroundColorArgb` | Màu renderer; background color chỉ active khi decoration ID bằng `0` |
 | `backgroundDecorationId` | Nền đóng gói đã chọn; `0` là mode màu phẳng. Color và theme loại trừ nhau khi render |
-| `showEmotion`, `emotionDecorationId` | Hiện/ẩn và chọn một trong 100 emotion: 20 Classic + 80 app-local thuộc tám pack mới |
+| `showEmotion`, `emotionDecorationId` | Hiện/ẩn và chọn một trong 100 emotion server: 20 Classic + 80 thuộc tám pack mới |
 | `wifi/data/signal/airplane/hotspot/ringer/charge *SizeDp/*ColorArgb` | Tùy chỉnh độc lập từng status component |
-| `dataType`, `chargeIconIndex` | Nhãn mạng 2G–9G và một trong 12 icon sạc |
+| `showWifi`, `showSignal`, `showData` | Bật/tắt độc lập Wi-Fi, cột sóng và nhãn loại mạng |
+| `dataSizeDp`, `dataColorArgb`, `chargeIconIndex` | Style nhãn mạng thật và icon sạc |
 | `showDateTime`, `dateFormat`, `dateTimeFont`, `dateTimeSizeDp`, `dateTimeColorArgb` | Ngày/giờ và 6 font bundled |
 | `privacyReserveDp` | Field tương thích dữ liệu cũ; renderer full-width hiện tại bỏ qua |
 | `favoriteThemeIds` | Favorite local theo theme ID |
@@ -222,7 +233,8 @@ Roboto Medium. `showTime` và `showDateTime` điều khiển độc lập. Airpl
 charge có switch riêng được persist; trạng thái OFF thắng cả preview focus và device state.
 Emotion group/detail dùng preview focus `EMOTION`, nhưng `showEmotion=false` vẫn thắng focus.
 Khi bật, item đang chọn được đánh dấu required trong width policy để user luôn quan sát được
-thay đổi ở preview hẹp; runtime và preview cùng resolve leaf ID sang asset bundled.
+thay đổi ở preview hẹp. Grid dùng ảnh preview server nhẹ; leaf full chỉ được chọn sau khi
+download/verify/cache thành công, rồi runtime và preview thật cùng resolve leaf ID đó.
 Các family/icon data có sẵn vẫn được chọn bằng grid theo card Charge và cập nhật live qua
 editor preview session. Ringer lưu một family nhưng map đúng hai biến thể vibrate/silent.
 
@@ -255,7 +267,12 @@ Giới hạn hiện tại:
 - Hotspot theo broadcast best-effort của OEM; Android không có API public ổn định để app
   thường truy vấn tethering hiện tại. Trước broadcast đầu tiên trạng thái là `UNKNOWN`
   và không hiển thị icon để tránh báo sai.
-- Nhãn data 2G–9G là style do user chọn, không tự suy luận generation của nhà mạng.
+- Android 11+ lấy nhãn hiển thị mạng thật từ `TelephonyDisplayInfo` (G/E/2G/3G/H/H+/4G/
+  4G+/5G/5G+), gồm cả override 5G NSA theo carrier policy, không cần quyền điện thoại nguy hiểm.
+  Android 10 trở xuống không suy diễn nhãn giả khi không có API đủ tin cậy; signal vẫn hiển thị
+  theo connectivity. Riêng preview của màn Mobile Data dùng sample `5G` khi thiết bị không trả
+  badge để user vẫn quan sát được size/color; runtime overlay không dùng sample này. Trường
+  `dataType` cũ chỉ còn để decode tương thích draft/DataStore v1.
 - Không có boot receiver và không tự hướng user quay lại Settings nếu họ disable service.
 
 ## Test gate

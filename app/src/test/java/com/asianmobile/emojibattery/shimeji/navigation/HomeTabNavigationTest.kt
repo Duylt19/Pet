@@ -62,10 +62,26 @@ class HomeTabNavigationTest {
     fun `status option pages replace the editor banner with one collapsible native`() {
         val route = "${Routes.BATTERY_EDITOR_COMPONENT}/{themeId}/{page}"
 
-        assertEquals(true, showBatteryStatusOptionNative(route, "AIRPLANE"))
-        assertEquals(true, showBatteryStatusOptionNative(route, "CLOCK"))
-        assertEquals(false, showBatteryStatusOptionNative(route, "BACKGROUND_THEMES"))
-        assertEquals(false, showBatteryStatusOptionNative(route, "EMOJI"))
-        assertEquals(false, showBatteryStatusOptionNative(Routes.BATTERY_CATALOG, "CHARGE"))
+        assertEquals(true, showBatteryEditorCollapsibleNative(route, "AIRPLANE"))
+        assertEquals(true, showBatteryEditorCollapsibleNative(route, "CLOCK"))
+        assertEquals(true, showBatteryEditorCollapsibleNative(route, "ANIMATION"))
+        assertEquals(true, showBatteryEditorCollapsibleNative(route, "WIFI"))
+        assertEquals(true, showBatteryEditorCollapsibleNative(route, "SIGNAL"))
+        assertEquals(true, showBatteryEditorCollapsibleNative(route, "DATA"))
+        assertEquals(false, showBatteryEditorCollapsibleNative(route, "BACKGROUND_THEMES"))
+        assertEquals(false, showBatteryEditorCollapsibleNative(Routes.BATTERY_CATALOG, "CHARGE"))
+    }
+
+    @Test
+    fun `emotion list and detail keep the same collapsible native owner`() {
+        val componentRoute = "${Routes.BATTERY_EDITOR_COMPONENT}/{themeId}/{page}"
+        val detailRoute = "${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/{themeId}/{groupKey}"
+
+        assertEquals(true, showBatteryEditorCollapsibleNative(componentRoute, "EMOJI"))
+        assertEquals(true, showBatteryEditorCollapsibleNative(detailRoute, null))
+        assertEquals(false, showBatteryEditorCollapsibleNative(
+            "${Routes.BATTERY_EDITOR}/{themeId}",
+            null
+        ))
     }
 }

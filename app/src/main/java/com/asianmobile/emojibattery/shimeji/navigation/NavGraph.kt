@@ -106,9 +106,14 @@ internal fun showBatteryEditorBottomBanner(route: String?): Boolean =
         route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true ||
         route?.startsWith("${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/") == true
 
-internal fun showBatteryStatusOptionNative(route: String?, page: String?): Boolean =
-    route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true &&
-        BatteryEditorPage.fromRoute(page)?.isStatusOptionPage() == true
+internal fun showBatteryEditorCollapsibleNative(route: String?, page: String?): Boolean =
+    route?.startsWith("${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/") == true ||
+        (
+            route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true &&
+                BatteryEditorPage.fromRoute(page)?.let { editorPage ->
+                    editorPage == BatteryEditorPage.EMOJI || editorPage.isStatusOptionPage()
+                } == true
+            )
 
 @Composable
 fun AppNavGraph(
@@ -126,12 +131,13 @@ fun AppNavGraph(
     )
     val currentRoute = currentBackStackEntry?.destination?.route
     val currentEditorPage = currentBackStackEntry?.arguments?.getString("page")
-    val shouldShowBatteryStatusOptionNative = showBatteryStatusOptionNative(
+    val shouldShowBatteryEditorCollapsibleNative = showBatteryEditorCollapsibleNative(
         currentRoute,
         currentEditorPage
     )
     val shouldShowBatteryEditorBottomBanner =
-        showBatteryEditorBottomBanner(currentRoute) && !shouldShowBatteryStatusOptionNative
+        showBatteryEditorBottomBanner(currentRoute) &&
+            !shouldShowBatteryEditorCollapsibleNative
 
     fun navigateToHomeTab(tab: HomeTab) {
         val route = routeForHomeTab(tab)
@@ -589,10 +595,13 @@ fun AppNavGraph(
                 onTabSelected = ::navigateToHomeTab
             )
         }
-        if (shouldShowBatteryStatusOptionNative) {
+        if (shouldShowBatteryEditorCollapsibleNative) {
             NativeAdInternal(
                 screenCode = SCREEN_HOME,
-                instanceKey = "battery_status_option_collapsible",
+                // One Activity-scoped holder is intentionally shared by option, Emotion list and
+                // Emotion detail routes. Moving list -> detail rebinds the same ad instead of
+                // issuing a second request.
+                instanceKey = "battery_editor_collapsible",
                 adTypeOverride = AdType.COLLAPSE_SMALL,
                 modifier = Modifier.fillMaxWidth()
             )

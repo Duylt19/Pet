@@ -52,11 +52,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryConnectivityState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryHotspotState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryRingerState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatterySystemStatusPolicy
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFont
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFormat
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.intuit.sdp.R as SdpR
@@ -72,7 +74,11 @@ internal fun BatteryEditorPage.isStatusOptionPage(): Boolean = this in setOf(
     BatteryEditorPage.DATE_TIME,
     BatteryEditorPage.HOTSPOT,
     BatteryEditorPage.CHARGE,
-    BatteryEditorPage.CLOCK
+    BatteryEditorPage.CLOCK,
+    BatteryEditorPage.ANIMATION,
+    BatteryEditorPage.WIFI,
+    BatteryEditorPage.SIGNAL,
+    BatteryEditorPage.DATA
 )
 
 @Composable
@@ -81,7 +87,8 @@ internal fun BatteryStatusOptionFigmaScreen(
     page: BatteryEditorPage,
     onBack: () -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
-    onApply: () -> Unit
+    onApply: () -> Unit,
+    showEmbeddedPreview: Boolean = true
 ) {
     val config = state.config
     var showColorPicker by remember { mutableStateOf(false) }
@@ -100,15 +107,17 @@ internal fun BatteryStatusOptionFigmaScreen(
                 onBack = onBack,
                 onCheckedChange = { enabled -> onConfig(spec.withEnabled(enabled)) }
             )
-            BatteryPreview(
-                state = state,
-                page = page,
-                modifier = Modifier.padding(
-                    start = dimensionResource(SdpR.dimen._12sdp),
-                    end = dimensionResource(SdpR.dimen._12sdp),
-                    top = dimensionResource(SdpR.dimen._9sdp)
+            if (showEmbeddedPreview) {
+                BatteryPreview(
+                    state = state,
+                    page = page,
+                    modifier = Modifier.padding(
+                        start = dimensionResource(SdpR.dimen._12sdp),
+                        end = dimensionResource(SdpR.dimen._12sdp),
+                        top = dimensionResource(SdpR.dimen._9sdp)
+                    )
                 )
-            )
+            }
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
             LazyColumn(
                 modifier = Modifier
@@ -127,18 +136,52 @@ internal fun BatteryStatusOptionFigmaScreen(
                     DesignSlider(
                         label = stringResource(R.string.battery_editor_size_label),
                         value = spec.size,
-                        range = 8f..32f,
+                        range = if (page == BatteryEditorPage.ANIMATION) 12f..36f else 8f..32f,
                         onValueChange = { onConfig(spec.withSize(it)) }
                     )
                 }
-                item {
-                    StatusOptionColorSection(
-                        selected = spec.color,
-                        onSelected = { onConfig(spec.withColor(it)) },
-                        onCustomClick = { showColorPicker = true }
-                    )
+                if (page != BatteryEditorPage.ANIMATION) {
+                    item {
+                        StatusOptionColorSection(
+                            selected = spec.color,
+                            onSelected = { onConfig(spec.withColor(it)) },
+                            onCustomClick = { showColorPicker = true }
+                        )
+                    }
                 }
                 when (page) {
+                    BatteryEditorPage.ANIMATION -> item {
+                        AnimationStyleSection(
+                            animations = state.animations,
+                            selectedName = config.animationAssetName,
+                            onSelected = { animation ->
+                                onConfig(
+                                    config.copy(
+                                        showAnimation = true,
+                                        animationAssetName = animation.name
+                                    )
+                                )
+                            }
+                        )
+                    }
+                    BatteryEditorPage.WIFI -> item {
+                        StatusOptionStyleSection(
+                            title = stringResource(R.string.battery_status_icon_style),
+                            selected = config.wifiIconStyleIndex,
+                            color = config.wifiColorArgb,
+                            iconStyles = wifiStyles(),
+                            onSelected = { onConfig(config.copy(wifiIconStyleIndex = it)) }
+                        )
+                    }
+                    BatteryEditorPage.SIGNAL -> item {
+                        StatusOptionStyleSection(
+                            title = stringResource(R.string.battery_status_icon_style),
+                            selected = config.signalIconStyleIndex,
+                            color = config.signalColorArgb,
+                            iconStyles = signalStyles(),
+                            onSelected = { onConfig(config.copy(signalIconStyleIndex = it)) }
+                        )
+                    }
                     BatteryEditorPage.DATE_TIME -> {
                         item { DateFormatSection(config, onConfig) }
                         item { DateStyleSection(config, onConfig) }
@@ -334,6 +377,56 @@ private fun OptionSectionTitle(value: String) {
         fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
         lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp
     )
+}
+
+@Composable
+private fun AnimationStyleSection(
+    animations: List<BatteryAnimationEntry>,
+    selectedName: String,
+    onSelected: (BatteryAnimationEntry) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))) {
+        OptionSectionTitle(stringResource(R.string.battery_animation_style))
+        animations.chunked(4).forEach { rowAnimations ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+            ) {
+                rowAnimations.forEach { animation ->
+                    val active = animation.name == selectedName
+                    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(1f)
+                            .clip(shape)
+                            .background(
+                                colorResource(
+                                    if (active) R.color.colors_FFEBF1 else R.color.colors_FFFFFF
+                                )
+                            )
+                            .border(
+                                dimensionResource(SdpR.dimen._1sdp),
+                                colorResource(
+                                    if (active) R.color.colors_FB3675 else R.color.colors_DEDEDF
+                                ),
+                                shape
+                            )
+                            .semantics { selected = active }
+                            .clickable { onSelected(animation) }
+                            .padding(dimensionResource(SdpR.dimen._6sdp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        BatteryAnimationAsset(
+                            animation = animation,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+                repeat(4 - rowAnimations.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
+    }
 }
 
 @Composable
@@ -655,6 +748,30 @@ private fun optionSpec(page: BatteryEditorPage, config: BatteryStatusConfig): St
             { config.copy(showTime = it) }, { config.copy(clockSizeDp = it) },
             { config.copy(clockColorArgb = it) }
         )
+        BatteryEditorPage.ANIMATION -> StatusOptionSpec(
+            stringResource(R.string.battery_component_animation), config.showAnimation,
+            config.animationSizeDp, config.foregroundColorArgb,
+            { config.copy(showAnimation = it) }, { config.copy(animationSizeDp = it) },
+            { config }
+        )
+        BatteryEditorPage.WIFI -> StatusOptionSpec(
+            stringResource(R.string.battery_component_wifi), config.showWifi,
+            config.wifiSizeDp, config.wifiColorArgb,
+            { config.copy(showWifi = it) }, { config.copy(wifiSizeDp = it) },
+            { config.copy(wifiColorArgb = it) }
+        )
+        BatteryEditorPage.SIGNAL -> StatusOptionSpec(
+            stringResource(R.string.battery_component_signal), config.showSignal,
+            config.signalSizeDp, config.signalColorArgb,
+            { config.copy(showSignal = it) }, { config.copy(signalSizeDp = it) },
+            { config.copy(signalColorArgb = it) }
+        )
+        BatteryEditorPage.DATA -> StatusOptionSpec(
+            stringResource(R.string.battery_component_data), config.showData,
+            config.dataSizeDp, config.dataColorArgb,
+            { config.copy(showData = it) }, { config.copy(dataSizeDp = it) },
+            { config.copy(dataColorArgb = it) }
+        )
         else -> error("Unsupported status option page: $page")
     }
 
@@ -671,6 +788,14 @@ private fun ringerStyles() = (1..4).map { index ->
         BatterySystemStatusPolicy.ringerIcon(BatteryRingerState.VIBRATE, index),
         BatterySystemStatusPolicy.ringerIcon(BatteryRingerState.SILENT, index)
     )
+}
+
+private fun wifiStyles() = (1..4).map { index ->
+    listOf(BatterySystemStatusPolicy.wifiIcon(BatteryConnectivityState.CONNECTED, index))
+}
+
+private fun signalStyles() = (1..4).map { index ->
+    listOf(BatterySystemStatusPolicy.cellularIcon(BatteryConnectivityState.CONNECTED, index))
 }
 
 private val CHARGE_STYLE_ORDER = listOf(10, 8, 1, 3, 9, 5, 7, 6, 4, 11, 2, 12)

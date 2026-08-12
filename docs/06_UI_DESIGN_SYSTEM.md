@@ -117,15 +117,19 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
 
 - overview dùng Material large app bar `exitUntilCollapsed`: title lớn khi expanded và title
   inline khi collapsed; Back và PRO luôn pinned;
-- preview `328×50px` luôn được ghim ngay dưới app bar trên overview và mọi màn More; chỉ phần
-  option bên dưới cuộn. Overlay thật chỉ live-update khi feature đã bật; trạng thái tắt chỉ
-  dùng preview nhúng. Preview dùng cùng thứ tự vật lý với renderer thật: trailing LTR là
+- preview `328×50px` được ghim ngay dưới app bar khi Accessibility chưa cấp hoặc feature đang
+  tắt. Khi Accessibility đã cấp và status bar thật đang hoạt động, preview nhúng được ẩn để
+  tránh hiển thị trùng. Preview dùng cùng thứ tự vật lý với renderer thật: trailing LTR là
   Hotspot → Signal/Data → Wifi → Percentage → Battery/Emoji pair → Charge; Battery và Emoji
   chồng cùng tâm và mọi component cách nhau 4dp;
 - More Battery/Emoji mở grid ba cột với artwork 73.03% item; More Theme mở grid hai cột từ
   background catalog runtime. Wallpaper của overview và mọi child phủ toàn viewport bằng crop
   căn top; không để lộ nền app legacy màu tối ở đáy trên thiết bị có tỷ lệ màn hình cao hơn
-  frame Figma 360×800. Tất cả child giữ chung draft và Back không tự Apply;
+  frame Figma 360×800;
+- Animation/Wi-Fi/Signal/Mobile Data dùng chung shell hồng, preview sticky,
+  switch, slider/color/style grid và native collapsible với sáu option screen còn lại. Tất cả
+  child giữ chung draft; child Apply commit vào draft overview, child Back rollback checkpoint
+  và live preview;
 - Hàng Theme ở overview hiển thị trước năm background. Nếu background đang chọn nằm ngoài năm
   item đầu, hàng giữ bốn item đầu và đưa item đang chọn vào vị trí thứ năm;
 - Background Color và Theme là hai mode loại trừ nhau: chọn Color đặt decoration ID về `0` và
@@ -133,9 +137,11 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   nền phía dưới asset;
 - Emotion dùng màn pack theo Figma `8404:6277`: nhóm Classic giữ 20 item cũ và tám card mới,
   mỗi card preview 5×2 item; chạm pack/item
-  mở detail `8404:7179` với slider Size, switch, grid ba cột và Apply sticky. Preview luôn ghim
-  dưới top bar ở cả hai màn. 80 frame art là PNG @3x vì nguồn Figma là raster/image-fill;
+  mở detail `8404:7179` với slider Size, switch, grid ba cột và Apply sticky. Khi cần preview
+  nhúng, nó được ghim dưới top bar ở cả hai màn. 80 frame art là PNG @3x vì nguồn Figma là raster/image-fill;
   card, selected stroke, shadow và background được dựng bằng Compose.
+- Emotion pack và detail dùng cùng native collapsible holder ở app shell. Lần đầu vào flow sẽ
+  request/bind native; chuyển pack → detail giữ nguyên Activity-scoped key nên không reload ad.
 - Template có đủ Battery, Emoji và Animation; header dùng icon Figma 16px và chevron vector
   14px. Color có custom wheel, bảy preset và ba theme preview; custom wheel mở HSV/opacity
   sheet, cập nhật trực tiếp cùng draft/live-preview policy;
@@ -147,8 +153,8 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   là Medium 500 và More là Regular 400. Top bar collapsed 20/28, expanded 24/32; không dùng
   SansSerif synthetic hoặc Roboto Condensed để giả SemiBold;
 - Apply là Roboto SemiBold 18/26 và nằm trong panel sticky phía trên banner editor dùng chung;
-- Back khi draft chưa Apply mở discard sheet full-width theo node `8345:7719`: Cancel giữ draft,
-  Exit restore config đã lưu rồi pop; sheet dùng native `HEIGHT_222`.
+- Back ở overview khi draft chưa Apply mở discard sheet full-width theo node `8345:7719`:
+  Cancel giữ draft, Exit restore config đã lưu rồi pop; sheet dùng native `HEIGHT_222`.
 
 Pet Store visual contract:
 

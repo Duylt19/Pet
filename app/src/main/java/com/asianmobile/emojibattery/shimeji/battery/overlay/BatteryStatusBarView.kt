@@ -284,28 +284,34 @@ class BatteryStatusBarView(context: Context) : View(context) {
             ).afterGap(gap, fromLeft)
         }
         if (layout.shows(BatteryStatusComponent.CELLULAR)) {
-            cursor = drawText(
-                canvas,
-                config.dataType.label,
-                cursor,
-                centerY,
-                config.dataSizeDp,
-                config.dataColorArgb,
-                robotoMediumTypeface,
-                fromLeft
-            ).afterGap(gap, fromLeft)
-            cursor = drawStatusIcon(
-                canvas,
-                BatterySystemStatusPolicy.cellularIcon(
-                    deviceState.cellular,
-                    config.signalIconStyleIndex
-                ),
-                cursor,
-                centerY,
-                config.signalSizeDp,
-                config.signalColorArgb,
-                fromLeft
-            ).afterGap(gap, fromLeft)
+            if (config.showData) {
+                deviceState.mobileDataBadge?.label?.let { label ->
+                    cursor = drawText(
+                        canvas,
+                        label,
+                        cursor,
+                        centerY,
+                        config.dataSizeDp,
+                        config.dataColorArgb,
+                        robotoMediumTypeface,
+                        fromLeft
+                    ).afterGap(gap, fromLeft)
+                }
+            }
+            if (config.showSignal) {
+                cursor = drawStatusIcon(
+                    canvas,
+                    BatterySystemStatusPolicy.cellularIcon(
+                        deviceState.cellular,
+                        config.signalIconStyleIndex
+                    ),
+                    cursor,
+                    centerY,
+                    config.signalSizeDp,
+                    config.signalColorArgb,
+                    fromLeft
+                ).afterGap(gap, fromLeft)
+            }
         }
         if (layout.shows(BatteryStatusComponent.HOTSPOT)) {
             BatterySystemStatusPolicy.hotspotIcon(
@@ -447,28 +453,33 @@ class BatteryStatusBarView(context: Context) : View(context) {
                     )
                 )
             }
-            add(
-                layoutItem(
-                    BatteryStatusComponent.WIFI,
-                    config.wifiSizeDp * density,
-                    gap,
-                    priority = 90,
-                    required = focusedComponent == BatteryStatusComponent.WIFI
+            if (config.showWifi) {
+                add(
+                    layoutItem(
+                        BatteryStatusComponent.WIFI,
+                        config.wifiSizeDp * density,
+                        gap,
+                        priority = 90,
+                        required = focusedComponent == BatteryStatusComponent.WIFI
+                    )
                 )
-            )
+            }
             if (
+                (config.showSignal ||
+                    (config.showData && deviceState.mobileDataBadge != null)) &&
                 deviceState.cellular in setOf(
                     BatteryConnectivityState.CONNECTED,
                     BatteryConnectivityState.LIMITED
                 ) &&
                 !deviceState.airplaneMode
             ) {
-                val cellularWidth = config.signalSizeDp * density +
-                    measuredTextWidth(
-                        config.dataType.label,
-                        config.dataSizeDp,
-                        robotoMediumTypeface
-                    ) + gap
+                val signalWidth = if (config.showSignal) config.signalSizeDp * density + gap else 0f
+                val dataWidth = if (config.showData) {
+                    deviceState.mobileDataBadge?.label?.let { label ->
+                        measuredTextWidth(label, config.dataSizeDp, robotoMediumTypeface) + gap
+                    } ?: 0f
+                } else 0f
+                val cellularWidth = signalWidth + dataWidth
                 add(
                     layoutItem(
                         BatteryStatusComponent.CELLULAR,
@@ -797,34 +808,42 @@ class BatteryStatusBarView(context: Context) : View(context) {
                 BatteryPlugType.UNKNOWN -> null
             }
             powerSource?.let { add(context.getString(it)) }
-            add(
-                context.getString(
-                    when (deviceState.wifi) {
-                        BatteryConnectivityState.CONNECTED ->
-                            R.string.battery_overlay_wifi_connected
-                        BatteryConnectivityState.LIMITED ->
-                            R.string.battery_overlay_wifi_limited
-                        BatteryConnectivityState.DISABLED ->
-                            R.string.battery_overlay_wifi_disabled
-                        BatteryConnectivityState.DISCONNECTED ->
-                            R.string.battery_overlay_wifi_disconnected
-                    }
+            if (config.showWifi) {
+                add(
+                    context.getString(
+                        when (deviceState.wifi) {
+                            BatteryConnectivityState.CONNECTED ->
+                                R.string.battery_overlay_wifi_connected
+                            BatteryConnectivityState.LIMITED ->
+                                R.string.battery_overlay_wifi_limited
+                            BatteryConnectivityState.DISABLED ->
+                                R.string.battery_overlay_wifi_disabled
+                            BatteryConnectivityState.DISCONNECTED ->
+                                R.string.battery_overlay_wifi_disconnected
+                        }
+                    )
                 )
-            )
+            }
             if (deviceState.airplaneMode) {
                 add(context.getString(R.string.battery_overlay_airplane_enabled))
             } else if (
-                deviceState.cellular == BatteryConnectivityState.CONNECTED ||
-                deviceState.cellular == BatteryConnectivityState.LIMITED
+                (
+                    deviceState.cellular == BatteryConnectivityState.CONNECTED ||
+                        deviceState.cellular == BatteryConnectivityState.LIMITED
+                    ) && (config.showSignal || config.showData)
             ) {
-                add(
-                    context.getString(
+                val cellularState = context.getString(
                         if (deviceState.cellular == BatteryConnectivityState.CONNECTED) {
                             R.string.battery_overlay_cellular_connected
                         } else {
                             R.string.battery_overlay_cellular_limited
                         }
                     )
+                add(
+                    if (config.showData) {
+                        deviceState.mobileDataBadge?.label?.let { "$cellularState, $it" }
+                            ?: cellularState
+                    } else cellularState
                 )
             }
             when (deviceState.ringer) {

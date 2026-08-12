@@ -18,6 +18,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_STATUS_IC
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_STATUS_ICON_SIZE_DP
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_STYLE_INDEX
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_EMOTION_ID
+import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_BACKGROUND_ID
 import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_STATUS_ICON_STYLE_INDEX
 
 class BatterySettingsPolicy(
@@ -33,7 +34,10 @@ class BatterySettingsPolicy(
             .coerceAtLeast(BUILT_IN_BATTERY_THEME_ID),
         selectedEmojiThemeId = config.selectedEmojiThemeId
             .coerceAtLeast(BUILT_IN_BATTERY_THEME_ID),
-        backgroundDecorationId = config.backgroundDecorationId.coerceIn(0, 20),
+        backgroundDecorationId = config.backgroundDecorationId.coerceIn(
+            0,
+            MAX_BATTERY_BACKGROUND_ID
+        ),
         emotionDecorationId = config.emotionDecorationId.coerceIn(0, MAX_BATTERY_EMOTION_ID),
         animationAssetName = config.animationAssetName
             .takeIf(ANIMATION_FILE_NAME::matches)

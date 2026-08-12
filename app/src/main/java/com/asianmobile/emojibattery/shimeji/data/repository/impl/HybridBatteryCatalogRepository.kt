@@ -4,16 +4,19 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.util.Log
 import com.asianmobile.emojibattery.shimeji.BuildConfig
+import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_CATEGORY
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
-import com.asianmobile.emojibattery.shimeji.data.model.BUNDLED_BATTERY_EMOTIONS
+import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_EMOTION_GROUPS
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogDistributionStatus
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationType
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryEmotionGroup
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BACKGROUND_ID
 import com.asianmobile.emojibattery.shimeji.data.remote.BatteryCatalogFetchResult
 import com.asianmobile.emojibattery.shimeji.data.remote.BatteryServerConfig
 import com.asianmobile.emojibattery.shimeji.data.remote.GithubBatteryCatalogClient
@@ -216,26 +219,48 @@ class HybridBatteryCatalogRepository @Inject constructor(
             )
         }
         val backgrounds = document.backgrounds.mapNotNull { record ->
-            resolve(record.asset)?.let { path ->
-                BatteryDecorationEntry(
-                    id = record.id,
-                    name = record.name,
-                    assetPath = path,
-                    type = BatteryDecorationType.BACKGROUND
-                )
+            if (record.id == DEFAULT_BATTERY_BACKGROUND_ID) {
+                builtInDefaultBackground()
+            } else {
+                val assetPath = resolve(record.asset)
+                val previewPath = resolve(record.preview ?: record.asset)
+                if (assetPath != null && previewPath != null) {
+                    BatteryDecorationEntry(
+                        id = record.id,
+                        name = record.name,
+                        assetPath = assetPath,
+                        previewPath = previewPath,
+                        order = record.order,
+                        type = BatteryDecorationType.BACKGROUND
+                    )
+                } else null
             }
-        }
-        val legacyEmotions = document.emotions.mapNotNull { record ->
-            resolve(record.asset)?.let { path ->
+        }.sortedWith(compareBy(BatteryDecorationEntry::order, BatteryDecorationEntry::id))
+        val emotions = document.emotions.mapNotNull { record ->
+            val assetPath = resolve(record.asset)
+            val previewPath = resolve(record.preview ?: record.asset)
+            if (assetPath != null && previewPath != null) {
                 BatteryDecorationEntry(
                     id = record.id,
                     name = record.name,
-                    assetPath = path,
+                    assetPath = assetPath,
+                    previewPath = previewPath,
+                    groupKey = record.groupKey,
+                    order = record.order,
                     type = BatteryDecorationType.EMOTION
                 )
-            }
+            } else null
         }
-        val emotions = legacyEmotions + BUNDLED_BATTERY_EMOTIONS
+        val emotionGroups = document.emotionGroups.mapNotNull { record ->
+            val backgroundPath = record.background?.let(resolve)
+            if (record.background == null || backgroundPath != null) {
+                BatteryEmotionGroup(
+                    key = record.key,
+                    emotionIds = record.emotionIds,
+                    backgroundPath = backgroundPath
+                )
+            } else null
+        }
         val animations = document.animations.mapNotNull { record ->
             resolve(record.asset)?.let { path ->
                 BatteryAnimationEntry(
@@ -251,7 +276,8 @@ class HybridBatteryCatalogRepository @Inject constructor(
             (
                 themes.any { !it.assetsReady } ||
                     backgrounds.size != document.backgrounds.size ||
-                    legacyEmotions.size != document.emotions.size ||
+                    emotions.size != document.emotions.size ||
+                    emotionGroups.size != document.emotionGroups.size ||
                     animations.size != document.animations.size
                 )
         ) {
@@ -262,6 +288,7 @@ class HybridBatteryCatalogRepository @Inject constructor(
             themes = listOf(BUILT_IN_BATTERY_THEME) + themes,
             backgrounds = backgrounds,
             emotions = emotions,
+            emotionGroups = emotionGroups.ifEmpty { BATTERY_EMOTION_GROUPS },
             animations = animations,
             catalogVersion = document.catalogVersion,
             capturedAt = document.capturedAt,
@@ -279,7 +306,10 @@ class HybridBatteryCatalogRepository @Inject constructor(
     private fun isCurrentSchema(document: BatteryCatalogDocument): Boolean =
         !BuildConfig.DEBUG ||
             (
-                document.backgrounds.isNotEmpty() &&
+                document.backgrounds.size == EXPECTED_BACKGROUND_COUNT &&
+                    document.backgrounds.take(FIGMA_BACKGROUND_COUNT).all {
+                        it.preview != null
+                    } &&
                     document.emotions.isNotEmpty() &&
                     document.animations.isNotEmpty()
                 )
@@ -339,7 +369,7 @@ class HybridBatteryCatalogRepository @Inject constructor(
     private fun initialSnapshot(): BatteryCatalogSnapshot {
         val root = localRoot()
         return BatteryCatalogSnapshot(
-            emotions = BUNDLED_BATTERY_EMOTIONS,
+            backgrounds = listOf(builtInDefaultBackground()),
             localRootPath = root?.absolutePath.orEmpty()
         )
     }
@@ -348,11 +378,28 @@ class HybridBatteryCatalogRepository @Inject constructor(
         rootPath: String,
         error: BatteryCatalogError
     ): BatteryCatalogSnapshot = BatteryCatalogSnapshot(
-        emotions = BUNDLED_BATTERY_EMOTIONS,
+        backgrounds = listOf(builtInDefaultBackground()),
         localRootPath = rootPath,
         isLoading = false,
         error = error
     )
+
+    private fun builtInDefaultBackground(): BatteryDecorationEntry {
+        val uri = buildString {
+            append("android.resource://")
+            append(context.packageName)
+            append('/')
+            append(R.drawable.img_battery_background_default)
+        }
+        return BatteryDecorationEntry(
+            id = DEFAULT_BATTERY_BACKGROUND_ID,
+            name = "status_background_01",
+            assetPath = uri,
+            previewPath = uri,
+            order = 0,
+            type = BatteryDecorationType.BACKGROUND
+        )
+    }
 
     private fun localRoot(): File? = context.getExternalFilesDir(LOCAL_DIRECTORY)
 
@@ -363,6 +410,8 @@ class HybridBatteryCatalogRepository @Inject constructor(
         const val PACKAGED_CATALOG_ROOT = "battery_catalog"
         const val PACKAGED_CATALOG_FILE = "$PACKAGED_CATALOG_ROOT/catalog.json"
         const val ANDROID_ASSET_URI_PREFIX = "file:///android_asset/"
+        const val EXPECTED_BACKGROUND_COUNT = 38
+        const val FIGMA_BACKGROUND_COUNT = 18
         const val SHA_256 = "SHA-256"
     }
 }

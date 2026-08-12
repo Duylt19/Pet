@@ -55,7 +55,8 @@ data class BatteryDeviceState(
     val cellular: BatteryConnectivityState = BatteryConnectivityState.DISCONNECTED,
     val airplaneMode: Boolean = false,
     val hotspot: BatteryHotspotState = BatteryHotspotState.UNKNOWN,
-    val ringer: BatteryRingerState = BatteryRingerState.NORMAL
+    val ringer: BatteryRingerState = BatteryRingerState.NORMAL,
+    val mobileDataBadge: BatteryMobileDataBadge? = null
 )
 
 data class BatteryNetworkObservation(
