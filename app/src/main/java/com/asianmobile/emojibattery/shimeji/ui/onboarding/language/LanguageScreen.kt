@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -172,7 +173,10 @@ internal fun LanguageContent(
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
-    val blurRadius = if (isLoading && isSupportBlur) 8.dp else 0.dp
+    val blurRadius = languageLoadingBlurRadius(
+        isLoading = isLoading,
+        isSupportBlur = isSupportBlur,
+    )
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -231,7 +235,9 @@ internal fun LanguageContent(
             containerColor = colorResource(R.color.colors_FFFFFF),
             modifier = Modifier
                 .fillMaxSize()
-                .blur(blurRadius)
+                .then(
+                    if (blurRadius > 0.dp) Modifier.blur(blurRadius) else Modifier
+                )
         ) { padding ->
             Column(
                 modifier = Modifier
@@ -275,19 +281,14 @@ internal fun LanguageContent(
         }
 
         if (isLoading) {
-            val overlayColor = if (isSupportBlur) {
-                colorResource(R.color.colors_FFFFFF).copy(alpha = 0.35f)
-            } else {
-                colorResource(R.color.colors_FFFFFF).copy(alpha = 0.92f)
-            }
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(overlayColor)
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
+                    .background(
+                        colorResource(R.color.colors_000000).copy(
+                            alpha = LANGUAGE_LOADING_SCRIM_ALPHA
+                        )
+                    )
                     .clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
@@ -321,12 +322,19 @@ private fun LanguageLoadingContent(
             text = stringResource(R.string.setting_up_your_app_experience_please_wait_a_moment),
             fontFamily = FontFamily(Font(R.font.roboto_regular)),
             fontSize = dimensionResource(id = R_ssp.dimen._13ssp).value.sp,
-            color = colorResource(R.color.colors_262626),
+            color = colorResource(R.color.colors_FFFFFF),
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = dimensionResource(R_sdp.dimen._30sdp))
         )
     }
 }
+
+internal const val LANGUAGE_LOADING_SCRIM_ALPHA = 0.6f
+
+internal fun languageLoadingBlurRadius(
+    isLoading: Boolean,
+    isSupportBlur: Boolean,
+): Dp = if (isLoading && isSupportBlur) 8.dp else 0.dp
 
 @Preview(widthDp = 360, heightDp = 800, showBackground = true)
 @Composable

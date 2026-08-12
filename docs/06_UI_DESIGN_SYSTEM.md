@@ -84,6 +84,13 @@ Discover Home contract:
 - Search field theo Figma `8287:6560`: khi query khác rỗng hiện clear icon 16px ở trailing;
   clear chỉ xoá query và giữ focus, còn tap ngắn ngoài toàn bộ field mới clear focus + ẩn IME.
   Gesture cuộn không được xem là outside tap.
+- Discover section Emoji/DIY Battery theo Figma `8019:1628` và `8019:1689` dùng text thuần
+  `Emoji`/`DIY Battery` cùng artwork 16px thật ở leading; không ghép emoji vào string.
+
+Language loading contract theo Figma `8421:9356`:
+
+- loading phủ scrim đen `60%` toàn màn và dùng text trắng; Android 12/API 31 trở lên blur
+  content phía sau `8dp`, API thấp hơn không dùng blur và chỉ giữ scrim tối tương đương Figma.
 
 Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
 
