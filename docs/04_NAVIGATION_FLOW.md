@@ -8,7 +8,7 @@
 | `language` | Language onboarding | First-run |
 | `language_settings` | Language settings | Mở từ Settings |
 | `intro` | Intro pager | First-run |
-| `permission` | Permission | Request overlay/notification, có Continue/Skip |
+| `permission` | Permission | Route/class được giữ nhưng tạm không nằm trong onboarding; request overlay/notification, có Continue/Skip |
 | `home` | Discover | Tab 1 của Home shell: battery toggle, Battery Troll hero và catalog preview |
 | `search` | Search | Tìm pet hoặc battery theme; pet mở Pet Store, theme mở Status Bar Editor |
 | `favourite_recent` | Favourite & Recent | Favourite battery theme đã lưu; Recent giữ empty state cho tới khi có contract MRU |
@@ -29,9 +29,10 @@ Splash
   └─ next onboarding step hoặc Home
 
 Language ──confirm──> Intro
-Intro ──finish──> Premium(onboarding, optional) ──close──> Permission
-Intro ──finish──> Permission
-Permission ──continue/skip──> Discover Home
+Intro ──finish──> Premium(onboarding, optional) ──close──> Discover Home
+Intro ──finish──> Discover Home
+
+Permission (tạm inactive) ──continue/skip──> Discover Home
 
 Home shell tabs: Discover ⇄ Battery Styles ⇄ Pet Store ⇄ Mine/Settings
 
@@ -71,7 +72,8 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
 
 ## Back stack
 
-- Splash, Language, Intro và Permission được remove khỏi stack sau khi hoàn tất bước tương ứng.
+- Splash, Language và Intro được remove khỏi stack sau khi hoàn tất bước tương ứng. Permission
+  vẫn có destination đầy đủ nhưng tạm không được đưa vào first-run stack.
 - Discover là root sau onboarding. Battery Styles, Pet Store và Settings là top-level tab
   của cùng Home shell. Mỗi lần đổi tab dùng `saveState/restoreState` và `launchSingleTop`,
   vì vậy ViewModel, scroll và navigation state của tab được giữ lại.
@@ -95,13 +97,17 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
 - Mọi action xin Accessibility trong Discover, Battery Styles, Mine, Status Bar Editor và Grant
   Permissions dùng cùng bottom-sheet disclosure. `Allow` không mở Settings cho tới khi checkbox
   consent được chọn; launcher tắt App Open Ad trước khi rời app và trạng thái được đọc lại khi về.
-- Premium onboarding close/success đi tiếp Permission.
+- Premium onboarding close/success đi thẳng Home trong thời gian bước Permission bị tắt.
 - Premium splash-return close/success đi Home.
 - Language settings restart activity với `skip_splash=true` sau confirm.
 
 ## Onboarding state
 
-`MainViewModel` kết hợp các Flow trong `DataStoreManager` để xác định màn tiếp theo. Khi thêm một onboarding step mới phải cập nhật state, route, popUpTo behavior, process-death behavior và docs này.
+`MainViewModel` kết hợp các Flow trong `DataStoreManager` để xác định màn tiếp theo.
+`IS_FIRST_PERMISSION_ONBOARDING_ENABLED=false` tạm bỏ Permission khỏi quyết định này và
+`destinationAfterIntro()` dùng cùng policy cho cả Intro/Premium. Không ghi completion giả khi
+skip để có thể bật lại đúng trạng thái cũ. Khi thêm/bật lại onboarding step phải cập nhật state,
+route, popUpTo behavior, process-death behavior và docs này.
 
 ## Navigation rules
 

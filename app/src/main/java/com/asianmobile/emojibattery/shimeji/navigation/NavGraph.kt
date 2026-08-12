@@ -39,6 +39,7 @@ import com.asianmobile.emojibattery.shimeji.ui.settings.mine.SettingsScreen
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.intro.IntroScreen
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.language.LanguageScreen
 import com.asianmobile.emojibattery.shimeji.ui.app.MainViewModel
+import com.asianmobile.emojibattery.shimeji.ui.app.destinationAfterIntro
 import com.asianmobile.emojibattery.shimeji.ui.settings.permissions.GrantPermissionsScreen
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.permission.PermissionScreen
 import com.asianmobile.emojibattery.shimeji.ui.premium.PremiumScreen
@@ -221,7 +222,7 @@ fun AppNavGraph(
                         } else {
                             navigateWithAd(context, "after_intro") {
                                 navController.safeNavigate(
-                                    Routes.PERMISSION,
+                                    destinationAfterIntro(),
                                     ignoreDebounce = true
                                 ) {
                                     popUpTo(Routes.INTRO) { inclusive = true }
@@ -488,7 +489,10 @@ fun AppNavGraph(
                 fun closePremium() {
                     when (startByIndex) {
                         StartPremiumIndexes.ONBOARDING_FIRST -> {
-                            navController.safeNavigate(Routes.PERMISSION, ignoreDebounce = true) {
+                            navController.safeNavigate(
+                                destinationAfterIntro(),
+                                ignoreDebounce = true
+                            ) {
                                 popUpTo(Routes.PREMIUM) { inclusive = true }
                             }
                         }

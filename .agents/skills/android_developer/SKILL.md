@@ -18,7 +18,8 @@ không còn là Private Browser.
   `privatebrower-7168d` là legacy identifier được giữ có chủ đích; không dùng chúng làm package
   và không tự đổi theo package.
 - Trước mọi thay đổi app identity/Firebase/app-specific storage, đọc `docs/PACKAGE_IDENTITY.md`.
-- Flow hiện tại: Splash → Language → Intro → Permission → Home.
+- Flow hiện tại: Splash → Language → Intro → Home. Permission onboarding tạm bị tắt bằng policy,
+  nhưng route/class/state vẫn được giữ để bật lại.
 - Home điều khiển Start/Stop Mixed 1–12 pet khác nhau hoặc Swarm 1–12 bản sao và có action Catalog/Settings/Premium.
 - Browser, search/clear-browsing, broad storage access, tab manager, bookmark/history, download, media/file manager, Room và foreground service cũ đã bị xóa.
 - Permission xử lý overlay special access + notification permission và cho phép Skip.

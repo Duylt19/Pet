@@ -26,14 +26,15 @@ data class MainUiState(
     fun getNextScreen(): String = when {
         isLanguageCompleted != true -> Routes.LANGUAGE
         isIntroCompleted != true -> Routes.INTRO
-        isPermissionCompleted != true -> Routes.PERMISSION
+        IS_FIRST_PERMISSION_ONBOARDING_ENABLED && isPermissionCompleted != true ->
+            Routes.PERMISSION
         else -> Routes.HOME
     }
 
     fun isReady(): Boolean =
         isLanguageCompleted != null &&
             isIntroCompleted != null &&
-            isPermissionCompleted != null
+            (!IS_FIRST_PERMISSION_ONBOARDING_ENABLED || isPermissionCompleted != null)
 }
 
 @HiltViewModel

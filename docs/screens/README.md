@@ -6,7 +6,7 @@
 | `language` | `ui/onboarding/language/LanguageScreen` | Danh sách language nền trắng theo Figma, chọn rồi confirm; giữ native ad onboarding |
 | `language_settings` | `ui/onboarding/language/LanguageScreen` | Cùng UI Language, có Back; confirm rồi restart app shell |
 | `intro` | `ui/onboarding/intro/IntroScreen` | Pager ba trang theo Figma: Emoji Battery, status-bar customization và Cute Pet; giữ native ads page 1/3 theo config |
-| `permission` | `ui/onboarding/permission/PermissionScreen` | Overlay special access + notification permission, có Continue/Skip; request overlay đi qua shared disclosure trước khi mở Android Settings |
+| `permission` | `ui/onboarding/permission/PermissionScreen` | Route/class được giữ nhưng tạm loại khỏi onboarding bằng `IS_FIRST_PERMISSION_ONBOARDING_ENABLED=false`. Khi bật lại: overlay special access + notification permission, có Continue/Skip; request overlay đi qua shared disclosure trước khi mở Android Settings |
 | `home` | `ui/home/discover/DiscoverScreen` | Tab Discover: Emoji Battery toggle, Battery Troll hero và pet/battery previews; không còn pet switch/quick-action frame; bottom chrome do Home shell sở hữu |
 | `search` | `ui/search/SearchScreen` | Figma Search: tab pet/battery, banner, lưới kết quả và native ad cố định; pet mở Pet Store, theme mở editor |
 | `favourite_recent` | `ui/battery/favoriterecent/FavouriteRecentScreen` | Favourite battery theme thật, Recent empty pending MRU contract, header/tab/grid và native ad theo Figma |
@@ -25,7 +25,7 @@
 - Discover, Battery, Battery category và Mine dùng wallpaper trắng với gradient pastel, primary pink `#FB3675`, Roboto,
   horizontal catalog rows và rounded cards theo Figma node `8015:1035`.
 - Splash, App Open Welcome Back, Language/Language Settings và Intro đã theo Figma. Permission
-  và Premium giữ nguyên visual hiện tại; chúng sẽ được update trong các task riêng.
+  giữ nguyên source/visual nhưng tạm inactive trong onboarding; Premium giữ visual hiện tại.
 
 ## Screen implementation contract
 

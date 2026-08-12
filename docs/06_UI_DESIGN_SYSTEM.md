@@ -2,7 +2,8 @@
 
 Base giữ infrastructure/theme và component pattern. Product screens từ Home trở đi dùng
 visual system Cute Pet. Splash, App Open Welcome Back và Language đã theo Figma;
-Intro, Permission và Premium vẫn giữ UI hiện tại cho tới task update riêng.
+Intro và Premium vẫn giữ UI hiện tại. Permission giữ nguyên UI/source nhưng tạm không nằm trong
+flow onboarding cho tới khi policy first-permission được bật lại.
 
 ## Cute Pet product direction
 
@@ -17,7 +18,7 @@ Intro, Permission và Premium vẫn giữ UI hiện tại cho tới task update 
 - Shared primitives nằm ở `ui/shared/component/CutePetComponents.kt`; component dark cũ không được
   dùng cho product screen mới nếu không có lý do tương thích.
 
-Các màn Intro, Permission và Premium cố ý chưa đổi trong refresh hiện tại.
+Intro và Premium cố ý chưa đổi trong refresh hiện tại. Permission hiện là destination inactive.
 
 Splash và App Open Welcome Back theo Figma node `8088:12715`/`8088:12986`:
 
