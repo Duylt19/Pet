@@ -71,6 +71,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_DISCOVER_INLINE
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibilityRecovery
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
@@ -130,7 +131,8 @@ fun DiscoverScreen(
         onPetStore = onNavigateToPetStore,
         onOpenTheme = onOpenBatteryTheme,
         onToggleFavorite = viewModel::toggleFavorite,
-        onCustomizeStatusBar = onCustomizeStatusBar
+        onCustomizeStatusBar = onCustomizeStatusBar,
+        onDismissRecovery = viewModel::dismissAccessibilityRecovery
     )
 
     if (showAccessibilityDisclosure) {
@@ -147,6 +149,80 @@ fun DiscoverScreen(
     }
 }
 
+/**
+ * Sits above the enable card rather than replacing it: the toggle is still the control, this only
+ * explains why it went back to off on its own. Tapping the action runs the ordinary enable path,
+ * which already asks for Accessibility and shows the disclosure before any hand-off to Settings.
+ */
+@Composable
+internal fun BatteryAccessibilityRecoveryCard(
+    recovery: BatteryAccessibilityRecovery,
+    onTurnBackOn: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+    val pink = colorResource(R.color.colors_FB3675)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = dimensionResource(SdpR.dimen._12sdp),
+                top = dimensionResource(SdpR.dimen._9sdp),
+                end = dimensionResource(SdpR.dimen._12sdp)
+            )
+            .clip(shape)
+            .background(pink.copy(alpha = 0.08f))
+            .border(
+                width = dimensionResource(SdpR.dimen._1sdp),
+                color = pink.copy(alpha = 0.4f),
+                shape = shape
+            )
+            .padding(dimensionResource(SdpR.dimen._9sdp))
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(
+                    when (recovery) {
+                        BatteryAccessibilityRecovery.APP_CLOSED ->
+                            R.string.battery_accessibility_recovery_app_closed
+
+                        BatteryAccessibilityRecovery.DEVICE_KILLED ->
+                            R.string.battery_accessibility_recovery_device_killed
+
+                        // NONE never renders; the caller checks before composing this.
+                        else -> R.string.battery_accessibility_recovery_unknown
+                    }
+                ),
+                color = colorResource(R.color.colors_212327),
+                fontFamily = DiscoverRobotoMedium,
+                fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._14ssp).value.sp
+            )
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
+            Text(
+                text = stringResource(R.string.battery_accessibility_recovery_action),
+                color = pink,
+                fontFamily = DiscoverRobotoSemiBold,
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                modifier = Modifier
+                    .clip(shape)
+                    .clickable(role = Role.Button, onClick = onTurnBackOn)
+                    .padding(vertical = dimensionResource(SdpR.dimen._2sdp))
+            )
+        }
+        Icon(
+            painter = painterResource(R.drawable.ic_close),
+            contentDescription = stringResource(
+                R.string.battery_accessibility_recovery_dismiss
+            ),
+            tint = colorResource(R.color.colors_6F7073),
+            modifier = Modifier
+                .size(dimensionResource(SdpR.dimen._15sdp))
+                .clickable(role = Role.Button, onClick = onDismiss)
+        )
+    }
+}
+
 @Composable
 private fun DiscoverContent(
     uiState: DiscoverUiState,
@@ -157,7 +233,8 @@ private fun DiscoverContent(
     onPetStore: () -> Unit,
     onOpenTheme: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
-    onCustomizeStatusBar: () -> Unit
+    onCustomizeStatusBar: () -> Unit,
+    onDismissRecovery: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -185,6 +262,15 @@ private fun DiscoverContent(
                     )
                 ) {
                     item { HomeHeader(onSearch = onSearch, onPremium = onPremium) }
+                    if (uiState.accessibilityRecovery != BatteryAccessibilityRecovery.NONE) {
+                        item {
+                            BatteryAccessibilityRecoveryCard(
+                                recovery = uiState.accessibilityRecovery,
+                                onTurnBackOn = onBatteryToggle,
+                                onDismiss = onDismissRecovery
+                            )
+                        }
+                    }
                     item {
                         HomeEnableCard(
                             text = stringResource(
@@ -787,7 +873,8 @@ private fun DiscoverContentPreview() {
         onPetStore = {},
         onOpenTheme = {},
         onToggleFavorite = {},
-        onCustomizeStatusBar = {}
+        onCustomizeStatusBar = {},
+        onDismissRecovery = {}
     )
 }
 

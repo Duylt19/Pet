@@ -201,6 +201,31 @@ Các guardrail bắt buộc:
 - Chỉ mở Settings sau disclosure chủ động; không tự bật service.
 - User có thể tắt service bất cứ lúc nào trong Android Settings.
 
+### Khi quyền bị thu hồi ngoài ý muốn
+
+Android **xoá** service khỏi `enabled_accessibility_services` mỗi khi package bị force-stop —
+`AccessibilityManagerService.onPackagesForceStoppedLocked` ghi thẳng thay đổi đó vào Settings.
+Đây là hành vi AOSP, không phải riêng ROM nào; nhiều ROM (MIUI/HyperOS…) force-stop khi user
+xoá app khỏi màn đa nhiệm, nên thanh pin đang chạy có thể biến mất chỉ vì một cú vuốt. App
+không thể ngăn, cũng không có API xin lại quyền, nên hợp đồng là **phát hiện và nói ra**:
+
+- `batteryAccessibilityRecovery()` so `config.enabled` (ý định đã lưu, sống sót qua cú kill) với
+  `BatteryAccessibility.isEnabled()` (thứ hệ thống cho phép lúc này). Hai cái lệch nhau là tín
+  hiệu duy nhất cần; user tự tắt thì `config.enabled` cũng false nên không thể nhầm.
+- Nguyên nhân lấy từ `PetBackgroundRestrictionReader.lastOverlayKill()` (`ApplicationExitInfo`,
+  API 30+): `USER` → user đóng app, khác `USER` → thiết bị giết, không có bản ghi → không đổ lỗi.
+  Đọc **một lần** cho mỗi ViewModel vì nó mô tả cái chết đã xảy ra và là một binder call.
+- Discover hiện `BatteryAccessibilityRecoveryCard` phía trên enable card. Action chạy đúng luồng
+  bật bình thường nên disclosure vẫn hiện trước khi sang Settings. Dismiss chỉ kéo dài trong
+  vòng đời ViewModel — lần thu hồi sau vẫn phải nói được.
+
+`BatteryAccessibility.detailsSettingsIntent()` mở thẳng trang của service thay vì danh sách
+Accessibility. Action `android.settings.ACCESSIBILITY_DETAILS_SETTINGS` **không phải public API**
+(`android.provider.Settings` chỉ export danh sách), nên mọi call site phải đi qua
+`launchFirstAvailable(deepLink, settingsIntent, appDetails)` để tự rơi xuống fallback trên ROM
+không có màn đó. AOSP `AccessibilityDetailsSettingsFragment` đọc `Intent.EXTRA_COMPONENT_NAME`
+rồi `unflattenFromString`, nên component phải được truyền dạng flatten.
+
 ### Lưu ý khi deploy debug
 
 Quyền Accessibility thuộc `Settings.Secure`, app không thể tự cấp, backup hoặc phục hồi.

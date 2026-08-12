@@ -1,9 +1,16 @@
 package com.asianmobile.emojibattery.shimeji.ui.home.discover
 
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibilityRecovery
+
 data class DiscoverUiState(
     val isLoading: Boolean = true,
     val isBatteryEnabled: Boolean = false,
     val isAccessibilityEnabled: Boolean = false,
+    /**
+     * Set when the bar is still configured on but the system revoked Accessibility behind the
+     * user's back. Nothing else on this screen would say why the bar disappeared.
+     */
+    val accessibilityRecovery: BatteryAccessibilityRecovery = BatteryAccessibilityRecovery.NONE,
     val trendingPets: List<DiscoverPetUiState> = emptyList(),
     val batteryThemes: List<DiscoverThemeUiState> = emptyList(),
     val statusBarThemes: List<DiscoverAssetUiState> = emptyList(),

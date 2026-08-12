@@ -4,6 +4,10 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibilityRecovery
+import com.asianmobile.emojibattery.shimeji.battery.overlay.batteryAccessibilityRecovery
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBackgroundRestrictionReader
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetProcessKillKind
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
@@ -24,8 +28,23 @@ class DiscoverViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val petCatalogRepository: OwnerPetCatalogRepository,
     private val batteryCatalogRepository: BatteryCatalogRepository,
-    private val batterySettingsRepository: BatterySettingsRepository
+    private val batterySettingsRepository: BatterySettingsRepository,
+    restrictionReader: PetBackgroundRestrictionReader
 ) : ViewModel() {
+    /**
+     * Read once and kept: it describes a death that already happened, and the lookup is a binder
+     * call into the system. Null whenever the platform recorded nothing usable — API 30 and below
+     * has no record at all, and [PetProcessKillKind.OTHER] is a crash or an update rather than
+     * anything that would have taken a permission away.
+     */
+    private val wasProcessEndedByUser: Boolean? =
+        when (restrictionReader.lastOverlayKill()) {
+            PetProcessKillKind.USER -> true
+            PetProcessKillKind.SIGNALLED, PetProcessKillKind.SYSTEM_RECLAIM -> false
+            PetProcessKillKind.OTHER, null -> null
+        }
+    private var isRecoveryDismissed = false
+
     private val _uiState = MutableStateFlow(
         DiscoverUiState(isAccessibilityEnabled = BatteryAccessibility.isEnabled(context))
     )
@@ -49,6 +68,10 @@ class DiscoverViewModel @Inject constructor(
                     isLoading = pets.isLoading || batteryCatalog.isLoading,
                     isBatteryEnabled = batteryConfig.enabled && accessibilityEnabled,
                     isAccessibilityEnabled = accessibilityEnabled,
+                    accessibilityRecovery = resolveRecovery(
+                        batteryConfig.enabled,
+                        accessibilityEnabled
+                    ),
                     trendingPets = pets.entries.take(MAX_TRENDING_PETS).map { pet ->
                         DiscoverPetUiState(
                             packKey = pet.installedPackKey,
@@ -114,13 +137,36 @@ class DiscoverViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 isBatteryEnabled = configuredBatteryEnabled && enabled,
-                isAccessibilityEnabled = enabled
+                isAccessibilityEnabled = enabled,
+                accessibilityRecovery = resolveRecovery(configuredBatteryEnabled, enabled)
             )
         }
         if (enabled && enableBatteryAfterAccessibility) {
             enableBatteryAfterAccessibility = false
             batterySettingsRepository.setEnabled(true)
         }
+    }
+
+    /** Dismissal lasts for this ViewModel only: a later revocation has to be able to say so. */
+    fun dismissAccessibilityRecovery() {
+        isRecoveryDismissed = true
+        _uiState.update { it.copy(accessibilityRecovery = BatteryAccessibilityRecovery.NONE) }
+    }
+
+    /**
+     * The kill reason is read once rather than per state change: it describes a death that already
+     * happened, and `getHistoricalProcessExitReasons` is a binder call into the system.
+     */
+    private fun resolveRecovery(
+        batteryConfigured: Boolean,
+        accessibilityEnabled: Boolean
+    ): BatteryAccessibilityRecovery {
+        if (isRecoveryDismissed) return BatteryAccessibilityRecovery.NONE
+        return batteryAccessibilityRecovery(
+            isBatteryConfigured = batteryConfigured,
+            isAccessibilityEnabled = accessibilityEnabled,
+            wasProcessEndedByUser = wasProcessEndedByUser
+        )
     }
 
     fun cancelPendingBatteryEnable() {

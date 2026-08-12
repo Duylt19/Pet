@@ -68,6 +68,7 @@ import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.OverlayPermissionDialog
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.launchFirstAvailable
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -109,6 +110,7 @@ fun GrantPermissionsScreen(
 
                 GrantPermissionsEffect.OpenAccessibilitySettings ->
                     settingsLauncher.openSettings(
+                        BatteryAccessibility.detailsSettingsIntent(context),
                         BatteryAccessibility.settingsIntent(),
                         appDetailsIntent(context.packageName)
                     )
@@ -127,7 +129,7 @@ fun GrantPermissionsScreen(
                     // Resolved again at tap: the ROM may have updated since the screen loaded.
                     // No fallback — there is no second screen that means the same thing.
                     viewModel.vendorAutoStartIntent()?.let {
-                        settingsLauncher.openSettings(it, fallback = null)
+                        settingsLauncher.openSettings(it)
                     }
 
                 GrantPermissionsEffect.OpenAppNotificationSettings ->
@@ -155,6 +157,7 @@ fun GrantPermissionsScreen(
             onGrantPermission = {
                 showAccessibilityDisclosure = false
                 settingsLauncher.openSettings(
+                    BatteryAccessibility.detailsSettingsIntent(context),
                     BatteryAccessibility.settingsIntent(),
                     appDetailsIntent(context.packageName)
                 )
@@ -178,20 +181,16 @@ fun GrantPermissionsScreen(
 }
 
 /**
- * Every destination on this screen is a system surface the ROM owns, and none of them is
- * guaranteed: a build can ship without the battery-optimisation list at all, and the vendor
- * power screens resolve through the package manager while still refusing to launch because the
- * activity is not exported. Both throw out of [launch] rather than returning a result, which
- * would take the whole screen down over a settings page that is only ever a convenience.
- *
- * Leaving for a system screen also has to suppress the app-open ad, or coming back from granting
- * a permission is answered with a full-screen ad the user did nothing to earn. Suppressing here
+ * Leaving for a system screen has to suppress the app-open ad, or coming back from granting a
+ * permission is answered with a full-screen ad the user did nothing to earn. Suppressing here
  * rather than at each call site is what keeps that true for every row.
+ *
+ * The intents are tried in order because none of these ROM-owned screens is guaranteed to exist;
+ * see [launchFirstAvailable].
  */
-private fun ActivityResultLauncher<Intent>.openSettings(intent: Intent, fallback: Intent?) {
+private fun ActivityResultLauncher<Intent>.openSettings(vararg intents: Intent) {
     InterstitialUtil.getInstance().openAd?.needShowOpenAds = false
-    if (runCatching { launch(intent) }.isSuccess) return
-    fallback?.let { runCatching { launch(it) } }
+    launchFirstAvailable(*intents)
 }
 
 private fun appNotificationIntent(packageName: String): Intent =

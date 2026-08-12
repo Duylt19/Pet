@@ -794,6 +794,13 @@
     <string name="battery_preview_wifi" translatable="false">⌁</string>
     <string name="battery_accessibility_required">Accessibility access is required to keep this bar visible above other apps.</string>
     <string name="battery_accessibility_ready">Accessibility access is on. Changes will apply to the overlay.</string>
+    <!-- Android drops an accessibility service from the enabled list whenever the package is
+         force-stopped, so the bar can vanish without the user having touched anything. -->
+    <string name="battery_accessibility_recovery_app_closed">Your battery bar turned off. Android removes Accessibility access when the app is closed from recents. Lock the app in recents to stop this happening again.</string>
+    <string name="battery_accessibility_recovery_device_killed">Your battery bar turned off. This device stopped the app, and Android removed its Accessibility access. Allow autostart and remove battery limits to stop this happening again.</string>
+    <string name="battery_accessibility_recovery_unknown">Your battery bar turned off because its Accessibility access is no longer granted.</string>
+    <string name="battery_accessibility_recovery_action">Turn back on</string>
+    <string name="battery_accessibility_recovery_dismiss">Dismiss</string>
     <string name="battery_accessibility_service_label">Cute Pet battery status</string>
     <string name="battery_accessibility_service_description">Displays the selected battery capsule and checks the foreground app package locally to apply your hidden-app list. It does not read screen content or control other apps.</string>
     <!-- Shown next to the on/off state in the system Accessibility list, so it has to say why the service must be turned on and what it never touches. -->

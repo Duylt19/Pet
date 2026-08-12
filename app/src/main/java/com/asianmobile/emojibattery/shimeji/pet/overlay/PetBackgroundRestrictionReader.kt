@@ -74,8 +74,11 @@ class PetBackgroundRestrictionReader @Inject constructor(
      * The most recent death of this app's process, classified. A process that died while it was
      * running a foreground service is the case worth acting on: the overlay was supposed to be
      * running and something ended it.
+     *
+     * Process-wide rather than pet-specific, so the battery bar reads it too — a force-stop takes
+     * its Accessibility permission with it and this is the only record of who did it.
      */
-    private fun lastOverlayKill(): PetProcessKillKind? = runCatching {
+    fun lastOverlayKill(): PetProcessKillKind? = runCatching {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return@runCatching null
         val manager = ContextCompat.getSystemService(context, ActivityManager::class.java)
             ?: return@runCatching null

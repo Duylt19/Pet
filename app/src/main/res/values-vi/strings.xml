@@ -655,6 +655,11 @@
     <string name="battery_disable">Tắt thanh pin</string>
     <string name="battery_accessibility_required">Cần bật Hỗ trợ tiếp cận để thanh này luôn hiển thị trên ứng dụng khác.</string>
     <string name="battery_accessibility_ready">Đã bật Hỗ trợ tiếp cận. Thay đổi sẽ được áp dụng vào lớp phủ.</string>
+    <string name="battery_accessibility_recovery_app_closed">Thanh pin đã tắt. Android thu hồi quyền Trợ năng khi ứng dụng bị đóng khỏi màn đa nhiệm. Hãy khoá ứng dụng trong màn đa nhiệm để tránh lặp lại.</string>
+    <string name="battery_accessibility_recovery_device_killed">Thanh pin đã tắt. Thiết bị đã dừng ứng dụng và Android thu hồi quyền Trợ năng. Hãy cho phép tự khởi động và bỏ giới hạn pin để tránh lặp lại.</string>
+    <string name="battery_accessibility_recovery_unknown">Thanh pin đã tắt vì quyền Trợ năng không còn được cấp.</string>
+    <string name="battery_accessibility_recovery_action">Bật lại</string>
+    <string name="battery_accessibility_recovery_dismiss">Bỏ qua</string>
     <string name="battery_accessibility_service_label">Thanh trạng thái pin Cute Pet</string>
     <string name="battery_accessibility_service_description">Hiển thị thanh pin đã chọn trong Cute Pet và kiểm tra cục bộ ứng dụng đang chạy ở nền trước để áp dụng danh sách ứng dụng bạn muốn ẩn. Dịch vụ không đọc nội dung màn hình hoặc điều khiển ứng dụng khác.</string>
     <string name="battery_accessibility_service_summary">Bật để Cute Pet vẽ thanh pin bạn đã chọn đè lên thanh trạng thái. Dịch vụ chỉ kiểm tra ứng dụng nào đang chạy ở nền trước để ẩn thanh pin trong các ứng dụng bạn chọn. Dịch vụ không đọc nội dung màn hình và không thu thập hay chia sẻ dữ liệu cá nhân.</string>

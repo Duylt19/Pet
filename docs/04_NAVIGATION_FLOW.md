@@ -127,6 +127,10 @@ route, popUpTo behavior, process-death behavior và docs này.
   banner holder để không request/reload banner khi đi từ Battery Styles sang category.
 - String argument phải encode; enum argument phải parse an toàn với fallback.
 - Không phục hồi route Private Browser cũ nếu chưa có feature spec mới.
+- Mọi hand-off sang Accessibility Settings đi qua `launchFirstAvailable`: deep link tới trang của
+  service (`ACCESSIBILITY_DETAILS_SETTINGS`, không phải public API) rồi mới tới danh sách chung và
+  app details. Không màn hình nào được `launch` một intent settings trần — ROM thiếu màn đó sẽ ném
+  `ActivityNotFoundException` và hạ cả screen.
 - Overlay permission là special access, không phải runtime permission dialog. Mọi entry xin quyền
   (onboarding Permission, Grant Permissions và switch Pet Store) phải hiện shared disclosure theo
   Figma trước; chỉ action `Allow Access` mới mở `Settings.ACTION_MANAGE_OVERLAY_PERMISSION`.
