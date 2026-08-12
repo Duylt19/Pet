@@ -201,8 +201,8 @@ Intro onboarding theo Figma nodes `8088:13113`, `8088:13148`, `8088:13201`:
 Overlay permission disclosure theo Figma node `8436:5998`:
 
 - `ui/shared/component/OverlayPermissionDialog.kt` là bottom sheet dùng chung trước mọi request
-  `ACTION_MANAGE_OVERLAY_PERMISSION`; scrim/Back/swipe xuống/`Not now` chỉ đóng sheet,
-  `Allow Access` mới mở system special-access settings;
+  `ACTION_MANAGE_OVERLAY_PERMISSION`; scrim/Back/`Not now` chỉ đóng sheet, `Allow Access` mới mở
+  system special-access settings. Swipe chỉ dismiss sau khi kéo tối thiểu 25% chiều cao sheet;
 - hero `img_overlay_permission_hero.png` được export nguyên group 158×100 để giữ phone mockup,
   pets và bubble; title/body là text thật, action dùng shared gradient/outline buttons;
 - native `HEIGHT_222` nằm sát đáy và collapse khi placement không render.
@@ -269,8 +269,8 @@ Grant Permissions contract theo Figma node `8080:9754`:
   là bottom sheet full-width bo hai góc trên 24px, scrim 50%, handle `32×4`, title Roboto
   SemiBold 18/26 và body Roboto Regular 14/20. Nội dung dài là phần duy nhất được cuộn; hàng
   consent, nút `Allow`/`Close` và native ad luôn cố định. Checkbox dùng đúng hai vector của rate
-  flow; Back, scrim, `Close` và swipe xuống đều đóng sheet; `Allow` chỉ chuyển sang Android
-  Accessibility Settings sau khi user đã tick consent;
+  flow; Back, scrim và `Close` đóng ngay, còn swipe phải kéo tối thiểu 25% chiều cao sheet;
+  `Allow` chỉ chuyển sang Android Accessibility Settings sau khi user đã tick consent;
 - state `Allow` theo Figma `8437:7772`/`8437:9110`: enabled dùng gradient
   `#C95DFF → #FB54BB` opacity 100%; disabled giữ nguyên gradient/chữ trắng với opacity 30%.
   Disabled vẫn nhận tap để hiện toast yêu cầu đồng ý điều khoản, nhưng không mở Accessibility
