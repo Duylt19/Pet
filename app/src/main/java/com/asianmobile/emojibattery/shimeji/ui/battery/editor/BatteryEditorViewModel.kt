@@ -136,10 +136,13 @@ class BatteryEditorViewModel @Inject constructor(
     fun setBarHeight(value: Float) = update { copy(barHeightDp = value) }
     fun setEmojiSize(value: Float) = update { copy(emojiSizeDp = value) }
     fun setBatterySize(value: Float) = update { copy(batterySizeDp = value) }
-    fun setBackgroundColor(value: Int) = update { copy(backgroundColorArgb = value) }
+    fun setBackgroundColor(value: Int) = update {
+        BatteryBackgroundSelectionPolicy.selectColor(this, value)
+    }
     fun setForegroundColor(value: Int) = update { copy(foregroundColorArgb = value) }
-    fun setBackgroundDecoration(value: Int) =
-        update { copy(backgroundDecorationId = value) }
+    fun setBackgroundDecoration(value: Int) = update {
+        BatteryBackgroundSelectionPolicy.selectTheme(this, value)
+    }
     fun setShowEmotion(value: Boolean) = update { copy(showEmotion = value) }
     fun setEmotionDecoration(value: Int) =
         update { copy(emotionDecorationId = value) }

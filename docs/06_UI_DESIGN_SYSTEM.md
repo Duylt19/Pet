@@ -112,6 +112,9 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   background catalog runtime. Wallpaper của overview và mọi child phủ toàn viewport bằng crop
   căn top; không để lộ nền app legacy màu tối ở đáy trên thiết bị có tỷ lệ màn hình cao hơn
   frame Figma 360×800. Tất cả child giữ chung draft và Back không tự Apply;
+- Background Color và Theme là hai mode loại trừ nhau: chọn Color đặt decoration ID về `0` và
+  chỉ hiện viền selected ở palette; chọn Theme chỉ hiện selected ở theme, không tiếp tục tô màu
+  nền phía dưới asset;
 - Emotion dùng màn pack theo Figma `8404:6277`: nhóm Classic giữ 20 item cũ và tám card mới,
   mỗi card preview 5×2 item; chạm pack/item
   mở detail `8404:7179` với slider Size, switch, grid ba cột và Apply sticky. Preview luôn ghim

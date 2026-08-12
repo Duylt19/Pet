@@ -148,8 +148,8 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `showAnimation`, `animationAssetName`, `animationSizeDp` | Hoạt ảnh GIF/Lottie |
 | `barHeightDp`, `leftPaddingDp`, `rightPaddingDp` | Chiều cao window động theo status bar thiết bị và padding content full-width |
 | `emojiSizeDp`, `batterySizeDp`, `percentSizeDp` | Kích thước asset/pin |
-| `backgroundColorArgb`, `foregroundColorArgb` | Màu renderer |
-| `backgroundDecorationId` | Nền đóng gói đã chọn; `0` là nền màu phẳng |
+| `backgroundColorArgb`, `foregroundColorArgb` | Màu renderer; background color chỉ active khi decoration ID bằng `0` |
+| `backgroundDecorationId` | Nền đóng gói đã chọn; `0` là mode màu phẳng. Color và theme loại trừ nhau khi render |
 | `showEmotion`, `emotionDecorationId` | Hiện/ẩn và chọn một trong 100 emotion: 20 Classic + 80 app-local thuộc tám pack mới |
 | `wifi/data/signal/airplane/hotspot/ringer/charge *SizeDp/*ColorArgb` | Tùy chỉnh độc lập từng status component |
 | `dataType`, `chargeIconIndex` | Nhãn mạng 2G–9G và một trong 12 icon sạc |

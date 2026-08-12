@@ -340,7 +340,7 @@ private fun StatusBarOverview(
                         titleIcon = R.drawable.img_statusbar_color_palette
                     )
                     StatusBarColorPalette(
-                        selected = state.config.backgroundColorArgb,
+                        selected = BatteryBackgroundSelectionPolicy.activeColor(state.config),
                         onSelected = onBackgroundColor,
                         onCustomClick = { activeColorTarget = StatusBarColorTarget.BACKGROUND }
                     )
@@ -735,7 +735,7 @@ private fun TemplateOption(
 
 @Composable
 private fun StatusBarColorPalette(
-    selected: Int,
+    selected: Int?,
     onSelected: (Int) -> Unit,
     onCustomClick: () -> Unit
 ) {
@@ -752,7 +752,7 @@ private fun StatusBarColorPalette(
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
     LazyRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
         item(key = "custom_color") {
-            val isSelected = selected !in presetArgb
+            val isSelected = selected != null && selected !in presetArgb
             Box(
                 modifier = Modifier
                     .size(dimensionResource(SdpR.dimen._22sdp))
