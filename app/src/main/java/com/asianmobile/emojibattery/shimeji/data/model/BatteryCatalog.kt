@@ -110,6 +110,11 @@ val BUILT_IN_BATTERY_THEME = BatteryThemeEntry(
 
 private const val BUNDLED_EMOTION_ASSET_ROOT = "file:///android_asset/battery_emotions"
 
+val LEGACY_BATTERY_EMOTION_GROUP = BatteryEmotionGroup(
+    key = "classic",
+    emotionIds = (1..20).toList()
+)
+
 val BUNDLED_BATTERY_EMOTION_GROUPS: List<BatteryEmotionGroup> = listOf(
     "emoji",
     "cony",
@@ -122,9 +127,12 @@ val BUNDLED_BATTERY_EMOTION_GROUPS: List<BatteryEmotionGroup> = listOf(
 ).mapIndexed { groupIndex, key ->
     BatteryEmotionGroup(
         key = key,
-        emotionIds = (1..10).map { itemIndex -> groupIndex * 10 + itemIndex }
+        emotionIds = (1..10).map { itemIndex -> 20 + groupIndex * 10 + itemIndex }
     )
 }
+
+val BATTERY_EMOTION_GROUPS: List<BatteryEmotionGroup> =
+    listOf(LEGACY_BATTERY_EMOTION_GROUP) + BUNDLED_BATTERY_EMOTION_GROUPS
 
 val BUNDLED_BATTERY_EMOTIONS: List<BatteryDecorationEntry> =
     BUNDLED_BATTERY_EMOTION_GROUPS.flatMap { group ->

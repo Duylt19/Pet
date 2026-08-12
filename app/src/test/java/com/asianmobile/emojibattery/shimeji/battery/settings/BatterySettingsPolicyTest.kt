@@ -91,7 +91,7 @@ class BatterySettingsPolicyTest {
 
     @Test
     fun sanitize_accepts_allBundledEmotionIds_andClampsUnknownValues() {
-        assertEquals(80, policy.sanitize(BatteryStatusConfig(emotionDecorationId = 80)).emotionDecorationId)
-        assertEquals(80, policy.sanitize(BatteryStatusConfig(emotionDecorationId = 99)).emotionDecorationId)
+        assertEquals(100, policy.sanitize(BatteryStatusConfig(emotionDecorationId = 100)).emotionDecorationId)
+        assertEquals(100, policy.sanitize(BatteryStatusConfig(emotionDecorationId = 101)).emotionDecorationId)
     }
 }

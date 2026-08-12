@@ -50,7 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.data.model.BUNDLED_BATTERY_EMOTION_GROUPS
+import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_EMOTION_GROUPS
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryEmotionGroup
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
@@ -69,7 +69,7 @@ internal fun BatteryEmotionFigmaScreen(
     onConfig: (BatteryStatusConfig) -> Unit,
     onApply: () -> Unit
 ) {
-    val selectedGroup = BUNDLED_BATTERY_EMOTION_GROUPS.firstOrNull { it.key == groupKey }
+    val selectedGroup = BATTERY_EMOTION_GROUPS.firstOrNull { it.key == groupKey }
     Box(Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(R.drawable.img_home_wallpaper),
@@ -202,7 +202,7 @@ private fun EmotionGroupList(
         ),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
     ) {
-        items(BUNDLED_BATTERY_EMOTION_GROUPS, key = BatteryEmotionGroup::key) { group ->
+        items(BATTERY_EMOTION_GROUPS, key = BatteryEmotionGroup::key) { group ->
             EmotionGroupCard(
                 group = group,
                 emotions = group.items(state.emotions),
@@ -253,7 +253,7 @@ private fun EmotionGroupCard(
                 .background(colorResource(R.color.colors_FFFFFF))
                 .clickable { onOpenGroup(group.key) }
         ) {
-            if (group.key != "emoji") {
+            if (group.key != "emoji" && group.key != "classic") {
                 AsyncImage(
                     model = "file:///android_asset/battery_emotions/backgrounds/${group.key}.jpg",
                     contentDescription = null,
@@ -271,7 +271,7 @@ private fun EmotionGroupCard(
                     ),
                 verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._13sdp))
             ) {
-                emotions.chunked(5).forEach { rowItems ->
+                emotions.take(10).chunked(5).forEach { rowItems ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -428,6 +428,7 @@ private fun BatteryEmotionGroup.items(
 @Composable
 private fun BatteryEmotionGroup.title(): String = stringResource(
     when (key) {
+        "classic" -> R.string.battery_emotion_group_classic
         "emoji" -> R.string.battery_emotion_group_emoji
         "cony" -> R.string.battery_emotion_group_cony
         "kiiroitori" -> R.string.battery_emotion_group_kiiroitori

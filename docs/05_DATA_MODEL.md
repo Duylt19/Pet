@@ -137,8 +137,8 @@ không được restore sau process death/reboot.
 
 ## Battery catalog và config
 
-- `BatteryCatalogSnapshot` gồm category/theme, 20 background, 80 emotion bundled thuộc tám
-  pack, 26 animation,
+- `BatteryCatalogSnapshot` gồm category/theme, 20 background, 20 emotion catalog legacy trong
+  nhóm Classic + 80 emotion bundled thuộc tám pack mới, 26 animation,
   entitlement, remote/cache/local asset path, distribution status và typed error;
   built-in theme ID `0` luôn có.
 - Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và dimension cho
@@ -146,8 +146,9 @@ không được restore sau process death/reboot.
   `HybridBatteryCatalogRepository` đọc cache trước, revalidate private GitHub catalog
   theo TTL/ETag/backoff, materialize asset theo nhu cầu và chặn path escape,
   size/hash mismatch hoặc release catalog chưa `APPROVED`.
-- Emotion mới là asset app-local ổn định: ID `1..80`, mỗi pack 10 item theo thứ tự Emoji,
-  Cony, Kiiroitori, Molang, Mochi, Tobi, Keroppi và Pochacco. Group chỉ là taxonomy UI;
+- Emotion legacy giữ nguyên ID `1..20` để DataStore hiện có không đổi nghĩa. Emotion mới là
+  asset app-local ổn định với ID `21..100`, mỗi pack 10 item theo thứ tự Emoji, Cony,
+  Kiiroitori, Molang, Mochi, Tobi, Keroppi và Pochacco. Group chỉ là taxonomy UI;
   persistence tiếp tục lưu leaf `emotionDecorationId`, không lưu group đang browse.
 - `BatteryStatusConfig` là persistent source of truth. `BatterySettingsPolicy` clamp
   geometry/color/favorite/reward unlock trước khi ghi và sau khi decode DataStore.

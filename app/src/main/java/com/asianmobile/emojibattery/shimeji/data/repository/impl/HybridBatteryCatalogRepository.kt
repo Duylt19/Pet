@@ -225,7 +225,17 @@ class HybridBatteryCatalogRepository @Inject constructor(
                 )
             }
         }
-        val emotions = BUNDLED_BATTERY_EMOTIONS
+        val legacyEmotions = document.emotions.mapNotNull { record ->
+            resolve(record.asset)?.let { path ->
+                BatteryDecorationEntry(
+                    id = record.id,
+                    name = record.name,
+                    assetPath = path,
+                    type = BatteryDecorationType.EMOTION
+                )
+            }
+        }
+        val emotions = legacyEmotions + BUNDLED_BATTERY_EMOTIONS
         val animations = document.animations.mapNotNull { record ->
             resolve(record.asset)?.let { path ->
                 BatteryAnimationEntry(
@@ -241,6 +251,7 @@ class HybridBatteryCatalogRepository @Inject constructor(
             (
                 themes.any { !it.assetsReady } ||
                     backgrounds.size != document.backgrounds.size ||
+                    legacyEmotions.size != document.emotions.size ||
                     animations.size != document.animations.size
                 )
         ) {

@@ -291,6 +291,7 @@ private fun previewEditorState(): BatteryEditorUiState {
             selectedEmojiThemeId = themes[2].id,
             showAnimation = true,
             animationAssetName = animations.first().name,
+            emotionDecorationId = 21,
             backgroundDecorationId = backgrounds.first().id,
             backgroundColorArgb = 0xFF111111.toInt(),
             foregroundColorArgb = 0xFFFFFFFF.toInt(),

@@ -94,10 +94,10 @@ backoff giống Pet. Thumbnail/preview dùng URL GitHub qua Coil; asset renderer
 được chọn, verify size + SHA-256 rồi cache app-private. Token private repo dùng chung
 Firebase Remote Config key `github_token_pet_server`, không hardcode trong source.
 
-Nhánh `emotion/` trong snapshot remote là dữ liệu legacy 20 item. UI/runtime hiện dùng
-80 PNG @3x đã export từ Figma trong `assets/battery_emotions/<group>/`; bảy background pack
-nằm tại `assets/battery_emotions/backgrounds/`. Repository thay danh sách emotion legacy bằng
-taxonomy bundled này để release không phụ thuộc remote schema cũ.
+Nhánh `emotion/` trong snapshot remote là nhóm Classic 20 item và tiếp tục giữ ID `1..20`.
+UI/runtime bổ sung 80 PNG @3x đã export từ Figma trong `assets/battery_emotions/<group>/`
+với ID `21..100`; bảy background pack nằm tại `assets/battery_emotions/backgrounds/`.
+Repository ghép Classic trước tám nhóm bundled, không thay thế dữ liệu legacy.
 
 Trong Customize, card Pet luôn load trực tiếp `emojiPath` và card Pin luôn load trực tiếp
 `batteryPath` qua Coil. Thumbnail tổng hợp của catalog không được dùng làm placeholder cho
@@ -145,7 +145,7 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `emojiSizeDp`, `batterySizeDp`, `percentSizeDp` | Kích thước asset/pin |
 | `backgroundColorArgb`, `foregroundColorArgb` | Màu renderer |
 | `backgroundDecorationId` | Nền đóng gói đã chọn; `0` là nền màu phẳng |
-| `showEmotion`, `emotionDecorationId` | Hiện/ẩn và chọn một trong 80 emotion app-local thuộc tám pack |
+| `showEmotion`, `emotionDecorationId` | Hiện/ẩn và chọn một trong 100 emotion: 20 Classic + 80 app-local thuộc tám pack mới |
 | `wifi/data/signal/airplane/hotspot/ringer/charge *SizeDp/*ColorArgb` | Tùy chỉnh độc lập từng status component |
 | `dataType`, `chargeIconIndex` | Nhãn mạng 2G–9G và một trong 12 icon sạc |
 | `showDateTime`, `dateFormat`, `dateTimeFont`, `dateTimeSizeDp`, `dateTimeColorArgb` | Ngày/giờ và 6 font bundled |

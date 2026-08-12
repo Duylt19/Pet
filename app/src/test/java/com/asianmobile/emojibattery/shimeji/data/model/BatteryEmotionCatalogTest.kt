@@ -6,14 +6,29 @@ import org.junit.Test
 
 class BatteryEmotionCatalogTest {
     @Test
-    fun `bundled emotion taxonomy has eight ordered groups and eighty unique items`() {
+    fun `emotion taxonomy keeps classic data before eight bundled groups`() {
         assertEquals(
-            listOf("emoji", "cony", "kiiroitori", "molang", "mochi", "tobi", "keroppi", "pochacco"),
-            BUNDLED_BATTERY_EMOTION_GROUPS.map(BatteryEmotionGroup::key)
+            listOf(
+                "classic",
+                "emoji",
+                "cony",
+                "kiiroitori",
+                "molang",
+                "mochi",
+                "tobi",
+                "keroppi",
+                "pochacco"
+            ),
+            BATTERY_EMOTION_GROUPS.map(BatteryEmotionGroup::key)
         )
+        assertEquals((1..20).toList(), LEGACY_BATTERY_EMOTION_GROUP.emotionIds)
         assertTrue(BUNDLED_BATTERY_EMOTION_GROUPS.all { it.emotionIds.size == 10 })
-        assertEquals((1..80).toList(), BUNDLED_BATTERY_EMOTIONS.map(BatteryDecorationEntry::id))
+        assertEquals((21..100).toList(), BUNDLED_BATTERY_EMOTIONS.map(BatteryDecorationEntry::id))
         assertEquals(80, BUNDLED_BATTERY_EMOTIONS.map(BatteryDecorationEntry::id).distinct().size)
+        assertEquals(
+            (1..100).toList(),
+            BATTERY_EMOTION_GROUPS.flatMap(BatteryEmotionGroup::emotionIds)
+        )
     }
 
     @Test
