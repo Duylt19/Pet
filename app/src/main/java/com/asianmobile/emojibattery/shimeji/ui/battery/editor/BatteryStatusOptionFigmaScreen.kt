@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -150,20 +151,18 @@ internal fun BatteryStatusOptionFigmaScreen(
                     }
                 }
                 when (page) {
-                    BatteryEditorPage.ANIMATION -> item {
-                        AnimationStyleSection(
-                            animations = state.animations,
-                            selectedName = config.animationAssetName,
-                            onSelected = { animation ->
-                                onConfig(
-                                    config.copy(
-                                        showAnimation = true,
-                                        animationAssetName = animation.name
-                                    )
+                    BatteryEditorPage.ANIMATION -> animationStyleItems(
+                        animations = state.animations,
+                        selectedName = config.animationAssetName,
+                        onSelected = { animation ->
+                            onConfig(
+                                config.copy(
+                                    showAnimation = true,
+                                    animationAssetName = animation.name
                                 )
-                            }
-                        )
-                    }
+                            )
+                        }
+                    )
                     BatteryEditorPage.WIFI -> item {
                         StatusOptionStyleSection(
                             title = stringResource(R.string.battery_status_icon_style),
@@ -379,52 +378,56 @@ private fun OptionSectionTitle(value: String) {
     )
 }
 
-@Composable
-private fun AnimationStyleSection(
+private fun LazyListScope.animationStyleItems(
     animations: List<BatteryAnimationEntry>,
     selectedName: String,
     onSelected: (BatteryAnimationEntry) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))) {
+    item(key = "animation_style_title") {
         OptionSectionTitle(stringResource(R.string.battery_animation_style))
-        animations.chunked(4).forEach { rowAnimations ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
-            ) {
-                rowAnimations.forEach { animation ->
-                    val active = animation.name == selectedName
-                    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .aspectRatio(1f)
-                            .clip(shape)
-                            .background(
-                                colorResource(
-                                    if (active) R.color.colors_FFEBF1 else R.color.colors_FFFFFF
-                                )
+    }
+    val rows = animations.chunked(4)
+    items(
+        count = rows.size,
+        key = { rowIndex -> "animation_row_${rows[rowIndex].first().id}" }
+    ) { rowIndex ->
+        val rowAnimations = rows[rowIndex]
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+        ) {
+            rowAnimations.forEach { animation ->
+                val active = animation.name == selectedName
+                val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .aspectRatio(1f)
+                        .clip(shape)
+                        .background(
+                            colorResource(
+                                if (active) R.color.colors_FFEBF1 else R.color.colors_FFFFFF
                             )
-                            .border(
-                                dimensionResource(SdpR.dimen._1sdp),
-                                colorResource(
-                                    if (active) R.color.colors_FB3675 else R.color.colors_DEDEDF
-                                ),
-                                shape
-                            )
-                            .semantics { selected = active }
-                            .clickable { onSelected(animation) }
-                            .padding(dimensionResource(SdpR.dimen._6sdp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        BatteryAnimationAsset(
-                            animation = animation,
-                            modifier = Modifier.fillMaxSize()
                         )
-                    }
+                        .border(
+                            dimensionResource(SdpR.dimen._1sdp),
+                            colorResource(
+                                if (active) R.color.colors_FB3675 else R.color.colors_DEDEDF
+                            ),
+                            shape
+                        )
+                        .semantics { selected = active }
+                        .clickable { onSelected(animation) }
+                        .padding(dimensionResource(SdpR.dimen._6sdp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    BatteryAnimationAsset(
+                        animation = animation,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
-                repeat(4 - rowAnimations.size) { Spacer(Modifier.weight(1f)) }
             }
+            repeat(4 - rowAnimations.size) { Spacer(Modifier.weight(1f)) }
         }
     }
 }

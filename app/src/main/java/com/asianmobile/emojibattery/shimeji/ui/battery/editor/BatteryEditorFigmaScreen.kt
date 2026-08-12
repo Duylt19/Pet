@@ -664,12 +664,22 @@ internal fun BatteryAnimationAsset(
                 else -> LottieCompositionSpec.File(animation.assetPath)
             }
         }
-        val composition by rememberLottieComposition(spec)
-        LottieAnimation(
-            composition = composition,
-            iterations = LottieConstants.IterateForever,
-            modifier = modifier
-        )
+        val compositionResult = rememberLottieComposition(spec)
+        val composition by compositionResult
+        if (composition != null) {
+            LottieAnimation(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                modifier = modifier
+            )
+        } else {
+            Image(
+                painter = painterResource(R.drawable.img_statusbar_template_animation),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = modifier
+            )
+        }
     } else {
         AsyncImage(
             model = animation.assetPath,

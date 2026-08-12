@@ -169,6 +169,10 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `favoriteThemeIds` | Favorite local theo theme ID |
 | `rewardUnlockedThemeIds` | Theme Premium đã mở khóa bằng Rewarded trên thiết bị |
 
+Picker Animation stream GIF theo viewport và materialize Lottie server thành file local trước
+khi tạo composition. Cách này giữ đủ item cuối danh sách, tránh chạy đồng thời toàn bộ 26
+animation và vẫn có fallback nhìn thấy được khi asset đang tải hoặc không parse được.
+
 `BatterySettingsPolicy` clamp toàn bộ geometry và loại ID âm để dữ liệu DataStore lỗi
 không đi thẳng vào `WindowManager`. DataStore cũ chưa có hai component ID sẽ migrate cả
 hai từ `selectedThemeId`. `BatteryDraftCodec` schema 2 lưu bản nháp versioned trong

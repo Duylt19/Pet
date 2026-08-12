@@ -130,6 +130,9 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   switch, slider/color/style grid và native collapsible với sáu option screen còn lại. Tất cả
   child giữ chung draft; child Apply commit vào draft overview, child Back rollback checkpoint
   và live preview;
+- Grid Animation lazy theo từng hàng bốn item để chỉ chạy animation đang nằm trong viewport.
+  Lottie server render từ file cache đã materialize; khi đang tải/parse hoặc gặp lỗi, card dùng
+  illustration Animation thay vì để trống;
 - Hàng Theme ở overview hiển thị trước năm background. Nếu background đang chọn nằm ngoài năm
   item đầu, hàng giữ bốn item đầu và đưa item đang chọn vào vị trí thứ năm;
 - Background Color và Theme là hai mode loại trừ nhau: chọn Color đặt decoration ID về `0` và

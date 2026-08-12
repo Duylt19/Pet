@@ -147,6 +147,9 @@ không được restore sau process death/reboot.
   `HybridBatteryCatalogRepository` đọc cache trước, revalidate private GitHub catalog
   theo TTL/ETag/backoff, materialize asset theo nhu cầu và chặn path escape,
   size/hash mismatch hoặc release catalog chưa `APPROVED`.
+- GIF trong picker được Coil stream/cache theo viewport. Lottie remote được materialize và
+  kiểm tra hash vào cache Battery catalog trước khi parse; UI dùng asset Animation mặc định
+  trong lúc tải hoặc khi composition lỗi nên không tạo item trắng.
 - Emotion legacy giữ nguyên ID `1..20` để DataStore hiện có không đổi nghĩa. Emotion mới là
   asset server ổn định với ID `21..100`, mỗi pack 10 item theo thứ tự Emoji, Cony,
   Kiiroitori, Molang, Mochi, Tobi, Keroppi và Pochacco. Group chỉ là taxonomy UI;

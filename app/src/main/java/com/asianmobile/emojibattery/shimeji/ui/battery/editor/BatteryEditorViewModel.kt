@@ -12,6 +12,7 @@ import com.asianmobile.emojibattery.shimeji.battery.settings.resolveBatteryStatu
 import com.asianmobile.emojibattery.shimeji.battery.settings.systemStatusBarHeightDp
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME_ID
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
@@ -31,6 +32,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -74,6 +78,7 @@ class BatteryEditorViewModel @Inject constructor(
     private var backgroundSelectionRequestId = 0L
     private var emotionSelectionRequestId = 0L
     private val childEditCheckpoints = mutableMapOf<String, ChildEditCheckpoint>()
+    private val animationPreviewFiles = MutableStateFlow<Map<String, String>>(emptyMap())
     private val _uiState = MutableStateFlow(
         BatteryEditorUiState(
             config = restoredDraft ?: BatteryStatusConfig(barHeightDp = barHeightRange.defaultDp),
@@ -90,8 +95,9 @@ class BatteryEditorViewModel @Inject constructor(
             combine(
                 catalogRepository.snapshot,
                 settingsRepository.config,
-                mobileDataMonitor.badge
-            ) { catalog, stored, mobileDataBadge ->
+                mobileDataMonitor.badge,
+                animationPreviewFiles
+            ) { catalog, stored, mobileDataBadge, localAnimationFiles ->
                 latestStored = stored
                 val isCurrentStyle = themeId == CURRENT_BATTERY_STYLE_ID
                 val theme = if (isCurrentStyle) {
@@ -131,7 +137,10 @@ class BatteryEditorViewModel @Inject constructor(
                     backgrounds = catalog.backgrounds,
                     emotions = catalog.emotions,
                     emotionGroups = catalog.emotionGroups,
-                    animations = catalog.animations,
+                    animations = BatteryAnimationPreviewPolicy.applyLocalFiles(
+                        catalog.animations,
+                        localAnimationFiles
+                    ),
                     mobileDataBadge = mobileDataBadge,
                     isThemeAvailable = selectedAssetsReady(catalog.themes, draft),
                     isPremium = SharedPreferencesUtils.getIsPremium(context),
@@ -140,6 +149,30 @@ class BatteryEditorViewModel @Inject constructor(
             }.collect { state ->
                 _uiState.value = state
                 publishPreview(state.config)
+            }
+        }
+        viewModelScope.launch {
+            catalogRepository.snapshot
+                .map { it.animations }
+                .distinctUntilChanged()
+                .collectLatest(::materializeAnimationPreviews)
+        }
+    }
+
+    private suspend fun materializeAnimationPreviews(animations: List<BatteryAnimationEntry>) {
+        val remoteLottieAnimations = animations.filter(
+            BatteryAnimationPreviewPolicy::requiresLocalFile
+        )
+        val activeRemotePaths = remoteLottieAnimations.mapTo(mutableSetOf()) { it.assetPath }
+        animationPreviewFiles.update { cached -> cached.filterKeys(activeRemotePaths::contains) }
+
+        remoteLottieAnimations.forEach { animation ->
+            if (animationPreviewFiles.value.containsKey(animation.assetPath)) return@forEach
+            val localPath = catalogRepository.materializeAsset(animation.assetPath)
+                ?.takeIf { it != animation.assetPath }
+                ?: return@forEach
+            animationPreviewFiles.update { cached ->
+                cached + (animation.assetPath to localPath)
             }
         }
     }
