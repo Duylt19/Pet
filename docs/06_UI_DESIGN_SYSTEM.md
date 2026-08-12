@@ -68,7 +68,8 @@ Discover Home contract:
 - route `home` là root sau onboarding và hiển thị dữ liệu thật từ owner/battery catalog;
 - toggle chính điều khiển `BatteryStatusConfig.enabled`, có disclosure và Accessibility gate;
 - Home shell có bốn tab Discover/Battery/Pet Store/Mine. `HomeBottomNavigation` cố định
-  trên bottom banner hiện có; từng screen không tự tạo lại bottom chrome;
+  trên bottom banner hiện có; từng screen không tự tạo lại bottom chrome. Battery selected dùng
+  glyph filled 24×24 export từ frame Figma `8017:3666`, không tái sử dụng icon outline unselected;
 - Discover, Pet Store và Mine dùng chung `HomeHeader` và `HomeEnableCard`: header `43sdp`, search
   `25sdp`, enable card `37sdp`, switch `34×18sdp`. Discover chỉ render Battery enable card;
   pet switch được quản lý ở flow pet. Không copy component rồi đổi metric riêng;
