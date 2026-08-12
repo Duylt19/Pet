@@ -17,6 +17,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_PRIVACY_R
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_STATUS_ICON_COLOR
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_STATUS_ICON_SIZE_DP
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_STYLE_INDEX
+import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_EMOTION_ID
 import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_STATUS_ICON_STYLE_INDEX
 
 class BatterySettingsPolicy(
@@ -33,7 +34,7 @@ class BatterySettingsPolicy(
         selectedEmojiThemeId = config.selectedEmojiThemeId
             .coerceAtLeast(BUILT_IN_BATTERY_THEME_ID),
         backgroundDecorationId = config.backgroundDecorationId.coerceIn(0, 20),
-        emotionDecorationId = config.emotionDecorationId.coerceIn(0, 20),
+        emotionDecorationId = config.emotionDecorationId.coerceIn(0, MAX_BATTERY_EMOTION_ID),
         animationAssetName = config.animationAssetName
             .takeIf(ANIMATION_FILE_NAME::matches)
             ?: DEFAULT_BATTERY_ANIMATION_ASSET,
@@ -62,6 +63,7 @@ class BatterySettingsPolicy(
         ringerSizeDp = config.ringerSizeDp.statusSize(),
         chargeSizeDp = config.chargeSizeDp.statusSize(),
         dateTimeSizeDp = config.dateTimeSizeDp.statusSize(),
+        clockSizeDp = config.clockSizeDp.statusSize(),
         wifiIconStyleIndex = config.wifiIconStyleIndex.statusIconStyle(),
         signalIconStyleIndex = config.signalIconStyleIndex.statusIconStyle(),
         airplaneIconStyleIndex = config.airplaneIconStyleIndex.statusIconStyle(),
@@ -87,6 +89,7 @@ class BatterySettingsPolicy(
         ringerColorArgb = config.ringerColorArgb.statusColor(),
         chargeColorArgb = config.chargeColorArgb.statusColor(),
         dateTimeColorArgb = config.dateTimeColorArgb.statusColor(),
+        clockColorArgb = config.clockColorArgb.statusColor(),
         favoriteThemeIds = config.favoriteThemeIds.filterTo(mutableSetOf()) { it >= 0 },
         rewardUnlockedThemeIds = config.rewardUnlockedThemeIds
             .filterTo(mutableSetOf()) { it > BUILT_IN_BATTERY_THEME_ID }

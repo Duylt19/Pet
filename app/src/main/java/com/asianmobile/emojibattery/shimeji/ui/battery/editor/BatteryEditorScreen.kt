@@ -154,6 +154,7 @@ internal enum class BatteryEditorPage {
     SIZE,
     APPEARANCE,
     EMOJI,
+    EMOTION_DETAIL,
     BATTERY,
     ANIMATION,
     WIFI,
@@ -163,12 +164,13 @@ internal enum class BatteryEditorPage {
     HOTSPOT,
     RINGER,
     CHARGE,
-    DATE_TIME;
+    DATE_TIME,
+    CLOCK;
 
     companion object {
         fun fromRoute(value: String?): BatteryEditorPage? =
             entries.firstOrNull { page ->
-                page != OVERVIEW && page.name == value
+                page != OVERVIEW && page != EMOTION_DETAIL && page.name == value
             }
     }
 }
@@ -176,8 +178,10 @@ internal enum class BatteryEditorPage {
 @Composable
 internal fun BatteryEditorScreen(
     page: BatteryEditorPage = BatteryEditorPage.OVERVIEW,
+    emotionGroupKey: String? = null,
     onBack: () -> Unit,
     onOpenPage: (BatteryEditorPage) -> Unit = {},
+    onOpenEmotionGroup: (String) -> Unit = {},
     onNavigateToPremium: () -> Unit,
     viewModel: BatteryEditorViewModel = hiltViewModel()
 ) {
@@ -255,10 +259,12 @@ internal fun BatteryEditorScreen(
     BatteryEditorContent(
         state = state,
         page = page,
+        emotionGroupKey = emotionGroupKey,
         accessibilityEnabled = accessibilityEnabled,
         onBack = requestBack,
         onDone = onBack,
         onOpenPage = onOpenPage,
+        onOpenEmotionGroup = onOpenEmotionGroup,
         onPremium = onNavigateToPremium,
         onShowTime = viewModel::setShowTime,
         onShowPercentage = viewModel::setShowPercentage,
@@ -354,10 +360,12 @@ internal fun BatteryEditorScreen(
 private fun BatteryEditorContent(
     state: BatteryEditorUiState,
     page: BatteryEditorPage,
+    emotionGroupKey: String?,
     accessibilityEnabled: Boolean,
     onBack: () -> Unit,
     onDone: () -> Unit,
     onOpenPage: (BatteryEditorPage) -> Unit,
+    onOpenEmotionGroup: (String) -> Unit,
     onPremium: () -> Unit,
     onShowTime: (Boolean) -> Unit,
     onShowPercentage: (Boolean) -> Unit,
@@ -374,6 +382,28 @@ private fun BatteryEditorContent(
     onApply: () -> Unit,
     onDisable: () -> Unit
 ) {
+    if (page == BatteryEditorPage.EMOJI || page == BatteryEditorPage.EMOTION_DETAIL) {
+        BatteryEmotionFigmaScreen(
+            state = state,
+            groupKey = emotionGroupKey,
+            onBack = onBack,
+            onPremium = onPremium,
+            onOpenGroup = onOpenEmotionGroup,
+            onConfig = onConfig,
+            onApply = onApply
+        )
+        return
+    }
+    if (page.isStatusOptionPage()) {
+        BatteryStatusOptionFigmaScreen(
+            state = state,
+            page = page,
+            onBack = onBack,
+            onConfig = onConfig,
+            onApply = onApply
+        )
+        return
+    }
     if (page == BatteryEditorPage.OVERVIEW || page.isFigmaPickerPage()) {
         BatteryEditorFigmaContent(
             state = state,
@@ -510,6 +540,8 @@ private fun BatteryEditorContent(
                 )
                 BatteryEditorPage.CHARGE -> ChargeEditor(state.config, onConfig)
                 BatteryEditorPage.DATE_TIME -> DateTimeEditor(state.config, onConfig)
+                BatteryEditorPage.CLOCK -> DateTimeEditor(state.config, onConfig)
+                BatteryEditorPage.EMOTION_DETAIL -> Unit
             }
             if (page == BatteryEditorPage.OVERVIEW) {
                 Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
@@ -540,6 +572,7 @@ private fun editorPageTitle(page: BatteryEditorPage): String = when (page) {
     BatteryEditorPage.SIZE -> stringResource(R.string.battery_editor_size_title)
     BatteryEditorPage.APPEARANCE -> stringResource(R.string.battery_editor_appearance_title)
     BatteryEditorPage.EMOJI -> stringResource(R.string.battery_editor_emoji_title)
+    BatteryEditorPage.EMOTION_DETAIL -> stringResource(R.string.battery_component_emotion)
     BatteryEditorPage.BATTERY -> stringResource(R.string.battery_editor_battery_title)
     BatteryEditorPage.ANIMATION -> stringResource(R.string.battery_component_animation)
     BatteryEditorPage.WIFI -> stringResource(R.string.battery_component_wifi)
@@ -550,6 +583,7 @@ private fun editorPageTitle(page: BatteryEditorPage): String = when (page) {
     BatteryEditorPage.RINGER -> stringResource(R.string.battery_component_ringer)
     BatteryEditorPage.CHARGE -> stringResource(R.string.battery_component_charge)
     BatteryEditorPage.DATE_TIME -> stringResource(R.string.battery_component_date)
+    BatteryEditorPage.CLOCK -> stringResource(R.string.battery_component_clock)
 }
 
 @Composable
@@ -1818,9 +1852,9 @@ internal fun BatteryPreview(
             if (layout.shows(BatteryStatusComponent.TIME)) {
                 Text(
                     text = stringResource(R.string.battery_preview_time),
-                    color = Color(config.dateTimeColorArgb),
-                    fontFamily = previewDateFont,
-                    fontSize = config.dateTimeSizeDp.sp,
+                    color = Color(config.clockColorArgb),
+                    fontFamily = RobotoFontFamily,
+                    fontSize = config.clockSizeDp.sp,
                     maxLines = 1
                 )
             }
@@ -1992,9 +2026,10 @@ internal fun batteryPreviewLayout(
             add(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.TIME,
-                    width = config.dateTimeSizeDp * 3.2f + gap,
+                    width = config.clockSizeDp * 3.2f + gap,
                     priority = 100,
-                    required = focusedComponent == BatteryStatusComponent.DATE
+                    required = focusedComponent == BatteryStatusComponent.DATE ||
+                        focusedComponent == BatteryStatusComponent.TIME
                 )
             )
         }
@@ -2008,7 +2043,7 @@ internal fun batteryPreviewLayout(
                 )
             )
         }
-        if (focusedComponent == BatteryStatusComponent.AIRPLANE) {
+        if (config.showAirplane && focusedComponent == BatteryStatusComponent.AIRPLANE) {
             add(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.AIRPLANE,
@@ -2018,7 +2053,7 @@ internal fun batteryPreviewLayout(
                 )
             )
         }
-        if (focusedComponent == BatteryStatusComponent.RINGER) {
+        if (config.showRinger && focusedComponent == BatteryStatusComponent.RINGER) {
             add(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.RINGER,
@@ -2043,11 +2078,12 @@ internal fun batteryPreviewLayout(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.EMOTION,
                     width = config.emojiSizeDp + gap,
-                    priority = 30
+                    priority = 30,
+                    required = focusedComponent == BatteryStatusComponent.EMOTION
                 )
             )
         }
-        if (focusedComponent == BatteryStatusComponent.CHARGE) {
+        if (config.showCharge && focusedComponent == BatteryStatusComponent.CHARGE) {
             add(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.CHARGE,
@@ -2097,7 +2133,7 @@ internal fun batteryPreviewLayout(
                 )
             )
         }
-        if (focusedComponent == BatteryStatusComponent.HOTSPOT) {
+        if (config.showHotspot && focusedComponent == BatteryStatusComponent.HOTSPOT) {
             add(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.HOTSPOT,
@@ -2111,6 +2147,8 @@ internal fun batteryPreviewLayout(
 )
 
 private fun BatteryEditorPage.previewComponent(): BatteryStatusComponent? = when (this) {
+    BatteryEditorPage.EMOJI,
+    BatteryEditorPage.EMOTION_DETAIL -> BatteryStatusComponent.EMOTION
     BatteryEditorPage.ANIMATION -> BatteryStatusComponent.ANIMATION
     BatteryEditorPage.WIFI -> BatteryStatusComponent.WIFI
     BatteryEditorPage.DATA,
@@ -2120,6 +2158,7 @@ private fun BatteryEditorPage.previewComponent(): BatteryStatusComponent? = when
     BatteryEditorPage.RINGER -> BatteryStatusComponent.RINGER
     BatteryEditorPage.CHARGE -> BatteryStatusComponent.CHARGE
     BatteryEditorPage.DATE_TIME -> BatteryStatusComponent.DATE
+    BatteryEditorPage.CLOCK -> BatteryStatusComponent.TIME
     else -> null
 }
 
@@ -2137,7 +2176,8 @@ private fun BatteryEditorPage.analyticsScreen(): ScreenName = when (this) {
     BatteryEditorPage.BACKGROUND_THEMES -> ScreenName.BATTERY_APPEARANCE_EDITOR
     BatteryEditorPage.SIZE -> ScreenName.BATTERY_SIZE_EDITOR
     BatteryEditorPage.APPEARANCE -> ScreenName.BATTERY_APPEARANCE_EDITOR
-    BatteryEditorPage.EMOJI -> ScreenName.BATTERY_EMOJI_EDITOR
+    BatteryEditorPage.EMOJI -> ScreenName.BATTERY_EMOTION_EDITOR
+    BatteryEditorPage.EMOTION_DETAIL -> ScreenName.BATTERY_EMOTION_DETAIL
     BatteryEditorPage.BATTERY -> ScreenName.BATTERY_ICON_EDITOR
     BatteryEditorPage.ANIMATION -> ScreenName.BATTERY_ANIMATION_EDITOR
     BatteryEditorPage.WIFI -> ScreenName.BATTERY_WIFI_EDITOR
@@ -2148,6 +2188,7 @@ private fun BatteryEditorPage.analyticsScreen(): ScreenName = when (this) {
     BatteryEditorPage.RINGER -> ScreenName.BATTERY_RINGER_EDITOR
     BatteryEditorPage.CHARGE -> ScreenName.BATTERY_CHARGE_EDITOR
     BatteryEditorPage.DATE_TIME -> ScreenName.BATTERY_DATE_TIME_EDITOR
+    BatteryEditorPage.CLOCK -> ScreenName.BATTERY_DATE_TIME_EDITOR
 }
 
 @Composable
@@ -2383,10 +2424,12 @@ private fun BatteryEditorOverviewPreview() {
     BatteryEditorContent(
         state = BatteryEditorUiState(),
         page = BatteryEditorPage.OVERVIEW,
+        emotionGroupKey = null,
         accessibilityEnabled = true,
         onBack = {},
         onDone = {},
         onOpenPage = {},
+        onOpenEmotionGroup = {},
         onPremium = {},
         onShowTime = {},
         onShowPercentage = {},

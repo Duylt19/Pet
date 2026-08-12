@@ -176,9 +176,9 @@ class BatteryStatusBarView(context: Context) : View(context) {
                 timeText,
                 cursor,
                 centerY,
-                config.dateTimeSizeDp,
-                config.dateTimeColorArgb,
-                dateTypeface(),
+                config.clockSizeDp,
+                config.clockColorArgb,
+                robotoMediumTypeface,
                 fromLeft
             ).afterGap(gap, fromLeft)
         }
@@ -339,12 +339,13 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         BatteryStatusComponent.TIME,
                         measuredTextWidth(
                             timeText,
-                            config.dateTimeSizeDp,
-                            dateTypeface()
+                            config.clockSizeDp,
+                            robotoMediumTypeface
                         ),
                         gap,
                         priority = 100,
-                        required = focusedComponent == BatteryStatusComponent.DATE
+                        required = focusedComponent == BatteryStatusComponent.DATE ||
+                            focusedComponent == BatteryStatusComponent.TIME
                     )
                 )
             }
@@ -359,7 +360,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                     )
                 )
             }
-            if (deviceState.airplaneMode) {
+            if (config.showAirplane && deviceState.airplaneMode) {
                 add(
                     layoutItem(
                         BatteryStatusComponent.AIRPLANE,
@@ -371,6 +372,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                 )
             }
             if (
+                config.showRinger &&
                 BatterySystemStatusPolicy.ringerIcon(
                     deviceState.ringer,
                     config.ringerIconStyleIndex
@@ -403,11 +405,12 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         BatteryStatusComponent.EMOTION,
                         config.emojiSizeDp * density,
                         gap,
-                        priority = 30
+                        priority = 30,
+                        required = focusedComponent == BatteryStatusComponent.EMOTION
                     )
                 )
             }
-            if (powerState.isCharging) {
+            if (config.showCharge && powerState.isCharging) {
                 add(
                     layoutItem(
                         BatteryStatusComponent.CHARGE,
@@ -477,6 +480,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                 )
             }
             if (
+                config.showHotspot &&
                 BatterySystemStatusPolicy.hotspotIcon(
                     deviceState.hotspot,
                     config.hotspotIconStyleIndex

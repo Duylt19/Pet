@@ -51,15 +51,19 @@ object BatteryDraftCodec {
         .put("signalColorArgb", config.signalColorArgb)
         .put("signalIconStyleIndex", config.signalIconStyleIndex)
         .put("airplaneSizeDp", config.airplaneSizeDp.toDouble())
+        .put("showAirplane", config.showAirplane)
         .put("airplaneColorArgb", config.airplaneColorArgb)
         .put("airplaneIconStyleIndex", config.airplaneIconStyleIndex)
         .put("hotspotSizeDp", config.hotspotSizeDp.toDouble())
+        .put("showHotspot", config.showHotspot)
         .put("hotspotColorArgb", config.hotspotColorArgb)
         .put("hotspotIconStyleIndex", config.hotspotIconStyleIndex)
         .put("ringerSizeDp", config.ringerSizeDp.toDouble())
+        .put("showRinger", config.showRinger)
         .put("ringerColorArgb", config.ringerColorArgb)
         .put("ringerIconStyleIndex", config.ringerIconStyleIndex)
         .put("chargeSizeDp", config.chargeSizeDp.toDouble())
+        .put("showCharge", config.showCharge)
         .put("chargeIconIndex", config.chargeIconIndex)
         .put("chargeColorArgb", config.chargeColorArgb)
         .put("showDateTime", config.showDateTime)
@@ -67,6 +71,8 @@ object BatteryDraftCodec {
         .put("dateTimeSizeDp", config.dateTimeSizeDp.toDouble())
         .put("dateFormat", config.dateFormat.name)
         .put("dateTimeFont", config.dateTimeFont.name)
+        .put("clockColorArgb", config.clockColorArgb)
+        .put("clockSizeDp", config.clockSizeDp.toDouble())
         .put("privacyReserveDp", config.privacyReserveDp.toDouble())
         .put(
             "favoriteThemeIds",
@@ -156,6 +162,7 @@ object BatteryDraftCodec {
                     fallback.signalIconStyleIndex
                 ),
                 airplaneSizeDp = json.float("airplaneSizeDp", fallback.airplaneSizeDp),
+                showAirplane = json.boolean("showAirplane", fallback.showAirplane),
                 airplaneColorArgb = json.int(
                     "airplaneColorArgb",
                     fallback.airplaneColorArgb
@@ -165,18 +172,21 @@ object BatteryDraftCodec {
                     fallback.airplaneIconStyleIndex
                 ),
                 hotspotSizeDp = json.float("hotspotSizeDp", fallback.hotspotSizeDp),
+                showHotspot = json.boolean("showHotspot", fallback.showHotspot),
                 hotspotColorArgb = json.int("hotspotColorArgb", fallback.hotspotColorArgb),
                 hotspotIconStyleIndex = json.int(
                     "hotspotIconStyleIndex",
                     fallback.hotspotIconStyleIndex
                 ),
                 ringerSizeDp = json.float("ringerSizeDp", fallback.ringerSizeDp),
+                showRinger = json.boolean("showRinger", fallback.showRinger),
                 ringerColorArgb = json.int("ringerColorArgb", fallback.ringerColorArgb),
                 ringerIconStyleIndex = json.int(
                     "ringerIconStyleIndex",
                     fallback.ringerIconStyleIndex
                 ),
                 chargeSizeDp = json.float("chargeSizeDp", fallback.chargeSizeDp),
+                showCharge = json.boolean("showCharge", fallback.showCharge),
                 chargeIconIndex = json.int("chargeIconIndex", fallback.chargeIconIndex),
                 chargeColorArgb = json.int("chargeColorArgb", fallback.chargeColorArgb),
                 showDateTime = json.boolean("showDateTime", fallback.showDateTime),
@@ -195,6 +205,8 @@ object BatteryDraftCodec {
                     fallback.dateTimeFont,
                     BatteryDateFont.entries
                 ),
+                clockColorArgb = json.int("clockColorArgb", fallback.clockColorArgb),
+                clockSizeDp = json.float("clockSizeDp", fallback.clockSizeDp),
                 privacyReserveDp = json.float(
                     "privacyReserveDp",
                     fallback.privacyReserveDp

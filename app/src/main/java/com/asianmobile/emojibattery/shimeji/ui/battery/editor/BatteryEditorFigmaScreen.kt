@@ -824,11 +824,15 @@ internal fun DesignSlider(
     label: String,
     value: Float,
     range: ClosedFloatingPointRange<Float>,
-    onValueChange: (Float) -> Unit
+    onValueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val coercedValue = value.coerceIn(range)
     val pink = colorResource(R.color.colors_FB3675)
-    Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
+    ) {
         Text(
             text = label,
             color = colorResource(R.color.colors_212327),
@@ -879,7 +883,7 @@ private fun StatusBarComponentGrid(onOpenPage: (BatteryEditorPage) -> Unit) {
         FigmaComponentDestination(R.string.battery_component_signal, BatteryEditorPage.SIGNAL, R.drawable.ic_statusbar_custom_signal),
         FigmaComponentDestination(R.string.battery_component_data_short, BatteryEditorPage.DATA, R.drawable.ic_statusbar_custom_data),
         FigmaComponentDestination(R.string.battery_component_charge_short, BatteryEditorPage.CHARGE, R.drawable.ic_statusbar_custom_charge),
-        FigmaComponentDestination(R.string.battery_component_clock, BatteryEditorPage.DATE_TIME, R.drawable.ic_statusbar_custom_clock)
+        FigmaComponentDestination(R.string.battery_component_clock, BatteryEditorPage.CLOCK, R.drawable.ic_statusbar_custom_clock)
     )
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))) {
         destinations.chunked(4).forEach { rowItems ->

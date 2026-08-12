@@ -42,9 +42,10 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Battery landing tái sử dụng native placement `screen_home` với template `HEIGHT_150` sau
   section đầu tiên. Category detail có banner inline `battery_category_inline`; creative do SDK
   tải, không đóng gói ảnh quảng cáo mẫu trong Figma. Bottom banner vẫn là holder của shell.
-- Customize Status Bar và các child library dùng một holder shell riêng với key
-  `battery_editor_bottom`, nằm ngoài NavHost content để overview → Battery/Emoji/Theme không
-  tự tạo hoặc reload banner.
+- Customize Status Bar và các child library dùng holder shell nằm ngoài NavHost. Overview và
+  Battery/Emoji/Theme cùng Emotion group/detail giữ banner `battery_editor_bottom`; sáu editor custom icon thay slot đó
+  bằng một native `COLLAPSE_SMALL` dùng chung, nên không double-render ad và Apply luôn reflow
+  ngay phía trên chiều cao collapsed/expanded thực tế.
 - Các banner inline `discover_inline`, `search_inline` và `battery_category_inline` có ViewModel
   key riêng để không dùng chung ad object với banner shell. Holder căn giữa creative SDK 320×50,
   dùng nền trắng và shimmer `#E6E6E6`; khi ads bị tắt/Premium/load fail thì slot collapse, không

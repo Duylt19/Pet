@@ -36,6 +36,8 @@ enum class ScreenName(val value: String) {
     BATTERY_SIZE_EDITOR("battery_size_editor"),
     BATTERY_APPEARANCE_EDITOR("battery_appearance_editor"),
     BATTERY_EMOJI_EDITOR("battery_emoji_editor"),
+    BATTERY_EMOTION_EDITOR("battery_emotion_editor"),
+    BATTERY_EMOTION_DETAIL("battery_emotion_detail"),
     BATTERY_ICON_EDITOR("battery_icon_editor"),
     BATTERY_ANIMATION_EDITOR("battery_animation_editor"),
     BATTERY_WIFI_EDITOR("battery_wifi_editor"),

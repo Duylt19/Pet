@@ -23,6 +23,8 @@
 | Battery size editor | `battery_size_editor` |
 | Battery appearance editor | `battery_appearance_editor` |
 | Battery emoji editor | `battery_emoji_editor` |
+| Battery emotion packs | `battery_emotion_editor` |
+| Battery emotion group detail | `battery_emotion_detail` |
 | Battery icon editor | `battery_icon_editor` |
 | Battery animation editor | `battery_animation_editor` |
 | Battery Wi-Fi editor | `battery_wifi_editor` |

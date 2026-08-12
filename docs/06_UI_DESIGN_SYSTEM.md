@@ -106,6 +106,11 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   chồng cùng tâm và mọi component cách nhau 4dp;
 - More Battery/Emoji mở grid ba cột với artwork 73.03% item; More Theme mở grid hai cột từ
   background catalog runtime. Tất cả child giữ chung draft và Back không tự Apply;
+- Emotion dùng màn pack theo Figma `8404:6277`: nhóm Classic giữ 20 item cũ và tám card mới,
+  mỗi card preview 5×2 item; chạm pack/item
+  mở detail `8404:7179` với slider Size, switch, grid ba cột và Apply sticky. Preview luôn ghim
+  dưới top bar ở cả hai màn. 80 frame art là PNG @3x vì nguồn Figma là raster/image-fill;
+  card, selected stroke, shadow và background được dựng bằng Compose.
 - Template có đủ Battery, Emoji và Animation; header dùng icon Figma 16px và chevron vector
   14px. Color có custom wheel, bảy preset và ba theme preview; custom wheel mở HSV/opacity
   sheet, cập nhật trực tiếp cùng draft/live-preview policy;
