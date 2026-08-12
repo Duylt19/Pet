@@ -69,6 +69,36 @@ class BatteryCatalogParserTest {
     }
 
     @Test
+    fun parse_accepts_webp_emotion_group_background() {
+        val root = JSONObject(validCatalog())
+            .put("emotionCount", 1)
+            .put("emotionGroupCount", 1)
+            .put(
+                "emotionGroups",
+                JSONArray().put(
+                    JSONObject()
+                        .put("key", "classic")
+                        .put("order", 0)
+                        .put("emotionIds", JSONArray().put(1))
+                        .put(
+                            "background",
+                            JSONObject()
+                                .put("path", "emotion_group/classic.webp")
+                                .put("sizeBytes", 8)
+                                .put("sha256", "2".repeat(64))
+                                .put("width", 656)
+                                .put("height", 270)
+                        )
+                )
+            )
+
+        assertEquals(
+            "emotion_group/classic.webp",
+            parser.parse(root.toString()).emotionGroups.single().background?.path
+        )
+    }
+
+    @Test
     fun parse_rejects_unsupported_static_image_extension() {
         assertThrows(BatteryCatalogParseException::class.java) {
             parser.parse(validCatalog().replace("battery/7.png", "battery/7.jpg"))

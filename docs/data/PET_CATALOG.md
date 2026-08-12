@@ -5,13 +5,14 @@
 ```text
 json/pets.json
 data/<petId>.zip
-thumb/<petId>.png
+thumb/<petId>.webp
 schema/catalog-v1.schema.json
 ```
 
 `pets.json` schema v1 chứa catalog/source version, count, categories và Pet records. Mỗi
 record có stable ID, name/category/author, thumbnail, ZIP archive và optional speech anchor.
-Asset record giữ path, bytes và SHA-256.
+Asset record giữ path, bytes và SHA-256. Parser vẫn đọc thumbnail PNG của catalog cache cũ,
+nhưng baseline server từ `2026-08-12-webp-v1` dùng WebP lossless.
 
 ## Runtime
 
@@ -26,7 +27,9 @@ Asset record giữ path, bytes và SHA-256.
 
 - Không đổi nghĩa/tái sử dụng Pet ID đã publish.
 - Sửa metadata: giữ ID/path/hash nếu binary không đổi; tăng `catalogVersion`.
-- Thay ZIP/thumbnail: giữ ID, pipeline cập nhật size/hash; checksum tạo cache revision mới.
+- Thay ZIP/thumbnail: giữ ID, pipeline cập nhật path/size/hash; checksum tạo cache revision mới.
+- Không đổi extension bằng phép thay chuỗi ở client. `thumbnail.path` trong catalog là source of
+  truth và có thể là `.webp` hoặc `.png` trong giai đoạn tương thích.
 - Xóa Pet phải có selection fallback; ưu tiên hidden/deprecated trong schema mới.
 - Đổi shape record là breaking migration: ship parser mới trước rồi tăng schema.
 

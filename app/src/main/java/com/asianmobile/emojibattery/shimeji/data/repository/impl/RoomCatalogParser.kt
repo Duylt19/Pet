@@ -63,8 +63,8 @@ class RoomCatalogParser {
                 name = name,
                 slug = slug,
                 entitlement = entitlement,
-                background = assets.getJSONObject("background").toAsset("bg/BG_$id.png", index),
-                thumbnail = assets.getJSONObject("thumbnail").toAsset("thumb/BG_$id.png", index)
+                background = assets.getJSONObject("background").toAsset("bg/BG_$id", index),
+                thumbnail = assets.getJSONObject("thumbnail").toAsset("thumb/BG_$id", index)
             )
         }
         validate(root, rooms)
@@ -105,7 +105,10 @@ class RoomCatalogParser {
         }
     }
 
-    private fun JSONObject.toAsset(expectedPath: String, index: Int): RoomCatalogAssetRecord {
+    private fun JSONObject.toAsset(
+        expectedPathWithoutExtension: String,
+        index: Int
+    ): RoomCatalogAssetRecord {
         val record = RoomCatalogAssetRecord(
             path = getString("path"),
             sizeBytes = getLong("sizeBytes"),
@@ -113,7 +116,14 @@ class RoomCatalogParser {
             width = getInt("width"),
             height = getInt("height")
         )
-        if (record.path != expectedPath || record.sizeBytes <= 0L ||
+        val extension = record.path.substringAfterLast('.', missingDelimiterValue = "")
+        val pathWithoutExtension = record.path.substringBeforeLast(
+            delimiter = ".",
+            missingDelimiterValue = ""
+        )
+        if (pathWithoutExtension != expectedPathWithoutExtension ||
+            extension !in IMAGE_EXTENSIONS ||
+            record.sizeBytes <= 0L ||
             !SHA_256.matches(record.sha256) ||
             record.width !in 1..MAX_IMAGE_DIMENSION ||
             record.height !in 1..MAX_IMAGE_DIMENSION
@@ -138,6 +148,7 @@ class RoomCatalogParser {
         const val APPROVED_STATUS = "APPROVED"
         val DISTRIBUTION_STATUSES = setOf(APPROVED_STATUS, "REVIEW_REQUIRED")
         val SHA_256 = Regex("[0-9a-f]{64}")
+        val IMAGE_EXTENSIONS = setOf("png", "webp")
         val SLUG = Regex("[a-z0-9]+(?:[-_][a-z0-9]+)*")
     }
 }

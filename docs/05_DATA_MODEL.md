@@ -203,7 +203,7 @@ không được restore sau process death/reboot.
   SHA-256 và dimension. `RemotePetRoomCatalogRepository` đọc cache trước, revalidate theo
   cùng `PetCatalogRefreshPolicy` (TTL 24h + ETag + rate-limit backoff) như pet/battery,
   materialize asset theo nhu cầu và verify size/SHA-256 trước khi dùng.
-- Mỗi room có đúng hai asset: `bg/BG_<id>.png` full-resolution và `thumb/BG_<id>.png` bản
+- Mỗi room có đúng hai asset: `bg/BG_<id>.webp` full-resolution và `thumb/BG_<id>.webp` bản
   preview nhẹ. `RoomCatalogParser` từ chối catalog nếu thumbnail không nhỏ và nhẹ hơn
   background, nên grid Room không thể vô tình tải ảnh full-size. Release chỉ chấp nhận
   catalog `APPROVED`; debug chấp nhận cả `REVIEW_REQUIRED`.

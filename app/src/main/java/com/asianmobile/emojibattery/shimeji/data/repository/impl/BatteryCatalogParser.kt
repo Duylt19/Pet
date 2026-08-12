@@ -264,7 +264,11 @@ class BatteryCatalogParser {
                 order = order,
                 emotionIds = emotionIds,
                 background = item.optJSONObject("background")
-                    ?.toAsset("emotion_group/$key.jpg", index)
+                    ?.toStaticImageAsset(
+                        expectedPathWithoutExtension = "emotion_group/$key",
+                        index = index,
+                        allowedExtensions = GROUP_BACKGROUND_EXTENSIONS
+                    )
             ).also {
                 if (key.isBlank() || order < 0 || emotionIds.isEmpty()) {
                     throw BatteryCatalogParseException(
@@ -371,7 +375,8 @@ class BatteryCatalogParser {
 
     private fun JSONObject.toStaticImageAsset(
         expectedPathWithoutExtension: String,
-        index: Int
+        index: Int,
+        allowedExtensions: Set<String> = STATIC_IMAGE_EXTENSIONS
     ): BatteryCatalogAssetRecord {
         val record = toAssetRecord()
         val extension = record.path.substringAfterLast('.', missingDelimiterValue = "")
@@ -380,7 +385,7 @@ class BatteryCatalogParser {
             missingDelimiterValue = ""
         )
         if (pathWithoutExtension != expectedPathWithoutExtension ||
-            extension !in STATIC_IMAGE_EXTENSIONS ||
+            extension !in allowedExtensions ||
             !record.hasValidMetadata()
         ) {
             throw BatteryCatalogParseException(
@@ -421,6 +426,7 @@ class BatteryCatalogParser {
         const val SCHEMA_VERSION = 1
         const val MAX_IMAGE_DIMENSION = 4096
         val STATIC_IMAGE_EXTENSIONS = setOf("png", "webp")
+        val GROUP_BACKGROUND_EXTENSIONS = STATIC_IMAGE_EXTENSIONS + setOf("jpg", "jpeg")
         val SHA_256 = Regex("[0-9a-f]{64}")
         val SLUG = Regex("[a-z0-9]+(?:-[a-z0-9]+)*")
         val ANIMATION_NAME = Regex("(?:cute_[1-5]\\.json|(?:[1-9]|1[0-9]|2[01])\\.gif)")

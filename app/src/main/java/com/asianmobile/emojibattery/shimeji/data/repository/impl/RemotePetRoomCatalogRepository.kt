@@ -90,6 +90,7 @@ class RemotePetRoomCatalogRepository @Inject constructor(
     override fun cachedAssetPath(path: String?): String? {
         val record = path?.let(assetsByPath::get) ?: return null
         return client.cachedAsset(
+            relativePath = record.path,
             expectedSizeBytes = record.sizeBytes,
             expectedSha256 = record.sha256
         )?.absolutePath

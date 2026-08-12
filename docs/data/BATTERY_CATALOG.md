@@ -12,12 +12,13 @@ battery/
 ├── background_preview/<name>.webp|png
 ├── emotion/<name>.webp|png
 ├── emotion_preview/<name>.webp|png
-├── emotion_group/<groupKey>.jpg
+├── emotion_group/<groupKey>.webp|jpg
 └── animation/<name>.gif|json
 ```
 
-Ảnh tĩnh chấp nhận PNG hoặc lossless WebP. GIF, Lottie JSON và JPEG group background giữ
-nguyên. Path trong catalog là source of truth; app không tự thay extension.
+Ảnh tĩnh chấp nhận PNG hoặc WebP; group background còn đọc JPEG để tương thích cache cũ.
+Baseline server `battery-webp-2026-08-12-v1` dùng WebP cho toàn bộ ảnh tĩnh. GIF và Lottie
+JSON giữ nguyên. Path trong catalog là source of truth; app không tự thay extension.
 
 ## Nhóm data và lazy loading
 
@@ -25,7 +26,7 @@ nguyên. Path trong catalog là source of truth; app không tự thay extension.
 |---|---|---|---|
 | Theme | theme ID; Battery/Emoji độc lập | `thumb` | materialize full `battery`/`emoji` |
 | Background | leaf ID; `0` là màu phẳng | `background_preview` | full `background` |
-| Emotion | leaf ID; group chỉ taxonomy | `emotion_preview` + group JPEG | full `emotion` |
+| Emotion | leaf ID; group chỉ taxonomy | `emotion_preview` + group WebP/JPEG | full `emotion` |
 | Animation | ID/name/type | GIF theo viewport; Lottie fallback | selected GIF/Lottie local verified |
 
 Asset record có `path`, `sizeBytes`, `sha256`, `width`, `height`. Preview phải nhẹ hơn full.
@@ -37,11 +38,10 @@ record thành private GitHub URL. Preview dùng Coil. Full asset được
 `files/battery_catalog_assets/<sha256>.<extension>`. Renderer không dùng file chưa verify;
 download lỗi giữ selection cũ.
 
-## Manual lossless WebP
+## Baseline WebP hiện tại
 
-Server hiện vẫn dùng PNG. Khi owner tự convert trong giai đoạn debug, dùng Android Studio
-**Convert to WebP → Lossless encoding**, bật skip nếu WebP lớn hơn PNG và giữ nguyên ID/name.
-Catalog hợp lệ có thể chứa hỗn hợp PNG/WebP.
+Owner đã convert toàn bộ ảnh Battery tĩnh sang WebP trong giai đoạn debug v1. Catalog hợp lệ
+vẫn có thể chứa hỗn hợp PNG/WebP để rollout và đọc cache cũ; không convert GIF/Lottie.
 
 Sau khi convert thủ công, cập nhật `path`, `sizeBytes`, `sha256`, `width`, `height`, tăng
 `catalogVersion`/`capturedAt`, rồi chạy:
@@ -50,8 +50,8 @@ Sau khi convert thủ công, cập nhật `path`, `sizeBytes`, `sha256`, `width`
 python3 tools/battery_catalog_pipeline.py validate
 ```
 
-Không convert GIF/Lottie. Không dùng lossy WebP cho icon/status asset có alpha và nét nhỏ.
-Không xóa PNG trước khi catalog mới đã validate.
+Không xóa file cũ trước khi catalog WebP mới đã cập nhật path/hash/size/dimension và validate.
+Với icon/status asset có alpha và nét nhỏ, ưu tiên lossless WebP và kiểm tra decoded pixels.
 
 ## Cách update
 

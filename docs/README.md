@@ -60,9 +60,9 @@ qua `raw.githubusercontent.com` nhánh `master`.
 
 | Catalog | Config phía app | File phía server |
 |---|---|---|
-| Pet | `PetServerConfig` | `json/pets.json`, `data/<id>.zip`, `thumb/<id>.png` |
+| Pet | `PetServerConfig` | `json/pets.json`, `data/<id>.zip`, `thumb/<id>.webp` |
 | Battery | `BatteryServerConfig` | `json/batteries.json`, `battery/**` |
-| Room | `RoomServerConfig` | `json/rooms.json`, `room/bg|thumb/BG_<id>.png` |
+| Room | `RoomServerConfig` | `json/rooms.json`, `room/bg|thumb/BG_<id>.webp` |
 
 Repo private nên mọi request gửi `Authorization: Bearer <token>`; token lấy từ Remote Config key
 `github_token_pet_server` và default trong source luôn rỗng. Đọc cache-first, revalidate TTL 24h

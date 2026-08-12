@@ -26,7 +26,7 @@ python3 tools/pet_data_snapshot.py audit private_data/anime-shimeji \
 The audit:
 
 - records repository URL and exact commit;
-- cross-checks every catalog ID against `data/<id>.zip` and `thumb/<id>.png`;
+- cross-checks every catalog ID against `data/<id>.zip` and thumbnail path trong catalog;
 - verifies PNG signatures and ZIP CRCs;
 - rejects unsafe ZIP paths, detects duplicate/non-canonical numbered frames and reports missing/extra frame numbers against the app's case-sensitive `shime1.png`–`shime46.png` contract;
 - inventories size, SHA-256, frame range and uncompressed size;

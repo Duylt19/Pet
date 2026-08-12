@@ -60,7 +60,7 @@ class OwnerPetCatalogParserTest {
                     "sha256": "${"a".repeat(64)}"
                   },
                   "thumbnail": {
-                    "path": "thumb/42.png",
+                    "path": "thumb/42.webp",
                     "sizeBytes": 321,
                     "sha256": "${"b".repeat(64)}"
                   },
@@ -79,7 +79,7 @@ class OwnerPetCatalogParserTest {
         assertEquals("Creator", document.records.single().author)
         assertEquals("data/42.zip", document.records.single().archive?.path)
         assertEquals(1234L, document.records.single().archive?.sizeBytes)
-        assertEquals("thumb/42.png", document.records.single().thumbnail?.path)
+        assertEquals("thumb/42.webp", document.records.single().thumbnail?.path)
         assertEquals(
             OwnerPetCatalogSpeechAnchorRecord(0.421875f, 0.671875f),
             document.records.single().speechAnchor
