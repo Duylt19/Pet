@@ -71,13 +71,7 @@ internal fun BatteryEmotionFigmaScreen(
 ) {
     val selectedGroup = BATTERY_EMOTION_GROUPS.firstOrNull { it.key == groupKey }
     Box(Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(R.drawable.img_home_wallpaper),
-            contentDescription = null,
-            contentScale = ContentScale.FillWidth,
-            alignment = Alignment.TopCenter,
-            modifier = Modifier.fillMaxWidth()
-        )
+        StatusBarEditorWallpaper()
         Column(
             modifier = Modifier
                 .fillMaxSize()

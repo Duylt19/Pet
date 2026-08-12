@@ -105,7 +105,9 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   Hotspot → Signal/Data → Wifi → Percentage → Battery/Emoji pair → Charge; Battery và Emoji
   chồng cùng tâm và mọi component cách nhau 4dp;
 - More Battery/Emoji mở grid ba cột với artwork 73.03% item; More Theme mở grid hai cột từ
-  background catalog runtime. Tất cả child giữ chung draft và Back không tự Apply;
+  background catalog runtime. Wallpaper của overview và mọi child phủ toàn viewport bằng crop
+  căn top; không để lộ nền app legacy màu tối ở đáy trên thiết bị có tỷ lệ màn hình cao hơn
+  frame Figma 360×800. Tất cả child giữ chung draft và Back không tự Apply;
 - Emotion dùng màn pack theo Figma `8404:6277`: nhóm Classic giữ 20 item cũ và tám card mới,
   mỗi card preview 5×2 item; chạm pack/item
   mở detail `8404:7179` với slider Size, switch, grid ba cột và Apply sticky. Preview luôn ghim

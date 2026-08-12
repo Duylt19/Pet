@@ -108,13 +108,7 @@ internal fun BatteryEditorFigmaContent(
         null
     }
     Box(Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(R.drawable.img_home_wallpaper),
-            contentDescription = null,
-            contentScale = ContentScale.FillWidth,
-            alignment = Alignment.TopCenter,
-            modifier = Modifier.fillMaxWidth()
-        )
+        StatusBarEditorWallpaper()
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
@@ -174,6 +168,19 @@ internal fun BatteryEditorFigmaContent(
             }
         }
     }
+}
+
+@Composable
+internal fun StatusBarEditorWallpaper() {
+    Image(
+        painter = painterResource(R.drawable.img_home_wallpaper),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        alignment = Alignment.TopCenter,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.colors_FFFFFF))
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
