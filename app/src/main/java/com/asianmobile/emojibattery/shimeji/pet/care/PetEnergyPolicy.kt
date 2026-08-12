@@ -28,6 +28,24 @@ object PetEnergyPolicy {
         return (stored - drained).toInt()
     }
 
+    /**
+     * A newly adopted pet has no explicit energy record until its first meal. In that case the
+     * adoption time is the honest start of the full bowl instead of resetting the clock on every
+     * UI read.
+     */
+    fun resolvedEnergy(
+        storedPercent: Int?,
+        updatedAtMillis: Long?,
+        adoptedAtMillis: Long?,
+        nowMillis: Long
+    ): Int = currentEnergy(
+        storedPercent = storedPercent ?: INITIAL_ENERGY,
+        updatedAtMillis = updatedAtMillis?.takeIf { it > 0L }
+            ?: adoptedAtMillis?.takeIf { it > 0L }
+            ?: nowMillis,
+        nowMillis = nowMillis
+    )
+
     fun afterFeeding(currentPercent: Int, foodEnergy: Int): Int =
         (currentPercent.coerceIn(0, MAX_ENERGY) + foodEnergy.coerceAtLeast(0))
             .coerceAtMost(MAX_ENERGY)

@@ -337,6 +337,8 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
 - pet luôn hiển thị pill trạng thái ở góc trên trái card: `Active` dùng nền `#FFF1B2`, chữ
   Roboto Medium 8/12 `#A54905`; `Inactive` dùng nền `#F0F0F0`, chữ `#6F7073`. Cả hai giữ
   padding ngang 6px/dọc 2px và offset 6px;
+- roster vẫn liệt kê mọi pet đã sở hữu, nhưng scene phòng chỉ dựng pet `Active`. Đổi switch
+  cập nhật cả overlay slot và scene; `Inactive` biến mất khỏi sảnh nhưng vẫn có card để bật lại;
 - pet đã sở hữu đi lại trong scene bằng `PetRoomWander`, không dùng `PetEngine`: engine overlay
   dựng cho góc nhìn ngang nên trọng lực dồn mọi pet về một đường sàn. Phòng nhìn từ phía trước
   nên sàn là hình thang phối cảnh `0.50–0.72` chiều cao scene, mép sau hẹp hơn 14%; pet chọn một
@@ -364,8 +366,10 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   label `#8F6250` 11/16 · value `#212327` 12/16 ngăn bằng divider nét đứt; khối Energy có chip
   `77×24` nền `#8F6250` và thanh `336×42`. Thanh dùng ba gradient theo mức: `#94DF37→#47B321`,
   `#FFDF50→#EDB90E`, `#FF4E4E→#BF3535`;
-- Energy tụt 1%/phút kể cả khi app đóng và chỉ hồi khi cho ăn; food card tiêu một phần, nút `+`
-  đưa về Pet Store vì đó là nơi nhận thêm food bằng Rewarded;
+- Energy tụt 1%/phút kể cả khi app đóng và chỉ hồi khi cho ăn. Pet chưa có record thức ăn dùng
+  thời điểm nhận nuôi làm mốc 100%, không dùng thời điểm UI vừa đọc; khi panel đang mở, ticker
+  cập nhật giá trị mỗi giây để mốc phút mới hiện ngay. Food card tiêu một phần, nút `+` đưa về
+  Pet Store vì đó là nơi nhận thêm food bằng Rewarded;
 - chạm một pet trong scene mở đúng panel của pet đó; pet vẽ trên cùng thắng nên tap không mở
   nhầm con nằm dưới. Title bar đổi thành tên pet khi panel mở;
 - nút music phát `res/raw/bgm_pet_room.ogg` lặp, persist trạng thái và chỉ phát khi màn đang

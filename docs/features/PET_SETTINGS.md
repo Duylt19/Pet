@@ -55,6 +55,7 @@ các pet; add/remove dùng position list đã được repository materialize th
 - Pet Store sở hữu browse, Rewarded/Premium unlock, download/verify và bước đặt tên.
 - My Pet Room sở hữu roster đã mở khóa, xóa pet, cho ăn, background phòng và toggle
   `Active`/`Inactive` cho từng pet.
+- Scene My Pet Room chỉ dựng các pack `Active`; card `Inactive` vẫn ở roster để user bật lại.
 - Switch global ở Shimeji Pets không xin quyền hoặc khởi động service khi roster không có pet
   active; UI giữ trạng thái off và không hiển thị pet mặc định.
 - Mine chỉ còn app/support; không còn Pet Catalog, Pet Detail, Customize Pet hoặc Pet Swarm editor.
