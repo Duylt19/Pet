@@ -203,7 +203,7 @@ Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343`
 
 Grant Permissions contract theo Figma node `8080:9754`:
 
-- route `grant_permissions` mở từ Mine. Nền **trắng phẳng** — lớp wallpaper trong design bị tắt,
+- route `grant_permissions` được giữ nhưng option mở từ Mine đang tạm ẩn. Nền **trắng phẳng** — lớp wallpaper trong design bị tắt,
   card trắng nổi lên bằng shadow chứ không bằng đổi màu nền;
 - top nav `360×56` có back 28 và **một** title duy nhất `Grant Permission` Roboto 600 20/28.
   Node PRO pill và heading lớn `Grant Permissions` đều là layer ẩn trong Figma nên không dựng;
@@ -250,6 +250,10 @@ Grant Permissions contract theo Figma node `8080:9754`:
   SemiBold 18/26 và body Roboto Regular 14/20. Nội dung dài là phần duy nhất được cuộn; hàng
   consent, nút `Allow`/`Close` và native ad luôn cố định. Checkbox dùng đúng hai vector của rate
   flow; `Allow` chỉ chuyển sang Android Accessibility Settings sau khi user đã tick consent;
+- state `Allow` theo Figma `8437:7772`/`8437:9110`: enabled dùng gradient
+  `#C95DFF → #FB54BB` opacity 100%; disabled giữ nguyên gradient/chữ trắng với opacity 30%.
+  Disabled vẫn nhận tap để hiện toast yêu cầu đồng ý điều khoản, nhưng không mở Accessibility
+  Settings;
 - toàn bộ Discover, Battery Catalog, Mine, Status Bar Editor và Grant Permissions dùng chung
   disclosure này. Khi quyền đã bật, row Accessibility trong Grant Permissions mở thẳng Settings
   để user quản lý/tắt quyền, không hỏi consent lại.

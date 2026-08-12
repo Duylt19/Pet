@@ -12,7 +12,7 @@
 | `home` | Discover | Tab 1 của Home shell: battery toggle, Battery Troll hero và catalog preview |
 | `search` | Search | Tìm pet hoặc battery theme; pet mở Pet Store, theme mở Status Bar Editor |
 | `favourite_recent` | Favourite & Recent | Favourite battery theme đã lưu; Recent giữ empty state cho tới khi có contract MRU |
-| `grant_permissions` | Grant Permission | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Lối vào duy nhất là row trong Mine, không có interstitial; Back pop về Mine. Khác hẳn `permission` (bước onboarding) |
+| `grant_permissions` | Grant Permission | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Route/screen được giữ nhưng row vào từ Mine đang tạm ẩn; Back vẫn pop về màn trước khi route được mở trực tiếp. Khác hẳn `permission` (bước onboarding) |
 | `my_pet` | My Pet Room | Scene phòng in-app + sheet ba tab; Back pop về màn trước, shortcut mở tab Pet Store |
 | `pet_store` | Pet Store | Tab 3 của Home shell: duyệt pet/food, Rewarded/Premium gate, download/verify chỉ để mở khóa |
 | `settings` | Mine | Tab 4 của Home shell: Emoji Battery toggle, shortcuts, app-exclusion sheet, shared pet-settings dialog và app/support hub |
@@ -51,7 +51,7 @@ Mine ──Language──> Language Settings
 Mine ──Emoji Battery toggle──> Accessibility disclosure/settings
 Mine ──Apps that hide icons──> modal picker ──switch app──> persist local package exclusion
 Mine ──Setting Pets──> shared speed/size dialog ──Save──> apply cho toàn bộ pet slots
-Mine ──Grant Permission──> Grant Permissions ──Accessibility chưa cấp──> consent disclosure ──Settings
+Grant Permissions (route giữ lại, entry Mine tạm ẩn) ──Accessibility chưa cấp──> consent disclosure ──Settings
                                       └─ quyền đã cấp/permission khác ──> system surface tương ứng ──back──> đọc lại trạng thái
 Mine ──Rate/Share/Contact/Privacy──> action tương ứng
 Discover/My Pet ──Settings──> Mine ──Language──> Language Settings

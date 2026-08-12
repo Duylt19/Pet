@@ -77,6 +77,7 @@ import com.intuit.ssp.R as SspR
 
 private val MineRoboto = RobotoFontFamily
 private val MineRobotoMedium = FontFamily(Font(R.font.roboto_medium))
+internal const val IS_MINE_GRANT_PERMISSION_VISIBLE = false
 
 @Composable
 fun SettingsScreen(
@@ -258,12 +259,14 @@ internal fun MineContent(
                             onClick = onAppsHidden
                         )
                         MineDivider()
-                        MineRow(
-                            iconRes = R.drawable.ic_mine_permission,
-                            title = stringResource(R.string.mine_grant_permission),
-                            onClick = onGrantPermission
-                        )
-                        MineDivider()
+                        if (IS_MINE_GRANT_PERMISSION_VISIBLE) {
+                            MineRow(
+                                iconRes = R.drawable.ic_mine_permission,
+                                title = stringResource(R.string.mine_grant_permission),
+                                onClick = onGrantPermission
+                            )
+                            MineDivider()
+                        }
                         MineRow(
                             iconRes = R.drawable.ic_mine_setting_pets,
                             title = stringResource(R.string.mine_setting_pets),

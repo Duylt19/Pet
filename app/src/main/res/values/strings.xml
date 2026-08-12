@@ -921,6 +921,7 @@
     <string name="accessibility_disclosure_consent">I have read and agree to the terms of service</string>
     <string name="accessibility_disclosure_allow">Allow</string>
     <string name="accessibility_disclosure_close">Close</string>
+    <string name="accessibility_disclosure_consent_required_toast">Please agree to the terms of service before continuing.</string>
     <string name="overlay_permission_disclosure_title">Allow Pets to Show on Screen</string>
     <string name="overlay_permission_disclosure_body">To keep your pets visible while you are using other applications, please grant the \"Display over other apps\" permission.</string>
     <string name="overlay_permission_disclosure_allow">Allow Access</string>

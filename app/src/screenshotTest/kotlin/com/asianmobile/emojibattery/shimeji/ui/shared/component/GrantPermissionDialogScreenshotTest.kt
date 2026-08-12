@@ -75,6 +75,7 @@ private fun AccessibilityDisclosureScreenshotContent(isConsentGranted: Boolean) 
             isConsentGranted = isConsentGranted,
             onConsentChanged = {},
             onGrantPermission = {},
+            onDisabledAllow = {},
             onMaybeLater = {},
             modifier = Modifier.heightIn(max = maxHeight),
             nativeAdContent = {

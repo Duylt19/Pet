@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -50,6 +51,7 @@ import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_PERMISSION
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
+import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
@@ -59,6 +61,10 @@ fun GrantPermissionDialog(
     onMaybeLater: () -> Unit
 ) {
     var isConsentGranted by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    val consentRequiredMessage = stringResource(
+        R.string.accessibility_disclosure_consent_required_toast
+    )
 
     Dialog(
         onDismissRequest = onMaybeLater,
@@ -83,6 +89,9 @@ fun GrantPermissionDialog(
                 isConsentGranted = isConsentGranted,
                 onConsentChanged = { isConsentGranted = it },
                 onGrantPermission = onGrantPermission,
+                onDisabledAllow = {
+                    ToastHelper.show(context, consentRequiredMessage)
+                },
                 onMaybeLater = onMaybeLater,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -102,6 +111,7 @@ internal fun GrantPermissionDialogContent(
     isConsentGranted: Boolean,
     onConsentChanged: (Boolean) -> Unit,
     onGrantPermission: () -> Unit,
+    onDisabledAllow: () -> Unit,
     onMaybeLater: () -> Unit,
     modifier: Modifier = Modifier,
     nativeAdContent: @Composable () -> Unit = { AccessibilityDisclosureNativeAd() }
@@ -242,10 +252,24 @@ internal fun GrantPermissionDialogContent(
             ) {
                 RewardGradientButton(
                     text = stringResource(R.string.accessibility_disclosure_allow),
-                    onClick = onGrantPermission,
+                    onClick = {
+                        handleAccessibilityAllowClick(
+                            isConsentGranted = isConsentGranted,
+                            onGrantPermission = onGrantPermission,
+                            onConsentRequired = onDisabledAllow
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = canGrantAccessibilityPermission(isConsentGranted),
-                    retainEnabledStyleWhenDisabled = true
+                    retainEnabledStyleWhenDisabled = true,
+                    disabledContentAlpha = ACCESSIBILITY_ALLOW_DISABLED_ALPHA,
+                    onDisabledClick = {
+                        handleAccessibilityAllowClick(
+                            isConsentGranted = isConsentGranted,
+                            onGrantPermission = onGrantPermission,
+                            onConsentRequired = onDisabledAllow
+                        )
+                    }
                 )
                 RewardOutlineButton(
                     text = stringResource(R.string.accessibility_disclosure_close),
@@ -262,6 +286,20 @@ internal fun GrantPermissionDialogContent(
 
 internal fun canGrantAccessibilityPermission(isConsentGranted: Boolean): Boolean =
     isConsentGranted
+
+internal fun handleAccessibilityAllowClick(
+    isConsentGranted: Boolean,
+    onGrantPermission: () -> Unit,
+    onConsentRequired: () -> Unit
+) {
+    if (canGrantAccessibilityPermission(isConsentGranted)) {
+        onGrantPermission()
+    } else {
+        onConsentRequired()
+    }
+}
+
+internal const val ACCESSIBILITY_ALLOW_DISABLED_ALPHA = 0.3f
 
 @Composable
 private fun AccessibilityDisclosureNativeAd() {
@@ -286,6 +324,7 @@ private fun GrantPermissionDialogPreview() {
             isConsentGranted = true,
             onConsentChanged = {},
             onGrantPermission = {},
+            onDisabledAllow = {},
             onMaybeLater = {},
             nativeAdContent = {
                 Box(
