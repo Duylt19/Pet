@@ -75,7 +75,7 @@ Home → Battery styles → chọn theme → Customize status bar
                                       ├─ đổi pet, pin, animation, nền và màu trong draft
                                       ├─ feature đang bật → live preview trên status bar
                                       ├─ feature đang tắt → chỉ preview nhúng
-                                      ├─ child Apply → commit draft; child Back → rollback checkpoint
+                                      ├─ child Done → commit draft; child Back → rollback checkpoint
                                       └─ Apply → nếu thiếu quyền thì disclosure → persist + render
 ```
 

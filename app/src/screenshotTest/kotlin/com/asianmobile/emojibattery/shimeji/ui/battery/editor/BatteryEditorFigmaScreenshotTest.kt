@@ -114,6 +114,14 @@ fun BatteryAnimationOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEdit
 fun BatteryWifiOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.WIFI)
 
 @PreviewTest
+@Preview(name = "Status bar Wi-Fi option off", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryWifiOptionOffScreenshotTest() = PreviewStatusOptionPage(
+    page = BatteryEditorPage.WIFI,
+    optionEnabled = false
+)
+
+@PreviewTest
 @Preview(name = "Status bar Signal option", widthDp = 360, heightDp = 800)
 @Composable
 fun BatterySignalOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.SIGNAL)
@@ -230,7 +238,10 @@ private fun PreviewEditorPage(page: BatteryEditorPage) {
 }
 
 @Composable
-private fun PreviewStatusOptionPage(page: BatteryEditorPage) {
+private fun PreviewStatusOptionPage(
+    page: BatteryEditorPage,
+    optionEnabled: Boolean = true
+) {
     val baseState = previewEditorState()
     val optionState = baseState.copy(
         config = baseState.config.copy(
@@ -244,7 +255,7 @@ private fun PreviewStatusOptionPage(page: BatteryEditorPage) {
             wifiColorArgb = 0xFF000000.toInt(),
             signalColorArgb = 0xFF000000.toInt(),
             dataColorArgb = 0xFF000000.toInt()
-        )
+        ).withOptionEnabled(page, optionEnabled)
     )
     Column(Modifier.fillMaxSize()) {
         Box(Modifier.weight(1f)) {
@@ -253,7 +264,7 @@ private fun PreviewStatusOptionPage(page: BatteryEditorPage) {
                 page = page,
                 onBack = {},
                 onConfig = {},
-                onApply = {}
+                onDone = {}
             )
         }
         Box(
@@ -268,6 +279,23 @@ private fun PreviewStatusOptionPage(page: BatteryEditorPage) {
     }
 }
 
+private fun BatteryStatusConfig.withOptionEnabled(
+    page: BatteryEditorPage,
+    enabled: Boolean
+): BatteryStatusConfig = when (page) {
+    BatteryEditorPage.AIRPLANE -> copy(showAirplane = enabled)
+    BatteryEditorPage.RINGER -> copy(showRinger = enabled)
+    BatteryEditorPage.DATE_TIME -> copy(showDateTime = enabled)
+    BatteryEditorPage.HOTSPOT -> copy(showHotspot = enabled)
+    BatteryEditorPage.CHARGE -> copy(showCharge = enabled)
+    BatteryEditorPage.CLOCK -> copy(showTime = enabled)
+    BatteryEditorPage.ANIMATION -> copy(showAnimation = enabled)
+    BatteryEditorPage.WIFI -> copy(showWifi = enabled)
+    BatteryEditorPage.SIGNAL -> copy(showSignal = enabled)
+    BatteryEditorPage.DATA -> copy(showData = enabled)
+    else -> this
+}
+
 @Composable
 private fun PreviewEmotionPage(groupKey: String?) {
     Column(Modifier.fillMaxSize()) {
@@ -280,7 +308,7 @@ private fun PreviewEmotionPage(groupKey: String?) {
                 onOpenGroup = {},
                 onSelectEmotion = {},
                 onConfig = {},
-                onApply = {}
+                onDone = {}
             )
         }
         Box(

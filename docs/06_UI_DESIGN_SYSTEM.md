@@ -130,7 +130,7 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   frame Figma 360×800;
 - Animation/Wi-Fi/Signal/Mobile Data dùng chung shell hồng, preview sticky,
   switch, slider/color/style grid và native collapsible với sáu option screen còn lại. Tất cả
-  child giữ chung draft; child Apply commit vào draft overview, child Back rollback checkpoint
+  child giữ chung draft; child Done commit vào draft overview, child Back rollback checkpoint
   và live preview;
 - Grid Animation lazy theo từng hàng bốn item để chỉ chạy animation đang nằm trong viewport.
   Lottie server render từ file cache đã materialize; khi đang tải/parse hoặc gặp lỗi, card dùng
@@ -142,7 +142,7 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   nền phía dưới asset;
 - Emotion dùng màn pack theo Figma `8404:6277`: nhóm Classic giữ 20 item cũ và tám card mới,
   mỗi card preview 5×2 item; chạm pack/item
-  mở detail `8404:7179` với slider Size, switch, grid ba cột và Apply sticky. Khi cần preview
+  mở detail `8404:7179` với slider Size, switch, grid ba cột và Done sticky. Khi cần preview
   nhúng, nó được ghim dưới top bar ở cả hai màn. 80 frame art là PNG @3x vì nguồn Figma là raster/image-fill;
   card, selected stroke, shadow và background được dựng bằng Compose.
 - Emotion pack và detail dùng cùng native collapsible holder ở app shell. Lần đầu vào flow sẽ
@@ -157,10 +157,11 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   label và 14/20 cho value. Slider dùng Material 3 interaction/semantics giống Pet Settings,
   track hồng không tick và vùng điều khiển cao 48px theo Figma; không tự vẽ thumb dạng thanh.
   Mười icon Customize đều dùng VectorDrawable Figma màu `#FB3675`;
-- toàn màn dùng Roboto local đúng weight: top bar/section/Apply là SemiBold 600, row/slider/grid
+- toàn màn dùng Roboto local đúng weight: top bar/section/action là SemiBold 600, row/slider/grid
   là Medium 500 và More là Regular 400. Top bar collapsed 20/28, expanded 24/32; không dùng
   SansSerif synthetic hoặc Roboto Condensed để giả SemiBold;
-- Apply là Roboto SemiBold 18/26 và nằm trong panel sticky phía trên banner editor dùng chung;
+- Các editor con dùng chung `AppSwitch` (ON hồng, OFF xám, thumb trắng) và CTA Done trong panel
+  sticky phía trên banner; chỉ CTA Apply của overview mới persist cấu hình;
 - Back ở overview khi draft chưa Apply mở discard sheet full-width theo node `8345:7719`:
   Cancel giữ draft, Exit restore config đã lưu rồi pop; sheet dùng native `HEIGHT_222`.
 

@@ -33,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -42,15 +41,12 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryConnectivityState
@@ -61,6 +57,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFont
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFormat
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
@@ -88,7 +85,7 @@ internal fun BatteryStatusOptionFigmaScreen(
     page: BatteryEditorPage,
     onBack: () -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
-    onApply: () -> Unit,
+    onDone: () -> Unit,
     showEmbeddedPreview: Boolean = true
 ) {
     val config = state.config
@@ -229,7 +226,7 @@ internal fun BatteryStatusOptionFigmaScreen(
                     else -> Unit
                 }
             }
-            StatusOptionApplyPanel(onClick = onApply)
+            BatteryEditorDonePanel(onDone = onDone)
         }
     }
 
@@ -279,35 +276,9 @@ private fun StatusOptionTopBar(
             lineHeight = dimensionResource(SspR.dimen._22ssp).value.sp
         )
         Spacer(Modifier.weight(1f))
-        StatusOptionSwitch(checked, onCheckedChange)
-    }
-}
-
-@Composable
-private fun StatusOptionSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    val trackWidth = dimensionResource(SdpR.dimen._40sdp)
-    val trackHeight = dimensionResource(SdpR.dimen._22sdp)
-    val thumbSize = dimensionResource(SdpR.dimen._17sdp)
-    val inset = (trackHeight - thumbSize) / 2
-    Box(
-        modifier = Modifier
-            .size(trackWidth, trackHeight)
-            .clip(CircleShape)
-            .background(
-                colorResource(if (checked) R.color.colors_FB3675 else R.color.colors_F1E0FF)
-            )
-            .semantics { role = Role.Switch }
-            .clickable { onCheckedChange(!checked) },
-        contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart
-    ) {
-        Box(
-            Modifier
-                .padding(horizontal = inset)
-                .size(thumbSize)
-                .clip(CircleShape)
-                .background(
-                    colorResource(if (checked) R.color.colors_FFFFFF else R.color.colors_B06EFF)
-                )
+        AppSwitch(
+            checked = checked,
+            onCheckedChange = { onCheckedChange(!checked) }
         )
     }
 }
@@ -651,55 +622,6 @@ private fun optionFontWeight(font: BatteryDateFont): FontWeight = when (font) {
     BatteryDateFont.DANCING_SCRIPT -> FontWeight.Bold
     BatteryDateFont.RUSSO_ONE,
     BatteryDateFont.COINY -> FontWeight.Normal
-}
-
-@Composable
-private fun StatusOptionApplyPanel(onClick: () -> Unit) {
-    val shape = RoundedCornerShape(
-        topStart = dimensionResource(SdpR.dimen._18sdp),
-        topEnd = dimensionResource(SdpR.dimen._18sdp)
-    )
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(dimensionResource(SdpR.dimen._4sdp), shape)
-            .clip(shape)
-            .background(colorResource(R.color.colors_FFFFFF))
-            .padding(
-                start = dimensionResource(SdpR.dimen._12sdp),
-                top = dimensionResource(SdpR.dimen._18sdp),
-                end = dimensionResource(SdpR.dimen._12sdp),
-                bottom = dimensionResource(SdpR.dimen._9sdp)
-            )
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._37sdp))
-                .clip(CircleShape)
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(
-                            colorResource(R.color.colors_C95DFF),
-                            colorResource(R.color.colors_FB54BB)
-                        )
-                    )
-                )
-                .semantics { role = Role.Button }
-                .clickable(onClick = onClick),
-            contentAlignment = Alignment.Center
-        ) {
-            androidx.compose.material3.Text(
-                text = stringResource(R.string.battery_apply),
-                color = colorResource(R.color.colors_FFFFFF),
-                fontFamily = RobotoFontFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
-                lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
 }
 
 private data class StatusOptionSpec(

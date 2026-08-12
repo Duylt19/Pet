@@ -422,7 +422,7 @@ private fun BatteryEditorContent(
             onOpenGroup = onOpenEmotionGroup,
             onSelectEmotion = onSelectEmotion,
             onConfig = onConfig,
-            onApply = onApply,
+            onDone = onDone,
             showEmbeddedPreview = showEmbeddedPreview
         )
         return
@@ -433,7 +433,7 @@ private fun BatteryEditorContent(
             page = page,
             onBack = onBack,
             onConfig = onConfig,
-            onApply = onApply,
+            onDone = onDone,
             showEmbeddedPreview = showEmbeddedPreview
         )
         return
