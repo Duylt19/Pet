@@ -304,7 +304,9 @@ Grant Permissions contract theo Figma node `8080:9754`:
   là bottom sheet full-width bo hai góc trên 24px, scrim 50%, handle `32×4`, title Roboto
   SemiBold 18/26 và body Roboto Regular 14/20. Nội dung dài là phần duy nhất được cuộn; hàng
   consent, nút `Allow`/`Close` và native ad luôn cố định. Checkbox dùng đúng hai vector của rate
-  flow; Back, scrim và `Close` đóng ngay, còn swipe phải kéo tối thiểu 25% chiều cao sheet;
+  flow: frame luôn là `20×20`, phần nền `16.25×16.25` nằm giữa với inset `1.875` và tick giữ
+  nguyên offset Figma để không lệch hoặc nhảy khi đổi state. Back, scrim và `Close` đóng ngay,
+  còn swipe phải kéo tối thiểu 25% chiều cao sheet;
   `Allow` chỉ chuyển sang màn `Accessibility How to use` sau khi user đã tick consent;
 - state `Allow` theo Figma `8437:7772`/`8437:9110`: enabled dùng gradient
   `#C95DFF → #FB54BB` opacity 100%; disabled giữ nguyên gradient/chữ trắng với opacity 30%.
