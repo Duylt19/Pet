@@ -35,7 +35,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.colorResource
@@ -96,13 +95,7 @@ internal fun BatteryStatusOptionFigmaScreen(
     val spec = optionSpec(page, config)
 
     Box(Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(R.drawable.img_home_wallpaper),
-            contentDescription = null,
-            contentScale = ContentScale.FillWidth,
-            alignment = Alignment.TopCenter,
-            modifier = Modifier.fillMaxWidth()
-        )
+        StatusBarEditorWallpaper()
         Column(
             modifier = Modifier
                 .fillMaxSize()

@@ -34,6 +34,7 @@ class DiscoverViewModel @Inject constructor(
     private val _effects = Channel<DiscoverEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
     private var enableBatteryAfterAccessibility = false
+    private var configuredBatteryEnabled = false
 
     init {
         viewModelScope.launch {
@@ -43,6 +44,7 @@ class DiscoverViewModel @Inject constructor(
                 batterySettingsRepository.config
             ) { pets, batteryCatalog, batteryConfig ->
                 val accessibilityEnabled = BatteryAccessibility.isEnabled(context)
+                configuredBatteryEnabled = batteryConfig.enabled
                 DiscoverUiState(
                     isLoading = pets.isLoading || batteryCatalog.isLoading,
                     isBatteryEnabled = batteryConfig.enabled && accessibilityEnabled,
@@ -109,7 +111,12 @@ class DiscoverViewModel @Inject constructor(
 
     fun refreshAccessibility() {
         val enabled = BatteryAccessibility.isEnabled(context)
-        _uiState.update { it.copy(isAccessibilityEnabled = enabled) }
+        _uiState.update {
+            it.copy(
+                isBatteryEnabled = configuredBatteryEnabled && enabled,
+                isAccessibilityEnabled = enabled
+            )
+        }
         if (enabled && enableBatteryAfterAccessibility) {
             enableBatteryAfterAccessibility = false
             batterySettingsRepository.setEnabled(true)

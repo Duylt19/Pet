@@ -67,15 +67,30 @@ Discover Home contract:
 
 - route `home` là root sau onboarding và hiển thị dữ liệu thật từ owner/battery catalog;
 - toggle chính điều khiển `BatteryStatusConfig.enabled`, có disclosure và Accessibility gate;
+  Discover và Battery cùng tính trạng thái switch từ config đã lưu + trạng thái Accessibility
+  hiện tại mỗi lần app resume, nên việc cấp hoặc thu hồi quyền không làm hai tab lệch nhau;
 - Home shell có bốn tab Discover/Battery/Pet Store/Mine. `HomeBottomNavigation` cố định
-  trên bottom banner hiện có; từng screen không tự tạo lại bottom chrome;
+  trên bottom banner hiện có; từng screen không tự tạo lại bottom chrome. Battery selected dùng
+  glyph filled 24×24 export từ frame Figma `8017:3666`, không tái sử dụng icon outline unselected;
 - Discover, Pet Store và Mine dùng chung `HomeHeader` và `HomeEnableCard`: header `43sdp`, search
   `25sdp`, enable card `37sdp`, switch `34×18sdp`. Discover chỉ render Battery enable card;
   pet switch được quản lý ở flow pet. Không copy component rồi đổi metric riêng;
 - Discover hero dùng composite `Battery Troll` PNG @3x tại tỉ lệ `328×100px`; banner thấp hơn
   dùng placement SDK thật `discover_inline`, không đóng gói creative quảng cáo mẫu;
+- Thứ tự nhóm đầu sau hero là `Trending Emoji Battery` → `Shimeji Pets` → inline banner;
+  `Status bar themes` tiếp tục nằm ngay sau banner, đúng hierarchy node Figma `8015:1035`;
 - Battery Themes dùng favorite state thật; Trending hiện dùng thứ tự catalog cho tới khi
   server có ranking riêng.
+- Search field theo Figma `8287:6560`: khi query khác rỗng hiện clear icon 16px ở trailing;
+  clear chỉ xoá query và giữ focus, còn tap ngắn ngoài toàn bộ field mới clear focus + ẩn IME.
+  Gesture cuộn không được xem là outside tap.
+- Discover section Emoji/DIY Battery theo Figma `8019:1628` và `8019:1689` dùng text thuần
+  `Emoji`/`DIY Battery` cùng artwork 16px thật ở leading; không ghép emoji vào string.
+
+Language loading contract theo Figma `8421:9356`:
+
+- loading phủ scrim đen `60%` toàn màn và dùng text trắng; Android 12/API 31 trở lên blur
+  content phía sau `8dp`, API thấp hơn không dùng blur và chỉ giữ scrim tối tương đương Figma.
 
 Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
 
@@ -91,6 +106,9 @@ Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
   để tránh hiển thị trùng khi catalog cập nhật tên category;
 - More mở child route có header Back/title/PRO, inline banner SDK thật và grid ba cột. Card detail giữ
   tỷ lệ vuông, preview `74/101.333`, selected dùng `#FFEBF1` + stroke `#FB3675`, không hiện heart;
+- inline banner chỉ giữ grid item khi placement đủ điều kiện và chưa load fail. Khi SDK/config/
+  ad-free policy không cho hiển thị hoặc load fail, xóa cả holder lẫn grid item để card đầu tiên
+  dồn lên ngay dưới header, không để lại vùng trắng;
 - landing giữ Home bottom navigation; detail ẩn navigation nhưng giữ cùng bottom banner holder.
   DIY FAB và Lottie star bling dùng lại component Discover.
 
@@ -105,9 +123,18 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   Hotspot → Signal/Data → Wifi → Percentage → Battery/Emoji pair → Charge; Battery và Emoji
   chồng cùng tâm và mọi component cách nhau 4dp;
 - More Battery/Emoji mở grid ba cột với artwork 73.03% item; More Theme mở grid hai cột từ
-  background catalog runtime. Animation/Wi-Fi/Signal/Mobile Data dùng chung shell hồng,
-  preview sticky, switch, slider/color/style grid và native collapsible với sáu option screen
-  còn lại. Child Apply commit vào draft overview; child Back rollback checkpoint và live preview;
+  background catalog runtime. Wallpaper của overview và mọi child phủ toàn viewport bằng crop
+  căn top; không để lộ nền app legacy màu tối ở đáy trên thiết bị có tỷ lệ màn hình cao hơn
+  frame Figma 360×800;
+- Animation/Wi-Fi/Signal/Mobile Data dùng chung shell hồng, preview sticky,
+  switch, slider/color/style grid và native collapsible với sáu option screen còn lại. Tất cả
+  child giữ chung draft; child Apply commit vào draft overview, child Back rollback checkpoint
+  và live preview;
+- Hàng Theme ở overview hiển thị trước năm background. Nếu background đang chọn nằm ngoài năm
+  item đầu, hàng giữ bốn item đầu và đưa item đang chọn vào vị trí thứ năm;
+- Background Color và Theme là hai mode loại trừ nhau: chọn Color đặt decoration ID về `0` và
+  chỉ hiện viền selected ở palette; chọn Theme chỉ hiện selected ở theme, không tiếp tục tô màu
+  nền phía dưới asset;
 - Emotion dùng màn pack theo Figma `8404:6277`: nhóm Classic giữ 20 item cũ và tám card mới,
   mỗi card preview 5×2 item; chạm pack/item
   mở detail `8404:7179` với slider Size, switch, grid ba cột và Apply sticky. Khi cần preview
@@ -191,7 +218,7 @@ Overlay permission disclosure theo Figma node `8436:5998`:
 
 - `ui/shared/component/OverlayPermissionDialog.kt` là bottom sheet dùng chung trước mọi request
   `ACTION_MANAGE_OVERLAY_PERMISSION`; scrim/Back/`Not now` chỉ đóng sheet, `Allow Access` mới mở
-  system special-access settings;
+  system special-access settings. Swipe chỉ dismiss sau khi kéo tối thiểu 25% chiều cao sheet;
 - hero `img_overlay_permission_hero.png` được export nguyên group 158×100 để giữ phone mockup,
   pets và bubble; title/body là text thật, action dùng shared gradient/outline buttons;
 - native `HEIGHT_222` nằm sát đáy và collapse khi placement không render.
@@ -258,7 +285,8 @@ Grant Permissions contract theo Figma node `8080:9754`:
   là bottom sheet full-width bo hai góc trên 24px, scrim 50%, handle `32×4`, title Roboto
   SemiBold 18/26 và body Roboto Regular 14/20. Nội dung dài là phần duy nhất được cuộn; hàng
   consent, nút `Allow`/`Close` và native ad luôn cố định. Checkbox dùng đúng hai vector của rate
-  flow; `Allow` chỉ chuyển sang Android Accessibility Settings sau khi user đã tick consent;
+  flow; Back, scrim và `Close` đóng ngay, còn swipe phải kéo tối thiểu 25% chiều cao sheet;
+  `Allow` chỉ chuyển sang Android Accessibility Settings sau khi user đã tick consent;
 - state `Allow` theo Figma `8437:7772`/`8437:9110`: enabled dùng gradient
   `#C95DFF → #FB54BB` opacity 100%; disabled giữ nguyên gradient/chữ trắng với opacity 30%.
   Disabled vẫn nhận tap để hiện toast yêu cầu đồng ý điều khoản, nhưng không mở Accessibility

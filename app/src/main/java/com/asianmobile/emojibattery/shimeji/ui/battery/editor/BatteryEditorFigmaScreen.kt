@@ -110,13 +110,7 @@ internal fun BatteryEditorFigmaContent(
         null
     }
     Box(Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(R.drawable.img_home_wallpaper),
-            contentDescription = null,
-            contentScale = ContentScale.FillWidth,
-            alignment = Alignment.TopCenter,
-            modifier = Modifier.fillMaxWidth()
-        )
+        StatusBarEditorWallpaper()
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
@@ -179,6 +173,19 @@ internal fun BatteryEditorFigmaContent(
             }
         }
     }
+}
+
+@Composable
+internal fun StatusBarEditorWallpaper() {
+    Image(
+        painter = painterResource(R.drawable.img_home_wallpaper),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        alignment = Alignment.TopCenter,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.colors_FFFFFF))
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -341,7 +348,7 @@ private fun StatusBarOverview(
                         titleIcon = R.drawable.img_statusbar_color_palette
                     )
                     StatusBarColorPalette(
-                        selected = state.config.backgroundColorArgb,
+                        selected = BatteryBackgroundSelectionPolicy.activeColor(state.config),
                         onSelected = onBackgroundColor,
                         onCustomClick = { activeColorTarget = StatusBarColorTarget.BACKGROUND }
                     )
@@ -737,7 +744,7 @@ private fun TemplateOption(
 
 @Composable
 private fun StatusBarColorPalette(
-    selected: Int,
+    selected: Int?,
     onSelected: (Int) -> Unit,
     onCustomClick: () -> Unit
 ) {
@@ -754,7 +761,7 @@ private fun StatusBarColorPalette(
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
     LazyRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
         item(key = "custom_color") {
-            val isSelected = selected !in presetArgb
+            val isSelected = selected != null && selected !in presetArgb
             Box(
                 modifier = Modifier
                     .size(dimensionResource(SdpR.dimen._22sdp))
@@ -823,10 +830,10 @@ internal fun statusBarBackgroundPreviewItems(
     backgrounds: List<BatteryDecorationEntry>,
     selectedId: Int
 ): List<BatteryDecorationEntry> {
-    val initial = backgrounds.take(FIGMA_INLINE_BACKGROUND_COUNT)
+    val initial = backgrounds.take(INLINE_BACKGROUND_PREVIEW_COUNT)
     if (initial.any { it.id == selectedId }) return initial
     val selected = backgrounds.firstOrNull { it.id == selectedId } ?: return initial
-    return backgrounds.take(FIGMA_INLINE_BACKGROUND_COUNT - 1) + selected
+    return backgrounds.take(INLINE_BACKGROUND_PREVIEW_COUNT - 1) + selected
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1225,5 +1232,5 @@ private enum class StatusBarColorTarget {
 
 private const val PICKER_ART_FRACTION = 0.7303f
 private const val FIGMA_FREE_BACKGROUND_COUNT = 5
-private const val FIGMA_INLINE_BACKGROUND_COUNT = 3
+private const val INLINE_BACKGROUND_PREVIEW_COUNT = 5
 private const val ANDROID_ASSET_URI_PREFIX = "file:///android_asset/"

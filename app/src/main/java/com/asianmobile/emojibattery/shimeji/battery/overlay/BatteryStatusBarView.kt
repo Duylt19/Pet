@@ -530,11 +530,13 @@ class BatteryStatusBarView(context: Context) : View(context) {
     }
 
     private fun drawBackground(canvas: Canvas, backgroundRight: Float) {
-        paint.color = config.backgroundColorArgb
-        canvas.drawRect(0f, 0f, backgroundRight, height.toFloat(), paint)
-        background?.let { bitmap ->
+        val backgroundBitmap = background
+        if (backgroundBitmap == null) {
+            paint.color = config.backgroundColorArgb
+            canvas.drawRect(0f, 0f, backgroundRight, height.toFloat(), paint)
+        } else {
             destination.set(0f, 0f, backgroundRight, height.toFloat())
-            canvas.drawBitmap(bitmap, null, destination, paint)
+            canvas.drawBitmap(backgroundBitmap, null, destination, paint)
         }
     }
 

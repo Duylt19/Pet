@@ -149,7 +149,9 @@ class BatteryEditorViewModel @Inject constructor(
     fun setBarHeight(value: Float) = update { copy(barHeightDp = value) }
     fun setEmojiSize(value: Float) = update { copy(emojiSizeDp = value) }
     fun setBatterySize(value: Float) = update { copy(batterySizeDp = value) }
-    fun setBackgroundColor(value: Int) = update { copy(backgroundColorArgb = value) }
+    fun setBackgroundColor(value: Int) = update {
+        BatteryBackgroundSelectionPolicy.selectColor(this, value)
+    }
     fun setForegroundColor(value: Int) = update { copy(foregroundColorArgb = value) }
     fun selectBackground(background: BatteryDecorationEntry) {
         val state = _uiState.value
@@ -163,7 +165,9 @@ class BatteryEditorViewModel @Inject constructor(
             val materializedPath = catalogRepository.materializeAsset(background.assetPath)
             if (requestId != backgroundSelectionRequestId) return@launch
             if (materializedPath != null) {
-                update { copy(backgroundDecorationId = background.id) }
+                update {
+                    BatteryBackgroundSelectionPolicy.selectTheme(this, background.id)
+                }
                 _uiState.update {
                     it.copy(
                         backgrounds = it.backgrounds.map { entry ->

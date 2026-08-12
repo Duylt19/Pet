@@ -4,9 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,12 +18,12 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,12 +35,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -114,10 +127,18 @@ private fun SearchContent(
     onSelectTab: (SearchTab) -> Unit = {},
     onOpenPetStore: () -> Unit = {}
 ) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var searchFieldBounds by remember { mutableStateOf<Rect?>(null) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(R.color.colors_FFFFFF))
+            .dismissKeyboardOnTapOutside(searchFieldBounds) {
+                focusManager.clearFocus()
+                keyboardController?.hide()
+            }
     ) {
         Image(
             painter = painterResource(R.drawable.img_home_wallpaper),
@@ -134,7 +155,8 @@ private fun SearchContent(
             SearchHeader(
                 query = uiState.query,
                 onQueryChanged = onQueryChanged,
-                onCancel = onCancel
+                onCancel = onCancel,
+                onFieldBoundsChanged = { searchFieldBounds = it }
             )
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -242,7 +264,8 @@ private fun SearchTabItem(
 private fun SearchHeader(
     query: String,
     onQueryChanged: (String) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    onFieldBoundsChanged: (Rect) -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -266,7 +289,8 @@ private fun SearchHeader(
                 )
                 .clip(CircleShape)
                 .background(colorResource(R.color.colors_FFFFFF))
-                .padding(horizontal = dimensionResource(SdpR.dimen._9sdp)),
+                .padding(horizontal = dimensionResource(SdpR.dimen._9sdp))
+                .onGloballyPositioned { onFieldBoundsChanged(it.boundsInRoot()) },
             horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp)),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -302,8 +326,19 @@ private fun SearchHeader(
                         innerTextField()
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.weight(1f)
             )
+            if (query.isNotEmpty()) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_search_clear),
+                    contentDescription = stringResource(R.string.search_clear_content_description),
+                    tint = colorResource(R.color.colors_6F7073),
+                    modifier = Modifier
+                        .size(dimensionResource(SdpR.dimen._12sdp))
+                        .clip(CircleShape)
+                        .clickable { onQueryChanged("") }
+                )
+            }
         }
         Text(
             text = stringResource(R.string.search_cancel),
@@ -318,6 +353,41 @@ private fun SearchHeader(
         )
     }
 }
+
+private fun Modifier.dismissKeyboardOnTapOutside(
+    inputBounds: Rect?,
+    onDismissKeyboard: () -> Unit
+): Modifier = pointerInput(inputBounds, onDismissKeyboard) {
+    awaitEachGesture {
+        val down = awaitFirstDown(
+            requireUnconsumed = false,
+            pass = PointerEventPass.Initial
+        )
+        val pointerId = down.id
+        val startPosition = down.position
+        var isTap = true
+
+        while (true) {
+            val event = awaitPointerEvent(PointerEventPass.Initial)
+            val change = event.changes.firstOrNull { it.id == pointerId } ?: break
+            if ((change.position - startPosition).getDistance() > viewConfiguration.touchSlop) {
+                isTap = false
+            }
+            if (!change.pressed) {
+                if (shouldDismissSearchKeyboard(inputBounds, startPosition, isTap)) {
+                    onDismissKeyboard()
+                }
+                break
+            }
+        }
+    }
+}
+
+internal fun shouldDismissSearchKeyboard(
+    inputBounds: Rect?,
+    tapPosition: Offset,
+    isTap: Boolean
+): Boolean = isTap && inputBounds?.contains(tapPosition) == false
 
 @Composable
 private fun ResultsSection(

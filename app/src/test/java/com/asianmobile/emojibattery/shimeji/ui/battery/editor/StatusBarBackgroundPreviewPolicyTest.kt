@@ -6,7 +6,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class StatusBarBackgroundPreviewPolicyTest {
-    private val backgrounds = (1..5).map { id ->
+    private val backgrounds = (1..7).map { id ->
         BatteryDecorationEntry(
             id = id,
             name = "Background $id",
@@ -16,9 +16,9 @@ class StatusBarBackgroundPreviewPolicyTest {
     }
 
     @Test
-    fun `keeps the first three backgrounds stable when selected item is already visible`() {
+    fun `keeps the first five backgrounds stable when selected item is already visible`() {
         assertEquals(
-            listOf(1, 2, 3),
+            listOf(1, 2, 3, 4, 5),
             statusBarBackgroundPreviewItems(backgrounds, selectedId = 2).map { it.id }
         )
     }
@@ -26,8 +26,8 @@ class StatusBarBackgroundPreviewPolicyTest {
     @Test
     fun `includes an offscreen selected background without reordering visible choices`() {
         assertEquals(
-            listOf(1, 2, 5),
-            statusBarBackgroundPreviewItems(backgrounds, selectedId = 5).map { it.id }
+            listOf(1, 2, 3, 4, 7),
+            statusBarBackgroundPreviewItems(backgrounds, selectedId = 7).map { it.id }
         )
     }
 }

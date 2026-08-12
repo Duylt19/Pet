@@ -55,7 +55,7 @@
 | `battery_status_charge_icon_index` | Int | Charge vector 1–12 |
 | `battery_status_{wifi,signal,airplane,hotspot,ringer}_icon_style_index` | Int | Family icon 1–4 của từng status component |
 | `battery_status_date_format`, `battery_status_date_time_font` | String enum | Định dạng và bundled font ngày |
-| `battery_status_background_decoration_id_v2` | Int | Background v2 ID; `0` dùng màu phẳng, mặc định `1` |
+| `battery_status_background_decoration_id_v2` | Int | Background v2 ID; `0` kích hoạt màu phẳng, ID khác `0` kích hoạt duy nhất theme asset và giữ `backgroundColorArgb` như lựa chọn màu gần nhất; mặc định `1` |
 | `battery_status_show_emotion` | Boolean | Hiện emotion trang trí |
 | `battery_status_emotion_decoration_id` | Int | Emotion asset ID |
 | `battery_status_hidden_app_packages` | String set | Package của app mà user chọn để tạm ẩn Emoji Battery; lưu cục bộ trên thiết bị |

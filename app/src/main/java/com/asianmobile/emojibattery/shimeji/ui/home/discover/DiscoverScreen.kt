@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.ui.home.discover
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -200,20 +201,20 @@ private fun DiscoverContent(
                     item { DiscoverBatteryTrollBanner(onClick = onBattery) }
                     item {
                         Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
-                        TrendingPetsSection(
-                            pets = uiState.trendingPets,
-                            isLoading = uiState.isLoading,
-                            onMore = onPetStore,
-                            onOpenPet = { onPetStore() }
-                        )
-                    }
-                    item {
-                        Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
                         BatteryThemesSection(
                             themes = uiState.batteryThemes,
                             onMore = onBattery,
                             onOpenTheme = onOpenTheme,
                             onToggleFavorite = onToggleFavorite
+                        )
+                    }
+                    item {
+                        Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
+                        TrendingPetsSection(
+                            pets = uiState.trendingPets,
+                            isLoading = uiState.isLoading,
+                            onMore = onPetStore,
+                            onOpenPet = { onPetStore() }
                         )
                     }
                     item {
@@ -237,6 +238,7 @@ private fun DiscoverContent(
                         Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
                         ComponentAssetsSection(
                             title = stringResource(R.string.discover_emoji_title),
+                            titleIcon = R.drawable.img_statusbar_template_emoji,
                             assets = uiState.emojiThemes,
                             fallbackRes = R.drawable.img_home_brand_bunny,
                             onMore = onBattery,
@@ -247,6 +249,7 @@ private fun DiscoverContent(
                         Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
                         ComponentAssetsSection(
                             title = stringResource(R.string.discover_battery_title),
+                            titleIcon = R.drawable.ic_statusbar_template_battery,
                             assets = uiState.batteryIcons,
                             fallbackRes = R.drawable.ic_home_battery,
                             onMore = onBattery,
@@ -359,9 +362,8 @@ private fun TrendingPetsSection(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
         SectionHeader(
-            title = stringResource(R.string.discover_trending_pets),
-            onMore = onMore,
-            underline = true
+            title = stringResource(R.string.discover_shimeji_pets),
+            onMore = onMore
         )
         if (isLoading && pets.isEmpty()) {
             Box(
@@ -445,8 +447,9 @@ private fun BatteryThemesSection(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
         SectionHeader(
-            title = stringResource(R.string.discover_battery_themes),
-            onMore = onMore
+            title = stringResource(R.string.discover_trending_battery_themes),
+            onMore = onMore,
+            underline = true
         )
         val slots = List(BATTERY_THEME_SLOT_COUNT) { index -> themes.getOrNull(index) }
         slots.chunked(BATTERY_THEME_COLUMN_COUNT).forEachIndexed { rowIndex, row ->
@@ -611,13 +614,14 @@ private fun StatusBarThemeCard(asset: DiscoverAssetUiState?, onClick: () -> Unit
 @Composable
 private fun ComponentAssetsSection(
     title: String,
+    @DrawableRes titleIcon: Int? = null,
     assets: List<DiscoverAssetUiState>,
     fallbackRes: Int,
     onMore: () -> Unit,
     onOpen: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
-        SectionHeader(title = title, onMore = onMore)
+        SectionHeader(title = title, titleIcon = titleIcon, onMore = onMore)
         val display = if (assets.isEmpty()) {
             List(8) { null }
         } else {
@@ -689,8 +693,9 @@ private fun HomePreviewImage(
 }
 
 @Composable
-private fun SectionHeader(
+internal fun SectionHeader(
     title: String,
+    @DrawableRes titleIcon: Int? = null,
     onMore: () -> Unit,
     underline: Boolean = false
 ) {
@@ -705,27 +710,37 @@ private fun SectionHeader(
             .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
         verticalAlignment = Alignment.Top
     ) {
-        Box {
-            Text(
-                text = title,
-                color = colorResource(R.color.colors_212327),
-                fontFamily = DiscoverRobotoMedium,
-                fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
-                lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp
-            )
-            if (underline) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (titleIcon != null) {
                 Image(
-                    painter = painterResource(R.drawable.img_home_trending_underline),
+                    painter = painterResource(titleIcon),
                     contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
-                    modifier = Modifier
-                        .padding(start = dimensionResource(SdpR.dimen._15sdp))
-                        .offset(y = dimensionResource(SdpR.dimen._18sdp))
-                        .size(
-                            width = dimensionResource(SdpR.dimen._75sdp),
-                            height = dimensionResource(SdpR.dimen._9sdp)
-                        )
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._12sdp))
                 )
+                Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
+            }
+            Box {
+                Text(
+                    text = title,
+                    color = colorResource(R.color.colors_212327),
+                    fontFamily = DiscoverRobotoMedium,
+                    fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp
+                )
+                if (underline) {
+                    Image(
+                        painter = painterResource(R.drawable.img_home_trending_underline),
+                        contentDescription = null,
+                        contentScale = ContentScale.FillBounds,
+                        modifier = Modifier
+                            .padding(start = dimensionResource(SdpR.dimen._15sdp))
+                            .offset(y = dimensionResource(SdpR.dimen._18sdp))
+                            .size(
+                                width = dimensionResource(SdpR.dimen._75sdp),
+                                height = dimensionResource(SdpR.dimen._9sdp)
+                            )
+                    )
+                }
             }
         }
         Spacer(Modifier.weight(1f))

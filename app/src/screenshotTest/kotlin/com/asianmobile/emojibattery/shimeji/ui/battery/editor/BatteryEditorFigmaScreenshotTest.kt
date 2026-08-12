@@ -41,6 +41,13 @@ fun BatteryEditorBatteryPickerScreenshotTest() {
 }
 
 @PreviewTest
+@Preview(name = "Status bar Battery picker tall", widthDp = 360, heightDp = 900)
+@Composable
+fun BatteryEditorBatteryPickerTallScreenshotTest() {
+    PreviewEditorPage(BatteryEditorPage.BATTERY_TEMPLATES)
+}
+
+@PreviewTest
 @Preview(name = "Status bar Theme picker", widthDp = 360, heightDp = 800)
 @Composable
 fun BatteryEditorThemePickerScreenshotTest() {

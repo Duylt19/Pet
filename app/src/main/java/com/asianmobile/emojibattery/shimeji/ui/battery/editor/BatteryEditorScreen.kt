@@ -1031,7 +1031,7 @@ private fun AppearanceEditor(
     EditorCard {
         ColorPalette(
             label = stringResource(R.string.battery_background_color),
-            selected = state.config.backgroundColorArgb,
+            selected = BatteryBackgroundSelectionPolicy.activeColor(state.config),
             onColor = onBackgroundColor
         )
         DecorationPicker(
@@ -1844,7 +1844,13 @@ internal fun BatteryPreview(
             .fillMaxWidth()
             .height(dimensionResource(SdpR.dimen._38sdp))
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._11sdp)))
-            .background(Color(config.backgroundColorArgb))
+            .background(
+                if (backgroundPath == null) {
+                    Color(config.backgroundColorArgb)
+                } else {
+                    Color.Transparent
+                }
+            )
             .semantics { contentDescription = previewDescription }
     ) {
         val layout = remember(
@@ -2338,7 +2344,7 @@ private fun EditorSlider(
 }
 
 @Composable
-private fun ColorPalette(label: String, selected: Int, onColor: (Int) -> Unit) {
+private fun ColorPalette(label: String, selected: Int?, onColor: (Int) -> Unit) {
     val colors = listOf(
         R.color.colors_E0F7F1,
         R.color.colors_FFFFFF,
