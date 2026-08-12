@@ -8,7 +8,7 @@ class PermissionDisclosureBottomSheetTest {
     @Test
     fun `short swipe returns the expanded sheet instead of dismissing it`() {
         assertFalse(
-            shouldAllowPermissionSheetDismiss(
+            shouldAllowSheetDismiss(
                 isExpanded = true,
                 currentOffsetPx = 180f,
                 expandedOffsetPx = 100f,
@@ -20,7 +20,7 @@ class PermissionDisclosureBottomSheetTest {
     @Test
     fun `deep swipe dismisses the sheet`() {
         assertTrue(
-            shouldAllowPermissionSheetDismiss(
+            shouldAllowSheetDismiss(
                 isExpanded = true,
                 currentOffsetPx = 300f,
                 expandedOffsetPx = 100f,
@@ -32,7 +32,7 @@ class PermissionDisclosureBottomSheetTest {
     @Test
     fun `explicit dismiss at expanded position remains allowed`() {
         assertTrue(
-            shouldAllowPermissionSheetDismiss(
+            shouldAllowSheetDismiss(
                 isExpanded = true,
                 currentOffsetPx = 100f,
                 expandedOffsetPx = 100f,

@@ -48,6 +48,8 @@ Vertical slice hiện đã có trong source:
 - Mine có bottom sheet `Apps that hide icons` lấy danh sách app launchable qua package
   visibility intent query. Package được chọn chỉ lưu cục bộ; khi Accessibility báo app đó
   đang foreground, service tháo battery window và tự gắn lại khi user chuyển sang app khác.
+  Danh sách app cuộn độc lập; khi list đã ở đầu, sheet nhận gesture kéo xuống và chỉ dismiss
+  sau khi kéo tối thiểu 25% chiều cao, cùng contract với các permission disclosure sheet.
   Service chỉ dùng package name của window event cho rule này, không đọc node/content và
   không ghi hay gửi lịch sử app foreground. Accessibility disclosure nêu rõ boundary này.
 - Pet và pin được renderer như một pair: cùng anchor ở cụm battery phía trailing, pin

@@ -26,12 +26,24 @@ internal fun PermissionDisclosureBottomSheet(
     onDismissRequest: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val layoutMetrics = remember { PermissionSheetLayoutMetrics() }
-    val sheetStateReference = remember { PermissionSheetStateReference() }
+    DismissThresholdBottomSheet(
+        onDismissRequest = onDismissRequest,
+        content = content
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun DismissThresholdBottomSheet(
+    onDismissRequest: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val layoutMetrics = remember { BottomSheetLayoutMetrics() }
+    val sheetStateReference = remember { BottomSheetStateReference() }
     val confirmValueChange = remember {
         { target: SheetValue ->
             val state = sheetStateReference.value
-            target != SheetValue.Hidden || shouldAllowPermissionSheetDismiss(
+            target != SheetValue.Hidden || shouldAllowSheetDismiss(
                 isExpanded = state?.currentValue == SheetValue.Expanded,
                 currentOffsetPx = state?.runCatching { requireOffset() }?.getOrNull(),
                 expandedOffsetPx = layoutMetrics.expandedOffsetPx,
@@ -72,7 +84,7 @@ internal fun PermissionDisclosureBottomSheet(
     )
 }
 
-internal fun shouldAllowPermissionSheetDismiss(
+internal fun shouldAllowSheetDismiss(
     isExpanded: Boolean,
     currentOffsetPx: Float?,
     expandedOffsetPx: Float?,
@@ -84,18 +96,18 @@ internal fun shouldAllowPermissionSheetDismiss(
 
     val dragDistancePx = (currentOffsetPx - expandedOffsetPx).coerceAtLeast(0f)
     return dragDistancePx <= EXPLICIT_DISMISS_OFFSET_TOLERANCE_PX ||
-        dragDistancePx >= sheetHeightPx * PERMISSION_SHEET_DISMISS_FRACTION
+        dragDistancePx >= sheetHeightPx * BOTTOM_SHEET_DISMISS_FRACTION
 }
 
-private class PermissionSheetLayoutMetrics {
+private class BottomSheetLayoutMetrics {
     var expandedOffsetPx: Float? = null
     var sheetHeightPx: Float = 0f
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-private class PermissionSheetStateReference {
+private class BottomSheetStateReference {
     var value: SheetState? = null
 }
 
-private const val PERMISSION_SHEET_DISMISS_FRACTION = 0.25f
+private const val BOTTOM_SHEET_DISMISS_FRACTION = 0.25f
 private const val EXPLICIT_DISMISS_OFFSET_TOLERANCE_PX = 1f
