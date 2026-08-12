@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,7 +29,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -303,24 +303,21 @@ private fun IntroPrimaryButton(
 ) {
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = dimensionResource(R_sdp.dimen._15sdp))
+            .fillMaxWidth(320f / 360f)
             .height(dimensionResource(R_sdp.dimen._37sdp))
             .clip(CircleShape)
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        colorResource(R.color.colors_FB54BB),
-                        colorResource(R.color.colors_FF5D7D),
-                    ),
-                ),
+            .background(colorResource(R.color.colors_FFFFFF))
+            .border(
+                width = dimensionResource(R_sdp.dimen._2sdp),
+                color = colorResource(R.color.colors_FF5D7D),
+                shape = CircleShape,
             )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = stringResource(R.string.next),
-            color = colorResource(R.color.colors_FFFFFF),
+            color = colorResource(R.color.colors_FB3675),
             fontFamily = robotoMediumFontFamily,
             fontWeight = FontWeight.Medium,
             fontSize = dimensionResource(R_ssp.dimen._15ssp).value.sp,
