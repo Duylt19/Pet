@@ -263,8 +263,7 @@ private fun PreviewStatusOptionPage(
                 state = optionState,
                 page = page,
                 onBack = {},
-                onConfig = {},
-                onDone = {}
+                onConfig = {}
             )
         }
         Box(
@@ -307,8 +306,7 @@ private fun PreviewEmotionPage(groupKey: String?) {
                 onPremium = {},
                 onOpenGroup = {},
                 onSelectEmotion = {},
-                onConfig = {},
-                onDone = {}
+                onConfig = {}
             )
         }
         Box(

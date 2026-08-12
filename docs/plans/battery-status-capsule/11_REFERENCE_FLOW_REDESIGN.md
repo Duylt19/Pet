@@ -35,25 +35,25 @@ Battery styles
     → chọn theme
         → Customize status bar / Overview
             ├─ Quick controls: time, percentage
-            ├─ Size → Done
-            ├─ Appearance → Done
-            ├─ Emoji & emotion → Done
-            ├─ Battery icon → Done
+            ├─ Size → edit trực tiếp draft → Back
+            ├─ Appearance → edit trực tiếp draft → Back
+            ├─ Emoji & emotion → edit trực tiếp draft → Back
+            ├─ Battery icon → edit trực tiếp draft → Back
             ├─ More components / disabled roadmap
             └─ Apply
                 ├─ Accessibility đã bật → lưu toàn bộ draft
                 └─ chưa bật → disclosure → Android Accessibility Settings → lưu
 ```
 
-Editor con là page nội bộ của cùng destination/ViewModel, không phải route độc lập. Vì
-vậy draft không bị ghi sớm vào DataStore, Back/Done không làm mất các thay đổi đã chỉnh
-trong session và chỉ Apply mới cập nhật overlay.
+Editor con dùng cùng ViewModel/draft với overview. Vì vậy control cập nhật preview ngay nhưng
+không ghi sớm vào DataStore; Back giữ các thay đổi trong session và chỉ Apply mới persist cấu
+hình runtime.
 
 ## Quy tắc UX
 
 - Preview luôn nằm trước control của page hiện tại.
 - Overview chỉ chứa toggle nhanh, summary và entry point; không chứa picker dài.
-- Back ở editor con tương đương Done và quay về overview.
+- Back ở editor con quay về overview và giữ draft hiện tại; không hiển thị Done.
 - Apply chỉ xuất hiện ở overview, cố định phía dưới.
 - Disable chỉ xuất hiện khi overlay đang được áp dụng.
 - Component chưa có runtime state phải disabled và ghi rõ `Sắp có`.

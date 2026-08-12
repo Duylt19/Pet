@@ -17,8 +17,8 @@
 | `battery_catalog` | `ui/battery/catalog/BatteryCatalogScreen` | Tab Battery theo Figma: shared Home header/toggle, promo Customize Status Bar, carousel theo category, favorite/Premium, native ad sau Trending và Accessibility gate |
 | `battery_category/{categoryId}` | `ui/battery/catalog/BatteryCategoryScreen` | Child route từ More: Back/title/PRO, inline banner, grid ba cột, selected theme và crown Premium; dùng chung catalog ViewModel |
 | `battery_editor/{themeId}` | `ui/battery/editor/BatteryEditorScreen` | Overview khởi tạo cặp pet+pin; picker category đổi hai asset độc lập, Rewarded/Premium theo component, live preview, Apply cố định và disclosure |
-| `battery_editor_component/{themeId}/{page}` | `ui/battery/editor/BatteryEditorScreen` | Destination editor riêng theo component, dùng ViewModel/draft của overview; Back/Done phục hồi đúng vị trí cuộn và có screen tracking độc lập |
-| `battery_editor_emotion_detail/{themeId}/{groupKey}` | `ui/battery/editor/BatteryEmotionFigmaScreen` | Detail 10 emotion của pack, preview ghim, switch/size/selected state và Done; banner do editor shell sở hữu |
+| `battery_editor_component/{themeId}/{page}` | `ui/battery/editor/BatteryEditorScreen` | Destination editor riêng theo component, dùng ViewModel/draft của overview; control cập nhật preview ngay, Back giữ draft và phục hồi đúng vị trí cuộn |
+| `battery_editor_emotion_detail/{themeId}/{groupKey}` | `ui/battery/editor/BatteryEmotionFigmaScreen` | Detail 10 emotion của pack, preview ghim, switch/size/selected state cập nhật trực tiếp; banner do editor shell sở hữu |
 | `premium/{startByIndex}` | `ui/premium/PremiumScreen` | Subscription UI, close behavior theo entry source |
 
 ## Visual scope hiện tại

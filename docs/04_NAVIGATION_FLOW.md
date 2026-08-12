@@ -61,8 +61,8 @@ Discover/My Pet ──Battery──> Battery Styles ──More──> Battery ca
 Customize Battery Bar ──Apply khi chưa có quyền──> Accessibility disclosure/settings
   └─ theme ID khởi tạo cả pet + pin; editor có thể mix hai theme khác nhau
 Customize Battery Bar ──locked pet/pin──> Rewarded hoặc Premium ──return──> chọn component
-Customize Battery Bar ──custom icon──> Icon Editor ──Done/Back──> đúng draft và scroll offset của overview
-Customize Battery Bar ──Emotion──> 8 emotion packs ──pack──> 10 emotion styles ──Done──> commit draft
+Customize Battery Bar ──custom icon──> Icon Editor ──chỉnh trực tiếp draft/preview ──Back──> overview
+Customize Battery Bar ──Emotion──> 8 emotion packs ──pack──> 10 emotion styles ──chọn──> cập nhật draft/preview
 Customize Battery Bar ──Apply(service on)──> persist config + accessibility overlay
 ```
 
@@ -93,15 +93,15 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
   editor refresh entitlement và hoàn tất pending component selection khi resume.
 - Mỗi Battery component editor là một destination nằm trên overview và dùng ViewModel của
   overview. Mười editor Airplane/Ringer/Date/Hotspot/Charge/Clock/Animation/Wi-Fi/Signal/
-  Mobile Data dùng preview cố định, Done
-  cố định và state riêng cho từng switch; Clock không còn dùng chung size/màu với Date.
+  Mobile Data dùng preview cố định và state riêng cho từng switch; Clock không còn dùng chung
+  size/màu với Date. Không có CTA Done ở các editor con.
 - Emotion overview và detail cũng dùng ViewModel của `battery_editor/{themeId}` thay vì scope
   theo destination trung gian. Chọn style cập nhật draft/preview; Back từ detail quay về đúng
   danh sách tám pack. Hai route giữ cùng một native collapsible holder/key ở shell nên không
   reload ad khi push/pop detail.
 - Theme selection trong Battery Styles mở editor ngay cả khi chưa có Accessibility. Preview
-  nhúng vẫn hoạt động. Done ở child chỉ commit vào draft overview rồi quay lại; Back ở child
-  rollback về checkpoint lúc mở màn. Chỉ Apply tại overview mới hiện disclosure và persist.
+  nhúng vẫn hoạt động. Mọi chỉnh sửa ở child cập nhật ngay draft chung và preview; Back chỉ pop
+  về overview, không rollback. Chỉ Apply tại overview mới hiện disclosure và persist.
 - Mọi action xin Accessibility trong Discover, Battery Styles, Mine, Status Bar Editor và Grant
   Permissions dùng cùng bottom-sheet disclosure. `Allow` không mở Settings cho tới khi checkbox
   consent được chọn; launcher tắt App Open Ad trước khi rời app và trạng thái được đọc lại khi về.
