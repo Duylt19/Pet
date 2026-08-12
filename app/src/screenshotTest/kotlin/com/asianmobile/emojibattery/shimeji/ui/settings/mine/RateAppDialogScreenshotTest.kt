@@ -103,7 +103,8 @@ private fun RateDialogPreview(
             onUpdateOtherText = {},
             onSendFeedback = {},
             artworkProgress = artworkProgress,
-            showStarIntro = false
+            showStarIntro = false,
+            autoFocusOtherFeedback = false
         )
     }
 }

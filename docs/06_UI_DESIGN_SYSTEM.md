@@ -50,6 +50,9 @@ Mine visual contract theo Figma node `8080:4828`:
   và OTHER. Card setting rộng `328/360`, radius 16px, nền trắng và shadow 12%;
 - label dùng Roboto Medium 14/20, subtitle Roboto Regular 12/16, icon vector 24px màu
   `#FB3675`, divider `#F2F2F2`; hai shortcut illustration là raster phức tạp PNG @3x;
+- Rate feedback dialog dùng IME-aware window: khi chọn `Other`, ô nhập tự focus và bàn phím
+  làm co vùng dialog thay vì che dialog. Nếu chiều cao còn lại không đủ, content feedback cuộn
+  bên trong card; dialog luôn giữ khoảng cách với cạnh trên và bàn phím;
 - toggle điều khiển cùng `BatteryStatusConfig.enabled` và Accessibility gate với Discover;
   Language, Rate, Share, Contact và Privacy giữ flow thật. My Pet mở route `my_pet`,
 - Favourite & Recent là destination riêng: hai tab cố định, lưới ba cột dùng favorite battery

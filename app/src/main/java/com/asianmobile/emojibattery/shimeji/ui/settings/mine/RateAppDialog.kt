@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.ui.settings.mine
 
+import android.view.WindowManager
 import androidx.annotation.RawRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,8 +13,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -23,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,11 +37,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -51,6 +60,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import com.airbnb.lottie.LottieCompositionFactory
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -89,19 +99,52 @@ fun RateAppDialog(
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        )
     ) {
-        DismissibleDialogBackdrop(onDismissRequest = onDismiss) {
-            RateAppDialogCard(
-                state = state,
-                onSelectStars = onSelectStars,
-                onDismiss = onDismiss,
-                onRateOnPlayStore = onRateOnPlayStore,
-                onGoToFeedbackForm = onGoToFeedbackForm,
-                onToggleFeedbackOption = onToggleFeedbackOption,
-                onUpdateOtherText = onUpdateOtherText,
-                onSendFeedback = onSendFeedback
-            )
+        ConfigureRateDialogImeWindow()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+        ) {
+            DismissibleDialogBackdrop(
+                onDismissRequest = onDismiss,
+                surfaceModifier = Modifier.padding(
+                    vertical = dimensionResource(SdpR.dimen._12sdp)
+                )
+            ) {
+                RateAppDialogCard(
+                    state = state,
+                    onSelectStars = onSelectStars,
+                    onDismiss = onDismiss,
+                    onRateOnPlayStore = onRateOnPlayStore,
+                    onGoToFeedbackForm = onGoToFeedbackForm,
+                    onToggleFeedbackOption = onToggleFeedbackOption,
+                    onUpdateOtherText = onUpdateOtherText,
+                    onSendFeedback = onSendFeedback
+                )
+            }
+        }
+    }
+}
+
+@Composable
+@Suppress("DEPRECATION")
+private fun ConfigureRateDialogImeWindow() {
+    val view = LocalView.current
+    DisposableEffect(view) {
+        val window = (view.parent as? DialogWindowProvider)?.window
+        val previousSoftInputMode = window?.attributes?.softInputMode
+        window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        onDispose {
+            previousSoftInputMode?.let { softInputMode ->
+                window.setSoftInputMode(softInputMode)
+            }
         }
     }
 }
@@ -118,7 +161,8 @@ internal fun RateAppDialogCard(
     onSendFeedback: () -> Unit,
     modifier: Modifier = Modifier,
     artworkProgress: Float? = null,
-    showStarIntro: Boolean = true
+    showStarIntro: Boolean = true,
+    autoFocusOtherFeedback: Boolean = true
 ) {
     val cardWidthFraction = if (state.step is RateAppStep.ThankYou) {
         RateThankYouDialogWidthFraction
@@ -153,7 +197,8 @@ internal fun RateAppDialogCard(
                 onToggleOption = onToggleFeedbackOption,
                 onUpdateOtherText = onUpdateOtherText,
                 onSendClick = onSendFeedback,
-                onDismiss = onDismiss
+                onDismiss = onDismiss,
+                autoFocusOtherFeedback = autoFocusOtherFeedback
             )
 
             RateAppStep.ThankYou -> ThankYouContent(onDismiss = onDismiss)
@@ -277,15 +322,31 @@ private fun FeedbackFormContent(
     onToggleOption: (Int) -> Unit,
     onUpdateOtherText: (String) -> Unit,
     onSendClick: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    autoFocusOtherFeedback: Boolean
 ) {
     val isOthersSelected = state.feedbackOptions.lastOrNull()?.isSelected == true
     val sendEnabled = state.canSendFeedback()
+    val scrollState = rememberScrollState()
+    val otherFeedbackFocusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(isOthersSelected, autoFocusOtherFeedback) {
+        if (autoFocusOtherFeedback) {
+            if (isOthersSelected) {
+                otherFeedbackFocusRequester.requestFocus()
+                keyboardController?.show()
+                scrollState.animateScrollTo(scrollState.maxValue)
+            } else {
+                keyboardController?.hide()
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .padding(
                 horizontal = dimensionResource(SdpR.dimen._9sdp),
                 vertical = dimensionResource(SdpR.dimen._15sdp)
@@ -318,7 +379,8 @@ private fun FeedbackFormContent(
         if (isOthersSelected) {
             FeedbackTextField(
                 value = state.otherFeedbackText,
-                onValueChange = onUpdateOtherText
+                onValueChange = onUpdateOtherText,
+                modifier = Modifier.focusRequester(otherFeedbackFocusRequester)
             )
         }
 
@@ -343,12 +405,13 @@ private fun FeedbackFormContent(
 @Composable
 private fun FeedbackTextField(
     value: String,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(dimensionResource(SdpR.dimen._92sdp))
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp)))
