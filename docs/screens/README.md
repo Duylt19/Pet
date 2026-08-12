@@ -1,5 +1,9 @@
 # Current Screens
 
+Bốn route `home`, `battery_catalog`, `pet_store` và `settings` là các tab ngang hàng trong cùng
+Home shell. System Back tại một trong bốn tab mở Exit dialog trực tiếp; Back ở màn con mới pop về
+tab đã mở màn đó.
+
 | Route | Package/screen | Contract hiện tại |
 |---|---|---|
 | `splash` | `ui/onboarding/splash/SplashScreen` | Figma pastel startup, billing/consent/banner và điều hướng bước tiếp theo |

@@ -18,6 +18,17 @@ class HomeTabNavigationTest {
     }
 
     @Test
+    fun `system back treats every home tab as an equivalent app root`() {
+        assertEquals(true, isHomeTopLevelRoute(Routes.HOME))
+        assertEquals(true, isHomeTopLevelRoute(Routes.BATTERY_CATALOG))
+        assertEquals(true, isHomeTopLevelRoute(Routes.PET_STORE))
+        assertEquals(true, isHomeTopLevelRoute(Routes.SETTINGS))
+        assertEquals(false, isHomeTopLevelRoute(Routes.SEARCH))
+        assertEquals(false, isHomeTopLevelRoute(Routes.MY_PET))
+        assertEquals(false, isHomeTopLevelRoute(null))
+    }
+
+    @Test
     fun `every home tab maps to its top level route`() {
         assertEquals(Routes.HOME, routeForHomeTab(HomeTab.DISCOVER))
         assertEquals(Routes.BATTERY_CATALOG, routeForHomeTab(HomeTab.BATTERY))

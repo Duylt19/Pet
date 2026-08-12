@@ -33,6 +33,7 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.ads.utils.AdOverlayState
 import com.asianmobile.emojibattery.shimeji.navigation.AppNavGraph
 import com.asianmobile.emojibattery.shimeji.navigation.Routes
+import com.asianmobile.emojibattery.shimeji.navigation.isHomeTopLevelRoute
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.ExitDialog
 import com.asianmobile.emojibattery.shimeji.ui.app.MainViewModel
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.BaseAppTheme
@@ -100,7 +101,7 @@ class MainActivity : ComponentActivity() {
 
         setupAdOverlay()
         onBackPressedDispatcher.addCallback(this) {
-            if (currentRoute == Routes.HOME) {
+            if (isHomeTopLevelRoute(currentRoute)) {
                 showExitDialog = true
             } else {
                 isEnabled = false

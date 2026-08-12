@@ -114,6 +114,9 @@ internal fun homeTabForRoute(route: String?): HomeTab? = when (route) {
     else -> null
 }
 
+/** All four bottom-navigation destinations are equivalent roots for system Back handling. */
+internal fun isHomeTopLevelRoute(route: String?): Boolean = homeTabForRoute(route) != null
+
 internal fun routeForHomeTab(tab: HomeTab): String = when (tab) {
     HomeTab.DISCOVER -> Routes.HOME
     HomeTab.BATTERY -> Routes.BATTERY_CATALOG
