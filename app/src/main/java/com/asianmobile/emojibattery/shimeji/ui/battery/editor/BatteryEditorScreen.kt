@@ -90,7 +90,10 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BATTERY_STATUS_COMPONENT_GAP_DP
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryConnectivityState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryDeviceState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryHotspotState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPowerState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPreviewSystemStatePolicy
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryRingerState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutItem
@@ -1835,6 +1838,14 @@ internal fun BatteryPreview(
     val batteryTheme = state.themes.firstOrNull {
         it.id == config.selectedBatteryThemeId
     } ?: state.theme
+    val previewDeviceState = BatteryPreviewSystemStatePolicy.deviceState(
+        state.systemState.deviceState,
+        focusedComponent
+    )
+    val previewPowerState = BatteryPreviewSystemStatePolicy.powerState(
+        state.systemState.powerState,
+        focusedComponent
+    )
     val previewDate = remember(config.dateFormat) {
         SimpleDateFormat(config.dateFormat.pattern, Locale.getDefault()).format(Date())
     }
@@ -1861,7 +1872,9 @@ internal fun BatteryPreview(
             animation?.assetPath,
             previewMobileDataLabel,
             maxWidth,
-            focusedComponent
+            focusedComponent,
+            previewDeviceState,
+            previewPowerState
         ) {
             batteryPreviewLayout(
                 config = config,
@@ -1872,7 +1885,9 @@ internal fun BatteryPreview(
                 hasEmotion = emotionPath != null,
                 hasAnimation = animation != null,
                 mobileDataLabel = previewMobileDataLabel,
-                focusedComponent = focusedComponent
+                focusedComponent = focusedComponent,
+                deviceState = previewDeviceState,
+                powerState = previewPowerState
             )
         }
         backgroundPath?.let { path ->
@@ -1924,7 +1939,7 @@ internal fun BatteryPreview(
                 PreviewStatusIcon(
                     iconName = requireNotNull(
                         BatterySystemStatusPolicy.ringerIcon(
-                            BatteryRingerState.SILENT,
+                            previewDeviceState.ringer,
                             config.ringerIconStyleIndex
                         )
                     ),
@@ -1956,7 +1971,7 @@ internal fun BatteryPreview(
                     BatteryStatusComponent.HOTSPOT -> PreviewStatusIcon(
                         iconName = requireNotNull(
                             BatterySystemStatusPolicy.hotspotIcon(
-                                BatteryHotspotState.ENABLED,
+                                previewDeviceState.hotspot,
                                 config.hotspotIconStyleIndex
                             )
                         ),
@@ -2068,141 +2083,171 @@ internal fun batteryPreviewLayout(
     hasEmotion: Boolean,
     hasAnimation: Boolean,
     mobileDataLabel: String? = "5G",
-    focusedComponent: BatteryStatusComponent? = null
-) = BatteryStatusLayoutPolicy().resolve(
-    availableWidth = availableWidthDp,
-    items = buildList {
-        val gap = BATTERY_STATUS_COMPONENT_GAP_DP
-        if (config.showTime) {
-            add(
-                BatteryStatusLayoutItem(
-                    BatteryStatusComponent.TIME,
-                    width = config.clockSizeDp * 3.2f + gap,
-                    priority = 100,
-                    required = focusedComponent == BatteryStatusComponent.DATE ||
-                        focusedComponent == BatteryStatusComponent.TIME
+    focusedComponent: BatteryStatusComponent? = null,
+    deviceState: BatteryDeviceState = BatteryDeviceState(),
+    powerState: BatteryPowerState = BatteryPowerState()
+) : BatteryStatusLayoutResult {
+    val previewDeviceState = BatteryPreviewSystemStatePolicy.deviceState(
+        deviceState,
+        focusedComponent
+    )
+    val previewPowerState = BatteryPreviewSystemStatePolicy.powerState(
+        powerState,
+        focusedComponent
+    )
+    return BatteryStatusLayoutPolicy().resolve(
+        availableWidth = availableWidthDp,
+        items = buildList {
+            val gap = BATTERY_STATUS_COMPONENT_GAP_DP
+            if (config.showTime) {
+                add(
+                    BatteryStatusLayoutItem(
+                        BatteryStatusComponent.TIME,
+                        width = config.clockSizeDp * 3.2f + gap,
+                        priority = 100,
+                        required = focusedComponent == BatteryStatusComponent.DATE ||
+                            focusedComponent == BatteryStatusComponent.TIME
+                    )
                 )
-            )
-        }
-        if (config.showDateTime) {
-            add(
-                BatteryStatusLayoutItem(
-                    BatteryStatusComponent.DATE,
-                    width = config.dateTimeSizeDp * 4.2f + gap,
-                    priority = 20,
-                    required = focusedComponent == BatteryStatusComponent.DATE
+            }
+            if (config.showDateTime) {
+                add(
+                    BatteryStatusLayoutItem(
+                        BatteryStatusComponent.DATE,
+                        width = config.dateTimeSizeDp * 4.2f + gap,
+                        priority = 20,
+                        required = focusedComponent == BatteryStatusComponent.DATE
+                    )
                 )
-            )
-        }
-        if (config.showAirplane && focusedComponent == BatteryStatusComponent.AIRPLANE) {
+            }
+            if (config.showAirplane && previewDeviceState.airplaneMode) {
+                add(
+                    BatteryStatusLayoutItem(
+                        BatteryStatusComponent.AIRPLANE,
+                        width = config.airplaneSizeDp + gap,
+                        priority = 65,
+                        required = focusedComponent == BatteryStatusComponent.AIRPLANE
+                    )
+                )
+            }
+            if (
+                config.showRinger &&
+                BatterySystemStatusPolicy.ringerIcon(
+                    previewDeviceState.ringer,
+                    config.ringerIconStyleIndex
+                ) != null
+            ) {
+                add(
+                    BatteryStatusLayoutItem(
+                        BatteryStatusComponent.RINGER,
+                        width = config.ringerSizeDp + gap,
+                        priority = 60,
+                        required = focusedComponent == BatteryStatusComponent.RINGER
+                    )
+                )
+            }
+            if (config.showAnimation && hasAnimation) {
+                add(
+                    BatteryStatusLayoutItem(
+                        BatteryStatusComponent.ANIMATION,
+                        width = config.animationSizeDp + gap,
+                        priority = 40,
+                        required = focusedComponent == BatteryStatusComponent.ANIMATION
+                    )
+                )
+            }
+            if (config.showEmotion && hasEmotion) {
+                add(
+                    BatteryStatusLayoutItem(
+                        BatteryStatusComponent.EMOTION,
+                        width = config.emojiSizeDp + gap,
+                        priority = 30,
+                        required = focusedComponent == BatteryStatusComponent.EMOTION
+                    )
+                )
+            }
+            if (config.showCharge && previewPowerState.isCharging) {
+                add(
+                    BatteryStatusLayoutItem(
+                        BatteryStatusComponent.CHARGE,
+                        width = config.chargeSizeDp + gap,
+                        priority = 85,
+                        required = focusedComponent == BatteryStatusComponent.CHARGE
+                    )
+                )
+            }
             add(
                 BatteryStatusLayoutItem(
-                    BatteryStatusComponent.AIRPLANE,
-                    width = config.airplaneSizeDp + gap,
-                    priority = 65,
+                    BatteryStatusComponent.BATTERY,
+                    width = maxOf(
+                        config.batterySizeDp,
+                        if (hasEmoji) config.emojiSizeDp else 0f
+                    ) + gap,
+                    priority = 110,
                     required = true
                 )
             )
-        }
-        if (config.showRinger && focusedComponent == BatteryStatusComponent.RINGER) {
-            add(
-                BatteryStatusLayoutItem(
-                    BatteryStatusComponent.RINGER,
-                    width = config.ringerSizeDp + gap,
-                    priority = 60,
-                    required = true
+            if (config.showPercentage) {
+                add(
+                    BatteryStatusLayoutItem(
+                        BatteryStatusComponent.PERCENTAGE,
+                        width = config.percentSizeDp * 2.5f + gap,
+                        priority = 95
+                    )
                 )
-            )
-        }
-        if (config.showAnimation && hasAnimation) {
-            add(
-                BatteryStatusLayoutItem(
-                    BatteryStatusComponent.ANIMATION,
-                    width = config.animationSizeDp + gap,
-                    priority = 40,
-                    required = focusedComponent == BatteryStatusComponent.ANIMATION
+            }
+            if (config.showWifi) {
+                add(
+                    BatteryStatusLayoutItem(
+                        BatteryStatusComponent.WIFI,
+                        width = config.wifiSizeDp * 1.4f + gap,
+                        priority = 90,
+                        required = focusedComponent == BatteryStatusComponent.WIFI
+                    )
                 )
-            )
-        }
-        if (config.showEmotion && hasEmotion) {
-            add(
-                BatteryStatusLayoutItem(
-                    BatteryStatusComponent.EMOTION,
-                    width = config.emojiSizeDp + gap,
-                    priority = 30,
-                    required = focusedComponent == BatteryStatusComponent.EMOTION
+            }
+            if (
+                (config.showSignal || (config.showData && mobileDataLabel != null)) &&
+                !previewDeviceState.airplaneMode
+            ) {
+                val signalWidth = if (config.showSignal) {
+                    config.signalSizeDp * 1.4f + gap
+                } else {
+                    0f
+                }
+                val dataWidth = if (config.showData && mobileDataLabel != null) {
+                    config.dataSizeDp * mobileDataLabel.length.coerceAtLeast(1) + gap
+                } else {
+                    0f
+                }
+                add(
+                    BatteryStatusLayoutItem(
+                        BatteryStatusComponent.CELLULAR,
+                        width = signalWidth + dataWidth,
+                        priority = 70,
+                        required = focusedComponent == BatteryStatusComponent.CELLULAR
+                    )
                 )
-            )
-        }
-        if (config.showCharge && focusedComponent == BatteryStatusComponent.CHARGE) {
-            add(
-                BatteryStatusLayoutItem(
-                    BatteryStatusComponent.CHARGE,
-                    width = config.chargeSizeDp + gap,
-                    priority = 85,
-                    required = true
+            }
+            if (
+                config.showHotspot &&
+                BatterySystemStatusPolicy.hotspotIcon(
+                    previewDeviceState.hotspot,
+                    config.hotspotIconStyleIndex
+                ) != null
+            ) {
+                add(
+                    BatteryStatusLayoutItem(
+                        BatteryStatusComponent.HOTSPOT,
+                        width = config.hotspotSizeDp + gap,
+                        priority = 55,
+                        required = focusedComponent == BatteryStatusComponent.HOTSPOT
+                    )
                 )
-            )
+            }
         }
-        add(
-            BatteryStatusLayoutItem(
-                BatteryStatusComponent.BATTERY,
-                width = maxOf(
-                    config.batterySizeDp,
-                    if (hasEmoji) config.emojiSizeDp else 0f
-                ) + gap,
-                priority = 110,
-                required = true
-            )
-        )
-        if (config.showPercentage) {
-            add(
-                BatteryStatusLayoutItem(
-                    BatteryStatusComponent.PERCENTAGE,
-                    width = config.percentSizeDp * 2.5f + gap,
-                    priority = 95
-                )
-            )
-        }
-        if (config.showWifi) {
-            add(
-                BatteryStatusLayoutItem(
-                    BatteryStatusComponent.WIFI,
-                    width = config.wifiSizeDp * 1.4f + gap,
-                    priority = 90,
-                    required = focusedComponent == BatteryStatusComponent.WIFI
-                )
-            )
-        }
-        if (
-            (config.showSignal || (config.showData && mobileDataLabel != null)) &&
-            focusedComponent != BatteryStatusComponent.AIRPLANE
-        ) {
-            val signalWidth = if (config.showSignal) config.signalSizeDp * 1.4f + gap else 0f
-            val dataWidth = if (config.showData && mobileDataLabel != null) {
-                config.dataSizeDp * mobileDataLabel.length.coerceAtLeast(1) + gap
-            } else 0f
-            add(
-                BatteryStatusLayoutItem(
-                    BatteryStatusComponent.CELLULAR,
-                    width = signalWidth + dataWidth,
-                    priority = 70,
-                    required = focusedComponent == BatteryStatusComponent.CELLULAR
-                )
-            )
-        }
-        if (config.showHotspot && focusedComponent == BatteryStatusComponent.HOTSPOT) {
-            add(
-                BatteryStatusLayoutItem(
-                    BatteryStatusComponent.HOTSPOT,
-                    width = config.hotspotSizeDp + gap,
-                    priority = 55,
-                    required = true
-                )
-            )
-        }
-    }
-)
+    )
+}
 
 private fun BatteryEditorPage.previewComponent(): BatteryStatusComponent? = when (this) {
     BatteryEditorPage.EMOJI,

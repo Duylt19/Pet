@@ -25,12 +25,31 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOfferSheetSurface
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryMobileDataBadge
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryChargeState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPowerState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPreviewSystemState
 
 @PreviewTest
 @Preview(name = "Status bar editor expanded", widthDp = 360, heightDp = 800)
 @Composable
 fun BatteryEditorOverviewScreenshotTest() {
     PreviewEditorPage(BatteryEditorPage.OVERVIEW)
+}
+
+@PreviewTest
+@Preview(name = "Status bar charging preview", widthDp = 360, heightDp = 50)
+@Composable
+fun BatteryEditorChargingPreviewScreenshotTest() {
+    val state = previewEditorState()
+    BatteryPreview(
+        state = state.copy(
+            config = state.config.copy(chargeColorArgb = 0xFFFFFFFF.toInt()),
+            systemState = BatteryPreviewSystemState(
+                powerState = BatteryPowerState(chargeState = BatteryChargeState.CHARGING)
+            )
+        ),
+        page = BatteryEditorPage.OVERVIEW
+    )
 }
 
 @PreviewTest

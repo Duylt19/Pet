@@ -119,7 +119,9 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   inline khi collapsed; Back và PRO luôn pinned;
 - preview `328×50px` được ghim ngay dưới app bar khi Accessibility chưa cấp hoặc feature đang
   tắt. Khi Accessibility đã cấp và status bar thật đang hoạt động, preview nhúng được ẩn để
-  tránh hiển thị trùng. Preview dùng cùng thứ tự vật lý với renderer thật: trailing LTR là
+  tránh hiển thị trùng. Khi preview nhúng đang hiện, Charge/Airplane/Ringer/Hotspot lấy trạng
+  thái hệ thống thật; riêng màn option đang chỉnh sẽ mô phỏng trạng thái active để user luôn
+  nhìn thấy style vừa chọn. Preview dùng cùng thứ tự vật lý với renderer thật: trailing LTR là
   Hotspot → Signal/Data → Wifi → Percentage → Battery/Emoji pair → Charge; Battery và Emoji
   chồng cùng tâm và mọi component cách nhau 4dp;
 - More Battery/Emoji mở grid ba cột với artwork 73.03% item; More Theme mở grid hai cột từ

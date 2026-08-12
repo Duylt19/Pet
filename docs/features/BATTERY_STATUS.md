@@ -24,6 +24,9 @@ Vertical slice hiện đã có trong source:
   chưa cấp hoặc feature đang tắt. Khi status bar thật đã hoạt động, preview nhúng được ẩn. Các
   library Battery/Emoji/Theme là child destination dùng chung ViewModel/draft. Battery/Emoji
   dùng grid ba cột; Theme dùng grid hai cột từ catalog runtime.
+- Preview nhúng theo dõi broadcast pin/sạc, airplane, ringer và hotspot ngay cả khi
+  Accessibility service chưa chạy. Ở overview icon conditional chỉ hiện khi switch bật và trạng
+  thái hệ thống đang active; trong màn option tương ứng policy mô phỏng active để kiểm tra style.
 - Overview có đủ picker Battery/Emoji/Animation, Color/Theme và color picker HSV + opacity.
   Preset, slider và color picker đều cập nhật draft ngay; overlay thật chỉ nhận thay đổi khi
   feature đang bật.

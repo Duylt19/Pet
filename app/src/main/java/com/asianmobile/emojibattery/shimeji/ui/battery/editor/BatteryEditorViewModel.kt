@@ -8,6 +8,7 @@ import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryEditorPreviewSession
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryMobileDataMonitor
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryEditorSystemStateMonitor
 import com.asianmobile.emojibattery.shimeji.battery.settings.resolveBatteryStatusBarHeightRange
 import com.asianmobile.emojibattery.shimeji.battery.settings.systemStatusBarHeightDp
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
@@ -46,6 +47,7 @@ class BatteryEditorViewModel @Inject constructor(
     private val catalogRepository: BatteryCatalogRepository,
     private val settingsRepository: BatterySettingsRepository,
     private val mobileDataMonitor: BatteryMobileDataMonitor,
+    private val systemStateMonitor: BatteryEditorSystemStateMonitor,
     private val previewSession: BatteryEditorPreviewSession
 ) : ViewModel() {
     private val themeId = savedStateHandle.get<Int>("themeId") ?: BUILT_IN_BATTERY_THEME_ID
@@ -96,8 +98,9 @@ class BatteryEditorViewModel @Inject constructor(
                 catalogRepository.snapshot,
                 settingsRepository.config,
                 mobileDataMonitor.badge,
-                animationPreviewFiles
-            ) { catalog, stored, mobileDataBadge, localAnimationFiles ->
+                animationPreviewFiles,
+                systemStateMonitor.state
+            ) { catalog, stored, mobileDataBadge, localAnimationFiles, systemState ->
                 latestStored = stored
                 val isCurrentStyle = themeId == CURRENT_BATTERY_STYLE_ID
                 val theme = if (isCurrentStyle) {
@@ -142,6 +145,7 @@ class BatteryEditorViewModel @Inject constructor(
                         localAnimationFiles
                     ),
                     mobileDataBadge = mobileDataBadge,
+                    systemState = systemState,
                     isThemeAvailable = selectedAssetsReady(catalog.themes, draft),
                     isPremium = SharedPreferencesUtils.getIsPremium(context),
                     hasUnsavedChanges = hasLocalEdits
