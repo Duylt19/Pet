@@ -346,7 +346,6 @@ private fun FeedbackFormContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .verticalScroll(scrollState)
             .padding(
                 horizontal = dimensionResource(SdpR.dimen._9sdp),
                 vertical = dimensionResource(SdpR.dimen._15sdp)
@@ -365,7 +364,10 @@ private fun FeedbackFormContent(
         )
 
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f, fill = false)
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
         ) {
             state.feedbackOptions.forEachIndexed { index, option ->
