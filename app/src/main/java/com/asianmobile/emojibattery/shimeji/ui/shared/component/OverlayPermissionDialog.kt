@@ -2,8 +2,6 @@ package com.asianmobile.emojibattery.shimeji.ui.shared.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -20,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,8 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_PERMISSION
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
@@ -47,36 +42,18 @@ fun OverlayPermissionDialog(
     onAllowAccess: () -> Unit,
     onNotNow: () -> Unit
 ) {
-    Dialog(
-        onDismissRequest = onNotNow,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false
-        )
+    PermissionDisclosureBottomSheet(
+        onDismissRequest = onNotNow
     ) {
-        HideDialogNavigationBar()
         BoxWithConstraints(
             modifier = Modifier
-                .fillMaxSize()
-                .background(colorResource(R.color.colors_000000).copy(alpha = 0.5f))
+                .fillMaxWidth()
                 .statusBarsPadding()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onNotNow
-                )
         ) {
             OverlayPermissionDialogContent(
                 onAllowAccess = onAllowAccess,
                 onNotNow = onNotNow,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .heightIn(max = maxHeight)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {}
-                    )
+                modifier = Modifier.heightIn(max = maxHeight)
             )
         }
     }
