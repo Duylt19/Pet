@@ -23,7 +23,7 @@
 | Observability | Firebase Analytics/Crashlytics/Remote Config | Tracking/config/crash |
 | Responsive sizing | Intuit SDP/SSP | Mapping design hiện tại |
 | Feedback | Android Mail/Activation | Rate feedback email |
-| Screen overlay | `WindowManager`, custom Canvas `View`, Choreographer | Mixed 1–12 hoặc Swarm 1–12 windows + shared adaptive FPS clock |
+| Screen overlay | `WindowManager`, custom Canvas `View`, Choreographer | Mixed 0–12 hoặc Swarm 1–12 windows + shared adaptive FPS clock |
 | Battery status cover | `AccessibilityService`, `TYPE_ACCESSIBILITY_OVERLAY`, custom Canvas `View` | Opt-in non-touchable status capsule; no node retrieval/automation |
 | Long-running pet | Android foreground service `specialUse` | User-visible lifetime + ongoing notification |
 | Pet packs | Platform ZIP/JSON/Bitmap APIs, JVM `org.json` test artifact | Secure import, validation, sprite preload/cache |

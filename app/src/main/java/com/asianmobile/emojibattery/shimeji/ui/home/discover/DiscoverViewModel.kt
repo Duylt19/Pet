@@ -6,11 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibilityRecovery
 import com.asianmobile.emojibattery.shimeji.battery.overlay.batteryAccessibilityRecovery
-import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBackgroundRestrictionReader
-import com.asianmobile.emojibattery.shimeji.pet.overlay.PetProcessKillKind
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_THEME_ID
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBackgroundRestrictionReader
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetProcessKillKind
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -81,7 +82,9 @@ class DiscoverViewModel @Inject constructor(
                         )
                     },
                     batteryThemes = batteryCatalog.themes
-                        .filter { it.assetsReady }
+                        .filter { theme ->
+                            theme.assetsReady && theme.id != DEFAULT_BATTERY_THEME_ID
+                        }
                         .take(MAX_DISCOVER_PREVIEW_ITEMS)
                         .map { theme ->
                             DiscoverThemeUiState(

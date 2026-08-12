@@ -79,8 +79,8 @@ Discover Home contract:
   dùng placement SDK thật `discover_inline`, không đóng gói creative quảng cáo mẫu;
 - Thứ tự nhóm đầu sau hero là `Trending Emoji Battery` → `Shimeji Pets` → inline banner;
   `Status bar themes` tiếp tục nằm ngay sau banner, đúng hierarchy node Figma `8015:1035`;
-- Battery Themes dùng favorite state thật; Trending hiện dùng thứ tự catalog cho tới khi
-  server có ranking riêng.
+- Battery Themes dùng favorite state thật; Trending bỏ theme default ID `1`, sau đó giữ thứ
+  tự catalog cho tới khi server có ranking riêng.
 - Search field theo Figma `8287:6560`: khi query khác rỗng hiện clear icon 16px ở trailing;
   clear chỉ xoá query và giữ focus, còn tap ngắn ngoài toàn bộ field mới clear focus + ẩn IME.
   Gesture cuộn không được xem là outside tap.
@@ -334,8 +334,9 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   icon 18px cùng màu;
 - card grid ba cột: card room/food `104×122`, card pet `104×106` nền `#FFFEF9` viền `#FFECD4`
   2px radius 16; ô add `104×106` nền `#FFECD4` viền `#8F6250` với vòng tròn nét đứt `#D3BEA2`;
-- pet có switch `Pet on screen` đang ON hiển thị pill `Active` ở góc trên trái card: nền
-  `#FFF1B2`, chữ Roboto Medium 8/12 `#A54905`, padding ngang 6px/dọc 2px và offset 6px;
+- pet luôn hiển thị pill trạng thái ở góc trên trái card: `Active` dùng nền `#FFF1B2`, chữ
+  Roboto Medium 8/12 `#A54905`; `Inactive` dùng nền `#F0F0F0`, chữ `#6F7073`. Cả hai giữ
+  padding ngang 6px/dọc 2px và offset 6px;
 - pet đã sở hữu đi lại trong scene bằng `PetRoomWander`, không dùng `PetEngine`: engine overlay
   dựng cho góc nhìn ngang nên trọng lực dồn mọi pet về một đường sàn. Phòng nhìn từ phía trước
   nên sàn là hình thang phối cảnh `0.50–0.72` chiều cao scene, mép sau hẹp hơn 14%; pet chọn một
@@ -357,7 +358,8 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   indeterminate và khóa double tap cho tới khi background được cache rồi selected. Download lỗi
   trả card về icon download và không đổi room hiện tại. Card pet có nút xoá `16×16` tại `(8,8)`
   góc trên phải và xoá phải qua dialog xác nhận dựng theo `GrantPermissionDialog`;
-- panel chi tiết pet thay body sheet: hàng back `24` + nhãn `Pet on screen` `#FB3675` + toggle
+- panel chi tiết pet thay body sheet: hàng back `24` + nhãn động `Active` màu `#FB3675` hoặc
+  `Inactive` màu `#6F7073` + toggle
   `44×24`; khối info `336×78` với thumbnail `78×78` (ảnh `60×60`, băng dính `44×35`) và ba dòng
   label `#8F6250` 11/16 · value `#212327` 12/16 ngăn bằng divider nét đứt; khối Energy có chip
   `77×24` nền `#8F6250` và thanh `336×42`. Thanh dùng ba gradient theo mức: `#94DF37→#47B321`,

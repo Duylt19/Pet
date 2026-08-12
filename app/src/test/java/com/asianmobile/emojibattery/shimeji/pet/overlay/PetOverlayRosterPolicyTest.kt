@@ -1,6 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.pet.overlay
 
-import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SELECTED_PACK_KEY
+import com.asianmobile.emojibattery.shimeji.data.model.LEGACY_DEFAULT_SELECTED_PACK_KEY
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -11,7 +11,7 @@ class PetOverlayRosterPolicyTest {
     fun `a fresh install has no pet the user chose`() {
         assertFalse(
             PetOverlayRosterPolicy.hasChosenPet(
-                slotPackKeys = listOf(DEFAULT_SELECTED_PACK_KEY, "", ""),
+                slotPackKeys = listOf(LEGACY_DEFAULT_SELECTED_PACK_KEY, "", ""),
                 slotEnabled = listOf(true, true, true),
                 petCount = 1
             )
@@ -44,7 +44,7 @@ class PetOverlayRosterPolicyTest {
     fun `a pet beyond the roster does not count`() {
         assertFalse(
             PetOverlayRosterPolicy.hasChosenPet(
-                slotPackKeys = listOf(DEFAULT_SELECTED_PACK_KEY, "owner.shimeji.42@1"),
+                slotPackKeys = listOf(LEGACY_DEFAULT_SELECTED_PACK_KEY, "owner.shimeji.42@1"),
                 slotEnabled = listOf(true, true),
                 petCount = 1
             )
@@ -54,7 +54,10 @@ class PetOverlayRosterPolicyTest {
     @Test
     fun `the built-in slot is free for the first pet turned on`() {
         val keys = PetOverlayRosterPolicy.freeableSlotKeys(
-            slotPackKeys = listOf(DEFAULT_SELECTED_PACK_KEY, DEFAULT_SELECTED_PACK_KEY),
+            slotPackKeys = listOf(
+                LEGACY_DEFAULT_SELECTED_PACK_KEY,
+                LEGACY_DEFAULT_SELECTED_PACK_KEY
+            ),
             petCount = 1
         )
 
@@ -64,7 +67,7 @@ class PetOverlayRosterPolicyTest {
     @Test
     fun `a chosen pet keeps its slot`() {
         val keys = PetOverlayRosterPolicy.freeableSlotKeys(
-            slotPackKeys = listOf("owner.shimeji.42@1", DEFAULT_SELECTED_PACK_KEY),
+            slotPackKeys = listOf("owner.shimeji.42@1", LEGACY_DEFAULT_SELECTED_PACK_KEY),
             petCount = 2
         )
 

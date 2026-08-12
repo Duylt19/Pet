@@ -45,7 +45,7 @@ Discover ──More Shimeji Pets──> Shimeji Pets
 Discover ──Trending pet──> Rewarded/Premium sheet dùng chung ──> Download/verify/unlock ──> bật ở slot Mixed trống đầu tiên
 Discover ──Battery theme/icon──> Rewarded/Premium nếu bị khóa ──> Customize Status Bar
 Discover ──Mine──> Mine
-My Pet ──pet card──> detail panel ──Pet on screen──> Pet overlay foreground service
+My Pet ──pet card──> detail panel ──Active/Inactive──> cập nhật Pet overlay foreground service
 My Pet ──Add/Food+──> Shimeji Pets
 Mine ──My Pet──> My Pet
 Mine ──Favourite & Recent──> Favourite & Recent ──favourite theme──> Customize Status Bar
@@ -70,7 +70,7 @@ Customize Battery Bar ──Apply(service on)──> persist config + accessibil
 Sau khi pet được verify/cài thành công, Pet Store hiển thị unlock-success overlay và chạy
 clip movement `SPECIAL` của chính pack vừa cài (`SPECIAL_2`/thumbnail là fallback), rồi mới
 chuyển sang bước đặt tên khi user chạm Continue. Pet mới được bật atomically ở slot Mixed
-trống đầu tiên để switch `Pet on screen` mặc định ON; flow không đổi cấu hình Swarm và không
+trống đầu tiên với trạng thái `Active`; flow không đổi cấu hình Swarm và không
 thay pet khác nếu toàn bộ roster Mixed đã đầy.
 
 ## Back stack

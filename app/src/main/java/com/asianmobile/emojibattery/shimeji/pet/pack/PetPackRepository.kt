@@ -96,11 +96,10 @@ class FilePetPackRepository @Inject constructor(
         val updated = listOf(builtIn) + installed
         _packs.value = updated
         val requestedKeys = settingsRepository.preferences.value.selectedPackKeys
-            .ifEmpty { listOf(builtIn.key) }
             .toMutableList()
         if (preferredKey != null && preferredSlotIndex in 0 until MAX_PET_SLOTS) {
             while (requestedKeys.size <= preferredSlotIndex) {
-                requestedKeys += requestedKeys.firstOrNull() ?: builtIn.key
+                requestedKeys += ""
             }
             requestedKeys[preferredSlotIndex] = preferredKey
         }
@@ -108,18 +107,20 @@ class FilePetPackRepository @Inject constructor(
             updated.firstOrNull { it.key == requestedKey } ?: builtIn
         }
         _selectedPacks.value = selected
-        val resolvedKeys = selected.map(PetPack::key)
+        val resolvedKeys = requestedKeys.map { requestedKey ->
+            requestedKey.takeIf { key -> updated.any { it.key == key } }.orEmpty()
+        }
         if (preferredKey != null || resolvedKeys != requestedKeys) {
             settingsRepository.updateSelectedPacks(resolvedKeys)
         }
     }
 
     private fun selectFromPreferences(keys: List<String>) {
-        val selected = keys.ifEmpty { listOf(builtIn.key) }.map { key ->
+        val selected = keys.map { key ->
             find(key) ?: builtIn
         }
         _selectedPacks.value = selected
-        val resolvedKeys = selected.map(PetPack::key)
+        val resolvedKeys = keys.map { key -> key.takeIf { find(it) != null }.orEmpty() }
         if (resolvedKeys != keys) {
             settingsRepository.updateSelectedPacks(resolvedKeys)
         }

@@ -66,7 +66,9 @@ Language được mirror sang SharedPreferences `language_cache` để có thể
 `PetPreferences.petSlots` luôn materialize thành 12 `PetSlotPreferences`. Mỗi record sở hữu
 `packKey`, size, speed, messages, custom messages, interaction và `isEnabled`; `petCount`
 quyết định số slot Mixed đã cấu hình, còn `isEnabled` quyết định slot nào thật sự xuất
-hiện. Mixed luôn giữ tối thiểu một pet visible; global Start/Stop là cách tắt toàn bộ.
+hiện. Fresh install có `petCount=0`, 12 slot rỗng/inactive và không tự chọn Orange Cat.
+Mọi slot, kể cả pet cuối cùng, đều có thể chuyển sang inactive; khi không còn pet active,
+overlay không tạo window nào và service tự dừng.
 Ba slot đầu miễn phí. Slot 4–12 mở tuần tự sau earned Rewarded callback khi quảng cáo có
 sẵn; nếu Rewarded unavailable thì flow tiếp tục để lỗi quảng cáo không chặn tính năng.
 Premium bypass toàn bộ gate. Capacity đã mở được persist độc lập với roster nên remove pet
@@ -99,7 +101,9 @@ không được restore sau process death/reboot.
 ## Pet pack model
 
 - `PetPackManifest` là schema v1 versioned gồm identity, canvas, anchor, interaction và action clips/frame metadata.
-- `PetPackRepository.packs/selectedPacks` là `StateFlow`; selection thiếu slot được materialize một lần từ slot 1 thành 12 giá trị độc lập, và built-in Orange Cat luôn là fallback khi key không còn hợp lệ.
+- `PetPackRepository.packs/selectedPacks` là `StateFlow`; selection có pet thiếu slot được
+  materialize một lần từ slot 1 thành 12 giá trị độc lập. Slot rỗng giữ nguyên rỗng. Sentinel
+  debug v1 `builtin.orange-cat@1` được migrate về slot rỗng, không trở thành pet của user.
 - Installed source chỉ trỏ tới app-private directory sau khi secure installer validate và atomic promote.
 - Pet Store coi `installedPackKey` xuất hiện trong `PetPackRepository.packs` là đã mở khóa.
   Sau khi install thành công, repository ghi atomically pack key, `slotEnabled=true` và
@@ -108,7 +112,8 @@ không được restore sau process death/reboot.
   inventory/coin persistence được bổ sung cùng flow My Pet.
 - Pack của controller là snapshot theo từng rebuild. Khi selected key/count thay đổi,
   service preload visual rồi thay controller ngay trong foreground session; invalid/missing
-  key vẫn fallback built-in và không đưa file chưa validate vào renderer.
+  key bị loại khỏi roster user. Renderer vẫn giữ visual built-in nội bộ làm guard cuối cùng,
+  nhưng guard đó không được persist hoặc tính là pet đã sở hữu.
 - Android bitmap/`File` không đi vào pure engine state. Manifest được map sang `PetClip`; renderer giữ `PetPackVisual` đã preload.
 
 ## Owner catalog model

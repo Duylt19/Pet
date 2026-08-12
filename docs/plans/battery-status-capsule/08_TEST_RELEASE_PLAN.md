@@ -143,7 +143,7 @@ ship, không nới budget âm thầm.
 
 ## Regression for existing product
 
-- Mixed 1–12 and Swarm behavior unchanged.
+- Mixed 0–12 (including an empty/inactive roster) and Swarm behavior remain stable.
 - Pet shared FPS/position/speech/gesture unchanged.
 - Current onboarding permission/back stack unchanged until explicitly updated.
 - Existing ads/premium/App Open suppression unchanged.

@@ -20,7 +20,7 @@ data class PetPreferences(
             ?: PetSlotPreferences()
 
     fun packKeyForSlot(slotIndex: Int): String =
-        slot(slotIndex).packKey.takeIf(String::isNotBlank) ?: DEFAULT_SELECTED_PACK_KEY
+        slot(slotIndex).packKey
 
     val enabledMixedPetCount: Int
         get() = petSlots.take(petCount).count(PetSlotPreferences::isEnabled)
@@ -33,13 +33,13 @@ data class PetPreferences(
 }
 
 data class PetSlotPreferences(
-    val packKey: String = DEFAULT_SELECTED_PACK_KEY,
+    val packKey: String = "",
     val sizePercent: Int = DEFAULT_SIZE_PERCENT,
     val speedPercent: Int = DEFAULT_SPEED_PERCENT,
     val messagesEnabled: Boolean = true,
     val customMessages: List<String> = emptyList(),
     val interactionEnabled: Boolean = true,
-    val isEnabled: Boolean = true
+    val isEnabled: Boolean = false
 )
 
 enum class PetDisplayMode {
@@ -79,8 +79,9 @@ data class PetPositionFraction(
     val y: Float
 )
 
-const val DEFAULT_SELECTED_PACK_KEY = "builtin.orange-cat@1"
-const val DEFAULT_PET_COUNT = 1
+/** Legacy v1 sentinel. It is migrated to an empty slot and is never selected for a new user. */
+const val LEGACY_DEFAULT_SELECTED_PACK_KEY = "builtin.orange-cat@1"
+const val DEFAULT_PET_COUNT = 0
 const val DEFAULT_SIZE_PERCENT = 100
 const val DEFAULT_SPEED_PERCENT = 100
 const val DEFAULT_SWARM_COUNT = 6
