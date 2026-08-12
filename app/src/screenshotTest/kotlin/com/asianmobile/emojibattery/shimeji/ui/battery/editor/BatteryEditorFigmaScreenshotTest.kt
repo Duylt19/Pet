@@ -24,6 +24,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOfferSheetSurface
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryMobileDataBadge
 
 @PreviewTest
 @Preview(name = "Status bar editor expanded", widthDp = 360, heightDp = 800)
@@ -75,6 +76,26 @@ fun BatteryChargeOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorP
 @Preview(name = "Status bar Clock option", widthDp = 360, heightDp = 800)
 @Composable
 fun BatteryClockOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.CLOCK)
+
+@PreviewTest
+@Preview(name = "Status bar Animation option", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryAnimationOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.ANIMATION)
+
+@PreviewTest
+@Preview(name = "Status bar Wi-Fi option", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryWifiOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.WIFI)
+
+@PreviewTest
+@Preview(name = "Status bar Signal option", widthDp = 360, heightDp = 800)
+@Composable
+fun BatterySignalOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.SIGNAL)
+
+@PreviewTest
+@Preview(name = "Status bar Mobile data option", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryMobileDataOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.DATA)
 
 @PreviewTest
 @Preview(name = "Status bar Emotion groups", widthDp = 360, heightDp = 800)
@@ -193,7 +214,10 @@ private fun PreviewStatusOptionPage(page: BatteryEditorPage) {
             airplaneColorArgb = 0xFF000000.toInt(),
             hotspotColorArgb = 0xFF000000.toInt(),
             ringerColorArgb = 0xFF000000.toInt(),
-            chargeColorArgb = 0xFF000000.toInt()
+            chargeColorArgb = 0xFF000000.toInt(),
+            wifiColorArgb = 0xFF000000.toInt(),
+            signalColorArgb = 0xFF000000.toInt(),
+            dataColorArgb = 0xFF000000.toInt()
         )
     )
     Column(Modifier.fillMaxSize()) {
@@ -296,6 +320,7 @@ private fun previewEditorState(): BatteryEditorUiState {
             }
         },
         animations = animations,
+        mobileDataBadge = BatteryMobileDataBadge.G5,
         config = BatteryStatusConfig(
             enabled = false,
             selectedThemeId = themes[1].id,

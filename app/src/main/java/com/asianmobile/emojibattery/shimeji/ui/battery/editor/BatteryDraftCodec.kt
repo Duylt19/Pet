@@ -41,12 +41,15 @@ object BatteryDraftCodec {
         .put("backgroundColorArgb", config.backgroundColorArgb)
         .put("foregroundColorArgb", config.foregroundColorArgb)
         .put("percentColorArgb", config.percentColorArgb)
+        .put("showWifi", config.showWifi)
         .put("wifiSizeDp", config.wifiSizeDp.toDouble())
         .put("wifiColorArgb", config.wifiColorArgb)
         .put("wifiIconStyleIndex", config.wifiIconStyleIndex)
         .put("dataType", config.dataType.name)
+        .put("showData", config.showData)
         .put("dataSizeDp", config.dataSizeDp.toDouble())
         .put("dataColorArgb", config.dataColorArgb)
+        .put("showSignal", config.showSignal)
         .put("signalSizeDp", config.signalSizeDp.toDouble())
         .put("signalColorArgb", config.signalColorArgb)
         .put("signalIconStyleIndex", config.signalIconStyleIndex)
@@ -146,6 +149,7 @@ object BatteryDraftCodec {
                     fallback.foregroundColorArgb
                 ),
                 percentColorArgb = json.int("percentColorArgb", fallback.percentColorArgb),
+                showWifi = json.boolean("showWifi", fallback.showWifi),
                 wifiSizeDp = json.float("wifiSizeDp", fallback.wifiSizeDp),
                 wifiColorArgb = json.int("wifiColorArgb", fallback.wifiColorArgb),
                 wifiIconStyleIndex = json.int(
@@ -153,8 +157,10 @@ object BatteryDraftCodec {
                     fallback.wifiIconStyleIndex
                 ),
                 dataType = json.enum("dataType", fallback.dataType, BatteryDataType.entries),
+                showData = json.boolean("showData", fallback.showData),
                 dataSizeDp = json.float("dataSizeDp", fallback.dataSizeDp),
                 dataColorArgb = json.int("dataColorArgb", fallback.dataColorArgb),
+                showSignal = json.boolean("showSignal", fallback.showSignal),
                 signalSizeDp = json.float("signalSizeDp", fallback.signalSizeDp),
                 signalColorArgb = json.int("signalColorArgb", fallback.signalColorArgb),
                 signalIconStyleIndex = json.int(

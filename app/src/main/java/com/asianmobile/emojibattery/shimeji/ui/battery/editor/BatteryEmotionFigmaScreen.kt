@@ -68,7 +68,8 @@ internal fun BatteryEmotionFigmaScreen(
     onOpenGroup: (String) -> Unit,
     onSelectEmotion: (BatteryDecorationEntry) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
-    onApply: () -> Unit
+    onApply: () -> Unit,
+    showEmbeddedPreview: Boolean = true
 ) {
     val selectedGroup = state.emotionGroups.firstOrNull { it.key == groupKey }
     Box(Modifier.fillMaxSize()) {
@@ -92,15 +93,17 @@ internal fun BatteryEmotionFigmaScreen(
                 onPremium = onPremium,
                 onCheckedChange = { onConfig(state.config.copy(showEmotion = it)) }
             )
-            BatteryPreview(
-                state = state,
-                page = BatteryEditorPage.EMOJI,
-                modifier = Modifier.padding(
-                    start = dimensionResource(SdpR.dimen._12sdp),
-                    end = dimensionResource(SdpR.dimen._12sdp),
-                    top = dimensionResource(SdpR.dimen._9sdp)
+            if (showEmbeddedPreview) {
+                BatteryPreview(
+                    state = state,
+                    page = BatteryEditorPage.EMOJI,
+                    modifier = Modifier.padding(
+                        start = dimensionResource(SdpR.dimen._12sdp),
+                        end = dimensionResource(SdpR.dimen._12sdp),
+                        top = dimensionResource(SdpR.dimen._9sdp)
+                    )
                 )
-            )
+            }
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
             if (selectedGroup == null) {
                 EmotionGroupList(

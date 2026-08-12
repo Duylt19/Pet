@@ -15,7 +15,7 @@ module còn lại là tùy chọn.
 - Dùng `Battery Status Capsule`, `Battery bar` hoặc bản dịch tự nhiên `Thanh trạng thái pin`.
 - Có thể gọi UI là `Che thanh trạng thái`/`Status-cover mode`, nhưng không tuyên bố app
   sửa hoặc thay thế SystemUI thật.
-- `Data label` là label trang trí; không gọi 6G–9G là mạng thật.
+- `Data label` dùng carrier display state thật trên Android 11+; không hiển thị 6G–9G giả.
 - `Animation` là asset trang trí, không được mô tả như dữ liệu hoạt động của thiết bị.
 
 ## User stories

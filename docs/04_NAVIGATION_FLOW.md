@@ -92,13 +92,16 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
   catalog hoặc picker component trong editor rồi quay lại đúng destination theo back stack;
   editor refresh entitlement và hoàn tất pending component selection khi resume.
 - Mỗi Battery component editor là một destination nằm trên overview và dùng ViewModel của
-  overview. Sáu editor Airplane/Ringer/Date/Hotspot/Charge/Clock dùng preview cố định, Apply
+  overview. Mười editor Airplane/Ringer/Date/Hotspot/Charge/Clock/Animation/Wi-Fi/Signal/
+  Mobile Data dùng preview cố định, Apply
   cố định và state riêng cho từng switch; Clock không còn dùng chung size/màu với Date.
 - Emotion overview và detail cũng dùng ViewModel của `battery_editor/{themeId}` thay vì scope
   theo destination trung gian. Chọn style cập nhật draft/preview; Back từ detail quay về đúng
-  danh sách tám pack và banner editor chỉ có một holder ở shell.
+  danh sách tám pack. Hai route giữ cùng một native collapsible holder/key ở shell nên không
+  reload ad khi push/pop detail.
 - Theme selection trong Battery Styles mở editor ngay cả khi chưa có Accessibility. Preview
-  nhúng vẫn hoạt động; Apply mới hiện disclosure và chỉ bật overlay khi quyền hợp lệ.
+  nhúng vẫn hoạt động. Apply ở child chỉ commit vào draft overview rồi quay lại; Back ở child
+  rollback về checkpoint lúc mở màn. Chỉ Apply tại overview mới hiện disclosure và persist.
 - Mọi action xin Accessibility trong Discover, Battery Styles, Mine, Status Bar Editor và Grant
   Permissions dùng cùng bottom-sheet disclosure. `Allow` không mở Settings cho tới khi checkbox
   consent được chọn; launcher tắt App Open Ad trước khi rời app và trạng thái được đọc lại khi về.

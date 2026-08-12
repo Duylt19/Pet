@@ -108,12 +108,15 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             preferences[BACKGROUND_COLOR] = sanitized.backgroundColorArgb
             preferences[FOREGROUND_COLOR] = sanitized.foregroundColorArgb
             preferences[PERCENT_COLOR] = sanitized.percentColorArgb
+            preferences[SHOW_WIFI] = sanitized.showWifi
             preferences[WIFI_SIZE_DP] = sanitized.wifiSizeDp
             preferences[WIFI_COLOR] = sanitized.wifiColorArgb
             preferences[WIFI_ICON_STYLE_INDEX] = sanitized.wifiIconStyleIndex
             preferences[DATA_TYPE] = sanitized.dataType.name
+            preferences[SHOW_DATA] = sanitized.showData
             preferences[DATA_SIZE_DP] = sanitized.dataSizeDp
             preferences[DATA_COLOR] = sanitized.dataColorArgb
+            preferences[SHOW_SIGNAL] = sanitized.showSignal
             preferences[SIGNAL_SIZE_DP] = sanitized.signalSizeDp
             preferences[SIGNAL_COLOR] = sanitized.signalColorArgb
             preferences[SIGNAL_ICON_STYLE_INDEX] = sanitized.signalIconStyleIndex
@@ -229,6 +232,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                 foregroundColorArgb = preferences[FOREGROUND_COLOR]
                     ?: DEFAULT_BATTERY_FOREGROUND_COLOR,
                 percentColorArgb = preferences[PERCENT_COLOR] ?: defaults.percentColorArgb,
+                showWifi = preferences[SHOW_WIFI] ?: defaults.showWifi,
                 wifiSizeDp = preferences[WIFI_SIZE_DP] ?: defaults.wifiSizeDp,
                 wifiColorArgb = preferences[WIFI_COLOR] ?: defaults.wifiColorArgb,
                 wifiIconStyleIndex = preferences[WIFI_ICON_STYLE_INDEX]
@@ -236,8 +240,10 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                 dataType = preferences[DATA_TYPE]
                     ?.let { name -> BatteryDataType.entries.firstOrNull { it.name == name } }
                     ?: defaults.dataType,
+                showData = preferences[SHOW_DATA] ?: defaults.showData,
                 dataSizeDp = preferences[DATA_SIZE_DP] ?: defaults.dataSizeDp,
                 dataColorArgb = preferences[DATA_COLOR] ?: defaults.dataColorArgb,
+                showSignal = preferences[SHOW_SIGNAL] ?: defaults.showSignal,
                 signalSizeDp = preferences[SIGNAL_SIZE_DP] ?: defaults.signalSizeDp,
                 signalColorArgb = preferences[SIGNAL_COLOR] ?: defaults.signalColorArgb,
                 signalIconStyleIndex = preferences[SIGNAL_ICON_STYLE_INDEX]
@@ -335,13 +341,16 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         val BACKGROUND_COLOR = intPreferencesKey("battery_status_background_color")
         val FOREGROUND_COLOR = intPreferencesKey("battery_status_foreground_color")
         val PERCENT_COLOR = intPreferencesKey("battery_status_percent_color")
+        val SHOW_WIFI = booleanPreferencesKey("battery_status_show_wifi")
         val WIFI_SIZE_DP = floatPreferencesKey("battery_status_wifi_size_dp")
         val WIFI_COLOR = intPreferencesKey("battery_status_wifi_color")
         val WIFI_ICON_STYLE_INDEX =
             intPreferencesKey("battery_status_wifi_icon_style_index")
         val DATA_TYPE = stringPreferencesKey("battery_status_data_type")
+        val SHOW_DATA = booleanPreferencesKey("battery_status_show_data")
         val DATA_SIZE_DP = floatPreferencesKey("battery_status_data_size_dp")
         val DATA_COLOR = intPreferencesKey("battery_status_data_color")
+        val SHOW_SIGNAL = booleanPreferencesKey("battery_status_show_signal")
         val SIGNAL_SIZE_DP = floatPreferencesKey("battery_status_signal_size_dp")
         val SIGNAL_COLOR = intPreferencesKey("battery_status_signal_color")
         val SIGNAL_ICON_STYLE_INDEX =

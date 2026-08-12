@@ -190,8 +190,12 @@ internal fun BatteryEditorScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDisclosure by remember { mutableStateOf(false) }
     var showDiscardConfirmation by rememberSaveable { mutableStateOf(false) }
+    val isTransactionalChild = page.isTransactionalChildPage()
     val requestBack = {
-        if (page == BatteryEditorPage.OVERVIEW && state.hasUnsavedChanges) {
+        if (isTransactionalChild) {
+            viewModel.rollbackChildEdit(page)
+            onBack()
+        } else if (page == BatteryEditorPage.OVERVIEW && state.hasUnsavedChanges) {
             showDiscardConfirmation = true
         } else {
             onBack()
@@ -200,6 +204,10 @@ internal fun BatteryEditorScreen(
     var accessibilityEnabled by remember {
         mutableStateOf(BatteryAccessibility.isEnabled(context))
     }
+    val showEmbeddedPreview = BatteryEditorPreviewVisibilityPolicy.shouldShow(
+        accessibilityEnabled = accessibilityEnabled,
+        statusBarEnabled = state.config.enabled
+    )
     val openAccessibilitySettings = rememberAccessibilitySettingsLauncher {
         accessibilityEnabled = BatteryAccessibility.isEnabled(context)
         if (accessibilityEnabled) viewModel.apply()
@@ -237,8 +245,14 @@ internal fun BatteryEditorScreen(
     LaunchedEffect(page) {
         viewModel.setPreviewComponent(page.previewComponent())
     }
+    LaunchedEffect(page, state.isInitialized) {
+        if (state.isInitialized && isTransactionalChild) {
+            viewModel.beginChildEdit(page)
+        }
+    }
     BackHandler(
-        enabled = page == BatteryEditorPage.OVERVIEW && state.hasUnsavedChanges,
+        enabled = isTransactionalChild ||
+            (page == BatteryEditorPage.OVERVIEW && state.hasUnsavedChanges),
         onBack = requestBack
     )
     DisposableEffect(viewModel) {
@@ -261,8 +275,12 @@ internal fun BatteryEditorScreen(
         page = page,
         emotionGroupKey = emotionGroupKey,
         accessibilityEnabled = accessibilityEnabled,
+        showEmbeddedPreview = showEmbeddedPreview,
         onBack = requestBack,
-        onDone = onBack,
+        onDone = {
+            viewModel.commitChildEdit(page)
+            onBack()
+        },
         onOpenPage = onOpenPage,
         onOpenEmotionGroup = onOpenEmotionGroup,
         onPremium = onNavigateToPremium,
@@ -280,7 +298,14 @@ internal fun BatteryEditorScreen(
         onSelectTheme = viewModel::requestTheme,
         onConfig = viewModel::setConfig,
         onApply = {
-            if (accessibilityEnabled) viewModel.apply() else showDisclosure = true
+            if (isTransactionalChild) {
+                viewModel.commitChildEdit(page)
+                onBack()
+            } else if (accessibilityEnabled) {
+                viewModel.apply()
+            } else {
+                showDisclosure = true
+            }
         },
         onDisable = viewModel::disable
     )
@@ -363,6 +388,7 @@ private fun BatteryEditorContent(
     page: BatteryEditorPage,
     emotionGroupKey: String?,
     accessibilityEnabled: Boolean,
+    showEmbeddedPreview: Boolean,
     onBack: () -> Unit,
     onDone: () -> Unit,
     onOpenPage: (BatteryEditorPage) -> Unit,
@@ -393,7 +419,8 @@ private fun BatteryEditorContent(
             onOpenGroup = onOpenEmotionGroup,
             onSelectEmotion = onSelectEmotion,
             onConfig = onConfig,
-            onApply = onApply
+            onApply = onApply,
+            showEmbeddedPreview = showEmbeddedPreview
         )
         return
     }
@@ -403,7 +430,8 @@ private fun BatteryEditorContent(
             page = page,
             onBack = onBack,
             onConfig = onConfig,
-            onApply = onApply
+            onApply = onApply,
+            showEmbeddedPreview = showEmbeddedPreview
         )
         return
     }
@@ -418,7 +446,8 @@ private fun BatteryEditorContent(
             onBackgroundColor = onBackgroundColor,
             onBackgroundDecoration = onBackgroundDecoration,
             onConfig = onConfig,
-            onApply = onApply
+            onApply = onApply,
+            showEmbeddedPreview = showEmbeddedPreview
         )
         return
     }
@@ -444,15 +473,17 @@ private fun BatteryEditorContent(
                 }
             }
         )
-        BatteryPreview(
-            state = state,
-            page = page,
-            modifier = Modifier.padding(
-                start = dimensionResource(SdpR.dimen._12sdp),
-                end = dimensionResource(SdpR.dimen._12sdp),
-                top = dimensionResource(SdpR.dimen._9sdp)
+        if (showEmbeddedPreview) {
+            BatteryPreview(
+                state = state,
+                page = page,
+                modifier = Modifier.padding(
+                    start = dimensionResource(SdpR.dimen._12sdp),
+                    end = dimensionResource(SdpR.dimen._12sdp),
+                    top = dimensionResource(SdpR.dimen._9sdp)
+                )
             )
-        )
+        }
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
         Column(
             modifier = Modifier
@@ -1787,6 +1818,8 @@ internal fun BatteryPreview(
     val config = state.config
     val previewDescription = stringResource(R.string.battery_overlay_description, 82)
     val focusedComponent = page.previewComponent()
+    val previewMobileDataLabel = state.mobileDataBadge?.label
+        ?: "5G".takeIf { page == BatteryEditorPage.DATA }
     val backgroundPath = state.backgrounds
         .firstOrNull { it.id == config.backgroundDecorationId }
         ?.assetPath
@@ -1820,6 +1853,7 @@ internal fun BatteryPreview(
             batteryTheme.batteryPath,
             emotionPath,
             animation?.assetPath,
+            previewMobileDataLabel,
             maxWidth,
             focusedComponent
         ) {
@@ -1831,6 +1865,7 @@ internal fun BatteryPreview(
                 hasEmoji = emojiTheme.emojiPath != null,
                 hasEmotion = emotionPath != null,
                 hasAnimation = animation != null,
+                mobileDataLabel = previewMobileDataLabel,
                 focusedComponent = focusedComponent
             )
         }
@@ -1923,20 +1958,26 @@ internal fun BatteryPreview(
                         colorArgb = config.hotspotColorArgb
                     )
                     BatteryStatusComponent.CELLULAR -> {
-                        PreviewStatusIcon(
-                            iconName = BatterySystemStatusPolicy.cellularIcon(
-                                BatteryConnectivityState.CONNECTED,
-                                config.signalIconStyleIndex
-                            ),
-                            sizeDp = config.signalSizeDp,
-                            colorArgb = config.signalColorArgb
-                        )
-                        Text(
-                            text = config.dataType.label,
-                            color = Color(config.dataColorArgb),
-                            fontSize = config.dataSizeDp.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        if (config.showSignal) {
+                            PreviewStatusIcon(
+                                iconName = BatterySystemStatusPolicy.cellularIcon(
+                                    BatteryConnectivityState.CONNECTED,
+                                    config.signalIconStyleIndex
+                                ),
+                                sizeDp = config.signalSizeDp,
+                                colorArgb = config.signalColorArgb
+                            )
+                        }
+                        if (config.showData) {
+                            previewMobileDataLabel?.let { label ->
+                                Text(
+                                    text = label,
+                                    color = Color(config.dataColorArgb),
+                                    fontSize = config.dataSizeDp.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
                     }
                     BatteryStatusComponent.WIFI -> PreviewStatusIcon(
                         iconName = BatterySystemStatusPolicy.wifiIcon(
@@ -2020,6 +2061,7 @@ internal fun batteryPreviewLayout(
     hasEmoji: Boolean,
     hasEmotion: Boolean,
     hasAnimation: Boolean,
+    mobileDataLabel: String? = "5G",
     focusedComponent: BatteryStatusComponent? = null
 ) = BatteryStatusLayoutPolicy().resolve(
     availableWidth = availableWidthDp,
@@ -2116,21 +2158,28 @@ internal fun batteryPreviewLayout(
                 )
             )
         }
-        add(
-            BatteryStatusLayoutItem(
-                BatteryStatusComponent.WIFI,
-                width = config.wifiSizeDp * 1.4f + gap,
-                priority = 90,
-                required = focusedComponent == BatteryStatusComponent.WIFI
+        if (config.showWifi) {
+            add(
+                BatteryStatusLayoutItem(
+                    BatteryStatusComponent.WIFI,
+                    width = config.wifiSizeDp * 1.4f + gap,
+                    priority = 90,
+                    required = focusedComponent == BatteryStatusComponent.WIFI
+                )
             )
-        )
-        if (focusedComponent != BatteryStatusComponent.AIRPLANE) {
+        }
+        if (
+            (config.showSignal || (config.showData && mobileDataLabel != null)) &&
+            focusedComponent != BatteryStatusComponent.AIRPLANE
+        ) {
+            val signalWidth = if (config.showSignal) config.signalSizeDp * 1.4f + gap else 0f
+            val dataWidth = if (config.showData && mobileDataLabel != null) {
+                config.dataSizeDp * mobileDataLabel.length.coerceAtLeast(1) + gap
+            } else 0f
             add(
                 BatteryStatusLayoutItem(
                     BatteryStatusComponent.CELLULAR,
-                    width = config.signalSizeDp * 1.4f +
-                        config.dataSizeDp * 1.8f +
-                        gap * 2,
+                    width = signalWidth + dataWidth,
                     priority = 70,
                     required = focusedComponent == BatteryStatusComponent.CELLULAR
                 )
@@ -2171,6 +2220,11 @@ internal fun BatteryEditorPage.isFigmaPickerPage(): Boolean = when (this) {
     BatteryEditorPage.BACKGROUND_THEMES -> true
     else -> false
 }
+
+internal fun BatteryEditorPage.isTransactionalChildPage(): Boolean =
+    this != BatteryEditorPage.OVERVIEW &&
+        this != BatteryEditorPage.EMOJI &&
+        !isFigmaPickerPage()
 
 private fun BatteryEditorPage.analyticsScreen(): ScreenName = when (this) {
     BatteryEditorPage.OVERVIEW -> ScreenName.BATTERY_EDITOR
@@ -2429,6 +2483,7 @@ private fun BatteryEditorOverviewPreview() {
         page = BatteryEditorPage.OVERVIEW,
         emotionGroupKey = null,
         accessibilityEnabled = true,
+        showEmbeddedPreview = true,
         onBack = {},
         onDone = {},
         onOpenPage = {},

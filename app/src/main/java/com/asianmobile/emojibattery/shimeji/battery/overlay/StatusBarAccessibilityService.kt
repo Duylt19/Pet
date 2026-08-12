@@ -52,6 +52,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
     @Inject lateinit var catalogRepository: BatteryCatalogRepository
     @Inject lateinit var settingsRepository: BatterySettingsRepository
     @Inject lateinit var editorPreviewSession: BatteryEditorPreviewSession
+    @Inject lateinit var mobileDataMonitor: BatteryMobileDataMonitor
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private lateinit var windowManager: WindowManager
@@ -59,6 +60,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private var layoutParams: WindowManager.LayoutParams? = null
     private var renderJob: Job? = null
     private var observeJob: Job? = null
+    private var mobileDataJob: Job? = null
     private var currentConfig = BatteryStatusConfig()
     private var currentBatteryTheme: BatteryThemeEntry? = null
     private var currentEmojiTheme: BatteryThemeEntry? = null
@@ -146,6 +148,15 @@ class StatusBarAccessibilityService : AccessibilityService() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         if (!receiverRegistered) registerSystemReceiver()
         registerNetworkCallback()
+        mobileDataJob?.cancel()
+        mobileDataJob = scope.launch {
+            mobileDataMonitor.badge.collect { badge ->
+                if (deviceState.mobileDataBadge != badge) {
+                    deviceState = deviceState.copy(mobileDataBadge = badge)
+                    render()
+                }
+            }
+        }
         refreshDeviceState()
         observeJob?.cancel()
         observeJob = scope.launch {
@@ -209,6 +220,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
     override fun onDestroy() {
         removeOverlay()
         observeJob?.cancel()
+        mobileDataJob?.cancel()
         if (receiverRegistered) {
             try {
                 unregisterReceiver(systemReceiver)
@@ -407,6 +419,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
         )
         BatteryStatusComponent.CELLULAR -> deviceState.copy(
             cellular = BatteryConnectivityState.CONNECTED,
+            mobileDataBadge = deviceState.mobileDataBadge ?: BatteryMobileDataBadge.G5,
             airplaneMode = false
         )
         BatteryStatusComponent.WIFI -> deviceState.copy(

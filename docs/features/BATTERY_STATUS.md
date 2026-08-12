@@ -18,7 +18,8 @@ Vertical slice hiện đã có trong source:
 - Chọn một theme trong catalog khởi tạo đúng cặp pet + pin của theme đó. Editor có hai
   picker category độc lập để mix pet của theme A với pin của theme B; entitlement
   Rewarded/Premium được kiểm tra cho từng lựa chọn.
-- Editor dùng Material app bar `exitUntilCollapsed`, preview nhúng luôn hiển thị và các
+- Editor dùng Material app bar `exitUntilCollapsed`; preview nhúng chỉ hiển thị khi Accessibility
+  chưa cấp hoặc feature đang tắt. Khi status bar thật đã hoạt động, preview nhúng được ẩn. Các
   library Battery/Emoji/Theme là child destination dùng chung ViewModel/draft. Battery/Emoji
   dùng grid ba cột; Theme dùng grid hai cột từ catalog runtime.
 - Overview có đủ picker Battery/Emoji/Animation, Color/Theme và color picker HSV + opacity.
@@ -69,7 +70,7 @@ Home → Battery styles → chọn theme → Customize status bar
                                       ├─ đổi pet, pin, animation, nền và màu trong draft
                                       ├─ feature đang bật → live preview trên status bar
                                       ├─ feature đang tắt → chỉ preview nhúng
-                                      ├─ destination editor con → Done/Back → overview giữ scroll
+                                      ├─ child Apply → commit draft; child Back → rollback checkpoint
                                       └─ Apply → nếu thiếu quyền thì disclosure → persist + render
 ```
 
@@ -161,7 +162,8 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `backgroundDecorationId` | Nền đóng gói đã chọn; `0` là nền màu phẳng |
 | `showEmotion`, `emotionDecorationId` | Hiện/ẩn và chọn một trong 100 emotion server: 20 Classic + 80 thuộc tám pack mới |
 | `wifi/data/signal/airplane/hotspot/ringer/charge *SizeDp/*ColorArgb` | Tùy chỉnh độc lập từng status component |
-| `dataType`, `chargeIconIndex` | Nhãn mạng 2G–9G và một trong 12 icon sạc |
+| `showWifi`, `showSignal`, `showData` | Bật/tắt độc lập Wi-Fi, cột sóng và nhãn loại mạng |
+| `dataSizeDp`, `dataColorArgb`, `chargeIconIndex` | Style nhãn mạng thật và icon sạc |
 | `showDateTime`, `dateFormat`, `dateTimeFont`, `dateTimeSizeDp`, `dateTimeColorArgb` | Ngày/giờ và 6 font bundled |
 | `privacyReserveDp` | Field tương thích dữ liệu cũ; renderer full-width hiện tại bỏ qua |
 | `favoriteThemeIds` | Favorite local theo theme ID |
@@ -265,7 +267,12 @@ Giới hạn hiện tại:
 - Hotspot theo broadcast best-effort của OEM; Android không có API public ổn định để app
   thường truy vấn tethering hiện tại. Trước broadcast đầu tiên trạng thái là `UNKNOWN`
   và không hiển thị icon để tránh báo sai.
-- Nhãn data 2G–9G là style do user chọn, không tự suy luận generation của nhà mạng.
+- Android 11+ lấy nhãn hiển thị mạng thật từ `TelephonyDisplayInfo` (G/E/2G/3G/H/H+/4G/
+  4G+/5G/5G+), gồm cả override 5G NSA theo carrier policy, không cần quyền điện thoại nguy hiểm.
+  Android 10 trở xuống không suy diễn nhãn giả khi không có API đủ tin cậy; signal vẫn hiển thị
+  theo connectivity. Riêng preview của màn Mobile Data dùng sample `5G` khi thiết bị không trả
+  badge để user vẫn quan sát được size/color; runtime overlay không dùng sample này. Trường
+  `dataType` cũ chỉ còn để decode tương thích draft/DataStore v1.
 - Không có boot receiver và không tự hướng user quay lại Settings nếu họ disable service.
 
 ## Test gate
