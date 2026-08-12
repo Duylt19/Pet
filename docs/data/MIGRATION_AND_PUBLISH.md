@@ -26,7 +26,7 @@ Lần WebP này được coi là tạo baseline mới, không migrate dữ liệ
 1. Đồng bộ app/server với main/master và tạo branch.
 2. Xác nhận ownership/license; giữ `REVIEW_REQUIRED` khi chưa duyệt.
 3. Import bằng pipeline, không sửa JSON/hash thủ công.
-4. Battery: chạy lossless WebP pipeline sau cùng.
+4. Battery: nếu owner tự convert lossless WebP, thực hiện sau cùng và cập nhật integrity metadata.
 5. Tăng catalogVersion/capturedAt; cập nhật count/path/bytes/SHA/dimension.
 6. Chạy schema, validators và tests.
 7. Review ID/order, asset add/delete và dung lượng trước/sau.
@@ -65,7 +65,7 @@ git diff --check
 - [ ] ID/name/order không đổi nghĩa ngoài kế hoạch.
 - [ ] Count, unique ID/path đúng.
 - [ ] Preview nhẹ hơn full; alpha/dimension đúng.
-- [ ] Battery static là PNG hoặc pixel-exact lossless WebP; GIF/Lottie không bị convert.
+- [ ] Battery static là PNG hoặc lossless WebP do owner convert; GIF/Lottie không bị convert.
 - [ ] Mọi path tồn tại và khớp bytes/SHA-256.
 - [ ] App parser/client hỗ trợ schema/extension trước server.
 - [ ] Fresh/cache/offline/corrupt download đã test.

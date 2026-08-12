@@ -37,22 +37,21 @@ record thành private GitHub URL. Preview dùng Coil. Full asset được
 `files/battery_catalog_assets/<sha256>.<extension>`. Renderer không dùng file chưa verify;
 download lỗi giữ selection cũ.
 
-## Lossless WebP baseline v1
+## Manual lossless WebP
 
-Đây là baseline mới trong giai đoạn debug; không migrate cache/DataStore debug cũ. Pipeline
-encode tương đương Android Studio **Convert to WebP → Lossless encoding**, sau đó decode và
-so sánh RGBA pixel-by-pixel. Chỉ giữ `.webp` nếu nhỏ hơn PNG; file không giảm được giữ PNG.
-Vì vậy catalog hợp lệ có thể chứa hỗn hợp PNG/WebP.
+Server hiện vẫn dùng PNG. Khi owner tự convert trong giai đoạn debug, dùng Android Studio
+**Convert to WebP → Lossless encoding**, bật skip nếu WebP lớn hơn PNG và giữ nguyên ID/name.
+Catalog hợp lệ có thể chứa hỗn hợp PNG/WebP.
 
-Sau mọi pipeline tạo/cập nhật Battery image, chạy:
+Sau khi convert thủ công, cập nhật `path`, `sizeBytes`, `sha256`, `width`, `height`, tăng
+`catalogVersion`/`capturedAt`, rồi chạy:
 
 ```bash
-python3 tools/battery_webp_pipeline.py \
-  --catalog-version battery-<yyyy-mm-dd>-v<revision>
 python3 tools/battery_catalog_pipeline.py validate
 ```
 
 Không convert GIF/Lottie. Không dùng lossy WebP cho icon/status asset có alpha và nét nhỏ.
+Không xóa PNG trước khi catalog mới đã validate.
 
 ## Cách update
 
