@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +51,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_EMOTION_GROUPS
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryEmotionGroup
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
@@ -66,10 +66,12 @@ internal fun BatteryEmotionFigmaScreen(
     onBack: () -> Unit,
     onPremium: () -> Unit,
     onOpenGroup: (String) -> Unit,
+    onSelectEmotion: (BatteryDecorationEntry) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
-    onApply: () -> Unit
+    onApply: () -> Unit,
+    showEmbeddedPreview: Boolean = true
 ) {
-    val selectedGroup = BATTERY_EMOTION_GROUPS.firstOrNull { it.key == groupKey }
+    val selectedGroup = state.emotionGroups.firstOrNull { it.key == groupKey }
     Box(Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(R.drawable.img_home_wallpaper),
@@ -91,15 +93,17 @@ internal fun BatteryEmotionFigmaScreen(
                 onPremium = onPremium,
                 onCheckedChange = { onConfig(state.config.copy(showEmotion = it)) }
             )
-            BatteryPreview(
-                state = state,
-                page = BatteryEditorPage.EMOJI,
-                modifier = Modifier.padding(
-                    start = dimensionResource(SdpR.dimen._12sdp),
-                    end = dimensionResource(SdpR.dimen._12sdp),
-                    top = dimensionResource(SdpR.dimen._9sdp)
+            if (showEmbeddedPreview) {
+                BatteryPreview(
+                    state = state,
+                    page = BatteryEditorPage.EMOJI,
+                    modifier = Modifier.padding(
+                        start = dimensionResource(SdpR.dimen._12sdp),
+                        end = dimensionResource(SdpR.dimen._12sdp),
+                        top = dimensionResource(SdpR.dimen._9sdp)
+                    )
                 )
-            )
+            }
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
             if (selectedGroup == null) {
                 EmotionGroupList(
@@ -111,6 +115,7 @@ internal fun BatteryEmotionFigmaScreen(
                 EmotionDetailContent(
                     state = state,
                     group = selectedGroup,
+                    onSelectEmotion = onSelectEmotion,
                     onConfig = onConfig,
                     modifier = Modifier.weight(1f)
                 )
@@ -202,7 +207,7 @@ private fun EmotionGroupList(
         ),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
     ) {
-        items(BATTERY_EMOTION_GROUPS, key = BatteryEmotionGroup::key) { group ->
+        items(state.emotionGroups, key = BatteryEmotionGroup::key) { group ->
             EmotionGroupCard(
                 group = group,
                 emotions = group.items(state.emotions),
@@ -228,7 +233,7 @@ private fun EmotionGroupCard(
         ) {
             emotions.firstOrNull()?.let { emotion ->
                 AsyncImage(
-                    model = emotion.assetPath,
+                    model = emotion.pickerPath,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
@@ -253,9 +258,9 @@ private fun EmotionGroupCard(
                 .background(colorResource(R.color.colors_FFFFFF))
                 .clickable { onOpenGroup(group.key) }
         ) {
-            if (group.key != "emoji" && group.key != "classic") {
+            group.backgroundPath?.let { backgroundPath ->
                 AsyncImage(
-                    model = "file:///android_asset/battery_emotions/backgrounds/${group.key}.jpg",
+                    model = backgroundPath,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     alpha = if (group.key == "cony") 0.2f else 1f,
@@ -278,7 +283,7 @@ private fun EmotionGroupCard(
                     ) {
                         rowItems.forEach { emotion ->
                             AsyncImage(
-                                model = emotion.assetPath,
+                                model = emotion.pickerPath,
                                 contentDescription = emotion.name,
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
@@ -297,6 +302,7 @@ private fun EmotionGroupCard(
 private fun EmotionDetailContent(
     state: BatteryEditorUiState,
     group: BatteryEmotionGroup,
+    onSelectEmotion: (BatteryDecorationEntry) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -333,6 +339,7 @@ private fun EmotionDetailContent(
         ) {
             items(emotions, key = BatteryDecorationEntry::id) { emotion ->
                 val active = state.config.emotionDecorationId == emotion.id
+                val loading = state.emotionSelectionInProgress == emotion.id
                 val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
                 Box(
                     modifier = Modifier
@@ -348,22 +355,26 @@ private fun EmotionDetailContent(
                             contentDescription = emotion.name
                             selected = active
                         }
-                        .clickable {
-                            onConfig(
-                                state.config.copy(
-                                    showEmotion = true,
-                                    emotionDecorationId = emotion.id
-                                )
-                            )
-                        },
+                        .clickable(
+                            enabled = state.emotionSelectionInProgress == null,
+                            onClick = { onSelectEmotion(emotion) }
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    AsyncImage(
-                        model = emotion.assetPath,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.size(dimensionResource(SdpR.dimen._43sdp))
-                    )
+                    if (loading) {
+                        CircularProgressIndicator(
+                            color = colorResource(R.color.colors_FB3675),
+                            strokeWidth = dimensionResource(SdpR.dimen._2sdp),
+                            modifier = Modifier.size(dimensionResource(SdpR.dimen._22sdp))
+                        )
+                    } else {
+                        AsyncImage(
+                            model = emotion.pickerPath,
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.size(dimensionResource(SdpR.dimen._43sdp))
+                        )
+                    }
                 }
             }
         }

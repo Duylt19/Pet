@@ -18,6 +18,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Build
@@ -51,6 +52,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
     @Inject lateinit var catalogRepository: BatteryCatalogRepository
     @Inject lateinit var settingsRepository: BatterySettingsRepository
     @Inject lateinit var editorPreviewSession: BatteryEditorPreviewSession
+    @Inject lateinit var mobileDataMonitor: BatteryMobileDataMonitor
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private lateinit var windowManager: WindowManager
@@ -58,6 +60,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private var layoutParams: WindowManager.LayoutParams? = null
     private var renderJob: Job? = null
     private var observeJob: Job? = null
+    private var mobileDataJob: Job? = null
     private var currentConfig = BatteryStatusConfig()
     private var currentBatteryTheme: BatteryThemeEntry? = null
     private var currentEmojiTheme: BatteryThemeEntry? = null
@@ -145,6 +148,15 @@ class StatusBarAccessibilityService : AccessibilityService() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         if (!receiverRegistered) registerSystemReceiver()
         registerNetworkCallback()
+        mobileDataJob?.cancel()
+        mobileDataJob = scope.launch {
+            mobileDataMonitor.badge.collect { badge ->
+                if (deviceState.mobileDataBadge != badge) {
+                    deviceState = deviceState.copy(mobileDataBadge = badge)
+                    render()
+                }
+            }
+        }
         refreshDeviceState()
         observeJob?.cancel()
         observeJob = scope.launch {
@@ -208,6 +220,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
     override fun onDestroy() {
         removeOverlay()
         observeJob?.cancel()
+        mobileDataJob?.cancel()
         if (receiverRegistered) {
             try {
                 unregisterReceiver(systemReceiver)
@@ -406,6 +419,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
         )
         BatteryStatusComponent.CELLULAR -> deviceState.copy(
             cellular = BatteryConnectivityState.CONNECTED,
+            mobileDataBadge = deviceState.mobileDataBadge ?: BatteryMobileDataBadge.G5,
             airplaneMode = false
         )
         BatteryStatusComponent.WIFI -> deviceState.copy(
@@ -471,6 +485,18 @@ class StatusBarAccessibilityService : AccessibilityService() {
 
     private fun decode(path: String?): Bitmap? {
         if (path == null) return null
+        if (path.startsWith(ANDROID_RESOURCE_URI_PREFIX)) {
+            return try {
+                contentResolver.openInputStream(Uri.parse(path))
+                    ?.use(BitmapFactory::decodeStream)
+            } catch (error: java.io.IOException) {
+                Log.w(TAG, "Unable to decode drawable battery asset", error)
+                null
+            } catch (error: RuntimeException) {
+                Log.w(TAG, "Drawable battery asset is invalid", error)
+                null
+            }
+        }
         if (path.startsWith(ANDROID_ASSET_URI_PREFIX)) {
             val assetPath = path.removePrefix(ANDROID_ASSET_URI_PREFIX)
             return try {
@@ -605,6 +631,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private companion object {
         const val TAG = "BatteryStatusService"
         const val ANDROID_ASSET_URI_PREFIX = "file:///android_asset/"
+        const val ANDROID_RESOURCE_URI_PREFIX = "android.resource://"
         const val WIFI_AP_STATE_CHANGED = "android.net.wifi.WIFI_AP_STATE_CHANGED"
         const val WIFI_STATE_EXTRA = "wifi_state"
         const val WIFI_AP_STATE_DISABLED = 11

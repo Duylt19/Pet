@@ -145,9 +145,6 @@ val prepareDebugBatteryAssets by tasks.registering(Sync::class) {
     from(batterySnapshotDirectory.dir("bundled/assets/background_template")) {
         into("battery_catalog/background")
     }
-    from(batterySnapshotDirectory.dir("bundled/assets/cute_emotion")) {
-        into("battery_catalog/emotion")
-    }
     from(batterySnapshotDirectory.dir("bundled/assets/cute_animation")) {
         into("battery_catalog/animation")
     }

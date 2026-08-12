@@ -31,12 +31,19 @@ data class BatteryDecorationEntry(
     val id: Int,
     val name: String,
     val assetPath: String,
+    val previewPath: String? = null,
+    val groupKey: String? = null,
+    val order: Int = 0,
     val type: BatteryDecorationType
-)
+) {
+    val pickerPath: String
+        get() = previewPath ?: assetPath
+}
 
 data class BatteryEmotionGroup(
     val key: String,
-    val emotionIds: List<Int>
+    val emotionIds: List<Int>,
+    val backgroundPath: String? = null
 )
 
 enum class BatteryDecorationType {
@@ -61,6 +68,7 @@ data class BatteryCatalogSnapshot(
     val themes: List<BatteryThemeEntry> = listOf(BUILT_IN_BATTERY_THEME),
     val backgrounds: List<BatteryDecorationEntry> = emptyList(),
     val emotions: List<BatteryDecorationEntry> = emptyList(),
+    val emotionGroups: List<BatteryEmotionGroup> = BATTERY_EMOTION_GROUPS,
     val animations: List<BatteryAnimationEntry> = emptyList(),
     val catalogVersion: String? = null,
     val capturedAt: String? = null,
@@ -108,14 +116,12 @@ val BUILT_IN_BATTERY_THEME = BatteryThemeEntry(
     assetsReady = true
 )
 
-private const val BUNDLED_EMOTION_ASSET_ROOT = "file:///android_asset/battery_emotions"
-
 val LEGACY_BATTERY_EMOTION_GROUP = BatteryEmotionGroup(
     key = "classic",
     emotionIds = (1..20).toList()
 )
 
-val BUNDLED_BATTERY_EMOTION_GROUPS: List<BatteryEmotionGroup> = listOf(
+val FIGMA_BATTERY_EMOTION_GROUPS: List<BatteryEmotionGroup> = listOf(
     "emoji",
     "cony",
     "kiiroitori",
@@ -132,17 +138,4 @@ val BUNDLED_BATTERY_EMOTION_GROUPS: List<BatteryEmotionGroup> = listOf(
 }
 
 val BATTERY_EMOTION_GROUPS: List<BatteryEmotionGroup> =
-    listOf(LEGACY_BATTERY_EMOTION_GROUP) + BUNDLED_BATTERY_EMOTION_GROUPS
-
-val BUNDLED_BATTERY_EMOTIONS: List<BatteryDecorationEntry> =
-    BUNDLED_BATTERY_EMOTION_GROUPS.flatMap { group ->
-        group.emotionIds.mapIndexed { itemIndex, id ->
-            BatteryDecorationEntry(
-                id = id,
-                name = "${group.key}_${itemIndex + 1}",
-                assetPath = "$BUNDLED_EMOTION_ASSET_ROOT/${group.key}/" +
-                    "emotion_${group.key}_${(itemIndex + 1).toString().padStart(2, '0')}.png",
-                type = BatteryDecorationType.EMOTION
-            )
-        }
-    }
+    listOf(LEGACY_BATTERY_EMOTION_GROUP) + FIGMA_BATTERY_EMOTION_GROUPS

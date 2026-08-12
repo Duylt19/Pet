@@ -2,6 +2,8 @@ package com.asianmobile.emojibattery.shimeji.data.repository.impl
 
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogDistributionStatus
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -20,7 +22,14 @@ class BatteryCatalogParserTest {
         assertEquals(BatteryThemeEntitlement.FREE, document.themes.single().entitlement)
         assertEquals("battery/7.png", document.themes.single().battery.path)
         assertEquals("background/template_color_01.png", document.backgrounds.single().asset.path)
+        assertEquals(
+            "background_preview/template_color_01.png",
+            document.backgrounds.single().preview?.path
+        )
+        assertEquals(0, document.backgrounds.single().order)
         assertEquals("emotion/emotion_01.png", document.emotions.single().asset.path)
+        assertEquals("emotion/emotion_01.png", document.emotions.single().preview?.path ?: document.emotions.single().asset.path)
+        assertEquals("classic", document.emotionGroups.single().key)
         assertEquals("animation/cute_1.json", document.animations.single().asset.path)
     }
 
@@ -48,6 +57,57 @@ class BatteryCatalogParserTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun parse_reads_emotion_preview_and_group_metadata() {
+        val updated = validCatalog()
+            .replace(
+                "\"emotions\": [",
+                "\"emotionCount\": 1,\n  \"emotionGroupCount\": 1,\n" +
+                    "  \"emotionGroups\": [{\"key\":\"classic\",\"order\":0," +
+                    "\"emotionIds\":[1]}],\n  \"emotions\": ["
+            )
+            .replace(
+                "\"name\": \"emotion_01\",",
+                "\"name\": \"emotion_01\",\n              \"groupKey\": \"classic\"," +
+                    "\n              \"order\": 0,\n              \"preview\": {" +
+                    "\n                \"path\": \"emotion_preview/emotion_01.png\"," +
+                    "\n                \"sizeBytes\": 7,\n                \"sha256\": \"${"1".repeat(64)}\"," +
+                    "\n                \"width\": 72,\n                \"height\": 72\n              },"
+            )
+
+        val document = parser.parse(updated)
+
+        assertEquals("emotion_preview/emotion_01.png", document.emotions.single().preview?.path)
+        assertEquals("classic", document.emotions.single().groupKey)
+        assertEquals(listOf(1), document.emotionGroups.single().emotionIds)
+    }
+
+    @Test
+    fun parse_sorts_backgrounds_by_explicit_order() {
+        val root = JSONObject(validCatalog())
+        val template = root.getJSONArray("backgrounds").getJSONObject(0)
+        val first = JSONObject(template.toString()).apply {
+            put("id", 2)
+            put("name", "template_color_02")
+            put("order", 1)
+            getJSONObject("asset").put("path", "background/template_color_02.png")
+            getJSONObject("preview").put(
+                "path",
+                "background_preview/template_color_02.png"
+            )
+        }
+        val second = JSONObject(template.toString()).apply {
+            put("id", 1)
+            put("order", 0)
+        }
+        root.put("backgroundCount", 2)
+        root.put("backgrounds", JSONArray().put(first).put(second))
+
+        val document = parser.parse(root.toString())
+
+        assertEquals(listOf(1, 2), document.backgrounds.map { it.id })
     }
 
     private fun validCatalog(): String = """
@@ -95,10 +155,19 @@ class BatteryCatalogParserTest {
               }
             }
           ],
+          "backgroundCount": 1,
           "backgrounds": [
             {
               "id": 1,
               "name": "template_color_01",
+              "order": 0,
+              "preview": {
+                "path": "background_preview/template_color_01.png",
+                "sizeBytes": 7,
+                "sha256": "${"1".repeat(64)}",
+                "width": 360,
+                "height": 40
+              },
               "asset": {
                 "path": "background/template_color_01.png",
                 "sizeBytes": 13,

@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
@@ -99,7 +100,8 @@ internal fun BatteryEditorFigmaContent(
     onBackgroundColor: (Int) -> Unit,
     onBackgroundDecoration: (Int) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
-    onApply: () -> Unit
+    onApply: () -> Unit,
+    showEmbeddedPreview: Boolean = true
 ) {
     val isOverview = page == BatteryEditorPage.OVERVIEW
     val scrollBehavior = if (isOverview) {
@@ -146,7 +148,8 @@ internal fun BatteryEditorFigmaContent(
                 if (isOverview) {
                     StatusBarApplyPanel(
                         enabled = state.isThemeAvailable &&
-                            state.assetSelectionInProgress == null,
+                            state.assetSelectionInProgress == null &&
+                            state.backgroundSelectionInProgress == null,
                         onApply = onApply
                     )
                 }
@@ -160,7 +163,8 @@ internal fun BatteryEditorFigmaContent(
                     onSelectTheme = onSelectTheme,
                     onBackgroundColor = onBackgroundColor,
                     onBackgroundDecoration = onBackgroundDecoration,
-                    onConfig = onConfig
+                    onConfig = onConfig,
+                    showEmbeddedPreview = showEmbeddedPreview
                 )
             } else {
                 StatusBarPicker(
@@ -169,7 +173,8 @@ internal fun BatteryEditorFigmaContent(
                     innerPadding = innerPadding,
                     onPremium = onPremium,
                     onSelectTheme = onSelectTheme,
-                    onBackgroundDecoration = onBackgroundDecoration
+                    onBackgroundDecoration = onBackgroundDecoration,
+                    showEmbeddedPreview = showEmbeddedPreview
                 )
             }
         }
@@ -280,7 +285,8 @@ private fun StatusBarOverview(
     onSelectTheme: (BatteryThemeEntry, BatteryThemeComponent) -> Unit,
     onBackgroundColor: (Int) -> Unit,
     onBackgroundDecoration: (Int) -> Unit,
-    onConfig: (BatteryStatusConfig) -> Unit
+    onConfig: (BatteryStatusConfig) -> Unit,
+    showEmbeddedPreview: Boolean
 ) {
     var activeColorTarget by remember { mutableStateOf<StatusBarColorTarget?>(null) }
     Column(
@@ -290,8 +296,10 @@ private fun StatusBarOverview(
             .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
     ) {
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
-        BatteryPreview(state = state, page = BatteryEditorPage.OVERVIEW)
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+        if (showEmbeddedPreview) {
+            BatteryPreview(state = state, page = BatteryEditorPage.OVERVIEW)
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+        }
         LazyColumn(
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(bottom = dimensionResource(SdpR.dimen._12sdp)),
@@ -346,6 +354,7 @@ private fun StatusBarOverview(
                     BackgroundThemeRow(
                         backgrounds = state.backgrounds,
                         selectedId = state.config.backgroundDecorationId,
+                        loadingId = state.backgroundSelectionInProgress,
                         onSelected = onBackgroundDecoration
                     )
                 }
@@ -788,6 +797,7 @@ private fun StatusBarColorPalette(
 private fun BackgroundThemeRow(
     backgrounds: List<BatteryDecorationEntry>,
     selectedId: Int,
+    loadingId: Int?,
     onSelected: (Int) -> Unit
 ) {
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._6sdp)))
@@ -799,6 +809,7 @@ private fun BackgroundThemeRow(
             BackgroundThemeOption(
                 background = background,
                 selected = selectedId == background.id,
+                loading = loadingId == background.id,
                 modifier = Modifier
                     .width(dimensionResource(SdpR.dimen._77sdp))
                     .height(dimensionResource(SdpR.dimen._38sdp)),
@@ -1005,7 +1016,8 @@ private fun StatusBarPicker(
     innerPadding: PaddingValues,
     onPremium: () -> Unit,
     onSelectTheme: (BatteryThemeEntry, BatteryThemeComponent) -> Unit,
-    onBackgroundDecoration: (Int) -> Unit
+    onBackgroundDecoration: (Int) -> Unit,
+    showEmbeddedPreview: Boolean
 ) {
     val columns = if (page == BatteryEditorPage.BACKGROUND_THEMES) 2 else 3
     Column(
@@ -1015,8 +1027,10 @@ private fun StatusBarPicker(
             .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
     ) {
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
-        BatteryPreview(state = state, page = page)
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+        if (showEmbeddedPreview) {
+            BatteryPreview(state = state, page = page)
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+        }
         LazyVerticalGrid(
             columns = GridCells.Fixed(columns),
             modifier = Modifier.weight(1f),
@@ -1037,6 +1051,7 @@ private fun StatusBarPicker(
                             .height(dimensionResource(SdpR.dimen._46sdp)),
                         showSelectionBorder = true,
                         locked = locked,
+                        loading = state.backgroundSelectionInProgress == background.id,
                         onClick = {
                             if (locked) onPremium() else onBackgroundDecoration(background.id)
                         }
@@ -1141,6 +1156,7 @@ private fun BackgroundThemeOption(
     modifier: Modifier,
     showSelectionBorder: Boolean = true,
     locked: Boolean = false,
+    loading: Boolean = false,
     onClick: () -> Unit
 ) {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
@@ -1158,11 +1174,11 @@ private fun BackgroundThemeOption(
                 shape
             )
             .semantics { this.selected = selected }
-            .clickable(onClick = onClick)
+            .clickable(enabled = !loading, onClick = onClick)
     ) {
         if (background.assetPath.isNotBlank()) {
             AsyncImage(
-                model = background.assetPath,
+                model = background.pickerPath,
                 contentDescription = background.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -1173,6 +1189,15 @@ private fun BackgroundThemeOption(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(dimensionResource(SdpR.dimen._5sdp))
+                    .size(dimensionResource(SdpR.dimen._18sdp))
+            )
+        }
+        if (loading) {
+            CircularProgressIndicator(
+                color = colorResource(R.color.colors_FB3675),
+                strokeWidth = dimensionResource(SdpR.dimen._2sdp),
+                modifier = Modifier
+                    .align(Alignment.Center)
                     .size(dimensionResource(SdpR.dimen._18sdp))
             )
         }

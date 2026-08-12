@@ -115,6 +115,29 @@ class BatteryPreviewLayoutTest {
     }
 
     @Test
+    fun connectivityComponents_respectTheirEditorSwitches() {
+        val wifi = batteryPreviewLayout(
+            config = BatteryStatusConfig(showWifi = false),
+            availableWidthDp = 320f,
+            hasEmoji = false,
+            hasEmotion = false,
+            hasAnimation = false,
+            focusedComponent = BatteryStatusComponent.WIFI
+        )
+        val cellular = batteryPreviewLayout(
+            config = BatteryStatusConfig(showSignal = false, showData = false),
+            availableWidthDp = 320f,
+            hasEmoji = false,
+            hasEmotion = false,
+            hasAnimation = false,
+            focusedComponent = BatteryStatusComponent.CELLULAR
+        )
+
+        assertFalse(wifi.shows(BatteryStatusComponent.WIFI))
+        assertFalse(cellular.shows(BatteryStatusComponent.CELLULAR))
+    }
+
+    @Test
     fun themedEmoji_isPartOfBatteryPair_notLeadingStatusGroup() {
         val layout = batteryPreviewLayout(
             config = BatteryStatusConfig(

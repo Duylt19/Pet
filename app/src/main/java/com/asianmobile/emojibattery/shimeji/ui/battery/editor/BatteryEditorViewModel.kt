@@ -7,11 +7,13 @@ import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryEditorPreviewSession
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryMobileDataMonitor
 import com.asianmobile.emojibattery.shimeji.battery.settings.resolveBatteryStatusBarHeightRange
 import com.asianmobile.emojibattery.shimeji.battery.settings.systemStatusBarHeightDp
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
@@ -39,6 +41,7 @@ class BatteryEditorViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val catalogRepository: BatteryCatalogRepository,
     private val settingsRepository: BatterySettingsRepository,
+    private val mobileDataMonitor: BatteryMobileDataMonitor,
     private val previewSession: BatteryEditorPreviewSession
 ) : ViewModel() {
     private val themeId = savedStateHandle.get<Int>("themeId") ?: BUILT_IN_BATTERY_THEME_ID
@@ -68,6 +71,9 @@ class BatteryEditorViewModel @Inject constructor(
     private var previewStopJob: Job? = null
     private var focusedComponent: BatteryStatusComponent? = null
     private var assetSelectionRequestId = 0L
+    private var backgroundSelectionRequestId = 0L
+    private var emotionSelectionRequestId = 0L
+    private val childEditCheckpoints = mutableMapOf<String, ChildEditCheckpoint>()
     private val _uiState = MutableStateFlow(
         BatteryEditorUiState(
             config = restoredDraft ?: BatteryStatusConfig(barHeightDp = barHeightRange.defaultDp),
@@ -81,7 +87,11 @@ class BatteryEditorViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            combine(catalogRepository.snapshot, settingsRepository.config) { catalog, stored ->
+            combine(
+                catalogRepository.snapshot,
+                settingsRepository.config,
+                mobileDataMonitor.badge
+            ) { catalog, stored, mobileDataBadge ->
                 latestStored = stored
                 val isCurrentStyle = themeId == CURRENT_BATTERY_STYLE_ID
                 val theme = if (isCurrentStyle) {
@@ -111,6 +121,7 @@ class BatteryEditorViewModel @Inject constructor(
                     else -> stored
                 }
                 _uiState.value.copy(
+                    isInitialized = true,
                     theme = theme ?: BUILT_IN_BATTERY_THEME,
                     themes = catalog.themes,
                     categories = catalog.categories,
@@ -119,7 +130,9 @@ class BatteryEditorViewModel @Inject constructor(
                     ),
                     backgrounds = catalog.backgrounds,
                     emotions = catalog.emotions,
+                    emotionGroups = catalog.emotionGroups,
                     animations = catalog.animations,
+                    mobileDataBadge = mobileDataBadge,
                     isThemeAvailable = selectedAssetsReady(catalog.themes, draft),
                     isPremium = SharedPreferencesUtils.getIsPremium(context),
                     hasUnsavedChanges = hasLocalEdits
@@ -138,12 +151,139 @@ class BatteryEditorViewModel @Inject constructor(
     fun setBatterySize(value: Float) = update { copy(batterySizeDp = value) }
     fun setBackgroundColor(value: Int) = update { copy(backgroundColorArgb = value) }
     fun setForegroundColor(value: Int) = update { copy(foregroundColorArgb = value) }
-    fun setBackgroundDecoration(value: Int) =
-        update { copy(backgroundDecorationId = value) }
+    fun selectBackground(background: BatteryDecorationEntry) {
+        val state = _uiState.value
+        if (state.backgroundSelectionInProgress != null) return
+        if (state.config.backgroundDecorationId == background.id) return
+        val requestId = ++backgroundSelectionRequestId
+        _uiState.update {
+            it.copy(backgroundSelectionInProgress = background.id, message = null)
+        }
+        viewModelScope.launch {
+            val materializedPath = catalogRepository.materializeAsset(background.assetPath)
+            if (requestId != backgroundSelectionRequestId) return@launch
+            if (materializedPath != null) {
+                update { copy(backgroundDecorationId = background.id) }
+                _uiState.update {
+                    it.copy(
+                        backgrounds = it.backgrounds.map { entry ->
+                            if (entry.id == background.id) {
+                                entry.copy(assetPath = materializedPath)
+                            } else entry
+                        },
+                        backgroundSelectionInProgress = null,
+                        message = null
+                    )
+                }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        backgroundSelectionInProgress = null,
+                        message = BatteryEditorMessage.ASSET_DOWNLOAD_FAILED
+                    )
+                }
+            }
+        }
+    }
+    fun setBackgroundDecoration(value: Int) {
+        if (value == 0) {
+            update { copy(backgroundDecorationId = 0) }
+            return
+        }
+        _uiState.value.backgrounds.firstOrNull { it.id == value }?.let(::selectBackground)
+    }
     fun setShowEmotion(value: Boolean) = update { copy(showEmotion = value) }
-    fun setEmotionDecoration(value: Int) =
-        update { copy(emotionDecorationId = value) }
+    fun selectEmotion(emotion: BatteryDecorationEntry) {
+        val state = _uiState.value
+        if (state.emotionSelectionInProgress != null) return
+        if (state.config.showEmotion && state.config.emotionDecorationId == emotion.id) return
+        val requestId = ++emotionSelectionRequestId
+        _uiState.update {
+            it.copy(emotionSelectionInProgress = emotion.id, message = null)
+        }
+        viewModelScope.launch {
+            val materializedPath = catalogRepository.materializeAsset(emotion.assetPath)
+            if (requestId != emotionSelectionRequestId) return@launch
+            if (materializedPath != null) {
+                update {
+                    copy(showEmotion = true, emotionDecorationId = emotion.id)
+                }
+                _uiState.update {
+                    it.copy(
+                        emotions = it.emotions.map { entry ->
+                            if (entry.id == emotion.id) {
+                                entry.copy(assetPath = materializedPath)
+                            } else entry
+                        },
+                        emotionSelectionInProgress = null,
+                        message = null
+                    )
+                }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        emotionSelectionInProgress = null,
+                        message = BatteryEditorMessage.ASSET_DOWNLOAD_FAILED
+                    )
+                }
+            }
+        }
+    }
+    fun setEmotionDecoration(value: Int) {
+        _uiState.value.emotions.firstOrNull { it.id == value }?.let(::selectEmotion)
+    }
     fun setConfig(value: BatteryStatusConfig) = update { value }
+
+    internal fun beginChildEdit(page: BatteryEditorPage) {
+        if (
+            page == BatteryEditorPage.OVERVIEW ||
+            page == BatteryEditorPage.EMOJI ||
+            page.isFigmaPickerPage()
+        ) return
+        childEditCheckpoints.putIfAbsent(
+            page.name,
+            ChildEditCheckpoint(
+                config = _uiState.value.config,
+                hadUnsavedChanges = hasLocalEdits
+            )
+        )
+    }
+
+    internal fun commitChildEdit(page: BatteryEditorPage) {
+        childEditCheckpoints.remove(page.name)
+    }
+
+    internal fun rollbackChildEdit(page: BatteryEditorPage) {
+        val checkpoint = childEditCheckpoints.remove(page.name) ?: return
+        invalidatePendingSelections()
+        val restored = checkpoint.config.copy(
+            rewardUnlockedThemeIds =
+                checkpoint.config.rewardUnlockedThemeIds +
+                    _uiState.value.config.rewardUnlockedThemeIds
+        )
+        hasLocalEdits = checkpoint.hadUnsavedChanges
+        if (hasLocalEdits) {
+            savedStateHandle[KEY_DRAFT] = BatteryDraftCodec.encode(restored)
+            savedStateHandle[KEY_DIRTY] = true
+        } else {
+            savedStateHandle[KEY_DRAFT] = null
+            savedStateHandle[KEY_DIRTY] = false
+        }
+        _uiState.update {
+            it.copy(
+                config = restored,
+                isThemeAvailable = selectedAssetsReady(it.themes, restored),
+                hasUnsavedChanges = hasLocalEdits,
+                pendingSelection = null,
+                assetSelectionInProgress = null,
+                backgroundSelectionInProgress = null,
+                emotionSelectionInProgress = null,
+                isRewardInProgress = false,
+                message = null
+            )
+        }
+        publishPreview(restored)
+    }
 
     fun startPreview() {
         previewClientCount += 1
@@ -275,8 +415,11 @@ class BatteryEditorViewModel @Inject constructor(
 
     fun apply() {
         val state = _uiState.value
-        if (!state.isThemeAvailable || state.assetSelectionInProgress != null) return
+        if (!state.isThemeAvailable || state.assetSelectionInProgress != null ||
+            state.emotionSelectionInProgress != null
+        ) return
         settingsRepository.applyConfig(state.config.copy(enabled = true, hasApplied = true))
+        childEditCheckpoints.clear()
         clearDraft()
         _uiState.update {
             it.copy(
@@ -287,6 +430,7 @@ class BatteryEditorViewModel @Inject constructor(
     }
 
     fun disable() {
+        childEditCheckpoints.clear()
         clearDraft()
         stopPreviewImmediately()
         settingsRepository.setEnabled(false)
@@ -296,6 +440,8 @@ class BatteryEditorViewModel @Inject constructor(
     }
 
     fun discardDraft() {
+        childEditCheckpoints.clear()
+        invalidatePendingSelections()
         clearDraft()
         _uiState.update { state ->
             state.copy(
@@ -394,6 +540,12 @@ class BatteryEditorViewModel @Inject constructor(
         savedStateHandle[KEY_DIRTY] = false
     }
 
+    private fun invalidatePendingSelections() {
+        assetSelectionRequestId += 1
+        backgroundSelectionRequestId += 1
+        emotionSelectionRequestId += 1
+    }
+
     override fun onCleared() {
         previewStopJob?.cancel()
         previewSession.stop(previewOwnerId)
@@ -415,4 +567,9 @@ class BatteryEditorViewModel @Inject constructor(
         const val KEY_SELECTION_INITIALIZED = "battery_editor_selection_initialized"
         const val BUILT_IN_ASSET_MARKER = "built-in"
     }
+
+    private data class ChildEditCheckpoint(
+        val config: BatteryStatusConfig,
+        val hadUnsavedChanges: Boolean
+    )
 }
