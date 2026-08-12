@@ -113,11 +113,11 @@ class BatteryCatalogParser {
                         )
                 },
                 thumbnail = assets.getJSONObject("thumbnail")
-                    .toAsset("thumb/$id.png", index),
+                    .toStaticImageAsset("thumb/$id", index),
                 battery = assets.getJSONObject("battery")
-                    .toAsset("battery/$id.png", index),
+                    .toStaticImageAsset("battery/$id", index),
                 emoji = assets.getJSONObject("emoji")
-                    .toAsset("emoji/$id.png", index)
+                    .toStaticImageAsset("emoji/$id", index)
             ).also { theme ->
                 if (theme.id <= 0 || theme.name.isBlank() || theme.categoryName.isBlank()) {
                     throw BatteryCatalogParseException(
@@ -161,7 +161,7 @@ class BatteryCatalogParser {
                 id = id,
                 name = name,
                 asset = item.getJSONObject("asset")
-                    .toAsset("$runtimeDirectory/$name.png", index)
+                    .toStaticImageAsset("$runtimeDirectory/$name", index)
             ).also {
                 if (id <= 0 || name.isBlank()) {
                     throw BatteryCatalogParseException(
@@ -185,9 +185,9 @@ class BatteryCatalogParser {
                 id = id,
                 name = name,
                 asset = item.getJSONObject("asset")
-                    .toAsset("background/$name.png", index),
+                    .toStaticImageAsset("background/$name", index),
                 preview = item.optJSONObject("preview")
-                    ?.toAsset("background_preview/$name.png", index),
+                    ?.toStaticImageAsset("background_preview/$name", index),
                 order = order
             ).also {
                 if (id <= 0 || name.isBlank() || order < 0) {
@@ -218,9 +218,9 @@ class BatteryCatalogParser {
                 id = id,
                 name = name,
                 asset = item.getJSONObject("asset")
-                    .toAsset("emotion/$name.png", index),
+                    .toStaticImageAsset("emotion/$name", index),
                 preview = item.optJSONObject("preview")
-                    ?.toAsset("emotion_preview/$name.png", index),
+                    ?.toStaticImageAsset("emotion_preview/$name", index),
                 groupKey = groupKey,
                 order = order
             ).also {
@@ -264,7 +264,11 @@ class BatteryCatalogParser {
                 order = order,
                 emotionIds = emotionIds,
                 background = item.optJSONObject("background")
-                    ?.toAsset("emotion_group/$key.jpg", index)
+                    ?.toStaticImageAsset(
+                        expectedPathWithoutExtension = "emotion_group/$key",
+                        index = index,
+                        allowedExtensions = GROUP_BACKGROUND_EXTENSIONS
+                    )
             ).also {
                 if (key.isBlank() || order < 0 || emotionIds.isEmpty()) {
                     throw BatteryCatalogParseException(
@@ -360,24 +364,51 @@ class BatteryCatalogParser {
         expectedPath: String,
         index: Int
     ): BatteryCatalogAssetRecord {
-        val record = BatteryCatalogAssetRecord(
-            path = getString("path"),
-            sizeBytes = getLong("sizeBytes"),
-            sha256 = getString("sha256").lowercase(),
-            width = getInt("width"),
-            height = getInt("height")
-        )
-        if (record.path != expectedPath || record.sizeBytes <= 0L ||
-            !SHA_256.matches(record.sha256) ||
-            record.width !in 1..MAX_IMAGE_DIMENSION ||
-            record.height !in 1..MAX_IMAGE_DIMENSION
-        ) {
+        val record = toAssetRecord()
+        if (record.path != expectedPath || !record.hasValidMetadata()) {
             throw BatteryCatalogParseException(
                 "Invalid Battery asset at index $index"
             )
         }
         return record
     }
+
+    private fun JSONObject.toStaticImageAsset(
+        expectedPathWithoutExtension: String,
+        index: Int,
+        allowedExtensions: Set<String> = STATIC_IMAGE_EXTENSIONS
+    ): BatteryCatalogAssetRecord {
+        val record = toAssetRecord()
+        val extension = record.path.substringAfterLast('.', missingDelimiterValue = "")
+        val pathWithoutExtension = record.path.substringBeforeLast(
+            delimiter = ".",
+            missingDelimiterValue = ""
+        )
+        if (pathWithoutExtension != expectedPathWithoutExtension ||
+            extension !in allowedExtensions ||
+            !record.hasValidMetadata()
+        ) {
+            throw BatteryCatalogParseException(
+                "Invalid Battery static image at index $index"
+            )
+        }
+        return record
+    }
+
+    private fun JSONObject.toAssetRecord(): BatteryCatalogAssetRecord =
+        BatteryCatalogAssetRecord(
+            path = getString("path"),
+            sizeBytes = getLong("sizeBytes"),
+            sha256 = getString("sha256").lowercase(),
+            width = getInt("width"),
+            height = getInt("height")
+        )
+
+    private fun BatteryCatalogAssetRecord.hasValidMetadata(): Boolean =
+        sizeBytes > 0L &&
+            SHA_256.matches(sha256) &&
+            width in 1..MAX_IMAGE_DIMENSION &&
+            height in 1..MAX_IMAGE_DIMENSION
 
     private inline fun <T> JSONArray.mapObjects(
         transform: (JSONObject, Int) -> T
@@ -394,6 +425,8 @@ class BatteryCatalogParser {
     private companion object {
         const val SCHEMA_VERSION = 1
         const val MAX_IMAGE_DIMENSION = 4096
+        val STATIC_IMAGE_EXTENSIONS = setOf("png", "webp")
+        val GROUP_BACKGROUND_EXTENSIONS = STATIC_IMAGE_EXTENSIONS + setOf("jpg", "jpeg")
         val SHA_256 = Regex("[0-9a-f]{64}")
         val SLUG = Regex("[a-z0-9]+(?:-[a-z0-9]+)*")
         val ANIMATION_NAME = Regex("(?:cute_[1-5]\\.json|(?:[1-9]|1[0-9]|2[01])\\.gif)")

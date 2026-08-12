@@ -316,7 +316,7 @@ Input text contract:
 
 My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `8191:5950`:
 
-- route `my_pet` là scene phòng full-screen, background lấy từ room catalog (`bg/BG_<id>.png`)
+- route `my_pet` là scene phòng full-screen, background lấy từ room catalog (`bg/BG_<id>.webp`)
   và vẽ `ContentScale.Crop`; không dùng Home chrome, không có bottom navigation;
 - top bar `360×64` gồm back `32×32`, biển gỗ `178×40` (`img_pet_room_sign`) mang title, và
   Settings `32×32`. Music toggle `32×32` hai state nằm ngay dưới top bar ở mép phải. Mọi

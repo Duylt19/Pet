@@ -92,13 +92,13 @@ runtime fallback nhưng không được render thành catalog card.
 raw.githubusercontent.com/.../master/
 ├── json/batteries.json
 └── battery/
-    ├── thumb/<id>.png
-    ├── battery/<id>.png
-    ├── emoji/<id>.png
-    ├── background/status_background_<id>.png
-    ├── background/template_color_<id>.png
-    ├── background_preview/<name>.png
-    ├── emotion/emotion_<id>.png
+    ├── thumb/<id>.webp|png
+    ├── battery/<id>.webp|png
+    ├── emoji/<id>.webp|png
+    ├── background/<name>.webp|png
+    ├── background_preview/<name>.webp|png
+    ├── emotion/<name>.webp|png
+    ├── emotion_preview/<name>.webp|png
     └── animation/<name>.gif|json
 ```
 
@@ -114,7 +114,8 @@ nhẹ và tải full asset theo lựa chọn của user.
 Repository ghép Classic trước tám nhóm bundled, không thay thế dữ liệu legacy.
 
 Background catalog v2 có 38 item: 18 frame Figma mới dùng ID `1..18` và luôn đứng trước,
-20 nền cũ dùng ID `19..38`. Grid tải preview nhẹ; full PNG chỉ được download/verify khi
+20 nền cũ dùng ID `19..38`. Grid tải preview nhẹ; full lossless WebP/PNG chỉ được
+download/verify khi
 chọn. Frame ID `1` còn được đóng gói ở
 `drawable-nodpi/img_battery_background_default.png`, nên default vẫn hiển thị khi offline.
 ID `0` tiếp tục là nền màu phẳng.

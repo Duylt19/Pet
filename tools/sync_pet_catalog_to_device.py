@@ -66,10 +66,18 @@ def verify_source(source: Path, metadata_only: bool) -> tuple[int, int]:
     if metadata_only:
         return 0, 0
     archives = list((source / "data").glob("*.zip"))
-    thumbnails = list((source / "thumb").glob("*.png"))
+    thumbnails = thumbnail_files(source / "thumb")
     if not archives or not thumbnails:
         raise FileNotFoundError("Snapshot data/thumb directories are empty")
     return len(archives), len(thumbnails)
+
+
+def thumbnail_files(directory: Path) -> list[Path]:
+    return sorted(
+        path
+        for extension in ("*.webp", "*.png")
+        for path in directory.glob(extension)
+    )
 
 
 def remote_file_count(
@@ -139,15 +147,18 @@ def main() -> int:
             push_files(
                 adb,
                 args.serial,
-                sorted((source / "thumb").glob("*.png")),
+                thumbnail_files(source / "thumb"),
                 f"{remote_root}/thumb",
             )
             actual_archives = remote_file_count(adb, args.serial, f"{remote_root}/data", "*.zip")
-            actual_thumbnails = remote_file_count(
-                adb,
-                args.serial,
-                f"{remote_root}/thumb",
-                "*.png",
+            actual_thumbnails = sum(
+                remote_file_count(
+                    adb,
+                    args.serial,
+                    f"{remote_root}/thumb",
+                    pattern,
+                )
+                for pattern in ("*.webp", "*.png")
             )
             if (actual_archives, actual_thumbnails) != (
                 expected_archives,

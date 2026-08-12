@@ -9,7 +9,7 @@ Server-Emoji-Battery-Shimeji-Pet-AM/
 ├── json/pets.json
 ├── json/speech-anchors.json
 ├── data/<petId>.zip
-└── thumb/<petId>.png
+└── thumb/<petId>.webp
 ```
 
 `json/pets.json` schema v1 chứa `catalogVersion`, source provenance, 269 category và 1.062
@@ -89,7 +89,8 @@ runtime path như mọi owner pack khác; không nhúng asset bóng đá vào AP
 ## Source snapshot và server import
 
 Owner-authorized source snapshot vẫn nằm ngoài app Git dưới `private_data/`. Server pipeline
-chỉ copy `shimeji.json`-referenced `data/<id>.zip` và `thumb/<id>.png`; không copy nested
+chỉ copy asset được `shimeji.json` tham chiếu (`data/<id>.zip`, `thumb/<id>.webp|png`);
+không copy nested
 `.git`, audit report hoặc custom asset không thuộc runtime catalog.
 
 Server validator đối chiếu:

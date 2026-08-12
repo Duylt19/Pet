@@ -252,7 +252,7 @@ class GithubBatteryCatalogClient @Inject constructor(
         const val ETAG_JSON_KEY = "etag"
         const val LAST_VALIDATED_AT_JSON_KEY = "lastValidatedAtEpochMillis"
         const val RETRY_AFTER_JSON_KEY = "retryAfterEpochMillis"
-        val SAFE_EXTENSION = Regex("(?:png|gif|json)")
+        val SAFE_EXTENSION = Regex("(?:png|webp|jpg|jpeg|gif|json)")
     }
 }
 

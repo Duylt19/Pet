@@ -57,14 +57,20 @@ class LocalOwnerPetCatalogRepository @Inject constructor(
         try {
             val records = parser.parse(catalogFile.readText(Charsets.UTF_8))
             val entries = records.map { record ->
-                val thumbnail = File(root, "$THUMBNAIL_DIRECTORY/${record.id}.png")
+                val thumbnail = record.thumbnail?.path
+                    ?.let { File(root, it) }
+                    ?: listOf("webp", "png")
+                        .map { extension ->
+                            File(root, "$THUMBNAIL_DIRECTORY/${record.id}.$extension")
+                        }
+                        .firstOrNull(File::isFile)
                 val archive = File(root, "$ARCHIVE_DIRECTORY/${record.id}.zip")
                 OwnerPetCatalogEntry(
                     id = record.id,
                     name = record.name,
                     category = record.category,
                     author = record.author,
-                    thumbnailPath = thumbnail.takeIf(File::isFile)?.absolutePath,
+                    thumbnailPath = thumbnail?.takeIf(File::isFile)?.absolutePath,
                     hasLocalArchive = archive.isFile,
                     speechAnchor = record.speechAnchor?.let {
                         OwnerPetSpeechAnchor(x = it.x, y = it.y)
