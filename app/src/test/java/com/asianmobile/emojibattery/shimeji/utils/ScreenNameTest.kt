@@ -39,6 +39,8 @@ class ScreenNameTest {
             "battery_size_editor",
             "battery_appearance_editor",
             "battery_emoji_editor",
+            "battery_emotion_editor",
+            "battery_emotion_detail",
             "battery_icon_editor",
             "battery_animation_editor",
             "battery_wifi_editor",

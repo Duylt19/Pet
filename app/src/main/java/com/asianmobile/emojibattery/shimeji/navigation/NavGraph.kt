@@ -69,12 +69,15 @@ object Routes {
     const val BATTERY_CATEGORY = "battery_category"
     const val BATTERY_EDITOR = "battery_editor"
     const val BATTERY_EDITOR_COMPONENT = "battery_editor_component"
+    const val BATTERY_EDITOR_EMOTION_DETAIL = "battery_editor_emotion_detail"
     const val PREMIUM = "premium"
 
     fun batteryEditor(themeId: Int): String = "$BATTERY_EDITOR/$themeId"
     fun batteryCategory(categoryId: Int): String = "$BATTERY_CATEGORY/$categoryId"
     fun batteryEditorComponent(themeId: Int, page: String): String =
         "$BATTERY_EDITOR_COMPONENT/$themeId/$page"
+    fun batteryEditorEmotionDetail(themeId: Int, groupKey: String): String =
+        "$BATTERY_EDITOR_EMOTION_DETAIL/$themeId/$groupKey"
 }
 
 private const val HOME_BOTTOM_BANNER_POSITION = "home_mode_bottom"
@@ -99,7 +102,8 @@ internal fun showHomeBottomBanner(route: String?): Boolean =
 
 internal fun showBatteryEditorBottomBanner(route: String?): Boolean =
     route?.startsWith("${Routes.BATTERY_EDITOR}/") == true ||
-        route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true
+        route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true ||
+        route?.startsWith("${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/") == true
 
 internal fun showBatteryStatusOptionNative(route: String?, page: String?): Boolean =
     route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true &&
@@ -453,7 +457,39 @@ fun AppNavGraph(
                             ignoreDebounce = true
                         )
                     },
+                    onOpenEmotionGroup = { groupKey ->
+                        val themeId = backStackEntry.arguments?.getInt("themeId") ?: 0
+                        navController.safeNavigate(
+                            Routes.batteryEditorEmotionDetail(themeId, groupKey),
+                            ignoreDebounce = true
+                        )
+                    },
                     viewModel = editorViewModel
+                )
+            }
+
+            composable(
+                route = "${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/{themeId}/{groupKey}",
+                arguments = listOf(
+                    navArgument("themeId") { type = NavType.IntType },
+                    navArgument("groupKey") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val themeId = backStackEntry.arguments?.getInt("themeId") ?: 0
+                val overviewEntry = remember(backStackEntry, themeId) {
+                    navController.getBackStackEntry(Routes.batteryEditor(themeId))
+                }
+                BatteryEditorScreen(
+                    page = BatteryEditorPage.EMOTION_DETAIL,
+                    emotionGroupKey = backStackEntry.arguments?.getString("groupKey"),
+                    onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                    onNavigateToPremium = {
+                        navController.safeNavigate(
+                            "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
+                            ignoreDebounce = true
+                        )
+                    },
+                    viewModel = hiltViewModel<BatteryEditorViewModel>(overviewEntry)
                 )
             }
 

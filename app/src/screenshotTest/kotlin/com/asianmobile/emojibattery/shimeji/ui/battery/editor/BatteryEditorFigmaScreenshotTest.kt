@@ -19,6 +19,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationType
+import com.asianmobile.emojibattery.shimeji.data.model.BUNDLED_BATTERY_EMOTIONS
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
@@ -74,6 +75,16 @@ fun BatteryChargeOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorP
 @Preview(name = "Status bar Clock option", widthDp = 360, heightDp = 800)
 @Composable
 fun BatteryClockOptionScreenshotTest() = PreviewStatusOptionPage(BatteryEditorPage.CLOCK)
+
+@PreviewTest
+@Preview(name = "Status bar Emotion groups", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryEmotionGroupsScreenshotTest() = PreviewEmotionPage(groupKey = null)
+
+@PreviewTest
+@Preview(name = "Status bar Emotion detail", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryEmotionDetailScreenshotTest() = PreviewEmotionPage(groupKey = "emoji")
 
 @PreviewTest
 @Preview(name = "Status bar color picker", widthDp = 360, heightDp = 491)
@@ -207,6 +218,32 @@ private fun PreviewStatusOptionPage(page: BatteryEditorPage) {
     }
 }
 
+@Composable
+private fun PreviewEmotionPage(groupKey: String?) {
+    Column(Modifier.fillMaxSize()) {
+        Box(Modifier.weight(1f)) {
+            BatteryEmotionFigmaScreen(
+                state = previewEditorState(),
+                groupKey = groupKey,
+                onBack = {},
+                onPremium = {},
+                onOpenGroup = {},
+                onConfig = {},
+                onApply = {}
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("AD")
+        }
+    }
+}
+
 private fun previewEditorState(): BatteryEditorUiState {
     val themes = List(12) { index ->
         BatteryThemeEntry(
@@ -245,6 +282,7 @@ private fun previewEditorState(): BatteryEditorUiState {
         theme = themes[1],
         themes = themes,
         backgrounds = backgrounds,
+        emotions = BUNDLED_BATTERY_EMOTIONS,
         animations = animations,
         config = BatteryStatusConfig(
             enabled = false,

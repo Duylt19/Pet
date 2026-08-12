@@ -405,7 +405,8 @@ class BatteryStatusBarView(context: Context) : View(context) {
                         BatteryStatusComponent.EMOTION,
                         config.emojiSizeDp * density,
                         gap,
-                        priority = 30
+                        priority = 30,
+                        required = focusedComponent == BatteryStatusComponent.EMOTION
                     )
                 )
             }

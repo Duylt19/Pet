@@ -16,6 +16,7 @@ class BatteryPreviewLayoutTest {
             BatteryStatusComponent.AIRPLANE,
             BatteryStatusComponent.RINGER,
             BatteryStatusComponent.ANIMATION,
+            BatteryStatusComponent.EMOTION,
             BatteryStatusComponent.CHARGE,
             BatteryStatusComponent.WIFI,
             BatteryStatusComponent.CELLULAR,
@@ -75,6 +76,20 @@ class BatteryPreviewLayoutTest {
         )
 
         assertFalse(layout.shows(BatteryStatusComponent.DATE))
+    }
+
+    @Test
+    fun emotionPreview_respectsVisibilityToggle_evenWhileFocused() {
+        val layout = batteryPreviewLayout(
+            config = BatteryStatusConfig(showEmotion = false),
+            availableWidthDp = 320f,
+            hasEmoji = false,
+            hasEmotion = true,
+            hasAnimation = false,
+            focusedComponent = BatteryStatusComponent.EMOTION
+        )
+
+        assertFalse(layout.shows(BatteryStatusComponent.EMOTION))
     }
 
     @Test

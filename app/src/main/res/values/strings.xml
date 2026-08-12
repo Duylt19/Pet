@@ -938,4 +938,13 @@
     <string name="grant_permissions_autostart_title">Allow auto-start</string>
     <string name="grant_permissions_autostart_body">Your device keeps its own list of apps allowed to run in the background. Add Cute Pet so your pet is not stopped.</string>
     <string name="battery_category_back">Back</string>
+    <string name="battery_emotion_style_title">Emotion Style</string>
+    <string name="battery_emotion_group_emoji">Emoji</string>
+    <string name="battery_emotion_group_cony">Cony</string>
+    <string name="battery_emotion_group_kiiroitori">Kiiroitori</string>
+    <string name="battery_emotion_group_molang">Molang</string>
+    <string name="battery_emotion_group_mochi">Mochi</string>
+    <string name="battery_emotion_group_tobi">Tobi</string>
+    <string name="battery_emotion_group_keroppi">Keroppi</string>
+    <string name="battery_emotion_group_pochacco">Pochacco</string>
 </resources>

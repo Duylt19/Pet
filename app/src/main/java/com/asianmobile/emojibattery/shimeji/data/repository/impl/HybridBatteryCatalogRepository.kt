@@ -6,6 +6,7 @@ import android.util.Log
 import com.asianmobile.emojibattery.shimeji.BuildConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_CATEGORY
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
+import com.asianmobile.emojibattery.shimeji.data.model.BUNDLED_BATTERY_EMOTIONS
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogDistributionStatus
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogError
@@ -224,16 +225,7 @@ class HybridBatteryCatalogRepository @Inject constructor(
                 )
             }
         }
-        val emotions = document.emotions.mapNotNull { record ->
-            resolve(record.asset)?.let { path ->
-                BatteryDecorationEntry(
-                    id = record.id,
-                    name = record.name,
-                    assetPath = path,
-                    type = BatteryDecorationType.EMOTION
-                )
-            }
-        }
+        val emotions = BUNDLED_BATTERY_EMOTIONS
         val animations = document.animations.mapNotNull { record ->
             resolve(record.asset)?.let { path ->
                 BatteryAnimationEntry(
@@ -249,7 +241,6 @@ class HybridBatteryCatalogRepository @Inject constructor(
             (
                 themes.any { !it.assetsReady } ||
                     backgrounds.size != document.backgrounds.size ||
-                    emotions.size != document.emotions.size ||
                     animations.size != document.animations.size
                 )
         ) {
@@ -336,13 +327,17 @@ class HybridBatteryCatalogRepository @Inject constructor(
 
     private fun initialSnapshot(): BatteryCatalogSnapshot {
         val root = localRoot()
-        return BatteryCatalogSnapshot(localRootPath = root?.absolutePath.orEmpty())
+        return BatteryCatalogSnapshot(
+            emotions = BUNDLED_BATTERY_EMOTIONS,
+            localRootPath = root?.absolutePath.orEmpty()
+        )
     }
 
     private fun fallbackSnapshot(
         rootPath: String,
         error: BatteryCatalogError
     ): BatteryCatalogSnapshot = BatteryCatalogSnapshot(
+        emotions = BUNDLED_BATTERY_EMOTIONS,
         localRootPath = rootPath,
         isLoading = false,
         error = error

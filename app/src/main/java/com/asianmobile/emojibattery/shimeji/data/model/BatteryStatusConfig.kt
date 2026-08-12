@@ -112,6 +112,7 @@ const val DEFAULT_BATTERY_TIME_SIZE_DP = 16f
 const val DEFAULT_BATTERY_PRIVACY_RESERVE_DP = 72f
 const val DEFAULT_BATTERY_BACKGROUND_ID = 17
 const val DEFAULT_BATTERY_EMOTION_ID = 1
+const val MAX_BATTERY_EMOTION_ID = 80
 const val DEFAULT_BATTERY_ANIMATION_ASSET = "cute_1.json"
 // Figma's leading Charge style maps to the simple bolt stored as charge_10.
 const val DEFAULT_BATTERY_CHARGE_ICON_INDEX = 10

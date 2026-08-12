@@ -40,7 +40,7 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   section đầu tiên. Category detail có banner inline `battery_category_inline`; creative do SDK
   tải, không đóng gói ảnh quảng cáo mẫu trong Figma. Bottom banner vẫn là holder của shell.
 - Customize Status Bar và các child library dùng holder shell nằm ngoài NavHost. Overview và
-  Battery/Emoji/Theme giữ banner `battery_editor_bottom`; sáu editor custom icon thay slot đó
+  Battery/Emoji/Theme cùng Emotion group/detail giữ banner `battery_editor_bottom`; sáu editor custom icon thay slot đó
   bằng một native `COLLAPSE_SMALL` dùng chung, nên không double-render ad và Apply luôn reflow
   ngay phía trên chiều cao collapsed/expanded thực tế.
 - Các banner inline `discover_inline`, `search_inline` và `battery_category_inline` có ViewModel

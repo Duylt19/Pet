@@ -824,11 +824,15 @@ internal fun DesignSlider(
     label: String,
     value: Float,
     range: ClosedFloatingPointRange<Float>,
-    onValueChange: (Float) -> Unit
+    onValueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val coercedValue = value.coerceIn(range)
     val pink = colorResource(R.color.colors_FB3675)
-    Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
+    ) {
         Text(
             text = label,
             color = colorResource(R.color.colors_212327),

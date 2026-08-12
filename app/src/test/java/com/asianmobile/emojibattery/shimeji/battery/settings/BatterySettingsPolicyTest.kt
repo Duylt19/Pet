@@ -88,4 +88,10 @@ class BatterySettingsPolicyTest {
         assertEquals(48f, sanitized.barHeightDp)
         assertEquals(DEFAULT_BATTERY_BACKGROUND_COLOR, sanitized.backgroundColorArgb)
     }
+
+    @Test
+    fun sanitize_accepts_allBundledEmotionIds_andClampsUnknownValues() {
+        assertEquals(80, policy.sanitize(BatteryStatusConfig(emotionDecorationId = 80)).emotionDecorationId)
+        assertEquals(80, policy.sanitize(BatteryStatusConfig(emotionDecorationId = 99)).emotionDecorationId)
+    }
 }
