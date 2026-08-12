@@ -40,7 +40,7 @@ Home bottom nav → Battery Catalog
 
 Full Editor
   ├─ edit common settings inline
-  ├─ open Component Editor → Done → update parent draft
+  ├─ open Component Editor → edit trực tiếp parent draft/preview → Back
   └─ Apply
        ├─ below-bar + no overlay access → overlay settings → resume → apply
        ├─ cover-bar + Accessibility off → disclosure/consent → accessibility settings
@@ -52,8 +52,8 @@ Full Editor
 
 - `appliedConfig`: configuration authoritative cho runtime.
 - `draftConfig`: bản copy chỉnh trong editor.
-- Thay đổi draft chỉ update in-app preview.
-- `Done` ở component editor commit vào draft của full editor, không tự persist runtime.
+- Thay đổi ở component editor cập nhật draft và preview ngay, nhưng chưa persist runtime.
+- Back từ component editor giữ draft hiện tại; component editor không có CTA Done riêng.
 - `Apply` validate, persist atomically rồi update runtime.
 - Back khi draft khác applied config hiển thị confirm Discard/Keep editing.
 - Process death trong editor restore draft bằng `SavedStateHandle`; không persist một config

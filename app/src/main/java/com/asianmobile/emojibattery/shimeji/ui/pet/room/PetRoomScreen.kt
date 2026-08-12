@@ -661,21 +661,30 @@ private fun PetCard(
                     .clip(CircleShape)
                     .clickable(onClick = onRemove)
             )
-            if (pet.isOnScreen) {
-                Text(
-                    text = stringResource(R.string.pet_room_active),
-                    color = colorResource(R.color.colors_A54905),
-                    fontWeight = FontWeight.Medium,
-                    fontSize = dimensionResource(SspR.dimen._6ssp).value.sp,
-                    lineHeight = dimensionResource(SspR.dimen._9ssp).value.sp,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(start = unit * 6f, top = unit * 6f)
-                        .clip(CircleShape)
-                        .background(colorResource(R.color.colors_FFF1B2))
-                        .padding(horizontal = unit * 6f, vertical = unit * 2f)
-                )
-            }
+            Text(
+                text = stringResource(
+                    if (pet.isOnScreen) R.string.pet_room_active
+                    else R.string.pet_room_inactive
+                ),
+                color = colorResource(
+                    if (pet.isOnScreen) R.color.colors_A54905
+                    else R.color.colors_6F7073
+                ),
+                fontWeight = FontWeight.Medium,
+                fontSize = dimensionResource(SspR.dimen._6ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._9ssp).value.sp,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = unit * 6f, top = unit * 6f)
+                    .clip(CircleShape)
+                    .background(
+                        colorResource(
+                            if (pet.isOnScreen) R.color.colors_FFF1B2
+                            else R.color.colors_F0F0F0
+                        )
+                    )
+                    .padding(horizontal = unit * 6f, vertical = unit * 2f)
+            )
         }
         Column(
             modifier = Modifier
@@ -745,8 +754,14 @@ private fun PetDetailPanel(
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = stringResource(R.string.pet_room_on_screen),
-                color = colorResource(R.color.colors_FB3675),
+                text = stringResource(
+                    if (detail.isOnScreen) R.string.pet_room_active
+                    else R.string.pet_room_inactive
+                ),
+                color = colorResource(
+                    if (detail.isOnScreen) R.color.colors_FB3675
+                    else R.color.colors_6F7073
+                ),
                 fontWeight = FontWeight.Medium,
                 fontSize = dimensionResource(SspR.dimen._9ssp).value.sp
             )

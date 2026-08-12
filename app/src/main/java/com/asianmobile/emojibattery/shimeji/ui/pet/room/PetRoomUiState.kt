@@ -110,6 +110,14 @@ object PetRoomRosterPolicy {
                 thumbnailPath = entry.thumbnailPath
             )
         }
+
+    /** Only Active pets walk in the room scene; Inactive pets remain available in the roster. */
+    fun activePackKeys(roster: List<PetRoomPetUiState>): Set<String> = roster
+        .asSequence()
+        .filter(PetRoomPetUiState::isOnScreen)
+        .map(PetRoomPetUiState::packKey)
+        .filter(String::isNotBlank)
+        .toSet()
 }
 
 /** Catalog fields the roster needs, kept free of the catalog model so it stays unit-testable. */

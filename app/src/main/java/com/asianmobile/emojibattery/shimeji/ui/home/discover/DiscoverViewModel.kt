@@ -6,11 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibilityRecovery
 import com.asianmobile.emojibattery.shimeji.battery.overlay.batteryAccessibilityRecovery
-import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBackgroundRestrictionReader
-import com.asianmobile.emojibattery.shimeji.pet.overlay.PetProcessKillKind
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_THEME_ID
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBackgroundRestrictionReader
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetProcessKillKind
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -72,7 +73,7 @@ class DiscoverViewModel @Inject constructor(
                         batteryConfig.enabled,
                         accessibilityEnabled
                     ),
-                    trendingPets = pets.entries.take(MAX_TRENDING_PETS).map { pet ->
+                    trendingPets = pets.entries.take(MAX_DISCOVER_PREVIEW_ITEMS).map { pet ->
                         DiscoverPetUiState(
                             packKey = pet.installedPackKey,
                             name = pet.name,
@@ -81,8 +82,10 @@ class DiscoverViewModel @Inject constructor(
                         )
                     },
                     batteryThemes = batteryCatalog.themes
-                        .filter { it.assetsReady }
-                        .take(MAX_BATTERY_THEMES)
+                        .filter { theme ->
+                            theme.assetsReady && theme.id != DEFAULT_BATTERY_THEME_ID
+                        }
+                        .take(MAX_DISCOVER_PREVIEW_ITEMS)
                         .map { theme ->
                             DiscoverThemeUiState(
                                 id = theme.id,
@@ -92,7 +95,7 @@ class DiscoverViewModel @Inject constructor(
                             )
                         },
                     statusBarThemes = batteryCatalog.backgrounds
-                        .take(MAX_STATUS_BAR_THEMES)
+                        .take(MAX_DISCOVER_PREVIEW_ITEMS)
                         .map { asset ->
                             DiscoverAssetUiState(asset.id, asset.name, asset.assetPath)
                         },
@@ -102,14 +105,14 @@ class DiscoverViewModel @Inject constructor(
                                 DiscoverAssetUiState(theme.id, theme.name, path)
                             }
                         }
-                        .take(MAX_COMPONENT_ASSETS),
+                        .take(MAX_DISCOVER_PREVIEW_ITEMS),
                     batteryIcons = batteryCatalog.themes
                         .mapNotNull { theme ->
                             theme.batteryPath?.let { path ->
                                 DiscoverAssetUiState(theme.id, theme.name, path)
                             }
                         }
-                        .take(MAX_COMPONENT_ASSETS)
+                        .take(MAX_DISCOVER_PREVIEW_ITEMS)
                 )
             }.collect { state ->
                 _uiState.value = state
@@ -178,9 +181,6 @@ class DiscoverViewModel @Inject constructor(
     }
 
     private companion object {
-        const val MAX_TRENDING_PETS = 12
-        const val MAX_BATTERY_THEMES = 6
-        const val MAX_STATUS_BAR_THEMES = 8
-        const val MAX_COMPONENT_ASSETS = 12
+        const val MAX_DISCOVER_PREVIEW_ITEMS = 16
     }
 }

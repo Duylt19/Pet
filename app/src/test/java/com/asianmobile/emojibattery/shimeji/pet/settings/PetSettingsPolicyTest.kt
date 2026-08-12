@@ -13,9 +13,24 @@ class PetSettingsPolicyTest {
 
     @Test
     fun `pet count respects device budget`() {
-        assertEquals(1, policy.sanitizePetCount(0, maxPets = 3))
+        assertEquals(0, policy.sanitizePetCount(0, maxPets = 3))
         assertEquals(2, policy.sanitizePetCount(3, maxPets = 2))
         assertEquals(12, policy.sanitizePetCount(20, maxPets = 12))
+    }
+
+    @Test
+    fun `configured pet count keeps an empty or migrated roster at zero`() {
+        assertEquals(0, policy.configuredPetCount(List(12) { "" }, 1, maxPets = 12))
+        assertEquals(
+            0,
+            policy.configuredPetCount(
+                listOf("builtin.orange-cat@1"),
+                1,
+                maxPets = 12
+            )
+        )
+        assertEquals(1, policy.configuredPetCount(listOf("pack.cat@1"), null, maxPets = 12))
+        assertEquals(3, policy.configuredPetCount(listOf("pack.cat@1"), 3, maxPets = 12))
     }
 
     @Test
@@ -69,19 +84,6 @@ class PetSettingsPolicyTest {
         assertEquals(24, policy.targetFramesPerSecond(3, 30))
         assertEquals(20, policy.targetFramesPerSecond(6, 30))
         assertEquals(16, policy.targetFramesPerSecond(12, 30))
-    }
-
-    @Test
-    fun `mixed profile always restores one visible active pet`() {
-        val hiddenSlots = List(3) { PetSlotPreferences(isEnabled = false) }
-
-        val restored = policy.ensureMixedPetVisible(hiddenSlots, petCount = 2)
-
-        assertEquals(listOf(true, false, false), restored.map { it.isEnabled })
-        assertEquals(
-            listOf(false, false, false),
-            policy.ensureMixedPetVisible(hiddenSlots, petCount = 0).map { it.isEnabled }
-        )
     }
 
     @Test
@@ -288,6 +290,15 @@ class PetSelectionCodecTest {
         assertEquals(12, replaced.size)
         assertEquals("pack.new@1", replaced.first())
         assertEquals(true, replaced.drop(1).all { it == "pack.old@1" })
+    }
+
+    @Test
+    fun `empty and legacy built in selections materialize as empty slots`() {
+        assertEquals(List(12) { "" }, codec.materialize(emptyList()))
+        assertEquals(
+            List(12) { "" },
+            codec.materialize(listOf("builtin.orange-cat@1"))
+        )
     }
 }
 

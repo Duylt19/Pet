@@ -1,6 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.pet.settings
 
-import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SELECTED_PACK_KEY
+import com.asianmobile.emojibattery.shimeji.data.model.LEGACY_DEFAULT_SELECTED_PACK_KEY
 import com.asianmobile.emojibattery.shimeji.data.model.FREE_MIXED_PET_SLOTS
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_PET_SLOTS
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_SWARM_PETS
@@ -15,6 +15,15 @@ import org.json.JSONArray
 class PetSettingsPolicy {
     fun sanitizePetCount(value: Int, maxPets: Int): Int =
         value.coerceIn(MIN_PET_COUNT, maxPets.coerceAtLeast(MIN_PET_COUNT))
+
+    fun configuredPetCount(
+        packKeys: List<String>,
+        storedCount: Int?,
+        maxPets: Int
+    ): Int {
+        if (packKeys.none { it.isNotBlank() && it != LEGACY_DEFAULT_SELECTED_PACK_KEY }) return 0
+        return sanitizePetCount((storedCount ?: 1).coerceAtLeast(1), maxPets)
+    }
 
     fun sanitizeMixedRewardUnlockedSlotCount(value: Int): Int =
         value.coerceIn(FREE_MIXED_PET_SLOTS, MAX_PET_SLOTS)
@@ -81,19 +90,6 @@ class PetSettingsPolicy {
         )
     }
 
-    fun ensureMixedPetVisible(
-        slots: List<PetSlotPreferences>,
-        petCount: Int
-    ): List<PetSlotPreferences> {
-        val activeCount = petCount.coerceIn(0, slots.size)
-        if (activeCount == 0 || slots.take(activeCount).any(PetSlotPreferences::isEnabled)) {
-            return slots
-        }
-        return slots.toMutableList().apply {
-            this[0] = this[0].copy(isEnabled = true)
-        }
-    }
-
     /**
      * Reuses the pack's current Mixed slot or allocates the first slot outside the configured
      * roster. A configured pet is never evicted just to make a newly owned pet visible.
@@ -112,7 +108,7 @@ class PetSettingsPolicy {
         return slots.indices.firstOrNull { slotIndex ->
             slotIndex >= configuredCount ||
                 slots[slotIndex].packKey.isBlank() ||
-                slots[slotIndex].packKey == DEFAULT_SELECTED_PACK_KEY
+                slots[slotIndex].packKey == LEGACY_DEFAULT_SELECTED_PACK_KEY
         }
     }
 
@@ -154,7 +150,7 @@ class PetSettingsPolicy {
     }
 
     companion object {
-        const val MIN_PET_COUNT = 1
+        const val MIN_PET_COUNT = 0
         const val MIN_SIZE_PERCENT = 50
         const val MAX_SIZE_PERCENT = 150
         const val SIZE_STEP_PERCENT = 10
@@ -174,26 +170,26 @@ class PetSettingsPolicy {
 
 class PetSelectionCodec {
     fun encode(packKeys: List<String>): String = packKeys
-        .map(String::trim)
+        .map(::normalizeKey)
         .filter(String::isNotEmpty)
         .take(MAX_PET_SLOTS)
         .joinToString(SEPARATOR)
 
     fun decode(encoded: String): List<String> = encoded
         .split(SEPARATOR)
-        .map(String::trim)
+        .map(::normalizeKey)
         .filter(String::isNotEmpty)
         .take(MAX_PET_SLOTS)
 
     fun materialize(
         packKeys: List<String>,
-        fallbackKey: String = DEFAULT_SELECTED_PACK_KEY
+        fallbackKey: String = ""
     ): List<String> {
         val sanitized = packKeys
-            .map(String::trim)
+            .map(::normalizeKey)
             .filter(String::isNotEmpty)
             .take(MAX_PET_SLOTS)
-        val fallback = sanitized.firstOrNull() ?: fallbackKey
+        val fallback = sanitized.firstOrNull() ?: normalizeKey(fallbackKey)
         return List(MAX_PET_SLOTS) { slotIndex ->
             sanitized.getOrNull(slotIndex) ?: fallback
         }
@@ -214,6 +210,10 @@ class PetSelectionCodec {
     private companion object {
         const val SEPARATOR = "\n"
     }
+
+    private fun normalizeKey(key: String): String = key.trim()
+        .takeUnless { it == LEGACY_DEFAULT_SELECTED_PACK_KEY }
+        .orEmpty()
 }
 
 class PetPositionCodec {

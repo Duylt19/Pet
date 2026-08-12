@@ -172,10 +172,43 @@ fun PetStoreScreen(
     viewModel: PetStoreViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    TrackScreenView(ScreenName.PET_STORE)
+
+    PetStoreFlowHost(
+        state = state,
+        viewModel = viewModel,
+        onPremium = onPremium,
+        onViewPet = onViewPet
+    ) {
+        PetStoreContent(
+            state = state,
+            onSearch = onSearch,
+            onPremium = onPremium,
+            onOpenMyPet = onViewPet,
+            onToggle = viewModel::togglePetOverlay,
+            onTab = viewModel::selectTab,
+            onCategory = viewModel::selectCategory,
+            onPet = viewModel::selectPet,
+            onFood = viewModel::selectFood
+        )
+    }
+}
+
+/**
+ * Owns the reward/download/reveal surfaces shared by the Shimeji Pets tab and Discover cards.
+ * The caller owns only the browsing UI and navigation callbacks.
+ */
+@Composable
+internal fun PetStoreFlowHost(
+    state: PetStoreUiState,
+    viewModel: PetStoreViewModel,
+    onPremium: () -> Unit,
+    onViewPet: () -> Unit,
+    content: @Composable () -> Unit
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showOverlayPermissionDisclosure by rememberSaveable { mutableStateOf(false) }
-    TrackScreenView(ScreenName.PET_STORE)
 
     val overlayLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -222,17 +255,7 @@ fun PetStoreScreen(
         }
     }
 
-    PetStoreContent(
-        state = state,
-        onSearch = onSearch,
-        onPremium = onPremium,
-        onOpenMyPet = onViewPet,
-        onToggle = viewModel::togglePetOverlay,
-        onTab = viewModel::selectTab,
-        onCategory = viewModel::selectCategory,
-        onPet = viewModel::selectPet,
-        onFood = viewModel::selectFood
-    )
+    content()
 
     if (showOverlayPermissionDisclosure) {
         OverlayPermissionDialog(

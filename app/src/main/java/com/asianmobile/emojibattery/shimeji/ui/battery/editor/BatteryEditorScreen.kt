@@ -195,12 +195,8 @@ internal fun BatteryEditorScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDisclosure by remember { mutableStateOf(false) }
     var showDiscardConfirmation by rememberSaveable { mutableStateOf(false) }
-    val isTransactionalChild = page.isTransactionalChildPage()
     val requestBack = {
-        if (isTransactionalChild) {
-            viewModel.rollbackChildEdit(page)
-            onBack()
-        } else if (page == BatteryEditorPage.OVERVIEW && state.hasUnsavedChanges) {
+        if (page == BatteryEditorPage.OVERVIEW && state.hasUnsavedChanges) {
             showDiscardConfirmation = true
         } else {
             onBack()
@@ -253,14 +249,8 @@ internal fun BatteryEditorScreen(
     LaunchedEffect(page) {
         viewModel.setPreviewComponent(page.previewComponent())
     }
-    LaunchedEffect(page, state.isInitialized) {
-        if (state.isInitialized && isTransactionalChild) {
-            viewModel.beginChildEdit(page)
-        }
-    }
     BackHandler(
-        enabled = isTransactionalChild ||
-            (page == BatteryEditorPage.OVERVIEW && state.hasUnsavedChanges),
+        enabled = page == BatteryEditorPage.OVERVIEW && state.hasUnsavedChanges,
         onBack = requestBack
     )
     DisposableEffect(viewModel) {
@@ -285,10 +275,6 @@ internal fun BatteryEditorScreen(
         accessibilityEnabled = accessibilityEnabled,
         showEmbeddedPreview = showEmbeddedPreview,
         onBack = requestBack,
-        onDone = {
-            viewModel.commitChildEdit(page)
-            onBack()
-        },
         onOpenPage = onOpenPage,
         onOpenEmotionGroup = onOpenEmotionGroup,
         onPremium = onNavigateToPremium,
@@ -306,10 +292,7 @@ internal fun BatteryEditorScreen(
         onSelectTheme = viewModel::requestTheme,
         onConfig = viewModel::setConfig,
         onApply = {
-            if (isTransactionalChild) {
-                viewModel.commitChildEdit(page)
-                onBack()
-            } else if (accessibilityEnabled) {
+            if (accessibilityEnabled) {
                 viewModel.apply()
             } else {
                 showDisclosure = true
@@ -398,7 +381,6 @@ private fun BatteryEditorContent(
     accessibilityEnabled: Boolean,
     showEmbeddedPreview: Boolean,
     onBack: () -> Unit,
-    onDone: () -> Unit,
     onOpenPage: (BatteryEditorPage) -> Unit,
     onOpenEmotionGroup: (String) -> Unit,
     onPremium: () -> Unit,
@@ -427,7 +409,6 @@ private fun BatteryEditorContent(
             onOpenGroup = onOpenEmotionGroup,
             onSelectEmotion = onSelectEmotion,
             onConfig = onConfig,
-            onDone = onDone,
             showEmbeddedPreview = showEmbeddedPreview
         )
         return
@@ -438,7 +419,6 @@ private fun BatteryEditorContent(
             page = page,
             onBack = onBack,
             onConfig = onConfig,
-            onDone = onDone,
             showEmbeddedPreview = showEmbeddedPreview
         )
         return
@@ -468,18 +448,7 @@ private fun BatteryEditorContent(
     ) {
         CutePetTopBar(
             title = editorPageTitle(page),
-            onBack = onBack,
-            trailing = {
-                if (page != BatteryEditorPage.OVERVIEW) {
-                    TextButton(onClick = onDone) {
-                        Text(
-                            text = stringResource(R.string.common_done),
-                            color = colorResource(R.color.colors_12B890),
-                            fontFamily = FontFamily(Font(R.font.roboto_semibold))
-                        )
-                    }
-                }
-            }
+            onBack = onBack
         )
         if (showEmbeddedPreview) {
             BatteryPreview(
@@ -2277,11 +2246,6 @@ internal fun BatteryEditorPage.isFigmaPickerPage(): Boolean = when (this) {
     else -> false
 }
 
-internal fun BatteryEditorPage.isTransactionalChildPage(): Boolean =
-    this != BatteryEditorPage.OVERVIEW &&
-        this != BatteryEditorPage.EMOJI &&
-        !isFigmaPickerPage()
-
 private fun BatteryEditorPage.analyticsScreen(): ScreenName = when (this) {
     BatteryEditorPage.OVERVIEW -> ScreenName.BATTERY_EDITOR
     BatteryEditorPage.BATTERY_TEMPLATES -> ScreenName.BATTERY_ICON_EDITOR
@@ -2541,7 +2505,6 @@ private fun BatteryEditorOverviewPreview() {
         accessibilityEnabled = true,
         showEmbeddedPreview = true,
         onBack = {},
-        onDone = {},
         onOpenPage = {},
         onOpenEmotionGroup = {},
         onPremium = {},

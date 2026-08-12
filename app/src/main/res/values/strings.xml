@@ -860,10 +860,10 @@
     <string name="discover_favorite_theme">Favorite battery theme</string>
     <string name="discover_tab_discover">Discover</string>
     <string name="discover_tab_battery">Battery</string>
-    <string name="discover_tab_pet_store">Pet Store</string>
+    <string name="discover_tab_pet_store">Shimeji Pets</string>
     <string name="pet_store_enable_pet">Turn on to add a pet to your screen</string>
     <string name="pet_store_banner_placeholder">Banner my pet</string>
-    <string name="pet_store_tab_pets">Pet Store</string>
+    <string name="pet_store_tab_pets">Shimeji Pets</string>
     <string name="pet_store_tab_food">Food</string>
     <string name="pet_store_breed">Breed: %1$s</string>
     <string name="pet_store_unlock_title">Claim your reward now!</string>
@@ -892,12 +892,12 @@
     <string name="pet_room_music_off">Turn music on</string>
     <string name="pet_room_collapse_sheet">Hide panel</string>
     <string name="pet_room_expand_sheet">Show panel</string>
-    <string name="pet_room_open_store">Pet Store</string>
+    <string name="pet_room_open_store">Shimeji Pets</string>
     <string name="pet_room_add_pet">Add pet</string>
     <string name="pet_room_rooms_unavailable">Rooms are unavailable right now</string>
     <string name="pet_room_breed">Breed: %1$s</string>
-    <string name="pet_room_on_screen">Pet on screen</string>
     <string name="pet_room_active">Active</string>
+    <string name="pet_room_inactive">Inactive</string>
     <string name="pet_room_field_name">Pet Name:</string>
     <string name="pet_room_field_breed">Breed:</string>
     <string name="pet_room_field_adopted">Adopted On:</string>

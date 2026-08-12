@@ -71,11 +71,32 @@ class PetRoomRosterPolicyTest {
         )
     }
 
+    @Test
+    fun `room scene includes only active pets while roster keeps inactive pets`() {
+        val roster = listOf(
+            pet(id = 1, isOnScreen = true),
+            pet(id = 2, isOnScreen = false),
+            pet(id = 3, isOnScreen = true)
+        )
+
+        assertEquals(setOf("pack-1", "pack-3"), PetRoomRosterPolicy.activePackKeys(roster))
+        assertEquals(3, roster.size)
+    }
+
     private fun entry(id: Int, name: String = "Pet $id") = PetRoomRosterSource(
         petId = id,
         packKey = "pack-$id",
         catalogName = name,
         category = "Cat",
         thumbnailPath = "https://example.invalid/$id.png"
+    )
+
+    private fun pet(id: Int, isOnScreen: Boolean) = PetRoomPetUiState(
+        petId = id,
+        packKey = "pack-$id",
+        name = "Pet $id",
+        breed = "Cat",
+        thumbnailPath = null,
+        isOnScreen = isOnScreen
     )
 }

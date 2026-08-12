@@ -69,18 +69,18 @@ Discover Home contract:
 - toggle chính điều khiển `BatteryStatusConfig.enabled`, có disclosure và Accessibility gate;
   Discover và Battery cùng tính trạng thái switch từ config đã lưu + trạng thái Accessibility
   hiện tại mỗi lần app resume, nên việc cấp hoặc thu hồi quyền không làm hai tab lệch nhau;
-- Home shell có bốn tab Discover/Battery/Pet Store/Mine. `HomeBottomNavigation` cố định
+- Home shell có bốn tab Discover/Battery/Shimeji Pets/Mine. `HomeBottomNavigation` cố định
   trên bottom banner hiện có; từng screen không tự tạo lại bottom chrome. Battery selected dùng
   glyph filled 24×24 export từ frame Figma `8017:3666`, không tái sử dụng icon outline unselected;
-- Discover, Pet Store và Mine dùng chung `HomeHeader` và `HomeEnableCard`: header `43sdp`, search
+- Discover, Shimeji Pets và Mine dùng chung `HomeHeader` và `HomeEnableCard`: header `43sdp`, search
   `25sdp`, enable card `37sdp`, switch `34×18sdp`. Discover chỉ render Battery enable card;
   pet switch được quản lý ở flow pet. Không copy component rồi đổi metric riêng;
 - Discover hero dùng composite `Battery Troll` PNG @3x tại tỉ lệ `328×100px`; banner thấp hơn
   dùng placement SDK thật `discover_inline`, không đóng gói creative quảng cáo mẫu;
 - Thứ tự nhóm đầu sau hero là `Trending Emoji Battery` → `Shimeji Pets` → inline banner;
   `Status bar themes` tiếp tục nằm ngay sau banner, đúng hierarchy node Figma `8015:1035`;
-- Battery Themes dùng favorite state thật; Trending hiện dùng thứ tự catalog cho tới khi
-  server có ranking riêng.
+- Battery Themes dùng favorite state thật; Trending bỏ theme default ID `1`, sau đó giữ thứ
+  tự catalog cho tới khi server có ranking riêng.
 - Search field theo Figma `8287:6560`: khi query khác rỗng hiện clear icon 16px ở trailing;
   clear chỉ xoá query và giữ focus, còn tap ngắn ngoài toàn bộ field mới clear focus + ẩn IME.
   Gesture cuộn không được xem là outside tap.
@@ -98,10 +98,13 @@ Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
   dạng carousel và card `110×110px`; preview runtime dùng chung tỉ lệ `65%` và
   `ContentScale.Fit` của Discover vì asset dữ liệu thật có bounds khác mock Figma, favorite ở
   top-end, crown Premium ở top-start;
-- crown Premium của Pet Store, Search và Battery dùng chung `PetPremiumBadge`: nền
+- crown Premium của Discover, Shimeji Pets, Search và Battery dùng chung `PetPremiumBadge`: nền
   `#FFEA89` 50% và crown artwork theo tỉ lệ `18/24`, không dựng badge riêng theo từng feature.
   Search hiện crown khi theme có entitlement Premium, user chưa Premium và ID chưa được mở bằng
   reward; entitlement được đọc lại khi Search resume;
+- mỗi nhóm catalog trên Discover lấy tối đa 16 preview. Shimeji Pets dùng một hàng ngang;
+  Battery, Status Bar, Emoji và Battery component dùng các cột hai item trong `LazyRow`, vì vậy
+  danh sách luôn có thể kéo ngang mà không dựng hoặc tải trước toàn bộ catalog;
 - category header dùng trực tiếp emoji ở đầu `category.name`; không ghép thêm drawable/icon riêng
   để tránh hiển thị trùng khi catalog cập nhật tên category;
 - More mở child route có header Back/title/PRO, inline banner SDK thật và grid ba cột. Card detail giữ
@@ -130,8 +133,8 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   frame Figma 360×800;
 - Animation/Wi-Fi/Signal/Mobile Data dùng chung shell hồng, preview sticky,
   switch, slider/color/style grid và native collapsible với sáu option screen còn lại. Tất cả
-  child giữ chung draft; child Done commit vào draft overview, child Back rollback checkpoint
-  và live preview;
+  child giữ chung draft; mỗi thay đổi cập nhật preview ngay và Back giữ nguyên draft để overview
+  phản ánh lựa chọn mới;
 - Grid Animation lazy theo từng hàng bốn item để chỉ chạy animation đang nằm trong viewport.
   Lottie server render từ file cache đã materialize; khi đang tải/parse hoặc gặp lỗi, card dùng
   illustration Animation thay vì để trống;
@@ -142,7 +145,7 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   nền phía dưới asset;
 - Emotion dùng màn pack theo Figma `8404:6277`: nhóm Classic giữ 20 item cũ và tám card mới,
   mỗi card preview 5×2 item; chạm pack/item
-  mở detail `8404:7179` với slider Size, switch, grid ba cột và Done sticky. Khi cần preview
+  mở detail `8404:7179` với slider Size, switch và grid ba cột. Khi cần preview
   nhúng, nó được ghim dưới top bar ở cả hai màn. 80 frame art là PNG @3x vì nguồn Figma là raster/image-fill;
   card, selected stroke, shadow và background được dựng bằng Compose.
 - Emotion pack và detail dùng cùng native collapsible holder ở app shell. Lần đầu vào flow sẽ
@@ -161,8 +164,8 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
 - toàn màn dùng Roboto local đúng weight: top bar/section/action là SemiBold 600, row/slider/grid
   là Medium 500 và More là Regular 400. Top bar collapsed 20/28, expanded 24/32; không dùng
   SansSerif synthetic hoặc Roboto Condensed để giả SemiBold;
-- Các editor con dùng chung `AppSwitch` (ON hồng, OFF xám, thumb trắng) và CTA Done trong panel
-  sticky phía trên banner; chỉ CTA Apply của overview mới persist cấu hình;
+- Các editor con dùng chung `AppSwitch` (ON hồng, OFF xám, thumb trắng), không có footer/CTA
+  Done. Control cập nhật draft và preview ngay; chỉ CTA Apply của overview mới persist cấu hình;
 - Back ở overview khi draft chưa Apply mở discard sheet full-width theo node `8345:7719`:
   Cancel giữ draft, Exit restore config đã lưu rồi pop; sheet dùng native `HEIGHT_222`.
 
@@ -335,8 +338,11 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   icon 18px cùng màu;
 - card grid ba cột: card room/food `104×122`, card pet `104×106` nền `#FFFEF9` viền `#FFECD4`
   2px radius 16; ô add `104×106` nền `#FFECD4` viền `#8F6250` với vòng tròn nét đứt `#D3BEA2`;
-- pet có switch `Pet on screen` đang ON hiển thị pill `Active` ở góc trên trái card: nền
-  `#FFF1B2`, chữ Roboto Medium 8/12 `#A54905`, padding ngang 6px/dọc 2px và offset 6px;
+- pet luôn hiển thị pill trạng thái ở góc trên trái card: `Active` dùng nền `#FFF1B2`, chữ
+  Roboto Medium 8/12 `#A54905`; `Inactive` dùng nền `#F0F0F0`, chữ `#6F7073`. Cả hai giữ
+  padding ngang 6px/dọc 2px và offset 6px;
+- roster vẫn liệt kê mọi pet đã sở hữu, nhưng scene phòng chỉ dựng pet `Active`. Đổi switch
+  cập nhật cả overlay slot và scene; `Inactive` biến mất khỏi sảnh nhưng vẫn có card để bật lại;
 - pet đã sở hữu đi lại trong scene bằng `PetRoomWander`, không dùng `PetEngine`: engine overlay
   dựng cho góc nhìn ngang nên trọng lực dồn mọi pet về một đường sàn. Phòng nhìn từ phía trước
   nên sàn là hình thang phối cảnh `0.50–0.72` chiều cao scene, mép sau hẹp hơn 14%; pet chọn một
@@ -358,13 +364,16 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   indeterminate và khóa double tap cho tới khi background được cache rồi selected. Download lỗi
   trả card về icon download và không đổi room hiện tại. Card pet có nút xoá `16×16` tại `(8,8)`
   góc trên phải và xoá phải qua dialog xác nhận dựng theo `GrantPermissionDialog`;
-- panel chi tiết pet thay body sheet: hàng back `24` + nhãn `Pet on screen` `#FB3675` + toggle
+- panel chi tiết pet thay body sheet: hàng back `24` + nhãn động `Active` màu `#FB3675` hoặc
+  `Inactive` màu `#6F7073` + toggle
   `44×24`; khối info `336×78` với thumbnail `78×78` (ảnh `60×60`, băng dính `44×35`) và ba dòng
   label `#8F6250` 11/16 · value `#212327` 12/16 ngăn bằng divider nét đứt; khối Energy có chip
   `77×24` nền `#8F6250` và thanh `336×42`. Thanh dùng ba gradient theo mức: `#94DF37→#47B321`,
   `#FFDF50→#EDB90E`, `#FF4E4E→#BF3535`;
-- Energy tụt 1%/phút kể cả khi app đóng và chỉ hồi khi cho ăn; food card tiêu một phần, nút `+`
-  đưa về Pet Store vì đó là nơi nhận thêm food bằng Rewarded;
+- Energy tụt 1%/phút kể cả khi app đóng và chỉ hồi khi cho ăn. Pet chưa có record thức ăn dùng
+  thời điểm nhận nuôi làm mốc 100%, không dùng thời điểm UI vừa đọc; khi panel đang mở, ticker
+  cập nhật giá trị mỗi giây để mốc phút mới hiện ngay. Food card tiêu một phần, nút `+` đưa về
+  Pet Store vì đó là nơi nhận thêm food bằng Rewarded;
 - chạm một pet trong scene mở đúng panel của pet đó; pet vẽ trên cùng thắng nên tap không mở
   nhầm con nằm dưới. Title bar đổi thành tên pet khi panel mở;
 - nút music phát `res/raw/bgm_pet_room.ogg` lặp, persist trạng thái và chỉ phát khi màn đang

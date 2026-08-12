@@ -8,7 +8,6 @@ import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
 import com.asianmobile.emojibattery.shimeji.data.model.PetRoomCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetCareRepository
-import com.asianmobile.emojibattery.shimeji.data.repository.PetEnergyRecord
 import com.asianmobile.emojibattery.shimeji.data.repository.PetFoodRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetRoomCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetRoomRepository
@@ -37,6 +36,8 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,6 +45,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -70,6 +72,7 @@ class PetRoomViewModel @Inject constructor(
     private var selectedPetId: Int? = null
     private var isScreenResumed = false
     private var restoreOverlayOnExit = false
+    private var energyRefreshJob: Job? = null
     private var roomPacks: List<PetPack> = emptyList()
     private var downloadingRoomId: Int? = null
 
@@ -121,11 +124,11 @@ class PetRoomViewModel @Inject constructor(
                     )
                 }
                 refreshDetail()
-                // The scene shows exactly the pets the My Pet tab lists. Drawing every installed
-                // pack would put the built-in pack and any pack the catalog cannot describe into
-                // the room, which is what made the room disagree with the roster.
+                // The roster keeps every owned pet so an Inactive pet can be enabled again. The
+                // scene itself follows the same Active/Inactive state as the floating overlay.
+                val activePackKeys = PetRoomRosterPolicy.activePackKeys(roster)
                 roomPacks = packs.filter { pack ->
-                    pack.key in roster.mapTo(mutableSetOf(), PetRoomPetUiState::packKey)
+                    pack.key in activePackKeys
                 }
                 _scene.value = buildScene(roomPacks)
             }
@@ -193,6 +196,7 @@ class PetRoomViewModel @Inject constructor(
      */
     fun onScreenResumed() {
         isScreenResumed = true
+        startEnergyRefresh()
         soundPlayer.prepare()
         if (_uiState.value.isMusicOn) musicPlayer.play()
         if (PetOverlayRuntime.isRunning.value) {
@@ -203,6 +207,8 @@ class PetRoomViewModel @Inject constructor(
 
     fun onScreenPaused() {
         isScreenResumed = false
+        energyRefreshJob?.cancel()
+        energyRefreshJob = null
         musicPlayer.pause()
         if (restoreOverlayOnExit) {
             restoreOverlayOnExit = false
@@ -420,7 +426,7 @@ class PetRoomViewModel @Inject constructor(
         }
         val now = System.currentTimeMillis()
         val record = careRepository.energy.value[petId]
-            ?: PetEnergyRecord(PetEnergyPolicy.INITIAL_ENERGY, now)
+        val adoptedAtMillis = careRepository.adoptedAtMillis.value[petId]
         val preferences = petSettingsRepository.preferences.value
         _uiState.update { state ->
             state.copy(
@@ -433,9 +439,10 @@ class PetRoomViewModel @Inject constructor(
                         Date(careRepository.adoptedAtMillis.value[petId] ?: now)
                     ),
                     thumbnailPath = pet.thumbnailPath,
-                    energyPercent = PetEnergyPolicy.currentEnergy(
-                        storedPercent = record.percent,
-                        updatedAtMillis = record.updatedAtMillis,
+                    energyPercent = PetEnergyPolicy.resolvedEnergy(
+                        storedPercent = record?.percent,
+                        updatedAtMillis = record?.updatedAtMillis,
+                        adoptedAtMillis = adoptedAtMillis,
                         nowMillis = now
                     ),
                     isOnScreen = PetRoomOnScreenPolicy.isOnScreen(
@@ -458,6 +465,16 @@ class PetRoomViewModel @Inject constructor(
                 portions = inventory[food.id] ?: 0
             )
         }
+
+    private fun startEnergyRefresh() {
+        energyRefreshJob?.cancel()
+        energyRefreshJob = viewModelScope.launch {
+            while (isActive) {
+                if (selectedPetId != null) refreshDetail()
+                delay(ENERGY_REFRESH_INTERVAL_MILLIS)
+            }
+        }
+    }
 
     private suspend fun applyCatalog(snapshot: PetRoomCatalogSnapshot, selectedRoomId: Int) {
         val activeRoom = snapshot.resolveRoom(selectedRoomId)
@@ -536,6 +553,7 @@ class PetRoomViewModel @Inject constructor(
 
     private companion object {
         const val MAX_SCENE_PETS = 6
+        const val ENERGY_REFRESH_INTERVAL_MILLIS = 1_000L
         val ADOPTED_ON_FORMAT = SimpleDateFormat("dd.MM.yyyy", Locale.US)
     }
 }

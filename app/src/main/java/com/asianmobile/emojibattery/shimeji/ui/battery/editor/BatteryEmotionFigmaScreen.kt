@@ -65,7 +65,6 @@ internal fun BatteryEmotionFigmaScreen(
     onOpenGroup: (String) -> Unit,
     onSelectEmotion: (BatteryDecorationEntry) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
-    onDone: () -> Unit,
     showEmbeddedPreview: Boolean = true
 ) {
     val selectedGroup = state.emotionGroups.firstOrNull { it.key == groupKey }
@@ -110,7 +109,6 @@ internal fun BatteryEmotionFigmaScreen(
                     onConfig = onConfig,
                     modifier = Modifier.weight(1f)
                 )
-                BatteryEditorDonePanel(onDone = onDone)
             }
         }
     }

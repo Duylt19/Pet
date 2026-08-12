@@ -9,9 +9,9 @@ cũ, nhưng không còn screen quản lý công khai.
 
 | Setting | Giá trị hợp lệ | Runtime |
 |---|---|---|
-| Pack key / slot | đúng 12 installed/built-in key | missing/invalid fallback Orange Cat |
-| Count | Mixed 1–12 | một window/state machine mỗi pet |
-| Mixed visibility / slot | on/off; giữ tối thiểu một slot visible | hide/show đúng window và speech ngay |
+| Pack key / slot | đúng 12 installed key hoặc rỗng | missing/invalid được normalize về rỗng; không cấp pet mặc định |
+| Count | Mixed 0–12 | một window/state machine cho mỗi pet active; 0 không tạo overlay |
+| Mixed visibility / slot | on/off độc lập, kể cả pet cuối cùng | hide/show đúng window và speech ngay; tất cả off thì service dừng |
 | Swarm pack | một installed/built-in key riêng | lặp cùng pack cho mọi instance |
 | Swarm count | 1–12; low-RAM tối đa 6 | add/remove phần chênh lệch ngay, không reset pet cũ |
 | Swarm base size/speed | cùng range và step của pet thường | cập nhật runtime ngay, không rebuild Swarm |
@@ -27,7 +27,8 @@ cũ, nhưng không còn screen quản lý công khai.
 
 Legacy `pet_selected_pack_key` được materialize thành 12 slot cùng giá trị khi
 `pet_selected_pack_keys` chưa tồn tại hoặc chưa đủ record, sau đó mỗi slot được update
-độc lập. Key legacy tiếp tục mirror slot 1 để migration tương thích. Remove từ UI shift
+độc lập. Giá trị debug cũ `builtin.orange-cat@1` được migrate thành slot rỗng và
+`petCount=0`; key legacy tiếp tục mirror slot 1 để migration tương thích. Remove từ UI shift
 toàn bộ profile/position của slot sau lên trước và append một profile mặc định ở cuối.
 
 Size/speed/messages/custom messages/interaction global cũ là migration fallback: khi key
@@ -53,7 +54,10 @@ các pet; add/remove dùng position list đã được repository materialize th
 
 - Pet Store sở hữu browse, Rewarded/Premium unlock, download/verify và bước đặt tên.
 - My Pet Room sở hữu roster đã mở khóa, xóa pet, cho ăn, background phòng và toggle
-  `Pet on screen` cho từng pet.
+  `Active`/`Inactive` cho từng pet.
+- Scene My Pet Room chỉ dựng các pack `Active`; card `Inactive` vẫn ở roster để user bật lại.
+- Switch global ở Shimeji Pets không xin quyền hoặc khởi động service khi roster không có pet
+  active; UI giữ trạng thái off và không hiển thị pet mặc định.
 - Mine chỉ còn app/support; không còn Pet Catalog, Pet Detail, Customize Pet hoặc Pet Swarm editor.
 
 Speed là mức năng lượng di chuyển, không còn là hệ số tua đều cho mọi animation. `WALK`,

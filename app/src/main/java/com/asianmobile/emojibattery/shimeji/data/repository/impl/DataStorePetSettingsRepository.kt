@@ -9,8 +9,6 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.asianmobile.emojibattery.shimeji.data.local.dataStore
-import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_PET_COUNT
-import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SELECTED_PACK_KEY
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SIZE_PERCENT
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SPEED_PERCENT
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_SWARM_COUNT
@@ -98,10 +96,7 @@ class DataStorePetSettingsRepository @Inject constructor(
     }
 
     override fun updateSelectedPacks(keys: List<String>) = edit { preferences ->
-        writeSelectedPackKeys(
-            preferences,
-            keys.ifEmpty { listOf(DEFAULT_SELECTED_PACK_KEY) }
-        )
+        writeSelectedPackKeys(preferences, keys)
     }
 
     override fun enablePackInFirstFreeSlot(key: String) {
@@ -150,13 +145,12 @@ class DataStorePetSettingsRepository @Inject constructor(
 
     override fun removePet(slotIndex: Int) = edit { preferences ->
         val current = decode(preferences)
-        if (current.petCount <= 1 || slotIndex !in 0 until current.petCount) return@edit
+        if (current.petCount <= 0 || slotIndex !in 0 until current.petCount) return@edit
         val shiftedSlots = current.petSlots.toMutableList().apply {
             removeAt(slotIndex)
             add(PetSlotPreferences())
         }
         val nextPetCount = current.petCount - 1
-        val visibleSlots = policy.ensureMixedPetVisible(shiftedSlots, nextPetCount)
         val shiftedPositions = current.lastPositions.toMutableList().apply {
             removeAt(slotIndex)
             add(null)
@@ -168,7 +162,7 @@ class DataStorePetSettingsRepository @Inject constructor(
                 add(0)
             }
             .map { it + 1 }
-        writePetSlots(preferences, visibleSlots)
+        writePetSlots(preferences, shiftedSlots)
         preferences[LAST_POSITIONS] = positionCodec.encode(shiftedPositions)
         preferences[POSITION_RESET_REVISIONS] =
             slotValueCodec.encodeInts(invalidatedRevisions)
@@ -178,7 +172,6 @@ class DataStorePetSettingsRepository @Inject constructor(
     override fun updateSlotEnabled(slotIndex: Int, enabled: Boolean) = edit { preferences ->
         val current = decode(preferences)
         if (slotIndex !in 0 until current.petCount) return@edit
-        if (!enabled && current.enabledMixedPetCount <= 1) return@edit
         val slots = current.petSlots.toMutableList()
         slots[slotIndex] = slots[slotIndex].copy(isEnabled = enabled)
         writePetSlots(preferences, slots)
@@ -327,18 +320,18 @@ class DataStorePetSettingsRepository @Inject constructor(
             preferences[SLOT_INTERACTION_ENABLED].orEmpty(),
             legacyInteraction
         )
-        val enabledValues = slotValueCodec.decodeBooleans(
-            preferences[SLOT_ENABLED].orEmpty(),
-            true
-        )
+        val enabledValues = preferences[SLOT_ENABLED]?.let { encoded ->
+            slotValueCodec.decodeBooleans(encoded, false)
+        } ?: packKeys.map(String::isNotBlank)
         val legacyResetRevision = preferences[POSITION_RESET_REVISION] ?: 0
         val resetRevisions = slotValueCodec.decodeInts(
             preferences[POSITION_RESET_REVISIONS].orEmpty(),
             legacyResetRevision
         )
-        val petCount = policy.sanitizePetCount(
-            preferences[PET_COUNT] ?: DEFAULT_PET_COUNT,
-            performanceBudget.maxPets
+        val petCount = policy.configuredPetCount(
+            packKeys = packKeys,
+            storedCount = preferences[PET_COUNT],
+            maxPets = performanceBudget.maxPets
         )
         val decodedSlots = List(MAX_PET_SLOTS) { slotIndex ->
             PetSlotPreferences(
@@ -352,7 +345,7 @@ class DataStorePetSettingsRepository @Inject constructor(
             )
         }
         return PetPreferences(
-            petSlots = policy.ensureMixedPetVisible(decodedSlots, petCount),
+            petSlots = decodedSlots,
             petCount = petCount,
             mixedRewardUnlockedSlotCount = policy.sanitizeMixedRewardUnlockedSlotCount(
                 preferences[MIXED_REWARD_UNLOCKED_SLOT_COUNT] ?: FREE_MIXED_PET_SLOTS
@@ -398,7 +391,7 @@ class DataStorePetSettingsRepository @Inject constructor(
         selectionCodec.materialize(
             selectionCodec.decode(preferences[SELECTED_PACK_KEYS].orEmpty())
                 .ifEmpty {
-                    listOf(preferences[SELECTED_PACK_KEY] ?: DEFAULT_SELECTED_PACK_KEY)
+                    listOf(preferences[SELECTED_PACK_KEY].orEmpty())
                 }
         )
 

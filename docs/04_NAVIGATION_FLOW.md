@@ -10,12 +10,12 @@
 | `intro` | Intro pager | First-run |
 | `permission` | Permission | Route/class được giữ nhưng tạm không nằm trong onboarding; request overlay/notification, có Continue/Skip |
 | `home` | Discover | Tab 1 của Home shell: battery toggle, Battery Troll hero và catalog preview |
-| `search` | Search | Tìm pet hoặc battery theme; pet mở Pet Store, theme mở Status Bar Editor |
+| `search` | Search | Tìm pet hoặc battery theme; pet mở Shimeji Pets, theme mở Status Bar Editor |
 | `favourite_recent` | Favourite & Recent | Favourite battery theme đã lưu; Recent giữ empty state cho tới khi có contract MRU |
 | `grant_permissions` | Grant Permission | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Route/screen được giữ nhưng row vào từ Mine đang tạm ẩn; Back vẫn pop về màn trước khi route được mở trực tiếp. Khác hẳn `permission` (bước onboarding) |
 | `accessibility_how_to_use` | Accessibility How to use | Hướng dẫn bốn bước sau consent và trước Android Accessibility Settings; app bar `exitUntilCollapsed`, CTA cố định dưới đáy |
-| `my_pet` | My Pet Room | Scene phòng in-app + sheet ba tab; Back pop về màn trước, shortcut mở tab Pet Store |
-| `pet_store` | Pet Store | Tab 3 của Home shell: duyệt pet/food, Rewarded/Premium gate, download/verify chỉ để mở khóa |
+| `my_pet` | My Pet Room | Scene phòng in-app + sheet ba tab; Back pop về màn trước, shortcut mở tab Shimeji Pets |
+| `pet_store` | Shimeji Pets | Tab 3 của Home shell: duyệt pet/food, Rewarded/Premium gate, download/verify chỉ để mở khóa |
 | `settings` | Mine | Tab 4 của Home shell: Emoji Battery toggle, shortcuts, app-exclusion sheet, shared pet-settings dialog và app/support hub |
 | `battery_catalog` | Battery Styles | Tab 2 của Home shell: catalog local + category/favorite/Premium gate; editor luôn mở được với preview nhúng |
 | `battery_category/{categoryId}` | Battery category | Child destination từ action More: grid ba cột của category, Back về đúng vị trí Battery Styles |
@@ -36,17 +36,18 @@ Intro ──finish──> Discover Home
 
 Permission (tạm inactive) ──continue/skip──> Discover Home
 
-Home shell tabs: Discover ⇄ Battery Styles ⇄ Pet Store ⇄ Mine/Settings
+Home shell tabs: Discover ⇄ Battery Styles ⇄ Shimeji Pets ⇄ Mine/Settings
 
 Discover ──Emoji Battery toggle(no access)──> Accessibility disclosure ──How to use──> Settings ──back──> enable battery overlay
 Discover ──Battery/Theme/Emoji──> Battery Styles hoặc Customize Status Bar
 Discover ──Search──> Search ──theme──> Customize Status Bar
-Search ──pet──> Pet Store
-Discover ──Pet Store──> Pet Store ──Rewarded/Premium──> Download/verify/unlock ──> bật ở slot Mixed trống đầu tiên
-Discover ──Trending pet──> Pet Store
+Search ──pet──> Shimeji Pets
+Discover ──More Shimeji Pets──> Shimeji Pets
+Discover ──Trending pet──> Rewarded/Premium sheet dùng chung ──> Download/verify/unlock ──> bật ở slot Mixed trống đầu tiên
+Discover ──Battery theme/icon──> Rewarded/Premium nếu bị khóa ──> Customize Status Bar
 Discover ──Mine──> Mine
-My Pet ──pet card──> detail panel ──Pet on screen──> Pet overlay foreground service
-My Pet ──Add/Food+──> Pet Store
+My Pet ──pet card──> detail panel ──Active/Inactive──> cập nhật Pet overlay foreground service
+My Pet ──Add/Food+──> Shimeji Pets
 Mine ──My Pet──> My Pet
 Mine ──Favourite & Recent──> Favourite & Recent ──favourite theme──> Customize Status Bar
 Mine ──Language──> Language Settings
@@ -62,15 +63,15 @@ Discover/My Pet ──Battery──> Battery Styles ──More──> Battery ca
 Customize Battery Bar ──Apply khi chưa có quyền──> Accessibility disclosure ──How to use──> Settings
   └─ theme ID khởi tạo cả pet + pin; editor có thể mix hai theme khác nhau
 Customize Battery Bar ──locked pet/pin──> Rewarded hoặc Premium ──return──> chọn component
-Customize Battery Bar ──custom icon──> Icon Editor ──Done/Back──> đúng draft và scroll offset của overview
-Customize Battery Bar ──Emotion──> 8 emotion packs ──pack──> 10 emotion styles ──Done──> commit draft
+Customize Battery Bar ──custom icon──> Icon Editor ──chỉnh trực tiếp draft/preview ──Back──> overview
+Customize Battery Bar ──Emotion──> 8 emotion packs ──pack──> 10 emotion styles ──chọn──> cập nhật draft/preview
 Customize Battery Bar ──Apply(service on)──> persist config + accessibility overlay
 ```
 
 Sau khi pet được verify/cài thành công, Pet Store hiển thị unlock-success overlay và chạy
 clip movement `SPECIAL` của chính pack vừa cài (`SPECIAL_2`/thumbnail là fallback), rồi mới
 chuyển sang bước đặt tên khi user chạm Continue. Pet mới được bật atomically ở slot Mixed
-trống đầu tiên để switch `Pet on screen` mặc định ON; flow không đổi cấu hình Swarm và không
+trống đầu tiên với trạng thái `Active`; flow không đổi cấu hình Swarm và không
 thay pet khác nếu toàn bộ roster Mixed đã đầy.
 
 ## Back stack
@@ -94,15 +95,15 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
   editor refresh entitlement và hoàn tất pending component selection khi resume.
 - Mỗi Battery component editor là một destination nằm trên overview và dùng ViewModel của
   overview. Mười editor Airplane/Ringer/Date/Hotspot/Charge/Clock/Animation/Wi-Fi/Signal/
-  Mobile Data dùng preview cố định, Done
-  cố định và state riêng cho từng switch; Clock không còn dùng chung size/màu với Date.
+  Mobile Data dùng preview cố định và state riêng cho từng switch; Clock không còn dùng chung
+  size/màu với Date. Không có CTA Done ở các editor con.
 - Emotion overview và detail cũng dùng ViewModel của `battery_editor/{themeId}` thay vì scope
   theo destination trung gian. Chọn style cập nhật draft/preview; Back từ detail quay về đúng
   danh sách tám pack. Hai route giữ cùng một native collapsible holder/key ở shell nên không
   reload ad khi push/pop detail.
 - Theme selection trong Battery Styles mở editor ngay cả khi chưa có Accessibility. Preview
-  nhúng vẫn hoạt động. Done ở child chỉ commit vào draft overview rồi quay lại; Back ở child
-  rollback về checkpoint lúc mở màn. Chỉ Apply tại overview mới hiện disclosure và persist.
+  nhúng vẫn hoạt động. Mọi chỉnh sửa ở child cập nhật ngay draft chung và preview; Back chỉ pop
+  về overview, không rollback. Chỉ Apply tại overview mới hiện disclosure và persist.
 - Mọi action xin Accessibility trong Discover, Battery Styles, Mine, Status Bar Editor và Grant
   Permissions dùng cùng bottom-sheet disclosure. `Allow` không mở Settings cho tới khi checkbox
   consent được chọn, sau đó đi qua `accessibility_how_to_use`. CTA tại màn hướng dẫn mới mở

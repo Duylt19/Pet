@@ -29,6 +29,18 @@ class PetEnergyPolicyTest {
     }
 
     @Test
+    fun `an unwritten energy record drains from adoption time`() {
+        val energy = PetEnergyPolicy.resolvedEnergy(
+            storedPercent = null,
+            updatedAtMillis = null,
+            adoptedAtMillis = MINUTE,
+            nowMillis = MINUTE + 2 * MINUTE
+        )
+
+        assertEquals(98, energy)
+    }
+
+    @Test
     fun `empties rather than going negative after a long absence`() {
         val energy = PetEnergyPolicy.currentEnergy(
             storedPercent = 40,

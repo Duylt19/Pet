@@ -172,7 +172,6 @@ Shell chung:
 
 - Back;
 - centered title;
-- Done;
 - preview;
 - white card;
 - optional enabled toggle;
@@ -191,8 +190,8 @@ Renderer theo `componentType`:
 | Data label | label 2G–9G, with copy explaining decorative/custom |
 | Wi‑Fi/signal/hotspot/bell/airplane/charging | style grid và visibility behavior |
 
-`Done` chỉ update editor draft. Back khi component dirty hỏi discard nếu parent draft chưa
-nhận thay đổi.
+Mọi control update trực tiếp parent draft và preview. Back chỉ quay về Full Editor và giữ thay
+đổi; dialog discard chỉ thuộc Full Editor khi user rời toàn bộ flow mà chưa Apply.
 
 ## Asset Catalog
 

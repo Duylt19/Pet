@@ -11,7 +11,7 @@ sealed interface PetRoomOnScreenAction {
 }
 
 /**
- * "Pet on screen" maps a room pet onto the overlay slots the settings repository already owns,
+ * Active/Inactive maps a room pet onto the overlay slots the settings repository already owns,
  * so the floating session keeps one source of truth instead of gaining a second roster.
  */
 object PetRoomOnScreenPolicy {

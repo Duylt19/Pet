@@ -212,6 +212,7 @@ class PetStoreViewModel @Inject constructor(
             PetOverlay.stop(context)
             return
         }
+        if (petSettingsRepository.preferences.value.runtimePetCount == 0) return
         if (!PetOverlay.canDraw(context)) {
             viewModelScope.launch { _effects.send(PetStoreEffect.OpenOverlaySettings) }
             return
@@ -233,6 +234,7 @@ class PetStoreViewModel @Inject constructor(
     }
 
     private fun startOverlay() {
+        if (petSettingsRepository.preferences.value.runtimePetCount == 0) return
         when (PetOverlay.start(context)) {
             PetOverlayStartResult.START_REQUESTED -> Unit
             PetOverlayStartResult.PERMISSION_REQUIRED -> viewModelScope.launch {

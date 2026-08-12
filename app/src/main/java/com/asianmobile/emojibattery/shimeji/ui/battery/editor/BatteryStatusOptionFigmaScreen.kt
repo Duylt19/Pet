@@ -85,7 +85,6 @@ internal fun BatteryStatusOptionFigmaScreen(
     page: BatteryEditorPage,
     onBack: () -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
-    onDone: () -> Unit,
     showEmbeddedPreview: Boolean = true
 ) {
     val config = state.config
@@ -226,7 +225,6 @@ internal fun BatteryStatusOptionFigmaScreen(
                     else -> Unit
                 }
             }
-            BatteryEditorDonePanel(onDone = onDone)
         }
     }
 

@@ -9,6 +9,9 @@ class PetPreferencesTest {
         val preferences = PetPreferences()
 
         assertEquals(12, preferences.petSlots.size)
+        assertEquals(0, preferences.petCount)
+        assertEquals(0, preferences.runtimePetCount)
+        assertEquals(true, preferences.petSlots.all { it.packKey.isBlank() && !it.isEnabled })
         assertEquals(3, preferences.mixedRewardUnlockedSlotCount)
         assertEquals(12, MAX_PET_SLOTS)
         assertEquals(3, FREE_MIXED_PET_SLOTS)
@@ -29,11 +32,8 @@ class PetPreferencesTest {
     }
 
     @Test
-    fun `empty selection falls back to built in pet`() {
-        assertEquals(
-            DEFAULT_SELECTED_PACK_KEY,
-            PetPreferences(petSlots = emptyList()).packKeyForSlot(0)
-        )
+    fun `empty selection stays empty`() {
+        assertEquals("", PetPreferences(petSlots = emptyList()).packKeyForSlot(0))
     }
 
     @Test

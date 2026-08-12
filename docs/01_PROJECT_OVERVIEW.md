@@ -29,7 +29,7 @@ release capability này còn bị chặn bởi asset/policy/device verification.
 - Language onboarding + language settings.
 - Intro/onboarding pages.
 - Permission UX cho overlay special access và notification permission, có Skip.
-- Discover, Battery, Pet Store và Mine là bốn tab của Home shell. Pet Store sở hữu unlock;
+- Discover, Battery, Shimeji Pets và Mine là bốn tab của Home shell. Shimeji Pets sở hữu unlock;
   My Pet Room sở hữu roster, food, room background và toggle pet nổi theo từng pet.
 - Language/share/rate/feedback/version nằm ở Mine; không còn Catalog/Detail/Customize/Swarm
   UI màu xanh cũ.

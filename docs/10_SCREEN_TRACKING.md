@@ -17,7 +17,7 @@
 | Search | `search` |
 | Favourite & Recent | `favourite_recent` |
 | My Pet | `my_pet` |
-| Pet Store | `pet_store` |
+| Shimeji Pets | `pet_store` |
 | Battery styles | `battery_catalog` |
 | Battery category | `battery_category` |
 | Customize status bar overview | `battery_editor` |
