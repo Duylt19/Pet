@@ -27,7 +27,10 @@ class BatteryPreviewLayoutTest {
             val layout = batteryPreviewLayout(
                 config = BatteryStatusConfig(
                     showDateTime = true,
-                    showAnimation = true
+                    showAnimation = true,
+                    showEmotion = true,
+                    showData = true,
+                    showHotspot = true
                 ),
                 availableWidthDp = 120f,
                 hasEmoji = true,

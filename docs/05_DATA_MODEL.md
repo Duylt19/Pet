@@ -43,7 +43,7 @@
 | `pet_position_reset_revision` | Int | Legacy global fallback cho migration |
 | `battery_status_enabled` | Boolean | User đã Apply battery overlay |
 | `battery_status_has_applied` | Boolean | Đã từng Apply; điều khiển card Current độc lập với trạng thái bật/tắt |
-| `battery_status_selected_theme_id` | Int | Style gốc/legacy theme ID; `0` là built-in |
+| `battery_status_selected_theme_id` | Int | Style gốc/legacy theme ID; mặc định user-visible là `1`, `0` chỉ là renderer fallback |
 | `battery_status_selected_battery_theme_id` | Int | Theme ID cung cấp asset pin |
 | `battery_status_selected_emoji_theme_id` | Int | Theme ID cung cấp asset pet/emoji |
 | `battery_status_display_mode` | String enum | Cover hoặc below-system-bar |
@@ -141,7 +141,7 @@ không được restore sau process death/reboot.
 - `BatteryCatalogSnapshot` gồm category/theme, 38 background, 20 emotion server trong
   nhóm Classic + 80 emotion server thuộc tám pack mới, 26 animation,
   entitlement, remote/cache/local asset path, distribution status và typed error;
-  built-in theme ID `0` luôn có.
+  built-in theme ID `0` luôn có như fallback runtime nhưng không xuất hiện trong picker.
 - Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và dimension cho
   PNG/GIF/Lottie.
   `HybridBatteryCatalogRepository` đọc cache trước, revalidate private GitHub catalog
@@ -171,6 +171,10 @@ không được restore sau process death/reboot.
 - Catalog theme là cặp mặc định. Khi mở editor từ một theme, `selectedThemeId`,
   `selectedBatteryThemeId` và `selectedEmojiThemeId` cùng nhận ID đó. Sau đó hai component
   ID được chỉnh độc lập; runtime vẽ pet chồng lên pin tại cùng trailing anchor.
+- Fresh config chọn theme server ID `1` cho cả Battery và Emoji. DataStore/draft debug cũ
+  lưu ID `0` được normalize sang `1`; khi catalog chưa sẵn sàng renderer vẫn dùng built-in
+  ID `0` nội bộ. Emotion, Animation, nhãn Mobile Data và Hotspot mặc định tắt để status bar
+  ban đầu không bị chồng nhiều decoration.
 - Migration không cần DataStore transaction riêng: nếu hai key component chưa tồn tại,
   repository dùng `battery_status_selected_theme_id` cho cả hai. Draft schema 1 cũng được
   decode theo quy tắc này; schema 2 persist rõ hai ID, schema 3 thêm các status icon style

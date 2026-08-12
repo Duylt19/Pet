@@ -8,6 +8,8 @@ Vertical slice hiện đã có trong source:
 - Catalog local chuẩn hóa, Search từ Home header, category, Free/Premium, favorite và built-in
   fallback. Landing nhóm theme thật thành carousel theo category; More mở grid ba cột của
   category bằng ID canonical. Built-in ID `0` chỉ là runtime fallback, không phải catalog item.
+- Fresh config chọn theme catalog ID `1` cho cả Battery và Emoji. ID `0` từ DataStore/draft
+  debug cũ được migrate sang `1`; Emotion, Animation, Mobile Data label và Hotspot mặc định tắt.
 - Category name được pipeline gắn emoji theo slug trong khi giữ nguyên ID/slug canonical;
   `categoryName` của tất cả theme được sinh cùng display name để parser validation khớp.
 - Promo Customize Status Bar và DIY FAB mở editor bằng config hiện tại. Theme đang áp dụng được
@@ -173,7 +175,8 @@ Picker Animation stream GIF theo viewport và materialize Lottie server thành f
 khi tạo composition. Cách này giữ đủ item cuối danh sách, tránh chạy đồng thời toàn bộ 26
 animation và vẫn có fallback nhìn thấy được khi asset đang tải hoặc không parse được.
 
-`BatterySettingsPolicy` clamp toàn bộ geometry và loại ID âm để dữ liệu DataStore lỗi
+`BatterySettingsPolicy` clamp toàn bộ geometry, normalize theme user-visible tối thiểu về ID
+`1` và loại ID âm để dữ liệu DataStore lỗi
 không đi thẳng vào `WindowManager`. DataStore cũ chưa có hai component ID sẽ migrate cả
 hai từ `selectedThemeId`. `BatteryDraftCodec` schema 2 lưu bản nháp versioned trong
 `SavedStateHandle` và vẫn decode schema 1 theo cùng quy tắc; DataStore chỉ thay đổi khi

@@ -27,6 +27,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_HORIZONTA
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_ICON_SIZE_DP
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_EMOTION_ID
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_PRIVACY_RESERVE_DP
+import com.asianmobile.emojibattery.shimeji.data.model.normalizeSelectableBatteryThemeId
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
@@ -186,17 +187,20 @@ class DataStoreBatterySettingsRepository @Inject constructor(
     private fun decode(preferences: Preferences): BatteryStatusConfig {
         val defaults = BatteryStatusConfig()
         val enabled = preferences[ENABLED] ?: false
-        val selectedThemeId = preferences[SELECTED_THEME_ID]
-            ?: BUILT_IN_BATTERY_THEME_ID
+        val selectedThemeId = normalizeSelectableBatteryThemeId(
+            preferences[SELECTED_THEME_ID] ?: defaults.selectedThemeId
+        )
         return policy.sanitize(
             BatteryStatusConfig(
                 enabled = enabled,
                 hasApplied = resolveBatteryHasApplied(preferences[HAS_APPLIED], enabled),
                 selectedThemeId = selectedThemeId,
-                selectedBatteryThemeId = preferences[SELECTED_BATTERY_THEME_ID]
-                    ?: selectedThemeId,
-                selectedEmojiThemeId = preferences[SELECTED_EMOJI_THEME_ID]
-                    ?: selectedThemeId,
+                selectedBatteryThemeId = normalizeSelectableBatteryThemeId(
+                    preferences[SELECTED_BATTERY_THEME_ID] ?: selectedThemeId
+                ),
+                selectedEmojiThemeId = normalizeSelectableBatteryThemeId(
+                    preferences[SELECTED_EMOJI_THEME_ID] ?: selectedThemeId
+                ),
                 displayMode = preferences[DISPLAY_MODE]
                     ?.let { value ->
                         BatteryStatusDisplayMode.entries.firstOrNull { it.name == value }
@@ -206,7 +210,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                 showPercentage = preferences[SHOW_PERCENTAGE] ?: true,
                 backgroundDecorationId = preferences[BACKGROUND_DECORATION_ID]
                     ?: DEFAULT_BATTERY_BACKGROUND_ID,
-                showEmotion = preferences[SHOW_EMOTION] ?: true,
+                showEmotion = preferences[SHOW_EMOTION] ?: defaults.showEmotion,
                 emotionDecorationId = preferences[EMOTION_DECORATION_ID]
                     ?: DEFAULT_BATTERY_EMOTION_ID,
                 showAnimation = preferences[SHOW_ANIMATION] ?: defaults.showAnimation,
