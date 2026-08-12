@@ -23,39 +23,37 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   Banner chỉ dispose khi đi khỏi toàn bộ nhóm này. Settings khi chạy trong shell
   không render thêm native ad để tránh hai placement xếp chồng. Hero Battery Troll là asset
   presentational; slot promo thấp hơn dùng banner SDK `discover_inline`.
-- Grant Permissions dùng lại native placement `screen_permission` của màn Permission onboarding,
-  ghim cố định dưới danh sách quyền chứ không cuộn theo. Không thêm placement mới vì hai màn
-  cùng một ngữ cảnh xin quyền. Mọi row rời sang màn hệ thống đều tắt `needShowOpenAds` trong
+- Grant Permissions dùng native placement `screen_grant_permissions`, ghim cố định dưới danh
+  sách quyền chứ không cuộn theo. Mọi row rời sang màn hệ thống đều tắt `needShowOpenAds` trong
   `openSettings()` — quay lại sau khi vừa cấp quyền mà ăn app-open ad là trả giá cho đúng hành
   động mình vừa yêu cầu user làm. Đặt trong helper chứ không ở từng call site để không có row
   nào lọt.
-- Accessibility disclosure trên mọi feature cũng dùng placement `screen_permission` với
-  `AdType.HEIGHT_222` và `instanceKey=accessibility_disclosure`. Native nằm sát đáy sheet theo
+- Accessibility disclosure trên mọi feature dùng placement `dialog_accessibility_disclosure`
+  với `AdType.HEIGHT_222`. Native nằm sát đáy sheet theo
   Figma; nếu placement không load/đã Premium thì slot collapse. Sau consent, màn How to use không
   thêm placement mới; CTA Settings dùng cùng launcher contract tắt App Open Ad trước khi rời app.
-- Overlay disclosure dùng cùng placement `screen_permission`, template `AdType.HEIGHT_222` và
-  `instanceKey=overlay_permission_disclosure`. Sheet dùng chung cho onboarding Permission, Grant
+- Overlay disclosure dùng placement `dialog_overlay_permission`, template `AdType.HEIGHT_222`.
+  Sheet dùng chung cho onboarding Permission, Grant
   Permissions và switch Pet Store; native collapse theo policy chung khi không có ad/Premium.
-- Battery Troll không tạo placement mới. Grid theme dùng lại banner inline
-  `battery_category_inline` cho slot 328×50 ở đầu lưới, và reward sheet dùng lại
-  `RewardOfferSheet` + native `screen_permission`/`HEIGHT_222` y như Battery Styles. Lý do là
-  hai màn cùng một ngữ cảnh (chọn theme pin, mở khoá bằng rewarded), nên tách placement chỉ
-  làm loãng báo cáo chứ không đổi hành vi. Nếu sau này cần đo riêng doanh thu Troll thì thêm
-  `BANNER_BATTERY_TROLL_INLINE` trong `:ads` — đó là một product decision, không phải refactor.
+- Battery Troll không tạo thêm banner placement. Grid theme dùng lại banner inline
+  `battery_category_inline` cho slot 328×50 ở đầu lưới; reward sheet dùng
+  `RewardOfferSheet` + native riêng `dialog_battery_troll_reward`/`HEIGHT_222` để Remote Config
+  và báo cáo native không lẫn với Battery Styles. Nếu sau này cần đo riêng banner Troll thì thêm
+  `BANNER_BATTERY_TROLL_INLINE` trong `:ads` — đó là một product decision.
   Màn Customize không có native ad: giống Full/Component Editor, không chen quảng cáo vào
   thao tác tinh chỉnh và không che preview/Apply.
-- Search tái sử dụng native placement `screen_home` ở đáy màn hình và banner SDK
+- Search dùng native placement `screen_search` ở đáy màn hình và banner SDK
   `search_inline` trong content theo Figma; cả hai vẫn tuân theo remote key, frequency/ad-free
   policy và failure fallback chung của module ads.
-- Battery landing tái sử dụng native placement `screen_home` với template `HEIGHT_150` sau
+- Battery landing dùng native placement `screen_battery_catalog` với template `HEIGHT_150` sau
   section đầu tiên. Category detail có banner inline `battery_category_inline`; creative do SDK
   tải, không đóng gói ảnh quảng cáo mẫu trong Figma. Bottom banner vẫn là holder của shell.
 - Customize Status Bar và các child library dùng holder shell nằm ngoài NavHost. Overview và
   Battery/Emoji/Theme giữ banner `battery_editor_bottom`; Emotion group/detail cùng mười editor
   option thay slot đó bằng một native `COLLAPSE_SMALL` dùng chung, nên không double-render ad và Apply luôn reflow
   ngay phía trên chiều cao collapsed/expanded thực tế.
-- Native editor dùng chung `instanceKey=battery_editor_collapsible`. Khi vào Emotion lần đầu,
-  holder load/bind theo placement `screen_home`; push group → detail giữ cùng Compose slot và
+- Native editor dùng placement `screen_battery_editor`. Khi vào Emotion lần đầu, holder
+  load/bind; push group → detail giữ cùng Compose slot và
   Activity ViewModel nên không request lại. Rời flow rồi quay lại ưu tiên rebind cache còn hợp lệ.
 - Các banner inline `discover_inline`, `search_inline` và `battery_category_inline` có ViewModel
   key riêng để không dùng chung ad object với banner shell. Holder căn giữa creative SDK 320×50,
@@ -67,8 +65,7 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Theme `FREE`, theme đã reward-unlock và toàn bộ theme của user Premium mở trực tiếp.
 - Chạm theme `PREMIUM` chưa mở sẽ hiện bottom sheet với preview, hai action `Unlimited` và
   `Get it free`, cùng native `HEIGHT_222`; đóng bằng Back hoặc chạm scrim khi chưa loading.
-  Sheet dùng placement `screen_home` nhưng có `instanceKey` riêng để không tranh ad object
-  với native `HEIGHT_150` của landing.
+  Sheet dùng placement `dialog_battery_reward`, tách khỏi native `HEIGHT_150` của landing.
 - Rewarded chỉ được preload khi free user còn ít nhất một theme Premium chưa mở; Premium
   không tạo ad request. `EARNED` persist đúng theme ID vào
   `battery_status_reward_unlocked_theme_ids` rồi tự mở editor; `DISMISSED` giữ dialog và
@@ -91,8 +88,11 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Tránh chồng App Open Ads với interstitial/premium/full-screen flow.
 - Không thêm placement mới nếu chưa có product/UX decision.
 - Battery Rewarded là unlock trigger đã được owner duyệt. Editor có bottom banner đã được
-  Figma chỉ định; reward sheet và discard-changes sheet dùng native `HEIGHT_222`, mỗi sheet có
-  `instanceKey` riêng để không dùng chung ad object với placement khác trong cùng back stack.
+  Figma chỉ định; reward sheet dùng `dialog_battery_reward`, còn discard-changes sheet dùng
+  `dialog_battery_discard`; cả hai có template native `HEIGHT_222` riêng.
+- Pet Store reward sheet dùng `dialog_pet_reward`; Food reward sheet dùng `dialog_food_reward`.
+  Favourite & Recent dùng `screen_favourite_recent`. Mỗi placement có Remote Config và string
+  ad-unit riêng dù production ID hiện có thể đang dùng chung trong AdMob.
 - Banner wrapper phát trạng thái visibility cho placement inline cần layout động. Battery More
   xóa toàn bộ grid item khi banner không đủ điều kiện hoặc load fail; không giữ placeholder 50dp.
 - Screen code phải là constant trong ads config, không hardcode rải rác.

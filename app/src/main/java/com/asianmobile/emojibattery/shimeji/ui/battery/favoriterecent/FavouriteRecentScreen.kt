@@ -52,8 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
-import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_FAVOURITE_RECENT
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomePremiumButton
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
@@ -169,8 +168,7 @@ internal fun FavouriteRecentContent(
 
         if (showNativeAd) {
             NativeAdInternal(
-                screenCode = SCREEN_HOME,
-                adTypeOverride = AdType.HEIGHT_222,
+                screenCode = SCREEN_FAVOURITE_RECENT,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()

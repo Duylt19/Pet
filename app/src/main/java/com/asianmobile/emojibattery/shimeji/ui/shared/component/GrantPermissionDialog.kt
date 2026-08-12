@@ -43,8 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_PERMISSION
-import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
+import com.asianmobile.emojibattery.shimeji.ads.config.DIALOG_ACCESSIBILITY_DISCLOSURE
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
@@ -282,9 +281,7 @@ internal const val ACCESSIBILITY_ALLOW_DISABLED_ALPHA = 0.3f
 @Composable
 private fun AccessibilityDisclosureNativeAd() {
     NativeAdInternal(
-        screenCode = SCREEN_PERMISSION,
-        instanceKey = "accessibility_disclosure",
-        adTypeOverride = AdType.HEIGHT_222,
+        screenCode = DIALOG_ACCESSIBILITY_DISCLOSURE,
         modifier = Modifier.fillMaxWidth()
     )
 }

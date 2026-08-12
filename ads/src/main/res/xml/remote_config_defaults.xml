@@ -105,48 +105,63 @@
     </entry>
 
     <entry>
-        <key>is_show_native_home</key>
+        <key>is_show_native_grant_permissions</key>
         <value>true</value>
     </entry>
 
     <entry>
-        <key>is_show_native_downloads</key>
+        <key>is_show_native_accessibility_disclosure</key>
         <value>true</value>
     </entry>
 
     <entry>
-        <key>is_show_native_bookmarks</key>
+        <key>is_show_native_overlay_permission</key>
         <value>true</value>
     </entry>
 
     <entry>
-        <key>is_show_native_history</key>
+        <key>is_show_native_search</key>
         <value>true</value>
     </entry>
 
     <entry>
-        <key>is_show_native_setting</key>
+        <key>is_show_native_favourite_recent</key>
         <value>true</value>
     </entry>
 
     <entry>
-        <key>is_show_native_set_default</key>
+        <key>is_show_native_battery_catalog</key>
         <value>true</value>
     </entry>
+
     <entry>
-        <key>is_show_native_files_photos</key>
+        <key>is_show_native_battery_editor</key>
         <value>true</value>
     </entry>
+
     <entry>
-        <key>is_show_native_files_videos</key>
+        <key>is_show_native_battery_reward</key>
         <value>true</value>
     </entry>
+
     <entry>
-        <key>is_show_native_files_audio</key>
+        <key>is_show_native_battery_discard</key>
         <value>true</value>
     </entry>
+
     <entry>
-        <key>is_show_native_files_documents</key>
+        <key>is_show_native_pet_reward</key>
         <value>true</value>
     </entry>
+
+    <entry>
+        <key>is_show_native_food_reward</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_battery_troll_reward</key>
+        <value>true</value>
+    </entry>
+
 </defaultsMap>

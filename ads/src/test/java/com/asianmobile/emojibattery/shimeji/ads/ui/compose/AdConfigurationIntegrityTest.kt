@@ -44,7 +44,18 @@ class AdConfigurationIntegrityTest {
             "id_private_browser_native_intro",
             "id_private_browser_native_intro_second",
             "id_private_browser_native_permission",
-            "id_private_browser_native_home",
+            "id_private_browser_native_grant_permissions",
+            "id_private_browser_native_accessibility_disclosure",
+            "id_private_browser_native_overlay_permission",
+            "id_private_browser_native_search",
+            "id_private_browser_native_favourite_recent",
+            "id_private_browser_native_battery_catalog",
+            "id_private_browser_native_battery_editor",
+            "id_private_browser_native_battery_reward",
+            "id_private_browser_native_battery_discard",
+            "id_private_browser_native_pet_reward",
+            "id_private_browser_native_food_reward",
+            "id_private_browser_native_battery_troll_reward",
             "id_private_browser_native_exit_dialog"
         )
 

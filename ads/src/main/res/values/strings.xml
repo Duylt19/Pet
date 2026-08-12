@@ -23,17 +23,19 @@
     <string name="id_private_browser_native_intro" translatable="false">ca-app-pub-7219501334514633/3128991098</string>
     <string name="id_private_browser_native_intro_second" translatable="false">ca-app-pub-7219501334514633/3128991098</string>
     <string name="id_private_browser_native_permission" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
-    <string name="id_private_browser_native_home" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
-    <string name="id_private_browser_native_downloads" translatable="false">ca-app-pub-7219501334514633/4521963817</string>
-    <string name="id_private_browser_native_bookmarks" translatable="false">ca-app-pub-7219501334514633/1324954831</string>
-    <string name="id_private_browser_native_history" translatable="false">ca-app-pub-7219501334514633/1895800473</string>
-    <string name="id_private_browser_native_setting" translatable="false">ca-app-pub-7219501334514633/8269637135</string>
-    <string name="id_private_browser_native_set_default" translatable="false">ca-app-pub-7219501334514633/6956555469</string>
+    <string name="id_private_browser_native_grant_permissions" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
+    <string name="id_private_browser_native_accessibility_disclosure" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
+    <string name="id_private_browser_native_overlay_permission" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
+    <string name="id_private_browser_native_search" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_private_browser_native_favourite_recent" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_private_browser_native_battery_catalog" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_private_browser_native_battery_editor" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_private_browser_native_battery_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_private_browser_native_battery_discard" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_private_browser_native_pet_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_private_browser_native_food_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_private_browser_native_battery_troll_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
     <string name="id_private_browser_native_exit_dialog" translatable="false">ca-app-pub-7219501334514633/1512657095</string>
-    <string name="id_private_browser_native_files_photos" translatable="false">ca-app-pub-7219501334514633/9199575425</string>
-    <string name="id_private_browser_native_files_videos" translatable="false">ca-app-pub-7219501334514633/5563582742</string>
-    <string name="id_private_browser_native_files_audio" translatable="false">ca-app-pub-7219501334514633/9662729990</string>
-    <string name="id_private_browser_native_files_documents" translatable="false">ca-app-pub-7219501334514633/3947248740</string>
 
     <!-- Full intro native ads -->
     <string name="id_private_browser_native_full_intro" translatable="false"></string>

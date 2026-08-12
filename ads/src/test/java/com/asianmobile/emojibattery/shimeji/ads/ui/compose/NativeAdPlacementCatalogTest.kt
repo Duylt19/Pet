@@ -1,22 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.ads.ui.compose
 
-import com.asianmobile.emojibattery.shimeji.ads.config.DIALOG_EXIT_APP
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BOOKMARKS
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_DOWNLOADS
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_FILES_AUDIO
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_FILES_DOCUMENTS
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_FILES_PHOTOS
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_FILES_VIDEOS
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HISTORY
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_INTRO
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_INTRO_FULL
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_INTRO_SECOND
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_LANGUAGE
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_LANGUAGE_SECOND
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_PERMISSION
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_SET_DEFAULT
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_SETTING
+import com.asianmobile.emojibattery.shimeji.ads.config.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -25,38 +9,41 @@ import org.junit.Test
 class NativeAdPlacementCatalogTest {
 
     @Test
-    fun `screen codes and remote config keys are unique`() {
+    fun `screen codes remote config keys and ad unit resources are unique`() {
         val placements = NativeAdPlacementCatalog.all
 
         assertEquals(placements.size, placements.map { it.screenCode }.toSet().size)
         assertEquals(placements.size, placements.map { it.remoteConfigKey }.toSet().size)
+        assertEquals(placements.size, placements.map { it.adUnitResId }.toSet().size)
     }
 
     @Test
-    fun `all private browser native placements are registered`() {
+    fun `all native placements are registered`() {
         val expectedScreenCodes = setOf(
             SCREEN_LANGUAGE,
             SCREEN_LANGUAGE_SECOND,
             SCREEN_INTRO,
             SCREEN_INTRO_SECOND,
-            SCREEN_INTRO_FULL,
             SCREEN_PERMISSION,
-            SCREEN_SET_DEFAULT,
-            SCREEN_HOME,
-            SCREEN_DOWNLOADS,
-            SCREEN_BOOKMARKS,
-            SCREEN_HISTORY,
-            SCREEN_SETTING,
-            DIALOG_EXIT_APP,
-            SCREEN_FILES_PHOTOS,
-            SCREEN_FILES_VIDEOS,
-            SCREEN_FILES_AUDIO,
-            SCREEN_FILES_DOCUMENTS
+            SCREEN_GRANT_PERMISSIONS,
+            DIALOG_ACCESSIBILITY_DISCLOSURE,
+            DIALOG_OVERLAY_PERMISSION,
+            SCREEN_SEARCH,
+            SCREEN_FAVOURITE_RECENT,
+            SCREEN_BATTERY_CATALOG,
+            SCREEN_BATTERY_EDITOR,
+            DIALOG_BATTERY_REWARD,
+            DIALOG_BATTERY_DISCARD,
+            DIALOG_PET_REWARD,
+            DIALOG_FOOD_REWARD,
+            DIALOG_BATTERY_TROLL_REWARD,
+            DIALOG_EXIT_APP
         )
 
-        expectedScreenCodes.forEach { screenCode ->
-            assertNotNull(screenCode, NativeAdPlacementCatalog.find(screenCode))
-        }
+        assertEquals(
+            expectedScreenCodes,
+            NativeAdPlacementCatalog.all.map { it.screenCode }.toSet()
+        )
     }
 
     @Test
@@ -70,22 +57,6 @@ class NativeAdPlacementCatalogTest {
     }
 
     @Test
-    fun `bookmarks placement uses inline item layout`() {
-        assertEquals(
-            AdType.ITEM,
-            NativeAdPlacementCatalog.find(SCREEN_BOOKMARKS)?.adType
-        )
-    }
-
-    @Test
-    fun `history placement uses inline item layout`() {
-        assertEquals(
-            AdType.ITEM,
-            NativeAdPlacementCatalog.find(SCREEN_HISTORY)?.adType
-        )
-    }
-
-    @Test
     fun `intro pages use independently configurable string resources`() {
         val firstPage = NativeAdPlacementCatalog.find(SCREEN_INTRO)
         val secondPage = NativeAdPlacementCatalog.find(SCREEN_INTRO_SECOND)
@@ -94,4 +65,28 @@ class NativeAdPlacementCatalogTest {
         assertNotNull(secondPage)
         assertTrue(firstPage?.adUnitResId != secondPage?.adUnitResId)
     }
+
+    @Test
+    fun `feature placements keep their designed native layouts`() {
+        assertEquals(AdType.HEIGHT_150, placementType(SCREEN_BATTERY_CATALOG))
+        assertEquals(AdType.COLLAPSE_SMALL, placementType(SCREEN_BATTERY_EDITOR))
+
+        setOf(
+            SCREEN_GRANT_PERMISSIONS,
+            DIALOG_ACCESSIBILITY_DISCLOSURE,
+            DIALOG_OVERLAY_PERMISSION,
+            SCREEN_SEARCH,
+            SCREEN_FAVOURITE_RECENT,
+            DIALOG_BATTERY_REWARD,
+            DIALOG_BATTERY_DISCARD,
+            DIALOG_PET_REWARD,
+            DIALOG_FOOD_REWARD,
+            DIALOG_BATTERY_TROLL_REWARD
+        ).forEach { screenCode ->
+            assertEquals(screenCode, AdType.HEIGHT_222, placementType(screenCode))
+        }
+    }
+
+    private fun placementType(screenCode: String): AdType? =
+        NativeAdPlacementCatalog.find(screenCode)?.adType
 }

@@ -2,40 +2,7 @@ package com.asianmobile.emojibattery.shimeji.ads.ui.compose
 
 import androidx.annotation.StringRes
 import com.asianmobile.emojibattery.shimeji.ads.R
-import com.asianmobile.emojibattery.shimeji.ads.config.DIALOG_EXIT_APP
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_BOOKMARKS
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_DOWNLOADS
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_EXIT_DIALOG
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_FILES_AUDIO
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_FILES_DOCUMENTS
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_FILES_PHOTOS
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_FILES_VIDEOS
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_HOME
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_HISTORY
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_INTRO
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_INTRO_FULL
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_INTRO_SECOND
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_LANGUAGE
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_LANGUAGE_SECOND
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_PERMISSION
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_SET_DEFAULT
-import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_SETTING
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_DOWNLOADS
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BOOKMARKS
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_FILES_AUDIO
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_FILES_DOCUMENTS
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_FILES_PHOTOS
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_FILES_VIDEOS
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HISTORY
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_INTRO
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_INTRO_FULL
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_INTRO_SECOND
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_LANGUAGE
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_LANGUAGE_SECOND
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_PERMISSION
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_SET_DEFAULT
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_SETTING
+import com.asianmobile.emojibattery.shimeji.ads.config.*
 
 internal data class NativeAdPlacement(
     val screenCode: String,
@@ -71,82 +38,88 @@ internal object NativeAdPlacementCatalog {
             R.string.id_private_browser_native_intro_second
         ),
         NativeAdPlacement(
-            SCREEN_INTRO_FULL,
-            AdType.HEIGHT_222,
-            IS_SHOW_NATIVE_INTRO_FULL,
-            R.string.id_private_browser_native_full_intro
-        ),
-        NativeAdPlacement(
             SCREEN_PERMISSION,
             AdType.HEIGHT_222,
             IS_SHOW_NATIVE_PERMISSION,
             R.string.id_private_browser_native_permission
         ),
         NativeAdPlacement(
-            SCREEN_SET_DEFAULT,
+            SCREEN_GRANT_PERMISSIONS,
             AdType.HEIGHT_222,
-            IS_SHOW_NATIVE_SET_DEFAULT,
-            R.string.id_private_browser_native_set_default
+            IS_SHOW_NATIVE_GRANT_PERMISSIONS,
+            R.string.id_private_browser_native_grant_permissions
         ),
         NativeAdPlacement(
-            SCREEN_HOME,
+            DIALOG_ACCESSIBILITY_DISCLOSURE,
             AdType.HEIGHT_222,
-            IS_SHOW_NATIVE_HOME,
-            R.string.id_private_browser_native_home
+            IS_SHOW_NATIVE_ACCESSIBILITY_DISCLOSURE,
+            R.string.id_private_browser_native_accessibility_disclosure
         ),
         NativeAdPlacement(
-            SCREEN_DOWNLOADS,
-            AdType.ITEM,
-            IS_SHOW_NATIVE_DOWNLOADS,
-            R.string.id_private_browser_native_downloads
-        ),
-        NativeAdPlacement(
-            SCREEN_BOOKMARKS,
-            AdType.ITEM,
-            IS_SHOW_NATIVE_BOOKMARKS,
-            R.string.id_private_browser_native_bookmarks
-        ),
-        NativeAdPlacement(
-            SCREEN_HISTORY,
-            AdType.ITEM,
-            IS_SHOW_NATIVE_HISTORY,
-            R.string.id_private_browser_native_history
-        ),
-        NativeAdPlacement(
-            SCREEN_SETTING,
+            DIALOG_OVERLAY_PERMISSION,
             AdType.HEIGHT_222,
-            IS_SHOW_NATIVE_SETTING,
-            R.string.id_private_browser_native_setting
+            IS_SHOW_NATIVE_OVERLAY_PERMISSION,
+            R.string.id_private_browser_native_overlay_permission
+        ),
+        NativeAdPlacement(
+            SCREEN_SEARCH,
+            AdType.HEIGHT_222,
+            IS_SHOW_NATIVE_SEARCH,
+            R.string.id_private_browser_native_search
+        ),
+        NativeAdPlacement(
+            SCREEN_FAVOURITE_RECENT,
+            AdType.HEIGHT_222,
+            IS_SHOW_NATIVE_FAVOURITE_RECENT,
+            R.string.id_private_browser_native_favourite_recent
+        ),
+        NativeAdPlacement(
+            SCREEN_BATTERY_CATALOG,
+            AdType.HEIGHT_150,
+            IS_SHOW_NATIVE_BATTERY_CATALOG,
+            R.string.id_private_browser_native_battery_catalog
+        ),
+        NativeAdPlacement(
+            SCREEN_BATTERY_EDITOR,
+            AdType.COLLAPSE_SMALL,
+            IS_SHOW_NATIVE_BATTERY_EDITOR,
+            R.string.id_private_browser_native_battery_editor
+        ),
+        NativeAdPlacement(
+            DIALOG_BATTERY_REWARD,
+            AdType.HEIGHT_222,
+            IS_SHOW_NATIVE_BATTERY_REWARD,
+            R.string.id_private_browser_native_battery_reward
+        ),
+        NativeAdPlacement(
+            DIALOG_BATTERY_DISCARD,
+            AdType.HEIGHT_222,
+            IS_SHOW_NATIVE_BATTERY_DISCARD,
+            R.string.id_private_browser_native_battery_discard
+        ),
+        NativeAdPlacement(
+            DIALOG_PET_REWARD,
+            AdType.HEIGHT_222,
+            IS_SHOW_NATIVE_PET_REWARD,
+            R.string.id_private_browser_native_pet_reward
+        ),
+        NativeAdPlacement(
+            DIALOG_FOOD_REWARD,
+            AdType.HEIGHT_222,
+            IS_SHOW_NATIVE_FOOD_REWARD,
+            R.string.id_private_browser_native_food_reward
+        ),
+        NativeAdPlacement(
+            DIALOG_BATTERY_TROLL_REWARD,
+            AdType.HEIGHT_222,
+            IS_SHOW_NATIVE_BATTERY_TROLL_REWARD,
+            R.string.id_private_browser_native_battery_troll_reward
         ),
         NativeAdPlacement(
             DIALOG_EXIT_APP,
             AdType.HEIGHT_222,
             IS_SHOW_NATIVE_EXIT_DIALOG,
             R.string.id_private_browser_native_exit_dialog
-        ),
-        NativeAdPlacement(
-            SCREEN_FILES_PHOTOS,
-            AdType.COLLAPSE_MEDIUM,
-            IS_SHOW_NATIVE_FILES_PHOTOS,
-            R.string.id_private_browser_native_files_photos
-        ),
-        NativeAdPlacement(
-            SCREEN_FILES_VIDEOS,
-            AdType.COLLAPSE_MEDIUM,
-            IS_SHOW_NATIVE_FILES_VIDEOS,
-            R.string.id_private_browser_native_files_videos
-        ),
-        NativeAdPlacement(
-            SCREEN_FILES_AUDIO,
-            AdType.COLLAPSE_MEDIUM,
-            IS_SHOW_NATIVE_FILES_AUDIO,
-            R.string.id_private_browser_native_files_audio
-        ),
-        NativeAdPlacement(
-            SCREEN_FILES_DOCUMENTS,
-            AdType.COLLAPSE_MEDIUM,
-            IS_SHOW_NATIVE_FILES_DOCUMENTS,
-            R.string.id_private_browser_native_files_documents
         )
     )
 

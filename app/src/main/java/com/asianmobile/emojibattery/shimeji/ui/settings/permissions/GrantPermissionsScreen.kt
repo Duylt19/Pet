@@ -65,7 +65,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_PERMISSION
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_GRANT_PERMISSIONS
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
@@ -253,7 +253,7 @@ internal fun GrantPermissionsContent(
         bottomBar = {
             // Pinned outside the list so it stays put while the permission cards scroll.
             NativeAdInternal(
-                screenCode = SCREEN_PERMISSION,
+                screenCode = SCREEN_GRANT_PERMISSIONS,
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()

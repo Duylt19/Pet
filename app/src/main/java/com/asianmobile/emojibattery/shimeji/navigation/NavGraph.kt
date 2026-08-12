@@ -24,11 +24,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
-import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_BATTERY_EDITOR_BOTTOM
 import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_HOME_BOTTOM
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_EDITOR
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeBottomNavigation
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeTab
@@ -763,12 +762,10 @@ fun AppNavGraph(
         }
         if (shouldShowBatteryEditorCollapsibleNative) {
             NativeAdInternal(
-                screenCode = SCREEN_HOME,
+                screenCode = SCREEN_BATTERY_EDITOR,
                 // One Activity-scoped holder is intentionally shared by option, Emotion list and
                 // Emotion detail routes. Moving list -> detail rebinds the same ad instead of
                 // issuing a second request.
-                instanceKey = "battery_editor_collapsible",
-                adTypeOverride = AdType.COLLAPSE_SMALL,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.navigationBarsPadding())

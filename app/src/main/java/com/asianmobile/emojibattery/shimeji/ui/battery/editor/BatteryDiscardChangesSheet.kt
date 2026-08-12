@@ -16,8 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
-import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
+import com.asianmobile.emojibattery.shimeji.ads.config.DIALOG_BATTERY_DISCARD
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardGradientButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOfferSheet
@@ -98,9 +97,7 @@ internal fun BatteryDiscardChangesSheetContent(
 @Composable
 private fun BatteryDiscardNativeAd() {
     NativeAdInternal(
-        screenCode = SCREEN_HOME,
-        instanceKey = "battery_editor_discard",
-        adTypeOverride = AdType.HEIGHT_222,
+        screenCode = DIALOG_BATTERY_DISCARD,
         modifier = Modifier.fillMaxWidth()
     )
 }

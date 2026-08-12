@@ -51,8 +51,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
-import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
+import com.asianmobile.emojibattery.shimeji.ads.config.DIALOG_BATTERY_REWARD
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_CATALOG
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
@@ -607,9 +607,7 @@ internal fun BatteryRewardUnlockSheetContent(
 @Composable
 private fun BatteryRewardNativeAd() {
     NativeAdInternal(
-        screenCode = SCREEN_HOME,
-        instanceKey = "battery_reward_sheet",
-        adTypeOverride = AdType.HEIGHT_222,
+        screenCode = DIALOG_BATTERY_REWARD,
         modifier = Modifier.fillMaxWidth()
     )
 }
@@ -617,8 +615,7 @@ private fun BatteryRewardNativeAd() {
 @Composable
 private fun BatteryCatalogNativeAd() {
     NativeAdInternal(
-        screenCode = SCREEN_HOME,
-        adTypeOverride = AdType.HEIGHT_150,
+        screenCode = SCREEN_BATTERY_CATALOG,
         modifier = Modifier.fillMaxWidth()
     )
 }

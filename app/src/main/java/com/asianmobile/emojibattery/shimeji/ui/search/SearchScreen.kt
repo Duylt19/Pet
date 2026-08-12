@@ -73,7 +73,7 @@ import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_SEARCH_INLINE
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_SEARCH
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
@@ -180,7 +180,7 @@ private fun SearchContent(
         }
 
         NativeAdInternal(
-            screenCode = SCREEN_HOME,
+            screenCode = SCREEN_SEARCH,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()

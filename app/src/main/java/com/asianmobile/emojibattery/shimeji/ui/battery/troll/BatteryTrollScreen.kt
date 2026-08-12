@@ -66,8 +66,7 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_BATTERY_CATEGORY_INLINE
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
-import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
+import com.asianmobile.emojibattery.shimeji.ads.config.DIALOG_BATTERY_TROLL_REWARD
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
@@ -473,9 +472,7 @@ private fun BatteryTrollInlineBannerAd() {
 @Composable
 private fun BatteryTrollRewardNativeAd() {
     NativeAdInternal(
-        screenCode = SCREEN_HOME,
-        instanceKey = "battery_troll_reward_sheet",
-        adTypeOverride = AdType.HEIGHT_222,
+        screenCode = DIALOG_BATTERY_TROLL_REWARD,
         modifier = Modifier.fillMaxWidth()
     )
 }

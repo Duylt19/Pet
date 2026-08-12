@@ -101,8 +101,8 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieConstants
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
-import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
-import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
+import com.asianmobile.emojibattery.shimeji.ads.config.DIALOG_FOOD_REWARD
+import com.asianmobile.emojibattery.shimeji.ads.config.DIALOG_PET_REWARD
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
@@ -919,8 +919,7 @@ internal fun ColumnScope.PetRewardSheetContent(
     }
     if (showNativeAd) {
         NativeAdInternal(
-            screenCode = SCREEN_HOME,
-            adTypeOverride = AdType.HEIGHT_222,
+            screenCode = DIALOG_PET_REWARD,
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -935,7 +934,10 @@ private fun FoodRewardSheet(food: PetStoreFood, onDismiss: () -> Unit, onPremium
             RewardOutlineButton(stringResource(R.string.pet_store_unlimited), onPremium, Modifier.weight(1f), iconRes = R.drawable.img_pet_store_premium_crown)
             RewardGradientButton(stringResource(R.string.pet_store_get_free), onAcquire, Modifier.weight(1f), iconRes = R.drawable.ic_pet_store_reward_video)
         }
-        NativeAdInternal(screenCode = SCREEN_HOME, adTypeOverride = AdType.HEIGHT_222, modifier = Modifier.fillMaxWidth())
+        NativeAdInternal(
+            screenCode = DIALOG_FOOD_REWARD,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
