@@ -12,6 +12,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_EMOTION_GROUPS
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryEmotionGroup
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryMobileDataBadge
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPreviewSystemState
 
 data class BatteryEditorUiState(
     val isInitialized: Boolean = false,
@@ -26,6 +27,7 @@ data class BatteryEditorUiState(
     val emotionGroups: List<BatteryEmotionGroup> = BATTERY_EMOTION_GROUPS,
     val animations: List<BatteryAnimationEntry> = emptyList(),
     val mobileDataBadge: BatteryMobileDataBadge? = null,
+    val systemState: BatteryPreviewSystemState = BatteryPreviewSystemState(),
     val isThemeAvailable: Boolean = true,
     val hasUnsavedChanges: Boolean = false,
     val isPremium: Boolean = false,

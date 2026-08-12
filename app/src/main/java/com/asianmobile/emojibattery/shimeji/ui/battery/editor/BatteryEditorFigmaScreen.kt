@@ -502,7 +502,10 @@ private fun TemplatePickerRow(
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
     ) {
-        items(state.themes, key = { it.id }) { theme ->
+        items(
+            BatteryEditorThemeDisplayPolicy.selectableThemes(state.themes),
+            key = { it.id }
+        ) { theme ->
             val locked = theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
                 !state.isPremium && theme.id !in state.config.rewardUnlockedThemeIds
             val isPending = state.assetSelectionInProgress ==
@@ -664,12 +667,22 @@ internal fun BatteryAnimationAsset(
                 else -> LottieCompositionSpec.File(animation.assetPath)
             }
         }
-        val composition by rememberLottieComposition(spec)
-        LottieAnimation(
-            composition = composition,
-            iterations = LottieConstants.IterateForever,
-            modifier = modifier
-        )
+        val compositionResult = rememberLottieComposition(spec)
+        val composition by compositionResult
+        if (composition != null) {
+            LottieAnimation(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                modifier = modifier
+            )
+        } else {
+            Image(
+                painter = painterResource(R.drawable.img_statusbar_template_animation),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = modifier
+            )
+        }
     } else {
         AsyncImage(
             model = animation.assetPath,
@@ -692,6 +705,13 @@ private fun TemplateOption(
     onClick: () -> Unit
 ) {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp))
+    val fallbackPainter = painterResource(
+        if (component == BatteryThemeComponent.BATTERY) {
+            R.drawable.ic_battery_status
+        } else {
+            R.drawable.img_statusbar_template_emoji
+        }
+    )
     Box(
         modifier = Modifier
             .size(dimensionResource(SdpR.dimen._46sdp))
@@ -720,13 +740,9 @@ private fun TemplateOption(
                 BatteryThemeComponent.BATTERY -> theme.batteryPath
                 BatteryThemeComponent.EMOJI -> theme.emojiPath
             },
-            fallback = painterResource(
-                if (component == BatteryThemeComponent.BATTERY) {
-                    R.drawable.ic_home_battery
-                } else {
-                    R.drawable.ic_notification_pet
-                }
-            ),
+            placeholder = fallbackPainter,
+            fallback = fallbackPainter,
+            error = fallbackPainter,
             contentDescription = null,
             contentScale = ContentScale.Fit,
             modifier = Modifier.size(dimensionResource(SdpR.dimen._38sdp))
@@ -1075,7 +1091,10 @@ private fun StatusBarPicker(
                 } else {
                     state.config.selectedEmojiThemeId
                 }
-                items(state.themes, key = { it.id }) { theme ->
+                items(
+                    BatteryEditorThemeDisplayPolicy.selectableThemes(state.themes),
+                    key = { it.id }
+                ) { theme ->
                     val locked = theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
                         !state.isPremium && theme.id !in state.config.rewardUnlockedThemeIds
                     val isPending = state.assetSelectionInProgress ==
@@ -1104,6 +1123,13 @@ private fun PickerThemeCard(
     onClick: () -> Unit
 ) {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+    val fallbackPainter = painterResource(
+        if (component == BatteryThemeComponent.BATTERY) {
+            R.drawable.ic_battery_status
+        } else {
+            R.drawable.img_statusbar_template_emoji
+        }
+    )
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -1134,13 +1160,9 @@ private fun PickerThemeCard(
             } else {
                 theme.emojiPath
             },
-            fallback = painterResource(
-                if (component == BatteryThemeComponent.BATTERY) {
-                    R.drawable.ic_home_battery
-                } else {
-                    R.drawable.ic_notification_pet
-                }
-            ),
+            placeholder = fallbackPainter,
+            fallback = fallbackPainter,
+            error = fallbackPainter,
             contentDescription = null,
             contentScale = ContentScale.Fit,
             modifier = Modifier.fillMaxSize(PICKER_ART_FRACTION)

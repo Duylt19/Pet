@@ -8,6 +8,8 @@ Vertical slice hiện đã có trong source:
 - Catalog local chuẩn hóa, Search từ Home header, category, Free/Premium, favorite và built-in
   fallback. Landing nhóm theme thật thành carousel theo category; More mở grid ba cột của
   category bằng ID canonical. Built-in ID `0` chỉ là runtime fallback, không phải catalog item.
+- Fresh config chọn theme catalog ID `1` cho cả Battery và Emoji. ID `0` từ DataStore/draft
+  debug cũ được migrate sang `1`; Emotion, Animation, Mobile Data label và Hotspot mặc định tắt.
 - Category name được pipeline gắn emoji theo slug trong khi giữ nguyên ID/slug canonical;
   `categoryName` của tất cả theme được sinh cùng display name để parser validation khớp.
 - Promo Customize Status Bar và DIY FAB mở editor bằng config hiện tại. Theme đang áp dụng được
@@ -22,6 +24,9 @@ Vertical slice hiện đã có trong source:
   chưa cấp hoặc feature đang tắt. Khi status bar thật đã hoạt động, preview nhúng được ẩn. Các
   library Battery/Emoji/Theme là child destination dùng chung ViewModel/draft. Battery/Emoji
   dùng grid ba cột; Theme dùng grid hai cột từ catalog runtime.
+- Preview nhúng theo dõi broadcast pin/sạc, airplane, ringer và hotspot ngay cả khi
+  Accessibility service chưa chạy. Ở overview icon conditional chỉ hiện khi switch bật và trạng
+  thái hệ thống đang active; trong màn option tương ứng policy mô phỏng active để kiểm tra style.
 - Overview có đủ picker Battery/Emoji/Animation, Color/Theme và color picker HSV + opacity.
   Preset, slider và color picker đều cập nhật draft ngay; overlay thật chỉ nhận thay đổi khi
   feature đang bật.
@@ -70,7 +75,7 @@ Home → Battery styles → chọn theme → Customize status bar
                                       ├─ đổi pet, pin, animation, nền và màu trong draft
                                       ├─ feature đang bật → live preview trên status bar
                                       ├─ feature đang tắt → chỉ preview nhúng
-                                      ├─ child Apply → commit draft; child Back → rollback checkpoint
+                                      ├─ child Done → commit draft; child Back → rollback checkpoint
                                       └─ Apply → nếu thiếu quyền thì disclosure → persist + render
 ```
 
@@ -169,7 +174,12 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `favoriteThemeIds` | Favorite local theo theme ID |
 | `rewardUnlockedThemeIds` | Theme Premium đã mở khóa bằng Rewarded trên thiết bị |
 
-`BatterySettingsPolicy` clamp toàn bộ geometry và loại ID âm để dữ liệu DataStore lỗi
+Picker Animation stream GIF theo viewport và materialize Lottie server thành file local trước
+khi tạo composition. Cách này giữ đủ item cuối danh sách, tránh chạy đồng thời toàn bộ 26
+animation và vẫn có fallback nhìn thấy được khi asset đang tải hoặc không parse được.
+
+`BatterySettingsPolicy` clamp toàn bộ geometry, normalize theme user-visible tối thiểu về ID
+`1` và loại ID âm để dữ liệu DataStore lỗi
 không đi thẳng vào `WindowManager`. DataStore cũ chưa có hai component ID sẽ migrate cả
 hai từ `selectedThemeId`. `BatteryDraftCodec` schema 2 lưu bản nháp versioned trong
 `SavedStateHandle` và vẫn decode schema 1 theo cùng quy tắc; DataStore chỉ thay đổi khi

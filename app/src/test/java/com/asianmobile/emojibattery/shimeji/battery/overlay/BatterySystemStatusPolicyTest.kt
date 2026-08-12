@@ -109,6 +109,38 @@ class BatterySystemStatusPolicyTest {
     }
 
     @Test
+    fun previewState_usesActualStateAndOnlySimulatesTheFocusedConditionalComponent() {
+        val actualDevice = BatteryDeviceState(
+            airplaneMode = false,
+            hotspot = BatteryHotspotState.DISABLED,
+            ringer = BatteryRingerState.NORMAL
+        )
+        val actualPower = BatteryPowerState(chargeState = BatteryChargeState.DISCHARGING)
+
+        assertEquals(
+            actualDevice,
+            BatteryPreviewSystemStatePolicy.deviceState(actualDevice, focusedComponent = null)
+        )
+        assertEquals(
+            actualPower,
+            BatteryPreviewSystemStatePolicy.powerState(actualPower, focusedComponent = null)
+        )
+        assertTrue(
+            BatteryPreviewSystemStatePolicy.powerState(
+                actualPower,
+                BatteryStatusComponent.CHARGE
+            ).isCharging
+        )
+        assertEquals(
+            BatteryHotspotState.ENABLED,
+            BatteryPreviewSystemStatePolicy.deviceState(
+                actualDevice,
+                BatteryStatusComponent.HOTSPOT
+            ).hotspot
+        )
+    }
+
+    @Test
     fun icon_policy_covers_every_visible_state() {
         assertEquals(
             "ic_status_wifi_off",

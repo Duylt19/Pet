@@ -703,8 +703,7 @@
     <string name="battery_editor_customize_icon">Customize icon</string>
     <string name="battery_editor_dp_value">%1$ddp</string>
     <string name="battery_color_picker_title">Select color</string>
-    <string name="battery_color_picker_grid">Grid</string>
-    <string name="battery_color_picker_sliders">Sliders</string>
+    <string name="battery_color_picker_close">Close color picker</string>
     <string name="battery_color_picker_opacity">OPACITY</string>
     <string name="battery_color_picker_rgb">RGB</string>
     <string name="battery_color_picker_percentage">%1$d%%</string>

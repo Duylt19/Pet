@@ -34,26 +34,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryEmotionGroup
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomePremiumButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.intuit.sdp.R as SdpR
@@ -68,7 +65,7 @@ internal fun BatteryEmotionFigmaScreen(
     onOpenGroup: (String) -> Unit,
     onSelectEmotion: (BatteryDecorationEntry) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
-    onApply: () -> Unit,
+    onDone: () -> Unit,
     showEmbeddedPreview: Boolean = true
 ) {
     val selectedGroup = state.emotionGroups.firstOrNull { it.key == groupKey }
@@ -113,7 +110,7 @@ internal fun BatteryEmotionFigmaScreen(
                     onConfig = onConfig,
                     modifier = Modifier.weight(1f)
                 )
-                EmotionApplyPanel(onClick = onApply)
+                BatteryEditorDonePanel(onDone = onDone)
             }
         }
     }
@@ -154,35 +151,13 @@ private fun EmotionTopBar(
         )
         Spacer(Modifier.weight(1f))
         if (showSwitch) {
-            EmotionSwitch(checked = checked, onCheckedChange = onCheckedChange)
+            AppSwitch(
+                checked = checked,
+                onCheckedChange = { onCheckedChange(!checked) }
+            )
         } else {
             HomePremiumButton(onClick = onPremium)
         }
-    }
-}
-
-@Composable
-private fun EmotionSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    val trackWidth = dimensionResource(SdpR.dimen._40sdp)
-    val trackHeight = dimensionResource(SdpR.dimen._22sdp)
-    val thumbSize = dimensionResource(SdpR.dimen._17sdp)
-    val inset = (trackHeight - thumbSize) / 2
-    Box(
-        modifier = Modifier
-            .size(trackWidth, trackHeight)
-            .clip(CircleShape)
-            .background(colorResource(if (checked) R.color.colors_FB3675 else R.color.colors_F1E0FF))
-            .semantics { role = Role.Switch }
-            .clickable { onCheckedChange(!checked) },
-        contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart
-    ) {
-        Box(
-            Modifier
-                .padding(horizontal = inset)
-                .size(thumbSize)
-                .clip(CircleShape)
-                .background(colorResource(if (checked) R.color.colors_FFFFFF else R.color.colors_B06EFF))
-        )
     }
 }
 
@@ -371,55 +346,6 @@ private fun EmotionDetailContent(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun EmotionApplyPanel(onClick: () -> Unit) {
-    val shape = RoundedCornerShape(
-        topStart = dimensionResource(SdpR.dimen._18sdp),
-        topEnd = dimensionResource(SdpR.dimen._18sdp)
-    )
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(dimensionResource(SdpR.dimen._4sdp), shape)
-            .clip(shape)
-            .background(colorResource(R.color.colors_FFFFFF))
-            .padding(
-                start = dimensionResource(SdpR.dimen._12sdp),
-                top = dimensionResource(SdpR.dimen._18sdp),
-                end = dimensionResource(SdpR.dimen._12sdp),
-                bottom = dimensionResource(SdpR.dimen._9sdp)
-            )
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._37sdp))
-                .clip(CircleShape)
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(
-                            colorResource(R.color.colors_C95DFF),
-                            colorResource(R.color.colors_FB54BB)
-                        )
-                    )
-                )
-                .semantics { role = Role.Button }
-                .clickable(onClick = onClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = stringResource(R.string.battery_apply),
-                color = colorResource(R.color.colors_FFFFFF),
-                fontFamily = RobotoFontFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
-                lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp,
-                textAlign = TextAlign.Center
-            )
         }
     }
 }

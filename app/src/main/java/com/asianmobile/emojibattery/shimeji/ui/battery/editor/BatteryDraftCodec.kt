@@ -5,6 +5,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFont
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFormat
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusDisplayMode
+import com.asianmobile.emojibattery.shimeji.data.model.normalizeSelectableBatteryThemeId
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -95,18 +96,18 @@ object BatteryDraftCodec {
         return runCatching {
             val json = JSONObject(value)
             if (json.optInt(KEY_SCHEMA, 0) != SCHEMA_VERSION) return@runCatching null
-            val selectedThemeId = json.int("selectedThemeId", fallback.selectedThemeId)
+            val selectedThemeId = normalizeSelectableBatteryThemeId(
+                json.int("selectedThemeId", fallback.selectedThemeId)
+            )
             fallback.copy(
                 enabled = json.boolean("enabled", fallback.enabled),
                 hasApplied = json.boolean("hasApplied", fallback.hasApplied),
                 selectedThemeId = selectedThemeId,
-                selectedBatteryThemeId = json.int(
-                    "selectedBatteryThemeId",
-                    selectedThemeId
+                selectedBatteryThemeId = normalizeSelectableBatteryThemeId(
+                    json.int("selectedBatteryThemeId", selectedThemeId)
                 ),
-                selectedEmojiThemeId = json.int(
-                    "selectedEmojiThemeId",
-                    selectedThemeId
+                selectedEmojiThemeId = normalizeSelectableBatteryThemeId(
+                    json.int("selectedEmojiThemeId", selectedThemeId)
                 ),
                 displayMode = json.enum(
                     "displayMode",
