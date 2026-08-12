@@ -327,6 +327,7 @@ class InterstitialUtil {
             override fun onAdFailedToShowFullScreenContent(fullScreenContentError: FullScreenContentError) {
                 // Called when ad fails to show.
                 Log.e(TAG, "Ad failed to show fullscreen content.")
+                _isShowing = false
                 if (!activity.isDestroyed && !activity.isFinishing) {
                     activity.runOnUiThread {
                         dismissProgressDialog(activity)
@@ -341,6 +342,7 @@ class InterstitialUtil {
                 // Called when ad is shown.
                 Log.d(TAG, "Ad showed fullscreen content.")
                 _isShowing = true
+                AdOverlayState.show()
             }
 
             override fun onAdClicked() {

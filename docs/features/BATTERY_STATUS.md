@@ -43,8 +43,9 @@ Vertical slice hiện đã có trong source:
   slider. Range đối xứng thông thường là 50%–150% chiều cao hệ thống, nên user có thể
   giảm hoặc tăng bar thay vì bị giới hạn tối đa bằng status bar OEM. Cỡ chữ thời gian
   giữ cố định ở 16dp và không thay đổi theo slider chiều cao.
-- Service ẩn khi màn hình khóa, màn hình tắt hoặc portrait không còn hiệu lực; không
-  auto-start sau boot.
+- Service ẩn khi màn hình khóa, màn hình tắt, portrait không còn hiệu lực hoặc App Open /
+  Interstitial / Rewarded fullscreen ad đang hiển thị; sau dismiss/fail overlay chỉ gắn lại nếu
+  các điều kiện config hiện hành vẫn hợp lệ. Service không auto-start sau boot.
 - Mine có bottom sheet `Apps that hide icons` lấy danh sách app launchable qua package
   visibility intent query. Package được chọn chỉ lưu cục bộ; khi Accessibility báo app đó
   đang foreground, service tháo battery window và tự gắn lại khi user chuyển sang app khác.

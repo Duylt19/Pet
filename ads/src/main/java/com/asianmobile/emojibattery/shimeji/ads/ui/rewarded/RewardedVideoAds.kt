@@ -9,6 +9,7 @@ import com.asianmobile.emojibattery.shimeji.ads.tracking.Tracking
 import com.asianmobile.emojibattery.shimeji.ads.tracking.AdFormat
 import com.asianmobile.emojibattery.shimeji.ads.tracking.AdPlacement
 import com.asianmobile.emojibattery.shimeji.ads.utils.AdsIdLogger
+import com.asianmobile.emojibattery.shimeji.ads.utils.AdOverlayState
 import com.asianmobile.emojibattery.shimeji.ads.utils.Utils
 import com.google.android.libraries.ads.mobile.sdk.MobileAds
 import com.google.android.libraries.ads.mobile.sdk.common.AdLoadCallback
@@ -113,6 +114,7 @@ class RewardedVideoAds {
                     rewardedAd = null
                     loadRewardedVideo(activity)
                     _isShowing = false
+                    AdOverlayState.hide()
                     completeResult(
                         activity,
                         if (rewardEarned) {
@@ -128,6 +130,7 @@ class RewardedVideoAds {
                     Log.e(TAG, "Ad failed to show fullscreen content.")
                     rewardedAd = null
                     _isShowing = false
+                    AdOverlayState.hide()
                     completeResult(activity, RewardedAdResult.UNAVAILABLE)
                     loadRewardedVideo(activity)
                 }
@@ -141,6 +144,7 @@ class RewardedVideoAds {
                     // Called when ad is shown.
                     Log.d(TAG, "Ad showed fullscreen content.")
                     _isShowing = true
+                    AdOverlayState.show()
                 }
 
                 override fun onAdPaid(value: AdValue) {
@@ -150,6 +154,7 @@ class RewardedVideoAds {
 
             rewardedAd?.setImmersiveMode(true)
             _isShowing = true
+            AdOverlayState.show()
             rewardedAd?.show(activity) { rewardItem ->
                 val rewardAmount = rewardItem.amount
                 val rewardType = rewardItem.type

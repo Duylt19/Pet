@@ -38,6 +38,7 @@ import androidx.core.app.ServiceCompat
 import com.asianmobile.emojibattery.shimeji.BuildConfig
 import com.asianmobile.emojibattery.shimeji.MainActivity
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.utils.AdOverlayState
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.airbnb.lottie.LottieCompositionFactory
@@ -69,6 +70,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private var layoutParams: WindowManager.LayoutParams? = null
     private var renderJob: Job? = null
     private var observeJob: Job? = null
+    private var adOverlayJob: Job? = null
     private var mobileDataJob: Job? = null
     private var currentConfig = BatteryStatusConfig()
     private var currentBatteryTheme: BatteryThemeEntry? = null
@@ -90,6 +92,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private var receiverRegistered = false
     private var networkCallbackRegistered = false
     private var isForeground = false
+    private var isFullScreenAdShowing = AdOverlayState.isAdShowing.value
     private val networkCapabilities = mutableMapOf<Network, NetworkCapabilities>()
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
@@ -169,6 +172,15 @@ class StatusBarAccessibilityService : AccessibilityService() {
             }
         }
         refreshDeviceState()
+        adOverlayJob?.cancel()
+        adOverlayJob = scope.launch {
+            // The ad SDK owns a separate full-screen window. Detach our Accessibility window
+            // for that whole lifecycle so it cannot cover the creative or its close control.
+            AdOverlayState.isAdShowing.collect { isShowing ->
+                isFullScreenAdShowing = isShowing
+                updateOverlay()
+            }
+        }
         observeJob?.cancel()
         observeJob = scope.launch {
             combine(
@@ -232,6 +244,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
         removeOverlay()
         demoteFromForeground()
         observeJob?.cancel()
+        adOverlayJob?.cancel()
         mobileDataJob?.cancel()
         if (receiverRegistered) {
             try {
@@ -340,16 +353,20 @@ class StatusBarAccessibilityService : AccessibilityService() {
         syncForegroundState()
         val keyguardManager = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
         val powerManager = getSystemService(POWER_SERVICE) as PowerManager
-        if (!BuildConfig.BATTERY_STATUS_ENABLED ||
-            !currentConfig.enabled ||
-            !powerManager.isInteractive ||
-            keyguardManager.isKeyguardLocked ||
-            BatteryAppExclusionPolicy.shouldHide(
-                foregroundPackage = currentForegroundPackage,
-                hiddenAppPackages = hiddenAppPackages
-            ) ||
-            resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT
-        ) {
+        val isExcludedApp = BatteryAppExclusionPolicy.shouldHide(
+            foregroundPackage = currentForegroundPackage,
+            hiddenAppPackages = hiddenAppPackages
+        )
+        val shouldAttach = shouldAttachBatteryStatusOverlay(
+            featureEnabled = BuildConfig.BATTERY_STATUS_ENABLED,
+            configEnabled = currentConfig.enabled,
+            isInteractive = powerManager.isInteractive,
+            isKeyguardLocked = keyguardManager.isKeyguardLocked,
+            isExcludedApp = isExcludedApp,
+            isPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT,
+            isFullScreenAdShowing = isFullScreenAdShowing
+        )
+        if (!shouldAttach) {
             removeOverlay()
             return
         }
@@ -708,6 +725,22 @@ class StatusBarAccessibilityService : AccessibilityService() {
         const val CONTENT_REQUEST_CODE = 2002
     }
 }
+
+internal fun shouldAttachBatteryStatusOverlay(
+    featureEnabled: Boolean,
+    configEnabled: Boolean,
+    isInteractive: Boolean,
+    isKeyguardLocked: Boolean,
+    isExcludedApp: Boolean,
+    isPortrait: Boolean,
+    isFullScreenAdShowing: Boolean
+): Boolean = featureEnabled &&
+    configEnabled &&
+    isInteractive &&
+    !isKeyguardLocked &&
+    !isExcludedApp &&
+    isPortrait &&
+    !isFullScreenAdShowing
 
 internal fun resolveBatteryStatusBarHeightPx(
     barHeightDp: Float,

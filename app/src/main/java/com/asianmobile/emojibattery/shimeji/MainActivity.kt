@@ -29,6 +29,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialLauncherUtil
 import com.asianmobile.emojibattery.shimeji.ads.ui.interstitial.InterstitialUtil
+import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.ads.utils.AdOverlayState
 import com.asianmobile.emojibattery.shimeji.navigation.AppNavGraph
 import com.asianmobile.emojibattery.shimeji.navigation.Routes
@@ -189,6 +190,7 @@ class MainActivity : ComponentActivity() {
             AdOverlayState.isAdShowing.value &&
             !InterstitialUtil.getInstance().isShowing &&
             !InterstitialLauncherUtil.getInstance().isShowing &&
+            !RewardedVideoAds.getInstance().isShowing &&
             InterstitialUtil.getInstance().openAd?.isShowing != true
         ) {
             AdOverlayState.hide()

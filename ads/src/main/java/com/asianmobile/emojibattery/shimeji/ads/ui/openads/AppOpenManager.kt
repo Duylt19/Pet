@@ -116,6 +116,8 @@ class AppOpenManager() : LifecycleObserver {
                         }
 
                         override fun onAdFailedToShowFullScreenContent(fullScreenContentError: FullScreenContentError) {
+                            appOpenAd = null
+                            isShowingAd = false
                             if (!activity.isDestroyed && !activity.isFinishing) {
                                 activity.runOnUiThread {
                                     dismissProgressDialog(activity)
@@ -127,6 +129,7 @@ class AppOpenManager() : LifecycleObserver {
 
                         override fun onAdShowedFullScreenContent() {
                             isShowingAd = true
+                            AdOverlayState.show()
                         }
 
                         override fun onAdClicked() {
@@ -143,6 +146,7 @@ class AppOpenManager() : LifecycleObserver {
                         }
                     }
                 AdOverlayState.show()
+                isShowingAd = true
                 showProgressDialog(activity)
                 val handler = Handler(Looper.getMainLooper())
                 handler.postDelayed({

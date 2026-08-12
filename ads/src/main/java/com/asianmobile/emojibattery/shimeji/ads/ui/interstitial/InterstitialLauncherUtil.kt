@@ -122,6 +122,7 @@ class InterstitialLauncherUtil {
                 // Called when ad fails to show.
                 Log.e(TAG, "Ad failed to show fullscreen content : $fullScreenContentError")
                 admobFullLauncher = null
+                _isShowing = false
                 AdOverlayState.hide()
                 if (!activity.isDestroyed && !activity.isFinishing) {
                     activity.runOnUiThread {
@@ -135,6 +136,7 @@ class InterstitialLauncherUtil {
                 // Called when ad is shown.
                 Log.e(TAG, "Ad showed fullscreen content.")
                 _isShowing = true
+                AdOverlayState.show()
             }
 
             override fun onAdPaid(value: AdValue) {

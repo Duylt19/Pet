@@ -30,6 +30,18 @@ class PermissionDisclosureBottomSheetTest {
     }
 
     @Test
+    fun `swipe immediately below threshold returns the expanded sheet`() {
+        assertFalse(
+            shouldAllowSheetDismiss(
+                isExpanded = true,
+                currentOffsetPx = 299f,
+                expandedOffsetPx = 100f,
+                sheetHeightPx = 800f
+            )
+        )
+    }
+
+    @Test
     fun `explicit dismiss at expanded position remains allowed`() {
         assertTrue(
             shouldAllowSheetDismiss(

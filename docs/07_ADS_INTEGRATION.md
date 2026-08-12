@@ -76,6 +76,10 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Rewarded trả ba trạng thái `EARNED`, `DISMISSED`, `UNAVAILABLE`: `EARNED` và
   `UNAVAILABLE` tiếp tục flow, riêng `DISMISSED` dừng để không thưởng khi user đóng
   quảng cáo sớm.
+- `AdOverlayState` phản ánh lifecycle callback thật của App Open, Interstitial và Rewarded,
+  không tự reset theo timeout. Trong suốt fullscreen ad, MainActivity ẩn content phía sau và
+  `StatusBarAccessibilityService` tháo custom status-bar overlay để overlay không che creative
+  hoặc nút Close; callback dismiss/fail gắn lại overlay theo config hiện hành.
 - Tránh chồng App Open Ads với interstitial/premium/full-screen flow.
 - Không thêm placement mới nếu chưa có product/UX decision.
 - Battery Rewarded là unlock trigger đã được owner duyệt. Editor có bottom banner đã được
