@@ -27,6 +27,7 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.AdType
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_BATTERY_EDITOR_BOTTOM
+import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_HOME_BOTTOM
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_HOME
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeBottomNavigation
@@ -91,7 +92,6 @@ object Routes {
         "$BATTERY_EDITOR_EMOTION_DETAIL/$themeId/$groupKey"
 }
 
-private const val HOME_BOTTOM_BANNER_POSITION = "home_mode_bottom"
 private const val ACCESSIBILITY_HOW_TO_USE_RESULT = "accessibility_how_to_use_result"
 
 @Composable
@@ -738,7 +738,7 @@ fun AppNavGraph(
                 adPosition = if (shouldShowBatteryEditorBottomBanner) {
                     BANNER_BATTERY_EDITOR_BOTTOM
                 } else {
-                    HOME_BOTTOM_BANNER_POSITION
+                    BANNER_HOME_BOTTOM
                 }
             )
             Spacer(Modifier.navigationBarsPadding())

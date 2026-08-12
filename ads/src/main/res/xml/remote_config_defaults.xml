@@ -32,6 +32,11 @@
     </entry>
 
     <entry>
+        <key>is_show_rewarded_ads</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
         <key>is_show_open_ads</key>
         <value>true</value>
     </entry>

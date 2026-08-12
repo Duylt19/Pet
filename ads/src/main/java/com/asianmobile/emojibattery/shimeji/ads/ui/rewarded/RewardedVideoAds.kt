@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import com.asianmobile.emojibattery.shimeji.ads.BuildConfig
 import com.asianmobile.emojibattery.shimeji.ads.R
+import com.asianmobile.emojibattery.shimeji.ads.data.CheckShowAdsUtil
 import com.asianmobile.emojibattery.shimeji.ads.tracking.Tracking
 import com.asianmobile.emojibattery.shimeji.ads.tracking.AdFormat
 import com.asianmobile.emojibattery.shimeji.ads.tracking.AdPlacement
@@ -48,7 +49,7 @@ class RewardedVideoAds {
             isLoading = false
             return
         }
-        if (Utils.checkLimitAd(context)) {
+        if (!CheckShowAdsUtil.checkShowRewardedAd(context)) {
             isLoading = false
             return
         }
@@ -91,7 +92,7 @@ class RewardedVideoAds {
             completeResult(activity, RewardedAdResult.UNAVAILABLE)
             return
         }
-        if (Utils.checkLimitAd(activity)) {
+        if (!CheckShowAdsUtil.checkShowRewardedAd(activity)) {
             completeResult(activity, RewardedAdResult.UNAVAILABLE)
             return
         }

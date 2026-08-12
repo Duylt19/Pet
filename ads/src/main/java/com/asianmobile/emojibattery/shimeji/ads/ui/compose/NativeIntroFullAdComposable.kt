@@ -91,6 +91,11 @@ fun NativeIntroFullAd(
         }
     }
 
+    if (nativeAdId.isBlank()) {
+        onLoadComplete()
+        return
+    }
+
     LaunchedEffect(nativeAdId) {
         if (activity.isDestroyed || activity.isFinishing) return@LaunchedEffect
 

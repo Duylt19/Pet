@@ -49,6 +49,12 @@ object CheckShowAdsUtil {
         return true
     }
 
+    fun checkShowRewardedAd(context: Context): Boolean = shouldShowRewardedAd(
+        isAdsEnabled = SharedPreferencesUtils.getIsEnableAds(context),
+        isRewardedEnabled = isShowRewarded(),
+        isAdLimitReached = Utils.checkLimitAd(context)
+    )
+
     private fun isShowOpenAd(): Boolean = try {
         SafeRemoteConfig.getBoolean(IS_SHOW_OPEN_ADS)
     } catch (e: Exception) { true }
@@ -60,5 +66,14 @@ object CheckShowAdsUtil {
     private fun isShowNative(): Boolean = try {
         SafeRemoteConfig.getBoolean(IS_SHOW_NATIVE)
     } catch (e: Exception) { true }
+
+    private fun isShowRewarded(): Boolean = try {
+        SafeRemoteConfig.getBoolean(IS_SHOW_REWARDED_ADS)
+    } catch (e: Exception) { true }
 }
 
+internal fun shouldShowRewardedAd(
+    isAdsEnabled: Boolean,
+    isRewardedEnabled: Boolean,
+    isAdLimitReached: Boolean
+): Boolean = isAdsEnabled && isRewardedEnabled && !isAdLimitReached

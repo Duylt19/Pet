@@ -21,6 +21,7 @@
     <string name="id_private_browser_native_language" translatable="false">ca-app-pub-7219501334514633/8832175699</string>
     <string name="id_private_browser_native_language_second" translatable="false">ca-app-pub-7219501334514633/8832175699</string>
     <string name="id_private_browser_native_intro" translatable="false">ca-app-pub-7219501334514633/3128991098</string>
+    <string name="id_private_browser_native_intro_second" translatable="false">ca-app-pub-7219501334514633/3128991098</string>
     <string name="id_private_browser_native_permission" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
     <string name="id_private_browser_native_home" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
     <string name="id_private_browser_native_downloads" translatable="false">ca-app-pub-7219501334514633/4521963817</string>

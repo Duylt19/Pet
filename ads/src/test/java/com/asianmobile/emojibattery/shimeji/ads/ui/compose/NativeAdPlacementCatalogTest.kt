@@ -84,4 +84,14 @@ class NativeAdPlacementCatalogTest {
             NativeAdPlacementCatalog.find(SCREEN_HISTORY)?.adType
         )
     }
+
+    @Test
+    fun `intro pages use independently configurable string resources`() {
+        val firstPage = NativeAdPlacementCatalog.find(SCREEN_INTRO)
+        val secondPage = NativeAdPlacementCatalog.find(SCREEN_INTRO_SECOND)
+
+        assertNotNull(firstPage)
+        assertNotNull(secondPage)
+        assertTrue(firstPage?.adUnitResId != secondPage?.adUnitResId)
+    }
 }

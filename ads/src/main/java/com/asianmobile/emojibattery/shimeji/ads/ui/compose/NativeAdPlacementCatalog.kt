@@ -68,7 +68,7 @@ internal object NativeAdPlacementCatalog {
             SCREEN_INTRO_SECOND,
             AdType.HEIGHT_222,
             IS_SHOW_NATIVE_INTRO_SECOND,
-            R.string.id_private_browser_native_intro
+            R.string.id_private_browser_native_intro_second
         ),
         NativeAdPlacement(
             SCREEN_INTRO_FULL,
