@@ -26,9 +26,9 @@ import kotlinx.coroutines.launch
  * owner asked a troll theme to unlock exactly the way a battery style does, so the reward flow,
  * the premium re-check on resume and the pending-unlock bookkeeping are the same shape here.
  *
- * Reward unlocks are held in memory only — `BatteryStatusConfig` persists reward unlocks for the
- * battery catalog (`rewardUnlockedThemeIds`) and has no equivalent field for troll ids, so a
- * rewarded unlock survives the screen but not the process.
+ * Reward unlocks are persisted through `BatterySettingsRepository.unlockTrollByReward` into
+ * `BatteryStatusConfig.rewardUnlockedTrollIds`, so an ad the user already watched is never
+ * charged twice after process death.
  */
 @HiltViewModel
 class BatteryTrollViewModel @Inject constructor(
@@ -129,10 +129,6 @@ class BatteryTrollViewModel @Inject constructor(
             )
         }
         emit(BatteryTrollEffect.OpenCustomize(trollId))
-    }
-
-    fun clearMessage() {
-        _uiState.update { it.copy(message = null) }
     }
 
     private fun reduce(

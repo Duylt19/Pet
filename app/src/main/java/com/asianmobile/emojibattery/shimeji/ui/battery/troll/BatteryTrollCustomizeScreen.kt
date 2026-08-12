@@ -42,6 +42,7 @@ import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollMode
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryDiscardChangesSheet
+import com.asianmobile.emojibattery.shimeji.ui.battery.editor.StatusBarEditorWallpaper
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
@@ -52,8 +53,9 @@ import com.intuit.ssp.R as SspR
  * Battery Troll — Customize (Figma `8315:8232` default, `8359:6992` Real + Random,
  * `8359:7165` discard).
  *
- * Analytics is deliberately not tracked here: `ScreenName` belongs to the agent that owns
- * `utils/AnalyticsHelper.kt`, and this screen must be wired into it when its route lands.
+ * The screen reports itself as [ScreenName.BATTERY_TROLL_CUSTOMIZE]. The bottom banner is not a
+ * parameter: `NavGraph.showBatteryEditorBottomBanner` already covers this route from the shell, so
+ * a slot here would either render nothing or duplicate that banner.
  */
 @Composable
 fun BatteryTrollCustomizeScreen(
@@ -61,8 +63,7 @@ fun BatteryTrollCustomizeScreen(
     viewModel: BatteryTrollCustomizeViewModel = hiltViewModel(),
     accessibilityHowToUseResult: Boolean? = null,
     onAccessibilityHowToUseResultConsumed: () -> Unit = {},
-    onNavigateToAccessibilityHowToUse: () -> Unit = {},
-    bannerAdContent: @Composable () -> Unit = {}
+    onNavigateToAccessibilityHowToUse: () -> Unit = {}
 ) {
     TrackScreenView(ScreenName.BATTERY_TROLL_CUSTOMIZE)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -108,13 +109,14 @@ fun BatteryTrollCustomizeScreen(
         onEditPercentDismiss = viewModel::onEditPercentDismiss,
         onShowPercentageToggle = viewModel::onShowPercentageToggle,
         onPercentSizeChange = viewModel::onPercentSizeChange,
+        onShowEmojiToggle = viewModel::onShowEmojiToggle,
         onRandomArtworkChange = viewModel::onRandomArtworkChange,
         onEmojiLevelChange = viewModel::onEmojiLevelChange,
         onBatteryLevelChange = viewModel::onBatteryLevelChange,
         onDiscardDismiss = viewModel::onDiscardDismiss,
         onDiscardConfirm = viewModel::onDiscardConfirm,
-        onApply = viewModel::apply,
-        bannerAdContent = bannerAdContent
+        onRetry = viewModel::retry,
+        onApply = viewModel::apply
     )
 
     if (showAccessibilityDisclosure) {
@@ -142,16 +144,30 @@ internal fun BatteryTrollCustomizeContent(
     onEditPercentDismiss: () -> Unit,
     onShowPercentageToggle: () -> Unit,
     onPercentSizeChange: (Float) -> Unit,
+    onShowEmojiToggle: () -> Unit,
     onRandomArtworkChange: (Boolean) -> Unit,
     onEmojiLevelChange: (Int) -> Unit,
     onBatteryLevelChange: (Int) -> Unit,
     onDiscardDismiss: () -> Unit,
     onDiscardConfirm: () -> Unit,
-    onApply: () -> Unit,
-    bannerAdContent: @Composable () -> Unit = {}
+    onRetry: () -> Unit,
+    onApply: () -> Unit
 ) {
+    // Random mode rotates the artwork on the status bar, so the previews rotate too instead of
+    // freezing on a pick the bar will ignore.
+    val rotationStep = rememberTrollRotationStep(uiState.draft.randomArtwork)
+    val previewEmojiIndex = if (uiState.draft.randomArtwork) {
+        rotationStep
+    } else {
+        uiState.draft.emojiLevelIndex
+    }
+    val previewBatteryIndex = if (uiState.draft.randomArtwork) {
+        rotationStep
+    } else {
+        uiState.draft.batteryLevelIndex
+    }
     Box(modifier = Modifier.fillMaxSize()) {
-        TrollWallpaper()
+        StatusBarEditorWallpaper()
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -160,8 +176,11 @@ internal fun BatteryTrollCustomizeContent(
             TrollStatusBarPreview(
                 troll = uiState.troll,
                 percent = uiState.previewPercent,
-                emojiLevelIndex = uiState.draft.emojiLevelIndex,
-                batteryLevelIndex = uiState.draft.batteryLevelIndex
+                showPercentage = uiState.draft.showPercentage,
+                percentSizeDp = uiState.draft.percentSizeDp,
+                showEmoji = uiState.draft.showEmoji,
+                emojiLevelIndex = previewEmojiIndex,
+                batteryLevelIndex = previewBatteryIndex
             )
             TrollCustomizeTopBar(
                 title = stringResource(R.string.battery_troll_customize_title),
@@ -179,26 +198,38 @@ internal fun BatteryTrollCustomizeContent(
                     .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
                 verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
             ) {
-                TrollModeGroup(
-                    uiState = uiState,
-                    onModeChange = onModeChange,
-                    onEditPercentRequest = onEditPercentRequest
-                )
-                TrollPercentageGroup(
-                    uiState = uiState,
-                    onShowPercentageToggle = onShowPercentageToggle,
-                    onPercentSizeChange = onPercentSizeChange
-                )
-                TrollEmojiGroup(
-                    uiState = uiState,
-                    onRandomArtworkChange = onRandomArtworkChange,
-                    onEmojiLevelChange = onEmojiLevelChange,
-                    onBatteryLevelChange = onBatteryLevelChange
-                )
+                when {
+                    uiState.isLoading -> TrollCustomizeLoading()
+                    uiState.isUnavailable -> TrollCustomizeUnavailable(
+                        error = uiState.catalogError,
+                        onRetry = onRetry
+                    )
+
+                    else -> {
+                        TrollModeGroup(
+                            uiState = uiState,
+                            emojiLevelIndex = previewEmojiIndex,
+                            batteryLevelIndex = previewBatteryIndex,
+                            onModeChange = onModeChange,
+                            onEditPercentRequest = onEditPercentRequest
+                        )
+                        TrollPercentageGroup(
+                            uiState = uiState,
+                            onShowPercentageToggle = onShowPercentageToggle,
+                            onPercentSizeChange = onPercentSizeChange
+                        )
+                        TrollEmojiGroup(
+                            uiState = uiState,
+                            onShowEmojiToggle = onShowEmojiToggle,
+                            onRandomArtworkChange = onRandomArtworkChange,
+                            onEmojiLevelChange = onEmojiLevelChange,
+                            onBatteryLevelChange = onBatteryLevelChange
+                        )
+                    }
+                }
                 Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
             }
-            TrollApplyPanel(onApply = onApply)
-            bannerAdContent()
+            TrollApplyPanel(onApply = onApply, enabled = uiState.isApplyEnabled)
         }
     }
 
@@ -220,6 +251,8 @@ internal fun BatteryTrollCustomizeContent(
 @Composable
 private fun TrollModeGroup(
     uiState: BatteryTrollCustomizeUiState,
+    emojiLevelIndex: Int,
+    batteryLevelIndex: Int,
     onModeChange: (BatteryTrollMode) -> Unit,
     onEditPercentRequest: () -> Unit
 ) {
@@ -242,6 +275,8 @@ private fun TrollModeGroup(
         ) {
             Column(
                 modifier = Modifier.weight(1f),
+                // Figma `8315:8232` centres the number over the Edit chip in this cell.
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
             ) {
                 Text(
@@ -262,8 +297,9 @@ private fun TrollModeGroup(
             }
             TrollThemePreview(
                 troll = uiState.troll,
-                emojiLevelIndex = uiState.draft.emojiLevelIndex,
-                batteryLevelIndex = uiState.draft.batteryLevelIndex
+                showEmoji = uiState.draft.showEmoji,
+                emojiLevelIndex = emojiLevelIndex,
+                batteryLevelIndex = batteryLevelIndex
             )
         }
     }
@@ -331,6 +367,7 @@ private fun TrollPercentageGroup(
 @Composable
 private fun TrollEmojiGroup(
     uiState: BatteryTrollCustomizeUiState,
+    onShowEmojiToggle: () -> Unit,
     onRandomArtworkChange: (Boolean) -> Unit,
     onEmojiLevelChange: (Int) -> Unit,
     onBatteryLevelChange: (Int) -> Unit
@@ -384,11 +421,16 @@ private fun TrollEmojiGroup(
             selectedIndex = uiState.draft.emojiLevelIndex,
             enabled = uiState.isArtworkPickerEnabled,
             onSelect = onEmojiLevelChange,
+            // Off keeps the troll running with its battery shell and faked percentage but drops
+            // the character, which is exactly what `BatteryTrollAssetPolicy` does with
+            // `BatteryStatusConfig.trollShowEmoji`. The level tiles dim with it because a level
+            // for artwork nobody draws is not a choice.
+            tilesEnabled = uiState.draft.showEmoji,
             trailingSwitch = {
-                // Figma shows this switch on in every frame and never shows an off state, and the
-                // draft has no field for it — so it stays a read-only marker until the owner says
-                // what turning it off should do.
-                AppSwitch(checked = true, onCheckedChange = {}, interactive = false)
+                AppSwitch(
+                    checked = uiState.draft.showEmoji,
+                    onCheckedChange = onShowEmojiToggle
+                )
             }
         )
         TrollArtworkBlock(

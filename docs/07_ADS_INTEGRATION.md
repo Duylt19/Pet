@@ -41,7 +41,11 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
   và báo cáo native không lẫn với Battery Styles. Nếu sau này cần đo riêng banner Troll thì thêm
   `BANNER_BATTERY_TROLL_INLINE` trong `:ads` — đó là một product decision.
   Màn Customize không có native ad: giống Full/Component Editor, không chen quảng cáo vào
-  thao tác tinh chỉnh và không che preview/Apply.
+  thao tác tinh chỉnh và không che preview/Apply. Nó dùng chung banner đáy
+  `battery_editor_bottom` do shell sở hữu (`showBatteryEditorBottomBanner` nhận cả route
+  `battery_troll_customize/*`), đúng như Figma vẽ banner collapsed 50px dưới nút Apply.
+  Grid theme thì nằm trong `showHomeBottomBanner` nên giữ banner shell của Home. Hai predicate
+  loại trừ nhau — có test chặn để một màn không render hai banner chồng nhau.
 - Search dùng native placement `screen_search` ở đáy màn hình và banner SDK
   `search_inline` trong content theo Figma; cả hai vẫn tuân theo remote key, frequency/ad-free
   policy và failure fallback chung của module ads.

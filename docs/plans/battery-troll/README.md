@@ -3,15 +3,29 @@
 Trạng thái: **ĐÃ TRIỂN KHAI.** Server commit `6b44e78` (branch `agent/battery-troll`, chưa
 push). App: 550 unit test xanh, compile + screenshot-test compile pass.
 
-Còn treo, cần owner quyết trước khi phát hành:
+Sau vòng review đối kháng và đợt fix, trạng thái:
 
-| # | Việc | Vì sao còn treo |
+| # | Việc | Trạng thái |
 |---|---|---|
-| 1 | **Screenshot golden chưa sinh.** | Theo CLAUDE.md, golden chỉ được refresh sau khi UI đã được so với Figma bằng mắt người. Chạy `./gradlew updateDebugScreenshotTest` sau khi bạn duyệt. |
-| 2 | **Dialog nhập phần trăm là do agent tự dựng.** | Figma không có frame nào cho nó. Đang theo style `PetRoomRemoveDialog`, giới hạn 0–999, chỉ nhận chữ số. Cần bạn duyệt hoặc cấp Figma. |
-| 3 | **Switch ở nhóm `Emoji` chưa có ngữ nghĩa.** | Figma vẽ nó luôn ở trạng thái bật, không có state tắt, và draft không có field nào để ghi. Hiện render read-only. Chọn một trong hai: thêm field `showEmoji` vào draft, hoặc bỏ switch khỏi design. |
-| 4 | **Server chưa push.** | `distributionStatus = REVIEW_REQUIRED` nên release chưa nhận. Push + merge `master` là hành động phát hành. |
-| 5 | **Bản quyền.** | 6/10 theme là IP, và 4 trong số đó đang nằm sau paywall. |
+| 1 | Screenshot golden | **Đã sinh và đã so với Figma.** `validateDebugScreenshotTest` 77/77 pass. |
+| 2 | Dialog nhập phần trăm | Vẫn là thiết kế tự dựng vì Figma không có frame. Giới hạn 0–999, chỉ nhận chữ số. Cần owner duyệt hoặc cấp Figma. |
+| 3 | Switch nhóm `Emoji` | **Đã giải quyết**: điều khiển `trollShowEmoji`, tắt thì nhân vật biến mất khỏi cả preview lẫn status bar. |
+| 4 | Server chưa push | Vẫn `REVIEW_REQUIRED`. Push + merge `master` là hành động phát hành. |
+| 5 | Bản quyền | Chưa đổi. 6/10 theme là IP, 4 trong số đó nằm sau paywall. |
+
+### Ghi chú vận hành: screenshot test flaky
+
+`RateAppDialogScreenshotTest` thỉnh thoảng chết với
+`Resources_Delegate.initSystem called twice before disposeSystem` — lỗi teardown của
+Layoutlib, không phải sai lệch ảnh. Nó lộ ra theo tổng tải render của cả suite chứ không theo
+một test cụ thể, và không tái hiện đều: cùng một cây mã có lượt fail rồi ba lượt liền pass.
+
+Đã giảm tải bằng cách hạ preview màn Customize từ `heightDp = 1148` (chiều cao full-scroll của
+frame Figma) xuống `800` — đúng khung nhìn thật của điện thoại, và màn này vốn cuộn được. Đánh
+đổi: golden không phủ hai hàng picker Emoji/Battery ở nửa dưới. Đừng nâng lại 1148: đã đo,
+1000 và 1148 đều làm tỉ lệ fail tăng rõ rệt.
+
+Nếu gặp lại, chạy lại lệnh trước khi đi tìm lỗi UI.
 
 Nguồn: Figma `hjefC57z0ysLDHdP60VqMK`
 — UI section `8102:2545` (cụm frame ở `y=1998`), data section `8465:6119`.

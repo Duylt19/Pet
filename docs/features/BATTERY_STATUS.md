@@ -339,6 +339,32 @@ Giới hạn hiện tại:
   `dataType` cũ chỉ còn để decode tương thích draft/DataStore v1.
 - Không có boot receiver và không tự hướng user quay lại Settings nếu họ disable service.
 
+## Battery Troll
+
+Battery Troll là **một chế độ của chính service này**, không phải overlay hay activity riêng.
+Đọc mục này trước khi sửa `StatusBarAccessibilityService` hoặc `BatteryStatusBarView`.
+
+- **Chỉ con số bị làm giả.** `trollMode = FAKE` đổi chuỗi phần trăm sang `trollFakePercent`
+  (0–999). `powerState.level` vẫn `coerceIn(0, 100)` và vẫn điều khiển độ đầy icon pin.
+  Tách hai thứ này là lý do 999% là trò đùa chứ không phải bug render. Layout được đo lại mỗi
+  `render()` (`cachedLayout = null`) nên chuỗi ba chữ số không phá cơ chế rớt component
+  theo priority.
+- **Artwork.** `trollThemeId != 0` thì emoji và pin lấy từ `BatteryTrollCatalogRepository`
+  theo chỉ số mức (0 = đầy … 4 = cạn) thay vì từ battery catalog. Quyết định chọn path nằm ở
+  `BatteryTrollAssetPolicy` (Kotlin thuần, có test); service chỉ materialize/decode.
+- **Fallback bắt buộc.** Theme đã chọn nhưng vắng mặt trong catalog — chưa tải, offline, hoặc
+  bị gỡ trên server — phải rơi về theme battery thường. Không bao giờ để slot trống vì lý do này.
+- **`trollShowEmoji = false` là một lựa chọn, không phải lỗi.** Lúc đó troll vẫn sở hữu slot
+  emoji và cố ý để trống. Không được fallback về emoji của theme thường, nếu không nhân vật cũ
+  sẽ lặng lẽ quay lại đúng lúc user vừa tắt nó đi.
+- **Random artwork** tự hẹn lần vẽ kế tiếp đúng mốc chu kỳ (`BATTERY_TROLL_RANDOM_ROTATION_MS`),
+  suy ra từ thời gian còn lại chứ không hardcode. Emoji và pin xoay **đồng bộ**: nhân vật khóc
+  cạnh viên pin đầy trông như lỗi chứ không phải trò đùa.
+- **Mọi `postDelayed` trong service phải dùng `Runnable` field cố định**, không dùng
+  `::render`. Method reference tạo instance mới mỗi lần nên `removeCallbacks` không huỷ được,
+  và callback còn treo sau khi overlay detach là rò pin. Cả `trollRotationTick` lẫn
+  `assetRetryTick` đều bị huỷ trong `removeOverlay()`.
+
 ## Test gate
 
 Trước release phải kiểm tra tối thiểu:

@@ -109,6 +109,9 @@ class StatusBarAccessibilityService : AccessibilityService() {
      */
     private val trollRotationTick = Runnable { render() }
 
+    /** Same identity rule as [trollRotationTick]: a method reference could never be cancelled. */
+    private val assetRetryTick = Runnable { render() }
+
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) = Unit
 
@@ -482,13 +485,18 @@ class StatusBarAccessibilityService : AccessibilityService() {
         }
         renderJob?.cancel()
         renderJob = scope.launch {
-            // Whichever source owns the emoji/battery slot this pass; null on both sides simply
-            // means the bar draws that slot empty, exactly as before.
-            val emojiSource = trollArtwork?.emojiPath ?: currentEmojiTheme?.emojiPath
+            // A troll owns the whole emoji slot once it is active, including the decision to
+            // leave it empty. Falling back to the normal theme here would quietly put the old
+            // character back the moment the user switched it off.
+            val emojiSource = if (trollArtwork != null) {
+                trollArtwork.emojiPath
+            } else {
+                currentEmojiTheme?.emojiPath
+            }
             val batterySource = trollArtwork?.batteryPath ?: currentBatteryTheme?.batteryPath
             val decoded = withContext(Dispatchers.IO) {
                 val emojiPath = if (trollArtwork != null) {
-                    trollCatalogRepository.materializeAsset(trollArtwork.emojiPath)
+                    trollArtwork.emojiPath?.let { trollCatalogRepository.materializeAsset(it) }
                 } else {
                     catalogRepository.materializeAsset(currentEmojiTheme?.emojiPath)
                 }
@@ -534,7 +542,8 @@ class StatusBarAccessibilityService : AccessibilityService() {
             if (!decoded.complete) {
                 decoded.recycle()
                 loadedAssetKey = null
-                view.postDelayed(::render, ASSET_RETRY_DELAY_MS)
+                view.removeCallbacks(assetRetryTick)
+                view.postDelayed(assetRetryTick, ASSET_RETRY_DELAY_MS)
                 return@launch
             }
             emojiBitmap?.recycle()
@@ -573,6 +582,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
             // Before the view goes: a pending rotation tick would otherwise keep waking up for a
             // window that is no longer attached.
             view.removeCallbacks(trollRotationTick)
+            view.removeCallbacks(assetRetryTick)
             try {
                 windowManager.removeView(view)
             } catch (error: IllegalArgumentException) {

@@ -71,6 +71,9 @@ data class BatteryStatusConfig(
     val trollEmojiLevelIndex: Int = 0,
     val trollBatteryLevelIndex: Int = 0,
     val trollRandomArtwork: Boolean = false,
+    // The character is the loudest part of the prank; some users want the faked number and
+    // the battery shell only. Independent of showPercentage, which hides the number instead.
+    val trollShowEmoji: Boolean = true,
     // Separate from rewardUnlockedThemeIds: troll ids and battery theme ids are different
     // spaces, so sharing one set would silently unlock unrelated content.
     val rewardUnlockedTrollIds: Set<Int> = emptySet()

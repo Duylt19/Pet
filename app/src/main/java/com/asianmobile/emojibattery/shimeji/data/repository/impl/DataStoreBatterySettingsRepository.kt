@@ -157,6 +157,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             preferences[TROLL_EMOJI_LEVEL_INDEX] = sanitized.trollEmojiLevelIndex
             preferences[TROLL_BATTERY_LEVEL_INDEX] = sanitized.trollBatteryLevelIndex
             preferences[TROLL_RANDOM_ARTWORK] = sanitized.trollRandomArtwork
+            preferences[TROLL_SHOW_EMOJI] = sanitized.trollShowEmoji
             preferences[REWARD_UNLOCKED_TROLL_IDS] =
                 (decodeRewardUnlockedTrollIds(preferences) + sanitized.rewardUnlockedTrollIds)
                     .map(Int::toString).toSet()
@@ -323,6 +324,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                 trollBatteryLevelIndex = preferences[TROLL_BATTERY_LEVEL_INDEX]
                     ?: defaults.trollBatteryLevelIndex,
                 trollRandomArtwork = preferences[TROLL_RANDOM_ARTWORK] ?: defaults.trollRandomArtwork,
+                trollShowEmoji = preferences[TROLL_SHOW_EMOJI] ?: defaults.trollShowEmoji,
                 rewardUnlockedTrollIds = decodeRewardUnlockedTrollIds(preferences)
             )
         )
@@ -433,6 +435,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         val TROLL_EMOJI_LEVEL_INDEX = intPreferencesKey("battery_troll_emoji_level_index")
         val TROLL_BATTERY_LEVEL_INDEX = intPreferencesKey("battery_troll_battery_level_index")
         val TROLL_RANDOM_ARTWORK = booleanPreferencesKey("battery_troll_random_artwork")
+        val TROLL_SHOW_EMOJI = booleanPreferencesKey("battery_troll_show_emoji")
         val REWARD_UNLOCKED_TROLL_IDS =
             stringSetPreferencesKey("battery_troll_reward_unlocked_ids")
     }

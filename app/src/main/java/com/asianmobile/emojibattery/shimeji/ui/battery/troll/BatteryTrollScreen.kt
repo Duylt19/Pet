@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -49,8 +50,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -72,6 +71,7 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollBatteryOrientation
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntry
 import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollServerConfig
@@ -81,16 +81,14 @@ import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardGradientButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOfferSheet
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOutlineButton
+import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
-private val TrollRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-private val TrollRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
-
 // Figma: the 96 unit thumbnail inside the 101.33 unit tile, so the art keeps its white frame.
 private const val TROLL_THUMBNAIL_FRACTION = 96f / 101.33f
-// Figma: the reward sheet preview is a 74 unit thumbnail inside the 85 unit pink tile.
-private const val TROLL_REWARD_PREVIEW_FRACTION = 74f / 85f
+// Figma `8326:8469` → `Frame 2147223483` is 110x110 and holds the `248 3` art at 84x84.
+private const val TROLL_REWARD_PREVIEW_FRACTION = 84f / 110f
 
 @Composable
 fun BatteryTrollScreen(
@@ -198,6 +196,8 @@ internal fun BatteryTrollContent(
                     .padding(innerPadding),
                 contentPadding = PaddingValues(
                     start = dimensionResource(SdpR.dimen._12sdp),
+                    // Figma leaves 8 units between the title block and the first grid row.
+                    top = dimensionResource(SdpR.dimen._6sdp),
                     end = dimensionResource(SdpR.dimen._12sdp),
                     bottom = dimensionResource(SdpR.dimen._12sdp)
                 ),
@@ -237,7 +237,7 @@ internal fun BatteryTrollContent(
                         key = "battery_troll_empty",
                         span = { GridItemSpan(maxLineSpan) }
                     ) {
-                        BatteryTrollEmpty(onRetry = onRetry)
+                        BatteryTrollEmpty(error = state.error, onRetry = onRetry)
                     }
 
                     else -> items(state.trolls, key = BatteryTrollEntry::id) { troll ->
@@ -294,7 +294,7 @@ private fun BatteryTrollTopBar(
             Text(
                 text = stringResource(R.string.battery_troll_title),
                 color = colorResource(R.color.colors_212327),
-                fontFamily = TrollRobotoSemiBold,
+                fontFamily = RobotoFontFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = (
                     expandedSize + (collapsedSize - expandedSize) * collapsedFraction
@@ -317,7 +317,7 @@ private fun BatteryTrollTopBar(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_arrow_left),
+                    painter = painterResource(R.drawable.ic_favorite_recent_back),
                     contentDescription = stringResource(R.string.back),
                     tint = colorResource(R.color.colors_212327),
                     modifier = Modifier.size(dimensionResource(SdpR.dimen._22sdp))
@@ -369,6 +369,9 @@ private fun BatteryTrollCard(
             modifier = Modifier.fillMaxSize(TROLL_THUMBNAIL_FRACTION)
         )
         if (premium) {
+            // No Figma frame draws a lock layer on a troll tile, but the owner asked a troll
+            // theme to signal lock exactly like a battery style does, so the badge keeps the
+            // geometry `BatteryCatalogContent.BatteryLandingThemeCard` uses.
             val lockedLabel = stringResource(R.string.battery_troll_theme_locked)
             PetPremiumBadge(
                 modifier = Modifier
@@ -408,7 +411,7 @@ internal fun BatteryTrollRewardSheetContent(
             .clip(previewShape)
             .background(colorResource(R.color.colors_FFFBFC))
             .border(
-                dimensionResource(SdpR.dimen._2sdp),
+                dimensionResource(SdpR.dimen._1sdp),
                 colorResource(R.color.colors_FEC1D4),
                 previewShape
             ),
@@ -422,7 +425,7 @@ internal fun BatteryTrollRewardSheetContent(
     Text(
         text = stringResource(R.string.battery_reward_unlock_title),
         color = colorResource(R.color.colors_212327),
-        fontFamily = TrollRobotoMedium,
+        fontFamily = RobotoFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
         lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp,
@@ -433,7 +436,8 @@ internal fun BatteryTrollRewardSheetContent(
         Text(
             text = stringResource(R.string.battery_reward_not_earned),
             color = colorResource(R.color.colors_FB3675),
-            fontFamily = TrollRobotoMedium,
+            fontFamily = RobotoFontFamily,
+            fontWeight = FontWeight.Medium,
             fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -489,19 +493,68 @@ private fun BatteryTrollLoading() {
     }
 }
 
+/**
+ * The three catalog failures are not interchangeable, so the empty grid must not collapse them
+ * into one message. `DISTRIBUTION_NOT_APPROVED` means the server has not published the catalog
+ * yet — in a release build `BatteryTrollDistributionPolicy` rejects it no matter how often the
+ * user taps — so that case is the only one without a retry affordance.
+ *
+ * Pure so the mapping is unit-testable without rendering the grid.
+ */
+internal fun batteryTrollEmptyMessageRes(error: BatteryTrollCatalogError?): Int = when (error) {
+    BatteryTrollCatalogError.CATALOG_UNAVAILABLE -> R.string.battery_troll_error_offline
+    BatteryTrollCatalogError.CATALOG_INVALID -> R.string.battery_troll_error_invalid
+    BatteryTrollCatalogError.DISTRIBUTION_NOT_APPROVED -> R.string.battery_troll_unpublished
+    null -> R.string.battery_troll_empty
+}
+
+/** Retrying only ever helps when the catalog itself is reachable and publishable. */
+internal fun batteryTrollCanRetry(error: BatteryTrollCatalogError?): Boolean =
+    error != BatteryTrollCatalogError.DISTRIBUTION_NOT_APPROVED
+
 @Composable
-private fun BatteryTrollEmpty(onRetry: () -> Unit) {
-    Text(
-        text = stringResource(R.string.battery_troll_empty),
-        color = colorResource(R.color.colors_6F7073),
-        fontFamily = TrollRobotoMedium,
-        fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-        textAlign = TextAlign.Center,
+private fun BatteryTrollEmpty(error: BatteryTrollCatalogError?, onRetry: () -> Unit) {
+    val messageRes = batteryTrollEmptyMessageRes(error)
+    val canRetry = batteryTrollCanRetry(error)
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onRetry)
-            .padding(dimensionResource(SdpR.dimen._24sdp))
-    )
+            .padding(dimensionResource(SdpR.dimen._24sdp)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
+    ) {
+        Text(
+            text = stringResource(messageRes),
+            color = colorResource(R.color.colors_6F7073),
+            fontFamily = RobotoFontFamily,
+            fontWeight = FontWeight.Medium,
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        if (canRetry) {
+            Text(
+                text = stringResource(R.string.battery_troll_retry),
+                color = colorResource(R.color.colors_FB3675),
+                fontFamily = RobotoFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp)))
+                    .border(
+                        dimensionResource(SdpR.dimen._1sdp),
+                        colorResource(R.color.colors_FB3675),
+                        RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp))
+                    )
+                    .clickable(onClick = onRetry)
+                    .padding(
+                        horizontal = dimensionResource(SdpR.dimen._18sdp),
+                        vertical = dimensionResource(SdpR.dimen._8sdp)
+                    )
+            )
+        }
+    }
 }
 
 /** Figma places a 328x50 banner as the first grid child; the stub keeps that footprint. */
@@ -529,11 +582,53 @@ internal fun previewBatteryTrollState(): BatteryTrollUiState {
             },
             batteryOrientation = BatteryTrollBatteryOrientation.PORTRAIT,
             thumbnailPath = "thumb/TROLL_${index + 1}.webp",
-            emojiPaths = List(5) { level -> "emoji/TROLL_${index + 1}_$level.webp" },
-            batteryPaths = List(5) { level -> "battery/TROLL_${index + 1}_$level.webp" }
+            // The published catalog numbers the level assets `_1` to `_5`, not `_0` to `_4`.
+            emojiPaths = List(5) { level -> "emoji/TROLL_${index + 1}_${level + 1}.webp" },
+            batteryPaths = List(5) { level -> "battery/TROLL_${index + 1}_${level + 1}.webp" }
         )
     }
     return BatteryTrollUiState(trolls = trolls, isLoading = false)
+}
+
+/** Empty grid for one of the catalog failures; `null` is "catalog fine, just nothing in it". */
+internal fun previewBatteryTrollErrorState(
+    error: BatteryTrollCatalogError?
+): BatteryTrollUiState = BatteryTrollUiState(isLoading = false, error = error)
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 400)
+@Composable
+private fun BatteryTrollUnpublishedPreview() {
+    BatteryTrollContent(
+        state = previewBatteryTrollErrorState(
+            BatteryTrollCatalogError.DISTRIBUTION_NOT_APPROVED
+        ),
+        onBack = {},
+        onPremium = {},
+        onTroll = {},
+        onRetry = {},
+        onDismissReward = {},
+        onWatchReward = {},
+        isInlineBannerVisible = false,
+        bannerAdContent = {},
+        nativeAdContent = {}
+    )
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 400)
+@Composable
+private fun BatteryTrollOfflinePreview() {
+    BatteryTrollContent(
+        state = previewBatteryTrollErrorState(BatteryTrollCatalogError.CATALOG_UNAVAILABLE),
+        onBack = {},
+        onPremium = {},
+        onTroll = {},
+        onRetry = {},
+        onDismissReward = {},
+        onWatchReward = {},
+        isInlineBannerVisible = false,
+        bannerAdContent = {},
+        nativeAdContent = {}
+    )
 }
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)

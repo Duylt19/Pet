@@ -4,12 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollBatteryOrientation
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollMode
 
 @PreviewTest
-@Preview(name = "Battery troll customize", widthDp = 360, heightDp = 1148)
+@Preview(name = "Battery troll customize", widthDp = 360, heightDp = 800)
 @Composable
 fun BatteryTrollCustomizeScreenshotTest() {
     PreviewTrollCustomize(previewTrollCustomizeState())
@@ -17,7 +18,7 @@ fun BatteryTrollCustomizeScreenshotTest() {
 
 /** The two state deltas Figma calls out: Real Battery greys the Edit chip, Random dims both pickers. */
 @PreviewTest
-@Preview(name = "Battery troll customize real random", widthDp = 360, heightDp = 1148)
+@Preview(name = "Battery troll customize real random", widthDp = 360, heightDp = 800)
 @Composable
 fun BatteryTrollCustomizeRealRandomScreenshotTest() {
     val state = previewTrollCustomizeState()
@@ -27,6 +28,33 @@ fun BatteryTrollCustomizeRealRandomScreenshotTest() {
                 mode = BatteryTrollMode.REAL,
                 randomArtwork = true
             )
+        )
+    )
+}
+
+/** No troll resolved: the controls are replaced and Apply must read as unavailable. */
+@PreviewTest
+@Preview(name = "Battery troll customize unavailable", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryTrollCustomizeUnavailableScreenshotTest() {
+    PreviewTrollCustomize(
+        previewTrollCustomizeState().copy(
+            troll = null,
+            isLoading = false,
+            catalogError = BatteryTrollCatalogError.CATALOG_UNAVAILABLE
+        )
+    )
+}
+
+/** Percentage off and the character off: both must disappear from the preview strip. */
+@PreviewTest
+@Preview(name = "Battery troll customize no percent no emoji", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryTrollCustomizeHiddenPartsScreenshotTest() {
+    val state = previewTrollCustomizeState()
+    PreviewTrollCustomize(
+        state.copy(
+            draft = state.draft.copy(showPercentage = false, showEmoji = false)
         )
     )
 }
@@ -43,11 +71,13 @@ private fun PreviewTrollCustomize(state: BatteryTrollCustomizeUiState) {
         onEditPercentDismiss = {},
         onShowPercentageToggle = {},
         onPercentSizeChange = {},
+        onShowEmojiToggle = {},
         onRandomArtworkChange = {},
         onEmojiLevelChange = {},
         onBatteryLevelChange = {},
         onDiscardDismiss = {},
         onDiscardConfirm = {},
+        onRetry = {},
         onApply = {}
     )
 }

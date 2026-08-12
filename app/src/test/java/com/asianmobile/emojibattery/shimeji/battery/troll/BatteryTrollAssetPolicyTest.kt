@@ -8,6 +8,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntry
 import com.asianmobile.emojibattery.shimeji.data.model.NO_BATTERY_TROLL_THEME_ID
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -33,13 +34,33 @@ class BatteryTrollAssetPolicyTest {
         trollThemeId: Int = TROLL_ID,
         trollEmojiLevelIndex: Int = 0,
         trollBatteryLevelIndex: Int = 0,
-        trollRandomArtwork: Boolean = false
+        trollRandomArtwork: Boolean = false,
+        trollShowEmoji: Boolean = true
     ): BatteryStatusConfig = BatteryStatusConfig(
         trollThemeId = trollThemeId,
         trollEmojiLevelIndex = trollEmojiLevelIndex,
         trollBatteryLevelIndex = trollBatteryLevelIndex,
-        trollRandomArtwork = trollRandomArtwork
+        trollRandomArtwork = trollRandomArtwork,
+        trollShowEmoji = trollShowEmoji
     )
+
+    @Test
+    fun `turning the character off keeps the troll battery but drops the emoji`() {
+        val artwork = BatteryTrollAssetPolicy.artwork(
+            config(trollShowEmoji = false),
+            entry(),
+            elapsedMs = 0
+        )
+        assertNotNull(artwork)
+        assertNull(artwork?.emojiPath)
+        assertNotNull(artwork?.batteryPath)
+    }
+
+    @Test
+    fun `hiding the character does not stop the artwork from rotating`() {
+        val random = config(trollRandomArtwork = true, trollShowEmoji = false)
+        assertNotNull(BatteryTrollAssetPolicy.rotationDelayMs(random, entry(), elapsedMs = 0))
+    }
 
     @Test
     fun `no troll selected leaves the normal battery and emoji themes in place`() {

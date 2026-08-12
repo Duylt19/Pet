@@ -805,7 +805,6 @@
     <string name="battery_troll_edit_message">Pick the percentage other people will see.</string>
     <string name="battery_troll_edit_confirm">Save</string>
     <string name="battery_troll_theme_locked">Premium theme</string>
-    <string name="battery_troll_empty">No troll themes yet. Pull to refresh.</string>
     <string name="battery_preview_time" translatable="false">09:41</string>
     <string name="battery_preview_percentage" translatable="false">82%</string>
     <string name="battery_preview_date" translatable="false">Thu 30</string>
@@ -1003,4 +1002,9 @@
     <string name="battery_emotion_group_tobi">Tobi</string>
     <string name="battery_emotion_group_keroppi">Keroppi</string>
     <string name="battery_emotion_group_pochacco">Pochacco</string>
+    <string name="battery_troll_empty">No troll themes available right now.</string>
+    <string name="battery_troll_error_offline">Couldn’t load troll themes. Check your connection and try again.</string>
+    <string name="battery_troll_error_invalid">Troll themes couldn’t be read. Please try again later.</string>
+    <string name="battery_troll_unpublished">Troll themes are coming soon.</string>
+    <string name="battery_troll_retry">Try again</string>
 </resources>

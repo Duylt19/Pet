@@ -4,9 +4,14 @@ import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_TROLL_RANDOM_ROTA
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntry
 
-/** The catalog-relative artwork one troll render pass draws instead of the normal themes. */
+/**
+ * The catalog-relative artwork one troll render pass draws instead of the normal themes.
+ *
+ * [emojiPath] is null when the user turned the character off; the battery shell and the faked
+ * percentage still stand on their own, so the troll stays active without it.
+ */
 data class BatteryTrollArtwork(
-    val emojiPath: String,
+    val emojiPath: String?,
     val batteryPath: String
 )
 
@@ -40,9 +45,11 @@ object BatteryTrollAssetPolicy {
         // normal theme is a far better outcome than a crash inside the render pass.
         if (entry.emojiPaths.isEmpty() || entry.batteryPaths.isEmpty()) return null
         return BatteryTrollArtwork(
-            emojiPath = entry.emojiPathAt(
-                BatteryTrollPolicy.emojiLevelIndex(config, elapsedMs)
-            ),
+            emojiPath = if (config.trollShowEmoji) {
+                entry.emojiPathAt(BatteryTrollPolicy.emojiLevelIndex(config, elapsedMs))
+            } else {
+                null
+            },
             batteryPath = entry.batteryPathAt(
                 BatteryTrollPolicy.batteryLevelIndex(config, elapsedMs)
             )

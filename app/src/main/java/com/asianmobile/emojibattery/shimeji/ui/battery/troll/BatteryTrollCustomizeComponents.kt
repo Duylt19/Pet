@@ -2,6 +2,7 @@ package com.asianmobile.emojibattery.shimeji.ui.battery.troll
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,20 +15,23 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -41,15 +45,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -63,6 +71,8 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_TROLL_LEVEL_COUNT
+import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_TROLL_RANDOM_ROTATION_MS
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollMode
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_TROLL_FAKE_PERCENT
@@ -70,6 +80,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_TROLL_FAKE_PE
 import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollServerConfig
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.DismissibleDialogBackdrop
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
@@ -86,28 +97,58 @@ internal val CustomizeRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 /** Random mode keeps the picked artwork visible but stops it being a control. */
 internal const val TROLL_DISABLED_ALPHA = 0.30f
 
-/** Same sky the battery catalog and the editor sit on, so the flow keeps one background. */
+/**
+ * The project's Figma px -> sdp/ssp divisor. Only needed where a size comes from user state at
+ * runtime and therefore cannot be a `dimen` resource; everything static still uses sdp/ssp.
+ */
+private const val FIGMA_PX_PER_SSP = 1.3f
+
+/**
+ * The level index the previews must draw right now.
+ *
+ * Random mode is not a still frame on the real status bar: the artwork rotates, and a preview that
+ * froze on the user's last manual pick would promise something the bar will not do. So the preview
+ * steps on the bar's own period — [BATTERY_TROLL_RANDOM_ROTATION_MS], read from the model rather
+ * than restated here — which is honest by construction and needs no extra copy on screen (this
+ * screen may not add strings). Emoji and battery step together because `BatteryTrollPolicy` rotates
+ * them in lockstep. The loop lives in a `LaunchedEffect`, so it is cancelled the moment the screen
+ * leaves composition.
+ */
 @Composable
-internal fun TrollWallpaper() {
-    Image(
-        painter = painterResource(R.drawable.img_home_wallpaper),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        alignment = Alignment.TopCenter,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(R.color.colors_FFFFFF))
-    )
+internal fun rememberTrollRotationStep(active: Boolean): Int {
+    var step by remember { mutableIntStateOf(0) }
+    // Layoutlib renders a preview by draining the composition's effects; a `while (true)` that
+    // never suspends to completion leaves the render undisposed, which then fails whichever
+    // screenshot test happens to run next. Previews therefore show the frozen first frame.
+    val isInspecting = LocalInspectionMode.current
+    LaunchedEffect(active, isInspecting) {
+        if (!active || isInspecting) {
+            step = 0
+            return@LaunchedEffect
+        }
+        while (true) {
+            delay(BATTERY_TROLL_RANDOM_ROTATION_MS)
+            step = (step + 1) % BATTERY_TROLL_LEVEL_COUNT
+        }
+    }
+    return step
 }
 
 /**
  * The 360x48 themed strip at the top of the screen: it writes the number the prank will show and
  * the artwork the two pickers below selected — so the user judges the result, not the controls.
+ *
+ * Every control that reaches the real bar reaches this strip too: [showPercentage] removes the
+ * number, [percentSizeDp] sizes it the way `BatteryStatusBarView` will, and [showEmoji] removes the
+ * character.
  */
 @Composable
 internal fun TrollStatusBarPreview(
     troll: BatteryTrollEntry?,
     percent: Int,
+    showPercentage: Boolean,
+    percentSizeDp: Float,
+    showEmoji: Boolean,
     emojiLevelIndex: Int,
     batteryLevelIndex: Int,
     modifier: Modifier = Modifier
@@ -121,7 +162,9 @@ internal fun TrollStatusBarPreview(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._20sdp))
+                // A minimum, not a fixed height: the Size slider goes past this strip's Figma
+                // height, and clipping the number would misrepresent what the bar will draw.
+                .heightIn(min = dimensionResource(SdpR.dimen._20sdp))
                 .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -137,10 +180,12 @@ internal fun TrollStatusBarPreview(
                     fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
                     lineHeight = dimensionResource(SspR.dimen._17ssp).value.sp
                 )
-                TrollArtwork(
-                    path = troll?.emojiPaths?.getOrNull(emojiLevelIndex),
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._20sdp))
-                )
+                if (showEmoji) {
+                    TrollArtwork(
+                        path = troll?.emojiPaths?.getOrNull(emojiLevelIndex),
+                        modifier = Modifier.size(dimensionResource(SdpR.dimen._20sdp))
+                    )
+                }
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -164,13 +209,19 @@ internal fun TrollStatusBarPreview(
                         height = dimensionResource(SdpR.dimen._9sdp)
                     )
                 )
-                Text(
-                    text = stringResource(R.string.battery_troll_percent_value, percent),
-                    color = colorResource(R.color.colors_000000),
-                    fontFamily = CustomizeRobotoMedium,
-                    fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
-                    lineHeight = dimensionResource(SspR.dimen._14ssp).value.sp
-                )
+                if (showPercentage) {
+                    Text(
+                        text = stringResource(R.string.battery_troll_percent_value, percent),
+                        color = colorResource(R.color.colors_000000),
+                        fontFamily = CustomizeRobotoMedium,
+                        // The Size slider is stored in dp and the renderer uses it as the text
+                        // size, so the preview reads the slider instead of a fixed ssp. Figma
+                        // draws this strip with the stored number as px (16dp -> 16px), so it goes
+                        // through the same px/1.3 divisor as every other size on the screen.
+                        fontSize = (percentSizeDp / FIGMA_PX_PER_SSP).sp,
+                        maxLines = 1
+                    )
+                }
                 TrollArtwork(
                     path = troll?.batteryPaths?.getOrNull(batteryLevelIndex),
                     modifier = Modifier.size(
@@ -304,7 +355,7 @@ private fun TrollModeSegment(
             .background(
                 if (selected) colorResource(R.color.colors_FB3675) else Color.Transparent
             )
-            .clickable(role = Role.Tab, onClick = onClick),
+            .selectable(selected = selected, role = Role.Tab, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -399,16 +450,24 @@ internal fun TrollEditChip(
 /**
  * The 96x96 preview in the Mode card: the picked battery with the picked character sitting on it,
  * which is how the pair will read once the status bar is covered.
+ *
+ * The two images are decorative on their own, so the box carries one merged label — the troll's
+ * catalog name — instead of announcing two unnamed graphics.
  */
 @Composable
 internal fun TrollThemePreview(
     troll: BatteryTrollEntry?,
+    showEmoji: Boolean,
     emojiLevelIndex: Int,
     batteryLevelIndex: Int,
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier.size(dimensionResource(SdpR.dimen._74sdp)),
+        modifier = modifier
+            .size(dimensionResource(SdpR.dimen._74sdp))
+            .semantics(mergeDescendants = true) {
+                troll?.name?.let { contentDescription = it }
+            },
         contentAlignment = Alignment.Center
     ) {
         TrollArtwork(
@@ -418,12 +477,14 @@ internal fun TrollThemePreview(
                 .fillMaxWidth()
                 .height(dimensionResource(SdpR.dimen._49sdp))
         )
-        TrollArtwork(
-            path = troll?.emojiPaths?.getOrNull(emojiLevelIndex),
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .size(dimensionResource(SdpR.dimen._43sdp))
-        )
+        if (showEmoji) {
+            TrollArtwork(
+                path = troll?.emojiPaths?.getOrNull(emojiLevelIndex),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .size(dimensionResource(SdpR.dimen._43sdp))
+            )
+        }
     }
 }
 
@@ -500,6 +561,30 @@ internal fun TrollSizeSlider(
     }
 }
 
+/** Ring + dot per Figma `8359:6960` / `8359:6958`, sized by the caller. */
+@Composable
+private fun TrollRadioMark(
+    selected: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val ring = colorResource(
+        if (selected) R.color.colors_FB3675 else R.color.colors_CCCCCC
+    )
+    val dot = colorResource(R.color.colors_FB3675)
+    Canvas(modifier) {
+        // Figma: 20 outer, 12 inner, so the ring is 2 units of a 20-unit box.
+        val stroke = size.minDimension * 2f / 20f
+        drawCircle(
+            color = ring,
+            radius = (size.minDimension - stroke) / 2f,
+            style = Stroke(width = stroke)
+        )
+        if (selected) {
+            drawCircle(color = dot, radius = size.minDimension * 12f / 20f / 2f)
+        }
+    }
+}
+
 @Composable
 internal fun TrollRadioOption(
     label: String,
@@ -508,16 +593,19 @@ internal fun TrollRadioOption(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier.clickable(role = Role.RadioButton, onClick = onClick),
+        modifier = modifier.selectable(
+            selected = selected,
+            role = Role.RadioButton,
+            onClick = onClick
+        ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
     ) {
-        Icon(
-            painter = painterResource(
-                if (selected) R.drawable.ic_radio_selected else R.drawable.ic_radio_unselected
-            ),
-            contentDescription = null,
-            tint = Color.Unspecified,
+        // Figma `8359:6960` is a ring plus a dot. The shared `ic_radio_selected` drawable is a
+        // ring plus a check and belongs to the Language onboarding design, so it is drawn here
+        // instead of being changed underneath that screen.
+        TrollRadioMark(
+            selected = selected,
             modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
         )
         Text(
@@ -534,6 +622,9 @@ internal fun TrollRadioOption(
 /**
  * One artwork picker (Emoji or Battery). [enabled] is Random mode: the block keeps its highlight
  * so the user still sees what is stored, but at 30% and deaf to taps.
+ *
+ * [tilesEnabled] dims the tiles *only* — it is the Emoji block's own switch, and dimming the header
+ * would grey out the very switch that turns the tiles back on.
  */
 @Composable
 internal fun TrollArtworkBlock(
@@ -544,6 +635,7 @@ internal fun TrollArtworkBlock(
     enabled: Boolean,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    tilesEnabled: Boolean = true,
     trailingSwitch: (@Composable () -> Unit)? = null
 ) {
     Column(
@@ -581,14 +673,19 @@ internal fun TrollArtworkBlock(
             trailingSwitch?.invoke()
         }
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .alpha(if (tilesEnabled) 1f else TROLL_DISABLED_ALPHA),
             horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
         ) {
             repeat(BATTERY_TROLL_LEVEL_COUNT) { index ->
                 TrollArtworkTile(
                     path = paths.getOrNull(index),
+                    // The artwork itself carries no text, so the block's own label plus the
+                    // 1-based level is the only thing a screen reader can announce.
+                    label = "$label ${index + 1}",
                     selected = index == selectedIndex,
-                    enabled = enabled,
+                    enabled = enabled && tilesEnabled,
                     onClick = { onSelect(index) },
                     modifier = Modifier.weight(1f)
                 )
@@ -597,9 +694,14 @@ internal fun TrollArtworkBlock(
     }
 }
 
+/**
+ * `selectable` rather than `clickable`: it is what lets a screen reader say "Emoji 3, selected"
+ * instead of announcing ten identical unlabelled radio buttons.
+ */
 @Composable
 private fun TrollArtworkTile(
     path: String?,
+    label: String,
     selected: Boolean,
     enabled: Boolean,
     onClick: () -> Unit,
@@ -622,7 +724,13 @@ private fun TrollArtworkTile(
                 ),
                 shape = shape
             )
-            .clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick),
+            .selectable(
+                selected = selected,
+                enabled = enabled,
+                role = Role.RadioButton,
+                onClick = onClick
+            )
+            .semantics { contentDescription = label },
         contentAlignment = Alignment.Center
     ) {
         TrollArtwork(
@@ -638,7 +746,11 @@ internal fun TrollArtwork(
     path: String?,
     modifier: Modifier = Modifier
 ) {
-    if (path.isNullOrBlank()) {
+    // Layoutlib drains a preview's pending work before disposing the render. A Coil request that
+    // can never resolve offline keeps that render open, and the *next* screenshot test then dies
+    // on "initSystem called twice". Previews reserve the space instead; there is nothing to
+    // download in a test anyway, so the golden is unchanged and no longer depends on the network.
+    if (path.isNullOrBlank() || LocalInspectionMode.current) {
         Spacer(modifier)
         return
     }
@@ -650,9 +762,14 @@ internal fun TrollArtwork(
     )
 }
 
+/**
+ * [enabled] is false until the troll's artwork actually resolved — the button must not be able to
+ * commit a theme id the status bar cannot draw.
+ */
 @Composable
 internal fun TrollApplyPanel(
     onApply: () -> Unit,
+    enabled: Boolean,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(
@@ -682,6 +799,7 @@ internal fun TrollApplyPanel(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(dimensionResource(SdpR.dimen._37sdp))
+                .alpha(if (enabled) 1f else TROLL_DISABLED_ALPHA)
                 .clip(CircleShape)
                 .background(
                     Brush.horizontalGradient(
@@ -691,7 +809,7 @@ internal fun TrollApplyPanel(
                         )
                     )
                 )
-                .clickable(role = Role.Button, onClick = onApply),
+                .clickable(enabled = enabled, role = Role.Button, onClick = onApply),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -700,6 +818,82 @@ internal fun TrollApplyPanel(
                 fontFamily = CustomizeRobotoMedium,
                 fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
                 lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp
+            )
+        }
+    }
+}
+
+/**
+ * NOT IN FIGMA — Figma draws this screen with the catalog already resolved. Without a loading state
+ * the controls render as empty grey tiles, which reads as broken artwork rather than as "not here
+ * yet", so the same spinner the troll grid uses stands in until the entry arrives.
+ */
+@Composable
+internal fun TrollCustomizeLoading(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._115sdp)),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(color = colorResource(R.color.colors_FB3675))
+    }
+}
+
+/**
+ * NOT IN FIGMA — the troll id came from the grid, so this state only happens when the catalog is
+ * gone (offline, unreadable, or the id was withdrawn server-side). It mirrors the grid's own empty
+ * state, including dropping the retry affordance for `DISTRIBUTION_NOT_APPROVED`, which no amount
+ * of retrying can fix in a release build.
+ */
+@Composable
+internal fun TrollCustomizeUnavailable(
+    error: BatteryTrollCatalogError?,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val messageRes = when (error) {
+        BatteryTrollCatalogError.CATALOG_UNAVAILABLE -> R.string.battery_troll_error_offline
+        BatteryTrollCatalogError.CATALOG_INVALID -> R.string.battery_troll_error_invalid
+        BatteryTrollCatalogError.DISTRIBUTION_NOT_APPROVED -> R.string.battery_troll_unpublished
+        null -> R.string.battery_troll_empty
+    }
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(dimensionResource(SdpR.dimen._18sdp)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
+    ) {
+        Text(
+            text = stringResource(messageRes),
+            color = colorResource(R.color.colors_6F7073),
+            fontFamily = CustomizeRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        if (error != BatteryTrollCatalogError.DISTRIBUTION_NOT_APPROVED) {
+            val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp))
+            Text(
+                text = stringResource(R.string.battery_troll_retry),
+                color = colorResource(R.color.colors_FB3675),
+                fontFamily = CustomizeRobotoSemiBold,
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .clip(shape)
+                    .border(
+                        width = dimensionResource(SdpR.dimen._1sdp),
+                        color = colorResource(R.color.colors_FB3675),
+                        shape = shape
+                    )
+                    .clickable(role = Role.Button, onClick = onRetry)
+                    .padding(
+                        horizontal = dimensionResource(SdpR.dimen._18sdp),
+                        vertical = dimensionResource(SdpR.dimen._8sdp)
+                    )
             )
         }
     }
@@ -839,10 +1033,12 @@ private fun TrollDialogButton(
     Box(
         modifier = modifier
             .height(dimensionResource(SdpR.dimen._37sdp))
+            // `alpha` is a draw modifier: it only fades what comes after it, so it has to precede
+            // `background` or the disabled button keeps a full-opacity fill under a faded label.
+            .alpha(if (enabled) 1f else TROLL_DISABLED_ALPHA)
             .clip(CircleShape)
             .background(colorResource(backgroundRes))
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .alpha(if (enabled) 1f else TROLL_DISABLED_ALPHA),
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(

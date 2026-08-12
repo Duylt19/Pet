@@ -36,22 +36,36 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class BatteryTrollCustomizeViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val catalogRepository: BatteryTrollCatalogRepository,
     private val settingsRepository: BatterySettingsRepository,
     private val systemStateMonitor: BatteryEditorSystemStateMonitor
 ) : ViewModel() {
     private val trollId = savedStateHandle.get<Int>(ARG_TROLL_ID) ?: NO_BATTERY_TROLL_THEME_ID
+
+    /**
+     * Enabling the status bar sends the user to system Accessibility settings, which is where this
+     * process is most likely to be killed. Everything the user cannot retype from memory — the
+     * unapplied draft and the "switch it on when you come back" intent — therefore survives in
+     * [SavedStateHandle], exactly like `BatteryEditorViewModel` does with `BatteryDraftCodec`.
+     */
+    private val restoredDraft = BatteryTrollDraftCodec
+        .decode(savedStateHandle[KEY_DRAFT], BatteryTrollDraft(trollId = trollId))
+        ?.takeIf { it.trollId == trollId }
     private val _uiState = MutableStateFlow(
-        BatteryTrollCustomizeUiState(draft = BatteryTrollDraft(trollId = trollId))
+        BatteryTrollCustomizeUiState(
+            draft = restoredDraft ?: BatteryTrollDraft(trollId = trollId)
+        )
     )
     val uiState: StateFlow<BatteryTrollCustomizeUiState> = _uiState.asStateFlow()
     private val _effects = Channel<BatteryTrollCustomizeEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
 
-    private var hasLocalEdits = false
+    private var hasLocalEdits = savedStateHandle.get<Boolean>(KEY_DIRTY) == true &&
+        restoredDraft != null
     private var configuredBatteryEnabled = false
-    private var enableBatteryAfterAccessibility = false
+    private var enableBatteryAfterAccessibility =
+        savedStateHandle.get<Boolean>(KEY_PENDING_ENABLE) == true
     private var latestConfig = BatteryStatusConfig()
 
     init {
@@ -66,15 +80,17 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
                 latestConfig = config
                 configuredBatteryEnabled = config.enabled
                 val applied = draftOf(config)
+                val troll = catalog.findTroll(trollId)
                 _uiState.update { current ->
                     current.copy(
-                        troll = catalog.findTroll(trollId),
+                        troll = troll,
                         draft = if (hasLocalEdits) current.draft else applied,
                         applied = applied,
                         realBatteryLevel = systemState.powerState.level,
                         isBatteryEnabled = config.enabled &&
                             BatteryAccessibility.isEnabled(context),
-                        isLoading = catalog.isLoading && catalog.findTroll(trollId) == null
+                        isLoading = troll == null && catalog.isLoading,
+                        catalogError = if (troll == null) catalog.error else null
                     )
                 }
             }
@@ -82,9 +98,16 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
         viewModelScope.launch { catalogRepository.refresh() }
     }
 
+    /** The unavailable state's only affordance: ask the catalog again. */
+    fun retry() {
+        viewModelScope.launch { catalogRepository.refresh() }
+    }
+
     fun onModeChange(mode: BatteryTrollMode) = editDraft { it.copy(mode = mode) }
 
     fun onShowPercentageToggle() = editDraft { it.copy(showPercentage = !it.showPercentage) }
+
+    fun onShowEmojiToggle() = editDraft { it.copy(showEmoji = !it.showEmoji) }
 
     fun onPercentSizeChange(sizeDp: Float) = editDraft { it.copy(percentSizeDp = sizeDp) }
 
@@ -113,15 +136,13 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
             MIN_BATTERY_TROLL_FAKE_PERCENT,
             MAX_BATTERY_TROLL_FAKE_PERCENT
         )
-        hasLocalEdits = true
-        _uiState.update {
-            it.copy(draft = it.draft.copy(fakePercent = clamped), isEditingFakePercent = false)
-        }
+        editDraft { it.copy(fakePercent = clamped) }
+        _uiState.update { it.copy(isEditingFakePercent = false) }
     }
 
     fun onBatteryToggle() {
         if (!BatteryAccessibility.isEnabled(context)) {
-            enableBatteryAfterAccessibility = true
+            setPendingBatteryEnable(true)
             emit(BatteryTrollCustomizeEffect.RequestBatteryAccessibility)
             return
         }
@@ -134,13 +155,13 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
             it.copy(isBatteryEnabled = configuredBatteryEnabled && accessibilityEnabled)
         }
         if (accessibilityEnabled && enableBatteryAfterAccessibility) {
-            enableBatteryAfterAccessibility = false
+            setPendingBatteryEnable(false)
             settingsRepository.setEnabled(true)
         }
     }
 
     fun cancelPendingBatteryEnable() {
-        enableBatteryAfterAccessibility = false
+        setPendingBatteryEnable(false)
     }
 
     fun onBackRequest() {
@@ -157,6 +178,7 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
 
     fun onDiscardConfirm() {
         hasLocalEdits = false
+        clearDraft()
         _uiState.update { it.copy(draft = it.applied, isDiscardVisible = false) }
         emit(BatteryTrollCustomizeEffect.Close)
     }
@@ -164,8 +186,14 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
     /**
      * Apply is also the switch-on: a troll theme nobody can see is not what the button promises,
      * so the config is stored enabled exactly like the status-bar editor does.
+     *
+     * It is refused outright while the troll is unresolved. Writing `trollThemeId` for artwork the
+     * catalog never produced makes `BatteryTrollAssetPolicy` fall back to the normal theme, so the
+     * bar would switch on showing something the user never picked; and applying only the
+     * non-artwork parts would be the same silent no-op from the user's side of the screen.
      */
     fun apply() {
+        if (!_uiState.value.isApplyEnabled) return
         val draft = _uiState.value.draft
         settingsRepository.applyConfig(
             latestConfig.copy(
@@ -181,16 +209,34 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
                 trollThemeId = trollId,
                 trollEmojiLevelIndex = draft.emojiLevelIndex,
                 trollBatteryLevelIndex = draft.batteryLevelIndex,
-                trollRandomArtwork = draft.randomArtwork
+                trollRandomArtwork = draft.randomArtwork,
+                trollShowEmoji = draft.showEmoji
             )
         )
         hasLocalEdits = false
+        clearDraft()
         _uiState.update { it.copy(applied = draft) }
     }
 
     private fun editDraft(transform: (BatteryTrollDraft) -> BatteryTrollDraft) {
         hasLocalEdits = true
-        _uiState.update { it.copy(draft = transform(it.draft)) }
+        _uiState.update {
+            val draft = transform(it.draft)
+            savedStateHandle[KEY_DRAFT] = BatteryTrollDraftCodec.encode(draft)
+            savedStateHandle[KEY_DIRTY] = true
+            it.copy(draft = draft)
+        }
+    }
+
+    /** Applied or discarded, the draft is no longer worth restoring after a process death. */
+    private fun clearDraft() {
+        savedStateHandle[KEY_DRAFT] = null
+        savedStateHandle[KEY_DIRTY] = false
+    }
+
+    private fun setPendingBatteryEnable(pending: Boolean) {
+        enableBatteryAfterAccessibility = pending
+        savedStateHandle[KEY_PENDING_ENABLE] = pending
     }
 
     /**
@@ -210,6 +256,7 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
             showPercentage = config.showPercentage,
             percentSizeDp = config.percentSizeDp,
             randomArtwork = if (isThisTrollLive) config.trollRandomArtwork else fresh.randomArtwork,
+            showEmoji = if (isThisTrollLive) config.trollShowEmoji else fresh.showEmoji,
             emojiLevelIndex = if (isThisTrollLive) {
                 config.trollEmojiLevelIndex.coerceIn(0, BATTERY_TROLL_LEVEL_COUNT - 1)
             } else {
@@ -229,5 +276,8 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
 
     private companion object {
         const val ARG_TROLL_ID = "trollId"
+        const val KEY_DRAFT = "trollDraft"
+        const val KEY_DIRTY = "trollDraftDirty"
+        const val KEY_PENDING_ENABLE = "trollPendingBatteryEnable"
     }
 }

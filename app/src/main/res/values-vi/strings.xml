@@ -758,5 +758,9 @@
     <string name="battery_troll_edit_message">Chọn phần trăm mà người khác sẽ nhìn thấy.</string>
     <string name="battery_troll_edit_confirm">Lưu</string>
     <string name="battery_troll_theme_locked">Giao diện trả phí</string>
-    <string name="battery_troll_empty">Chưa có giao diện troll nào. Kéo xuống để tải lại.</string>
+    <string name="battery_troll_empty">Hiện chưa có giao diện troll nào.</string>
+    <string name="battery_troll_error_offline">Không tải được giao diện troll. Kiểm tra kết nối rồi thử lại.</string>
+    <string name="battery_troll_error_invalid">Không đọc được giao diện troll. Vui lòng thử lại sau.</string>
+    <string name="battery_troll_unpublished">Giao diện troll sắp ra mắt.</string>
+    <string name="battery_troll_retry">Thử lại</string>
 </resources>
