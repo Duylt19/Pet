@@ -24,6 +24,8 @@ tab đã mở màn đó.
 | `battery_editor/{themeId}` | `ui/battery/editor/BatteryEditorScreen` | Overview khởi tạo cặp pet+pin; picker category đổi hai asset độc lập, Rewarded/Premium theo component, live preview, Apply cố định và disclosure |
 | `battery_editor_component/{themeId}/{page}` | `ui/battery/editor/BatteryEditorScreen` | Destination editor riêng theo component, dùng ViewModel/draft của overview; control cập nhật preview ngay, Back giữ draft và phục hồi đúng vị trí cuộn |
 | `battery_editor_emotion_detail/{themeId}/{groupKey}` | `ui/battery/editor/BatteryEmotionFigmaScreen` | Detail 10 emotion của pack, preview ghim, switch/size/selected state cập nhật trực tiếp; banner do editor shell sở hữu |
+| `battery_troll` | `ui/battery/troll/BatteryTrollScreen` | Grid ba cột theme Battery Troll theo Figma: app bar collapse (title lớn thu vào bar khi cuộn) + PRO pill, banner inline đầu lưới, tile 96×96 viền `#DEDEDF`. Theme PREMIUM có crown và mở `RewardOfferSheet` dùng chung với Battery Styles; FREE mở thẳng Customize. Data từ catalog remote thứ tư (`json/battery-troll.json`) |
+| `battery_troll_customize/{trollId}` | `ui/battery/troll/BatteryTrollCustomizeScreen` | Preview status bar thật ở đỉnh, enable card dùng chung, ba nhóm Mode/Percentage/Emoji và Apply panel dính đáy. Mode `Fake Battery` hiển thị số giả tới 999% còn `Real Battery` khoá nút Edit; `Random` làm mờ 30% và vô hiệu cả hai picker Emoji/Battery vì lúc đó artwork tự xoay vòng theo chu kỳ. Apply ghi vào cùng `BatteryStatusConfig` mà status-bar cover đang chạy nên không có surface hiển thị riêng |
 | `premium/{startByIndex}` | `ui/premium/PremiumScreen` | Subscription UI, close behavior theo entry source |
 
 ## Visual scope hiện tại

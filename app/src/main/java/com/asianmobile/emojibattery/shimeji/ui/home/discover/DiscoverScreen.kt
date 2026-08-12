@@ -98,6 +98,7 @@ fun DiscoverScreen(
     onNavigateToSearch: () -> Unit,
     onNavigateToPremium: () -> Unit,
     onNavigateToBattery: () -> Unit,
+    onNavigateToBatteryTroll: () -> Unit,
     onNavigateToPetStore: () -> Unit,
     onNavigateToMyPet: () -> Unit,
     onNavigateToGrantPermissions: () -> Unit,
@@ -174,6 +175,7 @@ fun DiscoverScreen(
                 onPremium = onNavigateToPremium,
                 onBatteryToggle = viewModel::onBatteryToggle,
                 onBattery = onNavigateToBattery,
+                onBatteryTroll = onNavigateToBatteryTroll,
                 onPetStore = onNavigateToPetStore,
                 onOpenPet = { packKey ->
                     petStoreState.pets.firstOrNull { it.installedPackKey == packKey }
@@ -313,6 +315,7 @@ private fun DiscoverContent(
     onPremium: () -> Unit,
     onBatteryToggle: () -> Unit,
     onBattery: () -> Unit,
+    onBatteryTroll: () -> Unit,
     onPetStore: () -> Unit,
     onOpenPet: (String) -> Unit,
     onOpenTheme: (Int) -> Unit,
@@ -368,7 +371,7 @@ private fun DiscoverContent(
                             onCheckedChange = onBatteryToggle
                         )
                     }
-                    item { DiscoverBatteryTrollBanner(onClick = onBattery) }
+                    item { DiscoverBatteryTrollBanner(onClick = onBatteryTroll) }
                     item {
                         Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
                         BatteryThemesSection(
@@ -987,6 +990,7 @@ private fun DiscoverContentPreview() {
         onPremium = {},
         onBatteryToggle = {},
         onBattery = {},
+        onBatteryTroll = {},
         onPetStore = {},
         onOpenPet = {},
         onOpenTheme = {},

@@ -19,6 +19,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFont
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFormat
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusDisplayMode
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollMode
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BACKGROUND_COLOR
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BACKGROUND_ID
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_EMOJI_SIZE_DP
@@ -27,6 +28,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_HORIZONTA
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_ICON_SIZE_DP
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_EMOTION_ID
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_PRIVACY_RESERVE_DP
+import com.asianmobile.emojibattery.shimeji.data.model.NO_BATTERY_TROLL_THEME_ID
 import com.asianmobile.emojibattery.shimeji.data.model.normalizeSelectableBatteryThemeId
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -149,6 +151,15 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                 sanitized.favoriteThemeIds.map(Int::toString).toSet()
             preferences[REWARD_UNLOCKED_THEME_IDS] =
                 rewardUnlockedThemeIds.map(Int::toString).toSet()
+            preferences[TROLL_MODE] = sanitized.trollMode.name
+            preferences[TROLL_FAKE_PERCENT] = sanitized.trollFakePercent
+            preferences[TROLL_THEME_ID] = sanitized.trollThemeId
+            preferences[TROLL_EMOJI_LEVEL_INDEX] = sanitized.trollEmojiLevelIndex
+            preferences[TROLL_BATTERY_LEVEL_INDEX] = sanitized.trollBatteryLevelIndex
+            preferences[TROLL_RANDOM_ARTWORK] = sanitized.trollRandomArtwork
+            preferences[REWARD_UNLOCKED_TROLL_IDS] =
+                (decodeRewardUnlockedTrollIds(preferences) + sanitized.rewardUnlockedTrollIds)
+                    .map(Int::toString).toSet()
         }
     }
 
@@ -172,6 +183,15 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             val current = decodeFavoriteIds(preferences).toMutableSet()
             if (!current.add(themeId)) current.remove(themeId)
             preferences[FAVORITE_THEME_IDS] = current.map(Int::toString).toSet()
+        }
+    }
+
+    override fun unlockTrollByReward(trollId: Int) {
+        if (trollId <= NO_BATTERY_TROLL_THEME_ID) return
+        edit { preferences ->
+            val current = decodeRewardUnlockedTrollIds(preferences).toMutableSet()
+            current += trollId
+            preferences[REWARD_UNLOCKED_TROLL_IDS] = current.map(Int::toString).toSet()
         }
     }
 
@@ -292,7 +312,18 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                 privacyReserveDp = preferences[PRIVACY_RESERVE_DP]
                     ?: DEFAULT_BATTERY_PRIVACY_RESERVE_DP,
                 favoriteThemeIds = decodeFavoriteIds(preferences),
-                rewardUnlockedThemeIds = decodeRewardUnlockedIds(preferences)
+                rewardUnlockedThemeIds = decodeRewardUnlockedIds(preferences),
+                trollMode = preferences[TROLL_MODE]
+                    ?.let { name -> BatteryTrollMode.entries.firstOrNull { it.name == name } }
+                    ?: defaults.trollMode,
+                trollFakePercent = preferences[TROLL_FAKE_PERCENT] ?: defaults.trollFakePercent,
+                trollThemeId = preferences[TROLL_THEME_ID] ?: defaults.trollThemeId,
+                trollEmojiLevelIndex = preferences[TROLL_EMOJI_LEVEL_INDEX]
+                    ?: defaults.trollEmojiLevelIndex,
+                trollBatteryLevelIndex = preferences[TROLL_BATTERY_LEVEL_INDEX]
+                    ?: defaults.trollBatteryLevelIndex,
+                trollRandomArtwork = preferences[TROLL_RANDOM_ARTWORK] ?: defaults.trollRandomArtwork,
+                rewardUnlockedTrollIds = decodeRewardUnlockedTrollIds(preferences)
             )
         )
     }
@@ -302,6 +333,12 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             .orEmpty()
             .mapNotNull(String::toIntOrNull)
             .filterTo(mutableSetOf()) { it >= 0 }
+
+    private fun decodeRewardUnlockedTrollIds(preferences: Preferences): Set<Int> =
+        preferences[REWARD_UNLOCKED_TROLL_IDS]
+            .orEmpty()
+            .mapNotNull(String::toIntOrNull)
+            .filterTo(mutableSetOf()) { it > NO_BATTERY_TROLL_THEME_ID }
 
     private fun decodeRewardUnlockedIds(preferences: Preferences): Set<Int> =
         preferences[REWARD_UNLOCKED_THEME_IDS]
@@ -390,6 +427,14 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         val REWARD_UNLOCKED_THEME_IDS =
             stringSetPreferencesKey("battery_status_reward_unlocked_theme_ids")
         val HIDDEN_APP_PACKAGES = stringSetPreferencesKey("battery_status_hidden_app_packages")
+        val TROLL_MODE = stringPreferencesKey("battery_troll_mode")
+        val TROLL_FAKE_PERCENT = intPreferencesKey("battery_troll_fake_percent")
+        val TROLL_THEME_ID = intPreferencesKey("battery_troll_theme_id")
+        val TROLL_EMOJI_LEVEL_INDEX = intPreferencesKey("battery_troll_emoji_level_index")
+        val TROLL_BATTERY_LEVEL_INDEX = intPreferencesKey("battery_troll_battery_level_index")
+        val TROLL_RANDOM_ARTWORK = booleanPreferencesKey("battery_troll_random_artwork")
+        val REWARD_UNLOCKED_TROLL_IDS =
+            stringSetPreferencesKey("battery_troll_reward_unlocked_ids")
     }
 }
 

@@ -18,6 +18,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import com.airbnb.lottie.LottieComposition
 import com.airbnb.lottie.LottieDrawable
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.battery.troll.BatteryTrollPolicy
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -90,9 +91,11 @@ class BatteryStatusBarView(context: Context) : View(context) {
             ""
         }
         percentageText = if (this.powerState.present) {
+            // The clamped powerState.level still drives the battery fill below; only the text
+            // is allowed to lie, which is what makes Fake mode a prank instead of a bug.
             context.getString(
                 R.string.battery_overlay_percentage,
-                this.powerState.level
+                BatteryTrollPolicy.displayPercent(config, this.powerState.level)
             )
         } else {
             context.getString(R.string.battery_overlay_unavailable_short)

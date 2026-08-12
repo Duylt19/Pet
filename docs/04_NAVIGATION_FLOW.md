@@ -22,6 +22,8 @@
 | `battery_editor/{themeId}` | Customize Status Bar | Overview khởi tạo cặp pet+pin, cho phép đổi hai phần độc lập, giữ draft và live preview qua Accessibility |
 | `battery_editor_component/{themeId}/{page}` | Battery editor child | Library Battery/Emoji/Theme và từng status component; dùng chung ViewModel/draft với overview |
 | `battery_editor_emotion_detail/{themeId}/{groupKey}` | Emotion group detail | Grid 10 emotion của một pack; dùng đúng ViewModel/draft của overview và preview ghim |
+| `battery_troll` | Battery Troll Themes | Child destination từ hero Battery Troll ở Discover, **không phải** tab Home nên bottom navigation ẩn. Grid ba cột theme troll lấy từ catalog remote thứ tư; theme PREMIUM đi qua reward sheet dùng chung với Battery Styles |
+| `battery_troll_customize/{trollId}` | Battery Troll Customize | Chọn Fake/Real, phần trăm giả, cỡ chữ, emoji và mức pin của theme; Apply ghi vào cùng `BatteryStatusConfig` của status-bar cover. Back khi còn thay đổi chưa lưu sẽ hiện `BatteryDiscardChangesSheet` |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
 ## Flow

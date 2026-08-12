@@ -4,6 +4,7 @@ import android.content.Context
 import com.asianmobile.emojibattery.shimeji.data.local.DataStoreManager
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.BatteryTrollCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.InstalledAppsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetCareRepository
@@ -12,6 +13,7 @@ import com.asianmobile.emojibattery.shimeji.data.repository.PetRoomCatalogReposi
 import com.asianmobile.emojibattery.shimeji.data.repository.PetRoomRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetStoreRepository
+import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollCatalogParser
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.BatteryCatalogParser
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStoreBatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStorePetCareRepository
@@ -20,6 +22,7 @@ import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStorePetRoo
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStorePetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStorePetStoreRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.HybridBatteryCatalogRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.impl.HybridBatteryTrollCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.PackageManagerInstalledAppsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.OwnerPetCatalogParser
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.RemoteOwnerPetCatalogRepository
@@ -73,6 +76,10 @@ object DataModule {
 
     @Provides
     @Singleton
+    fun provideBatteryTrollCatalogParser(): BatteryTrollCatalogParser = BatteryTrollCatalogParser()
+
+    @Provides
+    @Singleton
     fun providePetPackRepository(
         repository: FilePetPackRepository
     ): PetPackRepository = repository
@@ -100,6 +107,12 @@ object DataModule {
     fun provideBatteryCatalogRepository(
         repository: HybridBatteryCatalogRepository
     ): BatteryCatalogRepository = repository
+
+    @Provides
+    @Singleton
+    fun provideBatteryTrollCatalogRepository(
+        repository: HybridBatteryTrollCatalogRepository
+    ): BatteryTrollCatalogRepository = repository
 
     @Provides
     @Singleton

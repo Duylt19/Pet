@@ -119,6 +119,8 @@ its `master` branch over `raw.githubusercontent.com`.
 | Pets | `PetServerConfig` | `json/pets.json` + `data/<id>.zip` + `thumb/<id>.png` |
 | Battery | `BatteryServerConfig` | `json/batteries.json` + `battery/**` |
 | Rooms | `RoomServerConfig` | `json/rooms.json` + `room/bg|thumb/BG_<id>.png` |
+| Battery Troll | `BatteryTrollServerConfig` | `json/battery-troll.json` + `troll/thumb|emoji|battery/TROLL_<id>*.webp` |
+| Battery Troll | `BatteryTrollServerConfig` | `json/battery-troll.json` + `troll/thumb|emoji|battery/TROLL_<id>*.webp` |
 
 Every catalog follows the same contract: the repo is **private**, so requests carry
 `Authorization: Bearer <token>` where the token comes from the Firebase Remote Config key

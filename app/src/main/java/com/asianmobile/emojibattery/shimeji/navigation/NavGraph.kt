@@ -36,6 +36,8 @@ import com.asianmobile.emojibattery.shimeji.ui.home.discover.DiscoverScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.favoriterecent.FavouriteRecentScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogViewModel
+import com.asianmobile.emojibattery.shimeji.ui.battery.troll.BatteryTrollCustomizeScreen
+import com.asianmobile.emojibattery.shimeji.ui.battery.troll.BatteryTrollScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCategoryScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.CURRENT_BATTERY_STYLE_ID
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorPage
@@ -79,6 +81,8 @@ object Routes {
     const val BATTERY_EDITOR = "battery_editor"
     const val BATTERY_EDITOR_COMPONENT = "battery_editor_component"
     const val BATTERY_EDITOR_EMOTION_DETAIL = "battery_editor_emotion_detail"
+    const val BATTERY_TROLL = "battery_troll"
+    const val BATTERY_TROLL_CUSTOMIZE = "battery_troll_customize"
     const val PREMIUM = "premium"
 
     fun batteryEditor(themeId: Int): String = "$BATTERY_EDITOR/$themeId"
@@ -86,6 +90,7 @@ object Routes {
         "$GRANT_PERMISSIONS?$GRANT_PERMISSIONS_REQUIRED_TARGET=" +
             GRANT_PERMISSIONS_OVERLAY_TARGET
     fun batteryCategory(categoryId: Int): String = "$BATTERY_CATEGORY/$categoryId"
+    fun batteryTrollCustomize(trollId: Int): String = "$BATTERY_TROLL_CUSTOMIZE/$trollId"
     fun batteryEditorComponent(themeId: Int, page: String): String =
         "$BATTERY_EDITOR_COMPONENT/$themeId/$page"
     fun batteryEditorEmotionDetail(themeId: Int, groupKey: String): String =
@@ -125,10 +130,13 @@ internal fun routeForHomeTab(tab: HomeTab): String = when (tab) {
 }
 
 internal fun showHomeBottomBanner(route: String?): Boolean =
-    homeTabForRoute(route) != null || route?.startsWith("${Routes.BATTERY_CATEGORY}/") == true
+    homeTabForRoute(route) != null ||
+        route?.startsWith("${Routes.BATTERY_CATEGORY}/") == true ||
+        route == Routes.BATTERY_TROLL
 
 internal fun showBatteryEditorBottomBanner(route: String?): Boolean =
-    route?.startsWith("${Routes.BATTERY_EDITOR}/") == true ||
+    route?.startsWith("${Routes.BATTERY_TROLL_CUSTOMIZE}/") == true ||
+        route?.startsWith("${Routes.BATTERY_EDITOR}/") == true ||
         route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true ||
         route?.startsWith("${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/") == true
 
@@ -321,6 +329,9 @@ fun AppNavGraph(
                     },
                     onNavigateToBattery = {
                         navigateToHomeTab(HomeTab.BATTERY)
+                    },
+                    onNavigateToBatteryTroll = {
+                        navController.safeNavigate(Routes.BATTERY_TROLL, ignoreDebounce = true)
                     },
                     onNavigateToPetStore = {
                         navigateToHomeTab(HomeTab.PET_STORE)
@@ -648,6 +659,35 @@ fun AppNavGraph(
                         }
                     },
                     accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
+                    onAccessibilityHowToUseResultConsumed =
+                        backStackEntry::consumeAccessibilityHowToUseResult,
+                    onNavigateToAccessibilityHowToUse = {
+                        navigateToAccessibilityHowToUse(backStackEntry)
+                    }
+                )
+            }
+
+            composable(Routes.BATTERY_TROLL) {
+                BatteryTrollScreen(
+                    onNavigateBack = { navController.safePopBackStack() },
+                    onNavigateToCustomize = { trollId ->
+                        navController.safeNavigate(
+                            Routes.batteryTrollCustomize(trollId),
+                            ignoreDebounce = true
+                        )
+                    },
+                    onPremium = { navigateFromHome(Routes.PREMIUM) }
+                )
+            }
+
+            composable(
+                route = "${Routes.BATTERY_TROLL_CUSTOMIZE}/{trollId}",
+                arguments = listOf(navArgument("trollId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                BatteryTrollCustomizeScreen(
+                    onNavigateBack = { navController.safePopBackStack() },
+                    accessibilityHowToUseResult =
+                        backStackEntry.accessibilityHowToUseResult(),
                     onAccessibilityHowToUseResultConsumed =
                         backStackEntry::consumeAccessibilityHowToUseResult,
                     onNavigateToAccessibilityHowToUse = {

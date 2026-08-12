@@ -62,8 +62,28 @@ data class BatteryStatusConfig(
     val clockSizeDp: Float = DEFAULT_BATTERY_STATUS_ICON_SIZE_DP,
     val privacyReserveDp: Float = DEFAULT_BATTERY_PRIVACY_RESERVE_DP,
     val favoriteThemeIds: Set<Int> = emptySet(),
-    val rewardUnlockedThemeIds: Set<Int> = emptySet()
+    val rewardUnlockedThemeIds: Set<Int> = emptySet(),
+    // Battery Troll rides this same config: it only changes which number is written and
+    // which artwork is drawn, never how the status bar is attached.
+    val trollMode: BatteryTrollMode = BatteryTrollMode.REAL,
+    val trollFakePercent: Int = DEFAULT_BATTERY_TROLL_FAKE_PERCENT,
+    val trollThemeId: Int = NO_BATTERY_TROLL_THEME_ID,
+    val trollEmojiLevelIndex: Int = 0,
+    val trollBatteryLevelIndex: Int = 0,
+    val trollRandomArtwork: Boolean = false,
+    // Separate from rewardUnlockedThemeIds: troll ids and battery theme ids are different
+    // spaces, so sharing one set would silently unlock unrelated content.
+    val rewardUnlockedTrollIds: Set<Int> = emptySet()
 )
+
+/**
+ * `FAKE` shows [BatteryStatusConfig.trollFakePercent] instead of the real charge level.
+ * The real level still drives nothing else — charging state and icons stay truthful.
+ */
+enum class BatteryTrollMode {
+    REAL,
+    FAKE
+}
 
 enum class BatteryStatusDisplayMode {
     BELOW_SYSTEM_BAR,
@@ -130,6 +150,16 @@ const val MAX_BATTERY_STATUS_ICON_STYLE_INDEX = 4
 const val DEFAULT_BATTERY_BACKGROUND_COLOR = 0xFFE0F7F1.toInt()
 const val DEFAULT_BATTERY_FOREGROUND_COLOR = 0xFF111827.toInt()
 const val DEFAULT_BATTERY_STATUS_ICON_COLOR = 0xFF000000.toInt()
+
+// ID 0 means "no troll theme selected", so the normal battery/emoji artwork is used.
+const val NO_BATTERY_TROLL_THEME_ID = 0
+// Every troll theme ships exactly five emoji states and five battery levels, full to empty.
+const val BATTERY_TROLL_LEVEL_COUNT = 5
+const val MIN_BATTERY_TROLL_FAKE_PERCENT = 0
+const val MAX_BATTERY_TROLL_FAKE_PERCENT = 999
+const val DEFAULT_BATTERY_TROLL_FAKE_PERCENT = 999
+// Random mode rotates the emoji on a timer rather than tracking the real charge level.
+const val BATTERY_TROLL_RANDOM_ROTATION_MS = 60_000L
 
 fun normalizeSelectableBatteryThemeId(themeId: Int): Int =
     themeId.coerceAtLeast(DEFAULT_BATTERY_THEME_ID)

@@ -36,6 +36,14 @@ Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/ut
 - Overlay disclosure dùng cùng placement `screen_permission`, template `AdType.HEIGHT_222` và
   `instanceKey=overlay_permission_disclosure`. Sheet dùng chung cho onboarding Permission, Grant
   Permissions và switch Pet Store; native collapse theo policy chung khi không có ad/Premium.
+- Battery Troll không tạo placement mới. Grid theme dùng lại banner inline
+  `battery_category_inline` cho slot 328×50 ở đầu lưới, và reward sheet dùng lại
+  `RewardOfferSheet` + native `screen_permission`/`HEIGHT_222` y như Battery Styles. Lý do là
+  hai màn cùng một ngữ cảnh (chọn theme pin, mở khoá bằng rewarded), nên tách placement chỉ
+  làm loãng báo cáo chứ không đổi hành vi. Nếu sau này cần đo riêng doanh thu Troll thì thêm
+  `BANNER_BATTERY_TROLL_INLINE` trong `:ads` — đó là một product decision, không phải refactor.
+  Màn Customize không có native ad: giống Full/Component Editor, không chen quảng cáo vào
+  thao tác tinh chỉnh và không che preview/Apply.
 - Search tái sử dụng native placement `screen_home` ở đáy màn hình và banner SDK
   `search_inline` trong content theo Figma; cả hai vẫn tuân theo remote key, frequency/ad-free
   policy và failure fallback chung của module ads.

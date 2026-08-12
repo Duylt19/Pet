@@ -52,6 +52,8 @@ class ScreenNameTest {
             "battery_ringer_editor",
             "battery_charge_editor",
             "battery_date_time_editor",
+            "battery_troll",
+            "battery_troll_customize",
             "premium",
             "settings"
         )

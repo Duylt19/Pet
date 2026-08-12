@@ -786,6 +786,26 @@
     <string name="battery_slider_value">%1$s · %2$d dp</string>
     <string name="battery_apply">Apply</string>
     <string name="battery_disable">Turn off battery bar</string>
+    <string name="battery_troll_title">Battery Troll Themes</string>
+    <string name="battery_troll_customize_title">Customize</string>
+    <string name="battery_troll_mode">Mode</string>
+    <string name="battery_troll_mode_fake">Fake Battery</string>
+    <string name="battery_troll_mode_real">Real Battery</string>
+    <string name="battery_troll_mode_hint">Display a fake battery percentage to prank others.</string>
+    <string name="battery_troll_edit">Edit</string>
+    <string name="battery_troll_percent_value">%1$d%%</string>
+    <string name="battery_troll_percentage">Percentage</string>
+    <string name="battery_troll_size">Size</string>
+    <string name="battery_troll_emoji">Emoji</string>
+    <string name="battery_troll_battery">Battery</string>
+    <string name="battery_troll_custom">Custom</string>
+    <string name="battery_troll_custom_hint">Use only one funny message.</string>
+    <string name="battery_troll_random">Random</string>
+    <string name="battery_troll_edit_title">Fake battery level</string>
+    <string name="battery_troll_edit_message">Pick the percentage other people will see.</string>
+    <string name="battery_troll_edit_confirm">Save</string>
+    <string name="battery_troll_theme_locked">Premium theme</string>
+    <string name="battery_troll_empty">No troll themes yet. Pull to refresh.</string>
     <string name="battery_preview_time" translatable="false">09:41</string>
     <string name="battery_preview_percentage" translatable="false">82%</string>
     <string name="battery_preview_date" translatable="false">Thu 30</string>

@@ -1,8 +1,12 @@
 package com.asianmobile.emojibattery.shimeji.battery.settings
 
+import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_TROLL_LEVEL_COUNT
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusDisplayMode
+import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_TROLL_FAKE_PERCENT
+import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_TROLL_FAKE_PERCENT
+import com.asianmobile.emojibattery.shimeji.data.model.NO_BATTERY_TROLL_THEME_ID
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BACKGROUND_COLOR
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_ANIMATION_ASSET
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_ANIMATION_SIZE_DP
@@ -97,8 +101,19 @@ class BatterySettingsPolicy(
         clockColorArgb = config.clockColorArgb.statusColor(),
         favoriteThemeIds = config.favoriteThemeIds.filterTo(mutableSetOf()) { it >= 0 },
         rewardUnlockedThemeIds = config.rewardUnlockedThemeIds
-            .filterTo(mutableSetOf()) { it > BUILT_IN_BATTERY_THEME_ID }
+            .filterTo(mutableSetOf()) { it > BUILT_IN_BATTERY_THEME_ID },
+        trollThemeId = config.trollThemeId.coerceAtLeast(NO_BATTERY_TROLL_THEME_ID),
+        trollFakePercent = config.trollFakePercent.coerceIn(
+            MIN_BATTERY_TROLL_FAKE_PERCENT,
+            MAX_BATTERY_TROLL_FAKE_PERCENT
+        ),
+        trollEmojiLevelIndex = config.trollEmojiLevelIndex.trollLevel(),
+        trollBatteryLevelIndex = config.trollBatteryLevelIndex.trollLevel(),
+        rewardUnlockedTrollIds = config.rewardUnlockedTrollIds
+            .filterTo(mutableSetOf()) { it > NO_BATTERY_TROLL_THEME_ID }
     )
+
+    private fun Int.trollLevel(): Int = coerceIn(0, BATTERY_TROLL_LEVEL_COUNT - 1)
 
     private fun sanitizeColor(color: Int, fallback: Int): Int =
         if ((color ushr 24) == 0) fallback else color

@@ -60,6 +60,11 @@
 | `battery_status_emotion_decoration_id` | Int | Emotion asset ID |
 | `battery_status_hidden_app_packages` | String set | Package của app mà user chọn để tạm ẩn Emoji Battery; lưu cục bộ trên thiết bị |
 | `battery_status_favorite_theme_ids` | String set | Favorite local |
+| `battery_troll_mode` | String enum | `REAL` giữ mức pin thật, `FAKE` ghi số giả lên status bar |
+| `battery_troll_fake_percent` | Int | Số phần trăm giả, clamp 0–999 |
+| `battery_troll_theme_id` | Int | Theme troll đang dùng; `0` nghĩa là không dùng, artwork quay về theme battery thường |
+| `battery_troll_emoji_level_index`, `battery_troll_battery_level_index` | Int | Chỉ số 0–4 trong năm asset của theme, 0 = đầy … 4 = cạn |
+| `battery_troll_random_artwork` | Boolean | `true` thì emoji và pin tự xoay vòng theo chu kỳ và user không chọn tay được nữa |
 
 Language được mirror sang SharedPreferences `language_cache` để có thể đọc sớm khi attach locale trước khi DataStore async emit.
 
@@ -218,6 +223,26 @@ không được restore sau process death/reboot.
   catalog, nên phòng luôn có nền kể cả lần chạy đầu hoặc khi offline. Background của room
   khác chỉ tải khi user chạm vào card đó, verify SHA-256 xong mới được áp dụng; thumbnail
   vẫn tải sẵn vì chỉ vài chục KB.
+
+## Battery Troll catalog
+
+- Catalog remote thứ tư: `json/battery-troll.json` + asset root `troll/`, đọc qua
+  `BatteryTrollServerConfig` với đúng token, TTL 24h, ETag, backoff và verify size/SHA-256
+  như ba catalog kia. Release chỉ chấp nhận `APPROVED`; debug chấp nhận cả
+  `REVIEW_REQUIRED`. **Không có bundled fallback** — thiếu mạng thì snapshot rỗng kèm
+  typed error, vì Battery Troll là feature tuỳ chọn chứ không phải nền tảng của màn nào.
+- `BatteryTrollEntry` gồm `id, name, slug, order, entitlement, batteryOrientation` và đúng
+  **11 asset**: một thumbnail, năm emoji và năm mức pin. Parser từ chối catalog nếu một
+  trong hai mảng không đúng năm phần tử, vì `BatteryTrollPolicy` đánh chỉ số 0–4 và một
+  mảng ngắn hơn sẽ thành crash lúc vẽ chứ không phải lỗi hiển thị.
+- `batteryOrientation` tồn tại vì theme 4 có vỏ pin dọc trong khi chín theme còn lại nằm
+  ngang; renderer cần biết trước để bố trí, không suy ra từ ảnh lúc chạy.
+- Hàng preview ghép sẵn trong Figma **không** được ship. Runtime tự chồng
+  `emoji[index]` lên `battery[index]`, nên hai lớp luôn cùng một mức và không phải tải
+  thêm 50 ảnh.
+- Config troll nằm chung trong `BatteryStatusConfig` chứ không có store riêng: Battery
+  Troll chỉ đổi *số nào được viết* và *artwork nào được vẽ*, không đổi cách status bar
+  được gắn.
 
 ## Không có database
 

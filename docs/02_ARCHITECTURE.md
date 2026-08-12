@@ -134,6 +134,17 @@ ui/<domain>/<feature>/
 - Danh sách exclusion do `BatterySettingsRepository.hiddenAppPackages` persist cục bộ.
   Accessibility event chỉ cung cấp foreground package để áp rule show/hide; service vẫn không
   retrieve window content, node tree, gesture hoặc global action.
+- Battery Troll là một chế độ của chính service này, không phải overlay riêng. Khi
+  `trollThemeId` khác `0`, emoji và pin lấy từ `BatteryTrollCatalogRepository` theo chỉ số
+  mức pin thay vì từ battery catalog; mọi thành phần còn lại của thanh giữ nguyên. Quyết
+  định chọn path nằm ở `BatteryTrollAssetPolicy` (Kotlin thuần), còn service chỉ
+  materialize/decode. Theme troll đã chọn nhưng chưa có trong catalog — chưa tải, offline,
+  hoặc bị gỡ trên server — phải rơi về theme battery thường chứ không được để thanh trống.
+- Chế độ Fake chỉ đổi **chuỗi phần trăm**; `powerState.level` vẫn bị clamp 0–100 và vẫn
+  điều khiển độ đầy icon. Tách hai thứ này là lý do 999% là trò đùa chứ không phải bug.
+- Random artwork tự hẹn lại lần vẽ kế tiếp đúng mốc chu kỳ bằng một `Runnable` cố định.
+  Không dùng `::render` cho `postDelayed` vì mỗi lần tham chiếu tạo một instance mới nên
+  `removeCallbacks` sẽ không huỷ được, và callback còn treo sau khi overlay detach là rò pin.
 - `COVER_SYSTEM_BAR` là lớp phủ best-effort theo OEM, không sửa SystemUI. Release vẫn cần
   Play policy/device-matrix gate.
 

@@ -1,0 +1,860 @@
+package com.asianmobile.emojibattery.shimeji.ui.battery.troll
+
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImage
+import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_TROLL_LEVEL_COUNT
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntry
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollMode
+import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_TROLL_FAKE_PERCENT
+import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_TROLL_FAKE_PERCENT
+import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollServerConfig
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.DismissibleDialogBackdrop
+import kotlin.math.roundToInt
+import com.intuit.sdp.R as SdpR
+import com.intuit.ssp.R as SspR
+
+/**
+ * The controls that only Battery Troll Customize has (Figma `8315:8232` / `8359:6992`). Anything
+ * the app already owns — `AppSwitch`, `HomeEnableCard`, `BatteryDiscardChangesSheet` — is reused
+ * from its own file instead of being redrawn here.
+ */
+
+internal val CustomizeRobotoRegular = FontFamily(Font(R.font.roboto_regular))
+internal val CustomizeRobotoMedium = FontFamily(Font(R.font.roboto_medium))
+internal val CustomizeRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
+
+/** Random mode keeps the picked artwork visible but stops it being a control. */
+internal const val TROLL_DISABLED_ALPHA = 0.30f
+
+/** Same sky the battery catalog and the editor sit on, so the flow keeps one background. */
+@Composable
+internal fun TrollWallpaper() {
+    Image(
+        painter = painterResource(R.drawable.img_home_wallpaper),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        alignment = Alignment.TopCenter,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.colors_FFFFFF))
+    )
+}
+
+/**
+ * The 360x48 themed strip at the top of the screen: it writes the number the prank will show and
+ * the artwork the two pickers below selected — so the user judges the result, not the controls.
+ */
+@Composable
+internal fun TrollStatusBarPreview(
+    troll: BatteryTrollEntry?,
+    percent: Int,
+    emojiLevelIndex: Int,
+    batteryLevelIndex: Int,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._37sdp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._20sdp))
+                .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
+            ) {
+                Text(
+                    text = stringResource(R.string.battery_preview_time),
+                    color = colorResource(R.color.colors_000000),
+                    fontFamily = CustomizeRobotoSemiBold,
+                    fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._17ssp).value.sp
+                )
+                TrollArtwork(
+                    path = troll?.emojiPaths?.getOrNull(emojiLevelIndex),
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._20sdp))
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._5sdp))
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_status_signal_steps),
+                    contentDescription = null,
+                    tint = colorResource(R.color.colors_000000),
+                    modifier = Modifier.size(
+                        width = dimensionResource(SdpR.dimen._15sdp),
+                        height = dimensionResource(SdpR.dimen._9sdp)
+                    )
+                )
+                Icon(
+                    painter = painterResource(R.drawable.ic_status_wifi_waves),
+                    contentDescription = null,
+                    tint = colorResource(R.color.colors_000000),
+                    modifier = Modifier.size(
+                        width = dimensionResource(SdpR.dimen._13sdp),
+                        height = dimensionResource(SdpR.dimen._9sdp)
+                    )
+                )
+                Text(
+                    text = stringResource(R.string.battery_troll_percent_value, percent),
+                    color = colorResource(R.color.colors_000000),
+                    fontFamily = CustomizeRobotoMedium,
+                    fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._14ssp).value.sp
+                )
+                TrollArtwork(
+                    path = troll?.batteryPaths?.getOrNull(batteryLevelIndex),
+                    modifier = Modifier.size(
+                        width = dimensionResource(SdpR.dimen._22sdp),
+                        height = dimensionResource(SdpR.dimen._12sdp)
+                    )
+                )
+            }
+        }
+    }
+}
+
+/** Same top navigation as the editor's compact bar, minus the PRO pill Figma drops here. */
+@Composable
+internal fun TrollCustomizeTopBar(
+    title: String,
+    onBack: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._43sdp))
+            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_favorite_recent_back),
+            contentDescription = stringResource(R.string.back),
+            tint = colorResource(R.color.colors_212327),
+            modifier = Modifier
+                .size(dimensionResource(SdpR.dimen._22sdp))
+                .clip(CircleShape)
+                .clickable(role = Role.Button, onClick = onBack)
+        )
+        Text(
+            text = title,
+            color = colorResource(R.color.colors_212327),
+            fontFamily = CustomizeRobotoSemiBold,
+            fontSize = dimensionResource(SspR.dimen._15ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._22ssp).value.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+internal fun TrollSectionHeader(title: String) {
+    Text(
+        text = title,
+        color = colorResource(R.color.colors_212327),
+        fontFamily = CustomizeRobotoSemiBold,
+        fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
+        lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp
+    )
+}
+
+@Composable
+internal fun TrollCard(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
+    val shadowColor = colorResource(R.color.colors_666666).copy(alpha = 0.12f)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = dimensionResource(SdpR.dimen._6sdp),
+                shape = shape,
+                ambientColor = shadowColor,
+                spotColor = shadowColor
+            )
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFFFFF))
+            .padding(dimensionResource(SdpR.dimen._12sdp)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp)),
+        content = content
+    )
+}
+
+@Composable
+internal fun TrollModeSegmentedControl(
+    mode: BatteryTrollMode,
+    onModeChange: (BatteryTrollMode) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._34sdp))
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFFFFF))
+            .border(
+                width = dimensionResource(SdpR.dimen._1sdp),
+                color = colorResource(R.color.colors_FEC1D4),
+                shape = shape
+            )
+            .padding(dimensionResource(SdpR.dimen._3sdp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TrollModeSegment(
+            label = stringResource(R.string.battery_troll_mode_fake),
+            selected = mode == BatteryTrollMode.FAKE,
+            onClick = { onModeChange(BatteryTrollMode.FAKE) },
+            modifier = Modifier.weight(1f)
+        )
+        TrollModeSegment(
+            label = stringResource(R.string.battery_troll_mode_real),
+            selected = mode == BatteryTrollMode.REAL,
+            onClick = { onModeChange(BatteryTrollMode.REAL) },
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun TrollModeSegment(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+    Box(
+        modifier = modifier
+            .height(dimensionResource(SdpR.dimen._28sdp))
+            .clip(shape)
+            .background(
+                if (selected) colorResource(R.color.colors_FB3675) else Color.Transparent
+            )
+            .clickable(role = Role.Tab, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            color = colorResource(
+                if (selected) R.color.colors_FFFFFF else R.color.colors_6F7073
+            ),
+            fontFamily = CustomizeRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+internal fun TrollInfoChip(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
+            .background(colorResource(R.color.colors_FFEBF1))
+            .padding(
+                horizontal = dimensionResource(SdpR.dimen._6sdp),
+                vertical = dimensionResource(SdpR.dimen._5sdp)
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_info_rounded),
+            contentDescription = null,
+            tint = colorResource(R.color.colors_FB3675),
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._12sdp))
+        )
+        Text(
+            text = text,
+            color = colorResource(R.color.colors_FB3675),
+            fontFamily = CustomizeRobotoRegular,
+            fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+/** Real mode has no number to type, so the chip greys out instead of disappearing. */
+@Composable
+internal fun TrollEditChip(
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val contentColor = colorResource(
+        if (enabled) R.color.colors_6F7073 else R.color.colors_DEDEDF
+    )
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp))
+    Row(
+        modifier = modifier
+            .width(dimensionResource(SdpR.dimen._65sdp))
+            .height(dimensionResource(SdpR.dimen._25sdp))
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFFFFF))
+            .border(width = dimensionResource(SdpR.dimen._1sdp), color = contentColor, shape = shape)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_edit),
+            contentDescription = null,
+            tint = contentColor,
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._12sdp))
+        )
+        Text(
+            text = stringResource(R.string.battery_troll_edit),
+            color = contentColor,
+            fontFamily = CustomizeRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp,
+            maxLines = 1
+        )
+    }
+}
+
+/**
+ * The 96x96 preview in the Mode card: the picked battery with the picked character sitting on it,
+ * which is how the pair will read once the status bar is covered.
+ */
+@Composable
+internal fun TrollThemePreview(
+    troll: BatteryTrollEntry?,
+    emojiLevelIndex: Int,
+    batteryLevelIndex: Int,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.size(dimensionResource(SdpR.dimen._74sdp)),
+        contentAlignment = Alignment.Center
+    ) {
+        TrollArtwork(
+            path = troll?.batteryPaths?.getOrNull(batteryLevelIndex),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._49sdp))
+        )
+        TrollArtwork(
+            path = troll?.emojiPaths?.getOrNull(emojiLevelIndex),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .size(dimensionResource(SdpR.dimen._43sdp))
+        )
+    }
+}
+
+/**
+ * Figma's slider: a 12dp pill track with a 4x38 bar thumb. Material's `Slider` draws a round
+ * thumb it will not give up, so the geometry is drawn directly instead of fighting it.
+ */
+@Composable
+internal fun TrollSizeSlider(
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    enabled: Boolean,
+    onValueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val span = (range.endInclusive - range.start).takeIf { it > 0f } ?: 1f
+    val fraction = ((value - range.start) / span).coerceIn(0f, 1f)
+    val thumbWidth = dimensionResource(SdpR.dimen._3sdp)
+    var trackWidthPx by remember { mutableIntStateOf(0) }
+
+    fun valueAt(positionX: Float, widthPx: Int, thumbPx: Float): Float {
+        val usable = (widthPx - thumbPx).coerceAtLeast(1f)
+        val ratio = ((positionX - thumbPx / 2f) / usable).coerceIn(0f, 1f)
+        return range.start + ratio * span
+    }
+
+    Box(
+        modifier = modifier
+            .height(dimensionResource(SdpR.dimen._37sdp))
+            .onSizeChanged { trackWidthPx = it.width }
+            .pointerInput(enabled, range) {
+                if (!enabled) return@pointerInput
+                val thumbPx = thumbWidth.toPx()
+                detectTapGestures { offset ->
+                    onValueChange(valueAt(offset.x, size.width, thumbPx))
+                }
+            }
+            .pointerInput(enabled, range) {
+                if (!enabled) return@pointerInput
+                val thumbPx = thumbWidth.toPx()
+                detectHorizontalDragGestures { change, _ ->
+                    onValueChange(valueAt(change.position.x, size.width, thumbPx))
+                }
+            },
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._9sdp))
+                .clip(CircleShape)
+                .background(colorResource(R.color.colors_FFEBF1))
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(fraction)
+                .height(dimensionResource(SdpR.dimen._9sdp))
+                .clip(CircleShape)
+                .background(colorResource(R.color.colors_FB3675))
+        )
+        Box(
+            modifier = Modifier
+                .offset {
+                    val thumbPx = thumbWidth.roundToPx()
+                    IntOffset(
+                        x = (fraction * (trackWidthPx - thumbPx).coerceAtLeast(0)).roundToInt(),
+                        y = 0
+                    )
+                }
+                .size(width = thumbWidth, height = dimensionResource(SdpR.dimen._29sdp))
+                .clip(CircleShape)
+                .background(colorResource(R.color.colors_FB3675))
+        )
+    }
+}
+
+@Composable
+internal fun TrollRadioOption(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.clickable(role = Role.RadioButton, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
+    ) {
+        Icon(
+            painter = painterResource(
+                if (selected) R.drawable.ic_radio_selected else R.drawable.ic_radio_unselected
+            ),
+            contentDescription = null,
+            tint = Color.Unspecified,
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
+        )
+        Text(
+            text = label,
+            color = colorResource(R.color.colors_212327),
+            fontFamily = CustomizeRobotoRegular,
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+            maxLines = 1
+        )
+    }
+}
+
+/**
+ * One artwork picker (Emoji or Battery). [enabled] is Random mode: the block keeps its highlight
+ * so the user still sees what is stored, but at 30% and deaf to taps.
+ */
+@Composable
+internal fun TrollArtworkBlock(
+    @DrawableRes iconRes: Int,
+    label: String,
+    paths: List<String>,
+    selectedIndex: Int,
+    enabled: Boolean,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    trailingSwitch: (@Composable () -> Unit)? = null
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .alpha(if (enabled) 1f else TROLL_DISABLED_ALPHA),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._18sdp)),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp)),
+                modifier = Modifier.weight(1f)
+            ) {
+                Image(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._12sdp))
+                )
+                Text(
+                    text = label,
+                    color = colorResource(R.color.colors_212327),
+                    fontFamily = CustomizeRobotoMedium,
+                    fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            trailingSwitch?.invoke()
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
+        ) {
+            repeat(BATTERY_TROLL_LEVEL_COUNT) { index ->
+                TrollArtworkTile(
+                    path = paths.getOrNull(index),
+                    selected = index == selectedIndex,
+                    enabled = enabled,
+                    onClick = { onSelect(index) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TrollArtworkTile(
+    path: String?,
+    selected: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp))
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .clip(shape)
+            .background(
+                colorResource(
+                    if (selected) R.color.colors_FFEBF1 else R.color.colors_FFFFFF
+                )
+            )
+            .border(
+                width = dimensionResource(SdpR.dimen._1sdp),
+                color = colorResource(
+                    if (selected) R.color.colors_FB3675 else R.color.colors_DEDEDF
+                ),
+                shape = shape
+            )
+            .clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        TrollArtwork(
+            path = path,
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._32sdp))
+        )
+    }
+}
+
+/** Catalog art is remote, so every troll image goes through the same resolver. */
+@Composable
+internal fun TrollArtwork(
+    path: String?,
+    modifier: Modifier = Modifier
+) {
+    if (path.isNullOrBlank()) {
+        Spacer(modifier)
+        return
+    }
+    AsyncImage(
+        model = BatteryTrollServerConfig.resolve(path),
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun TrollApplyPanel(
+    onApply: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(
+        topStart = dimensionResource(SdpR.dimen._18sdp),
+        topEnd = dimensionResource(SdpR.dimen._18sdp)
+    )
+    val shadowColor = colorResource(R.color.colors_000000).copy(alpha = 0.10f)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = dimensionResource(SdpR.dimen._3sdp),
+                shape = shape,
+                ambientColor = shadowColor,
+                spotColor = shadowColor
+            )
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFFFFF))
+            .padding(
+                start = dimensionResource(SdpR.dimen._12sdp),
+                top = dimensionResource(SdpR.dimen._18sdp),
+                end = dimensionResource(SdpR.dimen._12sdp),
+                bottom = dimensionResource(SdpR.dimen._9sdp)
+            )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._37sdp))
+                .clip(CircleShape)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            colorResource(R.color.colors_C95DFF),
+                            colorResource(R.color.colors_FB54BB)
+                        )
+                    )
+                )
+                .clickable(role = Role.Button, onClick = onApply),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.battery_apply),
+                color = colorResource(R.color.colors_FFFFFF),
+                fontFamily = CustomizeRobotoMedium,
+                fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp
+            )
+        }
+    }
+}
+
+/**
+ * NOT IN FIGMA — invented so the `Edit` chip has somewhere to go. It borrows the shape of
+ * `PetRoomRemoveDialog` and needs the owner's sign-off before it is treated as final.
+ */
+@Composable
+internal fun BatteryTrollEditPercentDialog(
+    initialPercent: Int,
+    onConfirm: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        DismissibleDialogBackdrop(onDismissRequest = onDismiss) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
+                contentAlignment = Alignment.Center
+            ) {
+                BatteryTrollEditPercentDialogCard(
+                    initialPercent = initialPercent,
+                    onConfirm = onConfirm,
+                    onDismiss = onDismiss
+                )
+            }
+        }
+    }
+}
+
+@Composable
+internal fun BatteryTrollEditPercentDialogCard(
+    initialPercent: Int,
+    onConfirm: (Int) -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var input by rememberSaveable(initialPercent) {
+        mutableStateOf(initialPercent.coerceIn(MIN_PERCENT, MAX_PERCENT).toString())
+    }
+    val parsed = input.toIntOrNull()
+    Column(
+        modifier = modifier
+            .fillMaxWidth(EDIT_DIALOG_WIDTH_FRACTION)
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._18sdp)))
+            .background(colorResource(R.color.colors_FFFFFF))
+            .padding(
+                horizontal = dimensionResource(SdpR.dimen._12sdp),
+                vertical = dimensionResource(SdpR.dimen._18sdp)
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
+        ) {
+            Text(
+                text = stringResource(R.string.battery_troll_edit_title),
+                color = colorResource(R.color.colors_212327),
+                fontFamily = CustomizeRobotoSemiBold,
+                fontSize = dimensionResource(SspR.dimen._15ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._21ssp).value.sp,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = stringResource(R.string.battery_troll_edit_message),
+                color = colorResource(R.color.colors_6F7073),
+                fontFamily = CustomizeRobotoRegular,
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+        BasicTextField(
+            value = input,
+            onValueChange = { raw ->
+                // Digits only, three at most: the prank tops out at 999%.
+                input = raw.filter { it.isDigit() }.take(MAX_PERCENT_DIGITS)
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            textStyle = TextStyle(
+                color = colorResource(R.color.colors_212327),
+                fontFamily = CustomizeRobotoSemiBold,
+                fontSize = dimensionResource(SspR.dimen._18ssp).value.sp,
+                textAlign = TextAlign.Center
+            ),
+            cursorBrush = SolidColor(colorResource(R.color.colors_FB3675)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(SdpR.dimen._37sdp))
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
+                .background(colorResource(R.color.colors_FFEBF1))
+                .padding(dimensionResource(SdpR.dimen._9sdp))
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
+        ) {
+            TrollDialogButton(
+                label = stringResource(R.string.battery_discard_cancel),
+                backgroundRes = R.color.colors_F2F2F2,
+                labelColorRes = R.color.colors_6F7073,
+                enabled = true,
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f)
+            )
+            TrollDialogButton(
+                label = stringResource(R.string.battery_troll_edit_confirm),
+                backgroundRes = R.color.colors_FB3675,
+                labelColorRes = R.color.colors_FFFFFF,
+                enabled = parsed != null,
+                onClick = { parsed?.let { onConfirm(it.coerceIn(MIN_PERCENT, MAX_PERCENT)) } },
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun TrollDialogButton(
+    label: String,
+    backgroundRes: Int,
+    labelColorRes: Int,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .height(dimensionResource(SdpR.dimen._37sdp))
+            .clip(CircleShape)
+            .background(colorResource(backgroundRes))
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .alpha(if (enabled) 1f else TROLL_DISABLED_ALPHA),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            color = colorResource(labelColorRes),
+            fontFamily = CustomizeRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._12ssp).value.sp
+        )
+    }
+}
+
+private const val MIN_PERCENT = MIN_BATTERY_TROLL_FAKE_PERCENT
+private const val MAX_PERCENT = MAX_BATTERY_TROLL_FAKE_PERCENT
+private const val MAX_PERCENT_DIGITS = 3
+private const val EDIT_DIALOG_WIDTH_FRACTION = 328f / 360f

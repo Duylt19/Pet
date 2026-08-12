@@ -28,6 +28,7 @@ import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Build
 import android.os.PowerManager
+import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
@@ -39,11 +40,15 @@ import com.asianmobile.emojibattery.shimeji.BuildConfig
 import com.asianmobile.emojibattery.shimeji.MainActivity
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.utils.AdOverlayState
+import com.asianmobile.emojibattery.shimeji.battery.troll.BatteryTrollArtwork
+import com.asianmobile.emojibattery.shimeji.battery.troll.BatteryTrollAssetPolicy
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntry
 import com.airbnb.lottie.LottieCompositionFactory
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.BatteryTrollCatalogRepository
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import javax.inject.Inject
@@ -60,6 +65,7 @@ import kotlin.math.roundToInt
 @AndroidEntryPoint
 class StatusBarAccessibilityService : AccessibilityService() {
     @Inject lateinit var catalogRepository: BatteryCatalogRepository
+    @Inject lateinit var trollCatalogRepository: BatteryTrollCatalogRepository
     @Inject lateinit var settingsRepository: BatterySettingsRepository
     @Inject lateinit var editorPreviewSession: BatteryEditorPreviewSession
     @Inject lateinit var mobileDataMonitor: BatteryMobileDataMonitor
@@ -75,6 +81,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private var currentConfig = BatteryStatusConfig()
     private var currentBatteryTheme: BatteryThemeEntry? = null
     private var currentEmojiTheme: BatteryThemeEntry? = null
+    private var currentTrollEntry: BatteryTrollEntry? = null
     private var currentPreviewFocus: BatteryStatusComponent? = null
     private var currentForegroundPackage: String? = null
     private var hiddenAppPackages: Set<String> = emptySet()
@@ -94,6 +101,13 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private var isForeground = false
     private var isFullScreenAdShowing = AdOverlayState.isAdShowing.value
     private val networkCapabilities = mutableMapOf<Network, NetworkCapabilities>()
+
+    /**
+     * One stable instance on purpose: `View.removeCallbacks` matches by identity, so a fresh
+     * `::render` reference per post would leave an un-cancellable 60s callback re-rendering a
+     * detached bar forever.
+     */
+    private val trollRotationTick = Runnable { render() }
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) = Unit
@@ -186,9 +200,10 @@ class StatusBarAccessibilityService : AccessibilityService() {
             combine(
                 settingsRepository.config,
                 catalogRepository.snapshot,
+                trollCatalogRepository.snapshot,
                 editorPreviewSession.preview,
                 settingsRepository.hiddenAppPackages
-            ) { storedConfig, catalog, preview, excludedPackages ->
+            ) { storedConfig, catalog, trollCatalog, preview, excludedPackages ->
                 val previewSource = resolveBatteryOverlayPreviewSource(storedConfig, preview)
                 val config = previewSource.config
                 BatteryOverlaySources(
@@ -199,6 +214,10 @@ class StatusBarAccessibilityService : AccessibilityService() {
                     emojiTheme = catalog.themes.firstOrNull {
                         it.id == config.selectedEmojiThemeId
                     },
+                    // Left null when the selected troll is not in the catalog — never downloaded,
+                    // offline with an empty catalog, or withdrawn server-side. The asset policy
+                    // then keeps the normal battery/emoji artwork instead of an empty bar.
+                    trollEntry = trollCatalog.findTroll(config.trollThemeId),
                     backgroundPath = catalog.backgrounds
                         .firstOrNull { it.id == config.backgroundDecorationId }
                         ?.assetPath,
@@ -215,6 +234,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
                 currentConfig = sources.config
                 currentBatteryTheme = sources.batteryTheme
                 currentEmojiTheme = sources.emojiTheme
+                currentTrollEntry = sources.trollEntry
                 currentPreviewFocus = sources.previewFocus
                 currentBackgroundPath = sources.backgroundPath
                 currentEmotionPath = sources.emotionPath
@@ -397,15 +417,49 @@ class StatusBarAccessibilityService : AccessibilityService() {
         render()
     }
 
+    /**
+     * Catalog-relative troll artwork for one render pass, or `null` to keep the normal themes.
+     *
+     * [now] is `SystemClock.uptimeMillis()` — the same clock `View.postDelayed` counts in, so the
+     * index this returns and the rotation callback armed for it agree on where the period ends.
+     */
+    private fun trollArtworkAt(now: Long): BatteryTrollArtwork? =
+        BatteryTrollAssetPolicy.artwork(currentConfig, currentTrollEntry, now)
+
+    private fun assetKeyFor(trollArtwork: BatteryTrollArtwork?): String = listOf(
+        currentBatteryTheme?.id,
+        currentEmojiTheme?.id,
+        trollArtwork?.emojiPath,
+        trollArtwork?.batteryPath,
+        currentBackgroundPath,
+        if (currentConfig.showEmotion) currentEmotionPath else null,
+        if (currentConfig.showAnimation) currentAnimationPath else null
+    ).joinToString("|")
+
+    /**
+     * Re-arms the random-artwork wake-up, or clears it. Called on every render pass, always after
+     * the attached-view check, so the timer only ever exists while the bar is attached, random is
+     * on and the selected troll actually resolved; [removeOverlay] clears it on the way out.
+     */
+    private fun scheduleTrollRotation(view: BatteryStatusBarView, now: Long) {
+        view.removeCallbacks(trollRotationTick)
+        val delay = BatteryTrollAssetPolicy.rotationDelayMs(
+            currentConfig,
+            currentTrollEntry,
+            now
+        ) ?: return
+        view.postDelayed(trollRotationTick, delay)
+    }
+
     private fun render() {
         val view = overlayView ?: return
-        val assetKey = listOf(
-            currentBatteryTheme?.id,
-            currentEmojiTheme?.id,
-            currentBackgroundPath,
-            if (currentConfig.showEmotion) currentEmotionPath else null,
-            if (currentConfig.showAnimation) currentAnimationPath else null
-        ).joinToString("|")
+        val now = SystemClock.uptimeMillis()
+        // One clock reading for the whole pass: the key computed here and the one recomputed
+        // after decoding must only differ when the config or the catalog actually changed, not
+        // because the rotation period elapsed while a bitmap was being read.
+        val trollArtwork = trollArtworkAt(now)
+        scheduleTrollRotation(view, now)
+        val assetKey = assetKeyFor(trollArtwork)
         if (loadedAssetKey == assetKey) {
             view.render(
                 currentConfig,
@@ -428,11 +482,21 @@ class StatusBarAccessibilityService : AccessibilityService() {
         }
         renderJob?.cancel()
         renderJob = scope.launch {
+            // Whichever source owns the emoji/battery slot this pass; null on both sides simply
+            // means the bar draws that slot empty, exactly as before.
+            val emojiSource = trollArtwork?.emojiPath ?: currentEmojiTheme?.emojiPath
+            val batterySource = trollArtwork?.batteryPath ?: currentBatteryTheme?.batteryPath
             val decoded = withContext(Dispatchers.IO) {
-                val emojiPath = catalogRepository.materializeAsset(currentEmojiTheme?.emojiPath)
-                val batteryPath = catalogRepository.materializeAsset(
-                    currentBatteryTheme?.batteryPath
-                )
+                val emojiPath = if (trollArtwork != null) {
+                    trollCatalogRepository.materializeAsset(trollArtwork.emojiPath)
+                } else {
+                    catalogRepository.materializeAsset(currentEmojiTheme?.emojiPath)
+                }
+                val batteryPath = if (trollArtwork != null) {
+                    trollCatalogRepository.materializeAsset(trollArtwork.batteryPath)
+                } else {
+                    catalogRepository.materializeAsset(currentBatteryTheme?.batteryPath)
+                }
                 val backgroundPath = catalogRepository.materializeAsset(currentBackgroundPath)
                 val emotionPath = if (currentConfig.showEmotion) {
                     catalogRepository.materializeAsset(currentEmotionPath)
@@ -451,8 +515,8 @@ class StatusBarAccessibilityService : AccessibilityService() {
                     emotion = decode(emotionPath),
                     animation = decodeAnimation(animationPath),
                     complete =
-                        (currentEmojiTheme?.emojiPath == null || emojiPath != null) &&
-                            (currentBatteryTheme?.batteryPath == null || batteryPath != null) &&
+                        (emojiSource == null || emojiPath != null) &&
+                            (batterySource == null || batteryPath != null) &&
                             (currentBackgroundPath == null || backgroundPath != null) &&
                             (!currentConfig.showEmotion ||
                                 currentEmotionPath == null ||
@@ -462,13 +526,7 @@ class StatusBarAccessibilityService : AccessibilityService() {
                                 animationPath != null)
                 )
             }
-            val latestAssetKey = listOf(
-                currentBatteryTheme?.id,
-                currentEmojiTheme?.id,
-                currentBackgroundPath,
-                if (currentConfig.showEmotion) currentEmotionPath else null,
-                if (currentConfig.showAnimation) currentAnimationPath else null
-            ).joinToString("|")
+            val latestAssetKey = assetKeyFor(trollArtworkAt(now))
             if (assetKey != latestAssetKey) {
                 decoded.recycle()
                 return@launch
@@ -512,6 +570,9 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private fun removeOverlay() {
         renderJob?.cancel()
         overlayView?.let { view ->
+            // Before the view goes: a pending rotation tick would otherwise keep waking up for a
+            // window that is no longer attached.
+            view.removeCallbacks(trollRotationTick)
             try {
                 windowManager.removeView(view)
             } catch (error: IllegalArgumentException) {
@@ -754,6 +815,7 @@ private data class BatteryOverlaySources(
     val config: BatteryStatusConfig,
     val batteryTheme: BatteryThemeEntry?,
     val emojiTheme: BatteryThemeEntry?,
+    val trollEntry: BatteryTrollEntry?,
     val backgroundPath: String?,
     val emotionPath: String?,
     val animationPath: String?,

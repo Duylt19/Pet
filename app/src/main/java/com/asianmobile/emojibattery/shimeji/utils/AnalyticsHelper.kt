@@ -49,6 +49,8 @@ enum class ScreenName(val value: String) {
     BATTERY_RINGER_EDITOR("battery_ringer_editor"),
     BATTERY_CHARGE_EDITOR("battery_charge_editor"),
     BATTERY_DATE_TIME_EDITOR("battery_date_time_editor"),
+    BATTERY_TROLL("battery_troll"),
+    BATTERY_TROLL_CUSTOMIZE("battery_troll_customize"),
     PREMIUM("premium"),
     SETTINGS("settings")
 }

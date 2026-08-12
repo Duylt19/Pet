@@ -739,4 +739,24 @@
     <string name="grant_permissions_notification_body">Cho phép Cute Pet hiển thị nhắc nhở về thú cưng và thông báo của dịch vụ đang chạy.</string>
     <string name="grant_permissions_autostart_title">Cho phép tự khởi động</string>
     <string name="grant_permissions_autostart_body">Thiết bị của bạn có danh sách riêng các ứng dụng được chạy nền. Hãy thêm Cute Pet để thú cưng không bị dừng.</string>
+    <string name="battery_troll_title">Pin troll</string>
+    <string name="battery_troll_customize_title">Tùy chỉnh</string>
+    <string name="battery_troll_mode">Chế độ</string>
+    <string name="battery_troll_mode_fake">Pin giả</string>
+    <string name="battery_troll_mode_real">Pin thật</string>
+    <string name="battery_troll_mode_hint">Hiện phần trăm pin giả để trêu người khác.</string>
+    <string name="battery_troll_edit">Sửa</string>
+    <string name="battery_troll_percent_value">%1$d%%</string>
+    <string name="battery_troll_percentage">Phần trăm</string>
+    <string name="battery_troll_size">Cỡ chữ</string>
+    <string name="battery_troll_emoji">Emoji</string>
+    <string name="battery_troll_battery">Pin</string>
+    <string name="battery_troll_custom">Tự chọn</string>
+    <string name="battery_troll_custom_hint">Chỉ dùng một biểu cảm duy nhất.</string>
+    <string name="battery_troll_random">Ngẫu nhiên</string>
+    <string name="battery_troll_edit_title">Mức pin giả</string>
+    <string name="battery_troll_edit_message">Chọn phần trăm mà người khác sẽ nhìn thấy.</string>
+    <string name="battery_troll_edit_confirm">Lưu</string>
+    <string name="battery_troll_theme_locked">Giao diện trả phí</string>
+    <string name="battery_troll_empty">Chưa có giao diện troll nào. Kéo xuống để tải lại.</string>
 </resources>

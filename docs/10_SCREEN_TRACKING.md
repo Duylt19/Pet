@@ -36,6 +36,8 @@
 | Battery ringer editor | `battery_ringer_editor` |
 | Battery charge editor | `battery_charge_editor` |
 | Battery date/time editor | `battery_date_time_editor` |
+| Battery Troll themes | `battery_troll` |
+| Battery Troll customize | `battery_troll_customize` |
 | Settings | `settings` |
 | Premium | `premium` |
 
