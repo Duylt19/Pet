@@ -276,6 +276,7 @@ internal fun BatteryEditorScreen(
         onBackgroundDecoration = viewModel::setBackgroundDecoration,
         onShowEmotion = viewModel::setShowEmotion,
         onEmotionDecoration = viewModel::setEmotionDecoration,
+        onSelectEmotion = viewModel::selectEmotion,
         onSelectTheme = viewModel::requestTheme,
         onConfig = viewModel::setConfig,
         onApply = {
@@ -377,6 +378,7 @@ private fun BatteryEditorContent(
     onBackgroundDecoration: (Int) -> Unit,
     onShowEmotion: (Boolean) -> Unit,
     onEmotionDecoration: (Int) -> Unit,
+    onSelectEmotion: (BatteryDecorationEntry) -> Unit,
     onSelectTheme: (BatteryThemeEntry, BatteryThemeComponent) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
     onApply: () -> Unit,
@@ -389,6 +391,7 @@ private fun BatteryEditorContent(
             onBack = onBack,
             onPremium = onPremium,
             onOpenGroup = onOpenEmotionGroup,
+            onSelectEmotion = onSelectEmotion,
             onConfig = onConfig,
             onApply = onApply
         )
@@ -2441,6 +2444,7 @@ private fun BatteryEditorOverviewPreview() {
         onBackgroundDecoration = {},
         onShowEmotion = {},
         onEmotionDecoration = {},
+        onSelectEmotion = {},
         onSelectTheme = { _, _ -> },
         onConfig = {},
         onApply = {},

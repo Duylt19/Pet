@@ -21,6 +21,8 @@ class BatteryCatalogParserTest {
         assertEquals("battery/7.png", document.themes.single().battery.path)
         assertEquals("background/template_color_01.png", document.backgrounds.single().asset.path)
         assertEquals("emotion/emotion_01.png", document.emotions.single().asset.path)
+        assertEquals("emotion/emotion_01.png", document.emotions.single().preview?.path ?: document.emotions.single().asset.path)
+        assertEquals("classic", document.emotionGroups.single().key)
         assertEquals("animation/cute_1.json", document.animations.single().asset.path)
     }
 
@@ -48,6 +50,31 @@ class BatteryCatalogParserTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun parse_reads_emotion_preview_and_group_metadata() {
+        val updated = validCatalog()
+            .replace(
+                "\"emotions\": [",
+                "\"emotionCount\": 1,\n  \"emotionGroupCount\": 1,\n" +
+                    "  \"emotionGroups\": [{\"key\":\"classic\",\"order\":0," +
+                    "\"emotionIds\":[1]}],\n  \"emotions\": ["
+            )
+            .replace(
+                "\"name\": \"emotion_01\",",
+                "\"name\": \"emotion_01\",\n              \"groupKey\": \"classic\"," +
+                    "\n              \"order\": 0,\n              \"preview\": {" +
+                    "\n                \"path\": \"emotion_preview/emotion_01.png\"," +
+                    "\n                \"sizeBytes\": 7,\n                \"sha256\": \"${"1".repeat(64)}\"," +
+                    "\n                \"width\": 72,\n                \"height\": 72\n              },"
+            )
+
+        val document = parser.parse(updated)
+
+        assertEquals("emotion_preview/emotion_01.png", document.emotions.single().preview?.path)
+        assertEquals("classic", document.emotions.single().groupKey)
+        assertEquals(listOf(1), document.emotionGroups.single().emotionIds)
     }
 
     private fun validCatalog(): String = """

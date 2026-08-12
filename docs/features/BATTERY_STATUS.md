@@ -100,8 +100,9 @@ backoff giống Pet. Thumbnail/preview dùng URL GitHub qua Coil; asset renderer
 Firebase Remote Config key `github_token_pet_server`, không hardcode trong source.
 
 Nhánh `emotion/` trong snapshot remote là nhóm Classic 20 item và tiếp tục giữ ID `1..20`.
-UI/runtime bổ sung 80 PNG @3x đã export từ Figma trong `assets/battery_emotions/<group>/`
-với ID `21..100`; bảy background pack nằm tại `assets/battery_emotions/backgrounds/`.
+UI/runtime bổ sung 80 PNG @3x đã export từ Figma trên private project server với ID
+`21..100`; bảy background pack cũng nằm trong Battery catalog server. APK chỉ đọc preview
+nhẹ và tải full asset theo lựa chọn của user.
 Repository ghép Classic trước tám nhóm bundled, không thay thế dữ liệu legacy.
 
 Trong Customize, card Pet luôn load trực tiếp `emojiPath` và card Pin luôn load trực tiếp
@@ -150,7 +151,7 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | `emojiSizeDp`, `batterySizeDp`, `percentSizeDp` | Kích thước asset/pin |
 | `backgroundColorArgb`, `foregroundColorArgb` | Màu renderer |
 | `backgroundDecorationId` | Nền đóng gói đã chọn; `0` là nền màu phẳng |
-| `showEmotion`, `emotionDecorationId` | Hiện/ẩn và chọn một trong 100 emotion: 20 Classic + 80 app-local thuộc tám pack mới |
+| `showEmotion`, `emotionDecorationId` | Hiện/ẩn và chọn một trong 100 emotion server: 20 Classic + 80 thuộc tám pack mới |
 | `wifi/data/signal/airplane/hotspot/ringer/charge *SizeDp/*ColorArgb` | Tùy chỉnh độc lập từng status component |
 | `dataType`, `chargeIconIndex` | Nhãn mạng 2G–9G và một trong 12 icon sạc |
 | `showDateTime`, `dateFormat`, `dateTimeFont`, `dateTimeSizeDp`, `dateTimeColorArgb` | Ngày/giờ và 6 font bundled |
@@ -222,7 +223,8 @@ Roboto Medium. `showTime` và `showDateTime` điều khiển độc lập. Airpl
 charge có switch riêng được persist; trạng thái OFF thắng cả preview focus và device state.
 Emotion group/detail dùng preview focus `EMOTION`, nhưng `showEmotion=false` vẫn thắng focus.
 Khi bật, item đang chọn được đánh dấu required trong width policy để user luôn quan sát được
-thay đổi ở preview hẹp; runtime và preview cùng resolve leaf ID sang asset bundled.
+thay đổi ở preview hẹp. Grid dùng ảnh preview server nhẹ; leaf full chỉ được chọn sau khi
+download/verify/cache thành công, rồi runtime và preview thật cùng resolve leaf ID đó.
 Các family/icon data có sẵn vẫn được chọn bằng grid theo card Charge và cập nhật live qua
 editor preview session. Ringer lưu một family nhưng map đúng hai biến thể vibrate/silent.
 

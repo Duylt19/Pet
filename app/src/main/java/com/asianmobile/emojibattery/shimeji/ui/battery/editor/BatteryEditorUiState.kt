@@ -8,6 +8,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BAR_HEIGH
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
+import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_EMOTION_GROUPS
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryEmotionGroup
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 
 data class BatteryEditorUiState(
@@ -19,12 +21,14 @@ data class BatteryEditorUiState(
         resolveBatteryStatusBarHeightRange(DEFAULT_BATTERY_BAR_HEIGHT_DP),
     val backgrounds: List<BatteryDecorationEntry> = emptyList(),
     val emotions: List<BatteryDecorationEntry> = emptyList(),
+    val emotionGroups: List<BatteryEmotionGroup> = BATTERY_EMOTION_GROUPS,
     val animations: List<BatteryAnimationEntry> = emptyList(),
     val isThemeAvailable: Boolean = true,
     val hasUnsavedChanges: Boolean = false,
     val isPremium: Boolean = false,
     val pendingSelection: BatteryEditorThemeSelection? = null,
     val assetSelectionInProgress: BatteryEditorThemeSelection? = null,
+    val emotionSelectionInProgress: Int? = null,
     val isRewardInProgress: Boolean = false,
     val message: BatteryEditorMessage? = null
 )

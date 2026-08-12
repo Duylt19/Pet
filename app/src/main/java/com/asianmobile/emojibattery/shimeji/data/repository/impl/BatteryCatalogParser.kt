@@ -3,6 +3,7 @@ package com.asianmobile.emojibattery.shimeji.data.repository.impl
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogDistributionStatus
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationType
+import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_EMOTION_GROUPS
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import org.json.JSONArray
 import org.json.JSONException
@@ -30,7 +31,17 @@ data class BatteryThemeRecord(
 data class BatteryDecorationRecord(
     val id: Int,
     val name: String,
-    val asset: BatteryCatalogAssetRecord
+    val asset: BatteryCatalogAssetRecord,
+    val preview: BatteryCatalogAssetRecord? = null,
+    val groupKey: String? = null,
+    val order: Int = 0
+)
+
+data class BatteryEmotionGroupRecord(
+    val key: String,
+    val order: Int,
+    val emotionIds: List<Int>,
+    val background: BatteryCatalogAssetRecord? = null
 )
 
 data class BatteryAnimationRecord(
@@ -48,6 +59,7 @@ data class BatteryCatalogDocument(
     val themes: List<BatteryThemeRecord>,
     val backgrounds: List<BatteryDecorationRecord>,
     val emotions: List<BatteryDecorationRecord>,
+    val emotionGroups: List<BatteryEmotionGroupRecord>,
     val animations: List<BatteryAnimationRecord>
 )
 
@@ -115,7 +127,8 @@ class BatteryCatalogParser {
             }
         }
         val backgrounds = parseDecorations(root, "backgrounds", "background")
-        val emotions = parseDecorations(root, "emotions", "emotion")
+        val emotions = parseEmotions(root)
+        val emotionGroups = parseEmotionGroups(root, emotions)
         val animations = parseAnimations(root)
         validate(root, categories, themes)
         BatteryCatalogDocument(
@@ -126,6 +139,7 @@ class BatteryCatalogParser {
             themes = themes.sortedBy(BatteryThemeRecord::id),
             backgrounds = backgrounds,
             emotions = emotions,
+            emotionGroups = emotionGroups,
             animations = animations
         )
     } catch (error: BatteryCatalogParseException) {
@@ -160,6 +174,85 @@ class BatteryCatalogParser {
             throw BatteryCatalogParseException("Duplicate Battery decoration IDs in $key")
         }
         return records.sortedBy(BatteryDecorationRecord::id)
+    }
+
+    private fun parseEmotions(root: JSONObject): List<BatteryDecorationRecord> {
+        val records = root.optJSONArray("emotions")?.mapObjects { item, index ->
+            val id = item.getInt("id")
+            val name = item.getString("name").trim()
+            val groupKey = item.optString("groupKey").trim().ifBlank { null }
+            val order = if (item.has("order")) item.getInt("order") else id - 1
+            BatteryDecorationRecord(
+                id = id,
+                name = name,
+                asset = item.getJSONObject("asset")
+                    .toAsset("emotion/$name.png", index),
+                preview = item.optJSONObject("preview")
+                    ?.toAsset("emotion_preview/$name.png", index),
+                groupKey = groupKey,
+                order = order
+            ).also {
+                if (id <= 0 || name.isBlank() || order < 0) {
+                    throw BatteryCatalogParseException(
+                        "Invalid Battery emotion at index $index"
+                    )
+                }
+            }
+        }.orEmpty()
+        if (records.map(BatteryDecorationRecord::id).distinct().size != records.size) {
+            throw BatteryCatalogParseException("Duplicate Battery emotion IDs")
+        }
+        return records.sortedBy(BatteryDecorationRecord::id)
+    }
+
+    private fun parseEmotionGroups(
+        root: JSONObject,
+        emotions: List<BatteryDecorationRecord>
+    ): List<BatteryEmotionGroupRecord> {
+        val array = root.optJSONArray("emotionGroups")
+        if (array == null) {
+            val availableIds = emotions.map(BatteryDecorationRecord::id).toSet()
+            return BATTERY_EMOTION_GROUPS.mapIndexedNotNull { index, group ->
+                val ids = group.emotionIds.filter(availableIds::contains)
+                ids.takeIf { it.isNotEmpty() }?.let {
+                    BatteryEmotionGroupRecord(
+                        key = group.key,
+                        order = index,
+                        emotionIds = ids
+                    )
+                }
+            }
+        }
+        val groups = array.mapObjects { item, index ->
+            val key = item.getString("key").trim()
+            val order = item.getInt("order")
+            val emotionIds = item.getJSONArray("emotionIds").mapInts()
+            BatteryEmotionGroupRecord(
+                key = key,
+                order = order,
+                emotionIds = emotionIds,
+                background = item.optJSONObject("background")
+                    ?.toAsset("emotion_group/$key.jpg", index)
+            ).also {
+                if (key.isBlank() || order < 0 || emotionIds.isEmpty()) {
+                    throw BatteryCatalogParseException(
+                        "Invalid Battery emotion group at index $index"
+                    )
+                }
+            }
+        }.sortedBy(BatteryEmotionGroupRecord::order)
+        if (groups.map(BatteryEmotionGroupRecord::key).distinct().size != groups.size ||
+            groups.flatMap(BatteryEmotionGroupRecord::emotionIds).sorted() !=
+            emotions.map(BatteryDecorationRecord::id).sorted()
+        ) {
+            throw BatteryCatalogParseException("Invalid Battery emotion group coverage")
+        }
+        if (root.optInt("emotionCount", emotions.size) != emotions.size ||
+            root.optInt("emotionGroupCount", groups.size) != groups.size
+        ) {
+            throw BatteryCatalogParseException("Battery emotion count does not match")
+        }
+        return groups
     }
 
     private fun parseAnimations(root: JSONObject): List<BatteryAnimationRecord> {
@@ -263,6 +356,8 @@ class BatteryCatalogParser {
             )
         transform(item, index)
     }
+
+    private fun JSONArray.mapInts(): List<Int> = List(length()) { index -> getInt(index) }
 
     private companion object {
         const val SCHEMA_VERSION = 1

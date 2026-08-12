@@ -19,7 +19,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationType
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationType
-import com.asianmobile.emojibattery.shimeji.data.model.BUNDLED_BATTERY_EMOTIONS
+import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_EMOTION_GROUPS
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
@@ -228,6 +228,7 @@ private fun PreviewEmotionPage(groupKey: String?) {
                 onBack = {},
                 onPremium = {},
                 onOpenGroup = {},
+                onSelectEmotion = {},
                 onConfig = {},
                 onApply = {}
             )
@@ -282,7 +283,18 @@ private fun previewEditorState(): BatteryEditorUiState {
         theme = themes[1],
         themes = themes,
         backgrounds = backgrounds,
-        emotions = BUNDLED_BATTERY_EMOTIONS,
+        emotions = BATTERY_EMOTION_GROUPS.flatMap { group ->
+            group.emotionIds.mapIndexed { order, id ->
+                BatteryDecorationEntry(
+                    id = id,
+                    name = "${group.key}_${order + 1}",
+                    assetPath = "",
+                    groupKey = group.key,
+                    order = order,
+                    type = BatteryDecorationType.EMOTION
+                )
+            }
+        },
         animations = animations,
         config = BatteryStatusConfig(
             enabled = false,

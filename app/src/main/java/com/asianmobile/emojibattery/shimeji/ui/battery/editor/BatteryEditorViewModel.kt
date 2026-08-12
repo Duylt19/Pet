@@ -12,6 +12,7 @@ import com.asianmobile.emojibattery.shimeji.battery.settings.systemStatusBarHeig
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME_ID
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
@@ -68,6 +69,7 @@ class BatteryEditorViewModel @Inject constructor(
     private var previewStopJob: Job? = null
     private var focusedComponent: BatteryStatusComponent? = null
     private var assetSelectionRequestId = 0L
+    private var emotionSelectionRequestId = 0L
     private val _uiState = MutableStateFlow(
         BatteryEditorUiState(
             config = restoredDraft ?: BatteryStatusConfig(barHeightDp = barHeightRange.defaultDp),
@@ -119,6 +121,7 @@ class BatteryEditorViewModel @Inject constructor(
                     ),
                     backgrounds = catalog.backgrounds,
                     emotions = catalog.emotions,
+                    emotionGroups = catalog.emotionGroups,
                     animations = catalog.animations,
                     isThemeAvailable = selectedAssetsReady(catalog.themes, draft),
                     isPremium = SharedPreferencesUtils.getIsPremium(context),
@@ -141,8 +144,45 @@ class BatteryEditorViewModel @Inject constructor(
     fun setBackgroundDecoration(value: Int) =
         update { copy(backgroundDecorationId = value) }
     fun setShowEmotion(value: Boolean) = update { copy(showEmotion = value) }
-    fun setEmotionDecoration(value: Int) =
-        update { copy(emotionDecorationId = value) }
+    fun selectEmotion(emotion: BatteryDecorationEntry) {
+        val state = _uiState.value
+        if (state.emotionSelectionInProgress != null) return
+        if (state.config.showEmotion && state.config.emotionDecorationId == emotion.id) return
+        val requestId = ++emotionSelectionRequestId
+        _uiState.update {
+            it.copy(emotionSelectionInProgress = emotion.id, message = null)
+        }
+        viewModelScope.launch {
+            val materializedPath = catalogRepository.materializeAsset(emotion.assetPath)
+            if (requestId != emotionSelectionRequestId) return@launch
+            if (materializedPath != null) {
+                update {
+                    copy(showEmotion = true, emotionDecorationId = emotion.id)
+                }
+                _uiState.update {
+                    it.copy(
+                        emotions = it.emotions.map { entry ->
+                            if (entry.id == emotion.id) {
+                                entry.copy(assetPath = materializedPath)
+                            } else entry
+                        },
+                        emotionSelectionInProgress = null,
+                        message = null
+                    )
+                }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        emotionSelectionInProgress = null,
+                        message = BatteryEditorMessage.ASSET_DOWNLOAD_FAILED
+                    )
+                }
+            }
+        }
+    }
+    fun setEmotionDecoration(value: Int) {
+        _uiState.value.emotions.firstOrNull { it.id == value }?.let(::selectEmotion)
+    }
     fun setConfig(value: BatteryStatusConfig) = update { value }
 
     fun startPreview() {
@@ -275,7 +315,9 @@ class BatteryEditorViewModel @Inject constructor(
 
     fun apply() {
         val state = _uiState.value
-        if (!state.isThemeAvailable || state.assetSelectionInProgress != null) return
+        if (!state.isThemeAvailable || state.assetSelectionInProgress != null ||
+            state.emotionSelectionInProgress != null
+        ) return
         settingsRepository.applyConfig(state.config.copy(enabled = true, hasApplied = true))
         clearDraft()
         _uiState.update {
