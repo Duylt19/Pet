@@ -200,20 +200,20 @@ private fun DiscoverContent(
                     item { DiscoverBatteryTrollBanner(onClick = onBattery) }
                     item {
                         Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
-                        TrendingPetsSection(
-                            pets = uiState.trendingPets,
-                            isLoading = uiState.isLoading,
-                            onMore = onPetStore,
-                            onOpenPet = { onPetStore() }
-                        )
-                    }
-                    item {
-                        Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
                         BatteryThemesSection(
                             themes = uiState.batteryThemes,
                             onMore = onBattery,
                             onOpenTheme = onOpenTheme,
                             onToggleFavorite = onToggleFavorite
+                        )
+                    }
+                    item {
+                        Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
+                        TrendingPetsSection(
+                            pets = uiState.trendingPets,
+                            isLoading = uiState.isLoading,
+                            onMore = onPetStore,
+                            onOpenPet = { onPetStore() }
                         )
                     }
                     item {
@@ -359,9 +359,8 @@ private fun TrendingPetsSection(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
         SectionHeader(
-            title = stringResource(R.string.discover_trending_pets),
-            onMore = onMore,
-            underline = true
+            title = stringResource(R.string.discover_shimeji_pets),
+            onMore = onMore
         )
         if (isLoading && pets.isEmpty()) {
             Box(
@@ -445,8 +444,9 @@ private fun BatteryThemesSection(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
         SectionHeader(
-            title = stringResource(R.string.discover_battery_themes),
-            onMore = onMore
+            title = stringResource(R.string.discover_trending_battery_themes),
+            onMore = onMore,
+            underline = true
         )
         val slots = List(BATTERY_THEME_SLOT_COUNT) { index -> themes.getOrNull(index) }
         slots.chunked(BATTERY_THEME_COLUMN_COUNT).forEachIndexed { rowIndex, row ->

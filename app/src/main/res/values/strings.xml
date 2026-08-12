@@ -838,9 +838,9 @@
     <string name="search_no_results">No matching battery themes</string>
     <string name="search_load_error">Unable to load battery themes</string>
     <string name="discover_battery_troll_banner" translatable="false">Battery Troll – Fake Battery</string>
-    <string name="discover_trending_pets">🔥 Trending Pets</string>
+    <string name="discover_shimeji_pets">🐰 Shimeji Pets</string>
     <string name="discover_pet_category">Breed: %1$s</string>
-    <string name="discover_battery_themes">🔋 Battery Themes</string>
+    <string name="discover_trending_battery_themes">🔥 Trending Emoji Battery</string>
     <string name="discover_status_bar_themes">Status bar themes</string>
     <string name="discover_emoji_title">✨ Emoji</string>
     <string name="discover_battery_title">🔋 Battery</string>

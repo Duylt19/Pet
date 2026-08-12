@@ -75,6 +75,8 @@ Discover Home contract:
   pet switch được quản lý ở flow pet. Không copy component rồi đổi metric riêng;
 - Discover hero dùng composite `Battery Troll` PNG @3x tại tỉ lệ `328×100px`; banner thấp hơn
   dùng placement SDK thật `discover_inline`, không đóng gói creative quảng cáo mẫu;
+- Thứ tự nhóm đầu sau hero là `Trending Emoji Battery` → `Shimeji Pets` → inline banner;
+  `Status bar themes` tiếp tục nằm ngay sau banner, đúng hierarchy node Figma `8015:1035`;
 - Battery Themes dùng favorite state thật; Trending hiện dùng thứ tự catalog cho tới khi
   server có ranking riêng.
 
