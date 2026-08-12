@@ -479,11 +479,35 @@ private fun RequiredPermissionCard(
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            Image(
-                painter = painterResource(R.drawable.img_permission_accessibility),
-                contentDescription = null,
-                modifier = Modifier.size(dimensionResource(SdpR.dimen._26sdp))
-            )
+            if (isOverlayRequired) {
+                Box(
+                    modifier = Modifier
+                        .size(dimensionResource(SdpR.dimen._26sdp))
+                        .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._8sdp)))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    colorResource(R.color.colors_5AB1FF),
+                                    colorResource(R.color.colors_138EFB)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_permission_overlay_phone),
+                        contentDescription = null,
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(dimensionResource(SdpR.dimen._17sdp))
+                    )
+                }
+            } else {
+                Image(
+                    painter = painterResource(R.drawable.img_permission_accessibility),
+                    contentDescription = null,
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._26sdp))
+                )
+            }
             Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

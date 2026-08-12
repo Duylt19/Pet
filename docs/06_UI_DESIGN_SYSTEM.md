@@ -275,7 +275,8 @@ Grant Permissions contract theo Figma node `8080:9754` và biến thể overlay 
   từng quyền, cách text 8px, text cách switch 8px;
 - card bắt buộc đổi theo entry point. Mine dùng Accessibility và minh hoạ hai bước; flow sau
   disclosure Draw over apps dùng title/description overlay cùng artwork
-  `img_overlay_permission_hero.png` `158×100`. Badge `Required` dùng
+  `img_overlay_permission_hero.png` `158×100`; icon phone dùng glyph vector export từ frame
+  `8591:7226` trên nền gradient `#5AB1FF → #138EFB`. Badge `Required` dùng
   `#FFECEC`/`#F04438`, `Allowed` dùng
   `#E6F9EF`/`#00C062` (Roboto 500 10/14, padding 10×4), minh hoạ hai bước và CTA
   `Go to Settings` gradient `#C95DFF → #FB54BB` cao 40; các card còn lại dùng `AppSwitch`
