@@ -133,6 +133,7 @@ class BatteryEditorViewModel @Inject constructor(
                     isInitialized = true,
                     theme = theme ?: BUILT_IN_BATTERY_THEME,
                     themes = catalog.themes,
+                    trendingEmojiThemeIds = catalog.trendingEmojiThemeIds,
                     categories = catalog.categories,
                     config = draft.copy(
                         rewardUnlockedThemeIds = stored.rewardUnlockedThemeIds

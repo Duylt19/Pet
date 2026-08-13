@@ -154,7 +154,7 @@ nên trạng thái running không được restore sau process death/reboot.
 
 ## Battery catalog và config
 
-- `BatteryCatalogSnapshot` gồm category/theme, ranking `trendingEmojiThemeIds` của Discover,
+- `BatteryCatalogSnapshot` gồm category/theme, shared ranking `trendingEmojiThemeIds`,
   38 background, 20 emotion server trong
   nhóm Classic + 80 emotion server thuộc tám pack mới, 26 animation,
   entitlement, remote/cache/local asset path, distribution status và typed error;
@@ -162,9 +162,9 @@ nên trạng thái running không được restore sau process death/reboot.
 - `batteries.json` có thể thêm `trendingEmojiThemeIds` optional theo cùng migration contract với
   owner catalog: field thiếu dùng fallback hiện tại, còn `[]` chủ đích ẩn section. UI giữ order
   catalog và bỏ qua theme không tồn tại hoặc built-in. Cùng ranking điều khiển cả Trending Emoji
-  Battery trên Discover lẫn category Trending ở landing/More của tab Battery. Đây là thay đổi
-  content trong baseline debug schema v1, không phải DataStore/DB migration; các lần đổi ranking
-  chỉ tăng `catalogVersion`.
+  Battery trên Discover, category Trending ở landing/More của tab Battery và ưu tiên Battery/
+  Emoji picker trong Customize Status Bar. Đây là thay đổi content trong baseline debug schema
+  v1, không phải DataStore/DB migration; các lần đổi ranking chỉ tăng `catalogVersion`.
 - Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và dimension. Ảnh tĩnh
   Battery chấp nhận pixel-exact lossless WebP hoặc PNG; GIF/Lottie giữ nguyên.
   `HybridBatteryCatalogRepository` đọc cache trước, revalidate private GitHub catalog

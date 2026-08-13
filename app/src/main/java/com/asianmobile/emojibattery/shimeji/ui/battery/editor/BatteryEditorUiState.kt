@@ -18,6 +18,7 @@ data class BatteryEditorUiState(
     val isInitialized: Boolean = false,
     val theme: BatteryThemeEntry = BUILT_IN_BATTERY_THEME,
     val themes: List<BatteryThemeEntry> = listOf(BUILT_IN_BATTERY_THEME),
+    val trendingEmojiThemeIds: List<Int> = emptyList(),
     val categories: List<BatteryCatalogCategory> = emptyList(),
     val config: BatteryStatusConfig = BatteryStatusConfig(),
     val barHeightRange: BatteryStatusBarHeightRange =

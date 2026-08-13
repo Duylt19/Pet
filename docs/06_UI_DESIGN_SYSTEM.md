@@ -142,6 +142,9 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   background catalog runtime. Wallpaper của overview và mọi child phủ toàn viewport bằng crop
   căn top; không để lộ nền app legacy màu tối ở đáy trên thiết bị có tỷ lệ màn hình cao hơn
   frame Figma 360×800;
+- hàng Battery/Emoji ở overview và grid More ưu tiên theme theo ordered
+  `trendingEmojiThemeIds`; theme còn lại tiếp tục theo catalog order để editor vẫn cho phép chọn
+  toàn bộ library. ID ranking thiếu bị bỏ qua và built-in ID `0` không xuất hiện;
 - Animation/Wi-Fi/Signal/Mobile Data dùng chung shell hồng, preview sticky,
   switch, slider/color/style grid và native collapsible với sáu option screen còn lại. Tất cả
   child giữ chung draft; mỗi thay đổi cập nhật preview ngay và Back giữ nguyên draft để overview

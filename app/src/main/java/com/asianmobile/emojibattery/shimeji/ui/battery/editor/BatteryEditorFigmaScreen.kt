@@ -503,7 +503,10 @@ private fun TemplatePickerRow(
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
     ) {
         items(
-            BatteryEditorThemeDisplayPolicy.selectableThemes(state.themes),
+            BatteryEditorThemeDisplayPolicy.selectableThemes(
+                themes = state.themes,
+                trendingThemeIds = state.trendingEmojiThemeIds
+            ),
             key = { it.id }
         ) { theme ->
             val locked = theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
@@ -1092,7 +1095,10 @@ private fun StatusBarPicker(
                     state.config.selectedEmojiThemeId
                 }
                 items(
-                    BatteryEditorThemeDisplayPolicy.selectableThemes(state.themes),
+                    BatteryEditorThemeDisplayPolicy.selectableThemes(
+                        themes = state.themes,
+                        trendingThemeIds = state.trendingEmojiThemeIds
+                    ),
                     key = { it.id }
                 ) { theme ->
                     val locked = theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
