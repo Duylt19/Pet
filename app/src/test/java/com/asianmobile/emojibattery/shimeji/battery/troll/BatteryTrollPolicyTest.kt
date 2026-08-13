@@ -28,6 +28,30 @@ class BatteryTrollPolicyTest {
     )
 
     @Test
+    fun `applying the status bar editor takes the artwork back from a troll`() {
+        val trolling = config(trollMode = BatteryTrollMode.FAKE, trollThemeId = 3)
+        val released = BatteryTrollPolicy.releaseOverride(trolling)
+        assertFalse(BatteryTrollPolicy.isArtworkActive(released))
+        assertEquals(64, BatteryTrollPolicy.displayPercent(released, realLevel = 64))
+    }
+
+    @Test
+    fun `releasing the override still remembers what the user picked in Battery Troll`() {
+        val trolling = config(
+            trollMode = BatteryTrollMode.FAKE,
+            trollThemeId = 3,
+            trollEmojiLevelIndex = 2,
+            trollBatteryLevelIndex = 4,
+            trollRandomArtwork = true
+        )
+        val released = BatteryTrollPolicy.releaseOverride(trolling)
+        assertEquals(2, released.trollEmojiLevelIndex)
+        assertEquals(4, released.trollBatteryLevelIndex)
+        assertTrue(released.trollRandomArtwork)
+        assertEquals(999, released.trollFakePercent)
+    }
+
+    @Test
     fun `no troll theme means the normal artwork keeps the status bar`() {
         assertFalse(BatteryTrollPolicy.isArtworkActive(config()))
         assertTrue(BatteryTrollPolicy.isArtworkActive(config(trollThemeId = 3)))

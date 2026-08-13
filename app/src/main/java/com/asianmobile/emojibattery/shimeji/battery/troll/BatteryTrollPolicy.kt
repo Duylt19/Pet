@@ -17,6 +17,22 @@ import com.asianmobile.emojibattery.shimeji.data.model.NO_BATTERY_TROLL_THEME_ID
  */
 object BatteryTrollPolicy {
 
+    /**
+     * Hands the emoji, battery and percentage back to the status-bar editor.
+     *
+     * Both screens write one [BatteryStatusConfig] on purpose — there is a single status bar, so
+     * there must be a single source of truth. That only works if the last Apply wins: without
+     * this, a troll applied earlier keeps overriding whatever the editor selects, and the
+     * editor's Apply silently does nothing the user can see.
+     *
+     * The level picks and the random/emoji switches are deliberately kept, so returning to
+     * Battery Troll still shows what the user last chose there.
+     */
+    fun releaseOverride(config: BatteryStatusConfig): BatteryStatusConfig = config.copy(
+        trollThemeId = NO_BATTERY_TROLL_THEME_ID,
+        trollMode = BatteryTrollMode.REAL
+    )
+
     /** True when a troll theme owns the emoji/battery artwork instead of the normal theme. */
     fun isArtworkActive(config: BatteryStatusConfig): Boolean =
         config.trollThemeId != NO_BATTERY_TROLL_THEME_ID

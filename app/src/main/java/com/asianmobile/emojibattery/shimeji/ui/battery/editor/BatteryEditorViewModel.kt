@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryEditorPreviewSession
+import com.asianmobile.emojibattery.shimeji.battery.troll.BatteryTrollPolicy
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryMobileDataMonitor
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryEditorSystemStateMonitor
@@ -407,7 +408,12 @@ class BatteryEditorViewModel @Inject constructor(
         if (!state.isThemeAvailable || state.assetSelectionInProgress != null ||
             state.emotionSelectionInProgress != null
         ) return
-        settingsRepository.applyConfig(state.config.copy(enabled = true, hasApplied = true))
+        // Applying here takes the status bar back from Battery Troll; one bar, one config,
+        // last Apply wins.
+        settingsRepository.applyConfig(
+            BatteryTrollPolicy.releaseOverride(state.config)
+                .copy(enabled = true, hasApplied = true)
+        )
         clearDraft()
         _uiState.update {
             it.copy(

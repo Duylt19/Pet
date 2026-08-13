@@ -349,6 +349,13 @@ Battery Troll là **một chế độ của chính service này**, không phải
   Tách hai thứ này là lý do 999% là trò đùa chứ không phải bug render. Layout được đo lại mỗi
   `render()` (`cachedLayout = null`) nên chuỗi ba chữ số không phá cơ chế rớt component
   theo priority.
+- **Một thanh, một config, Apply sau thắng.** Battery Troll và Customize Status Bar ghi vào
+  cùng một `BatteryStatusConfig` — cố ý, vì chỉ có đúng một thanh status bar. Để điều đó
+  không thành bẫy, Apply bên editor gọi `BatteryTrollPolicy.releaseOverride()` để trả lại
+  quyền vẽ: `trollThemeId` về `0` và `trollMode` về `REAL`. Thiếu bước này thì troll đã apply
+  trước đó tiếp tục đè lên lựa chọn emoji/pin của editor, và Apply bên editor trông như không
+  có tác dụng gì. Các mức level và switch random/emoji **được giữ lại**, để user quay về
+  Battery Troll vẫn thấy đúng lựa chọn cũ.
 - **Artwork.** `trollThemeId != 0` thì emoji và pin lấy từ `BatteryTrollCatalogRepository`
   theo chỉ số mức (0 = đầy … 4 = cạn) thay vì từ battery catalog. Quyết định chọn path nằm ở
   `BatteryTrollAssetPolicy` (Kotlin thuần, có test); service chỉ materialize/decode.
