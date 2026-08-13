@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibilityRecovery
 import com.asianmobile.emojibattery.shimeji.battery.overlay.batteryAccessibilityRecovery
-import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_THEME_ID
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
@@ -23,6 +23,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+internal fun discoverPreviewBatteryThemes(
+    themes: List<BatteryThemeEntry>,
+    limit: Int
+): List<BatteryThemeEntry> = themes
+    .filter { theme -> theme.assetsReady && !theme.isBuiltIn }
+    .take(limit)
 
 @HiltViewModel
 class DiscoverViewModel @Inject constructor(
@@ -81,11 +88,10 @@ class DiscoverViewModel @Inject constructor(
                             thumbnailPath = pet.thumbnailPath
                         )
                     },
-                    batteryThemes = batteryCatalog.themes
-                        .filter { theme ->
-                            theme.assetsReady && theme.id != DEFAULT_BATTERY_THEME_ID
-                        }
-                        .take(MAX_DISCOVER_PREVIEW_ITEMS)
+                    batteryThemes = discoverPreviewBatteryThemes(
+                        themes = batteryCatalog.themes,
+                        limit = MAX_DISCOVER_PREVIEW_ITEMS
+                    )
                         .map { theme ->
                             DiscoverThemeUiState(
                                 id = theme.id,
