@@ -880,7 +880,7 @@
     <string name="discover_tab_battery">Battery</string>
     <string name="discover_tab_pet_store">Shimeji Pets</string>
     <string name="pet_store_enable_pet">Turn on to add a pet to your screen</string>
-    <string name="pet_store_banner_placeholder">Banner my pet</string>
+    <string name="pet_store_banner_placeholder">Open Pet Home</string>
     <string name="pet_store_tab_pets">Shimeji Pets</string>
     <string name="pet_store_tab_food">Food</string>
     <string name="pet_store_breed">Breed: %1$s</string>

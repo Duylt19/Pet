@@ -423,7 +423,7 @@ internal fun PetStoreMyPetBanner(onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
-            .height(dimensionResource(SdpR.dimen._102sdp))
+            .height(dimensionResource(SdpR.dimen._92sdp))
             .clickable(role = Role.Button, onClick = onClick)
     )
 }

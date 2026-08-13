@@ -175,8 +175,8 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
 
 Pet Store visual contract:
 
-- My Pet hero dùng nguyên node Figma `8403:6520` dưới dạng PNG @3x `984×399`; bitmap có
-  transparency và nhân vật nhô khỏi nền nên render `328×133px` không clip thêm. Chạm toàn bộ
+- Pet Home hero dùng nguyên node Figma `8634:9046` dưới dạng PNG `334×126` (export gồm stroke
+  ngoài bounds); render vào viewport `328×120px` theo frame design, không clip thêm. Chạm toàn bộ
   banner mở My Pet Room;
 - Pet/Food selector theo Figma `8075:1848`: cả hai state dùng nền `#FFEBF1`, chữ Roboto Medium
   `#FB3675` và giữ icon raster có màu. Selected thêm viền hồng 1px; unselected không viền,
