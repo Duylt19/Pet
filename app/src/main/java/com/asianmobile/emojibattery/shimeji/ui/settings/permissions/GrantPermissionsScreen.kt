@@ -521,7 +521,7 @@ private fun GrantPermissionsTopBar(
         collapsedHeight = dimensionResource(SdpR.dimen._43sdp),
         expandedHeight = dimensionResource(SdpR.dimen._77sdp),
         colors = TopAppBarDefaults.largeTopAppBarColors(
-            containerColor = Color.Transparent,
+            containerColor = colorResource(R.color.colors_FFFFFF),
             scrolledContainerColor = colorResource(R.color.colors_FFFFFF)
         ),
         scrollBehavior = scrollBehavior
