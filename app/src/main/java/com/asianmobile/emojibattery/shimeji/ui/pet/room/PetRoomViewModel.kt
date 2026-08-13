@@ -171,7 +171,13 @@ class PetRoomViewModel @Inject constructor(
             requested = tab,
             isExpanded = state.isSheetExpanded
         )
-        state.copy(selectedTab = selected, isSheetExpanded = expanded, message = null)
+        if (selected != PetRoomTab.MY_PET) selectedPetId = null
+        state.copy(
+            selectedTab = selected,
+            isSheetExpanded = expanded,
+            detail = PetRoomSheetPolicy.detailForTab(selected, state.detail),
+            message = null
+        )
     }
 
     fun toggleSheet() {

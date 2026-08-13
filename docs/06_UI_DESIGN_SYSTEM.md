@@ -381,7 +381,8 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   action là nút trắng bo góc `32×32`, icon canh giữa;
 - shortcut Pet Store `50×68` nằm dưới Music ở mép phải; chevron `32×32` ngay trên sheet thu/mở
   sheet và xoay 180° khi đã thu;
-- sheet `360×236` = tab strip `346×40` + body `360×196` nền `#F7F0E7`, viền `#8F6250`,
+- sheet `360×236` gồm tab strip full width chia đều ba phần My Pet/Food/Room và body `360×196`
+  nền `#F7F0E7`, viền `#8F6250`,
   radius trên 12px. Tab được chọn cao `40` radius 16 với hai lớp `#E4CCB1` (108) và viền nét
   đứt `#B69B7D` (102); tab thường cao `32` radius 12. Label Roboto Medium 14/20 `#725938`,
   icon 18px cùng màu;
@@ -392,6 +393,8 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   padding ngang 6px/dọc 2px và offset 6px;
 - roster vẫn liệt kê mọi pet đã sở hữu, nhưng scene phòng chỉ dựng pet `Active`. Đổi switch
   cập nhật cả overlay slot và scene; `Inactive` biến mất khỏi sảnh nhưng vẫn có card để bật lại;
+- detail pet chỉ thuộc tab My Pet. Chuyển sang Food hoặc Room đóng detail và render đúng nội dung
+  của tab mới; state detail cũ không được phép che Room hoặc đổi title của màn;
 - pet đã sở hữu đi lại trong scene bằng `PetRoomWander`, không dùng `PetEngine`: engine overlay
   dựng cho góc nhìn ngang nên trọng lực dồn mọi pet về một đường sàn. Phòng nhìn từ phía trước
   nên sàn là hình thang phối cảnh `0.50–0.72` chiều cao scene, mép sau hẹp hơn 14%; pet chọn một

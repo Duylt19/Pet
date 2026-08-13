@@ -1,6 +1,8 @@
 package com.asianmobile.emojibattery.shimeji.ui.pet.room
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Test
 
 class PetRoomSheetPolicyTest {
@@ -53,4 +55,24 @@ class PetRoomSheetPolicyTest {
         assertEquals(false, PetRoomSheetPolicy.toggleExpanded(isExpanded = true))
         assertEquals(true, PetRoomSheetPolicy.toggleExpanded(isExpanded = false))
     }
+
+    @Test
+    fun `pet detail is visible only on my pet tab`() {
+        val detail = petDetail()
+
+        assertSame(detail, PetRoomSheetPolicy.detailForTab(PetRoomTab.MY_PET, detail))
+        assertNull(PetRoomSheetPolicy.detailForTab(PetRoomTab.FOOD, detail))
+        assertNull(PetRoomSheetPolicy.detailForTab(PetRoomTab.ROOM, detail))
+    }
+
+    private fun petDetail() = PetRoomDetailUiState(
+        petId = 1,
+        packKey = "ampharos",
+        name = "Ampharos",
+        breed = "Pokemon",
+        adoptedOn = "13.08.2026",
+        thumbnailPath = null,
+        energyPercent = 100,
+        isOnScreen = true
+    )
 }

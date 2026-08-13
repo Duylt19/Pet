@@ -145,6 +145,12 @@ object PetRoomSheetPolicy {
         current != requested -> requested to true
         else -> current to !isExpanded
     }
+
+    /** Pet detail belongs exclusively to My Pet and must never cover Food or Room content. */
+    fun detailForTab(
+        selectedTab: PetRoomTab,
+        detail: PetRoomDetailUiState?
+    ): PetRoomDetailUiState? = detail.takeIf { selectedTab == PetRoomTab.MY_PET }
 }
 
 /** Speed and size shared by every pet until the design gives each pet its own profile. */

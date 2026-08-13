@@ -443,9 +443,12 @@ private fun PetRoomSheet(
                     )
                     .navigationBarsPadding()
             ) {
-                val detail = uiState.detail
+                val detail = PetRoomSheetPolicy.detailForTab(
+                    selectedTab = uiState.selectedTab,
+                    detail = uiState.detail
+                )
                 when {
-                    detail != null && uiState.selectedTab != PetRoomTab.FOOD ->
+                    detail != null ->
                         PetDetailPanel(
                             detail = detail,
                             onBack = onCloseDetail,
@@ -479,7 +482,7 @@ private fun PetRoomTabStrip(
 ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth(TAB_STRIP_WIDTH_RATIO)
+            .fillMaxWidth()
             .height(dimensionResource(SdpR.dimen._31sdp)),
         verticalAlignment = Alignment.Bottom
     ) {
@@ -1218,8 +1221,7 @@ private fun PetRoomTab.labelRes(): Int = when (this) {
     PetRoomTab.ROOM -> R.string.pet_room_tab_room
 }
 
-// Figma: tab strip 346 of the 360 frame; selected tab inner plates 108 and 102 of 114.
-private const val TAB_STRIP_WIDTH_RATIO = 346f / 360f
+// Selected tab inner plates preserve the Figma proportions within each equal-width tab.
 private const val SELECTED_TAB_INNER_RATIO = 108f / 114f
 private const val SELECTED_TAB_DASH_RATIO = 102f / 114f
 private const val STORE_SHORTCUT_ASPECT_RATIO = 50f / 74.33f
