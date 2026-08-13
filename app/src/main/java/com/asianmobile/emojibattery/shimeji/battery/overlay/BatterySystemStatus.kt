@@ -73,9 +73,11 @@ internal object BatteryPreviewSystemStatePolicy {
             airplaneMode = true,
             cellular = BatteryConnectivityState.DISABLED
         )
-        BatteryStatusComponent.RINGER -> actual.copy(
-            ringer = BatterySystemStatusPolicy.ringerForPreview(actual.ringer)
-        )
+        // Ringer is not a binary decoration: NORMAL intentionally has no status icon while
+        // VIBRATE and SILENT use different assets. Do not manufacture a SILENT state merely
+        // because its editor is focused, otherwise the preview contradicts a ringer change the
+        // user has just made from the system volume controls.
+        BatteryStatusComponent.RINGER -> actual
         BatteryStatusComponent.HOTSPOT -> actual.copy(hotspot = BatteryHotspotState.ENABLED)
         BatteryStatusComponent.CELLULAR -> actual.copy(
             cellular = BatteryConnectivityState.CONNECTED,
@@ -128,12 +130,6 @@ internal object BatterySystemStatusPolicy {
         RINGER_MODE_VIBRATE -> BatteryRingerState.VIBRATE
         RINGER_MODE_SILENT -> BatteryRingerState.SILENT
         else -> BatteryRingerState.NORMAL
-    }
-
-    fun ringerForPreview(state: BatteryRingerState): BatteryRingerState = when (state) {
-        BatteryRingerState.NORMAL -> BatteryRingerState.SILENT
-        BatteryRingerState.VIBRATE,
-        BatteryRingerState.SILENT -> state
     }
 
     fun hotspot(state: Int): BatteryHotspotState = when (state) {

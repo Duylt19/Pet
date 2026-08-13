@@ -83,7 +83,14 @@ class BatteryPreviewLayoutTest {
                 hasEmoji = true,
                 hasEmotion = true,
                 hasAnimation = true,
-                focusedComponent = focusedComponent
+                focusedComponent = focusedComponent,
+                deviceState = BatteryDeviceState(
+                    ringer = if (focusedComponent == BatteryStatusComponent.RINGER) {
+                        BatteryRingerState.VIBRATE
+                    } else {
+                        BatteryRingerState.NORMAL
+                    }
+                )
             )
 
             assertTrue(
@@ -97,6 +104,21 @@ class BatteryPreviewLayoutTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun focusedRinger_reflectsNormalModeInsteadOfShowingSyntheticSilentIcon() {
+        val layout = batteryPreviewLayout(
+            config = BatteryStatusConfig(showRinger = true),
+            availableWidthDp = 320f,
+            hasEmoji = false,
+            hasEmotion = false,
+            hasAnimation = false,
+            focusedComponent = BatteryStatusComponent.RINGER,
+            deviceState = BatteryDeviceState(ringer = BatteryRingerState.NORMAL)
+        )
+
+        assertFalse(layout.shows(BatteryStatusComponent.RINGER))
     }
 
     @Test

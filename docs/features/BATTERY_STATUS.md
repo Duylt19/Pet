@@ -59,7 +59,8 @@ Vertical slice hiện đã có trong source:
   emotion/animation trước khi bỏ status cốt lõi; nhóm leading/trailing được mirror đúng
   trong RTL mà không lật ngược chữ hoặc bitmap.
 - Khi mở editor của component phụ thuộc trạng thái thiết bị, preview dùng sample state có
-  chủ đích để luôn hiện đúng Airplane/Hotspot/Ringer/Charging đang chỉnh trên status bar.
+  chủ đích cho Airplane/Hotspot/Charging. Riêng Ringer luôn phản ánh mode thật vì NORMAL không
+  có icon, còn VIBRATE và SILENT dùng hai asset khác nhau.
   Component focus
   được giữ qua width policy; Wi-Fi/Signal/Charge dùng đúng vector, còn Date cập nhật ngay
   format, bundled font, size và color từ draft.
@@ -311,7 +312,7 @@ editor preview session. Ringer lưu một family nhưng map đúng hai biến th
 | Nguồn sạc | none, AC, USB, wireless, dock, unknown | Lưu trong `BatteryPowerState` để description và behavior không suy diễn từ một boolean |
 | Wi‑Fi | disabled, disconnected, limited/captive, validated | Icon off, warning hoặc connected riêng |
 | Cellular | disabled, disconnected, limited, validated | Chỉ render khi limited/validated; airplane luôn khóa cellular |
-| Chuông | normal, vibrate, silent | Normal không chiếm chỗ; vibrate và silent có icon riêng. Preview giữ mode đang hoạt động, chỉ dùng silent mẫu khi mode thực là normal |
+| Chuông | normal, vibrate, silent | Normal không chiếm chỗ; vibrate và silent có icon riêng. Preview luôn giữ mode thật và đổi đúng icon khi user thay đổi chuông hệ thống |
 | Hotspot | unknown, disabled, disabling, enabling, enabled, failed | Ẩn khi unknown/disabled; pending, enabled và error có icon riêng |
 | Máy bay | on/off | Đọc `Settings.Global.AIRPLANE_MODE_ON`, icon chỉ hiện khi on |
 
