@@ -56,6 +56,7 @@ Pet unlock ──Save tên──> thiếu Overlay: disclosure/Grant Permissions 
 Discover ──Battery theme/icon──> Rewarded/Premium nếu bị khóa ──> Customize Status Bar
 Discover ──Mine──> Mine
 My Pet ──pet card──> detail panel ──Active/Inactive──> cập nhật Pet overlay foreground service
+                              └─ tắt pet Active cuối cùng──> dialog giữ tối thiểu một pet Active
 My Pet ──Shimeji Pets icon/Add pet──> Home/Shimeji Pets tab `PETS`
 My Pet ──Food+──> Home/Shimeji Pets tab `FOOD`
 Shimeji Pets ──Pet on Screen, chưa sở hữu pet──> dialog ──Browse pets──> tab `PETS`

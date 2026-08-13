@@ -6,6 +6,9 @@ sealed interface PetRoomOnScreenAction {
 
     data class SetEnabled(val slotIndex: Int, val enabled: Boolean) : PetRoomOnScreenAction
 
+    /** Pet on Screen must retain at least one enabled pet. */
+    data object KeepLastActive : PetRoomOnScreenAction
+
     /** Nothing to do: already in the requested state, or every slot is taken. */
     data object None : PetRoomOnScreenAction
 }
@@ -34,6 +37,9 @@ object PetRoomOnScreenPolicy {
         val slotIndex = slotPackKeys.indexOf(packKey)
         if (slotIndex >= 0) {
             val current = slotEnabled.getOrElse(slotIndex) { false }
+            if (current && !turnOn && activePetCount(slotPackKeys, slotEnabled) <= 1) {
+                return PetRoomOnScreenAction.KeepLastActive
+            }
             return if (current == turnOn) {
                 PetRoomOnScreenAction.None
             } else {
@@ -43,5 +49,12 @@ object PetRoomOnScreenPolicy {
         if (!turnOn) return PetRoomOnScreenAction.None
         val free = slotPackKeys.indexOfFirst(String::isBlank)
         return if (free >= 0) PetRoomOnScreenAction.Assign(free) else PetRoomOnScreenAction.None
+    }
+
+    private fun activePetCount(
+        slotPackKeys: List<String>,
+        slotEnabled: List<Boolean>
+    ): Int = slotPackKeys.indices.count { index ->
+        slotPackKeys[index].isNotBlank() && slotEnabled.getOrElse(index) { false }
     }
 }

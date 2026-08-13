@@ -429,6 +429,9 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   label `#8F6250` 11/16 · value `#212327` 12/16 ngăn bằng divider nét đứt; khối Energy có chip
   `77×24` nền `#8F6250` và thanh `336×42`. Thanh dùng ba gradient theo mức: `#94DF37→#47B321`,
   `#FFDF50→#EDB90E`, `#FF4E4E→#BF3535`;
+- tắt pet `Active` cuối cùng không ghi state `Inactive`; app giữ switch ON và hiện dialog giải
+  thích Pet on Screen cần tối thiểu một pet. Energy không khóa thao tác Active/Inactive. Khi đủ
+  12 slot đã gán, bật pet chưa có slot hiển thị toast thay vì im lặng;
 - Energy tụt 1%/phút kể cả khi app đóng và chỉ hồi khi cho ăn. Pet chưa có record thức ăn dùng
   thời điểm nhận nuôi làm mốc 100%, không dùng thời điểm UI vừa đọc; khi panel đang mở, ticker
   cập nhật giá trị mỗi giây để mốc phút mới hiện ngay. Food card tiêu một phần, nút `+` đưa về

@@ -302,6 +302,10 @@ class PetRoomViewModel @Inject constructor(
             is PetRoomOnScreenAction.SetEnabled ->
                 petSettingsRepository.updateSlotEnabled(action.slotIndex, action.enabled)
 
+            PetRoomOnScreenAction.KeepLastActive -> _uiState.update {
+                it.copy(lastActivePetName = detail.name)
+            }
+
             PetRoomOnScreenAction.None -> if (!detail.isOnScreen) {
                 showMessage(PetRoomMessage.NO_FREE_OVERLAY_SLOT)
             }
@@ -404,6 +408,8 @@ class PetRoomViewModel @Inject constructor(
     }
 
     fun dismissMessage() = _uiState.update { it.copy(message = null) }
+
+    fun dismissLastActivePetDialog() = _uiState.update { it.copy(lastActivePetName = null) }
 
     private fun showMessage(message: PetRoomMessage) =
         _uiState.update { it.copy(message = message) }

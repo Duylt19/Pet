@@ -936,6 +936,14 @@
     <string name="pet_room_remove_message">Are you sure you want to remove %1$s from your pet list?</string>
     <string name="pet_room_remove_confirm">Delete</string>
     <string name="pet_room_remove_cancel">Cancel</string>
+    <string name="pet_room_minimum_active_title">Keep one pet active</string>
+    <string name="pet_room_minimum_active_message">Pet on Screen needs at least one active pet. Turn on another pet before making %1$s inactive.</string>
+    <string name="pet_room_minimum_active_confirm">Got it</string>
+    <string name="pet_room_remove_failed">Could not remove this pet. Please try again.</string>
+    <string name="pet_room_select_pet_first">Select a pet first.</string>
+    <string name="pet_room_out_of_food">You do not have any of this food left.</string>
+    <string name="pet_room_already_full">This pet already has maximum energy.</string>
+    <string name="pet_room_no_free_slot">Up to 12 pets can be assigned to Pet on Screen. Remove a pet before activating another one.</string>
     <string name="pet_room_settings">Pet settings</string>
     <string name="pet_room_settings_title">Setting Pet</string>
     <string name="pet_room_settings_speed">Speed: </string>

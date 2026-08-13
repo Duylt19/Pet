@@ -106,8 +106,17 @@ fun PetRoomScreen(
 
     val context = LocalContext.current
     LaunchedEffect(uiState.message) {
-        if (uiState.message == PetRoomMessage.ROOM_DOWNLOAD_FAILED) {
-            ToastHelper.show(context, context.getString(R.string.pet_room_download_failed))
+        val messageRes = when (uiState.message) {
+            PetRoomMessage.ROOM_DOWNLOAD_FAILED -> R.string.pet_room_download_failed
+            PetRoomMessage.REMOVE_FAILED -> R.string.pet_room_remove_failed
+            PetRoomMessage.SELECT_A_PET_FIRST -> R.string.pet_room_select_pet_first
+            PetRoomMessage.OUT_OF_FOOD -> R.string.pet_room_out_of_food
+            PetRoomMessage.ALREADY_FULL -> R.string.pet_room_already_full
+            PetRoomMessage.NO_FREE_OVERLAY_SLOT -> R.string.pet_room_no_free_slot
+            null -> null
+        }
+        messageRes?.let {
+            ToastHelper.show(context, context.getString(it))
             viewModel.dismissMessage()
         }
     }
@@ -139,6 +148,7 @@ fun PetRoomScreen(
         onRemovePet = viewModel::requestRemovePet,
         onConfirmRemovePet = viewModel::confirmRemovePet,
         onCancelRemovePet = viewModel::cancelRemovePet,
+        onDismissLastActivePetDialog = viewModel::dismissLastActivePetDialog,
         onOpenSettings = viewModel::openSettings,
         onCloseSettings = viewModel::closeSettings,
         onSettingsSpeedChange = viewModel::updateSettingsSpeed,
@@ -166,6 +176,7 @@ private fun PetRoomContent(
     onRemovePet: (Int) -> Unit = {},
     onConfirmRemovePet: () -> Unit = {},
     onCancelRemovePet: () -> Unit = {},
+    onDismissLastActivePetDialog: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     onCloseSettings: () -> Unit = {},
     onSettingsSpeedChange: (Int) -> Unit = {},
@@ -274,6 +285,13 @@ private fun PetRoomContent(
                 pet = pet,
                 onConfirm = onConfirmRemovePet,
                 onDismiss = onCancelRemovePet
+            )
+        }
+
+        uiState.lastActivePetName?.let { petName ->
+            PetRoomMinimumActiveDialog(
+                petName = petName,
+                onDismiss = onDismissLastActivePetDialog
             )
         }
     }

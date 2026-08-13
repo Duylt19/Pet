@@ -25,6 +25,7 @@ data class PetRoomUiState(
     val foods: List<PetRoomFoodUiState> = emptyList(),
     val message: PetRoomMessage? = null,
     val petPendingRemoval: PetRoomPetUiState? = null,
+    val lastActivePetName: String? = null,
     val settings: PetRoomSettingsUiState? = null
 )
 

@@ -53,6 +53,30 @@ class PetRoomOnScreenPolicyTest {
     }
 
     @Test
+    fun `turning off the last active pet is blocked`() {
+        val action = PetRoomOnScreenPolicy.toggle(
+            slotPackKeys = listOf("a", "b", ""),
+            slotEnabled = listOf(false, true, false),
+            packKey = "b",
+            turnOn = false
+        )
+
+        assertEquals(PetRoomOnScreenAction.KeepLastActive, action)
+    }
+
+    @Test
+    fun `blank enabled slots do not count as active pets`() {
+        val action = PetRoomOnScreenPolicy.toggle(
+            slotPackKeys = listOf("a", ""),
+            slotEnabled = listOf(true, true),
+            packKey = "a",
+            turnOn = false
+        )
+
+        assertEquals(PetRoomOnScreenAction.KeepLastActive, action)
+    }
+
+    @Test
     fun `a new pet takes the first free slot`() {
         val action = PetRoomOnScreenPolicy.toggle(
             slotPackKeys = listOf("a", "", ""),

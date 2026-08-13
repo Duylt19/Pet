@@ -694,6 +694,14 @@
     <string name="battery_category_back">Quay lại</string>
     <!-- contentDescription của nút back dùng chung với My Pet Room -->
     <string name="pet_room_back">Quay lại</string>
+    <string name="pet_room_minimum_active_title">Hãy giữ ít nhất một thú cưng hoạt động</string>
+    <string name="pet_room_minimum_active_message">Pet on Screen cần ít nhất một thú cưng đang hoạt động. Hãy bật thú cưng khác trước khi chuyển %1$s sang trạng thái không hoạt động.</string>
+    <string name="pet_room_minimum_active_confirm">Đã hiểu</string>
+    <string name="pet_room_remove_failed">Không thể xóa thú cưng này. Vui lòng thử lại.</string>
+    <string name="pet_room_select_pet_first">Hãy chọn một thú cưng trước.</string>
+    <string name="pet_room_out_of_food">Bạn đã hết loại thức ăn này.</string>
+    <string name="pet_room_already_full">Thú cưng này đã có năng lượng tối đa.</string>
+    <string name="pet_room_no_free_slot">Pet on Screen hỗ trợ tối đa 12 thú cưng được gán. Hãy xóa một thú cưng trước khi kích hoạt thú cưng khác.</string>
     <string name="grant_permissions_nav">Quản lý quyền</string>
     <string name="mine_grant_permission">Quản lý quyền</string>
     <string name="accessibility_disclosure_title">Quyền truy cập Dịch vụ Trợ năng</string>
