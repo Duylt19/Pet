@@ -733,7 +733,6 @@
     <string name="grant_permissions_allowed">Đã cấp</string>
     <string name="grant_permissions_overlay_title">Hiển thị trên ứng dụng khác</string>
     <string name="grant_permissions_overlay_body">Hiển thị thú cưng và pin tùy chỉnh phía trên ứng dụng khác khi các tính năng này đang bật.</string>
-    <string name="grant_permissions_pet_overlay_body">Giữ thú cưng đang bật hiển thị phía trên ứng dụng khác khi tính năng Pet on Screen được bật.</string>
     <string name="grant_permissions_battery_title">Bỏ qua tối ưu hóa pin</string>
     <string name="grant_permissions_battery_body">Giúp lớp phủ thú cưng tiếp tục hoạt động trên các thiết bị thường xuyên dừng dịch vụ chạy nền.</string>
     <string name="grant_permissions_notification_title">Quyền thông báo</string>

@@ -984,7 +984,6 @@
     <string name="grant_permissions_allowed">Allowed</string>
     <string name="grant_permissions_overlay_title">Draw over other apps</string>
     <string name="grant_permissions_overlay_body">Shows your pet and custom battery above other apps while their features are enabled.</string>
-    <string name="grant_permissions_pet_overlay_body">Keeps your active pet visible above other apps while Pet on Screen is enabled.</string>
     <string name="grant_permissions_battery_title">Ignore Battery Optimization</string>
     <string name="grant_permissions_battery_body">Helps the active pet overlay stay available on devices that aggressively stop background services.</string>
     <string name="grant_permissions_notification_title">Notification access</string>

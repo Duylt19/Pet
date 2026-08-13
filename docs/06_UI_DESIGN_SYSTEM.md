@@ -283,6 +283,12 @@ Grant Permissions contract theo Figma node `8080:9754` và biến thể Pet on S
   `#E6F9EF`/`#00C062` (Roboto 500 10/14, padding 10×4), minh hoạ hai bước và CTA
   `Go to Settings` gradient `#C95DFF → #FB54BB` cao 40; các card còn lại dùng `AppSwitch`
   chung với Home;
+- ở biến thể Pet on Screen, hero `Allow Pets to Show on Screen` chính là item Draw over other
+  apps nên không render thêm row Overlay trùng lặp. Khi Overlay đã cấp nhưng Notification còn
+  thiếu, hero biến mất và chỉ còn row Notification;
+- Auto Start dùng đúng node `8593:7617`: container `34×34`, radius 10, gradient
+  `#8580FD → #615AD9`; glyph energy-saving leaf `22×22` export từ node `8606:8531`, không dùng
+  lại icon Battery Optimization;
 - CTA Pet on Screen điều phối system surface đúng thứ tự từ trên xuống: Overlay → Notification
   → Battery Optimization (nếu có ý nghĩa) → Auto Start (nếu ROM có màn tương ứng). Hai bước
   đầu là bắt buộc; ngay khi cả hai được cấp, pet foreground service được start, còn hai bước ổn

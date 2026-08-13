@@ -254,6 +254,9 @@ internal fun GrantPermissionsContent(
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val needsRequiredCard = uiState.needsRequiredCard(requiredTarget)
+    val needsRequiredSection = needsRequiredCard ||
+        (requiredTarget == GrantPermissionsTarget.OVERLAY &&
+            uiState.needsNotificationPermission)
     val needsStabilityPermission = uiState.hasStabilityPermissionToRequest(requiredTarget)
 
     // The design keeps this screen on a plain white sheet: the shared wallpaper is switched off
@@ -292,13 +295,15 @@ internal fun GrantPermissionsContent(
             ),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
         ) {
-            if (needsRequiredCard) {
+            if (needsRequiredSection) {
                 item {
                     SectionHeading(
                         step = "1",
                         titleRes = R.string.grant_permissions_section_necessary
                     )
                 }
+            }
+            if (needsRequiredCard) {
                 item {
                     RequiredPermissionCard(
                         requiredTarget = requiredTarget,
@@ -308,17 +313,6 @@ internal fun GrantPermissionsContent(
                 }
             }
             if (requiredTarget == GrantPermissionsTarget.OVERLAY) {
-                if (uiState.needsOverlayPermission) {
-                    item {
-                        PermissionCard(
-                            iconRes = R.drawable.img_permission_overlay,
-                            titleRes = R.string.grant_permissions_overlay_title,
-                            bodyRes = R.string.grant_permissions_pet_overlay_body,
-                            checked = false,
-                            onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
-                        )
-                    }
-                }
                 if (uiState.needsNotificationPermission) {
                     item {
                         PermissionCard(
@@ -369,7 +363,11 @@ internal fun GrantPermissionsContent(
             if (uiState.isAutoStartRowVisible) {
                 item {
                     PermissionCard(
-                        iconRes = R.drawable.img_permission_battery,
+                        iconRes = R.drawable.ic_permission_autostart,
+                        iconBackgroundColors = listOf(
+                            colorResource(R.color.colors_8580FD),
+                            colorResource(R.color.colors_615AD9)
+                        ),
                         titleRes = R.string.grant_permissions_autostart_title,
                         bodyRes = R.string.grant_permissions_autostart_body,
                         checked = null,
@@ -678,6 +676,7 @@ private fun StatusPill(isEnabled: Boolean) {
 @Composable
 private fun PermissionCard(
     iconRes: Int,
+    iconBackgroundColors: List<Color>? = null,
     titleRes: Int,
     bodyRes: Int,
     /** Null when no API reports the state, which is drawn as an action rather than a toggle. */
@@ -692,11 +691,28 @@ private fun PermissionCard(
             .padding(dimensionResource(SdpR.dimen._16sdp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(iconRes),
-            contentDescription = null,
-            modifier = Modifier.size(dimensionResource(SdpR.dimen._34sdp))
-        )
+        if (iconBackgroundColors == null) {
+            Image(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._34sdp))
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(dimensionResource(SdpR.dimen._34sdp))
+                    .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._8sdp)))
+                    .background(Brush.verticalGradient(iconBackgroundColors)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._22sdp))
+                )
+            }
+        }
         Spacer(Modifier.width(dimensionResource(SdpR.dimen._8sdp)))
         Column(modifier = Modifier.weight(1f)) {
             Text(

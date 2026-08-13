@@ -31,8 +31,8 @@ internal val GrantPermissionsUiState.needsBatteryOptimizationExemption: Boolean
 internal fun GrantPermissionsUiState.needsRequiredCard(
     requiredTarget: GrantPermissionsTarget
 ): Boolean = when (requiredTarget) {
-    GrantPermissionsTarget.OVERLAY ->
-        needsOverlayPermission || needsNotificationPermission
+    // On the Pet on Screen variant, the hero card itself is the overlay permission item.
+    GrantPermissionsTarget.OVERLAY -> needsOverlayPermission
     else -> !isAccessibilityEnabled
 }
 

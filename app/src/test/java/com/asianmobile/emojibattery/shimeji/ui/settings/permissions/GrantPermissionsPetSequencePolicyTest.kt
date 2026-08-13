@@ -97,6 +97,18 @@ class GrantPermissionsPetSequencePolicyTest {
         assertFalse(state.needsRequiredCard(GrantPermissionsTarget.OVERLAY))
     }
 
+    @Test
+    fun `pet hero represents overlay and does not duplicate its permission row`() {
+        val onlyNotificationMissing = GrantPermissionsUiState(
+            isOverlayGranted = true,
+            isNotificationGranted = false,
+            isNotificationRowVisible = true
+        )
+
+        assertFalse(onlyNotificationMissing.needsRequiredCard(GrantPermissionsTarget.OVERLAY))
+        assertTrue(onlyNotificationMissing.needsNotificationPermission)
+    }
+
     private fun readyMandatoryState(
         isBatteryRowVisible: Boolean = false,
         isAutoStartRowVisible: Boolean = false
