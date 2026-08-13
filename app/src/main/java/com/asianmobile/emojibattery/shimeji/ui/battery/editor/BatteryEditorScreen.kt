@@ -2246,11 +2246,11 @@ internal fun BatteryEditorPage.isFigmaPickerPage(): Boolean = when (this) {
     else -> false
 }
 
-private fun BatteryEditorPage.analyticsScreen(): ScreenName = when (this) {
+internal fun BatteryEditorPage.analyticsScreen(): ScreenName = when (this) {
     BatteryEditorPage.OVERVIEW -> ScreenName.BATTERY_EDITOR
-    BatteryEditorPage.BATTERY_TEMPLATES -> ScreenName.BATTERY_ICON_EDITOR
+    BatteryEditorPage.BATTERY_TEMPLATES -> ScreenName.BATTERY_TEMPLATE_PICKER
     BatteryEditorPage.EMOJI_TEMPLATES -> ScreenName.BATTERY_EMOJI_EDITOR
-    BatteryEditorPage.BACKGROUND_THEMES -> ScreenName.BATTERY_APPEARANCE_EDITOR
+    BatteryEditorPage.BACKGROUND_THEMES -> ScreenName.BATTERY_BACKGROUND_THEME_PICKER
     BatteryEditorPage.SIZE -> ScreenName.BATTERY_SIZE_EDITOR
     BatteryEditorPage.APPEARANCE -> ScreenName.BATTERY_APPEARANCE_EDITOR
     BatteryEditorPage.EMOJI -> ScreenName.BATTERY_EMOTION_EDITOR
@@ -2265,7 +2265,7 @@ private fun BatteryEditorPage.analyticsScreen(): ScreenName = when (this) {
     BatteryEditorPage.RINGER -> ScreenName.BATTERY_RINGER_EDITOR
     BatteryEditorPage.CHARGE -> ScreenName.BATTERY_CHARGE_EDITOR
     BatteryEditorPage.DATE_TIME -> ScreenName.BATTERY_DATE_TIME_EDITOR
-    BatteryEditorPage.CLOCK -> ScreenName.BATTERY_DATE_TIME_EDITOR
+    BatteryEditorPage.CLOCK -> ScreenName.BATTERY_CLOCK_EDITOR
 }
 
 @Composable

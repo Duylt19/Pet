@@ -21,6 +21,8 @@
 | Battery styles | `battery_catalog` |
 | Battery category | `battery_category` |
 | Customize status bar overview | `battery_editor` |
+| Battery template picker | `battery_template_picker` |
+| Battery background theme picker | `battery_background_theme_picker` |
 | Battery size editor | `battery_size_editor` |
 | Battery appearance editor | `battery_appearance_editor` |
 | Battery emoji editor | `battery_emoji_editor` |
@@ -36,6 +38,7 @@
 | Battery ringer editor | `battery_ringer_editor` |
 | Battery charge editor | `battery_charge_editor` |
 | Battery date/time editor | `battery_date_time_editor` |
+| Battery clock editor | `battery_clock_editor` |
 | Battery Troll themes | `battery_troll` |
 | Battery Troll customize | `battery_troll_customize` |
 | Settings | `settings` |
@@ -45,7 +48,23 @@
 
 - Dùng `TrackScreenView(ScreenName.X)` tại screen nhìn thấy.
 - Pager chỉ track page đang visible.
+- Mỗi destination/editor page nhìn thấy phải có screen name riêng; không dùng chung event chỉ vì
+  hai màn cùng chỉnh một nhóm dữ liệu.
 - Value lowercase snake_case, unique, ổn định và không quá 100 ký tự.
 - Không tái sử dụng screen name cũ cho meaning mới.
 - Không log PII, token hoặc nội dung user.
 - Khi thêm/xóa screen, cập nhật enum, `ScreenNameTest`, file này và navigation docs.
+
+## Runtime contract
+
+- `google_analytics_automatic_screen_reporting_enabled=false`; Single-Activity Compose chỉ dùng
+  manual `screen_view` để tránh Firebase tự ghi mọi destination thành `MainActivity`.
+- `TrackScreenView` chỉ log khi lifecycle owner của destination ở trạng thái `RESUMED`, log lại
+  khi user quay về màn sau navigation hoặc app resume, và không log adjacent pager page.
+- Intro dùng `PagerState.settledPage`; swipe chưa hoàn tất không được tính là screen view.
+- Battery Editor map từng `BatteryEditorPage` sang một `ScreenName` riêng. Picker, option editor,
+  emotion detail và Clock không được tái sử dụng event của màn khác.
+- `ScreenTrackingCoverageTest` đối chiếu mọi `*Screen()` được gọi trực tiếp trong `NavGraph` với
+  source owner có `TrackScreenView`; route mới thiếu tracker sẽ làm unit test fail.
+- Dialog/bottom sheet tạm thời không phát `screen_view` vì destination phía sau vẫn là màn visible.
+  Nếu cần đo funnel của dialog, dùng action event riêng thay vì giả thành screen event.

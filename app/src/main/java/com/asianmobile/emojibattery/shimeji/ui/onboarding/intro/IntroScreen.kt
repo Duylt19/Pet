@@ -97,13 +97,9 @@ fun IntroScreen(
     val coroutineScope = rememberCoroutineScope()
     val currentPage = pagerState.currentPage
 
-    TrackScreenView(
-        when (currentPage) {
-            0 -> ScreenName.INTRO_PAGE_1
-            1 -> ScreenName.INTRO_PAGE_2
-            else -> ScreenName.INTRO_PAGE_3
-        },
-    )
+    // Track only after the pager settles so an aborted swipe cannot emit a page the user did
+    // not actually enter.
+    TrackScreenView(introPageScreenName(pagerState.settledPage))
 
     HorizontalPager(
         state = pagerState,
@@ -133,6 +129,12 @@ fun IntroScreen(
             },
         )
     }
+}
+
+internal fun introPageScreenName(pageIndex: Int): ScreenName = when (pageIndex) {
+    0 -> ScreenName.INTRO_PAGE_1
+    1 -> ScreenName.INTRO_PAGE_2
+    else -> ScreenName.INTRO_PAGE_3
 }
 
 @Composable
