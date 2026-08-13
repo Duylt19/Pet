@@ -114,7 +114,7 @@ class InterstitialUtil {
             MobileAds.initialize(
                 application,
                 InitializationConfig.Builder(
-                    application.getString(R.string.id_pub)
+                    application.getString(R.string.id_emoji_battery_pub)
                 ).build()
             ) {
                 Log.e(TAG, "initializeAdSdk: SUCCESS")
@@ -251,10 +251,10 @@ class InterstitialUtil {
         if (!MobileAds.isInitialized) return
         if (!CheckShowAdsUtil.checkLoadInterAd(context)) return
         val id: String = if (BuildConfig.DEBUG) {
-            context.getString(R.string.id_private_browser_inter_test)
+            context.getString(R.string.id_emoji_battery_inter_test)
         } else {
             Log.d(TAG, "loadAdmob: 1")
-            context.getString(R.string.id_private_browser_inter)
+            context.getString(R.string.id_emoji_battery_inter)
         }
         AdsIdLogger.request(
             format = "INTERSTITIAL",
@@ -416,9 +416,9 @@ class InterstitialUtil {
             return
         }
         val idAds: String = if (BuildConfig.DEBUG) {
-            activity.getString(R.string.id_private_browser_inter_test)
+            activity.getString(R.string.id_emoji_battery_inter_test)
         } else {
-            activity.getString(R.string.id_private_browser_inter)
+            activity.getString(R.string.id_emoji_battery_inter)
         }
 
         val rule = getRuleShowInters()

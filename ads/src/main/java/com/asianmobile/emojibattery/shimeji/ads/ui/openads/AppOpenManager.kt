@@ -187,9 +187,9 @@ class AppOpenManager() : LifecycleObserver {
         }
 
         val adUnitId = if (BuildConfig.DEBUG) {
-            context.getString(R.string.id_private_browser_open_ads_test)
+            context.getString(R.string.id_emoji_battery_open_ads_test)
         } else {
-            context.getString(R.string.id_private_browser_open_ads)
+            context.getString(R.string.id_emoji_battery_open_ads)
         }
         AdsIdLogger.request(format = "APP_OPEN", adUnitId = adUnitId, placement = "app_open")
 

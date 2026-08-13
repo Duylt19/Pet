@@ -54,9 +54,9 @@ class RewardedVideoAds {
             return
         }
         val id: String = if (BuildConfig.DEBUG) {
-            context.getString(R.string.id_private_browser_rewarded_test)
+            context.getString(R.string.id_emoji_battery_rewarded_test)
         } else {
-            context.getString(R.string.id_private_browser_rewarded)
+            context.getString(R.string.id_emoji_battery_rewarded)
         }
         AdsIdLogger.request(format = "REWARDED", adUnitId = id, placement = "rewarded")
         val adRequest = AdRequest.Builder(id).build()

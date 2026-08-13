@@ -81,12 +81,12 @@ fun NativeIntroFullAd(
 
     val nativeAdId = remember(isReload) {
         if (BuildConfig.DEBUG) {
-            context.getString(R.string.id_private_browser_native_test)
+            context.getString(R.string.id_emoji_battery_native_test)
         } else {
             if (isReload) {
-                context.getString(R.string.id_private_browser_native_full_intro)
+                context.getString(R.string.id_emoji_battery_native_full_intro)
             } else {
-                context.getString(R.string.id_private_browser_native_full_intro_2)
+                context.getString(R.string.id_emoji_battery_native_full_intro_2)
             }
         }
     }

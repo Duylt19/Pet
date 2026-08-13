@@ -117,9 +117,9 @@ fun BannerAd(
         adViewModel.isLoading = true
         val bannerAdSize = AdSize.BANNER
         val bannerId = if (BuildConfig.DEBUG) {
-            activity.getString(R.string.id_private_browser_banner_test)
+            activity.getString(R.string.id_emoji_battery_banner_test)
         } else {
-            activity.getString(R.string.id_private_browser_banner)
+            activity.getString(R.string.id_emoji_battery_banner)
         }
         AdsIdLogger.request(format = "BANNER", adUnitId = bannerId, placement = adPosition)
         val adRequest =

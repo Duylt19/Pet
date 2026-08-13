@@ -4,6 +4,10 @@
 
 Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/utilities. Feature trong `:app` chỉ gọi public API của module; không khởi tạo SDK adapter trực tiếp.
 
+Mọi Android string resource chứa publisher/ad-unit ID dùng prefix
+`id_emoji_battery_`; không giữ identifier legacy `id_private_browser_` hoặc `id_pub`.
+Đổi tên resource không được tự ý đổi giá trị AdMob production/test bên trong.
+
 ## Base behavior còn giữ
 
 - Splash khởi tạo consent/config liên quan.

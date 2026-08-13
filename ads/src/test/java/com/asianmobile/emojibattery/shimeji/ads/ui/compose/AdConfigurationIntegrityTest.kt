@@ -12,6 +12,7 @@ import com.asianmobile.emojibattery.shimeji.ads.config.RULE_SHOW_INTER
 import com.asianmobile.emojibattery.shimeji.ads.config.SHOW_INTER_LAUNCHER
 import com.asianmobile.emojibattery.shimeji.ads.config.TIME_CLICK_ACTION
 import java.io.File
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -21,48 +22,59 @@ class AdConfigurationIntegrityTest {
     fun `every active ad unit string has a non blank value`() {
         val stringsXml = resourceFile("src/main/res/values/strings.xml").readText()
         val allAdUnitValues = Regex(
-            pattern = """<string\s+name="(id_(?:pub|private_browser_[^"]+))"[^>]*>(.*?)</string>""",
+            pattern = """<string\s+name="(id_emoji_battery_[^"]+)"[^>]*>(.*?)</string>""",
             options = setOf(RegexOption.DOT_MATCHES_ALL)
         ).findAll(stringsXml).associate { match ->
             match.groupValues[1] to match.groupValues[2].trim()
         }
+        val invalidAdResourceNames = Regex("<string\\s+name=\"(id_[^\"]+)\"")
+            .findAll(stringsXml)
+            .map { it.groupValues[1] }
+            .filterNot { it.startsWith("id_emoji_battery_") }
+            .toSet()
 
         val activeAdUnitNames = setOf(
-            "id_pub",
-            "id_private_browser_inter_test",
-            "id_private_browser_banner_test",
-            "id_private_browser_open_ads_test",
-            "id_private_browser_rewarded_test",
-            "id_private_browser_native_test",
-            "id_private_browser_inter",
-            "id_private_browser_banner",
-            "id_private_browser_open_ads",
-            "id_private_browser_rewarded",
-            "id_private_browser_inter_splash",
-            "id_private_browser_native_language",
-            "id_private_browser_native_language_second",
-            "id_private_browser_native_intro",
-            "id_private_browser_native_intro_second",
-            "id_private_browser_native_permission",
-            "id_private_browser_native_grant_permissions",
-            "id_private_browser_native_accessibility_disclosure",
-            "id_private_browser_native_overlay_permission",
-            "id_private_browser_native_search",
-            "id_private_browser_native_favourite_recent",
-            "id_private_browser_native_battery_catalog",
-            "id_private_browser_native_battery_editor",
-            "id_private_browser_native_battery_reward",
-            "id_private_browser_native_battery_discard",
-            "id_private_browser_native_pet_reward",
-            "id_private_browser_native_food_reward",
-            "id_private_browser_native_battery_troll_reward",
-            "id_private_browser_native_exit_dialog"
+            "id_emoji_battery_pub",
+            "id_emoji_battery_inter_test",
+            "id_emoji_battery_banner_test",
+            "id_emoji_battery_open_ads_test",
+            "id_emoji_battery_rewarded_test",
+            "id_emoji_battery_native_test",
+            "id_emoji_battery_inter",
+            "id_emoji_battery_banner",
+            "id_emoji_battery_open_ads",
+            "id_emoji_battery_rewarded",
+            "id_emoji_battery_inter_splash",
+            "id_emoji_battery_native_language",
+            "id_emoji_battery_native_language_second",
+            "id_emoji_battery_native_intro",
+            "id_emoji_battery_native_intro_second",
+            "id_emoji_battery_native_permission",
+            "id_emoji_battery_native_grant_permissions",
+            "id_emoji_battery_native_accessibility_disclosure",
+            "id_emoji_battery_native_overlay_permission",
+            "id_emoji_battery_native_search",
+            "id_emoji_battery_native_favourite_recent",
+            "id_emoji_battery_native_battery_catalog",
+            "id_emoji_battery_native_battery_editor",
+            "id_emoji_battery_native_battery_reward",
+            "id_emoji_battery_native_battery_discard",
+            "id_emoji_battery_native_pet_reward",
+            "id_emoji_battery_native_food_reward",
+            "id_emoji_battery_native_battery_troll_reward",
+            "id_emoji_battery_native_exit_dialog"
         )
 
         val missingNames = activeAdUnitNames - allAdUnitValues.keys
         assertTrue("Missing active ad unit strings: $missingNames", missingNames.isEmpty())
         val blankNames = activeAdUnitNames.filter { allAdUnitValues[it].isNullOrBlank() }
         assertTrue("Blank ad unit strings: $blankNames", blankNames.isEmpty())
+        assertTrue(
+            "Ad ID resources without Emoji Battery prefix: $invalidAdResourceNames",
+            invalidAdResourceNames.isEmpty()
+        )
+        assertFalse(stringsXml.contains("id_private_browser_"))
+        assertFalse(stringsXml.contains("name=\"id_pub\""))
     }
 
     @Test

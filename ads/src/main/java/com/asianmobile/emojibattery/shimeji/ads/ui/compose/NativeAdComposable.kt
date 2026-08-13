@@ -105,7 +105,7 @@ fun NativeAdInternal(
 
     val nativeAdId = remember(customAdId, screenCode, placement) {
         customAdId ?: if (BuildConfig.DEBUG) {
-            context.getString(R.string.id_private_browser_native_test)
+            context.getString(R.string.id_emoji_battery_native_test)
         } else {
             placement?.let { context.getString(it.adUnitResId) }.orEmpty()
         }

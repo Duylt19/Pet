@@ -2,44 +2,44 @@
     <string name="app_name" translatable="false">Ads</string>
 
     <!-- Test ad unit IDs -->
-    <string name="id_private_browser_inter_test" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
-    <string name="id_private_browser_banner_test" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
-    <string name="id_private_browser_open_ads_test" translatable="false">ca-app-pub-3940256099942544/9257395921</string>
-    <string name="id_private_browser_rewarded_test" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
-    <string name="id_private_browser_native_test" translatable="false">/21775744923/example/native</string>
+    <string name="id_emoji_battery_inter_test" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="id_emoji_battery_banner_test" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="id_emoji_battery_open_ads_test" translatable="false">ca-app-pub-3940256099942544/9257395921</string>
+    <string name="id_emoji_battery_rewarded_test" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
+    <string name="id_emoji_battery_native_test" translatable="false">/21775744923/example/native</string>
 
-    <string name="id_pub" translatable="false">ca-app-pub-7219501334514633~2007481116</string>
-    <string name="id_private_browser_inter" translatable="false">ca-app-pub-7219501334514633/6026617175</string>
-    <string name="id_private_browser_banner" translatable="false">ca-app-pub-7219501334514633/2087372169</string>
-    <string name="id_private_browser_open_ads" translatable="false">ca-app-pub-7219501334514633/4601975008</string>
-    <string name="id_private_browser_rewarded" translatable="false">ca-app-pub-7219501334514633/1145257362</string>
+    <string name="id_emoji_battery_pub" translatable="false">ca-app-pub-7219501334514633~2007481116</string>
+    <string name="id_emoji_battery_inter" translatable="false">ca-app-pub-7219501334514633/6026617175</string>
+    <string name="id_emoji_battery_banner" translatable="false">ca-app-pub-7219501334514633/2087372169</string>
+    <string name="id_emoji_battery_open_ads" translatable="false">ca-app-pub-7219501334514633/4601975008</string>
+    <string name="id_emoji_battery_rewarded" translatable="false">ca-app-pub-7219501334514633/1145257362</string>
 
-    <string name="id_private_browser_inter_splash" translatable="false">ca-app-pub-7219501334514633/1823648286</string>
+    <string name="id_emoji_battery_inter_splash" translatable="false">ca-app-pub-7219501334514633/1823648286</string>
 
-    <!-- Private Browser native placements. Keep separate resource names even when an
+    <!-- Emoji Battery native placements. Keep separate resource names even when an
          AdMob unit is shared temporarily so each placement can be split without code changes. -->
-    <string name="id_private_browser_native_language" translatable="false">ca-app-pub-7219501334514633/8832175699</string>
-    <string name="id_private_browser_native_language_second" translatable="false">ca-app-pub-7219501334514633/8832175699</string>
-    <string name="id_private_browser_native_intro" translatable="false">ca-app-pub-7219501334514633/3128991098</string>
-    <string name="id_private_browser_native_intro_second" translatable="false">ca-app-pub-7219501334514633/3128991098</string>
-    <string name="id_private_browser_native_permission" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
-    <string name="id_private_browser_native_grant_permissions" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
-    <string name="id_private_browser_native_accessibility_disclosure" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
-    <string name="id_private_browser_native_overlay_permission" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
-    <string name="id_private_browser_native_search" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
-    <string name="id_private_browser_native_favourite_recent" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
-    <string name="id_private_browser_native_battery_catalog" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
-    <string name="id_private_browser_native_battery_editor" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
-    <string name="id_private_browser_native_battery_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
-    <string name="id_private_browser_native_battery_discard" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
-    <string name="id_private_browser_native_pet_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
-    <string name="id_private_browser_native_food_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
-    <string name="id_private_browser_native_battery_troll_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
-    <string name="id_private_browser_native_exit_dialog" translatable="false">ca-app-pub-7219501334514633/1512657095</string>
+    <string name="id_emoji_battery_native_language" translatable="false">ca-app-pub-7219501334514633/8832175699</string>
+    <string name="id_emoji_battery_native_language_second" translatable="false">ca-app-pub-7219501334514633/8832175699</string>
+    <string name="id_emoji_battery_native_intro" translatable="false">ca-app-pub-7219501334514633/3128991098</string>
+    <string name="id_emoji_battery_native_intro_second" translatable="false">ca-app-pub-7219501334514633/3128991098</string>
+    <string name="id_emoji_battery_native_permission" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
+    <string name="id_emoji_battery_native_grant_permissions" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
+    <string name="id_emoji_battery_native_accessibility_disclosure" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
+    <string name="id_emoji_battery_native_overlay_permission" translatable="false">ca-app-pub-7219501334514633/3971419616</string>
+    <string name="id_emoji_battery_native_search" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_emoji_battery_native_favourite_recent" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_emoji_battery_native_battery_catalog" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_emoji_battery_native_battery_editor" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_emoji_battery_native_battery_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_emoji_battery_native_battery_discard" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_emoji_battery_native_pet_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_emoji_battery_native_food_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_emoji_battery_native_battery_troll_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_emoji_battery_native_exit_dialog" translatable="false">ca-app-pub-7219501334514633/1512657095</string>
 
     <!-- Full intro native ads -->
-    <string name="id_private_browser_native_full_intro" translatable="false"></string>
-    <string name="id_private_browser_native_full_intro_2" translatable="false"></string>
+    <string name="id_emoji_battery_native_full_intro" translatable="false"></string>
+    <string name="id_emoji_battery_native_full_intro_2" translatable="false"></string>
 
     <!-- Ad UI -->
     <string name="welcome_back">Welcome Back</string>

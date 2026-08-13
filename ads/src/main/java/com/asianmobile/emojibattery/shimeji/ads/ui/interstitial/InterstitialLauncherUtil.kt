@@ -65,9 +65,9 @@ class InterstitialLauncherUtil {
         }
 
         val id = if (BuildConfig.DEBUG) {
-            context.getString(R.string.id_private_browser_inter_test)
+            context.getString(R.string.id_emoji_battery_inter_test)
         } else {
-            context.getString(R.string.id_private_browser_inter_splash)
+            context.getString(R.string.id_emoji_battery_inter_splash)
         }
 
         AdsIdLogger.request(

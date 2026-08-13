@@ -32,24 +32,24 @@ tự thêm quảng cáo chỉ từ tên route.
 
 | Surface | Screen code | Remote Config | Ad-unit string | Layout |
 |---|---|---|---|---|
-| Language initial | `screen_language` | `is_show_native_language` | `id_private_browser_native_language` | `HEIGHT_222_SMALL_CTA` |
-| Language selected | `screen_language_second` | `is_show_native_language_second` | `id_private_browser_native_language_second` | `HEIGHT_222` |
-| Intro page 1 | `screen_intro` | `is_show_native_intro` | `id_private_browser_native_intro` | `HEIGHT_222` |
-| Intro page 3 | `screen_intro_second` | `is_show_native_intro_second` | `id_private_browser_native_intro_second` | `HEIGHT_222` |
-| Permission onboarding | `screen_permission` | `is_show_native_permission` | `id_private_browser_native_permission` | `HEIGHT_222` |
-| Grant Permissions | `screen_grant_permissions` | `is_show_native_grant_permissions` | `id_private_browser_native_grant_permissions` | `HEIGHT_222` |
-| Accessibility disclosure | `dialog_accessibility_disclosure` | `is_show_native_accessibility_disclosure` | `id_private_browser_native_accessibility_disclosure` | `HEIGHT_222` |
-| Overlay disclosure | `dialog_overlay_permission` | `is_show_native_overlay_permission` | `id_private_browser_native_overlay_permission` | `HEIGHT_222` |
-| Search | `screen_search` | `is_show_native_search` | `id_private_browser_native_search` | `HEIGHT_222` |
-| Favourite & Recent | `screen_favourite_recent` | `is_show_native_favourite_recent` | `id_private_browser_native_favourite_recent` | `HEIGHT_222` |
-| Battery catalog | `screen_battery_catalog` | `is_show_native_battery_catalog` | `id_private_browser_native_battery_catalog` | `HEIGHT_150` |
-| Battery editor options | `screen_battery_editor` | `is_show_native_battery_editor` | `id_private_browser_native_battery_editor` | `COLLAPSE_SMALL` |
-| Battery reward sheet | `dialog_battery_reward` | `is_show_native_battery_reward` | `id_private_browser_native_battery_reward` | `HEIGHT_222` |
-| Battery discard sheet | `dialog_battery_discard` | `is_show_native_battery_discard` | `id_private_browser_native_battery_discard` | `HEIGHT_222` |
-| Pet reward sheet | `dialog_pet_reward` | `is_show_native_pet_reward` | `id_private_browser_native_pet_reward` | `HEIGHT_222` |
-| Food reward sheet | `dialog_food_reward` | `is_show_native_food_reward` | `id_private_browser_native_food_reward` | `HEIGHT_222` |
-| Battery Troll reward | `dialog_battery_troll_reward` | `is_show_native_battery_troll_reward` | `id_private_browser_native_battery_troll_reward` | `HEIGHT_222` |
-| Exit dialog | `dialog_exit_app` | `is_show_native_exit_dialog` | `id_private_browser_native_exit_dialog` | `HEIGHT_222` |
+| Language initial | `screen_language` | `is_show_native_language` | `id_emoji_battery_native_language` | `HEIGHT_222_SMALL_CTA` |
+| Language selected | `screen_language_second` | `is_show_native_language_second` | `id_emoji_battery_native_language_second` | `HEIGHT_222` |
+| Intro page 1 | `screen_intro` | `is_show_native_intro` | `id_emoji_battery_native_intro` | `HEIGHT_222` |
+| Intro page 3 | `screen_intro_second` | `is_show_native_intro_second` | `id_emoji_battery_native_intro_second` | `HEIGHT_222` |
+| Permission onboarding | `screen_permission` | `is_show_native_permission` | `id_emoji_battery_native_permission` | `HEIGHT_222` |
+| Grant Permissions | `screen_grant_permissions` | `is_show_native_grant_permissions` | `id_emoji_battery_native_grant_permissions` | `HEIGHT_222` |
+| Accessibility disclosure | `dialog_accessibility_disclosure` | `is_show_native_accessibility_disclosure` | `id_emoji_battery_native_accessibility_disclosure` | `HEIGHT_222` |
+| Overlay disclosure | `dialog_overlay_permission` | `is_show_native_overlay_permission` | `id_emoji_battery_native_overlay_permission` | `HEIGHT_222` |
+| Search | `screen_search` | `is_show_native_search` | `id_emoji_battery_native_search` | `HEIGHT_222` |
+| Favourite & Recent | `screen_favourite_recent` | `is_show_native_favourite_recent` | `id_emoji_battery_native_favourite_recent` | `HEIGHT_222` |
+| Battery catalog | `screen_battery_catalog` | `is_show_native_battery_catalog` | `id_emoji_battery_native_battery_catalog` | `HEIGHT_150` |
+| Battery editor options | `screen_battery_editor` | `is_show_native_battery_editor` | `id_emoji_battery_native_battery_editor` | `COLLAPSE_SMALL` |
+| Battery reward sheet | `dialog_battery_reward` | `is_show_native_battery_reward` | `id_emoji_battery_native_battery_reward` | `HEIGHT_222` |
+| Battery discard sheet | `dialog_battery_discard` | `is_show_native_battery_discard` | `id_emoji_battery_native_battery_discard` | `HEIGHT_222` |
+| Pet reward sheet | `dialog_pet_reward` | `is_show_native_pet_reward` | `id_emoji_battery_native_pet_reward` | `HEIGHT_222` |
+| Food reward sheet | `dialog_food_reward` | `is_show_native_food_reward` | `id_emoji_battery_native_food_reward` | `HEIGHT_222` |
+| Battery Troll reward | `dialog_battery_troll_reward` | `is_show_native_battery_troll_reward` | `id_emoji_battery_native_battery_troll_reward` | `HEIGHT_222` |
+| Exit dialog | `dialog_exit_app` | `is_show_native_exit_dialog` | `id_emoji_battery_native_exit_dialog` | `HEIGHT_222` |
 
 ## Configuration contract
 
