@@ -69,17 +69,62 @@ class BatteryCatalogDisplayPolicyTest {
 
         val sections = policy.sections(
             categories = listOf(BUILT_IN_BATTERY_CATEGORY, trending, empty),
-            themes = listOf(BUILT_IN_BATTERY_THEME, batteryTheme, emojiTheme)
+            themes = listOf(BUILT_IN_BATTERY_THEME, batteryTheme, emojiTheme),
+            trendingThemeIds = listOf(batteryTheme.id, emojiTheme.id)
         )
 
         assertEquals(listOf(trending), sections.map(BatteryCatalogSection::category))
         assertEquals(listOf(batteryTheme, emojiTheme), sections.single().themes)
     }
 
-    private fun theme(id: Int, name: String) = BatteryThemeEntry(
+    @Test
+    fun sections_useSharedCuratedOrderForTrendingAndCategoryOrderElsewhere() {
+        val trending = BatteryCatalogCategory(1, "🔥 Trending", "trending", 1)
+        val cute = BatteryCatalogCategory(2, "Cute", "cute", 2)
+        val trendingTheme = theme(11, "Trending")
+        val cuteThemeOne = theme(21, "Cute one", categoryId = cute.id)
+        val cuteThemeTwo = theme(22, "Cute two", categoryId = cute.id)
+
+        val sections = policy.sections(
+            categories = listOf(trending, cute),
+            themes = listOf(trendingTheme, cuteThemeOne, cuteThemeTwo),
+            trendingThemeIds = listOf(cuteThemeTwo.id, 404, trendingTheme.id, cuteThemeOne.id)
+        )
+
+        assertEquals(
+            listOf(cuteThemeTwo, trendingTheme, cuteThemeOne),
+            sections.first { it.category == trending }.themes
+        )
+        assertEquals(
+            listOf(cuteThemeOne, cuteThemeTwo),
+            sections.first { it.category == cute }.themes
+        )
+    }
+
+    @Test
+    fun sections_hideTrendingWhenServerPublishesAnEmptyCuration() {
+        val trending = BatteryCatalogCategory(1, "🔥 Trending", "trending", 1)
+        val cute = BatteryCatalogCategory(2, "Cute", "cute", 2)
+        val cuteTheme = theme(21, "Cute", categoryId = cute.id)
+
+        val sections = policy.sections(
+            categories = listOf(trending, cute),
+            themes = listOf(batteryTheme, cuteTheme),
+            trendingThemeIds = emptyList()
+        )
+
+        assertEquals(listOf(cute), sections.map(BatteryCatalogSection::category))
+        assertEquals(listOf(cuteTheme), sections.single().themes)
+    }
+
+    private fun theme(
+        id: Int,
+        name: String,
+        categoryId: Int = 1
+    ) = BatteryThemeEntry(
         id = id,
         name = name,
-        categoryId = 1,
+        categoryId = categoryId,
         categoryName = "Trending",
         entitlement = BatteryThemeEntitlement.FREE,
         thumbnailPath = "thumb/$id.png",

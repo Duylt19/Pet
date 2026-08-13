@@ -205,7 +205,11 @@ class BatteryCatalogViewModel @Inject constructor(
         return current.copy(
             themes = catalog.themes,
             categories = displayPolicy.filterCategories(catalog.categories),
-            sections = displayPolicy.sections(catalog.categories, catalog.themes),
+            sections = displayPolicy.sections(
+                categories = catalog.categories,
+                themes = catalog.themes,
+                trendingThemeIds = catalog.trendingEmojiThemeIds
+            ),
             selectedThemeId = config.selectedThemeId,
             isBatteryEnabled = config.enabled && BatteryAccessibility.isEnabled(context),
             favoriteThemeIds = config.favoriteThemeIds,

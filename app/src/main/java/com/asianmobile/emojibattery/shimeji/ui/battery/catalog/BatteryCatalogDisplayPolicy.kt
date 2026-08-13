@@ -29,16 +29,26 @@ class BatteryCatalogDisplayPolicy {
 
     fun sections(
         categories: List<BatteryCatalogCategory>,
-        themes: List<BatteryThemeEntry>
+        themes: List<BatteryThemeEntry>,
+        trendingThemeIds: List<Int>
     ): List<BatteryCatalogSection> = filterCategories(categories).mapNotNull { category ->
-        val categoryThemes = themes.filter { theme ->
-            !theme.isBuiltIn && theme.categoryId == category.id
+        val categoryThemes = if (category.slug == TRENDING_CATEGORY_SLUG) {
+            val themesById = themes
+                .filterNot(BatteryThemeEntry::isBuiltIn)
+                .associateBy(BatteryThemeEntry::id)
+            trendingThemeIds.mapNotNull(themesById::get)
+        } else {
+            themes.filter { theme ->
+                !theme.isBuiltIn && theme.categoryId == category.id
+            }
         }
         categoryThemes.takeIf(List<BatteryThemeEntry>::isNotEmpty)?.let { entries ->
             BatteryCatalogSection(category = category, themes = entries)
         }
     }
 }
+
+private const val TRENDING_CATEGORY_SLUG = "trending"
 
 internal fun batteryCategoryDisplayName(rawName: String): String = rawName.trim()
 

@@ -32,10 +32,11 @@ JSON giữ nguyên. Path trong catalog là source of truth; app không tự thay
 Asset record có `path`, `sizeBytes`, `sha256`, `width`, `height`. Preview phải nhẹ hơn full.
 Theme entitlement là `FREE|PREMIUM`; source status là `REVIEW_REQUIRED|APPROVED`.
 
-Baseline debug schema v1 có optional ordered `trendingEmojiThemeIds` cho section Discover.
-Catalog cũ thiếu field dùng fallback đóng gói trong app; field có mặt giữ thứ tự catalog, bỏ ID
-không dương/trùng và cho phép `[]` để ẩn section. Theme thiếu, built-in hoặc chưa đủ asset bị UI
-bỏ qua. Mọi lần thêm/xóa/reorder ranking chỉ tăng `catalogVersion`.
+Baseline debug schema v1 có optional ordered `trendingEmojiThemeIds` dùng chung cho Discover và
+tab Battery. Catalog cũ thiếu field dùng fallback đóng gói trong app; field có mặt giữ thứ tự
+catalog, bỏ ID không dương/trùng và cho phép `[]` để ẩn section. Ranking này đồng thời điều khiển
+category Trending ở landing và màn More của tab Battery; theme thiếu hoặc built-in bị UI bỏ qua.
+Mọi lần thêm/xóa/reorder ranking chỉ tăng `catalogVersion`.
 
 `HybridBatteryCatalogRepository` đọc cache trước, revalidate theo TTL/ETag/backoff và map
 record thành private GitHub URL. Preview dùng Coil. Full asset được

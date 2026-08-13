@@ -101,6 +101,9 @@ Language loading contract theo Figma `8421:9356`:
 
 Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
 
+- category có slug `trending` dùng chung ordered `trendingEmojiThemeIds` với section Trending
+  Emoji Battery của Discover ở cả landing lẫn màn More; không lọc lại theo `categoryId` cũ.
+  Category khác tiếp tục giữ membership và thứ tự theme từ catalog;
 - landing dùng shared `HomeHeader`/`HomeEnableCard`, promo composite PNG @3x, category section
   dạng carousel và card `110×110px`; preview runtime dùng chung tỉ lệ `65%` và
   `ContentScale.Fit` của Discover vì asset dữ liệu thật có bounds khác mock Figma, favorite ở

@@ -161,7 +161,8 @@ nên trạng thái running không được restore sau process death/reboot.
   built-in theme ID `0` luôn có như fallback runtime nhưng không xuất hiện trong picker.
 - `batteries.json` có thể thêm `trendingEmojiThemeIds` optional theo cùng migration contract với
   owner catalog: field thiếu dùng fallback hiện tại, còn `[]` chủ đích ẩn section. UI giữ order
-  catalog và bỏ qua theme không tồn tại, built-in hoặc chưa materialize đủ asset. Đây là thay đổi
+  catalog và bỏ qua theme không tồn tại hoặc built-in. Cùng ranking điều khiển cả Trending Emoji
+  Battery trên Discover lẫn category Trending ở landing/More của tab Battery. Đây là thay đổi
   content trong baseline debug schema v1, không phải DataStore/DB migration; các lần đổi ranking
   chỉ tăng `catalogVersion`.
 - Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và dimension. Ảnh tĩnh
