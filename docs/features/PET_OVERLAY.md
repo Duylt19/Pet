@@ -48,8 +48,10 @@ Thứ tự gate bắt buộc cho mọi entry point bật pet:
    Settings để tránh vòng lặp launcher trả kết quả ngay sau khi user đã từ chối;
 5. còn lại → `START`.
 
-Grant Permissions mở theo thứ tự Overlay → Notification → Battery Optimization → Auto Start.
-Overlay và Notification chỉ đi tiếp khi đã cấp; nếu user quay lại mà chưa cấp thì dừng chuỗi để
+Grant Permissions render Notification ở đầu danh sách trên cả dashboard Mine lẫn biến thể Pet on
+Screen. Chuỗi tự động của Pet on Screen mở theo thứ tự Notification → Overlay → Battery
+Optimization → Auto Start. Notification và Overlay chỉ đi tiếp khi đã cấp; nếu user quay lại mà
+chưa cấp thì dừng chuỗi để
 không ném họ trở lại cùng system surface. Ngay khi hai quyền bắt buộc đạt, pet start lập tức; hai
 bước ổn định sau đó là optional và nếu bị bỏ qua cũng không lặp vô hạn.
 

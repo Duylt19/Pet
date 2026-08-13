@@ -306,6 +306,8 @@ Grant Permissions contract theo dashboard Mine Figma node `8080:7477`, card nề
   trên thiết bị: Overlay hoặc Notification đã cấp sẽ biến mất; Notification không tồn tại dưới API 33;
   Battery Optimization đã exemption hoặc không có restriction signal cũng không hiện. Section
   không còn row sẽ được ẩn cùng heading;
+- Notification là option đầu tiên ở cả dashboard Mine và biến thể Pet on Screen. Chuỗi xin quyền
+  Pet cũng theo đúng thứ tự UI: Notification → Overlay → Battery Optimization → Auto Start;
 - Ignore Battery Optimization chưa cấp sẽ thử mở dialog package-scoped bằng
   `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` trước; ROM không có activity tương ứng thì
   fallback sang `ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS`, cuối cùng mới tới App Details.

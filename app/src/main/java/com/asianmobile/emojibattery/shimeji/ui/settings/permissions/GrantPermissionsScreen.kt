@@ -303,6 +303,16 @@ internal fun GrantPermissionsContent(
             verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
         ) {
             if (requiredTarget == GrantPermissionsTarget.ACCESSIBILITY) {
+                if (uiState.isNotificationRowVisible) {
+                    item {
+                        NotificationPermissionCard(
+                            checked = uiState.isNotificationGranted,
+                            onClick = {
+                                onTargetClicked(GrantPermissionsTarget.NOTIFICATION)
+                            }
+                        )
+                    }
+                }
                 item {
                     SectionHeading(
                         step = "1",
@@ -345,17 +355,6 @@ internal fun GrantPermissionsContent(
                         )
                     }
                 }
-                if (uiState.isNotificationRowVisible) {
-                    item {
-                        PermissionCard(
-                            iconRes = R.drawable.img_permission_notification,
-                            titleRes = R.string.grant_permissions_notification_title,
-                            bodyRes = R.string.grant_permissions_notification_body,
-                            checked = uiState.isNotificationGranted,
-                            onClick = { onTargetClicked(GrantPermissionsTarget.NOTIFICATION) }
-                        )
-                    }
-                }
                 if (uiState.isAutoStartRowVisible) {
                     item {
                         AutoStartPermissionCard(
@@ -374,23 +373,22 @@ internal fun GrantPermissionsContent(
                         )
                     }
                 }
+                if (uiState.needsNotificationPermission) {
+                    item {
+                        NotificationPermissionCard(
+                            checked = false,
+                            onClick = {
+                                onTargetClicked(GrantPermissionsTarget.NOTIFICATION)
+                            }
+                        )
+                    }
+                }
                 if (needsRequiredCard) {
                     item {
                         RequiredPermissionCard(
                             requiredTarget = requiredTarget,
                             isEnabled = false,
                             onClick = onPrimaryAction
-                        )
-                    }
-                }
-                if (uiState.needsNotificationPermission) {
-                    item {
-                        PermissionCard(
-                            iconRes = R.drawable.img_permission_notification,
-                            titleRes = R.string.grant_permissions_notification_title,
-                            bodyRes = R.string.grant_permissions_notification_body,
-                            checked = false,
-                            onClick = { onTargetClicked(GrantPermissionsTarget.NOTIFICATION) }
                         )
                     }
                 }
@@ -428,6 +426,20 @@ internal fun GrantPermissionsContent(
             }
         }
     }
+}
+
+@Composable
+private fun NotificationPermissionCard(
+    checked: Boolean,
+    onClick: () -> Unit
+) {
+    PermissionCard(
+        iconRes = R.drawable.img_permission_notification,
+        titleRes = R.string.grant_permissions_notification_title,
+        bodyRes = R.string.grant_permissions_notification_body,
+        checked = checked,
+        onClick = onClick
+    )
 }
 
 @Composable

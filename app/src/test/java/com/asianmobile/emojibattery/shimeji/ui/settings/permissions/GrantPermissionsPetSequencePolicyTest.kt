@@ -20,13 +20,15 @@ class GrantPermissionsPetSequencePolicyTest {
     @Test
     fun `sequence follows the visible rows from top to bottom`() {
         assertEquals(
-            GrantPermissionsTarget.OVERLAY,
-            GrantPermissionsUiState().nextPetPermissionTarget(emptySet())
-        )
-        assertEquals(
             GrantPermissionsTarget.NOTIFICATION,
             GrantPermissionsUiState(
-                isOverlayGranted = true,
+                isNotificationRowVisible = true
+            ).nextPetPermissionTarget(emptySet())
+        )
+        assertEquals(
+            GrantPermissionsTarget.OVERLAY,
+            GrantPermissionsUiState(
+                isNotificationGranted = true,
                 isNotificationRowVisible = true
             )
                 .nextPetPermissionTarget(emptySet())

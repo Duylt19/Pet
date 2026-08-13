@@ -84,8 +84,8 @@ internal val GrantPermissionsUiState.hasMandatoryPetPermissions: Boolean
 internal fun GrantPermissionsUiState.nextPetPermissionTarget(
     attempted: Set<GrantPermissionsTarget>
 ): GrantPermissionsTarget? = when {
-    needsOverlayPermission -> GrantPermissionsTarget.OVERLAY
     needsNotificationPermission -> GrantPermissionsTarget.NOTIFICATION
+    needsOverlayPermission -> GrantPermissionsTarget.OVERLAY
     needsBatteryOptimizationExemption &&
         GrantPermissionsTarget.BATTERY_OPTIMIZATION !in attempted ->
         GrantPermissionsTarget.BATTERY_OPTIMIZATION
