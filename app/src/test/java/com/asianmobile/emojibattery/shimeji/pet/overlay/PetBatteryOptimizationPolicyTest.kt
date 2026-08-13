@@ -8,11 +8,11 @@ import org.junit.Test
 
 class PetBatteryOptimizationPolicyTest {
     @Test
-    fun `granting the exemption keeps the row, so the user can still revoke it`() {
+    fun `a granted exemption remains relevant but has no reason to ask again`() {
         val signals = PetBackgroundRestrictionSignals(isAlreadyIgnoringOptimization = true)
 
         assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
-        // Nothing left to ask for, so the row shows state rather than a reason.
+        // Nothing is left to ask for, so Grant Permissions hides the row.
         assertNull(PetBatteryOptimizationPolicy.reasonFor(signals))
     }
 

@@ -102,9 +102,8 @@ object PetBatteryOptimizationPolicy {
     }
 
     /**
-     * Whether the exemption means anything on this device, granted or not. A device that needs
-     * nothing never sees the row; a device that does keeps it, so the user can see the state and
-     * revoke it rather than watching the row vanish the moment they grant it.
+     * Whether the exemption means anything on this device, granted or not. UI that only lists
+     * pending requests must additionally use [reasonFor], which becomes null after grant.
      */
     fun isExemptionRelevant(signals: PetBackgroundRestrictionSignals): Boolean =
         signals.isAlreadyIgnoringOptimization ||

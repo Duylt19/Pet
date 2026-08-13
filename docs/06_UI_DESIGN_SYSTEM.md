@@ -291,13 +291,16 @@ Grant Permissions contract theo Figma node `8080:9754` và biến thể Pet on S
 - ảnh minh hoạ hai bước export theo **render bounds `296×96`**, không phải layout bounds
   `296×92`: hai khung điện thoại tràn khỏi frame 4px, export theo layout bounds thì đáy bị
   cắt. Compose dựng bằng `aspectRatio(296f/96f)`;
-- row Ignore Battery Optimization **không biến mất sau khi cấp**: nó hiện khi exemption có ý
-  nghĩa với máy này, còn switch phản ánh trạng thái, nên user vẫn thấy và gỡ lại được;
-- không quyền nào được cấp trong app: mỗi mục chỉ mở system surface tương ứng rồi đọc lại
-  trạng thái ở `ON_RESUME`. Ignore Battery Optimization mở
-  `ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS` thay vì hộp thoại một chạm, vì hộp thoại đó
-  cần `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` — quyền Play chỉ cấp cho nhóm use case hẹp mà
-  app này không thuộc về;
+- màn chỉ render permission còn thiếu và thật sự tồn tại/có ý nghĩa trên thiết bị: Overlay,
+  Notification hoặc Accessibility đã cấp sẽ biến mất; Notification không tồn tại dưới API 33;
+  Battery Optimization đã exemption hoặc không có restriction signal cũng không hiện. Section
+  không còn row sẽ được ẩn cùng heading;
+- Ignore Battery Optimization thử mở dialog package-scoped bằng
+  `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` trước; ROM không có activity tương ứng thì
+  fallback sang `ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS`, cuối cùng mới tới App Details.
+  Manifest vì vậy khai báo `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`. Đây là request chịu policy
+  Google Play: trước release phải xác nhận Pet on Screen là core function bị ảnh hưởng và phần
+  store listing/declaration mô tả đúng use case;
 - row Ignore Battery Optimization **chỉ hiện khi exemption thật sự làm được gì**. Trên máy
   không giết foreground service nó vô nghĩa với app này: exemption chỉ mở network + partial
   wake lock trong Doze, mà `PetOverlayService` không dùng cả hai và còn tự `pauseRendering()`
@@ -307,14 +310,15 @@ Grant Permissions contract theo Figma node `8080:9754` và biến thể Pet on S
   `getHistoricalProcessExitReasons()` cho thấy process từng chết lúc đang chạy foreground
   service vì `REASON_SIGNALED`/`LOW_MEMORY`/`OTHER` (API 30+), và cuối cùng mới tới danh sách
   vendor. Ba tín hiệu đầu là đo thật nên bắt được cả ROM tuỳ biến lẫn hãng mới; danh sách
-  vendor chỉ dùng cho máy API < 30 hoặc lần chạy đầu chưa có sự cố nào. Nếu row đã hiện thì vẫn
-  giữ lại sau khi cấp để user có thể mở lại system list và thu hồi;
+  vendor chỉ dùng cho máy API < 30 hoặc lần chạy đầu chưa có sự cố nào. Row biến mất ngay khi
+  `PowerManager.isIgnoringBatteryOptimizations(packageName)` xác nhận exemption;
 - native ad ghim cố định dưới cùng màn, ngoài `LazyColumn`, nên nó không cuộn cùng danh sách;
 - row **Allow auto-start** hiện khi ROM có allowlist riêng của hãng (`PetVendorPowerSettings`
   resolve component qua `PackageManager`, package khai trong `<queries>` để API 30+ nhìn thấy).
   Đây là ask tách biệt với battery exemption: cấp cái này không cấp cái kia, nên row vẫn hiện
   ngay cả khi user đã cấp exemption. Không API nào đọc được trạng thái allowlist, nên row dùng
-  mũi tên thay switch và intent được resolve lại đúng lúc chạm;
+  mũi tên thay switch và intent được resolve lại đúng lúc chạm. Vì không đọc được grant state,
+  đây là row duy nhất không thể tự ẩn chính xác sau khi user quay lại;
 - disclosure Accessibility (`GrantPermissionDialog`) theo Figma `8437:7570` và `8437:9099`
   là bottom sheet full-width bo hai góc trên 24px, scrim 50%, handle `32×4`, title Roboto
   SemiBold 18/26 và body Roboto Regular 14/20. Nội dung dài là phần duy nhất được cuộn; hàng

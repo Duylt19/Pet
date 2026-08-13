@@ -5,21 +5,41 @@ data class GrantPermissionsUiState(
     val isOverlayGranted: Boolean = false,
     val isBatteryOptimizationIgnored: Boolean = false,
     /**
-     * Only devices that kill foreground services see this row: on stock Android the exemption
-     * grants network and wake locks the pet overlay never uses. "Devices" rather than "vendors"
-     * because a resolved vendor power manager counts too, and that is measured on the device
-     * rather than guessed from its brand.
+     * True only while device signals say an exemption is useful and it has not been granted yet.
+     * Stock Android devices normally never see this row.
      */
     val isBatteryRowVisible: Boolean = false,
     /**
-     * The ROM has its own auto-start allowlist. No API reads or writes it, so the row is an
-     * action rather than a toggle and stays available even after the platform exemption.
+     * The ROM has its own auto-start allowlist. No public API can read whether the user enabled
+     * it, so this row is shown only when a matching vendor settings surface exists.
      */
     val isAutoStartRowVisible: Boolean = false,
     val isNotificationGranted: Boolean = false,
     /** Below API 33 the notification permission does not exist, so its row is hidden. */
     val isNotificationRowVisible: Boolean = false
 )
+
+internal val GrantPermissionsUiState.needsOverlayPermission: Boolean
+    get() = !isOverlayGranted
+
+internal val GrantPermissionsUiState.needsNotificationPermission: Boolean
+    get() = isNotificationRowVisible && !isNotificationGranted
+
+internal val GrantPermissionsUiState.needsBatteryOptimizationExemption: Boolean
+    get() = isBatteryRowVisible && !isBatteryOptimizationIgnored
+
+internal fun GrantPermissionsUiState.needsRequiredCard(
+    requiredTarget: GrantPermissionsTarget
+): Boolean = when (requiredTarget) {
+    GrantPermissionsTarget.OVERLAY ->
+        needsOverlayPermission || needsNotificationPermission
+    else -> !isAccessibilityEnabled
+}
+
+internal fun GrantPermissionsUiState.hasStabilityPermissionToRequest(
+    requiredTarget: GrantPermissionsTarget
+): Boolean = (requiredTarget != GrantPermissionsTarget.OVERLAY && needsOverlayPermission) ||
+    needsBatteryOptimizationExemption || isAutoStartRowVisible
 
 /**
  * Which permission a row on the Grant Permissions screen represents. The screen only ever hands
@@ -39,9 +59,8 @@ sealed interface GrantPermissionsEffect {
     data object OpenOverlaySettings : GrantPermissionsEffect
 
     /**
-     * Opens the system battery-optimisation list rather than the one-tap allow dialog: that
-     * dialog needs REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, which Play restricts to a narrow set of
-     * use cases this app is not in.
+     * Opens the package-scoped exemption dialog first. The screen falls back to the system list
+     * on ROMs that do not implement the direct request surface.
      */
     data object OpenBatteryOptimizationSettings : GrantPermissionsEffect
 
@@ -56,7 +75,7 @@ sealed interface GrantPermissionsEffect {
 }
 
 internal val GrantPermissionsUiState.hasMandatoryPetPermissions: Boolean
-    get() = isOverlayGranted && isNotificationGranted
+    get() = isOverlayGranted && !needsNotificationPermission
 
 /**
  * The order shown by the Pet on Screen design is also the order in which system surfaces open.
@@ -66,10 +85,9 @@ internal val GrantPermissionsUiState.hasMandatoryPetPermissions: Boolean
 internal fun GrantPermissionsUiState.nextPetPermissionTarget(
     attempted: Set<GrantPermissionsTarget>
 ): GrantPermissionsTarget? = when {
-    !isOverlayGranted -> GrantPermissionsTarget.OVERLAY
-    !isNotificationGranted -> GrantPermissionsTarget.NOTIFICATION
-    isBatteryRowVisible &&
-        !isBatteryOptimizationIgnored &&
+    needsOverlayPermission -> GrantPermissionsTarget.OVERLAY
+    needsNotificationPermission -> GrantPermissionsTarget.NOTIFICATION
+    needsBatteryOptimizationExemption &&
         GrantPermissionsTarget.BATTERY_OPTIMIZATION !in attempted ->
         GrantPermissionsTarget.BATTERY_OPTIMIZATION
     isAutoStartRowVisible && GrantPermissionsTarget.VENDOR_AUTO_START !in attempted ->

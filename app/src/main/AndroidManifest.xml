@@ -10,6 +10,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Required for the package-scoped system exemption dialog. Grant Permissions only offers
+         it on devices where runtime restriction signals show the pet overlay needs it. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <!-- Vendor power managers keep their own allowlist beside Android's battery
          exemption. Declared so resolveActivity can tell whether this device has one;
          the app never reads or writes their data. -->

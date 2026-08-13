@@ -1,6 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.ui.settings.permissions
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -24,7 +25,10 @@ class GrantPermissionsPetSequencePolicyTest {
         )
         assertEquals(
             GrantPermissionsTarget.NOTIFICATION,
-            GrantPermissionsUiState(isOverlayGranted = true)
+            GrantPermissionsUiState(
+                isOverlayGranted = true,
+                isNotificationRowVisible = true
+            )
                 .nextPetPermissionTarget(emptySet())
         )
         assertEquals(
@@ -58,6 +62,39 @@ class GrantPermissionsPetSequencePolicyTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `screen only exposes permissions that still need action`() {
+        val complete = GrantPermissionsUiState(
+            isAccessibilityEnabled = true,
+            isOverlayGranted = true,
+            isNotificationGranted = true,
+            isNotificationRowVisible = true,
+            isBatteryOptimizationIgnored = true,
+            isBatteryRowVisible = true
+        )
+
+        assertFalse(complete.needsRequiredCard(GrantPermissionsTarget.ACCESSIBILITY))
+        assertFalse(complete.needsRequiredCard(GrantPermissionsTarget.OVERLAY))
+        assertFalse(complete.needsOverlayPermission)
+        assertFalse(complete.needsNotificationPermission)
+        assertFalse(complete.needsBatteryOptimizationExemption)
+        assertFalse(
+            complete.hasStabilityPermissionToRequest(GrantPermissionsTarget.ACCESSIBILITY)
+        )
+    }
+
+    @Test
+    fun `notification is not requested on Android versions where the permission does not exist`() {
+        val state = GrantPermissionsUiState(
+            isOverlayGranted = true,
+            isNotificationGranted = true,
+            isNotificationRowVisible = false
+        )
+
+        assertFalse(state.needsNotificationPermission)
+        assertFalse(state.needsRequiredCard(GrantPermissionsTarget.OVERLAY))
     }
 
     private fun readyMandatoryState(

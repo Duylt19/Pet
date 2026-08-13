@@ -21,6 +21,9 @@ Platform và product vertical slice đã hoàn tất. `PetOverlay.start(context)
 - `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_SPECIAL_USE`: service target SDK 36 khai báo `specialUse` và property giải thích use case.
 - `POST_NOTIFICATIONS`: gate product bắt buộc của flow Pet on Screen trên API 33+; dưới API 33
   gate tự đạt. Foreground service vẫn luôn tạo notification/channel theo contract Android.
+- `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`: chỉ dùng khi runtime signals xác nhận thiết bị cần
+  exemption; mở dialog trực tiếp cho package và fallback về settings list nếu ROM không hỗ trợ.
+  Trước khi phát hành Google Play phải review/khai báo use case theo power-management policy.
 - Service `exported=false`, trả `START_NOT_STICKY`, không có boot receiver và không tự restart.
 - Play Console phải khai báo/review foreground-service type trước release.
 
@@ -48,9 +51,9 @@ Overlay và Notification chỉ đi tiếp khi đã cấp; nếu user quay lại 
 không ném họ trở lại cùng system surface. Ngay khi hai quyền bắt buộc đạt, pet start lập tức; hai
 bước ổn định sau đó là optional và nếu bị bỏ qua cũng không lặp vô hạn.
 
-Battery-optimisation exemption **không** nằm trong luồng này: nó không bắt buộc, chỉ có ý nghĩa
-trên máy giết foreground service, và được hỏi ở màn Grant Permissions theo
-`PetBatteryOptimizationPolicy`.
+Battery-optimisation exemption không chặn pet start: nó là bước optional tiếp theo, chỉ có ý
+nghĩa trên máy giết foreground service và chỉ hiện khi `PetBatteryOptimizationPolicy.reasonFor`
+trả về nguyên nhân còn cần xử lý. Dialog package-scoped được thử trước, rồi mới fallback settings.
 
 Row đó hiện khi **bất kỳ** tín hiệu nào sau đây đúng: đã được cấp (giữ lại để user thu hồi
 được), `isBackgroundRestricted`, standby bucket `RESTRICTED`, một lần chết process ngoài ý muốn,

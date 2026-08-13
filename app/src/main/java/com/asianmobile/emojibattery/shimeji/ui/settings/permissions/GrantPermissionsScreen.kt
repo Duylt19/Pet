@@ -147,6 +147,10 @@ fun GrantPermissionsScreen(
 
                 GrantPermissionsEffect.OpenBatteryOptimizationSettings ->
                     settingsLauncher.openSettings(
+                        Intent(
+                            Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                            Uri.fromParts("package", context.packageName, null)
+                        ),
                         Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
                         appDetailsIntent(context.packageName)
                     )
@@ -249,6 +253,8 @@ internal fun GrantPermissionsContent(
     onPrimaryAction: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val needsRequiredCard = uiState.needsRequiredCard(requiredTarget)
+    val needsStabilityPermission = uiState.hasStabilityPermissionToRequest(requiredTarget)
 
     // The design keeps this screen on a plain white sheet: the shared wallpaper is switched off
     // so the white cards read against it via their shadow rather than a colour change.
@@ -286,68 +292,74 @@ internal fun GrantPermissionsContent(
             ),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
         ) {
-            item {
-                SectionHeading(
-                    step = "1",
-                    titleRes = R.string.grant_permissions_section_necessary
-                )
-            }
-            item {
-                RequiredPermissionCard(
-                    requiredTarget = requiredTarget,
-                    isEnabled = when (requiredTarget) {
-                        GrantPermissionsTarget.OVERLAY ->
-                            uiState.hasMandatoryPetPermissions
-                        else -> uiState.isAccessibilityEnabled
-                    },
-                    onClick = onPrimaryAction
-                )
+            if (needsRequiredCard) {
+                item {
+                    SectionHeading(
+                        step = "1",
+                        titleRes = R.string.grant_permissions_section_necessary
+                    )
+                }
+                item {
+                    RequiredPermissionCard(
+                        requiredTarget = requiredTarget,
+                        isEnabled = false,
+                        onClick = onPrimaryAction
+                    )
+                }
             }
             if (requiredTarget == GrantPermissionsTarget.OVERLAY) {
-                item {
-                    PermissionCard(
-                        iconRes = R.drawable.img_permission_overlay,
-                        titleRes = R.string.grant_permissions_overlay_title,
-                        bodyRes = R.string.grant_permissions_pet_overlay_body,
-                        checked = uiState.isOverlayGranted,
-                        onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
-                    )
+                if (uiState.needsOverlayPermission) {
+                    item {
+                        PermissionCard(
+                            iconRes = R.drawable.img_permission_overlay,
+                            titleRes = R.string.grant_permissions_overlay_title,
+                            bodyRes = R.string.grant_permissions_pet_overlay_body,
+                            checked = false,
+                            onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
+                        )
+                    }
                 }
+                if (uiState.needsNotificationPermission) {
+                    item {
+                        PermissionCard(
+                            iconRes = R.drawable.img_permission_notification,
+                            titleRes = R.string.grant_permissions_notification_title,
+                            bodyRes = R.string.grant_permissions_notification_body,
+                            checked = false,
+                            onClick = { onTargetClicked(GrantPermissionsTarget.NOTIFICATION) }
+                        )
+                    }
+                }
+            }
+            if (needsStabilityPermission) {
                 item {
-                    PermissionCard(
-                        iconRes = R.drawable.img_permission_notification,
-                        titleRes = R.string.grant_permissions_notification_title,
-                        bodyRes = R.string.grant_permissions_notification_body,
-                        checked = uiState.isNotificationGranted,
-                        onClick = { onTargetClicked(GrantPermissionsTarget.NOTIFICATION) }
+                    SectionHeading(
+                        step = "2",
+                        titleRes = R.string.grant_permissions_section_stability,
+                        modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._5sdp))
                     )
                 }
             }
-            item {
-                SectionHeading(
-                    step = "2",
-                    titleRes = R.string.grant_permissions_section_stability,
-                    modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._5sdp))
-                )
-            }
-            if (requiredTarget != GrantPermissionsTarget.OVERLAY) {
+            if (requiredTarget != GrantPermissionsTarget.OVERLAY &&
+                uiState.needsOverlayPermission
+            ) {
                 item {
                     PermissionCard(
                         iconRes = R.drawable.img_permission_overlay,
                         titleRes = R.string.grant_permissions_overlay_title,
                         bodyRes = R.string.grant_permissions_overlay_body,
-                        checked = uiState.isOverlayGranted,
+                        checked = false,
                         onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
                     )
                 }
             }
-            if (uiState.isBatteryRowVisible) {
+            if (uiState.needsBatteryOptimizationExemption) {
                 item {
                     PermissionCard(
                         iconRes = R.drawable.img_permission_battery,
                         titleRes = R.string.grant_permissions_battery_title,
                         bodyRes = R.string.grant_permissions_battery_body,
-                        checked = uiState.isBatteryOptimizationIgnored,
+                        checked = false,
                         onClick = {
                             onTargetClicked(GrantPermissionsTarget.BATTERY_OPTIMIZATION)
                         }
@@ -366,7 +378,7 @@ internal fun GrantPermissionsContent(
                 }
             }
             if (requiredTarget != GrantPermissionsTarget.OVERLAY &&
-                uiState.isNotificationRowVisible
+                uiState.needsNotificationPermission
             ) {
                 item {
                     SectionHeading(
@@ -381,7 +393,7 @@ internal fun GrantPermissionsContent(
                         iconRes = R.drawable.img_permission_notification,
                         titleRes = R.string.grant_permissions_notification_title,
                         bodyRes = R.string.grant_permissions_notification_body,
-                        checked = uiState.isNotificationGranted,
+                        checked = false,
                         onClick = { onTargetClicked(GrantPermissionsTarget.NOTIFICATION) }
                     )
                 }

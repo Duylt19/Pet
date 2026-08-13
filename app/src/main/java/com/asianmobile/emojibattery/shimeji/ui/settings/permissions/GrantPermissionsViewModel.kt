@@ -49,7 +49,8 @@ class GrantPermissionsViewModel @Inject constructor(
             isAccessibilityEnabled = BatteryAccessibility.isEnabled(context),
             isOverlayGranted = PetOverlay.canDraw(context),
             isBatteryOptimizationIgnored = signals.isAlreadyIgnoringOptimization,
-            isBatteryRowVisible = PetBatteryOptimizationPolicy.isExemptionRelevant(signals),
+            // A granted exemption is no longer an action the user needs to take on this screen.
+            isBatteryRowVisible = PetBatteryOptimizationPolicy.reasonFor(signals) != null,
             isAutoStartRowVisible = signals.shouldOfferVendorAllowlist(),
             isNotificationGranted = isNotificationGranted(),
             isNotificationRowVisible = NOTIFICATION_PERMISSION_EXISTS
