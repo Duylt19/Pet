@@ -19,14 +19,10 @@ data class PetVendorPowerScreen(
  */
 object PetVendorPowerSettings {
     val CANDIDATES: List<PetVendorPowerScreen> = listOf(
-        // MIUI / HyperOS: Autostart, then the separate battery allowlist.
+        // MIUI / HyperOS: explicit Background autostart management.
         PetVendorPowerScreen(
             "com.miui.securitycenter",
             "com.miui.permcenter.autostart.AutoStartManagementActivity"
-        ),
-        PetVendorPowerScreen(
-            "com.miui.powerkeeper",
-            "com.miui.powerkeeper.ui.HiddenAppsConfigActivity"
         ),
         // EMUI / MagicOS: startup manager on newer builds, protected apps on older ones.
         PetVendorPowerScreen(
@@ -68,15 +64,6 @@ object PetVendorPowerSettings {
             "com.oneplus.security",
             "com.oneplus.security.chainlaunch.view.ChainLaunchAppListActivity"
         ),
-        // One UI keeps this under battery rather than auto-start.
-        PetVendorPowerScreen(
-            "com.samsung.android.lool",
-            "com.samsung.android.sm.battery.ui.BatteryActivity"
-        ),
-        PetVendorPowerScreen(
-            "com.samsung.android.lool",
-            "com.samsung.android.sm.ui.battery.BatteryActivity"
-        ),
         // Flyme.
         PetVendorPowerScreen("com.meizu.safe", "com.meizu.safe.permission.SmartBGActivity"),
         // ZenUI.
@@ -84,21 +71,10 @@ object PetVendorPowerSettings {
             "com.asus.mobilemanager",
             "com.asus.mobilemanager.autostart.AutoStartActivity"
         ),
-        PetVendorPowerScreen("com.asus.mobilemanager", "com.asus.mobilemanager.MainActivity"),
         // EUI.
         PetVendorPowerScreen(
             "com.letv.android.letvsafe",
             "com.letv.android.letvsafe.AutobootManageActivity"
-        ),
-        // HTC.
-        PetVendorPowerScreen(
-            "com.htc.pitroad",
-            "com.htc.pitroad.landingpage.activity.LandingPageActivity"
-        ),
-        // Nokia's Evenwell power saver.
-        PetVendorPowerScreen(
-            "com.evenwell.powersaving.g3",
-            "com.evenwell.powersaving.g3.exception.PowerSaverExceptionActivity"
         )
     )
 }

@@ -318,17 +318,21 @@ Grant Permissions contract theo dashboard Mine Figma node `8080:7477`, card nề
   không giết foreground service nó vô nghĩa với app này: exemption chỉ mở network + partial
   wake lock trong Doze, mà `PetOverlayService` không dùng cả hai và còn tự `pauseRendering()`
   khi `ACTION_SCREEN_OFF`; Doze cũng không dừng một foreground service.
-  `PetBackgroundRestrictionReader` đọc bốn tín hiệu, `PetBatteryOptimizationPolicy` quyết định:
+  `PetBackgroundRestrictionReader` đọc ba tín hiệu, `PetBatteryOptimizationPolicy` quyết định:
   `isBackgroundRestricted()` (API 28+), standby bucket `RESTRICTED` (API 30+),
   `getHistoricalProcessExitReasons()` cho thấy process từng chết lúc đang chạy foreground
-  service vì `REASON_SIGNALED`/`LOW_MEMORY`/`OTHER` (API 30+), và cuối cùng mới tới danh sách
-  vendor. Ba tín hiệu đầu là đo thật nên bắt được cả ROM tuỳ biến lẫn hãng mới; danh sách
-  vendor chỉ dùng cho máy API < 30 hoặc lần chạy đầu chưa có sự cố nào. Trong flow Pet, row biến
-  mất sau khi grant; trong dashboard Mine, row còn lại trên đúng thiết bị đó để phản ánh trạng
-  thái và cho phép quản lý;
+  service vì `REASON_SIGNALED`/`LOW_MEMORY`/`OTHER` (API 30+). Không fallback theo API level,
+  manufacturer/brand hoặc sự tồn tại của vendor settings: các dữ liệu đó không chứng minh Android
+  battery exemption là cần thiết. Samsung SM-J730G API 28 mặc định vì thế không hiện row; API 28
+  chỉ đóng góp `isBackgroundRestricted()` khi platform thực sự trả `true`. Trong flow Pet, row
+  biến mất sau khi grant; trong dashboard Mine, row còn lại trên đúng thiết bị đó để phản ánh
+  trạng thái và cho phép quản lý;
 - native ad ghim cố định dưới cùng màn, ngoài `LazyColumn`, nên nó không cuộn cùng danh sách;
 - row **Allow auto-start** hiện khi ROM có allowlist riêng của hãng (`PetVendorPowerSettings`
   resolve component qua `PackageManager`, package khai trong `<queries>` để API 30+ nhìn thấy).
+  Candidate chỉ gồm activity có semantics explicit như AutoStart/Startup/Protect/ChainLaunch;
+  generic Samsung Battery, ASUS Device Manager, HTC landing page và Evenwell battery page bị loại
+  vì tồn tại activity không đồng nghĩa thiết bị có một quyền Auto Start cần user chấp thuận.
   Đây là ask tách biệt với battery exemption: cấp cái này không cấp cái kia, nên row vẫn hiện
   ngay cả khi user đã cấp exemption. Không API nào đọc được trạng thái allowlist, nên row dùng
   mũi tên thay switch và intent được resolve lại đúng lúc chạm. Vì không đọc được grant state,

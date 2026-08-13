@@ -27,10 +27,6 @@ class PetBackgroundRestrictionReader @Inject constructor(
         isBackgroundRestricted = isBackgroundRestricted(),
         isInRestrictedStandbyBucket = isInRestrictedStandbyBucket(),
         lastOverlayKill = lastOverlayKill(),
-        isAggressiveVendor = PetBatteryOptimizationPolicy.isAggressiveVendor(
-            Build.MANUFACTURER,
-            Build.BRAND
-        ),
         hasVendorPowerScreen = vendorPowerIntent() != null
     )
 

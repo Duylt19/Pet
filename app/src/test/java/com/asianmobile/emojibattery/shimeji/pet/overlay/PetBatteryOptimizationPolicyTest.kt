@@ -16,17 +16,6 @@ class PetBatteryOptimizationPolicyTest {
     }
 
     @Test
-    fun `a relevant vendor remains visible after the exemption is granted`() {
-        val signals = PetBackgroundRestrictionSignals(
-            isAlreadyIgnoringOptimization = true,
-            isAggressiveVendor = true
-        )
-
-        assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
-        assertNull(PetBatteryOptimizationPolicy.reasonFor(signals))
-    }
-
-    @Test
     fun `a stock device with nothing wrong is never asked`() {
         val signals = PetBackgroundRestrictionSignals()
 
@@ -35,7 +24,22 @@ class PetBatteryOptimizationPolicyTest {
     }
 
     @Test
-    fun `being background restricted is enough on any device`() {
+    fun `android 9 samsung without a measured restriction is never asked`() {
+        // API 28 only contributes ActivityManager.isBackgroundRestricted. Manufacturer, model
+        // and API level are intentionally absent from the policy, so an unrestricted SM-J730G
+        // has exactly the same no-prompt state as stock Android.
+        val signalsFromUnrestrictedApi28Device = PetBackgroundRestrictionSignals()
+
+        assertFalse(
+            PetBatteryOptimizationPolicy.isExemptionRelevant(
+                signalsFromUnrestrictedApi28Device
+            )
+        )
+        assertNull(PetBatteryOptimizationPolicy.reasonFor(signalsFromUnrestrictedApi28Device))
+    }
+
+    @Test
+    fun `being background restricted is enough on any supported device`() {
         val signals = PetBackgroundRestrictionSignals(isBackgroundRestricted = true)
 
         assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
@@ -46,7 +50,7 @@ class PetBatteryOptimizationPolicyTest {
     }
 
     @Test
-    fun `the restricted standby bucket is enough on any device`() {
+    fun `the restricted standby bucket is enough on api 30 or newer`() {
         val signals = PetBackgroundRestrictionSignals(isInRestrictedStandbyBucket = true)
 
         assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
@@ -57,10 +61,9 @@ class PetBatteryOptimizationPolicyTest {
     }
 
     @Test
-    fun `a device that killed the overlay is asked even when its brand looks harmless`() {
+    fun `a device that killed the overlay is asked`() {
         val signals = PetBackgroundRestrictionSignals(
-            lastOverlayKill = PetProcessKillKind.SIGNALLED,
-            isAggressiveVendor = false
+            lastOverlayKill = PetProcessKillKind.SIGNALLED
         )
 
         assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
@@ -92,140 +95,29 @@ class PetBatteryOptimizationPolicyTest {
     }
 
     @Test
-    fun `evidence outranks the vendor list when both apply`() {
-        val signals = PetBackgroundRestrictionSignals(
-            lastOverlayKill = PetProcessKillKind.SIGNALLED,
-            isAggressiveVendor = true
-        )
+    fun `a vendor auto start screen does not imply android battery exemption`() {
+        val signals = PetBackgroundRestrictionSignals(hasVendorPowerScreen = true)
 
-        assertEquals(
-            PetExemptionReason.PREVIOUSLY_KILLED,
-            PetBatteryOptimizationPolicy.reasonFor(signals)
-        )
-    }
-
-    /**
-     * The strongest signal available below API 30, where the platform reports neither kills nor
-     * standby buckets: a resolved power-manager component is this device, not a brand string.
-     */
-    @Test
-    fun `a ROM shipping its own power manager is asked even when the brand is unknown`() {
-        val signals = PetBackgroundRestrictionSignals(
-            hasVendorPowerScreen = true,
-            isAggressiveVendor = false
-        )
-
-        assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
-        assertEquals(
-            PetExemptionReason.VENDOR_POWER_MANAGER,
-            PetBatteryOptimizationPolicy.reasonFor(signals)
-        )
+        assertFalse(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
+        assertNull(PetBatteryOptimizationPolicy.reasonFor(signals))
+        assertTrue(signals.shouldOfferVendorAllowlist())
     }
 
     @Test
-    fun `what the device ships outranks what its brand suggests`() {
-        val signals = PetBackgroundRestrictionSignals(
-            hasVendorPowerScreen = true,
-            isAggressiveVendor = true
-        )
-
-        assertEquals(
-            PetExemptionReason.VENDOR_POWER_MANAGER,
-            PetBatteryOptimizationPolicy.reasonFor(signals)
-        )
-    }
-
-    @Test
-    fun `the vendor list decides only when nothing measurable applies`() {
-        val signals = PetBackgroundRestrictionSignals(isAggressiveVendor = true)
-
-        assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
-        assertEquals(
-            PetExemptionReason.AGGRESSIVE_VENDOR,
-            PetBatteryOptimizationPolicy.reasonFor(signals)
-        )
-    }
-
-    @Test
-    fun `vendors that kill foreground services are on the list`() {
-        listOf("Xiaomi", "Redmi", "POCO", "HUAWEI", "HONOR", "OPPO", "realme", "OnePlus",
-            "vivo", "iQOO", "samsung", "Meizu", "TECNO", "Infinix", "itel", "asus")
-            .forEach { vendor ->
-                assertTrue(vendor, PetBatteryOptimizationPolicy.isAggressiveVendor(vendor))
-            }
-    }
-
-    /**
-     * The values above are the brand as a person writes it. These are what the devices actually
-     * report, legal entity and all — an equality check passes the test above and still misses
-     * every Transsion phone in the field.
-     */
-    @Test
-    fun `vendors are matched on the build strings devices really report`() {
-        listOf(
-            "INFINIX MOBILITY LIMITED",
-            "TECNO MOBILE LIMITED",
-            "ITEL MOBILE LIMITED",
-            "Xiaomi Communications Co., Ltd.",
-            "HUAWEI TECHNOLOGIES CO.,LTD",
-            "LeMobile"
-        ).forEach { manufacturer ->
-            assertTrue(
-                manufacturer,
-                PetBatteryOptimizationPolicy.isAggressiveVendor(manufacturer)
-            )
-        }
-    }
-
-    @Test
-    fun `the brand is read when the manufacturer does not name the vendor`() {
-        // MIUI reports the parent as the manufacturer and the sub-brand as the brand; some ROMs
-        // invert it, so neither string alone is enough.
-        assertTrue(PetBatteryOptimizationPolicy.isAggressiveVendor("QUALCOMM", "Redmi"))
-        assertTrue(PetBatteryOptimizationPolicy.isAggressiveVendor("Xiaomi", "POCO"))
-    }
-
-    @Test
-    fun `stock vendors and unknown brands are not guessed at`() {
-        listOf("Google", "motorola", "Nothing", "Fairphone", "SomeNewBrand", "")
-            .forEach { vendor ->
-                assertFalse(vendor, PetBatteryOptimizationPolicy.isAggressiveVendor(vendor))
-            }
-    }
-
-    @Test
-    fun `a word inside a longer brand name is not a match`() {
-        // Matching is word by word, not substring: "vivo" must not fire on "Vivobook".
-        assertFalse(PetBatteryOptimizationPolicy.isAggressiveVendor("Vivobook"))
-        assertFalse(PetBatteryOptimizationPolicy.isAggressiveVendor("Google", "Pixel"))
-    }
-
-    @Test
-    fun `the vendor allowlist is offered whenever the ROM has one`() {
-        assertTrue(
-            PetBackgroundRestrictionSignals(hasVendorPowerScreen = true)
-                .shouldOfferVendorAllowlist()
-        )
-    }
-
-    @Test
-    fun `the vendor allowlist stays offered after the platform exemption is granted`() {
-        // Granting one does not grant the other, so this must not disappear with the exemption.
+    fun `a grant hides a relevant battery request without hiding vendor auto start`() {
         val signals = PetBackgroundRestrictionSignals(
             isAlreadyIgnoringOptimization = true,
+            isBackgroundRestricted = true,
             hasVendorPowerScreen = true
         )
 
+        assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
+        assertNull(PetBatteryOptimizationPolicy.reasonFor(signals))
         assertTrue(signals.shouldOfferVendorAllowlist())
     }
 
     @Test
     fun `a ROM without its own allowlist is never sent to one`() {
         assertFalse(PetBackgroundRestrictionSignals().shouldOfferVendorAllowlist())
-    }
-
-    @Test
-    fun `the vendor match ignores case and stray whitespace`() {
-        assertTrue(PetBatteryOptimizationPolicy.isAggressiveVendor("  XIAOMI "))
     }
 }

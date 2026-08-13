@@ -57,24 +57,21 @@ Battery-optimisation exemption không chặn pet start: nó là bước optional
 nghĩa trên máy giết foreground service và chỉ hiện khi `PetBatteryOptimizationPolicy.reasonFor`
 trả về nguyên nhân còn cần xử lý. Dialog package-scoped được thử trước, rồi mới fallback settings.
 
-Row đó hiện khi **bất kỳ** tín hiệu nào sau đây đúng: `isBackgroundRestricted`, standby bucket
-`RESTRICTED`, một lần chết process ngoài ý muốn,
-**ROM có màn power manager riêng resolve được**, hoặc brand nằm trong danh sách vendor. Thứ tự
-đó cũng là thứ tự ưu tiên của `reasonFor()`: platform nói thẳng trước, rồi cái đã ghi nhận được,
-rồi cái máy này thật sự ship, và brand cuối cùng vì nó là suy đoán duy nhất.
+Row đó chỉ hiện khi có **tín hiệu runtime đo được**: `isBackgroundRestricted`, standby bucket
+`RESTRICTED`, hoặc một lần chết process ngoài ý muốn. API level, manufacturer/brand và việc ROM
+có một màn power manager không tự làm Battery Optimization xuất hiện. Vì vậy Samsung SM-J730G
+API 28 ở trạng thái mặc định không hiện row; API 28 chỉ cho phép đọc
+`ActivityManager.isBackgroundRestricted`, và chỉ khi giá trị này thật sự là `true` mới hiện.
 
 Grant đơn lẻ không khiến một stock Android device trở thành thiết bị cần exemption. Trên ROM đã
 được policy xác nhận, dashboard Mine vẫn giữ row sau grant để thể hiện trạng thái; flow Pet thì
 ẩn vì không còn gì cần xin.
 
-Hai tín hiệu cuối tồn tại vì `isBackgroundRestricted` là API 28+, còn standby bucket và
-`getHistoricalProcessExitReasons` là API 30+ — dưới các mức đó không có gì đo được, mà
-`minSdk = 24`. `hasVendorPowerScreen` chạy ở mọi API và là *đo đạc* chứ không phải đoán, nên nó
-gánh phần lớn khoảng trống này; brand list chỉ còn cho ROM giấu power manager khỏi `<queries>`.
-
-Brand được so khớp **theo từ**, trên cả `Build.MANUFACTURER` lẫn `Build.BRAND`: Transsion khai
-`INFINIX MOBILITY LIMITED` / `TECNO MOBILE LIMITED`, MIUI khai manufacturer `Xiaomi` với brand
-`Redmi`/`POCO`, nên so bằng chuỗi nguyên sẽ trượt đúng những ROM danh sách này sinh ra để bắt.
+`isBackgroundRestricted` có từ API 28; standby bucket `RESTRICTED` và
+`getHistoricalProcessExitReasons` có từ API 30. API 24–27 không có tín hiệu đủ chắc chắn nên app
+không đoán và không hiện Battery Optimization. Auto Start là policy tách biệt: chỉ hiện khi
+`PackageManager` resolve được một **activity allowlist/auto-start cụ thể** của ROM. Generic Device
+Manager/Battery pages (đặc biệt `com.samsung.android.lool`) không được coi là Auto Start.
 
 Nguồn platform: [Android foreground-service types](https://developer.android.com/develop/background-work/services/fgs/service-types), [launch foreground service](https://developer.android.com/develop/background-work/services/fgs/launch), [TYPE_APPLICATION_OVERLAY](https://developer.android.com/reference/android/view/WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY), [overlay special access](https://developer.android.com/reference/android/provider/Settings#canDrawOverlays(android.content.Context)).
 
