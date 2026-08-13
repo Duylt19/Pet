@@ -60,9 +60,11 @@ Mọi Android string resource chứa publisher/ad-unit ID dùng prefix
   Emotion group/detail cùng mười editor option dùng một native `COLLAPSE_SMALL`; các library
   Battery/Emoji/Theme vẫn giữ banner `battery_editor_bottom`. Hai loại loại trừ nhau nên không
   double-render ad và Apply luôn reflow ngay phía trên chiều cao collapsed/expanded thực tế.
-- Native editor dùng placement `screen_battery_editor`. Khi vào Customize Status Bar hoặc Emotion
-  lần đầu, holder load/bind; push group → detail giữ cùng Compose slot và
-  Activity ViewModel nên không request lại. Rời flow rồi quay lại ưu tiên rebind cache còn hợp lệ.
+- Overview Customize Status Bar dùng placement riêng `screen_customize_status_bar`, Remote Config
+  `is_show_native_customize_status_bar` và ad-unit resource
+  `id_emoji_battery_native_customize_status_bar`. Các màn con option/emotion/detail dùng
+  `screen_battery_editor`; mỗi `NavBackStackEntry` mới truyền một `reloadKey` mới để hủy ad cũ và
+  request native mới thay vì rebind lại cùng ad object.
 - Các banner inline `discover_inline`, `search_inline` và `battery_category_inline` có ViewModel
   key riêng để không dùng chung ad object với banner shell. Holder căn giữa creative SDK 320×50,
   dùng nền trắng và shimmer `#E6E6E6`; khi ads bị tắt/Premium/load fail thì slot collapse, không

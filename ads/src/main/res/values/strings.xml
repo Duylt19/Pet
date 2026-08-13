@@ -29,6 +29,7 @@
     <string name="id_emoji_battery_native_search" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
     <string name="id_emoji_battery_native_favourite_recent" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
     <string name="id_emoji_battery_native_battery_catalog" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
+    <string name="id_emoji_battery_native_customize_status_bar" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
     <string name="id_emoji_battery_native_battery_editor" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
     <string name="id_emoji_battery_native_battery_reward" translatable="false">ca-app-pub-7219501334514633/8760711869</string>
     <string name="id_emoji_battery_native_battery_discard" translatable="false">ca-app-pub-7219501334514633/8760711869</string>

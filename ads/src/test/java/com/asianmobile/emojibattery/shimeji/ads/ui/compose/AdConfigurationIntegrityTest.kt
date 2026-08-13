@@ -56,6 +56,7 @@ class AdConfigurationIntegrityTest {
             "id_emoji_battery_native_search",
             "id_emoji_battery_native_favourite_recent",
             "id_emoji_battery_native_battery_catalog",
+            "id_emoji_battery_native_customize_status_bar",
             "id_emoji_battery_native_battery_editor",
             "id_emoji_battery_native_battery_reward",
             "id_emoji_battery_native_battery_discard",

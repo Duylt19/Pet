@@ -28,6 +28,7 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_BATTERY_EDITOR_BOTTOM
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_EDITOR
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_CUSTOMIZE_STATUS_BAR
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeShell
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeTab
@@ -112,15 +113,33 @@ internal fun showBatteryEditorBottomBanner(route: String?): Boolean =
         route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true ||
         route?.startsWith("${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/") == true
 
-internal fun showBatteryEditorCollapsibleNative(route: String?, page: String?): Boolean =
-    route?.startsWith("${Routes.BATTERY_EDITOR}/") == true ||
-        route?.startsWith("${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/") == true ||
+internal fun batteryEditorCollapsibleNativeScreenCode(route: String?, page: String?): String? =
+    when {
+        route?.startsWith("${Routes.BATTERY_EDITOR}/") == true ->
+            SCREEN_CUSTOMIZE_STATUS_BAR
+
+        route?.startsWith("${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/") == true ->
+            SCREEN_BATTERY_EDITOR
+
         (
             route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true &&
                 BatteryEditorPage.fromRoute(page)?.let { editorPage ->
                     editorPage == BatteryEditorPage.EMOJI || editorPage.isStatusOptionPage()
                 } == true
-            )
+            ) -> SCREEN_BATTERY_EDITOR
+
+        else -> null
+    }
+
+internal fun showBatteryEditorCollapsibleNative(route: String?, page: String?): Boolean =
+    batteryEditorCollapsibleNativeScreenCode(route, page) != null
+
+internal fun childEditorNativeReloadKey(backStackEntryId: String?): Int =
+    backStackEntryId
+        ?.hashCode()
+        ?.and(Int.MAX_VALUE)
+        ?.coerceAtLeast(1)
+        ?: 0
 
 @Composable
 fun AppNavGraph(
@@ -139,13 +158,18 @@ fun AppNavGraph(
     )
     val currentRoute = currentBackStackEntry?.destination?.route
     val currentEditorPage = currentBackStackEntry?.arguments?.getString("page")
-    val shouldShowBatteryEditorCollapsibleNative = showBatteryEditorCollapsibleNative(
+    val batteryEditorNativeScreenCode = batteryEditorCollapsibleNativeScreenCode(
         currentRoute,
         currentEditorPage
     )
+    val batteryEditorNativeReloadKey = if (batteryEditorNativeScreenCode == SCREEN_BATTERY_EDITOR) {
+        childEditorNativeReloadKey(currentBackStackEntry?.id)
+    } else {
+        0
+    }
     val shouldShowBatteryEditorBottomBanner =
         showBatteryEditorBottomBanner(currentRoute) &&
-            !shouldShowBatteryEditorCollapsibleNative
+            batteryEditorNativeScreenCode == null
 
     fun navigateToHomeTab(tab: HomeTab) {
         val route = routeForHomeTab(tab)
@@ -613,12 +637,10 @@ fun AppNavGraph(
             }
             }
         }
-        if (shouldShowBatteryEditorCollapsibleNative) {
+        if (batteryEditorNativeScreenCode != null) {
             NativeAdInternal(
-                screenCode = SCREEN_BATTERY_EDITOR,
-                // One Activity-scoped holder is intentionally shared by option, Emotion list and
-                // Emotion detail routes. Moving list -> detail rebinds the same ad instead of
-                // issuing a second request.
+                screenCode = batteryEditorNativeScreenCode,
+                reloadKey = batteryEditorNativeReloadKey,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.navigationBarsPadding())

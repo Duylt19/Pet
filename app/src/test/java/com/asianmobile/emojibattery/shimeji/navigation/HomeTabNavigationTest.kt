@@ -1,5 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.navigation
 
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_EDITOR
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_CUSTOMIZE_STATUS_BAR
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeTab
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -100,13 +102,33 @@ class HomeTabNavigationTest {
     }
 
     @Test
-    fun `customize status bar and emotion pages keep the same collapsible native owner`() {
+    fun `customize status bar has a native placement separate from child editor pages`() {
         val editorRoute = "${Routes.BATTERY_EDITOR}/{themeId}"
         val componentRoute = "${Routes.BATTERY_EDITOR_COMPONENT}/{themeId}/{page}"
         val detailRoute = "${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/{themeId}/{groupKey}"
 
-        assertEquals(true, showBatteryEditorCollapsibleNative(editorRoute, null))
-        assertEquals(true, showBatteryEditorCollapsibleNative(componentRoute, "EMOJI"))
-        assertEquals(true, showBatteryEditorCollapsibleNative(detailRoute, null))
+        assertEquals(
+            SCREEN_CUSTOMIZE_STATUS_BAR,
+            batteryEditorCollapsibleNativeScreenCode(editorRoute, null)
+        )
+        assertEquals(
+            SCREEN_BATTERY_EDITOR,
+            batteryEditorCollapsibleNativeScreenCode(componentRoute, "EMOJI")
+        )
+        assertEquals(
+            SCREEN_BATTERY_EDITOR,
+            batteryEditorCollapsibleNativeScreenCode(detailRoute, null)
+        )
+    }
+
+    @Test
+    fun `each child editor back stack entry gets a fresh native reload key`() {
+        val firstEntryKey = childEditorNativeReloadKey("editor-entry-1")
+        val secondEntryKey = childEditorNativeReloadKey("editor-entry-2")
+
+        assertEquals(true, firstEntryKey > 0)
+        assertEquals(true, secondEntryKey > 0)
+        assertEquals(false, firstEntryKey == secondEntryKey)
+        assertEquals(0, childEditorNativeReloadKey(null))
     }
 }
