@@ -21,7 +21,7 @@
     <ImageView
         android:id="@+id/ivThumbBanner"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_50sdp"
+        android:layout_height="@dimen/_45sdp"
         android:background="@color/colors_FFFFFF"
         android:contentDescription="@string/app_name"
         android:scaleType="fitXY"
