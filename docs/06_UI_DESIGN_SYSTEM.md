@@ -278,7 +278,8 @@ Grant Permissions contract theo Figma node `8080:9754` và biến thể Pet on S
 - card bắt buộc đổi theo entry point. Mine dùng Accessibility và minh hoạ hai bước; flow Pet on
   Screen dùng artwork composite lossless @3x `img_grant_permission_pet_on_screen.png`
   (`474×300`, render `158×100`) export từ node `8606:8690`, thay cho ảnh cũ bị mờ/lệch. Icon
-  phone dùng glyph vector trên nền gradient `#5AB1FF → #138EFB`. Badge `Required` dùng
+  Draw over apps dùng đúng node `8591:7226`: glyph hai ô vuông chồng nhau `22×22` trên
+  container `34×34`, radius 10, gradient `#15EDB8 → #0EB7AD`. Badge `Required` dùng
   `#FFECEC`/`#F04438`, `Allowed` dùng
   `#E6F9EF`/`#00C062` (Roboto 500 10/14, padding 10×4), minh hoạ hai bước và CTA
   `Go to Settings` gradient `#C95DFF → #FB54BB` cao 40; các card còn lại dùng `AppSwitch`

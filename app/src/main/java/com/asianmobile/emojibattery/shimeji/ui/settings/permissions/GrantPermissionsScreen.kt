@@ -536,15 +536,15 @@ private fun RequiredPermissionCard(
                         .background(
                             Brush.verticalGradient(
                                 listOf(
-                                    colorResource(R.color.colors_5AB1FF),
-                                    colorResource(R.color.colors_138EFB)
+                                    colorResource(R.color.colors_15EDB8),
+                                    colorResource(R.color.colors_0EB7AD)
                                 )
                             )
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_permission_overlay_phone),
+                        painter = painterResource(R.drawable.ic_permission_draw_over_apps),
                         contentDescription = null,
                         tint = Color.Unspecified,
                         modifier = Modifier.size(dimensionResource(SdpR.dimen._22sdp))
