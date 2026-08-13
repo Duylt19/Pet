@@ -406,7 +406,10 @@ private fun ResultsSection(
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
     ) {
         SearchSectionTitle(text = stringResource(R.string.search_results))
-        BannerAd(adPosition = BANNER_SEARCH_INLINE)
+        BannerAd(
+            adPosition = BANNER_SEARCH_INLINE,
+            showContainerShadow = false
+        )
         when {
             uiState.isLoading && uiState.isEmpty -> {
                 SearchMessage {
