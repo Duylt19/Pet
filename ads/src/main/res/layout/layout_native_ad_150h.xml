@@ -46,13 +46,20 @@
                 app:layout_constraintStart_toEndOf="@id/mediaView"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/ivAdLabel"
+            <TextView
+                android:id="@+id/tvAdBadge"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/_4sdp"
-                android:contentDescription="@string/app_name"
-                android:src="@drawable/ic_label_ad_primary"
+                android:layout_height="@dimen/_10sdp"
+                android:layout_marginStart="@dimen/_3sdp"
+                android:background="@drawable/bg_ad_badge"
+                android:fontFamily="@font/inter_regular"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:minWidth="@dimen/_15sdp"
+                android:paddingHorizontal="@dimen/_3sdp"
+                android:text="@string/ad_attribution"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_7ssp"
                 app:layout_constraintBottom_toBottomOf="@id/tvTitleAds"
                 app:layout_constraintStart_toEndOf="@id/imgIcon"
                 app:layout_constraintTop_toTopOf="@id/tvTitleAds" />
@@ -72,7 +79,7 @@
                 android:textSize="@dimen/_12sdp"
                 app:layout_constraintBottom_toBottomOf="@id/imgIcon"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/ivAdLabel"
+                app:layout_constraintStart_toEndOf="@id/tvAdBadge"
                 app:layout_constraintTop_toTopOf="@id/imgIcon" />
 
             <TextView
