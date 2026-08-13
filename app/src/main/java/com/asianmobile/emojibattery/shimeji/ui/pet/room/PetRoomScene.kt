@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
@@ -113,7 +114,8 @@ private fun DrawScope.drawPet(runtime: PetRoomSceneRuntime) {
             srcOffset = IntOffset(frame.source.left, frame.source.top),
             srcSize = IntSize(frame.source.width(), frame.source.height()),
             dstOffset = IntOffset(left.roundToInt(), top.roundToInt()),
-            dstSize = IntSize(drawWidth.roundToInt(), drawHeight.roundToInt())
+            dstSize = IntSize(drawWidth.roundToInt(), drawHeight.roundToInt()),
+            filterQuality = FilterQuality.High
         )
     }
     // Pack sprites are drawn facing left, the way the overlay treats them, so walking right is

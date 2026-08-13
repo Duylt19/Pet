@@ -74,8 +74,16 @@ class PetBitmapCache @Inject constructor(
 
     private fun decode(root: File, relativePath: String): Bitmap {
         val file = File(root, relativePath)
-        return checkNotNull(BitmapFactory.decodeFile(file.absolutePath)) {
+        val options = BitmapFactory.Options().apply {
+            // Installed frames are raw files rather than density-qualified resources. Keep their
+            // exact pixel dimensions and alpha precision; the renderer owns the final scaling.
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+            inScaled = false
+        }
+        return checkNotNull(BitmapFactory.decodeFile(file.absolutePath, options)) {
             "Unable to decode pet frame"
+        }.also { bitmap ->
+            bitmap.prepareToDraw()
         }
     }
 

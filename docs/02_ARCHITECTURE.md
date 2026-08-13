@@ -113,7 +113,9 @@ ui/<domain>/<feature>/
   riêng.
 - Asset pack được parse/validate thành model nội bộ trước khi engine sử dụng; renderer không đọc JSON/storage mỗi frame.
 - Pack installer chỉ promote version hợp lệ từ random staging directory; repository luôn giữ built-in fallback.
-- Bitmap cache decode asset trước khi render loop bắt đầu và có memory budget 4–24 MiB.
+- Bitmap cache decode asset trước khi render loop bắt đầu và có memory budget 4–24 MiB. Frame
+  được decode đúng pixel nguồn bằng ARGB_8888, không density-scale; overlay và My Pet Room dùng
+  bitmap filtering khi phải scale sprite lên kích thước hiển thị.
 - Session Mixed hỗ trợ 1–12 pet khác nhau trên mọi device budget; shared clock hạ từ
   30/24 FPS xuống 20 FPS khi có 4–6 pet và 16 FPS khi có 7–12 pet. Không thêm Room;
   `PetSlotPreferences` giữ selection/size/speed/touch/speech theo slot, còn last

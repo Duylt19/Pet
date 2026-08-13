@@ -45,6 +45,9 @@ internal class PetOverlayView(
     private val earPaint = fillPaint(R.color.pet_demo_ear)
     private val inkPaint = fillPaint(R.color.pet_demo_ink)
     private val shadowPaint = fillPaint(R.color.pet_demo_shadow)
+    private val spritePaint = Paint(
+        Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG or Paint.DITHER_FLAG
+    )
     private val tailPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.pet_demo_fur_dark)
         style = Paint.Style.STROKE
@@ -415,7 +418,7 @@ internal class PetOverlayView(
             anchorX + (1f - visual.anchor.x) * drawWidth,
             anchorY + (1f - visual.anchor.y) * drawHeight
         )
-        canvas.drawBitmap(frame.bitmap, frame.source, destination, null)
+        canvas.drawBitmap(frame.bitmap, frame.source, destination, spritePaint)
     }
 
     private fun applySpriteMotion(
