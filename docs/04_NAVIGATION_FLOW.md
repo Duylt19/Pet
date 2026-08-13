@@ -83,7 +83,9 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
 - Discover là root sau onboarding. Battery Styles, Pet Store và Settings là top-level tab
   của cùng Home shell. Mỗi lần đổi tab dùng `saveState/restoreState` và `launchSingleTop`,
   vì vậy ViewModel, scroll và navigation state của tab được giữ lại. System Back tại bất kỳ
-  tab top-level nào cũng mở Exit dialog ngay; chỉ destination con mới pop về tab nguồn.
+  tab top-level nào cũng được `AppNavGraph` chặn trước default NavHost pop và mở Exit dialog
+  ngay; chỉ destination con mới pop về tab nguồn. `MainActivity` không tự cài callback Back
+  cạnh tranh với Navigation vì thứ tự đăng ký callback có thể đổi sau recomposition.
 - Search, My Pet và Premium là destination con và pop về destination đã mở chúng;
   My Pet không thay thế root Discover.
 - Search `Cancel`/Back pop về Discover; chọn theme mở Battery Editor và Back quay lại Search.

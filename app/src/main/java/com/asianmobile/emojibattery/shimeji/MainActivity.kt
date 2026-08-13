@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
-import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -33,7 +32,6 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.ads.utils.AdOverlayState
 import com.asianmobile.emojibattery.shimeji.navigation.AppNavGraph
 import com.asianmobile.emojibattery.shimeji.navigation.Routes
-import com.asianmobile.emojibattery.shimeji.navigation.isHomeTopLevelRoute
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.ExitDialog
 import com.asianmobile.emojibattery.shimeji.ui.app.MainViewModel
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.BaseAppTheme
@@ -83,6 +81,7 @@ class MainActivity : ComponentActivity() {
                             startDestination = startDestination,
                             nextScreenAfterSplash = nextScreen,
                             viewModel = mainViewModel,
+                            onHomeBack = { showExitDialog = true },
                             onDestinationChanged = { route ->
                                 currentRoute = route.orEmpty()
                             }
@@ -100,15 +99,6 @@ class MainActivity : ComponentActivity() {
         }
 
         setupAdOverlay()
-        onBackPressedDispatcher.addCallback(this) {
-            if (isHomeTopLevelRoute(currentRoute)) {
-                showExitDialog = true
-            } else {
-                isEnabled = false
-                onBackPressedDispatcher.onBackPressed()
-                isEnabled = true
-            }
-        }
         hideSystemNavigationBar()
         setupImmersiveReHide()
     }

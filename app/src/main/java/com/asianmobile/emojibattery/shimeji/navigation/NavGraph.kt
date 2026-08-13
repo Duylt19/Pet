@@ -2,6 +2,7 @@ package com.asianmobile.emojibattery.shimeji.navigation
 
 import android.app.Activity
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -153,6 +154,7 @@ fun AppNavGraph(
     startDestination: String,
     nextScreenAfterSplash: String,
     viewModel: MainViewModel,
+    onHomeBack: () -> Unit,
     onDestinationChanged: (String?) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -781,4 +783,11 @@ fun AppNavGraph(
             Spacer(Modifier.navigationBarsPadding())
         }
     }
+
+    // Register after NavHost so this callback has priority over Navigation's default pop.
+    // All four bottom-navigation destinations are equivalent Home roots.
+    BackHandler(
+        enabled = isHomeTopLevelRoute(currentRoute),
+        onBack = onHomeBack
+    )
 }
