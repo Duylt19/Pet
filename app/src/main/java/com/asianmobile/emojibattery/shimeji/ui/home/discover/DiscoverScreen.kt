@@ -82,8 +82,8 @@ import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreUiState
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreViewModel
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeHeader
+import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeEnableCard
+import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView

@@ -1,8 +1,9 @@
 # Current Screens
 
-Bốn route `home`, `battery_catalog`, `pet_store` và `settings` là các tab ngang hàng trong cùng
-Home shell. System Back tại một trong bốn tab mở Exit dialog trực tiếp; Back ở màn con mới pop về
-tab đã mở màn đó.
+Bốn route `home`, `battery_catalog`, `pet_store` và `settings` là các destination ngang hàng
+trong nested graph nội bộ `home_graph`. Graph này không phải screen; `ui/home/shell` sở hữu
+bottom chrome/banner chung. System Back tại một trong bốn tab mở Exit dialog trực tiếp; Back ở
+màn con mới pop về tab đã mở màn đó.
 
 | Route | Package/screen | Contract hiện tại |
 |---|---|---|

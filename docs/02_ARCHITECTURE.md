@@ -35,7 +35,7 @@ com.asianmobile.emojibattery.shimeji/
 │   │   └── impl/               # DataStore + remote/cache owner catalog implementations
 │   └── usecase/                # Nghiệp vụ tái sử dụng/testable
 ├── di/                         # Hilt modules đang có dependency thật
-├── navigation/                 # Routes, NavGraph, safe navigation
+├── navigation/                 # Routes, AppNavGraph, HomeNavGraph, safe navigation/policy
 ├── pet/
 │   ├── engine/                 # Kotlin thuần, không phụ thuộc Android framework
 │   ├── overlay/                # Android service/window/input/render adapter
@@ -48,7 +48,7 @@ com.asianmobile.emojibattery.shimeji/
 ├── ui/
 │   ├── app/                    # App-level presentation state
 │   ├── onboarding/             # Splash, Language, Intro, Permission
-│   ├── home/                   # Discover
+│   ├── home/                   # Home shell/chrome và Discover
 │   ├── battery/                # Catalog, Favourite/Recent, Editor
 │   ├── pet/                    # Pet Store và My Pet Room
 │   ├── settings/               # Mine và permission management
@@ -157,10 +157,12 @@ ui/<domain>/<feature>/
 
 ## Navigation boundary
 
-- `AppNavGraph` sở hữu NavController và route wiring.
+- `AppNavGraph` sở hữu NavController và wiring toàn app; `HomeNavGraph` khai báo nested graph
+  `home_graph` với bốn destination top-level. `home_graph` không phải screen và không track
+  analytics; destination Discover giữ route string ổn định `home`.
 - Bốn top-level route `home`, `battery_catalog`, `pet_store`, `settings` nằm trong một
-  Home shell dùng chung. Shell sở hữu bottom navigation và banner; feature screen chỉ sở
-  hữu content để đổi tab không dispose/reload quảng cáo.
+  Home graph/shell dùng chung. `ui/home/shell` sở hữu bottom navigation và banner; feature
+  screen chỉ sở hữu content để đổi tab không dispose/reload quảng cáo.
 - Chuyển Home tab dùng `popUpTo(home) + saveState/restoreState + launchSingleTop` để giữ
   ViewModel, scroll và state của từng route.
 - Feature Screen nhận callback như `onBack`, `onOpenSettings`; không nhận NavController nếu không có lý do đặc biệt.

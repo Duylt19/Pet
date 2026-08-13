@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
             val mainUiState by mainViewModel.uiState.collectAsState()
             val startDestination = remember {
                 if (intent.getBooleanExtra("skip_splash", false)) {
-                    Routes.HOME
+                    Routes.HOME_GRAPH
                 } else {
                     Routes.SPLASH
                 }

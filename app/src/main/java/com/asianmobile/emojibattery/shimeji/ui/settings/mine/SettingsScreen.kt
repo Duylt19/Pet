@@ -66,8 +66,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeHeader
+import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeEnableCard
+import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.pet.room.PetRoomSettingsDialog
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView

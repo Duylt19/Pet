@@ -64,7 +64,7 @@ app/src/main/java/com/asianmobile/emojibattery/shimeji/
 │   ├── repository/
 │   └── usecase/
 ├── di/
-├── navigation/
+├── navigation/                  # AppNavGraph + nested HomeNavGraph + route policies
 ├── pet/
 │   ├── engine/                 # Pure Kotlin state machine/timeline/geometry
 │   ├── overlay/                # FGS, WindowManager adapter, Canvas/sprite pet view
@@ -75,13 +75,13 @@ app/src/main/java/com/asianmobile/emojibattery/shimeji/
 ├── ui/
 │   ├── app/                     # MainViewModel/app-level presentation
 │   ├── onboarding/              # splash → language → intro → permission
-│   ├── home/                    # Discover
+│   ├── home/                    # Home shell/chrome + Discover tab
 │   ├── battery/                 # catalog → favourite/recent → editor
 │   ├── pet/                     # Shimeji Pets + My Pet Room
 │   ├── settings/                # Mine + permission management
 │   ├── search/
 │   ├── premium/
-│   └── shared/                  # reusable component + app theme
+│   └── shared/                  # component/theme thật sự dùng cross-feature
 └── utils/
 ```
 

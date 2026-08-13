@@ -9,4 +9,4 @@ import com.asianmobile.emojibattery.shimeji.navigation.Routes
 internal const val IS_FIRST_PERMISSION_ONBOARDING_ENABLED = false
 
 internal fun destinationAfterIntro(): String =
-    if (IS_FIRST_PERMISSION_ONBOARDING_ENABLED) Routes.PERMISSION else Routes.HOME
+    if (IS_FIRST_PERMISSION_ONBOARDING_ENABLED) Routes.PERMISSION else Routes.HOME_GRAPH

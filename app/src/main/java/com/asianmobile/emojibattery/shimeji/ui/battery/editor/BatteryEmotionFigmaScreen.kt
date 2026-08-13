@@ -51,7 +51,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryEmotionGroup
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomePremiumButton
+import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomePremiumButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR

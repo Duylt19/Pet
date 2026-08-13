@@ -28,7 +28,7 @@ data class MainUiState(
         isIntroCompleted != true -> Routes.INTRO
         IS_FIRST_PERMISSION_ONBOARDING_ENABLED && isPermissionCompleted != true ->
             Routes.PERMISSION
-        else -> Routes.HOME
+        else -> Routes.HOME_GRAPH
     }
 
     fun isReady(): Boolean =

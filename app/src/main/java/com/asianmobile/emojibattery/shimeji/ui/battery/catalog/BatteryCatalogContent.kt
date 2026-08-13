@@ -58,9 +58,9 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeHeader
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomePremiumButton
+import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeEnableCard
+import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeHeader
+import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomePremiumButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardGradientButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOfferSheet

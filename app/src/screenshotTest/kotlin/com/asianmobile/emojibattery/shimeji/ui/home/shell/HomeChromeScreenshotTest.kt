@@ -1,4 +1,4 @@
-package com.asianmobile.emojibattery.shimeji.ui.shared.component
+package com.asianmobile.emojibattery.shimeji.ui.home.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview

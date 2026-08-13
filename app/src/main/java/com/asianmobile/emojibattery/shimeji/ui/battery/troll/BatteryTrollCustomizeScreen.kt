@@ -45,7 +45,7 @@ import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryDiscardChan
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.StatusBarEditorWallpaper
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomeEnableCard
+import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeEnableCard
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 

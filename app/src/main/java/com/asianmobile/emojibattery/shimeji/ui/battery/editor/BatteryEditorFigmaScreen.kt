@@ -72,7 +72,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomePremiumButton
+import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomePremiumButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec

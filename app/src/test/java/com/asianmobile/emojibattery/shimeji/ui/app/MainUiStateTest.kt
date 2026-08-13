@@ -16,11 +16,11 @@ class MainUiStateTest {
             MainUiState(isLanguageCompleted = true).getNextScreen()
         )
         assertEquals(
-            Routes.HOME,
+            Routes.HOME_GRAPH,
             completedState(permissionCompleted = false).getNextScreen()
         )
         assertEquals(
-            Routes.HOME,
+            Routes.HOME_GRAPH,
             completedState(permissionCompleted = true).getNextScreen()
         )
     }
@@ -39,7 +39,7 @@ class MainUiStateTest {
 
     @Test
     fun `post intro destination is home while first permission is disabled`() {
-        assertEquals(Routes.HOME, destinationAfterIntro())
+        assertEquals(Routes.HOME_GRAPH, destinationAfterIntro())
     }
 
     private fun completedState(permissionCompleted: Boolean) = MainUiState(

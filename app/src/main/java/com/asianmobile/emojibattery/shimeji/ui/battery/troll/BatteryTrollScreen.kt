@@ -76,7 +76,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntry
 import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollServerConfig
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.StatusBarEditorWallpaper
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.HomePremiumButton
+import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomePremiumButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardGradientButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOfferSheet

@@ -15,6 +15,7 @@ ui/
 │   ├── intro/
 │   └── permission/
 ├── home/
+│   ├── shell/                  # Home chrome, bottom navigation và banner owner
 │   └── discover/
 ├── battery/
 │   ├── catalog/
@@ -41,6 +42,7 @@ feature phải di chuyển test cùng lúc.
 | Flow | Route | Package sở hữu |
 |---|---|---|
 | App entry | n/a | `ui/app` |
+| Home graph | `home_graph` (internal, không phải screen) | `navigation/HomeNavGraph` + `ui/home/shell` |
 | Onboarding | `splash`, `language`, `intro`, `permission` | `ui/onboarding/*` |
 | Discover tab | `home` | `ui/home/discover` |
 | Battery tab/detail | `battery_catalog`, `battery_category/{id}` | `ui/battery/catalog` |
@@ -60,8 +62,8 @@ feature phải di chuyển test cùng lúc.
   contract tái sử dụng rõ ràng.
 - `ui/shared/theme` là nguồn typography/color theme của toàn app; feature không tự
   tạo theme package khác.
-- `navigation/AppNavGraph.kt` chỉ wiring route/callback. Business state vẫn thuộc
-  ViewModel của feature.
+- `navigation/AppNavGraph.kt` và `HomeNavGraph.kt` chỉ wiring route/callback. Business state
+  vẫn thuộc ViewModel của feature.
 
 ## Home shell
 
@@ -70,10 +72,11 @@ Bốn tab top-level vẫn thuộc các domain riêng:
 ```text
 Discover              Battery              Shimeji Pets          Mine
 ui/home/discover      ui/battery/catalog   ui/pet/store          ui/settings/mine
-        \_____________________ AppNavGraph Home shell _____________________/
-                         bottom navigation + banner ad
+        \________________ nested HomeNavGraph (`home_graph`) ______________/
+                         ui/home/shell Home chrome
 ```
 
-Do Home shell sở hữu bottom navigation/banner ad, không di chuyển các composable ad
-này vào từng tab. Việc package các tab khác nhau không làm thay đổi back
-stack hay lifetime của banner.
+`AppNavGraph` giữ một `NavController`; `HomeNavGraph` chỉ nhóm bốn destination root chứ không
+tạo NavController thứ hai. `ui/home/shell` sở hữu bottom navigation/banner ad, vì vậy không
+di chuyển các composable này vào từng tab. Việc package các tab khác nhau không làm thay đổi
+back stack hay lifetime của banner.

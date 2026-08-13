@@ -80,8 +80,10 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
 
 - Splash, Language và Intro được remove khỏi stack sau khi hoàn tất bước tương ứng. Permission
   vẫn có destination đầy đủ nhưng tạm không được đưa vào first-run stack.
-- Discover là root sau onboarding. Battery Styles, Pet Store và Settings là top-level tab
-  của cùng Home shell. Mỗi lần đổi tab dùng `saveState/restoreState` và `launchSingleTop`,
+- Sau onboarding, app đi vào nested route `home_graph`; đây là graph nội bộ, không phải một
+  screen analytics. Start destination của graph là Discover với route string ổn định `home`.
+  Battery Styles, Pet Store và Settings là ba top-level destination còn lại của cùng Home graph.
+  Mỗi lần đổi tab dùng `saveState/restoreState` và `launchSingleTop`,
   vì vậy ViewModel, scroll và navigation state của tab được giữ lại. System Back tại bất kỳ
   tab top-level nào cũng được `AppNavGraph` chặn trước default NavHost pop và mở Exit dialog
   ngay; chỉ destination con mới pop về tab nguồn. `MainActivity` không tự cài callback Back
@@ -131,8 +133,8 @@ route, popUpTo behavior, process-death behavior và docs này.
 - Route constant chỉ định nghĩa trong `Routes`.
 - Dùng `safeNavigate`/`safePopBackStack`.
 - Full-screen ad transition dùng `navigateWithAd` theo policy.
-- Bottom navigation và placement `home_mode_bottom` do Home shell trong `AppNavGraph` sở
-  hữu. Child `battery_category/{categoryId}` ẩn bottom navigation nhưng tiếp tục dùng cùng
+- Bottom navigation và placement `home_mode_bottom` do `ui/home/shell/HomeShell` sở hữu.
+  Child `battery_category/{categoryId}` ẩn bottom navigation nhưng tiếp tục dùng cùng
   banner holder để không request/reload banner khi đi từ Battery Styles sang category.
 - String argument phải encode; enum argument phải parse an toàn với fallback.
 - Không phục hồi route Private Browser cũ nếu chưa có feature spec mới.
