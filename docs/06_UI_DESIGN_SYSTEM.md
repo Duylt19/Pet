@@ -178,13 +178,15 @@ Pet Store visual contract:
 - My Pet hero dùng nguyên node Figma `8403:6520` dưới dạng PNG @3x `984×399`; bitmap có
   transparency và nhân vật nhô khỏi nền nên render `328×133px` không clip thêm. Chạm toàn bộ
   banner mở My Pet Room;
-- Pet/Food selector dùng bốn image-fill state riêng từ Figma (`selected`/`unselected`);
-  đây là raster artwork nhiều màu nên lưu PNG @3x trong `drawable-nodpi`, không thay bằng
-  emoji hoặc icon navigation;
+- Pet/Food selector theo Figma `8075:1848`: cả hai state dùng nền `#FFEBF1`, chữ Roboto Medium
+  `#FB3675` và giữ icon raster có màu. Selected thêm viền hồng 1px; unselected không viền,
+  không chuyển nền/chữ/icon sang xám. Tab cao 44px, radius 12px, chia đều trong row gap 8px;
 - pet category theo Figma node `8287:4824` là `LazyRow` cao 40px, padding ngang 16px và gap
   20px. Category lấy động từ catalog, loại trùng không phân biệt hoa thường và giữ thứ tự server;
   active dùng Roboto Medium 14/20 màu `#FB3675` kèm underline, inactive dùng Roboto Regular
-  `#212327`. Chọn category chỉ lọc pet grid, không làm thay đổi trạng thái unlock;
+  `#212327`. Label đo theo full content width, không dùng minimum intrinsic width vì tên nhiều từ
+  sẽ bị cắt; category được chọn tự cuộn vào viewport đầy đủ. Chọn category chỉ lọc pet grid,
+  không làm thay đổi trạng thái unlock;
 - pet card giữ tỷ lệ `104/142`, image area `104/90`, thumbnail theo tỷ lệ item và crown
   premium 20px tại top-end;
 - food card giữ tỷ lệ `104/122`, image area `104/90`, artwork `70/104`; badge giá tại

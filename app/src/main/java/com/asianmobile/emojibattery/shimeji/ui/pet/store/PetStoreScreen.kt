@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,11 +33,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items as rowItems
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -438,8 +439,7 @@ private fun StoreTabs(selected: PetStoreTab, onTab: (PetStoreTab) -> Unit) {
         StoreTab(
             tab = PetStoreTab.PETS,
             selected = selected,
-            selectedImageRes = R.drawable.img_pet_store_tab_pet_selected,
-            unselectedImageRes = R.drawable.img_pet_store_tab_pet_unselected,
+            imageRes = R.drawable.img_pet_store_tab_pet_selected,
             label = stringResource(R.string.pet_store_tab_pets),
             onTab = onTab,
             modifier = Modifier.weight(1f)
@@ -447,8 +447,7 @@ private fun StoreTabs(selected: PetStoreTab, onTab: (PetStoreTab) -> Unit) {
         StoreTab(
             tab = PetStoreTab.FOOD,
             selected = selected,
-            selectedImageRes = R.drawable.img_pet_store_tab_food_selected,
-            unselectedImageRes = R.drawable.img_pet_store_food_tab,
+            imageRes = R.drawable.img_pet_store_tab_food_selected,
             label = stringResource(R.string.pet_store_tab_food),
             onTab = onTab,
             modifier = Modifier.weight(1f)
@@ -460,8 +459,7 @@ private fun StoreTabs(selected: PetStoreTab, onTab: (PetStoreTab) -> Unit) {
 private fun StoreTab(
     tab: PetStoreTab,
     selected: PetStoreTab,
-    selectedImageRes: Int,
-    unselectedImageRes: Int,
+    imageRes: Int,
     label: String,
     onTab: (PetStoreTab) -> Unit,
     modifier: Modifier
@@ -470,28 +468,26 @@ private fun StoreTab(
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
     Row(
         modifier = modifier
-            .height(dimensionResource(SdpR.dimen._37sdp))
+            .height(dimensionResource(SdpR.dimen._34sdp))
             .clip(shape)
-            .background(
-                colorResource(if (active) R.color.colors_FFEBF1 else R.color.colors_F2F2F2)
-            )
-            .border(
-                width = dimensionResource(
-                    if (active) SdpR.dimen._2sdp else SdpR.dimen._1sdp
-                ),
-                color = colorResource(
-                    if (active) R.color.colors_FB3675 else R.color.colors_C8C8C9
-                ),
-                shape = shape
+            .background(colorResource(R.color.colors_FFEBF1))
+            .then(
+                if (active) {
+                    Modifier.border(
+                        width = dimensionResource(SdpR.dimen._1sdp),
+                        color = colorResource(R.color.colors_FB3675),
+                        shape = shape
+                    )
+                } else {
+                    Modifier
+                }
             )
             .clickable(enabled = !active) { onTab(tab) },
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            painter = painterResource(
-                if (active) selectedImageRes else unselectedImageRes
-            ),
+            painter = painterResource(imageRes),
             contentDescription = null,
             contentScale = ContentScale.Fit,
             modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
@@ -499,9 +495,7 @@ private fun StoreTab(
         Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
         Text(
             text = label,
-            color = colorResource(
-                if (active) R.color.colors_FB3675 else R.color.colors_6F7073
-            ),
+            color = colorResource(R.color.colors_FB3675),
             fontFamily = StoreRobotoMedium,
             fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
             lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp
@@ -516,7 +510,15 @@ private fun PetCategoryTabs(
     onCategory: (String) -> Unit
 ) {
     if (categories.isEmpty()) return
+    val listState = rememberLazyListState()
+    val selectedIndex = categories.indexOfFirst {
+        it.equals(selectedCategory, ignoreCase = true)
+    }
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex >= 0) listState.animateScrollToItem(selectedIndex)
+    }
     LazyRow(
+        state = listState,
         modifier = Modifier
             .fillMaxWidth()
             .height(dimensionResource(SdpR.dimen._32sdp)),
@@ -531,7 +533,7 @@ private fun PetCategoryTabs(
             val isSelected = category.equals(selectedCategory, ignoreCase = true)
             Column(
                 modifier = Modifier
-                    .width(IntrinsicSize.Min)
+                    .wrapContentWidth()
                     .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._2sdp)))
                     .clickable(enabled = !isSelected) { onCategory(category) },
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -545,6 +547,7 @@ private fun PetCategoryTabs(
                     fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
                     lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
                     maxLines = 1,
+                    softWrap = false,
                     modifier = Modifier.padding(
                         horizontal = dimensionResource(SdpR.dimen._1sdp)
                     )
