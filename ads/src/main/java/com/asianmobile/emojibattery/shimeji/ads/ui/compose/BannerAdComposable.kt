@@ -57,6 +57,7 @@ import com.google.android.libraries.ads.mobile.sdk.common.LoadAdError
 fun BannerAd(
     modifier: Modifier = Modifier,
     adPosition: String = BOTTOM_POSITION,
+    showContainerShadow: Boolean = true,
     onVisibilityChanged: (Boolean) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -190,6 +191,10 @@ fun BannerAd(
                     ) as ShimmerFrameLayout
             },
             update = { shimmerLayout ->
+                if (!showContainerShadow) {
+                    shimmerLayout.elevation = 0f
+                    shimmerLayout.translationZ = 0f
+                }
                 val bannerContainer = shimmerLayout.findViewById<FrameLayout>(R.id.bannerContainer)
                 val viewShimmer = shimmerLayout.findViewById<ImageView>(R.id.ivThumbBanner)
 

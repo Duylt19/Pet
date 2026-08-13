@@ -396,7 +396,10 @@ private fun DiscoverContent(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
-                            BannerAd(adPosition = BANNER_DISCOVER_INLINE)
+                            BannerAd(
+                                adPosition = BANNER_DISCOVER_INLINE,
+                                showContainerShadow = false
+                            )
                         }
                     }
                     item {
