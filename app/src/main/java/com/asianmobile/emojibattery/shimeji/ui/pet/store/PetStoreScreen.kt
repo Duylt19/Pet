@@ -1,11 +1,8 @@
 package com.asianmobile.emojibattery.shimeji.ui.pet.store
 
-import android.Manifest
 import android.app.Activity
 import android.graphics.Color as AndroidColor
 import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -209,10 +206,6 @@ internal fun PetStoreFlowHost(
     val lifecycleOwner = LocalLifecycleOwner.current
     var showOverlayPermissionDisclosure by rememberSaveable { mutableStateOf(false) }
 
-    val notificationLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { viewModel.onNotificationPermissionResult() }
-
     DisposableEffect(lifecycleOwner, viewModel) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshPermissions()
@@ -240,13 +233,7 @@ internal fun PetStoreFlowHost(
                 PetStoreEffect.OpenOverlaySettings -> {
                     showOverlayPermissionDisclosure = true
                 }
-                PetStoreEffect.RequestNotificationPermission -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    } else {
-                        viewModel.onNotificationPermissionResult()
-                    }
-                }
+                PetStoreEffect.OpenGrantPermissions -> onNavigateToGrantPermissions()
             }
         }
     }

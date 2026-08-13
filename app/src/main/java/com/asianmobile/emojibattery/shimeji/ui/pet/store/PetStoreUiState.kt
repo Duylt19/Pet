@@ -56,7 +56,7 @@ sealed interface PetStoreEffect {
     data object ShowRewardedAd : PetStoreEffect
     data object OpenPremium : PetStoreEffect
     data object OpenOverlaySettings : PetStoreEffect
-    data object RequestNotificationPermission : PetStoreEffect
+    data object OpenGrantPermissions : PetStoreEffect
 }
 
 internal object PetStorePolicy {

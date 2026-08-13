@@ -42,7 +42,6 @@ class PetStoreViewModel @Inject constructor(
     val uiState: StateFlow<PetStoreUiState> = _uiState.asStateFlow()
     private val _effects = Channel<PetStoreEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
-    private var startAfterNotification = false
 
     init {
         viewModelScope.launch {
@@ -218,19 +217,10 @@ class PetStoreViewModel @Inject constructor(
             return
         }
         if (!isNotificationGranted()) {
-            startAfterNotification = true
-            viewModelScope.launch { _effects.send(PetStoreEffect.RequestNotificationPermission) }
+            viewModelScope.launch { _effects.send(PetStoreEffect.OpenGrantPermissions) }
             return
         }
         startOverlay()
-    }
-
-    fun onNotificationPermissionResult() {
-        refreshPermissions()
-        if (startAfterNotification) {
-            startAfterNotification = false
-            startOverlay()
-        }
     }
 
     private fun startOverlay() {

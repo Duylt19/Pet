@@ -52,6 +52,29 @@ sealed interface GrantPermissionsEffect {
     data object OpenVendorAutoStartSettings : GrantPermissionsEffect
     data object RequestNotificationPermission : GrantPermissionsEffect
     data object OpenAppNotificationSettings : GrantPermissionsEffect
+    data object PetOverlayStartFailed : GrantPermissionsEffect
+}
+
+internal val GrantPermissionsUiState.hasMandatoryPetPermissions: Boolean
+    get() = isOverlayGranted && isNotificationGranted
+
+/**
+ * The order shown by the Pet on Screen design is also the order in which system surfaces open.
+ * Optional stability steps are attempted once per run so declining one never traps the user in
+ * the same settings screen.
+ */
+internal fun GrantPermissionsUiState.nextPetPermissionTarget(
+    attempted: Set<GrantPermissionsTarget>
+): GrantPermissionsTarget? = when {
+    !isOverlayGranted -> GrantPermissionsTarget.OVERLAY
+    !isNotificationGranted -> GrantPermissionsTarget.NOTIFICATION
+    isBatteryRowVisible &&
+        !isBatteryOptimizationIgnored &&
+        GrantPermissionsTarget.BATTERY_OPTIMIZATION !in attempted ->
+        GrantPermissionsTarget.BATTERY_OPTIMIZATION
+    isAutoStartRowVisible && GrantPermissionsTarget.VENDOR_AUTO_START !in attempted ->
+        GrantPermissionsTarget.VENDOR_AUTO_START
+    else -> null
 }
 
 internal fun accessibilityTargetEffect(isAccessibilityEnabled: Boolean): GrantPermissionsEffect =

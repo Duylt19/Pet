@@ -19,7 +19,8 @@ Platform và product vertical slice đã hoàn tất. `PetOverlay.start(context)
 
 - `SYSTEM_ALERT_WINDOW`: tạo `TYPE_APPLICATION_OVERLAY`; user phải cấp qua system settings.
 - `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_SPECIAL_USE`: service target SDK 36 khai báo `specialUse` và property giải thích use case.
-- `POST_NOTIFICATIONS`: Permission/Home request trên API 33+; denial không block FGS start, foreground service vẫn luôn tạo notification/channel.
+- `POST_NOTIFICATIONS`: gate product bắt buộc của flow Pet on Screen trên API 33+; dưới API 33
+  gate tự đạt. Foreground service vẫn luôn tạo notification/channel theo contract Android.
 - Service `exported=false`, trả `START_NOT_STICKY`, không có boot receiver và không tự restart.
 - Play Console phải khai báo/review foreground-service type trước release.
 
@@ -37,15 +38,15 @@ Thứ tự gate bắt buộc cho mọi entry point bật pet:
    permission: hỏi xong hai màn hệ thống rồi mới báo "chưa chọn pet" là bắt user trả giá cho
    việc không xảy ra;
 3. chưa có overlay access → `OPEN_OVERLAY_SETTINGS`. Đây là quyền **bắt buộc**;
-4. API 33+ chưa có `POST_NOTIFICATIONS` và **chưa hỏi lần nào** → `REQUEST_NOTIFICATION_PERMISSION`.
-   Chỉ hỏi **một lần**: quyền này không bắt buộc cho overlay, và khi user đã từ chối vĩnh viễn thì
-   launcher trả kết quả ngay mà không hiện dialog — hỏi lại ở mỗi lần retry là vòng lặp không thoát
-   được;
+4. API 33+ chưa có `POST_NOTIFICATIONS` → mở biến thể Pet on Screen của Grant Permissions.
+   Runtime prompt chỉ được thử một lần trong mỗi phiên màn; lần tiếp theo dẫn tới App Notification
+   Settings để tránh vòng lặp launcher trả kết quả ngay sau khi user đã từ chối;
 5. còn lại → `START`.
 
-Callback của launcher cũng phải phân biệt: overlay chỉ đi tiếp **khi đã được cấp**; nếu không,
-user bấm back không được bị ném lại đúng màn system settings đó. Notification có thể đi tiếp bất
-kể kết quả vì pet vẫn chạy được.
+Grant Permissions mở theo thứ tự Overlay → Notification → Battery Optimization → Auto Start.
+Overlay và Notification chỉ đi tiếp khi đã cấp; nếu user quay lại mà chưa cấp thì dừng chuỗi để
+không ném họ trở lại cùng system surface. Ngay khi hai quyền bắt buộc đạt, pet start lập tức; hai
+bước ổn định sau đó là optional và nếu bị bỏ qua cũng không lặp vô hạn.
 
 Battery-optimisation exemption **không** nằm trong luồng này: nó không bắt buộc, chỉ có ý nghĩa
 trên máy giết foreground service, và được hỏi ở màn Grant Permissions theo

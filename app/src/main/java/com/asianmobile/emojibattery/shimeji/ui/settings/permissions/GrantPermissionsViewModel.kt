@@ -11,6 +11,8 @@ import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBackgroundRestrictionReader
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBatteryOptimizationPolicy
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayStartResult
 import com.asianmobile.emojibattery.shimeji.pet.overlay.shouldOfferVendorAllowlist
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -32,6 +34,9 @@ class GrantPermissionsViewModel @Inject constructor(
 
     private val _effects = Channel<GrantPermissionsEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
+    private var isPetPermissionSequenceActive = false
+    private var activeSequenceTarget: GrantPermissionsTarget? = null
+    private val attemptedOptionalTargets = mutableSetOf<GrantPermissionsTarget>()
 
     init {
         refresh()
@@ -60,8 +65,7 @@ class GrantPermissionsViewModel @Inject constructor(
             GrantPermissionsTarget.ACCESSIBILITY ->
                 accessibilityTargetEffect(state.isAccessibilityEnabled)
 
-            GrantPermissionsTarget.OVERLAY ->
-                GrantPermissionsEffect.OpenOverlaySettings.takeUnless { state.isOverlayGranted }
+            GrantPermissionsTarget.OVERLAY -> GrantPermissionsEffect.OpenOverlaySettings
 
             GrantPermissionsTarget.VENDOR_AUTO_START ->
                 GrantPermissionsEffect.OpenVendorAutoStartSettings
@@ -76,15 +80,78 @@ class GrantPermissionsViewModel @Inject constructor(
                 hasAskedForNotification -> GrantPermissionsEffect.OpenAppNotificationSettings
                 else -> GrantPermissionsEffect.RequestNotificationPermission
             }
-        } ?: return
+        }
         if (effect == GrantPermissionsEffect.RequestNotificationPermission) {
             hasAskedForNotification = true
         }
         viewModelScope.launch { _effects.send(effect) }
     }
 
-    private var hasAskedForNotification = false
+    /** Starts the Pet on Screen grant flow in the same top-to-bottom order as the UI. */
+    fun startPermissionSequence(requiredTarget: GrantPermissionsTarget) {
+        if (requiredTarget != GrantPermissionsTarget.OVERLAY) {
+            onTargetClicked(requiredTarget)
+            return
+        }
+        isPetPermissionSequenceActive = true
+        activeSequenceTarget = null
+        attemptedOptionalTargets.clear()
+        refresh()
+        startPetWhenMandatoryPermissionsAreReady()
+        advancePetPermissionSequence()
+    }
 
+    /** Called after either a runtime prompt or a system settings activity returns. */
+    fun onPermissionStepReturned(requiredTarget: GrantPermissionsTarget) {
+        val returnedTarget = activeSequenceTarget
+        refresh()
+
+        if (requiredTarget == GrantPermissionsTarget.OVERLAY) {
+            startPetWhenMandatoryPermissionsAreReady()
+        }
+        if (!isPetPermissionSequenceActive) return
+
+        if (returnedTarget == GrantPermissionsTarget.OVERLAY && !_uiState.value.isOverlayGranted) {
+            stopPetPermissionSequence()
+            return
+        }
+        if (returnedTarget == GrantPermissionsTarget.NOTIFICATION &&
+            !_uiState.value.isNotificationGranted
+        ) {
+            stopPetPermissionSequence()
+            return
+        }
+        returnedTarget
+            ?.takeIf { it.isOptionalPetPermission }
+            ?.let(attemptedOptionalTargets::add)
+        activeSequenceTarget = null
+        advancePetPermissionSequence()
+    }
+
+    private fun advancePetPermissionSequence() {
+        if (!isPetPermissionSequenceActive) return
+        val target = _uiState.value.nextPetPermissionTarget(attemptedOptionalTargets)
+        if (target == null) {
+            stopPetPermissionSequence()
+            return
+        }
+        activeSequenceTarget = target
+        onTargetClicked(target)
+    }
+
+    private fun startPetWhenMandatoryPermissionsAreReady() {
+        if (!_uiState.value.hasMandatoryPetPermissions || PetOverlayRuntime.isRunning.value) return
+        if (PetOverlay.start(context) == PetOverlayStartResult.FAILED) {
+            viewModelScope.launch { _effects.send(GrantPermissionsEffect.PetOverlayStartFailed) }
+        }
+    }
+
+    private fun stopPetPermissionSequence() {
+        isPetPermissionSequenceActive = false
+        activeSequenceTarget = null
+    }
+
+    private var hasAskedForNotification = false
 
     private fun isNotificationGranted(): Boolean = !NOTIFICATION_PERMISSION_EXISTS ||
         ContextCompat.checkSelfPermission(
@@ -96,3 +163,7 @@ class GrantPermissionsViewModel @Inject constructor(
         val NOTIFICATION_PERMISSION_EXISTS = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     }
 }
+
+private val GrantPermissionsTarget.isOptionalPetPermission: Boolean
+    get() = this == GrantPermissionsTarget.BATTERY_OPTIMIZATION ||
+        this == GrantPermissionsTarget.VENDOR_AUTO_START

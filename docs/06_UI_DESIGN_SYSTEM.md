@@ -258,29 +258,36 @@ Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343`
   phủ gì nên đã lệch design mà không ai phát hiện. Kiểm tra bằng cách đo lề núm trong golden:
   lề trên phải bằng lề dưới, và lề trái khi tắt phải bằng lề phải khi bật.
 
-Grant Permissions contract theo Figma node `8080:9754` và biến thể overlay `8591:7213`:
+Grant Permissions contract theo Figma node `8080:9754` và biến thể Pet on Screen
+`8591:7325`:
 
 - route `grant_permissions` được giữ nhưng option mở từ Mine đang tạm ẩn. Nền **trắng phẳng** — lớp wallpaper trong design bị tắt,
   card trắng nổi lên bằng shadow chứ không bằng đổi màu nền;
 - app bar dùng `LargeTopAppBar` và `exitUntilCollapsed`: trạng thái mở có back + title lớn
   `Grant Permissions`, khi list cuộn thì title thu về toolbar một dòng giống Customize Status
   Bar/Accessibility How to use; native ad vẫn ghim đáy, ngoài list;
-- ba nhóm đánh số bằng chip tròn `24×24` nền `#FB3675` (số Roboto 500 16/24), cách chip 8px:
-  Necessary, Enhanced Stability, Recommend. Khoảng cách heading → card và card → card là 12px,
-  giữa hai nhóm là 20px;
+- biến thể Accessibility có ba nhóm như cũ. Biến thể Pet on Screen có hai nhóm: Necessary
+  chứa Draw over other apps + Notification access; Enhanced Stability chứa Ignore Battery
+  Optimization + Auto Start. Khoảng cách heading → card và card → card là 12px, giữa hai nhóm
+  là 20px;
 - card trắng `328×?` radius 16, padding trong 16, shadow `DROP_SHADOW r=9 offset=(0,0) a=0.17`.
   Compose đổ bóng xuống dưới theo elevation chứ không blur đều như Figma, nên copy đúng alpha
   thì card trắng trên nền trắng gần như mất viền — dùng `shadow(_8sdp, #212327 alpha 0.30)`
   để bóng đọc được; icon quyền `34×34` radius 10 với gradient riêng
   từng quyền, cách text 8px, text cách switch 8px;
-- card bắt buộc đổi theo entry point. Mine dùng Accessibility và minh hoạ hai bước; flow sau
-  disclosure Draw over apps dùng title/description overlay cùng artwork
-  `img_overlay_permission_hero.png` `158×100`; icon phone dùng glyph vector export từ frame
-  `8591:7226` trên nền gradient `#5AB1FF → #138EFB`. Badge `Required` dùng
+- card bắt buộc đổi theo entry point. Mine dùng Accessibility và minh hoạ hai bước; flow Pet on
+  Screen dùng artwork composite lossless @3x `img_grant_permission_pet_on_screen.png`
+  (`474×300`, render `158×100`) export từ node `8606:8690`, thay cho ảnh cũ bị mờ/lệch. Icon
+  phone dùng glyph vector trên nền gradient `#5AB1FF → #138EFB`. Badge `Required` dùng
   `#FFECEC`/`#F04438`, `Allowed` dùng
   `#E6F9EF`/`#00C062` (Roboto 500 10/14, padding 10×4), minh hoạ hai bước và CTA
   `Go to Settings` gradient `#C95DFF → #FB54BB` cao 40; các card còn lại dùng `AppSwitch`
   chung với Home;
+- CTA Pet on Screen điều phối system surface đúng thứ tự từ trên xuống: Overlay → Notification
+  → Battery Optimization (nếu có ý nghĩa) → Auto Start (nếu ROM có màn tương ứng). Hai bước
+  đầu là bắt buộc; ngay khi cả hai được cấp, pet foreground service được start, còn hai bước ổn
+  định là optional và không chặn pet. Dưới API 33 không có runtime notification permission nên
+  bước Notification được xem là đã thỏa;
 - ảnh minh hoạ hai bước export theo **render bounds `296×96`**, không phải layout bounds
   `296×92`: hai khung điện thoại tràn khỏi frame 4px, export theo layout bounds thì đáy bị
   cắt. Compose dựng bằng `aspectRatio(296f/96f)`;
@@ -300,7 +307,8 @@ Grant Permissions contract theo Figma node `8080:9754` và biến thể overlay 
   `getHistoricalProcessExitReasons()` cho thấy process từng chết lúc đang chạy foreground
   service vì `REASON_SIGNALED`/`LOW_MEMORY`/`OTHER` (API 30+), và cuối cùng mới tới danh sách
   vendor. Ba tín hiệu đầu là đo thật nên bắt được cả ROM tuỳ biến lẫn hãng mới; danh sách
-  vendor chỉ dùng cho máy API < 30 hoặc lần chạy đầu chưa có sự cố nào. Row ẩn khi đã cấp;
+  vendor chỉ dùng cho máy API < 30 hoặc lần chạy đầu chưa có sự cố nào. Nếu row đã hiện thì vẫn
+  giữ lại sau khi cấp để user có thể mở lại system list và thu hồi;
 - native ad ghim cố định dưới cùng màn, ngoài `LazyColumn`, nên nó không cuộn cùng danh sách;
 - row **Allow auto-start** hiện khi ROM có allowlist riêng của hãng (`PetVendorPowerSettings`
   resolve component qua `PackageManager`, package khai trong `<queries>` để API 30+ nhìn thấy).

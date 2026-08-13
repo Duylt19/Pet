@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -97,10 +98,10 @@ fun GrantPermissionsScreen(
 
     val settingsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { viewModel.refresh() }
+    ) { viewModel.onPermissionStepReturned(requiredTarget) }
     val notificationLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { viewModel.refresh() }
+    ) { viewModel.onPermissionStepReturned(requiredTarget) }
 
     LaunchedEffect(accessibilityHowToUseResult) {
         if (accessibilityHowToUseResult != null) {
@@ -132,7 +133,9 @@ fun GrantPermissionsScreen(
                     )
 
                 GrantPermissionsEffect.OpenOverlaySettings -> {
-                    if (requiredTarget == GrantPermissionsTarget.OVERLAY) {
+                    if (requiredTarget == GrantPermissionsTarget.OVERLAY ||
+                        uiState.isOverlayGranted
+                    ) {
                         settingsLauncher.openSettings(
                             PetOverlay.permissionIntent(context),
                             Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
@@ -154,6 +157,7 @@ fun GrantPermissionsScreen(
                     viewModel.vendorAutoStartIntent()?.let {
                         settingsLauncher.openSettings(it)
                     }
+                        ?: viewModel.onPermissionStepReturned(requiredTarget)
 
                 GrantPermissionsEffect.OpenAppNotificationSettings ->
                     settingsLauncher.openSettings(
@@ -164,7 +168,15 @@ fun GrantPermissionsScreen(
                 GrantPermissionsEffect.RequestNotificationPermission ->
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        viewModel.onPermissionStepReturned(requiredTarget)
                     }
+
+                GrantPermissionsEffect.PetOverlayStartFailed -> Toast.makeText(
+                    context,
+                    R.string.grant_permissions_pet_start_failed,
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -173,7 +185,8 @@ fun GrantPermissionsScreen(
         uiState = uiState,
         requiredTarget = requiredTarget,
         onNavigateBack = onNavigateBack,
-        onTargetClicked = viewModel::onTargetClicked
+        onTargetClicked = viewModel::onTargetClicked,
+        onPrimaryAction = { viewModel.startPermissionSequence(requiredTarget) }
     )
 
     if (showAccessibilityDisclosure) {
@@ -232,7 +245,8 @@ internal fun GrantPermissionsContent(
     uiState: GrantPermissionsUiState,
     requiredTarget: GrantPermissionsTarget = GrantPermissionsTarget.ACCESSIBILITY,
     onNavigateBack: () -> Unit,
-    onTargetClicked: (GrantPermissionsTarget) -> Unit
+    onTargetClicked: (GrantPermissionsTarget) -> Unit,
+    onPrimaryAction: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -263,14 +277,14 @@ internal fun GrantPermissionsContent(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = dimensionResource(SdpR.dimen._12sdp),
-                end = dimensionResource(SdpR.dimen._12sdp),
+                start = dimensionResource(SdpR.dimen._16sdp),
+                end = dimensionResource(SdpR.dimen._16sdp),
                 top = innerPadding.calculateTopPadding() +
                     dimensionResource(SdpR.dimen._6sdp),
                 bottom = innerPadding.calculateBottomPadding() +
                     dimensionResource(SdpR.dimen._12sdp)
             ),
-            verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
         ) {
             item {
                 SectionHeading(
@@ -282,11 +296,32 @@ internal fun GrantPermissionsContent(
                 RequiredPermissionCard(
                     requiredTarget = requiredTarget,
                     isEnabled = when (requiredTarget) {
-                        GrantPermissionsTarget.OVERLAY -> uiState.isOverlayGranted
+                        GrantPermissionsTarget.OVERLAY ->
+                            uiState.hasMandatoryPetPermissions
                         else -> uiState.isAccessibilityEnabled
                     },
-                    onClick = { onTargetClicked(requiredTarget) }
+                    onClick = onPrimaryAction
                 )
+            }
+            if (requiredTarget == GrantPermissionsTarget.OVERLAY) {
+                item {
+                    PermissionCard(
+                        iconRes = R.drawable.img_permission_overlay,
+                        titleRes = R.string.grant_permissions_overlay_title,
+                        bodyRes = R.string.grant_permissions_pet_overlay_body,
+                        checked = uiState.isOverlayGranted,
+                        onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
+                    )
+                }
+                item {
+                    PermissionCard(
+                        iconRes = R.drawable.img_permission_notification,
+                        titleRes = R.string.grant_permissions_notification_title,
+                        bodyRes = R.string.grant_permissions_notification_body,
+                        checked = uiState.isNotificationGranted,
+                        onClick = { onTargetClicked(GrantPermissionsTarget.NOTIFICATION) }
+                    )
+                }
             }
             item {
                 SectionHeading(
@@ -295,14 +330,16 @@ internal fun GrantPermissionsContent(
                     modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._5sdp))
                 )
             }
-            item {
-                PermissionCard(
-                    iconRes = R.drawable.img_permission_overlay,
-                    titleRes = R.string.grant_permissions_overlay_title,
-                    bodyRes = R.string.grant_permissions_overlay_body,
-                    checked = uiState.isOverlayGranted,
-                    onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
-                )
+            if (requiredTarget != GrantPermissionsTarget.OVERLAY) {
+                item {
+                    PermissionCard(
+                        iconRes = R.drawable.img_permission_overlay,
+                        titleRes = R.string.grant_permissions_overlay_title,
+                        bodyRes = R.string.grant_permissions_overlay_body,
+                        checked = uiState.isOverlayGranted,
+                        onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
+                    )
+                }
             }
             if (uiState.isBatteryRowVisible) {
                 item {
@@ -328,7 +365,9 @@ internal fun GrantPermissionsContent(
                     )
                 }
             }
-            if (uiState.isNotificationRowVisible) {
+            if (requiredTarget != GrantPermissionsTarget.OVERLAY &&
+                uiState.isNotificationRowVisible
+            ) {
                 item {
                     SectionHeading(
                         step = "3",
@@ -358,7 +397,7 @@ internal fun GrantPermissionsContent(
  */
 @Composable
 private fun Modifier.cardSurface(): Modifier {
-    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp))
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._16sdp))
     val shadowColor = colorResource(R.color.colors_212327).copy(alpha = 0.30f)
     return this
         .shadow(
@@ -433,7 +472,7 @@ private fun SectionHeading(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(dimensionResource(SdpR.dimen._18sdp))
+                    .size(dimensionResource(SdpR.dimen._24sdp))
                     .clip(CircleShape)
                     .background(colorResource(R.color.colors_FB3675)),
                 contentAlignment = Alignment.Center
@@ -442,15 +481,15 @@ private fun SectionHeading(
                     text = step,
                     color = colorResource(R.color.colors_FFFFFF),
                     fontWeight = FontWeight.Medium,
-                    fontSize = dimensionResource(SspR.dimen._12ssp).value.sp
+                    fontSize = dimensionResource(SspR.dimen._14ssp).value.sp
                 )
             }
-            Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
+            Spacer(Modifier.width(dimensionResource(SdpR.dimen._8sdp)))
             Text(
                 text = stringResource(titleRes),
                 color = colorResource(R.color.colors_212327),
                 fontWeight = FontWeight.Medium,
-                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
+                fontSize = dimensionResource(SspR.dimen._14ssp).value.sp
             )
         }
         subtitleRes?.let {
@@ -475,14 +514,14 @@ private fun RequiredPermissionCard(
         modifier = Modifier
             .fillMaxWidth()
             .cardSurface()
-            .padding(dimensionResource(SdpR.dimen._12sdp)),
+            .padding(dimensionResource(SdpR.dimen._16sdp)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             if (isOverlayRequired) {
                 Box(
                     modifier = Modifier
-                        .size(dimensionResource(SdpR.dimen._26sdp))
+                        .size(dimensionResource(SdpR.dimen._34sdp))
                         .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._8sdp)))
                         .background(
                             Brush.verticalGradient(
@@ -498,17 +537,17 @@ private fun RequiredPermissionCard(
                         painter = painterResource(R.drawable.ic_permission_overlay_phone),
                         contentDescription = null,
                         tint = Color.Unspecified,
-                        modifier = Modifier.size(dimensionResource(SdpR.dimen._17sdp))
+                        modifier = Modifier.size(dimensionResource(SdpR.dimen._22sdp))
                     )
                 }
             } else {
                 Image(
                     painter = painterResource(R.drawable.img_permission_accessibility),
                     contentDescription = null,
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._26sdp))
+                    modifier = Modifier.size(dimensionResource(SdpR.dimen._34sdp))
                 )
             }
-            Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
+            Spacer(Modifier.width(dimensionResource(SdpR.dimen._8sdp)))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -521,7 +560,7 @@ private fun RequiredPermissionCard(
                         ),
                         color = colorResource(R.color.colors_212327),
                         fontWeight = FontWeight.Medium,
-                        fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                        fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
                         modifier = Modifier.weight(1f)
                     )
                     StatusPill(isEnabled = isEnabled)
@@ -535,20 +574,21 @@ private fun RequiredPermissionCard(
                         }
                     ),
                     color = colorResource(R.color.colors_6F7073),
-                    fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+                    fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
                     modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._3sdp))
                 )
             }
         }
         if (isOverlayRequired) {
             Image(
-                painter = painterResource(R.drawable.img_overlay_permission_hero),
+                painter = painterResource(R.drawable.img_grant_permission_pet_on_screen),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.size(
-                    width = dimensionResource(SdpR.dimen._122sdp),
-                    height = dimensionResource(SdpR.dimen._77sdp)
+                    width = dimensionResource(SdpR.dimen._158sdp),
+                    height = dimensionResource(SdpR.dimen._100sdp)
                 )
+                    .align(Alignment.CenterHorizontally)
             )
         } else {
             Image(
@@ -565,7 +605,7 @@ private fun RequiredPermissionCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._31sdp))
+                .height(dimensionResource(SdpR.dimen._40sdp))
                 .clip(CircleShape)
                 .background(
                     Brush.horizontalGradient(
@@ -582,7 +622,7 @@ private fun RequiredPermissionCard(
                 text = stringResource(R.string.grant_permissions_go_to_settings),
                 color = colorResource(R.color.colors_FFFFFF),
                 fontWeight = FontWeight.Medium,
-                fontSize = dimensionResource(SspR.dimen._12ssp).value.sp
+                fontSize = dimensionResource(SspR.dimen._14ssp).value.sp
             )
         }
     }
@@ -637,28 +677,28 @@ private fun PermissionCard(
             .fillMaxWidth()
             .cardSurface()
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(dimensionResource(SdpR.dimen._12sdp)),
+            .padding(dimensionResource(SdpR.dimen._16sdp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
             painter = painterResource(iconRes),
             contentDescription = null,
-            modifier = Modifier.size(dimensionResource(SdpR.dimen._26sdp))
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._34sdp))
         )
-        Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._8sdp)))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = stringResource(titleRes),
                 color = colorResource(R.color.colors_212327),
                 fontWeight = FontWeight.Medium,
-                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                fontSize = dimensionResource(SspR.dimen._14ssp).value.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = stringResource(bodyRes),
                 color = colorResource(R.color.colors_6F7073),
-                fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
+                fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
                 modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._3sdp))
             )
         }
@@ -678,7 +718,7 @@ private fun PermissionCard(
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
-private fun GrantPermissionsPreview() {
+private fun GrantPermissionsAccessibilityPreview() {
     GrantPermissionsContent(
         uiState = GrantPermissionsUiState(
             isAccessibilityEnabled = true,
@@ -686,6 +726,25 @@ private fun GrantPermissionsPreview() {
         ),
         requiredTarget = GrantPermissionsTarget.ACCESSIBILITY,
         onNavigateBack = {},
-        onTargetClicked = {}
+        onTargetClicked = {},
+        onPrimaryAction = {}
+    )
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+private fun GrantPermissionsPetOnScreenPreview() {
+    GrantPermissionsContent(
+        uiState = GrantPermissionsUiState(
+            isOverlayGranted = true,
+            isNotificationGranted = true,
+            isNotificationRowVisible = true,
+            isBatteryRowVisible = true,
+            isAutoStartRowVisible = true
+        ),
+        requiredTarget = GrantPermissionsTarget.OVERLAY,
+        onNavigateBack = {},
+        onTargetClicked = {},
+        onPrimaryAction = {}
     )
 }
