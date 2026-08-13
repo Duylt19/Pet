@@ -258,15 +258,17 @@ Switch dùng chung toàn app theo Figma node `8080:7307` (bật) và `8080:7343`
   phủ gì nên đã lệch design mà không ai phát hiện. Kiểm tra bằng cách đo lề núm trong golden:
   lề trên phải bằng lề dưới, và lề trái khi tắt phải bằng lề phải khi bật.
 
-Grant Permissions contract theo Figma node `8080:9754` và biến thể Pet on Screen
-`8591:7325`:
+Grant Permissions contract theo dashboard Mine Figma node `8080:7477`, card nền tảng node
+`8080:9754` và biến thể Pet on Screen `8591:7325`:
 
-- route `grant_permissions` được giữ nhưng option mở từ Mine đang tạm ẩn. Nền **trắng phẳng** — lớp wallpaper trong design bị tắt,
+- option Grant Permissions trong Mine được bật và mở dashboard trạng thái quyền. Nền **trắng
+  phẳng** — lớp wallpaper trong design bị tắt,
   card trắng nổi lên bằng shadow chứ không bằng đổi màu nền;
 - app bar dùng `LargeTopAppBar` và `exitUntilCollapsed`: trạng thái mở có back + title lớn
   `Grant Permissions`, khi list cuộn thì title thu về toolbar một dòng giống Customize Status
   Bar/Accessibility How to use; native ad vẫn ghim đáy, ngoài list;
-- biến thể Accessibility có ba nhóm như cũ. Biến thể Pet on Screen có hai nhóm: Necessary
+- dashboard Mine có hai nhóm `Battery Emoji` và `Pet on Screen`: giữ lại các quyền áp dụng trên
+  thiết bị dù đã cấp hay chưa để user đọc và quản lý trạng thái. Biến thể Pet on Screen có hai nhóm: Necessary
   chứa Draw over other apps + Notification access; Enhanced Stability chứa Ignore Battery
   Optimization + Auto Start. Khoảng cách heading → card và card → card là 12px, giữa hai nhóm
   là 20px;
@@ -298,13 +300,15 @@ Grant Permissions contract theo Figma node `8080:9754` và biến thể Pet on S
 - ảnh minh hoạ hai bước export theo **render bounds `296×96`**, không phải layout bounds
   `296×92`: hai khung điện thoại tràn khỏi frame 4px, export theo layout bounds thì đáy bị
   cắt. Compose dựng bằng `aspectRatio(296f/96f)`;
-- màn chỉ render permission còn thiếu và thật sự tồn tại/có ý nghĩa trên thiết bị: Overlay,
-  Notification hoặc Accessibility đã cấp sẽ biến mất; Notification không tồn tại dưới API 33;
+- riêng biến thể Pet on Screen chỉ render permission còn thiếu và thật sự tồn tại/có ý nghĩa
+  trên thiết bị: Overlay hoặc Notification đã cấp sẽ biến mất; Notification không tồn tại dưới API 33;
   Battery Optimization đã exemption hoặc không có restriction signal cũng không hiện. Section
   không còn row sẽ được ẩn cùng heading;
-- Ignore Battery Optimization thử mở dialog package-scoped bằng
+- Ignore Battery Optimization chưa cấp sẽ thử mở dialog package-scoped bằng
   `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` trước; ROM không có activity tương ứng thì
   fallback sang `ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS`, cuối cùng mới tới App Details.
+  Nếu dashboard đọc được trạng thái đã cấp, chạm row mở danh sách hệ thống để user có thể quản lý
+  hoặc thu hồi thay vì gọi lại request dialog.
   Manifest vì vậy khai báo `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`. Đây là request chịu policy
   Google Play: trước release phải xác nhận Pet on Screen là core function bị ảnh hưởng và phần
   store listing/declaration mô tả đúng use case;

@@ -76,7 +76,7 @@ import com.intuit.ssp.R as SspR
 
 private val MineRoboto = RobotoFontFamily
 private val MineRobotoMedium = FontFamily(Font(R.font.roboto_medium))
-internal const val IS_MINE_GRANT_PERMISSION_VISIBLE = false
+internal const val IS_MINE_GRANT_PERMISSION_VISIBLE = true
 
 @Composable
 fun SettingsScreen(

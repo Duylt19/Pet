@@ -12,7 +12,7 @@
 | `discover` | Discover | Tab 1 của Home shell: battery toggle, Battery Troll hero và catalog preview |
 | `search` | Search | Tìm pet hoặc battery theme; pet mở Shimeji Pets, theme mở Status Bar Editor |
 | `favourite_recent` | Favourite & Recent | Favourite battery theme đã lưu; Recent giữ empty state cho tới khi có contract MRU |
-| `grant_permissions?requiredTarget={accessibility\|overlay}` | Grant Permissions | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Mặc định ưu tiên Accessibility; `overlay` là flow Pet on Screen sau shared Draw over apps disclosure, với Overlay + Notification bắt buộc và hai bước ổn định optional. Route/screen được giữ nhưng row vào từ Mine đang tạm ẩn; Back pop về đúng feature source. Khác hẳn `permission` (bước onboarding) |
+| `grant_permissions?requiredTarget={accessibility\|overlay}` | Grant Permissions | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Entry từ Mine mở dashboard trạng thái quyền (`accessibility` mặc định); `overlay` là flow Pet on Screen sau shared Draw over apps disclosure, với Overlay + Notification bắt buộc và hai bước ổn định optional. Back pop về đúng feature source. Khác hẳn `permission` (bước onboarding) |
 | `accessibility_how_to_use` | Accessibility How to use | Hướng dẫn bốn bước sau consent và trước Android Accessibility Settings; app bar `exitUntilCollapsed`, CTA cố định dưới đáy |
 | `my_pet` | My Pet Room | Scene phòng in-app + sheet ba tab; Back pop về màn trước, shortcut mở tab Shimeji Pets |
 | `pet_store` | Shimeji Pets | Tab 3 của Home shell: duyệt pet/food, Rewarded/Premium gate, download/verify chỉ để mở khóa |
@@ -56,8 +56,8 @@ Mine ──Language──> Language Settings
 Mine ──Emoji Battery toggle──> Accessibility disclosure ──How to use──> Settings
 Mine ──Apps that hide icons──> modal picker ──switch app──> persist local package exclusion
 Mine ──Setting Pets──> shared speed/size dialog ──Save──> apply cho toàn bộ pet slots
-Grant Permissions (route giữ lại, entry Mine tạm ẩn) ──Accessibility chưa cấp──> consent disclosure ──How to use──> Settings
-                                      └─ quyền đã cấp/permission khác ──> system surface tương ứng ──back──> đọc lại trạng thái
+Mine ──Grant Permissions dashboard──Accessibility chưa cấp──> consent disclosure ──How to use──> Settings
+                              └─ quyền đã cấp/permission khác ──> system surface tương ứng ──back──> đọc lại trạng thái
 Pet on Screen Grant Permissions ──Go to Settings──> Overlay ──> Notification ──> Battery Optimization? ──> Auto Start?
                                       └─ đủ Overlay + Notification ──> start pet ngay, không chờ hai bước optional
 Mine ──Rate/Share/Contact/Privacy──> action tương ứng

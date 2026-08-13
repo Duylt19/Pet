@@ -146,14 +146,21 @@ fun GrantPermissionsScreen(
                 }
 
                 GrantPermissionsEffect.OpenBatteryOptimizationSettings ->
-                    settingsLauncher.openSettings(
-                        Intent(
-                            Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                            Uri.fromParts("package", context.packageName, null)
-                        ),
-                        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
-                        appDetailsIntent(context.packageName)
-                    )
+                    if (uiState.isBatteryOptimizationIgnored) {
+                        settingsLauncher.openSettings(
+                            Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
+                            appDetailsIntent(context.packageName)
+                        )
+                    } else {
+                        settingsLauncher.openSettings(
+                            Intent(
+                                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                                Uri.fromParts("package", context.packageName, null)
+                            ),
+                            Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
+                            appDetailsIntent(context.packageName)
+                        )
+                    }
 
                 GrantPermissionsEffect.OpenVendorAutoStartSettings ->
                     // Resolved again at tap: the ROM may have updated since the screen loaded.
@@ -295,24 +302,85 @@ internal fun GrantPermissionsContent(
             ),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
         ) {
-            if (needsRequiredSection) {
+            if (requiredTarget == GrantPermissionsTarget.ACCESSIBILITY) {
                 item {
                     SectionHeading(
                         step = "1",
-                        titleRes = R.string.grant_permissions_section_necessary
+                        titleRes = R.string.grant_permissions_section_battery_emoji
                     )
                 }
-            }
-            if (needsRequiredCard) {
                 item {
                     RequiredPermissionCard(
                         requiredTarget = requiredTarget,
-                        isEnabled = false,
+                        isEnabled = uiState.isAccessibilityEnabled,
                         onClick = onPrimaryAction
                     )
                 }
-            }
-            if (requiredTarget == GrantPermissionsTarget.OVERLAY) {
+                item {
+                    SectionHeading(
+                        step = "2",
+                        titleRes = R.string.grant_permissions_section_pet_on_screen,
+                        modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._5sdp))
+                    )
+                }
+                item {
+                    PermissionCard(
+                        iconRes = R.drawable.img_permission_overlay,
+                        titleRes = R.string.grant_permissions_overlay_required_title,
+                        bodyRes = R.string.grant_permissions_overlay_required_body,
+                        checked = uiState.isOverlayGranted,
+                        onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
+                    )
+                }
+                item {
+                    PermissionCard(
+                        iconRes = R.drawable.img_permission_battery,
+                        titleRes = R.string.grant_permissions_battery_title,
+                        bodyRes = R.string.grant_permissions_battery_body,
+                        checked = uiState.isBatteryOptimizationIgnored,
+                        onClick = {
+                            onTargetClicked(GrantPermissionsTarget.BATTERY_OPTIMIZATION)
+                        }
+                    )
+                }
+                if (uiState.isNotificationRowVisible) {
+                    item {
+                        PermissionCard(
+                            iconRes = R.drawable.img_permission_notification,
+                            titleRes = R.string.grant_permissions_notification_title,
+                            bodyRes = R.string.grant_permissions_notification_body,
+                            checked = uiState.isNotificationGranted,
+                            onClick = { onTargetClicked(GrantPermissionsTarget.NOTIFICATION) }
+                        )
+                    }
+                }
+                if (uiState.isAutoStartRowVisible) {
+                    item {
+                        AutoStartPermissionCard(
+                            onClick = {
+                                onTargetClicked(GrantPermissionsTarget.VENDOR_AUTO_START)
+                            }
+                        )
+                    }
+                }
+            } else {
+                if (needsRequiredSection) {
+                    item {
+                        SectionHeading(
+                            step = "1",
+                            titleRes = R.string.grant_permissions_section_necessary
+                        )
+                    }
+                }
+                if (needsRequiredCard) {
+                    item {
+                        RequiredPermissionCard(
+                            requiredTarget = requiredTarget,
+                            isEnabled = false,
+                            onClick = onPrimaryAction
+                        )
+                    }
+                }
                 if (uiState.needsNotificationPermission) {
                     item {
                         PermissionCard(
@@ -324,80 +392,55 @@ internal fun GrantPermissionsContent(
                         )
                     }
                 }
-            }
-            if (needsStabilityPermission) {
-                item {
-                    SectionHeading(
-                        step = "2",
-                        titleRes = R.string.grant_permissions_section_stability,
-                        modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._5sdp))
-                    )
+                if (needsStabilityPermission) {
+                    item {
+                        SectionHeading(
+                            step = "2",
+                            titleRes = R.string.grant_permissions_section_stability,
+                            modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._5sdp))
+                        )
+                    }
                 }
-            }
-            if (requiredTarget != GrantPermissionsTarget.OVERLAY &&
-                uiState.needsOverlayPermission
-            ) {
-                item {
-                    PermissionCard(
-                        iconRes = R.drawable.img_permission_overlay,
-                        titleRes = R.string.grant_permissions_overlay_title,
-                        bodyRes = R.string.grant_permissions_overlay_body,
-                        checked = false,
-                        onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
-                    )
+                if (uiState.needsBatteryOptimizationExemption) {
+                    item {
+                        PermissionCard(
+                            iconRes = R.drawable.img_permission_battery,
+                            titleRes = R.string.grant_permissions_battery_title,
+                            bodyRes = R.string.grant_permissions_battery_body,
+                            checked = false,
+                            onClick = {
+                                onTargetClicked(GrantPermissionsTarget.BATTERY_OPTIMIZATION)
+                            }
+                        )
+                    }
                 }
-            }
-            if (uiState.needsBatteryOptimizationExemption) {
-                item {
-                    PermissionCard(
-                        iconRes = R.drawable.img_permission_battery,
-                        titleRes = R.string.grant_permissions_battery_title,
-                        bodyRes = R.string.grant_permissions_battery_body,
-                        checked = false,
-                        onClick = {
-                            onTargetClicked(GrantPermissionsTarget.BATTERY_OPTIMIZATION)
-                        }
-                    )
-                }
-            }
-            if (uiState.isAutoStartRowVisible) {
-                item {
-                    PermissionCard(
-                        iconRes = R.drawable.ic_permission_autostart,
-                        iconBackgroundColors = listOf(
-                            colorResource(R.color.colors_8580FD),
-                            colorResource(R.color.colors_615AD9)
-                        ),
-                        titleRes = R.string.grant_permissions_autostart_title,
-                        bodyRes = R.string.grant_permissions_autostart_body,
-                        checked = null,
-                        onClick = { onTargetClicked(GrantPermissionsTarget.VENDOR_AUTO_START) }
-                    )
-                }
-            }
-            if (requiredTarget != GrantPermissionsTarget.OVERLAY &&
-                uiState.needsNotificationPermission
-            ) {
-                item {
-                    SectionHeading(
-                        step = "3",
-                        titleRes = R.string.grant_permissions_section_recommend,
-                        subtitleRes = R.string.grant_permissions_recommend_subtitle,
-                        modifier = Modifier.padding(top = dimensionResource(SdpR.dimen._5sdp))
-                    )
-                }
-                item {
-                    PermissionCard(
-                        iconRes = R.drawable.img_permission_notification,
-                        titleRes = R.string.grant_permissions_notification_title,
-                        bodyRes = R.string.grant_permissions_notification_body,
-                        checked = false,
-                        onClick = { onTargetClicked(GrantPermissionsTarget.NOTIFICATION) }
-                    )
+                if (uiState.isAutoStartRowVisible) {
+                    item {
+                        AutoStartPermissionCard(
+                            onClick = {
+                                onTargetClicked(GrantPermissionsTarget.VENDOR_AUTO_START)
+                            }
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun AutoStartPermissionCard(onClick: () -> Unit) {
+    PermissionCard(
+        iconRes = R.drawable.ic_permission_autostart,
+        iconBackgroundColors = listOf(
+            colorResource(R.color.colors_8580FD),
+            colorResource(R.color.colors_615AD9)
+        ),
+        titleRes = R.string.grant_permissions_autostart_title,
+        bodyRes = R.string.grant_permissions_autostart_body,
+        checked = null,
+        onClick = onClick
+    )
 }
 
 /**

@@ -5,8 +5,8 @@ data class GrantPermissionsUiState(
     val isOverlayGranted: Boolean = false,
     val isBatteryOptimizationIgnored: Boolean = false,
     /**
-     * True only while device signals say an exemption is useful and it has not been granted yet.
-     * Stock Android devices normally never see this row.
+     * Whether the dedicated Pet on Screen flow should offer the optional exemption step. The Mine
+     * dashboard still shows the real [isBatteryOptimizationIgnored] state so users can manage it.
      */
     val isBatteryRowVisible: Boolean = false,
     /**
@@ -42,8 +42,8 @@ internal fun GrantPermissionsUiState.hasStabilityPermissionToRequest(
     needsBatteryOptimizationExemption || isAutoStartRowVisible
 
 /**
- * Which permission a row on the Grant Permissions screen represents. The screen only ever hands
- * the user to a system surface; nothing here is granted in-app.
+ * Which permission a row on the Grant Permissions screen represents. Special permissions hand
+ * the user to a system surface; notification is the only runtime permission requested in-app.
  */
 enum class GrantPermissionsTarget {
     ACCESSIBILITY,
@@ -58,10 +58,7 @@ sealed interface GrantPermissionsEffect {
     data object OpenAccessibilitySettings : GrantPermissionsEffect
     data object OpenOverlaySettings : GrantPermissionsEffect
 
-    /**
-     * Opens the package-scoped exemption dialog first. The screen falls back to the system list
-     * on ROMs that do not implement the direct request surface.
-     */
+    /** Opens the request dialog when missing, or the system list when already granted. */
     data object OpenBatteryOptimizationSettings : GrantPermissionsEffect
 
     /**

@@ -20,7 +20,8 @@ fun GrantPermissionsScreenshotTest() {
         ),
         requiredTarget = GrantPermissionsTarget.ACCESSIBILITY,
         onNavigateBack = {},
-        onTargetClicked = {}
+        onTargetClicked = {},
+        onPrimaryAction = {}
     )
 }
 
@@ -40,6 +41,7 @@ fun OverlayGrantPermissionsScreenshotTest() {
         ),
         requiredTarget = GrantPermissionsTarget.OVERLAY,
         onNavigateBack = {},
-        onTargetClicked = {}
+        onTargetClicked = {},
+        onPrimaryAction = {}
     )
 }
