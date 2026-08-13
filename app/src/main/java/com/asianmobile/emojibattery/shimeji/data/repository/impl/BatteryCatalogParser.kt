@@ -5,6 +5,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogDistributio
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationType
 import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_EMOTION_GROUPS
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_DISCOVER_TRENDING_EMOJI_THEME_IDS
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -55,6 +56,7 @@ data class BatteryCatalogDocument(
     val catalogVersion: String,
     val capturedAt: String,
     val distributionStatus: BatteryCatalogDistributionStatus,
+    val trendingEmojiThemeIds: List<Int>,
     val categories: List<BatteryCatalogCategory>,
     val themes: List<BatteryThemeRecord>,
     val backgrounds: List<BatteryDecorationRecord>,
@@ -82,6 +84,10 @@ class BatteryCatalogParser {
         if (catalogVersion.isBlank() || capturedAt.isBlank()) {
             throw BatteryCatalogParseException("Battery catalog version is missing")
         }
+        val trendingEmojiThemeIds = root.optionalCuratedIds(
+            key = "trendingEmojiThemeIds",
+            fallback = DEFAULT_DISCOVER_TRENDING_EMOJI_THEME_IDS
+        )
         val categories = root.getJSONArray("categories").mapObjects { item, index ->
             BatteryCatalogCategory(
                 id = item.getInt("id"),
@@ -135,6 +141,7 @@ class BatteryCatalogParser {
             catalogVersion = catalogVersion,
             capturedAt = capturedAt,
             distributionStatus = distributionStatus,
+            trendingEmojiThemeIds = trendingEmojiThemeIds,
             categories = categories.sortedWith(compareBy({ it.priority }, { it.id })),
             themes = themes.sortedBy(BatteryThemeRecord::id),
             backgrounds = backgrounds,

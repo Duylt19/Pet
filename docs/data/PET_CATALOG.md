@@ -14,6 +14,10 @@ record có stable ID, name/category/author, thumbnail, ZIP archive và optional 
 Asset record giữ path, bytes và SHA-256. Parser vẫn đọc thumbnail PNG của catalog cache cũ,
 nhưng baseline server từ `2026-08-12-webp-v1` dùng WebP lossless.
 
+Baseline debug schema v1 có optional ordered `trendingPetIds` cho section Discover. Catalog cũ
+thiếu field dùng fallback đóng gói trong app; field có mặt giữ thứ tự catalog, bỏ ID không
+dương/trùng và cho phép `[]` để ẩn section. Thêm/xóa/reorder chỉ tăng `catalogVersion`.
+
 ## Runtime
 
 - Pet Store/Search/Discover chỉ tải metadata/thumbnail; không preload ZIP.
@@ -31,6 +35,7 @@ nhưng baseline server từ `2026-08-12-webp-v1` dùng WebP lossless.
 - Không đổi extension bằng phép thay chuỗi ở client. `thumbnail.path` trong catalog là source of
   truth và có thể là `.webp` hoặc `.png` trong giai đoạn tương thích.
 - Xóa Pet phải có selection fallback; ưu tiên hidden/deprecated trong schema mới.
+- Trending chỉ thay ordered ID list; không re-index hoặc đổi nghĩa Pet ID.
 - Đổi shape record là breaking migration: ship parser mới trước rồi tăng schema.
 
 ```bash

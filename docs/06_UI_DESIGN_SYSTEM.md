@@ -83,8 +83,11 @@ Discover Home contract:
   dùng placement SDK thật `discover_inline`, không đóng gói creative quảng cáo mẫu;
 - Thứ tự nhóm đầu sau hero là `Trending Emoji Battery` → `Shimeji Pets` → inline banner;
   `Status bar themes` tiếp tục nằm ngay sau banner, đúng hierarchy node Figma `8015:1035`;
-- Battery Themes dùng favorite state thật; Trending bỏ theme default ID `1`, sau đó giữ thứ
-  tự catalog cho tới khi server có ranking riêng.
+- Trending Emoji Battery và Shimeji Pets lấy ranking lần lượt từ
+  `BatteryCatalogSnapshot.trendingEmojiThemeIds` và `OwnerPetCatalogSnapshot.trendingPetIds`;
+  catalog cũ dùng fallback product đi kèm app. UI giữ đúng thứ tự, lấy toàn bộ item tìm thấy và
+  bỏ qua ID chưa tồn tại/asset chưa sẵn sàng thay vì tự chèn item khác. Battery Themes vẫn dùng
+  favorite state thật.
 - Search field theo Figma `8287:6560`: khi query khác rỗng hiện clear icon 16px ở trailing;
   clear chỉ xoá query và giữ focus, còn tap ngắn ngoài toàn bộ field mới clear focus + ẩn IME.
   Gesture cuộn không được xem là outside tap.
@@ -106,9 +109,10 @@ Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
   `#FFEA89` 50% và crown artwork theo tỉ lệ `18/24`, không dựng badge riêng theo từng feature.
   Search hiện crown khi theme có entitlement Premium, user chưa Premium và ID chưa được mở bằng
   reward; entitlement được đọc lại khi Search resume;
-- mỗi nhóm catalog trên Discover lấy tối đa 16 preview. Shimeji Pets dùng một hàng ngang;
-  Battery, Status Bar, Emoji và Battery component dùng các cột hai item trong `LazyRow`, vì vậy
-  danh sách luôn có thể kéo ngang mà không dựng hoặc tải trước toàn bộ catalog;
+- hai nhóm Trending trên Discover render toàn bộ ranking curated; các nhóm Status Bar, Emoji và
+  Battery component còn lại lấy tối đa 16 preview. Shimeji Pets dùng một hàng ngang; Battery,
+  Status Bar, Emoji và Battery component dùng các cột hai item trong `LazyRow`, vì vậy danh sách
+  luôn có thể kéo ngang mà không dựng hoặc tải trước toàn bộ catalog;
 - category header dùng trực tiếp emoji ở đầu `category.name`; không ghép thêm drawable/icon riêng
   để tránh hiển thị trùng khi catalog cập nhật tên category;
 - More mở child route có header Back/title/PRO, inline banner SDK thật và grid ba cột. Card detail giữ

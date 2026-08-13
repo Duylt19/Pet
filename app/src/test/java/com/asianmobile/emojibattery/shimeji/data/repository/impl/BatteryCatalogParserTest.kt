@@ -2,6 +2,7 @@ package com.asianmobile.emojibattery.shimeji.data.repository.impl
 
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogDistributionStatus
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_DISCOVER_TRENDING_EMOJI_THEME_IDS
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -16,6 +17,10 @@ class BatteryCatalogParserTest {
         val document = parser.parse(validCatalog())
 
         assertEquals("snapshot-1", document.catalogVersion)
+        assertEquals(
+            DEFAULT_DISCOVER_TRENDING_EMOJI_THEME_IDS,
+            document.trendingEmojiThemeIds
+        )
         assertEquals(BatteryCatalogDistributionStatus.REVIEW_REQUIRED, document.distributionStatus)
         assertEquals(1, document.categories.size)
         assertEquals(7, document.themes.single().id)
@@ -31,6 +36,17 @@ class BatteryCatalogParserTest {
         assertEquals("emotion/emotion_01.png", document.emotions.single().preview?.path ?: document.emotions.single().asset.path)
         assertEquals("classic", document.emotionGroups.single().key)
         assertEquals("animation/cute_1.json", document.animations.single().asset.path)
+    }
+
+    @Test
+    fun parse_reads_optional_trending_order_and_preserves_explicit_empty_list() {
+        val curated = JSONObject(validCatalog())
+            .put("trendingEmojiThemeIds", JSONArray().put(919).put(-1).put(919).put(7))
+        val hidden = JSONObject(validCatalog())
+            .put("trendingEmojiThemeIds", JSONArray())
+
+        assertEquals(listOf(919, 7), parser.parse(curated.toString()).trendingEmojiThemeIds)
+        assertEquals(emptyList<Int>(), parser.parse(hidden.toString()).trendingEmojiThemeIds)
     }
 
     @Test

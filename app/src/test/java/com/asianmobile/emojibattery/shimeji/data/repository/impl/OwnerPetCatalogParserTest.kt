@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.data.repository.impl
 
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_DISCOVER_TRENDING_PET_IDS
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -75,6 +76,7 @@ class OwnerPetCatalogParserTest {
         )
 
         assertEquals("2026-07-22", document.catalogVersion)
+        assertEquals(DEFAULT_DISCOVER_TRENDING_PET_IDS, document.trendingPetIds)
         assertEquals(1, document.records.size)
         assertEquals("Creator", document.records.single().author)
         assertEquals("data/42.zip", document.records.single().archive?.path)
@@ -84,6 +86,43 @@ class OwnerPetCatalogParserTest {
             OwnerPetCatalogSpeechAnchorRecord(0.421875f, 0.671875f),
             document.records.single().speechAnchor
         )
+    }
+
+    @Test
+    fun `parseDocument reads optional trending order and normalizes invalid ids`() {
+        val document = parser.parseDocument(
+            """
+            {
+              "schemaVersion": 1,
+              "catalogVersion": "v2",
+              "trendingPetIds": [42, -1, 42, 8, "invalid"],
+              "petCount": 2,
+              "pets": [
+                {"id":8,"name":"Cat","category":"Animals"},
+                {"id":42,"name":"Pikachu","category":"Pokemon"}
+              ]
+            }
+            """.trimIndent()
+        )
+
+        assertEquals(listOf(42, 8), document.trendingPetIds)
+    }
+
+    @Test
+    fun `parseDocument preserves an explicitly empty trending list`() {
+        val document = parser.parseDocument(
+            """
+            {
+              "schemaVersion": 1,
+              "catalogVersion": "v2",
+              "trendingPetIds": [],
+              "petCount": 1,
+              "pets": [{"id":42,"name":"Pikachu","category":"Pokemon"}]
+            }
+            """.trimIndent()
+        )
+
+        assertEquals(emptyList<Int>(), document.trendingPetIds)
     }
 
     @Test

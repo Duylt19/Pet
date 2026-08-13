@@ -12,7 +12,7 @@ Server-Emoji-Battery-Shimeji-Pet-AM/
 └── thumb/<petId>.webp
 ```
 
-`json/pets.json` schema v1 chứa `catalogVersion`, source provenance, 269 category và 1.062
+`json/pets.json` schema v1 hiện tại chứa `catalogVersion`, source provenance, 269 category và 1.062
 record. Trong đó có 1.026 pack hoạt ảnh nền và supplement 36 pack Shimeji `WC 2026` lấy
 đúng từ category API Pet ID 286. Source ID `1035..1071` được map sang server ID
 `2000..2036`; source ID đã xóa `1063` để trống server ID `2028`. Mỗi record giữ
@@ -20,6 +20,10 @@ identity/name/category/author cùng relative path, byte size và SHA-256 của t
 Optional `speechAnchor` giữ tọa độ góc khuyết chuẩn hóa cho 631 pet được detector xác nhận;
 431 pet còn lại không có field này. `speech-anchors.json` lưu thêm pixel nguồn/kích thước
 để audit, còn app chỉ đọc field gọn trong `pets.json`.
+
+Baseline debug schema v1 hỗ trợ optional ordered `trendingPetIds` dành riêng cho Discover.
+Catalog/cache cũ thiếu field tiếp tục dùng fallback hiện tại; `[]` là chủ đích ẩn section và các
+lần chỉnh ranking sau đó chỉ cần đổi `catalogVersion`.
 
 App dùng raw base URL:
 

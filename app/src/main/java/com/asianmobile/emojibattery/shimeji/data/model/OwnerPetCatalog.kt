@@ -39,6 +39,7 @@ const val OWNER_PET_PACK_VERSION = 7
 
 data class OwnerPetCatalogSnapshot(
     val entries: List<OwnerPetCatalogEntry> = emptyList(),
+    val trendingPetIds: List<Int> = DEFAULT_DISCOVER_TRENDING_PET_IDS,
     val localRootPath: String = "",
     val catalogVersion: String? = null,
     val isLoading: Boolean = true,

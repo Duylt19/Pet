@@ -66,6 +66,7 @@ enum class BatteryAnimationType {
 data class BatteryCatalogSnapshot(
     val categories: List<BatteryCatalogCategory> = listOf(BUILT_IN_BATTERY_CATEGORY),
     val themes: List<BatteryThemeEntry> = listOf(BUILT_IN_BATTERY_THEME),
+    val trendingEmojiThemeIds: List<Int> = DEFAULT_DISCOVER_TRENDING_EMOJI_THEME_IDS,
     val backgrounds: List<BatteryDecorationEntry> = emptyList(),
     val emotions: List<BatteryDecorationEntry> = emptyList(),
     val emotionGroups: List<BatteryEmotionGroup> = BATTERY_EMOTION_GROUPS,

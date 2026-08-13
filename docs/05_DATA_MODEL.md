@@ -127,7 +127,11 @@ nên trạng thái running không được restore sau process death/reboot.
 
 - `OwnerPetCatalogEntry`: owner ID, name, category, author, thumbnail source, archive URL,
   byte size, SHA-256 và optional `speechAnchor` chuẩn hóa.
-- `OwnerPetCatalogSnapshot`: immutable loading/content/error state cùng server catalog version.
+- `OwnerPetCatalogSnapshot`: immutable loading/content/error state cùng server catalog version và
+  ranking `trendingPetIds` của Discover. Trong baseline debug schema v1, field optional bị thiếu
+  dùng ranking fallback của app để cache/catalog cũ tiếp tục hoạt động; field có mặt, kể cả mảng
+  rỗng, là source of truth. Parser giữ thứ tự, bỏ ID không dương và ID trùng; UI bỏ qua ID không
+  tồn tại trong catalog.
 - `OwnerPetCatalogRepository`: boundary dùng chung cho UI; production implementation dùng
   private GitHub raw + app-private catalog cache + on-demand verified archive cache.
 - Catalog cache gồm `pets.json` cuối hợp lệ và `metadata.json` chứa ETag, thời điểm validation
@@ -150,10 +154,16 @@ nên trạng thái running không được restore sau process death/reboot.
 
 ## Battery catalog và config
 
-- `BatteryCatalogSnapshot` gồm category/theme, 38 background, 20 emotion server trong
+- `BatteryCatalogSnapshot` gồm category/theme, ranking `trendingEmojiThemeIds` của Discover,
+  38 background, 20 emotion server trong
   nhóm Classic + 80 emotion server thuộc tám pack mới, 26 animation,
   entitlement, remote/cache/local asset path, distribution status và typed error;
   built-in theme ID `0` luôn có như fallback runtime nhưng không xuất hiện trong picker.
+- `batteries.json` có thể thêm `trendingEmojiThemeIds` optional theo cùng migration contract với
+  owner catalog: field thiếu dùng fallback hiện tại, còn `[]` chủ đích ẩn section. UI giữ order
+  catalog và bỏ qua theme không tồn tại, built-in hoặc chưa materialize đủ asset. Đây là thay đổi
+  content trong baseline debug schema v1, không phải DataStore/DB migration; các lần đổi ranking
+  chỉ tăng `catalogVersion`.
 - Normalized schema v1 chỉ giữ relative path, byte size, SHA-256 và dimension. Ảnh tĩnh
   Battery chấp nhận pixel-exact lossless WebP hoặc PNG; GIF/Lottie giữ nguyên.
   `HybridBatteryCatalogRepository` đọc cache trước, revalidate private GitHub catalog

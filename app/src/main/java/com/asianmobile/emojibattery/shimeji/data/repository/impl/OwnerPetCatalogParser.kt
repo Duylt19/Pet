@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.data.repository.impl
 
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_DISCOVER_TRENDING_PET_IDS
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -28,6 +29,7 @@ data class OwnerPetCatalogSpeechAnchorRecord(
 
 data class OwnerPetCatalogDocument(
     val catalogVersion: String?,
+    val trendingPetIds: List<Int>,
     val records: List<OwnerPetCatalogRecord>
 )
 
@@ -37,10 +39,12 @@ class OwnerPetCatalogParser {
     fun parseDocument(json: String): OwnerPetCatalogDocument = try {
         val rootValue = JSONTokener(json).nextValue()
         val catalogVersion: String?
+        val trendingPetIds: List<Int>
         val root: JSONArray
         when (rootValue) {
             is JSONArray -> {
                 catalogVersion = null
+                trendingPetIds = DEFAULT_DISCOVER_TRENDING_PET_IDS
                 root = rootValue
             }
             is JSONObject -> {
@@ -50,6 +54,10 @@ class OwnerPetCatalogParser {
                 catalogVersion = rootValue.getString("catalogVersion").trim()
                     .takeIf(String::isNotEmpty)
                     ?: throw OwnerPetCatalogParseException("Catalog version is missing")
+                trendingPetIds = rootValue.optionalCuratedIds(
+                    key = "trendingPetIds",
+                    fallback = DEFAULT_DISCOVER_TRENDING_PET_IDS
+                )
                 root = rootValue.getJSONArray("pets")
                 if (rootValue.getInt("petCount") != root.length()) {
                     throw OwnerPetCatalogParseException("Catalog pet count does not match")
@@ -80,7 +88,11 @@ class OwnerPetCatalogParser {
             )
         }
         validate(records)
-        OwnerPetCatalogDocument(catalogVersion = catalogVersion, records = records)
+        OwnerPetCatalogDocument(
+            catalogVersion = catalogVersion,
+            trendingPetIds = trendingPetIds,
+            records = records
+        )
     } catch (error: OwnerPetCatalogParseException) {
         throw error
     } catch (error: JSONException) {

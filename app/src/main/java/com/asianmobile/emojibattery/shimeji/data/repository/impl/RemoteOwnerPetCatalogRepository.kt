@@ -153,6 +153,7 @@ class RemoteOwnerPetCatalogRepository @Inject constructor(
                     }
                 )
             },
+            trendingPetIds = trendingPetIds,
             catalogVersion = catalogVersion,
             isLoading = false
         )

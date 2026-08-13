@@ -286,6 +286,7 @@ class HybridBatteryCatalogRepository @Inject constructor(
         _snapshot.value = BatteryCatalogSnapshot(
             categories = listOf(BUILT_IN_BATTERY_CATEGORY) + document.categories,
             themes = listOf(BUILT_IN_BATTERY_THEME) + themes,
+            trendingEmojiThemeIds = document.trendingEmojiThemeIds,
             backgrounds = backgrounds,
             emotions = emotions,
             emotionGroups = emotionGroups.ifEmpty { BATTERY_EMOTION_GROUPS },

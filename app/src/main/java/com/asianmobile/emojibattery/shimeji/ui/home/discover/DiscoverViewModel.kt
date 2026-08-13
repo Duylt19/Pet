@@ -7,6 +7,7 @@ import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibilityRecovery
 import com.asianmobile.emojibattery.shimeji.battery.overlay.batteryAccessibilityRecovery
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
+import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
@@ -24,12 +25,32 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-internal fun discoverPreviewBatteryThemes(
+internal fun discoverTrendingPets(
+    pets: List<OwnerPetCatalogEntry>,
+    trendingIds: List<Int>
+): List<OwnerPetCatalogEntry> = selectTrendingItems(
+    items = pets,
+    ids = trendingIds,
+    idOf = OwnerPetCatalogEntry::id
+)
+
+internal fun discoverTrendingBatteryThemes(
     themes: List<BatteryThemeEntry>,
-    limit: Int
-): List<BatteryThemeEntry> = themes
-    .filter { theme -> theme.assetsReady && !theme.isBuiltIn }
-    .take(limit)
+    trendingIds: List<Int>
+): List<BatteryThemeEntry> = selectTrendingItems(
+    items = themes.filter { theme -> theme.assetsReady && !theme.isBuiltIn },
+    ids = trendingIds,
+    idOf = BatteryThemeEntry::id
+)
+
+private fun <T> selectTrendingItems(
+    items: List<T>,
+    ids: List<Int>,
+    idOf: (T) -> Int
+): List<T> {
+    val itemsById = items.associateBy(idOf)
+    return ids.mapNotNull(itemsById::get)
+}
 
 @HiltViewModel
 class DiscoverViewModel @Inject constructor(
@@ -80,7 +101,10 @@ class DiscoverViewModel @Inject constructor(
                         batteryConfig.enabled,
                         accessibilityEnabled
                     ),
-                    trendingPets = pets.entries.take(MAX_DISCOVER_PREVIEW_ITEMS).map { pet ->
+                    trendingPets = discoverTrendingPets(
+                        pets = pets.entries,
+                        trendingIds = pets.trendingPetIds
+                    ).map { pet ->
                         DiscoverPetUiState(
                             packKey = pet.installedPackKey,
                             name = pet.name,
@@ -88,9 +112,9 @@ class DiscoverViewModel @Inject constructor(
                             thumbnailPath = pet.thumbnailPath
                         )
                     },
-                    batteryThemes = discoverPreviewBatteryThemes(
+                    batteryThemes = discoverTrendingBatteryThemes(
                         themes = batteryCatalog.themes,
-                        limit = MAX_DISCOVER_PREVIEW_ITEMS
+                        trendingIds = batteryCatalog.trendingEmojiThemeIds
                     )
                         .map { theme ->
                             DiscoverThemeUiState(

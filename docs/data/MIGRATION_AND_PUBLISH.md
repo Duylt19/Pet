@@ -10,6 +10,11 @@
 
 `schemaVersion` mô tả shape/semantics parser. `catalogVersion` là revision nội dung/cache.
 
+Trong giai đoạn debug trước khi schema v1 được chốt/`APPROVED`, optional Discover curation
+(`trendingPetIds`, `trendingEmojiThemeIds`) được coi là một phần của baseline v1. Reader phải có
+fallback cho JSON/cache v1 cũ; sau khi baseline được chốt, mọi thay đổi shape mới quay lại policy
+tăng schema ở bảng trên. Việc đổi giá trị/thứ tự của hai list đã có chỉ tăng `catalogVersion`.
+
 ## Stable ID từ baseline v1
 
 Lần WebP này được coi là tạo baseline mới, không migrate dữ liệu debug cũ. Từ baseline:

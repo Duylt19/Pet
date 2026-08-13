@@ -55,8 +55,8 @@ class LocalOwnerPetCatalogRepository @Inject constructor(
             return@withContext
         }
         try {
-            val records = parser.parse(catalogFile.readText(Charsets.UTF_8))
-            val entries = records.map { record ->
+            val document = parser.parseDocument(catalogFile.readText(Charsets.UTF_8))
+            val entries = document.records.map { record ->
                 val thumbnail = record.thumbnail?.path
                     ?.let { File(root, it) }
                     ?: listOf("webp", "png")
@@ -79,7 +79,9 @@ class LocalOwnerPetCatalogRepository @Inject constructor(
             }
             _snapshot.value = OwnerPetCatalogSnapshot(
                 entries = entries,
+                trendingPetIds = document.trendingPetIds,
                 localRootPath = root.absolutePath,
+                catalogVersion = document.catalogVersion,
                 isLoading = false
             )
         } catch (error: OwnerPetCatalogParseException) {
