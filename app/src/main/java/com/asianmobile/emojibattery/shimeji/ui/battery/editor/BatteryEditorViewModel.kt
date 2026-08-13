@@ -516,11 +516,16 @@ class BatteryEditorViewModel @Inject constructor(
             if (previewActive) stopPreviewImmediately()
             return
         }
+        // The preview has to show what this screen edits. A troll owns the emoji and battery
+        // slots for as long as it is selected, so previewing with it still on makes every pick
+        // in here land on a bar that cannot change — the same override Apply releases, released
+        // for the duration of the preview instead.
+        val previewConfig = BatteryTrollPolicy.releaseOverride(config)
         if (!previewActive) {
             previewActive = true
-            previewSession.start(previewOwnerId, config)
+            previewSession.start(previewOwnerId, previewConfig)
         }
-        previewSession.update(previewOwnerId, config, focusedComponent)
+        previewSession.update(previewOwnerId, previewConfig, focusedComponent)
     }
 
     private fun emit(effect: BatteryEditorEffect) {

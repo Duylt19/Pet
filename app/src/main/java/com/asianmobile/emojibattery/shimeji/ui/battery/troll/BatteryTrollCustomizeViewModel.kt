@@ -174,7 +174,10 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
     fun refreshAccessibility() {
         val accessibilityEnabled = BatteryAccessibility.isEnabled(context)
         _uiState.update {
-            it.copy(isBatteryEnabled = configuredBatteryEnabled && accessibilityEnabled)
+            it.copy(
+                isBatteryEnabled = configuredBatteryEnabled && accessibilityEnabled,
+                isAccessibilityEnabled = accessibilityEnabled
+            )
         }
         if (accessibilityEnabled && enableBatteryAfterAccessibility) {
             setPendingBatteryEnable(false)

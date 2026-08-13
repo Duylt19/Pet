@@ -38,6 +38,9 @@ data class BatteryTrollCustomizeUiState(
     val emotionPath: String? = null,
     val animation: BatteryAnimationEntry? = null,
     val isBatteryEnabled: Boolean = false,
+    /** Kept apart from [isBatteryEnabled] so the embedded preview can follow the same rule the
+     *  status-bar editor uses: it only steps aside once a real bar is actually on screen. */
+    val isAccessibilityEnabled: Boolean = false,
     val isEditingFakePercent: Boolean = false,
     val isDiscardVisible: Boolean = false,
     val isLoading: Boolean = true,

@@ -44,6 +44,7 @@ import com.asianmobile.emojibattery.shimeji.battery.troll.batteryTrollEmojiSizeD
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollMode
 import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollServerConfig
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryDiscardChangesSheet
+import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorPreviewVisibilityPolicy
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.StatusBarEditorWallpaper
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.BatteryStatusPreviewCard
@@ -189,6 +190,12 @@ internal fun BatteryTrollCustomizeContent(
             // the switch above it: one renderer means a troll can never be previewed by rules the
             // real bar does not follow. `HomeEnableCard` already contributes the 9sdp above it,
             // which is the gap `StatusBarOverview` leaves over its own preview.
+            if (
+                BatteryEditorPreviewVisibilityPolicy.shouldShow(
+                    accessibilityEnabled = uiState.isAccessibilityEnabled,
+                    statusBarEnabled = uiState.storedConfig.enabled
+                )
+            ) {
             BatteryStatusPreviewCard(
                 config = uiState.previewConfig,
                 deviceState = uiState.systemState.deviceState,
@@ -230,6 +237,7 @@ internal fun BatteryTrollCustomizeContent(
                 )
             )
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+            }
             Column(
                 modifier = Modifier
                     .weight(1f)
