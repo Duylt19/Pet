@@ -157,7 +157,9 @@ class GrantPermissionsViewModel @Inject constructor(
     }
 
     private fun startPetWhenMandatoryPermissionsAreReady() {
-        if (!_uiState.value.hasMandatoryPetPermissions || PetOverlayRuntime.isRunning.value) return
+        if (!_uiState.value.hasMandatoryPetPermissions ||
+            PetOverlayRuntime.state.value.isEnabled
+        ) return
         if (PetOverlay.start(context) == PetOverlayStartResult.FAILED) {
             viewModelScope.launch { _effects.send(GrantPermissionsEffect.PetOverlayStartFailed) }
         }

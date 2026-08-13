@@ -155,7 +155,8 @@ fun HomeEnableCard(
     checked: Boolean,
     onCheckedChange: () -> Unit,
     onClick: (() -> Unit)? = null,
-    bottomPadding: Dp? = null
+    bottomPadding: Dp? = null,
+    switchInteractive: Boolean = true
 ) {
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
     val pink = colorResource(R.color.colors_FB3675)
@@ -198,7 +199,11 @@ fun HomeEnableCard(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
-        AppSwitch(checked = checked, onCheckedChange = onCheckedChange)
+        AppSwitch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            interactive = switchInteractive
+        )
     }
 }
 

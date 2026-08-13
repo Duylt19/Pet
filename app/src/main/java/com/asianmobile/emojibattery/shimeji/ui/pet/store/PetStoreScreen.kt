@@ -371,9 +371,10 @@ internal fun PetStoreContent(
         HomeHeader(onSearch = onSearch, onPremium = onPremium)
         HomeEnableCard(
             text = stringResource(R.string.pet_store_enable_pet),
-            checked = state.isPetRunning,
+            checked = state.isPetOnScreenEnabled,
             onCheckedChange = onToggle,
-            bottomPadding = dimensionResource(SdpR.dimen._10sdp)
+            bottomPadding = dimensionResource(SdpR.dimen._10sdp),
+            switchInteractive = !state.isPetOnScreenStarting
         )
         PetStoreMyPetBanner(onClick = onOpenMyPet)
         Spacer(Modifier.height(dimensionResource(SdpR.dimen._13sdp)))

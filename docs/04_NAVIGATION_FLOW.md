@@ -92,8 +92,9 @@ trống đầu tiên với trạng thái `Active`; flow không đổi cấu hìn
 thay pet khác nếu toàn bộ roster Mixed đã đầy. Sau khi lưu tên, nếu chưa có quyền Overlay thì
 app hiện shared disclosure và dẫn tới Pet Grant Permissions. Từ chối quyền không rollback pack,
 tên hoặc slot; mỗi pet mới tiếp theo sẽ hỏi lại khi Overlay vẫn thiếu. Khi Overlay và Notification
-(trên API có runtime permission) đều sẵn sàng, service tự start và switch `Pet on Screen` phản ánh
-trạng thái ON từ `PetOverlayRuntime`.
+(trên API có runtime permission) đều sẵn sàng, service tự start. Switch `Pet on Screen` chuyển ON
+ngay ở `PetOverlayRuntime.STARTING`, bỏ qua tap lặp trong lúc khởi động và được service xác nhận
+`RUNNING` sau khi controller sẵn sàng; lỗi/timeout rollback về OFF.
 
 ## Back stack
 

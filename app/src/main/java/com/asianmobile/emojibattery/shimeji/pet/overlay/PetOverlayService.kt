@@ -39,6 +39,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 @AndroidEntryPoint
@@ -74,12 +75,26 @@ class PetOverlayService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
+            PetOverlayRuntime.updateStopRequested()
             stopSelf()
             return START_NOT_STICKY
         }
 
-        promoteToForeground()
+        if (!PetOverlayRuntime.state.value.shouldStartService()) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        try {
+            promoteToForeground()
+        } catch (error: RuntimeException) {
+            Log.e(TAG, "Unable to promote pet overlay service", error)
+            PetOverlayRuntime.updateRunning(false)
+            stopSelf()
+            return START_NOT_STICKY
+        }
         if (!PetOverlay.canDraw(this)) {
+            PetOverlayRuntime.updateRunning(false)
             stopSelf()
             return START_NOT_STICKY
         }
@@ -96,6 +111,7 @@ class PetOverlayService : Service() {
         try {
             val preferences = petSettingsRepository.preferences.value
             if (preferences.runtimePetCount == 0) {
+                PetOverlayRuntime.updateRunning(false)
                 stopSelf()
                 return
             }
@@ -109,11 +125,24 @@ class PetOverlayService : Service() {
                     } ?: ownerPetCatalogRepository.snapshot.value
                 }
             }
-            overlayController = createOverlayController(preferences, catalog).also { controller ->
+            val assets = withContext(Dispatchers.Default) {
+                createOverlayAssets(preferences, catalog)
+            }
+            if (!PetOverlayRuntime.state.value.shouldStartService()) {
+                stopSelf()
+                return
+            }
+            overlayController = createOverlayController(preferences, assets).also { controller ->
                 controller.start()
                 if (!getSystemService(PowerManager::class.java).isInteractive) {
                     controller.pauseRendering()
                 }
+            }
+            if (!PetOverlayRuntime.state.value.shouldStartService()) {
+                overlayController?.stop()
+                overlayController = null
+                stopSelf()
+                return
             }
             activeSessionSignature = preferences.overlaySessionSignature()
             activeSessionMode = preferences.displayMode
@@ -125,6 +154,7 @@ class PetOverlayService : Service() {
             Log.e(TAG, "Unable to start pet overlay", error)
             overlayController?.stop()
             overlayController = null
+            PetOverlayRuntime.updateRunning(false)
             stopSelf()
         }
     }
@@ -148,14 +178,19 @@ class PetOverlayService : Service() {
                         PetOverlaySessionUpdate.MIXED_ROSTER -> {
                             val controller = overlayController ?: return@collect
                             try {
-                                controller.updateMixedRoster(
-                                    updatedPreferences = preferences,
-                                    requestedAssets = createOverlayAssets(
+                                val requestedAssets = withContext(Dispatchers.Default) {
+                                    createOverlayAssets(
                                         preferences = preferences,
                                         catalog = ownerPetCatalogRepository.snapshot.value
                                     )
+                                }
+                                controller.updateMixedRoster(
+                                    updatedPreferences = preferences,
+                                    requestedAssets = requestedAssets
                                 )
                                 activeSessionSignature = preferences.overlaySessionSignature()
+                            } catch (error: CancellationException) {
+                                throw error
                             } catch (error: RuntimeException) {
                                 Log.e(TAG, "Unable to reconcile running mixed pets", error)
                                 restartOverlay(preferences)
@@ -206,7 +241,7 @@ class PetOverlayService : Service() {
         }
     }
 
-    private fun restartOverlay(preferences: PetPreferences) {
+    private suspend fun restartOverlay(preferences: PetPreferences) {
         if (preferences.runtimePetCount == 0) {
             stopSelf()
             return
@@ -224,10 +259,14 @@ class PetOverlayService : Service() {
             } else {
                 preferences
             }
-            val replacement = createOverlayController(
-                preferences = replacementPreferences,
-                catalog = ownerPetCatalogRepository.snapshot.value
-            )
+            val replacementAssets = withContext(Dispatchers.Default) {
+                createOverlayAssets(
+                    preferences = replacementPreferences,
+                    catalog = ownerPetCatalogRepository.snapshot.value
+                )
+            }
+            if (!PetOverlayRuntime.state.value.shouldStartService()) return
+            val replacement = createOverlayController(replacementPreferences, replacementAssets)
             overlayController?.stop()
             overlayController = replacement.also { controller ->
                 controller.start()
@@ -239,6 +278,8 @@ class PetOverlayService : Service() {
             activeSessionSignature = preferences.overlaySessionSignature()
             activeSessionMode = preferences.displayMode
             PetOverlayRuntime.updateRunning(true, preferences.runtimePetCount)
+        } catch (error: CancellationException) {
+            throw error
         } catch (error: RuntimeException) {
             Log.e(TAG, "Unable to update running pet session", error)
             overlayController?.stop()
@@ -249,10 +290,10 @@ class PetOverlayService : Service() {
 
     private fun createOverlayController(
         preferences: PetPreferences,
-        catalog: OwnerPetCatalogSnapshot
+        assets: List<PetOverlayAsset>
     ): PetOverlayController = PetOverlayController(
         context = this,
-        assets = createOverlayAssets(preferences, catalog),
+        assets = assets,
         preferences = preferences,
         performanceBudget = petSettingsRepository.performanceBudget
     )

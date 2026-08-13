@@ -215,7 +215,7 @@ class PetRoomViewModel @Inject constructor(
         startEnergyRefresh()
         soundPlayer.prepare()
         if (_uiState.value.isMusicOn) musicPlayer.play()
-        if (PetOverlayRuntime.isRunning.value) {
+        if (PetOverlayRuntime.state.value.isEnabled) {
             restoreOverlayOnExit = true
             PetOverlay.stop(context)
         }

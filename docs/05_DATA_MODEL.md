@@ -99,10 +99,11 @@ Các model nằm trong `pet/engine`, là Kotlin thuần và không chứa bitmap
 
 ## Overlay runtime state
 
-`PetOverlayRuntime.isRunning` và `activePetCount` là process-local `StateFlow`, không phải
-persisted preference. `activePetCount` là số slot Mixed visible hoặc swarm count theo mode
-hiện hành. Service dùng `START_NOT_STICKY` và không có boot receiver nên trạng thái running
-không được restore sau process death/reboot.
+`PetOverlayRuntime.state`, `isRunning` và `activePetCount` là process-local `StateFlow`, không phải
+persisted preference. `state` phân biệt yêu cầu UI `STARTING` với controller thật sự `RUNNING`;
+`isRunning` chỉ true sau khi overlay window đã tạo xong. `activePetCount` là số slot Mixed visible
+hoặc swarm count theo mode hiện hành. Service dùng `START_NOT_STICKY` và không có boot receiver
+nên trạng thái running không được restore sau process death/reboot.
 
 ## Pet pack model
 

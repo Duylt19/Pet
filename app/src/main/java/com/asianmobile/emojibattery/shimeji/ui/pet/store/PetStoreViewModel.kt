@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.SystemClock
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import com.asianmobile.emojibattery.shimeji.data.repository.PetStoreRepository
 import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
+import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntimeState
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayStartResult
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackInstallResult
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
@@ -43,6 +45,7 @@ class PetStoreViewModel @Inject constructor(
     val uiState: StateFlow<PetStoreUiState> = _uiState.asStateFlow()
     private val _effects = Channel<PetStoreEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
+    private var lastPetOverlayToggleAtMillis: Long? = null
 
     init {
         viewModelScope.launch {
@@ -50,14 +53,14 @@ class PetStoreViewModel @Inject constructor(
                 ownerCatalogRepository.snapshot,
                 petPackRepository.packs,
                 petStoreRepository.customNames,
-                PetOverlayRuntime.isRunning
-            ) { catalog, packs, names, isRunning ->
+                PetOverlayRuntime.state
+            ) { catalog, packs, names, runtimeState ->
                 CatalogState(
                     pets = catalog.entries,
                     installedKeys = packs.mapTo(mutableSetOf()) { it.key },
                     names = names,
                     isLoading = catalog.isLoading,
-                    isRunning = isRunning
+                    runtimeState = runtimeState
                 )
             }.collect { source ->
                 _uiState.update {
@@ -70,7 +73,9 @@ class PetStoreViewModel @Inject constructor(
                             requestedCategory = it.selectedCategory
                         ),
                         isLoading = source.isLoading,
-                        isPetRunning = source.isRunning
+                        isPetOnScreenEnabled = source.runtimeState.isEnabled,
+                        isPetOnScreenStarting = source.runtimeState ==
+                            PetOverlayRuntimeState.STARTING
                     )
                 }
             }
@@ -228,7 +233,7 @@ class PetStoreViewModel @Inject constructor(
                 notificationGranted = isNotificationGranted()
             )
         }
-        if (!overlayGranted && PetOverlayRuntime.isRunning.value) PetOverlay.stop(context)
+        if (!overlayGranted && PetOverlayRuntime.state.value.isEnabled) PetOverlay.stop(context)
         val selected = _uiState.value.selectedPet
         if (selected != null && _uiState.value.downloadingPetId == null &&
             SharedPreferencesUtils.getIsPremium(context)
@@ -238,11 +243,21 @@ class PetStoreViewModel @Inject constructor(
     }
 
     fun togglePetOverlay() {
-        if (PetOverlayRuntime.isRunning.value) {
+        val nowMillis = SystemClock.elapsedRealtime()
+        val runtimeState = PetOverlayRuntime.state.value
+        if (!PetOverlayTogglePolicy.canHandle(
+                runtimeState = runtimeState,
+                nowMillis = nowMillis,
+                lastHandledAtMillis = lastPetOverlayToggleAtMillis
+            )
+        ) return
+        if (runtimeState == PetOverlayRuntimeState.RUNNING) {
+            lastPetOverlayToggleAtMillis = nowMillis
             PetOverlay.stop(context)
             return
         }
         if (_uiState.value.isLoading) return
+        lastPetOverlayToggleAtMillis = nowMillis
         val blocker = PetStorePolicy.startBlocker(
             ownedPetCount = PetStorePolicy.ownedPetCount(
                 pets = _uiState.value.pets,
@@ -300,6 +315,20 @@ class PetStoreViewModel @Inject constructor(
         val installedKeys: Set<String>,
         val names: Map<Int, String>,
         val isLoading: Boolean,
-        val isRunning: Boolean
+        val runtimeState: PetOverlayRuntimeState
     )
+}
+
+internal object PetOverlayTogglePolicy {
+    fun canHandle(
+        runtimeState: PetOverlayRuntimeState,
+        nowMillis: Long,
+        lastHandledAtMillis: Long?
+    ): Boolean {
+        if (runtimeState == PetOverlayRuntimeState.STARTING) return false
+        return lastHandledAtMillis == null ||
+            nowMillis - lastHandledAtMillis >= MIN_TOGGLE_INTERVAL_MILLIS
+    }
+
+    private const val MIN_TOGGLE_INTERVAL_MILLIS = 800L
 }

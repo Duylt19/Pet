@@ -9,7 +9,7 @@ Platform và product vertical slice đã hoàn tất. `PetOverlay.start(context)
 | Thành phần | Trách nhiệm |
 |---|---|
 | `PetOverlay` | Check special access, tạo settings intent, start/stop service |
-| `PetOverlayRuntime` | Process-local running/active-count flows |
+| `PetOverlayRuntime` | Process-local `STOPPED/STARTING/RUNNING`, running và active-count flows. Switch phản hồi ở `STARTING`, khóa tap lặp và debounce cạnh chuyển trạng thái; controller decode sprite ngoài main thread rồi mới xác nhận `RUNNING` |
 | `PetOverlayService` | Promote foreground, notification/channel, lifecycle cleanup |
 | `PetOverlayController` | Danh sách bounded window/state machine và một shared frame clock |
 | `PetOverlayView` | Code-native demo cat, tap/drag/fling input, không giữ business state |
