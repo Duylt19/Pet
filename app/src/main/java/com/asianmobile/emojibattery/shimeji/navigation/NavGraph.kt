@@ -61,7 +61,7 @@ object Routes {
     const val INTRO = "intro"
     const val PERMISSION = "permission"
     const val HOME_GRAPH = "home_graph"
-    const val DISCOVER = "home"
+    const val DISCOVER = "discover"
     const val SEARCH = "search"
     const val FAVOURITE_RECENT = "favourite_recent"
     const val GRANT_PERMISSIONS = "grant_permissions"

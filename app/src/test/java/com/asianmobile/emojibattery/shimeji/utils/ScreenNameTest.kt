@@ -29,7 +29,7 @@ class ScreenNameTest {
             "permission",
             "grant_permissions",
             "accessibility_how_to_use",
-            "home",
+            "discover",
             "search",
             "favourite_recent",
             "my_pet",

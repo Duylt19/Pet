@@ -801,8 +801,7 @@
     <string name="battery_troll_custom">Custom</string>
     <string name="battery_troll_custom_hint">Use only one funny message.</string>
     <string name="battery_troll_random">Random</string>
-    <string name="battery_troll_edit_title">Fake battery level</string>
-    <string name="battery_troll_edit_message">Pick the percentage other people will see.</string>
+    <string name="battery_troll_edit_title">Edit Battery</string>
     <string name="battery_troll_edit_confirm">Save</string>
     <string name="battery_troll_theme_locked">Premium theme</string>
     <string name="battery_preview_time" translatable="false">09:41</string>

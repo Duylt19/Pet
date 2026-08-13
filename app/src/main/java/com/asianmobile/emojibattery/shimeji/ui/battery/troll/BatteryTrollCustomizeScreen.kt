@@ -41,9 +41,11 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollMode
+import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollServerConfig
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryDiscardChangesSheet
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.StatusBarEditorWallpaper
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.BatteryStatusPreviewCard
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeEnableCard
 import com.intuit.sdp.R as SdpR
@@ -173,15 +175,6 @@ internal fun BatteryTrollCustomizeContent(
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.statusBars)
         ) {
-            TrollStatusBarPreview(
-                troll = uiState.troll,
-                percent = uiState.previewPercent,
-                showPercentage = uiState.draft.showPercentage,
-                percentSizeDp = uiState.draft.percentSizeDp,
-                showEmoji = uiState.draft.showEmoji,
-                emojiLevelIndex = previewEmojiIndex,
-                batteryLevelIndex = previewBatteryIndex
-            )
             TrollCustomizeTopBar(
                 title = stringResource(R.string.battery_troll_customize_title),
                 onBack = onBack
@@ -191,6 +184,41 @@ internal fun BatteryTrollCustomizeContent(
                 checked = uiState.isBatteryEnabled,
                 onCheckedChange = onBatteryToggle
             )
+            // The same card the status-bar editor previews with, in the same place relative to
+            // the switch above it: one renderer means a troll can never be previewed by rules the
+            // real bar does not follow. `HomeEnableCard` already contributes the 9sdp above it,
+            // which is the gap `StatusBarOverview` leaves over its own preview.
+            BatteryStatusPreviewCard(
+                config = uiState.previewConfig,
+                deviceState = uiState.systemState.deviceState,
+                powerState = uiState.systemState.powerState,
+                // Off means "draw no character": the card has no fallback, which is exactly what
+                // `trollShowEmoji` promises on the real bar.
+                emojiPath = if (uiState.draft.showEmoji) {
+                    uiState.troll?.emojiPaths
+                        ?.getOrNull(previewEmojiIndex)
+                        ?.let(BatteryTrollServerConfig::resolve)
+                } else {
+                    null
+                },
+                batteryPath = uiState.troll?.batteryPaths
+                    ?.getOrNull(previewBatteryIndex)
+                    ?.let(BatteryTrollServerConfig::resolve),
+                backgroundPath = uiState.backgroundPath,
+                emotionPath = uiState.emotionPath,
+                animation = uiState.animation,
+                // Nothing on this screen edits a single status-bar component, so no component is
+                // forced on for the sake of showing it off.
+                focusedComponent = null,
+                mobileDataLabel = uiState.systemState.deviceState.mobileDataBadge?.label,
+                // The prank's number, not the device's — the true level still reaches the card
+                // through `powerState` and keeps the layout honest.
+                displayPercent = uiState.previewPercent,
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(SdpR.dimen._12sdp)
+                )
+            )
+            Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
             Column(
                 modifier = Modifier
                     .weight(1f)

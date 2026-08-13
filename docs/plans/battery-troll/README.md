@@ -1,16 +1,16 @@
 # Battery Troll — Kế hoạch triển khai
 
-Trạng thái: **ĐÃ TRIỂN KHAI.** Server commit `6b44e78` (branch `agent/battery-troll`, chưa
-push). App: 550 unit test xanh, compile + screenshot-test compile pass.
+Trạng thái: **ĐÃ TRIỂN KHAI VÀ ĐÃ PHÁT HÀNH DATA.** Server `origin/master` = `3406d2c`,
+catalog + 110 asset đã live. App: 573 unit test xanh.
 
 Sau vòng review đối kháng và đợt fix, trạng thái:
 
 | # | Việc | Trạng thái |
 |---|---|---|
 | 1 | Screenshot golden | **Đã sinh và đã so với Figma.** `validateDebugScreenshotTest` 77/77 pass. |
-| 2 | Dialog nhập phần trăm | Vẫn là thiết kế tự dựng vì Figma không có frame. Giới hạn 0–999, chỉ nhận chữ số. Cần owner duyệt hoặc cấp Figma. |
+| 2 | Dialog nhập phần trăm | **Đã dựng lại theo Figma `8615:6284`**: card 320/360, tiêu đề `Edit Battery` Roboto 500 20/28, ô nhập 288×60 viền `#C8C8C9`, số Roboto 600 28/36, hai nút pill dùng lại `RewardOutlineButton`/`RewardGradientButton`. |
 | 3 | Switch nhóm `Emoji` | **Đã giải quyết**: điều khiển `trollShowEmoji`, tắt thì nhân vật biến mất khỏi cả preview lẫn status bar. |
-| 4 | Server chưa push | Vẫn `REVIEW_REQUIRED`. Push + merge `master` là hành động phát hành. |
+| 4 | Server | **Đã push + merge `master`** (`3406d2c`). Vẫn `REVIEW_REQUIRED` nên chỉ debug dùng được; đổi sang `APPROVED` bằng cách chạy lại pipeline với `--distribution-status APPROVED`, không sửa tay JSON. |
 | 5 | Bản quyền | Chưa đổi. 6/10 theme là IP, 4 trong số đó nằm sau paywall. |
 
 ### Ghi chú vận hành: screenshot test flaky
@@ -26,6 +26,13 @@ frame Figma) xuống `800` — đúng khung nhìn thật của điện thoại, 
 1000 và 1148 đều làm tỉ lệ fail tăng rõ rệt.
 
 Nếu gặp lại, chạy lại lệnh trước khi đi tìm lỗi UI.
+
+### Golden không còn hỏng theo lịch
+
+`BatteryStatusPreviewCard` từng format `Date()` thật, nên 7 golden của battery editor hết hạn
+lúc nửa đêm và `validateDebugScreenshotTest` đỏ mỗi ngày mà không ai nhận ra. Trong
+`LocalInspectionMode` ngày giờ bị ghim về **Thu, 15/01/2026 UTC** — ghim cả timezone, vì chỉ
+ghim mốc thời gian thì máy ở múi giờ âm vẫn lùi mất một ngày.
 
 Nguồn: Figma `hjefC57z0ysLDHdP60VqMK`
 — UI section `8102:2545` (cụm frame ở `y=1998`), data section `8465:6119`.
@@ -186,6 +193,8 @@ grid 3 cột tile 101.33×101.33 r=12, banner đáy.
 
 **Màn B — `BatteryTrollCustomizeScreen`** (Figma `8315:8232` / `8359:6992` / `8359:7165`)
 Preview status bar → enable card → nhóm Mode / Percentage / Emoji → Apply panel dính đáy.
+> Owner đã đổi thứ tự sau khi ship: enable card đứng trước, preview nằm **dưới** nó và dùng chung
+> `BatteryStatusPreviewCard` với màn Customize Status Bar. Xem `docs/screens/README.md`.
 State delta đã xác định: `Real Battery` ⇒ disable `Edit`; `Random` ⇒ mờ 30% cả hai picker.
 
 **Tái sử dụng (yêu cầu của owner) — đã đối chiếu tồn tại:**

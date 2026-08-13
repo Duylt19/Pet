@@ -6,12 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryEditorSystemStateMonitor
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPreviewSystemState
 import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_TROLL_LEVEL_COUNT
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollMode
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_TROLL_FAKE_PERCENT
 import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_TROLL_FAKE_PERCENT
 import com.asianmobile.emojibattery.shimeji.data.model.NO_BATTERY_TROLL_THEME_ID
+import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryTrollCatalogRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,6 +42,9 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val savedStateHandle: SavedStateHandle,
     private val catalogRepository: BatteryTrollCatalogRepository,
+    // The status bar draws whatever background decoration the stored config selected, so the
+    // preview has to read the same Battery catalog or it would show a bar the user does not have.
+    private val batteryCatalogRepository: BatteryCatalogRepository,
     private val settingsRepository: BatterySettingsRepository,
     private val systemStateMonitor: BatteryEditorSystemStateMonitor
 ) : ViewModel() {
@@ -72,11 +79,12 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 catalogRepository.snapshot,
+                batteryCatalogRepository.snapshot,
                 settingsRepository.config,
                 systemStateMonitor.state
-            ) { catalog, config, systemState ->
-                Triple(catalog, config, systemState)
-            }.collect { (catalog, config, systemState) ->
+            ) { catalog, batteryCatalog, config, systemState ->
+                Inputs(catalog, batteryCatalog, config, systemState)
+            }.collect { (catalog, batteryCatalog, config, systemState) ->
                 latestConfig = config
                 configuredBatteryEnabled = config.enabled
                 val applied = draftOf(config)
@@ -86,7 +94,21 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
                         troll = troll,
                         draft = if (hasLocalEdits) current.draft else applied,
                         applied = applied,
-                        realBatteryLevel = systemState.powerState.level,
+                        storedConfig = config,
+                        systemState = systemState,
+                        // Same resolution the status-bar editor's preview does. An entry the
+                        // catalog has not produced yet stays null and the card falls back to
+                        // `backgroundColorArgb`; nothing here waits for a download.
+                        backgroundPath = batteryCatalog.backgrounds
+                            .firstOrNull { it.id == config.backgroundDecorationId }
+                            ?.assetPath
+                            ?.takeIf(String::isNotBlank),
+                        emotionPath = batteryCatalog.emotions
+                            .firstOrNull { it.id == config.emotionDecorationId }
+                            ?.assetPath
+                            ?.takeIf(String::isNotBlank),
+                        animation = batteryCatalog.animations
+                            .firstOrNull { it.name == config.animationAssetName },
                         isBatteryEnabled = config.enabled &&
                             BatteryAccessibility.isEnabled(context),
                         isLoading = troll == null && catalog.isLoading,
@@ -273,6 +295,14 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
     private fun emit(effect: BatteryTrollCustomizeEffect) {
         viewModelScope.launch { _effects.send(effect) }
     }
+
+    /** Four sources feed one state, which is one too many for `Triple`. */
+    private data class Inputs(
+        val trollCatalog: BatteryTrollCatalogSnapshot,
+        val batteryCatalog: BatteryCatalogSnapshot,
+        val config: BatteryStatusConfig,
+        val systemState: BatteryPreviewSystemState
+    )
 
     private companion object {
         const val ARG_TROLL_ID = "trollId"

@@ -11,7 +11,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -84,7 +83,6 @@ import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
@@ -110,6 +108,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_STYLE_INDEX
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.BATTERY_PREVIEW_DEFAULT_PERCENT
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.BatteryStatusPreviewCard
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CutePetTopBar
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockSheet
@@ -117,9 +117,6 @@ import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import kotlinx.coroutines.delay
 
 private const val ITEM_LOADING_INDICATOR_DELAY_MS = 180L
@@ -1786,6 +1783,11 @@ private fun ApplyFooter(
     }
 }
 
+/**
+ * The editor's binding of the shared status-bar card: it resolves the selected theme, decoration
+ * and animation out of [BatteryEditorUiState] and hands the result to
+ * [BatteryStatusPreviewCard], which owns the drawing for every screen that previews the bar.
+ */
 @Composable
 internal fun BatteryPreview(
     state: BatteryEditorUiState,
@@ -1793,250 +1795,36 @@ internal fun BatteryPreview(
     modifier: Modifier = Modifier
 ) {
     val config = state.config
-    val previewDescription = stringResource(R.string.battery_overlay_description, 82)
     val focusedComponent = page.previewComponent()
-    val previewMobileDataLabel = state.mobileDataBadge?.label
-        ?: "5G".takeIf { page == BatteryEditorPage.DATA }
-    val backgroundPath = state.backgrounds
-        .firstOrNull { it.id == config.backgroundDecorationId }
-        ?.assetPath
-        ?.takeIf(String::isNotBlank)
-    val emotionPath = state.emotions
-        .firstOrNull { it.id == config.emotionDecorationId }
-        ?.assetPath
-    val animation = state.animations
-        .firstOrNull { it.name == config.animationAssetName }
     val emojiTheme = state.themes.firstOrNull {
         it.id == config.selectedEmojiThemeId
     } ?: state.theme
     val batteryTheme = state.themes.firstOrNull {
         it.id == config.selectedBatteryThemeId
     } ?: state.theme
-    val previewDeviceState = BatteryPreviewSystemStatePolicy.deviceState(
-        state.systemState.deviceState,
-        focusedComponent
-    )
-    val previewPowerState = BatteryPreviewSystemStatePolicy.powerState(
-        state.systemState.powerState,
-        focusedComponent
-    )
-    val previewDate = remember(config.dateFormat) {
-        SimpleDateFormat(config.dateFormat.pattern, Locale.getDefault()).format(Date())
-    }
-    val previewDateFont = previewDateFontFamily(config.dateTimeFont)
-    BoxWithConstraints(
+    BatteryStatusPreviewCard(
+        config = config,
+        deviceState = state.systemState.deviceState,
+        powerState = state.systemState.powerState,
+        emojiPath = emojiTheme.emojiPath,
+        batteryPath = batteryTheme.batteryPath,
+        backgroundPath = state.backgrounds
+            .firstOrNull { it.id == config.backgroundDecorationId }
+            ?.assetPath
+            ?.takeIf(String::isNotBlank),
+        emotionPath = state.emotions
+            .firstOrNull { it.id == config.emotionDecorationId }
+            ?.assetPath,
+        animation = state.animations
+            .firstOrNull { it.name == config.animationAssetName },
+        focusedComponent = focusedComponent,
+        mobileDataLabel = state.mobileDataBadge?.label
+            ?: "5G".takeIf { page == BatteryEditorPage.DATA },
+        // The editor previews a design, not the device: the number stays the sample percentage
+        // the card defaults to, so a theme looks the same whatever the phone is doing.
+        displayPercent = BATTERY_PREVIEW_DEFAULT_PERCENT,
         modifier = modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._38sdp))
-            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._11sdp)))
-            .background(
-                if (backgroundPath == null) {
-                    Color(config.backgroundColorArgb)
-                } else {
-                    Color.Transparent
-                }
-            )
-            .semantics { contentDescription = previewDescription }
-    ) {
-        val layout = remember(
-            config,
-            emojiTheme.emojiPath,
-            batteryTheme.batteryPath,
-            emotionPath,
-            animation?.assetPath,
-            previewMobileDataLabel,
-            maxWidth,
-            focusedComponent,
-            previewDeviceState,
-            previewPowerState
-        ) {
-            batteryPreviewLayout(
-                config = config,
-                availableWidthDp = maxWidth.value -
-                    config.leftPaddingDp -
-                    config.rightPaddingDp,
-                hasEmoji = emojiTheme.emojiPath != null,
-                hasEmotion = emotionPath != null,
-                hasAnimation = animation != null,
-                mobileDataLabel = previewMobileDataLabel,
-                focusedComponent = focusedComponent,
-                deviceState = previewDeviceState,
-                powerState = previewPowerState
-            )
-        }
-        backgroundPath?.let { path ->
-            AsyncImage(
-                model = path,
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    start = config.leftPaddingDp.dp,
-                    end = config.rightPaddingDp.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(BATTERY_STATUS_COMPONENT_GAP_DP.dp)
-        ) {
-            if (layout.shows(BatteryStatusComponent.TIME)) {
-                Text(
-                    text = stringResource(R.string.battery_preview_time),
-                    color = Color(config.clockColorArgb),
-                    fontFamily = RobotoFontFamily,
-                    fontSize = config.clockSizeDp.sp,
-                    maxLines = 1
-                )
-            }
-            if (layout.shows(BatteryStatusComponent.DATE)) {
-                Text(
-                    text = previewDate,
-                    color = Color(config.dateTimeColorArgb),
-                    fontFamily = previewDateFont,
-                    fontSize = config.dateTimeSizeDp.sp,
-                    maxLines = 1
-                )
-            }
-            if (layout.shows(BatteryStatusComponent.AIRPLANE)) {
-                PreviewStatusIcon(
-                    iconName = BatterySystemStatusPolicy.airplaneIcon(
-                        config.airplaneIconStyleIndex
-                    ),
-                    sizeDp = config.airplaneSizeDp,
-                    colorArgb = config.airplaneColorArgb
-                )
-            }
-            if (layout.shows(BatteryStatusComponent.RINGER)) {
-                PreviewStatusIcon(
-                    iconName = requireNotNull(
-                        BatterySystemStatusPolicy.ringerIcon(
-                            previewDeviceState.ringer,
-                            config.ringerIconStyleIndex
-                        )
-                    ),
-                    sizeDp = config.ringerSizeDp,
-                    colorArgb = config.ringerColorArgb
-                )
-            }
-            if (layout.shows(BatteryStatusComponent.ANIMATION)) {
-                animation?.let { entry ->
-                    BatteryAnimationAsset(
-                        animation = entry,
-                        modifier = Modifier.size(config.animationSizeDp.dp)
-                    )
-                }
-            }
-            if (layout.shows(BatteryStatusComponent.EMOTION)) {
-                emotionPath?.let { path ->
-                    AsyncImage(
-                        model = path,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.size(config.emojiSizeDp.dp)
-                    )
-                }
-            }
-            Spacer(Modifier.weight(1f))
-            batteryPreviewTrailingOrder(layout).forEach { component ->
-                when (component) {
-                    BatteryStatusComponent.HOTSPOT -> PreviewStatusIcon(
-                        iconName = requireNotNull(
-                            BatterySystemStatusPolicy.hotspotIcon(
-                                previewDeviceState.hotspot,
-                                config.hotspotIconStyleIndex
-                            )
-                        ),
-                        sizeDp = config.hotspotSizeDp,
-                        colorArgb = config.hotspotColorArgb
-                    )
-                    BatteryStatusComponent.CELLULAR -> {
-                        if (config.showSignal) {
-                            PreviewStatusIcon(
-                                iconName = BatterySystemStatusPolicy.cellularIcon(
-                                    BatteryConnectivityState.CONNECTED,
-                                    config.signalIconStyleIndex
-                                ),
-                                sizeDp = config.signalSizeDp,
-                                colorArgb = config.signalColorArgb
-                            )
-                        }
-                        if (config.showData) {
-                            previewMobileDataLabel?.let { label ->
-                                Text(
-                                    text = label,
-                                    color = Color(config.dataColorArgb),
-                                    fontSize = config.dataSizeDp.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-                    }
-                    BatteryStatusComponent.WIFI -> PreviewStatusIcon(
-                        iconName = BatterySystemStatusPolicy.wifiIcon(
-                            BatteryConnectivityState.CONNECTED,
-                            config.wifiIconStyleIndex
-                        ),
-                        sizeDp = config.wifiSizeDp,
-                        colorArgb = config.wifiColorArgb
-                    )
-                    BatteryStatusComponent.PERCENTAGE -> Text(
-                        text = stringResource(R.string.battery_preview_percentage),
-                        color = Color(config.percentColorArgb),
-                        fontFamily = FontFamily(Font(R.font.roboto_medium)),
-                        fontSize = config.percentSizeDp.sp
-                    )
-                    BatteryStatusComponent.BATTERY -> {
-                        val pairSize = maxOf(
-                            config.batterySizeDp,
-                            if (emojiTheme.emojiPath != null) config.emojiSizeDp else 0f
-                        )
-                        Box(
-                            modifier = Modifier.size(pairSize.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            batteryTheme.batteryPath?.let { path ->
-                                AsyncImage(
-                                    model = path,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.size(config.batterySizeDp.dp)
-                                )
-                            } ?: Box(
-                                modifier = Modifier
-                                    .size(
-                                        width = config.batterySizeDp.dp,
-                                        height = (config.batterySizeDp * 0.48f).dp
-                                    )
-                                    .clip(
-                                        RoundedCornerShape(
-                                            dimensionResource(SdpR.dimen._3sdp)
-                                        )
-                                    )
-                                    .background(Color(config.foregroundColorArgb))
-                            )
-                            emojiTheme.emojiPath?.let { path ->
-                                AsyncImage(
-                                    model = path,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.size(config.emojiSizeDp.dp)
-                                )
-                            }
-                        }
-                    }
-                    BatteryStatusComponent.CHARGE -> PreviewStatusIcon(
-                        iconName = "charge_%02d".format(config.chargeIconIndex),
-                        sizeDp = config.chargeSizeDp,
-                        colorArgb = config.chargeColorArgb
-                    )
-                    else -> Unit
-                }
-            }
-        }
-    }
+    )
 }
 
 internal fun batteryPreviewTrailingOrder(
@@ -2266,48 +2054,6 @@ internal fun BatteryEditorPage.analyticsScreen(): ScreenName = when (this) {
     BatteryEditorPage.CHARGE -> ScreenName.BATTERY_CHARGE_EDITOR
     BatteryEditorPage.DATE_TIME -> ScreenName.BATTERY_DATE_TIME_EDITOR
     BatteryEditorPage.CLOCK -> ScreenName.BATTERY_CLOCK_EDITOR
-}
-
-@Composable
-@SuppressLint("DiscouragedApi")
-private fun PreviewStatusIcon(
-    iconName: String,
-    sizeDp: Float,
-    colorArgb: Int
-) {
-    val context = LocalContext.current
-    val resources = LocalResources.current
-    val iconResource = remember(iconName, resources) {
-        resources.getIdentifier(iconName, "drawable", context.packageName)
-    }
-    if (iconResource != 0) {
-        Icon(
-            painter = painterResource(iconResource),
-            contentDescription = null,
-            tint = Color(colorArgb),
-            modifier = Modifier.size(sizeDp.dp)
-        )
-    } else {
-        Box(
-            modifier = Modifier
-                .size(sizeDp.dp)
-                .clip(CircleShape)
-                .background(Color(colorArgb))
-        )
-    }
-}
-
-@Composable
-@SuppressLint("DiscouragedApi")
-private fun previewDateFontFamily(font: BatteryDateFont): FontFamily {
-    val context = LocalContext.current
-    val resources = LocalResources.current
-    val fontResource = remember(font, resources) {
-        resources.getIdentifier(font.resourceName, "font", context.packageName)
-    }
-    return remember(fontResource) {
-        if (fontResource == 0) RobotoFontFamily else FontFamily(Font(fontResource))
-    }
 }
 
 @Composable

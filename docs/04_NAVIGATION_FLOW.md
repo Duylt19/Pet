@@ -9,7 +9,7 @@
 | `language_settings` | Language settings | Mở từ Settings |
 | `intro` | Intro pager | First-run |
 | `permission` | Permission | Route/class được giữ nhưng tạm không nằm trong onboarding; request overlay/notification, có Continue/Skip |
-| `home` | Discover | Tab 1 của Home shell: battery toggle, Battery Troll hero và catalog preview |
+| `discover` | Discover | Tab 1 của Home shell: battery toggle, Battery Troll hero và catalog preview |
 | `search` | Search | Tìm pet hoặc battery theme; pet mở Shimeji Pets, theme mở Status Bar Editor |
 | `favourite_recent` | Favourite & Recent | Favourite battery theme đã lưu; Recent giữ empty state cho tới khi có contract MRU |
 | `grant_permissions?requiredTarget={accessibility\|overlay}` | Grant Permissions | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Mặc định ưu tiên Accessibility; `overlay` là entry sau shared Draw over apps disclosure. Route/screen được giữ nhưng row vào từ Mine đang tạm ẩn; Back pop về đúng feature source. Khác hẳn `permission` (bước onboarding) |
@@ -81,7 +81,7 @@ thay pet khác nếu toàn bộ roster Mixed đã đầy.
 - Splash, Language và Intro được remove khỏi stack sau khi hoàn tất bước tương ứng. Permission
   vẫn có destination đầy đủ nhưng tạm không được đưa vào first-run stack.
 - Sau onboarding, app đi vào nested route `home_graph`; đây là graph nội bộ, không phải một
-  screen analytics. Start destination của graph là Discover với route string ổn định `home`.
+  screen analytics. Start destination của graph là Discover với route `discover`.
   Battery Styles, Pet Store và Settings là ba top-level destination còn lại của cùng Home graph.
   Mỗi lần đổi tab dùng `saveState/restoreState` và `launchSingleTop`,
   vì vậy ViewModel, scroll và navigation state của tab được giữ lại. System Back tại bất kỳ

@@ -1,6 +1,9 @@
 package com.asianmobile.emojibattery.shimeji.ui.battery.troll
 
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPowerState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPreviewSystemState
 import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_TROLL_LEVEL_COUNT
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollBatteryOrientation
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntitlement
@@ -61,6 +64,60 @@ class BatteryTrollCustomizeStateTest {
         assertTrue(base.isEmojiPickerEnabled)
         assertFalse(base.copy(draft = base.draft.copy(showEmoji = false)).isEmojiPickerEnabled)
         assertFalse(base.copy(draft = base.draft.copy(randomArtwork = true)).isEmojiPickerEnabled)
+    }
+
+    @Test
+    fun preview_config_lays_the_draft_over_the_stored_bar() {
+        val stored = BatteryStatusConfig(
+            backgroundColorArgb = 0x11223344,
+            percentSizeDp = 10f,
+            showPercentage = true,
+            trollThemeId = 99,
+            trollShowEmoji = true
+        )
+        val state = BatteryTrollCustomizeUiState(
+            troll = troll,
+            storedConfig = stored,
+            draft = BatteryTrollDraft(
+                trollId = troll.id,
+                mode = BatteryTrollMode.FAKE,
+                fakePercent = 999,
+                showPercentage = false,
+                percentSizeDp = 28f,
+                randomArtwork = true,
+                showEmoji = false,
+                emojiLevelIndex = 2,
+                batteryLevelIndex = 3
+            )
+        )
+
+        val preview = state.previewConfig
+        // Everything this screen does not edit survives untouched…
+        assertEquals(stored.backgroundColorArgb, preview.backgroundColorArgb)
+        // …and everything it does edit comes from the draft, not from the stored bar.
+        assertFalse(preview.showPercentage)
+        assertEquals(28f, preview.percentSizeDp, 0f)
+        assertEquals(troll.id, preview.trollThemeId)
+        assertEquals(999, preview.trollFakePercent)
+        assertEquals(2, preview.trollEmojiLevelIndex)
+        assertEquals(3, preview.trollBatteryLevelIndex)
+        assertTrue(preview.trollRandomArtwork)
+        assertFalse(preview.trollShowEmoji)
+    }
+
+    @Test
+    fun the_written_number_lies_while_the_device_level_stays_real() {
+        val state = BatteryTrollCustomizeUiState(
+            troll = troll,
+            systemState = BatteryPreviewSystemState(powerState = BatteryPowerState(level = 12)),
+            draft = BatteryTrollDraft(trollId = troll.id, fakePercent = 999)
+        )
+
+        assertEquals(999, state.copy(draft = state.draft.copy(mode = BatteryTrollMode.FAKE))
+            .previewPercent)
+        assertEquals(12, state.copy(draft = state.draft.copy(mode = BatteryTrollMode.REAL))
+            .previewPercent)
+        assertEquals(12, state.realBatteryLevel)
     }
 
     @Test

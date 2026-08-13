@@ -44,7 +44,7 @@ feature phải di chuyển test cùng lúc.
 | App entry | n/a | `ui/app` |
 | Home graph | `home_graph` (internal, không phải screen) | `navigation/HomeNavGraph` + `ui/home/shell` |
 | Onboarding | `splash`, `language`, `intro`, `permission` | `ui/onboarding/*` |
-| Discover tab | `home` | `ui/home/discover` |
+| Discover tab | `discover` | `ui/home/discover` |
 | Battery tab/detail | `battery_catalog`, `battery_category/{id}` | `ui/battery/catalog` |
 | Battery collection | `favourite_recent` | `ui/battery/favoriterecent` |
 | Status bar editor | `battery_editor/*` | `ui/battery/editor` |

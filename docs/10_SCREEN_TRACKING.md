@@ -13,7 +13,7 @@
 | Permission | `permission` |
 | Grant Permissions | `grant_permissions` |
 | Accessibility How to use | `accessibility_how_to_use` |
-| Discover Home | `home` |
+| Discover | `discover` |
 | Search | `search` |
 | Favourite & Recent | `favourite_recent` |
 | My Pet | `my_pet` |
@@ -64,7 +64,7 @@
 - Intro dùng `PagerState.settledPage`; swipe chưa hoàn tất không được tính là screen view.
 - Battery Editor map từng `BatteryEditorPage` sang một `ScreenName` riêng. Picker, option editor,
   emotion detail và Clock không được tái sử dụng event của màn khác.
-- `ScreenTrackingCoverageTest` đối chiếu mọi `*Screen()` được gọi trực tiếp trong `NavGraph` với
-  source owner có `TrackScreenView`; route mới thiếu tracker sẽ làm unit test fail.
+- `ScreenTrackingCoverageTest` đối chiếu mọi `*Screen()` được gọi trực tiếp trong `NavGraph` và
+  `HomeNavGraph` với source owner có `TrackScreenView`; route mới thiếu tracker sẽ làm unit test fail.
 - Dialog/bottom sheet tạm thời không phát `screen_view` vì destination phía sau vẫn là màn visible.
   Nếu cần đo funnel của dialog, dùng action event riêng thay vì giả thành screen event.

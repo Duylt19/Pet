@@ -10,11 +10,10 @@ class ScreenTrackingCoverageTest {
     @Test
     fun `every navigation screen owns a screen view tracker`() {
         val sourceRoot = sourceRoot()
-        val navGraph = sourceRoot
-            .resolve("com/asianmobile/emojibattery/shimeji/navigation/NavGraph.kt")
-            .readText()
-        val destinationScreens = SCREEN_CALL_PATTERN.findAll(navGraph)
-            .map { it.groupValues[1] }
+        val destinationScreens = NAV_GRAPH_FILES.asSequence()
+            .map { relativePath -> sourceRoot.resolve(relativePath).readText() }
+            .flatMap { source -> SCREEN_CALL_PATTERN.findAll(source) }
+            .map { match -> match.groupValues[1] }
             .toSet()
 
         assertTrue("No destination screens found in NavGraph", destinationScreens.isNotEmpty())
@@ -45,6 +44,10 @@ class ScreenTrackingCoverageTest {
             ?: error("Cannot find app source root from ${File(".").absolutePath}")
 
     private companion object {
+        val NAV_GRAPH_FILES = listOf(
+            "com/asianmobile/emojibattery/shimeji/navigation/NavGraph.kt",
+            "com/asianmobile/emojibattery/shimeji/navigation/HomeNavGraph.kt"
+        )
         val SCREEN_CALL_PATTERN = Regex("""\b([A-Z][A-Za-z0-9]*Screen)\(""")
     }
 }

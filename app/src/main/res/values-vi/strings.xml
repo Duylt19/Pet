@@ -754,8 +754,7 @@
     <string name="battery_troll_custom">Tự chọn</string>
     <string name="battery_troll_custom_hint">Chỉ dùng một biểu cảm duy nhất.</string>
     <string name="battery_troll_random">Ngẫu nhiên</string>
-    <string name="battery_troll_edit_title">Mức pin giả</string>
-    <string name="battery_troll_edit_message">Chọn phần trăm mà người khác sẽ nhìn thấy.</string>
+    <string name="battery_troll_edit_title">Sửa mức pin</string>
     <string name="battery_troll_edit_confirm">Lưu</string>
     <string name="battery_troll_theme_locked">Giao diện trả phí</string>
     <string name="battery_troll_empty">Hiện chưa có giao diện troll nào.</string>

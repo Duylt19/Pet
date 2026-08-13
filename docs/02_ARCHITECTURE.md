@@ -159,7 +159,7 @@ ui/<domain>/<feature>/
 
 - `AppNavGraph` sở hữu NavController và wiring toàn app; `HomeNavGraph` khai báo nested graph
   `home_graph` với bốn destination top-level. `home_graph` không phải screen và không track
-  analytics; destination Discover giữ route string ổn định `home`.
+  analytics; destination Discover dùng route `discover` đúng với tên feature.
 - Bốn top-level route `home`, `battery_catalog`, `pet_store`, `settings` nằm trong một
   Home graph/shell dùng chung. `ui/home/shell` sở hữu bottom navigation và banner; feature
   screen chỉ sở hữu content để đổi tab không dispose/reload quảng cáo.

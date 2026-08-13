@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -66,6 +65,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
@@ -79,6 +79,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_TROLL_FAKE_PE
 import com.asianmobile.emojibattery.shimeji.data.model.MIN_BATTERY_TROLL_FAKE_PERCENT
 import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollServerConfig
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.DismissibleDialogBackdrop
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOutlineButton
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardGradientButton
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import com.intuit.sdp.R as SdpR
@@ -96,12 +98,6 @@ internal val CustomizeRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 
 /** Random mode keeps the picked artwork visible but stops it being a control. */
 internal const val TROLL_DISABLED_ALPHA = 0.30f
-
-/**
- * The project's Figma px -> sdp/ssp divisor. Only needed where a size comes from user state at
- * runtime and therefore cannot be a `dimen` resource; everything static still uses sdp/ssp.
- */
-private const val FIGMA_PX_PER_SSP = 1.3f
 
 /**
  * The level index the previews must draw right now.
@@ -132,106 +128,6 @@ internal fun rememberTrollRotationStep(active: Boolean): Int {
         }
     }
     return step
-}
-
-/**
- * The 360x48 themed strip at the top of the screen: it writes the number the prank will show and
- * the artwork the two pickers below selected — so the user judges the result, not the controls.
- *
- * Every control that reaches the real bar reaches this strip too: [showPercentage] removes the
- * number, [percentSizeDp] sizes it the way `BatteryStatusBarView` will, and [showEmoji] removes the
- * character.
- */
-@Composable
-internal fun TrollStatusBarPreview(
-    troll: BatteryTrollEntry?,
-    percent: Int,
-    showPercentage: Boolean,
-    percentSizeDp: Float,
-    showEmoji: Boolean,
-    emojiLevelIndex: Int,
-    batteryLevelIndex: Int,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._37sdp)),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                // A minimum, not a fixed height: the Size slider goes past this strip's Figma
-                // height, and clipping the number would misrepresent what the bar will draw.
-                .heightIn(min = dimensionResource(SdpR.dimen._20sdp))
-                .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._8sdp))
-            ) {
-                Text(
-                    text = stringResource(R.string.battery_preview_time),
-                    color = colorResource(R.color.colors_000000),
-                    fontFamily = CustomizeRobotoSemiBold,
-                    fontSize = dimensionResource(SspR.dimen._13ssp).value.sp,
-                    lineHeight = dimensionResource(SspR.dimen._17ssp).value.sp
-                )
-                if (showEmoji) {
-                    TrollArtwork(
-                        path = troll?.emojiPaths?.getOrNull(emojiLevelIndex),
-                        modifier = Modifier.size(dimensionResource(SdpR.dimen._20sdp))
-                    )
-                }
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._5sdp))
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_status_signal_steps),
-                    contentDescription = null,
-                    tint = colorResource(R.color.colors_000000),
-                    modifier = Modifier.size(
-                        width = dimensionResource(SdpR.dimen._15sdp),
-                        height = dimensionResource(SdpR.dimen._9sdp)
-                    )
-                )
-                Icon(
-                    painter = painterResource(R.drawable.ic_status_wifi_waves),
-                    contentDescription = null,
-                    tint = colorResource(R.color.colors_000000),
-                    modifier = Modifier.size(
-                        width = dimensionResource(SdpR.dimen._13sdp),
-                        height = dimensionResource(SdpR.dimen._9sdp)
-                    )
-                )
-                if (showPercentage) {
-                    Text(
-                        text = stringResource(R.string.battery_troll_percent_value, percent),
-                        color = colorResource(R.color.colors_000000),
-                        fontFamily = CustomizeRobotoMedium,
-                        // The Size slider is stored in dp and the renderer uses it as the text
-                        // size, so the preview reads the slider instead of a fixed ssp. Figma
-                        // draws this strip with the stored number as px (16dp -> 16px), so it goes
-                        // through the same px/1.3 divisor as every other size on the screen.
-                        fontSize = (percentSizeDp / FIGMA_PX_PER_SSP).sp,
-                        maxLines = 1
-                    )
-                }
-                TrollArtwork(
-                    path = troll?.batteryPaths?.getOrNull(batteryLevelIndex),
-                    modifier = Modifier.size(
-                        width = dimensionResource(SdpR.dimen._22sdp),
-                        height = dimensionResource(SdpR.dimen._12sdp)
-                    )
-                )
-            }
-        }
-    }
 }
 
 /** Same top navigation as the editor's compact bar, minus the PRO pill Figma drops here. */
@@ -956,66 +852,68 @@ internal fun BatteryTrollEditPercentDialogCard(
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
         ) {
             Text(
                 text = stringResource(R.string.battery_troll_edit_title),
                 color = colorResource(R.color.colors_212327),
-                fontFamily = CustomizeRobotoSemiBold,
+                fontFamily = CustomizeRobotoMedium,
                 fontSize = dimensionResource(SspR.dimen._15ssp).value.sp,
                 lineHeight = dimensionResource(SspR.dimen._21ssp).value.sp,
                 textAlign = TextAlign.Center
             )
-            Text(
-                text = stringResource(R.string.battery_troll_edit_message),
-                color = colorResource(R.color.colors_6F7073),
-                fontFamily = CustomizeRobotoRegular,
-                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-                lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
-                textAlign = TextAlign.Center
+            BasicTextField(
+                value = input,
+                onValueChange = { raw ->
+                    // Digits only, three at most: the prank tops out at 999%.
+                    input = raw.filter { it.isDigit() }.take(MAX_PERCENT_DIGITS)
+                },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                textStyle = TextStyle(
+                    color = colorResource(R.color.colors_212327),
+                    fontFamily = CustomizeRobotoSemiBold,
+                    fontSize = dimensionResource(SspR.dimen._21ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._27ssp).value.sp,
+                    textAlign = TextAlign.Center
+                ),
+                cursorBrush = SolidColor(colorResource(R.color.colors_FB3675)),
+                decorationBox = { field ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(dimensionResource(SdpR.dimen._46sdp))
+                            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp)))
+                            .background(colorResource(R.color.colors_FFFFFF))
+                            .border(
+                                width = 1.dp,
+                                color = colorResource(R.color.colors_C8C8C9),
+                                shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        field()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
         }
-        BasicTextField(
-            value = input,
-            onValueChange = { raw ->
-                // Digits only, three at most: the prank tops out at 999%.
-                input = raw.filter { it.isDigit() }.take(MAX_PERCENT_DIGITS)
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            textStyle = TextStyle(
-                color = colorResource(R.color.colors_212327),
-                fontFamily = CustomizeRobotoSemiBold,
-                fontSize = dimensionResource(SspR.dimen._18ssp).value.sp,
-                textAlign = TextAlign.Center
-            ),
-            cursorBrush = SolidColor(colorResource(R.color.colors_FB3675)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._37sdp))
-                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
-                .background(colorResource(R.color.colors_FFEBF1))
-                .padding(dimensionResource(SdpR.dimen._9sdp))
-        )
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
         ) {
-            TrollDialogButton(
-                label = stringResource(R.string.battery_discard_cancel),
-                backgroundRes = R.color.colors_F2F2F2,
-                labelColorRes = R.color.colors_6F7073,
-                enabled = true,
+            // Same pill pair as the reward and discard sheets: gradient outline to back out,
+            // gradient fill to commit.
+            RewardOutlineButton(
+                text = stringResource(R.string.cancel),
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f)
             )
-            TrollDialogButton(
-                label = stringResource(R.string.battery_troll_edit_confirm),
-                backgroundRes = R.color.colors_FB3675,
-                labelColorRes = R.color.colors_FFFFFF,
-                enabled = parsed != null,
+            RewardGradientButton(
+                text = stringResource(R.string.battery_troll_edit_confirm),
                 onClick = { parsed?.let { onConfirm(it.coerceIn(MIN_PERCENT, MAX_PERCENT)) } },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                enabled = parsed != null
             )
         }
     }
@@ -1053,4 +951,4 @@ private fun TrollDialogButton(
 private const val MIN_PERCENT = MIN_BATTERY_TROLL_FAKE_PERCENT
 private const val MAX_PERCENT = MAX_BATTERY_TROLL_FAKE_PERCENT
 private const val MAX_PERCENT_DIGITS = 3
-private const val EDIT_DIALOG_WIDTH_FRACTION = 328f / 360f
+private const val EDIT_DIALOG_WIDTH_FRACTION = 320f / 360f

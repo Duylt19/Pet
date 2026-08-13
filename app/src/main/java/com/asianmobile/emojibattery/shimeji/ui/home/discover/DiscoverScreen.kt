@@ -116,7 +116,7 @@ fun DiscoverScreen(
     val petStoreState by petStoreViewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     var showAccessibilityDisclosure by remember { mutableStateOf(false) }
-    TrackScreenView(ScreenName.HOME)
+    TrackScreenView(ScreenName.DISCOVER)
 
     LaunchedEffect(accessibilityHowToUseResult) {
         accessibilityHowToUseResult?.let { permissionGranted ->

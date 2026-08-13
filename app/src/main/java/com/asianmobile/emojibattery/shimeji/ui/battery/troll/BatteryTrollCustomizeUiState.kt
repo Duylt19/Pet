@@ -1,6 +1,9 @@
 package com.asianmobile.emojibattery.shimeji.ui.battery.troll
 
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPreviewSystemState
 import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_TROLL_LEVEL_COUNT
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollMode
@@ -21,7 +24,19 @@ data class BatteryTrollCustomizeUiState(
     val troll: BatteryTrollEntry? = null,
     val draft: BatteryTrollDraft = BatteryTrollDraft(),
     val applied: BatteryTrollDraft = BatteryTrollDraft(),
-    val realBatteryLevel: Int = 100,
+    /**
+     * The status bar as it is stored right now. The preview card needs a *whole*
+     * [BatteryStatusConfig] — colours, paddings, icon sizes, which components are on — and this
+     * screen only edits a handful of its fields, so everything else is inherited rather than
+     * invented.
+     */
+    val storedConfig: BatteryStatusConfig = BatteryStatusConfig(),
+    /** The real device, from `BatteryEditorSystemStateMonitor`; never a stand-in. */
+    val systemState: BatteryPreviewSystemState = BatteryPreviewSystemState(),
+    /** Resolved decoration artwork; `null` means "not available", never "use something else". */
+    val backgroundPath: String? = null,
+    val emotionPath: String? = null,
+    val animation: BatteryAnimationEntry? = null,
     val isBatteryEnabled: Boolean = false,
     val isEditingFakePercent: Boolean = false,
     val isDiscardVisible: Boolean = false,
@@ -29,9 +44,29 @@ data class BatteryTrollCustomizeUiState(
     /** Why the catalog could not produce [troll]; `null` while it still can. */
     val catalogError: BatteryTrollCatalogError? = null
 ) {
+    /**
+     * What the preview must draw: the stored bar with the unapplied draft laid over it. The two
+     * halves of the split matter — the troll fields and the percentage controls are the only
+     * things this screen owns, so nothing else may differ from the bar the user already has.
+     */
+    val previewConfig: BatteryStatusConfig = storedConfig.copy(
+        showPercentage = draft.showPercentage,
+        percentSizeDp = draft.percentSizeDp,
+        trollMode = draft.mode,
+        trollFakePercent = draft.fakePercent,
+        trollThemeId = draft.trollId,
+        trollEmojiLevelIndex = draft.emojiLevelIndex,
+        trollBatteryLevelIndex = draft.batteryLevelIndex,
+        trollRandomArtwork = draft.randomArtwork,
+        trollShowEmoji = draft.showEmoji
+    )
+
     val hasUnsavedChanges: Boolean get() = draft != applied
 
-    /** The number the preview strip writes, which is the whole point of Fake mode. */
+    /** The device's true charge, which drives the bar's layout even while the number lies. */
+    val realBatteryLevel: Int get() = systemState.powerState.level
+
+    /** The number the preview writes, which is the whole point of Fake mode. */
     val previewPercent: Int
         get() = when (draft.mode) {
             BatteryTrollMode.FAKE -> draft.fakePercent

@@ -3,6 +3,8 @@ package com.asianmobile.emojibattery.shimeji.ui.battery.troll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPowerState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPreviewSystemState
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollBatteryOrientation
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntitlement
@@ -108,7 +110,9 @@ private fun previewTrollCustomizeState(): BatteryTrollCustomizeUiState {
         troll = troll,
         draft = draft,
         applied = draft,
-        realBatteryLevel = 12,
+        // The device really is nearly flat: Fake mode has to write 999% over a 12% bar, which is
+        // the only way the golden proves the two numbers stay independent.
+        systemState = BatteryPreviewSystemState(powerState = BatteryPowerState(level = 12)),
         isBatteryEnabled = true,
         isLoading = false
     )

@@ -39,7 +39,7 @@ class HomeTabNavigationTest {
     @Test
     fun `home graph and discover destination have distinct stable routes`() {
         assertEquals("home_graph", Routes.HOME_GRAPH)
-        assertEquals("home", Routes.DISCOVER)
+        assertEquals("discover", Routes.DISCOVER)
     }
 
     @Test
