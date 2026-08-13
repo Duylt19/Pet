@@ -56,12 +56,12 @@ Mọi Android string resource chứa publisher/ad-unit ID dùng prefix
 - Battery landing dùng native placement `screen_battery_catalog` với template `HEIGHT_150` sau
   section đầu tiên. Category detail có banner inline `battery_category_inline`; creative do SDK
   tải, không đóng gói ảnh quảng cáo mẫu trong Figma. Bottom banner vẫn là holder của shell.
-- Customize Status Bar và các child library dùng holder shell nằm ngoài NavHost. Overview và
-  Battery/Emoji/Theme giữ banner `battery_editor_bottom`; Emotion group/detail cùng mười editor
-  option thay slot đó bằng một native `COLLAPSE_SMALL` dùng chung, nên không double-render ad và Apply luôn reflow
-  ngay phía trên chiều cao collapsed/expanded thực tế.
-- Native editor dùng placement `screen_battery_editor`. Khi vào Emotion lần đầu, holder
-  load/bind; push group → detail giữ cùng Compose slot và
+- Customize Status Bar và các child library dùng holder shell nằm ngoài NavHost. Overview,
+  Emotion group/detail cùng mười editor option dùng một native `COLLAPSE_SMALL`; các library
+  Battery/Emoji/Theme vẫn giữ banner `battery_editor_bottom`. Hai loại loại trừ nhau nên không
+  double-render ad và Apply luôn reflow ngay phía trên chiều cao collapsed/expanded thực tế.
+- Native editor dùng placement `screen_battery_editor`. Khi vào Customize Status Bar hoặc Emotion
+  lần đầu, holder load/bind; push group → detail giữ cùng Compose slot và
   Activity ViewModel nên không request lại. Rời flow rồi quay lại ưu tiên rebind cache còn hợp lệ.
 - Các banner inline `discover_inline`, `search_inline` và `battery_category_inline` có ViewModel
   key riêng để không dùng chung ad object với banner shell. Holder căn giữa creative SDK 320×50,

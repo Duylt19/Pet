@@ -113,7 +113,8 @@ internal fun showBatteryEditorBottomBanner(route: String?): Boolean =
         route?.startsWith("${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/") == true
 
 internal fun showBatteryEditorCollapsibleNative(route: String?, page: String?): Boolean =
-    route?.startsWith("${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/") == true ||
+    route?.startsWith("${Routes.BATTERY_EDITOR}/") == true ||
+        route?.startsWith("${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/") == true ||
         (
             route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true &&
                 BatteryEditorPage.fromRoute(page)?.let { editorPage ->

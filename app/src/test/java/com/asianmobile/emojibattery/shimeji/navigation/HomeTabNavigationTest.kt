@@ -100,15 +100,13 @@ class HomeTabNavigationTest {
     }
 
     @Test
-    fun `emotion list and detail keep the same collapsible native owner`() {
+    fun `customize status bar and emotion pages keep the same collapsible native owner`() {
+        val editorRoute = "${Routes.BATTERY_EDITOR}/{themeId}"
         val componentRoute = "${Routes.BATTERY_EDITOR_COMPONENT}/{themeId}/{page}"
         val detailRoute = "${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/{themeId}/{groupKey}"
 
+        assertEquals(true, showBatteryEditorCollapsibleNative(editorRoute, null))
         assertEquals(true, showBatteryEditorCollapsibleNative(componentRoute, "EMOJI"))
         assertEquals(true, showBatteryEditorCollapsibleNative(detailRoute, null))
-        assertEquals(false, showBatteryEditorCollapsibleNative(
-            "${Routes.BATTERY_EDITOR}/{themeId}",
-            null
-        ))
     }
 }

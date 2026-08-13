@@ -22,7 +22,8 @@ tự thêm quảng cáo chỉ từ tên route.
 | Mine/Settings | `settings` | Banner shell Home; disclosure dùng `dialog_accessibility_disclosure` hoặc `dialog_overlay_permission` |
 | Search | `search` | Native `screen_search` + banner inline `search_inline` |
 | Favourite & Recent | `favourite_recent` | Native `screen_favourite_recent` |
-| Battery editor overview/library | `battery_editor` hoặc screen con tương ứng | Banner `battery_editor_bottom` |
+| Customize Status Bar overview | `battery_editor` | Native `screen_battery_editor` dạng collapsible |
+| Battery editor library | Screen library tương ứng | Banner `battery_editor_bottom` |
 | Battery editor option/emotion/detail | Screen editor tương ứng | Native `screen_battery_editor` dạng collapsible; discard sheet dùng `dialog_battery_discard` |
 | Battery Troll | `battery_troll` | Banner inline `battery_category_inline`; reward sheet dùng `dialog_battery_troll_reward` + Rewarded |
 | Premium | `premium` | Không có placement |
@@ -43,7 +44,7 @@ tự thêm quảng cáo chỉ từ tên route.
 | Search | `screen_search` | `is_show_native_search` | `id_emoji_battery_native_search` | `HEIGHT_222` |
 | Favourite & Recent | `screen_favourite_recent` | `is_show_native_favourite_recent` | `id_emoji_battery_native_favourite_recent` | `HEIGHT_222` |
 | Battery catalog | `screen_battery_catalog` | `is_show_native_battery_catalog` | `id_emoji_battery_native_battery_catalog` | `HEIGHT_150` |
-| Battery editor options | `screen_battery_editor` | `is_show_native_battery_editor` | `id_emoji_battery_native_battery_editor` | `COLLAPSE_SMALL` |
+| Customize Status Bar/options | `screen_battery_editor` | `is_show_native_battery_editor` | `id_emoji_battery_native_battery_editor` | `COLLAPSE_SMALL` |
 | Battery reward sheet | `dialog_battery_reward` | `is_show_native_battery_reward` | `id_emoji_battery_native_battery_reward` | `HEIGHT_222` |
 | Battery discard sheet | `dialog_battery_discard` | `is_show_native_battery_discard` | `id_emoji_battery_native_battery_discard` | `HEIGHT_222` |
 | Pet reward sheet | `dialog_pet_reward` | `is_show_native_pet_reward` | `id_emoji_battery_native_pet_reward` | `HEIGHT_222` |
