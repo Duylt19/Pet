@@ -84,6 +84,7 @@ fun PermissionScreen(
         },
         onRequestNotifications = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                viewModel.markNotificationPermissionRequested()
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         },

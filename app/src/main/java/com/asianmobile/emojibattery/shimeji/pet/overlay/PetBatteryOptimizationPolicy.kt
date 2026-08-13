@@ -102,12 +102,13 @@ object PetBatteryOptimizationPolicy {
     }
 
     /**
-     * Whether the exemption means anything on this device, granted or not. UI that only lists
-     * pending requests must additionally use [reasonFor], which becomes null after grant.
+     * Whether restriction or vendor evidence says the exemption means anything on this device.
+     * A grant alone is not evidence: a stock device manually exempted by the user stays hidden.
+     * UI that only lists pending requests must additionally use [reasonFor], which becomes null
+     * after grant.
      */
     fun isExemptionRelevant(signals: PetBackgroundRestrictionSignals): Boolean =
-        signals.isAlreadyIgnoringOptimization ||
-            signals.isBackgroundRestricted ||
+        signals.isBackgroundRestricted ||
             signals.isInRestrictedStandbyBucket ||
             isUnexpectedKill(signals.lastOverlayKill) ||
             signals.hasVendorPowerScreen ||

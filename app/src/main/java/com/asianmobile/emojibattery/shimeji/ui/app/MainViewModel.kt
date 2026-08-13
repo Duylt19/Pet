@@ -12,6 +12,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -41,6 +42,15 @@ data class MainUiState(
 class MainViewModel @Inject constructor(
     private val dataStoreManager: DataStoreManager
 ) : ViewModel() {
+
+    internal val hasRequestedNotificationPermission: StateFlow<Boolean?> =
+        dataStoreManager.hasRequestedNotificationPermission
+            .map<Boolean, Boolean?> { it }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = null
+            )
 
     internal val uiState: StateFlow<MainUiState> = combine(
         dataStoreManager.isLanguageCompleted,
@@ -88,5 +98,11 @@ class MainViewModel @Inject constructor(
 
     internal fun completePermission() {
         viewModelScope.launch { dataStoreManager.savePermissionCompleted(true) }
+    }
+
+    internal fun markNotificationPermissionRequested() {
+        viewModelScope.launch {
+            dataStoreManager.saveNotificationPermissionRequested(true)
+        }
     }
 }

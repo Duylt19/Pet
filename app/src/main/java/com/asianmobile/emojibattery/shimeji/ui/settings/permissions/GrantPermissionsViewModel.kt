@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.data.local.DataStoreManager
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBackgroundRestrictionReader
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetBatteryOptimizationPolicy
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlay
@@ -21,13 +22,16 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class GrantPermissionsViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val restrictionReader: PetBackgroundRestrictionReader
+    private val restrictionReader: PetBackgroundRestrictionReader,
+    private val dataStoreManager: DataStoreManager
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GrantPermissionsUiState())
     val uiState: StateFlow<GrantPermissionsUiState> = _uiState.asStateFlow()
@@ -40,20 +44,28 @@ class GrantPermissionsViewModel @Inject constructor(
 
     init {
         refresh()
+        viewModelScope.launch {
+            dataStoreManager.hasRequestedNotificationPermission.collectLatest { requested ->
+                _uiState.update { it.copy(hasRequestedNotificationPermission = requested) }
+            }
+        }
     }
 
-    /** Every permission here is granted on a system screen, so re-read them on every resume. */
+    /** Special-access state can change outside the app, so re-read every platform signal on resume. */
     fun refresh() {
         val signals = restrictionReader.read()
         _uiState.value = GrantPermissionsUiState(
             isAccessibilityEnabled = BatteryAccessibility.isEnabled(context),
             isOverlayGranted = PetOverlay.canDraw(context),
             isBatteryOptimizationIgnored = signals.isAlreadyIgnoringOptimization,
-            // A granted exemption is no longer an action the user needs to take on this screen.
-            isBatteryRowVisible = PetBatteryOptimizationPolicy.reasonFor(signals) != null,
+            // Relevance is device-specific and independent of whether the user already granted
+            // the exemption. Stock Android devices should not see this row at all.
+            isBatteryRowVisible = PetBatteryOptimizationPolicy.isExemptionRelevant(signals),
             isAutoStartRowVisible = signals.shouldOfferVendorAllowlist(),
             isNotificationGranted = isNotificationGranted(),
-            isNotificationRowVisible = NOTIFICATION_PERMISSION_EXISTS
+            isNotificationRowVisible = NOTIFICATION_PERMISSION_EXISTS,
+            hasRequestedNotificationPermission = _uiState.value
+                .hasRequestedNotificationPermission
         )
     }
 
@@ -78,12 +90,16 @@ class GrantPermissionsViewModel @Inject constructor(
             // Once denied, the runtime prompt never shows again, so send the user to settings.
             GrantPermissionsTarget.NOTIFICATION -> when {
                 state.isNotificationGranted -> GrantPermissionsEffect.OpenAppNotificationSettings
-                hasAskedForNotification -> GrantPermissionsEffect.OpenAppNotificationSettings
+                state.hasRequestedNotificationPermission ->
+                    GrantPermissionsEffect.OpenAppNotificationSettings
                 else -> GrantPermissionsEffect.RequestNotificationPermission
             }
         }
         if (effect == GrantPermissionsEffect.RequestNotificationPermission) {
-            hasAskedForNotification = true
+            _uiState.update { it.copy(hasRequestedNotificationPermission = true) }
+            viewModelScope.launch {
+                dataStoreManager.saveNotificationPermissionRequested(true)
+            }
         }
         viewModelScope.launch { _effects.send(effect) }
     }
@@ -151,8 +167,6 @@ class GrantPermissionsViewModel @Inject constructor(
         isPetPermissionSequenceActive = false
         activeSequenceTarget = null
     }
-
-    private var hasAskedForNotification = false
 
     private fun isNotificationGranted(): Boolean = !NOTIFICATION_PERMISSION_EXISTS ||
         ContextCompat.checkSelfPermission(

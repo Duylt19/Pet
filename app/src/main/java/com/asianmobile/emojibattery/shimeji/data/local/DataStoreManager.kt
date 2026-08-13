@@ -24,6 +24,8 @@ class DataStoreManager @Inject constructor(
         val IS_INTRO_COMPLETED = booleanPreferencesKey("is_intro_completed")
         val IS_LANGUAGE_COMPLETED = booleanPreferencesKey("is_language_completed")
         val IS_PERMISSION_COMPLETED = booleanPreferencesKey("is_permission_completed")
+        val HAS_REQUESTED_NOTIFICATION_PERMISSION =
+            booleanPreferencesKey("has_requested_notification_permission")
         val COUNTRY_LANGUAGE = stringPreferencesKey("country_language")
         val KEY_LANGUAGE = stringPreferencesKey("key_language")
     }
@@ -40,6 +42,11 @@ class DataStoreManager @Inject constructor(
         preferences[IS_PERMISSION_COMPLETED] ?: false
     }
 
+    val hasRequestedNotificationPermission: Flow<Boolean> =
+        context.dataStore.data.map { preferences ->
+            preferences[HAS_REQUESTED_NOTIFICATION_PERMISSION] ?: false
+        }
+
     suspend fun saveIntroCompleted(completed: Boolean) {
         context.dataStore.edit { preferences: MutablePreferences ->
             preferences[IS_INTRO_COMPLETED] = completed
@@ -55,6 +62,12 @@ class DataStoreManager @Inject constructor(
     suspend fun savePermissionCompleted(completed: Boolean) {
         context.dataStore.edit { preferences: MutablePreferences ->
             preferences[IS_PERMISSION_COMPLETED] = completed
+        }
+    }
+
+    suspend fun saveNotificationPermissionRequested(requested: Boolean) {
+        context.dataStore.edit { preferences: MutablePreferences ->
+            preferences[HAS_REQUESTED_NOTIFICATION_PERMISSION] = requested
         }
     }
 

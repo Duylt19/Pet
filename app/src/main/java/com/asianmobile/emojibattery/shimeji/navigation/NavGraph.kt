@@ -1,8 +1,13 @@
 package com.asianmobile.emojibattery.shimeji.navigation
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,9 +17,13 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
@@ -30,6 +39,7 @@ import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_BATTERY_EDITOR_BOT
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_EDITOR
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_CUSTOMIZE_STATUS_BAR
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
+import com.asianmobile.emojibattery.shimeji.ads.utils.AdOverlayState
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeShell
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeTab
 import com.asianmobile.emojibattery.shimeji.ui.battery.favoriterecent.FavouriteRecentScreen
@@ -152,6 +162,13 @@ fun AppNavGraph(
     val context = LocalContext.current
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val hasRequestedNotificationPermission by
+        viewModel.hasRequestedNotificationPermission.collectAsStateWithLifecycle()
+    val isFullScreenAdShowing by AdOverlayState.isAdShowing.collectAsStateWithLifecycle()
+    var hasLaunchedHomeNotificationPrompt by rememberSaveable { mutableStateOf(false) }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
     val selectedHomeTab = homeTabForRoute(currentBackStackEntry?.destination?.route)
     val shouldShowHomeBottomBanner = showHomeBottomBanner(
         currentBackStackEntry?.destination?.route
@@ -170,6 +187,34 @@ fun AppNavGraph(
     val shouldShowBatteryEditorBottomBanner =
         showBatteryEditorBottomBanner(currentRoute) &&
             batteryEditorNativeScreenCode == null
+
+    LaunchedEffect(
+        currentRoute,
+        hasRequestedNotificationPermission,
+        isFullScreenAdShowing,
+        hasLaunchedHomeNotificationPrompt
+    ) {
+        val isNotificationGranted = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        if (
+            !hasLaunchedHomeNotificationPrompt &&
+            shouldRequestHomeNotificationPermission(
+                sdkInt = Build.VERSION.SDK_INT,
+                isGranted = isNotificationGranted,
+                hasRequestedBefore = hasRequestedNotificationPermission,
+                isHomeTopLevelVisible = selectedHomeTab != null,
+                isFullScreenAdShowing = isFullScreenAdShowing
+            )
+        ) {
+            // Persist before launching so recreation or tab changes cannot show a second prompt.
+            hasLaunchedHomeNotificationPrompt = true
+            viewModel.markNotificationPermissionRequested()
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
 
     fun navigateToHomeTab(tab: HomeTab) {
         val route = routeForHomeTab(tab)

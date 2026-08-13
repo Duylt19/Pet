@@ -9,6 +9,7 @@
 | `is_language_completed` | Boolean | Hoàn thành chọn language onboarding |
 | `is_intro_completed` | Boolean | Hoàn thành intro |
 | `is_permission_completed` | Boolean | Hoàn thành/skip Permission; key được giữ nguyên nhưng tạm không tham gia onboarding khi `IS_FIRST_PERMISSION_ONBOARDING_ENABLED=false` |
+| `has_requested_notification_permission` | Boolean | Runtime prompt Notification đã được hiển thị; Home chỉ tự hỏi một lần, lần từ chối sau được quản lý tại Grant Permissions/App Settings |
 | `key_language` | String | Language code |
 | `country_language` | String | Region code |
 | `pet_selected_pack_keys` | String | 12 pack key độc lập theo slot, newline-delimited |

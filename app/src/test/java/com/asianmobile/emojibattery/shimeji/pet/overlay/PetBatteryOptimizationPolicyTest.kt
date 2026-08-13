@@ -8,11 +8,21 @@ import org.junit.Test
 
 class PetBatteryOptimizationPolicyTest {
     @Test
-    fun `a granted exemption remains relevant but has no reason to ask again`() {
+    fun `a grant alone does not make a stock device relevant`() {
         val signals = PetBackgroundRestrictionSignals(isAlreadyIgnoringOptimization = true)
 
+        assertFalse(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
+        assertNull(PetBatteryOptimizationPolicy.reasonFor(signals))
+    }
+
+    @Test
+    fun `a relevant vendor remains visible after the exemption is granted`() {
+        val signals = PetBackgroundRestrictionSignals(
+            isAlreadyIgnoringOptimization = true,
+            isAggressiveVendor = true
+        )
+
         assertTrue(PetBatteryOptimizationPolicy.isExemptionRelevant(signals))
-        // Nothing is left to ask for, so Grant Permissions hides the row.
         assertNull(PetBatteryOptimizationPolicy.reasonFor(signals))
     }
 

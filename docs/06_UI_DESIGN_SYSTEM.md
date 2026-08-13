@@ -268,7 +268,9 @@ Grant Permissions contract theo dashboard Mine Figma node `8080:7477`, card nề
   `Grant Permissions`, khi list cuộn thì title thu về toolbar một dòng giống Customize Status
   Bar/Accessibility How to use; native ad vẫn ghim đáy, ngoài list;
 - dashboard Mine có hai nhóm `Battery Emoji` và `Pet on Screen`: giữ lại các quyền áp dụng trên
-  thiết bị dù đã cấp hay chưa để user đọc và quản lý trạng thái. Biến thể Pet on Screen có hai nhóm: Necessary
+  thiết bị dù đã cấp hay chưa để user đọc và quản lý trạng thái. Battery Optimization chỉ được
+  xem là áp dụng nếu restriction/vendor policy xác nhận ROM cần nó; trạng thái grant đơn lẻ trên
+  stock Android không làm row xuất hiện. Biến thể Pet on Screen có hai nhóm: Necessary
   chứa Draw over other apps + Notification access; Enhanced Stability chứa Ignore Battery
   Optimization + Auto Start. Khoảng cách heading → card và card → card là 12px, giữa hai nhóm
   là 20px;
@@ -321,8 +323,9 @@ Grant Permissions contract theo dashboard Mine Figma node `8080:7477`, card nề
   `getHistoricalProcessExitReasons()` cho thấy process từng chết lúc đang chạy foreground
   service vì `REASON_SIGNALED`/`LOW_MEMORY`/`OTHER` (API 30+), và cuối cùng mới tới danh sách
   vendor. Ba tín hiệu đầu là đo thật nên bắt được cả ROM tuỳ biến lẫn hãng mới; danh sách
-  vendor chỉ dùng cho máy API < 30 hoặc lần chạy đầu chưa có sự cố nào. Row biến mất ngay khi
-  `PowerManager.isIgnoringBatteryOptimizations(packageName)` xác nhận exemption;
+  vendor chỉ dùng cho máy API < 30 hoặc lần chạy đầu chưa có sự cố nào. Trong flow Pet, row biến
+  mất sau khi grant; trong dashboard Mine, row còn lại trên đúng thiết bị đó để phản ánh trạng
+  thái và cho phép quản lý;
 - native ad ghim cố định dưới cùng màn, ngoài `LazyColumn`, nên nó không cuộn cùng danh sách;
 - row **Allow auto-start** hiện khi ROM có allowlist riêng của hãng (`PetVendorPowerSettings`
   resolve component qua `PackageManager`, package khai trong `<queries>` để API 30+ nhìn thấy).
@@ -330,6 +333,10 @@ Grant Permissions contract theo dashboard Mine Figma node `8080:7477`, card nề
   ngay cả khi user đã cấp exemption. Không API nào đọc được trạng thái allowlist, nên row dùng
   mũi tên thay switch và intent được resolve lại đúng lúc chạm. Vì không đọc được grant state,
   đây là row duy nhất không thể tự ẩn chính xác sau khi user quay lại;
+- runtime Notification prompt không còn phụ thuộc onboarding Permission đang tắt: trên API 33+
+  Home shell hỏi đúng một lần khi top-level Home đầu tiên xuất hiện, chỉ sau khi full-screen ad đã
+  đóng. DataStore giữ việc prompt đã từng hiển thị; nếu user từ chối, thao tác tại dashboard mở
+  App Notification Settings thay vì spam lại prompt mỗi lần vào Home;
 - disclosure Accessibility (`GrantPermissionDialog`) theo Figma `8437:7570` và `8437:9099`
   là bottom sheet full-width bo hai góc trên 24px, scrim 50%, handle `32×4`, title Roboto
   SemiBold 18/26 và body Roboto Regular 14/20. Nội dung dài là phần duy nhất được cuộn; hàng

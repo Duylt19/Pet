@@ -20,7 +20,9 @@ Platform và product vertical slice đã hoàn tất. `PetOverlay.start(context)
 - `SYSTEM_ALERT_WINDOW`: tạo `TYPE_APPLICATION_OVERLAY`; user phải cấp qua system settings.
 - `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_SPECIAL_USE`: service target SDK 36 khai báo `specialUse` và property giải thích use case.
 - `POST_NOTIFICATIONS`: gate product bắt buộc của flow Pet on Screen trên API 33+; dưới API 33
-  gate tự đạt. Foreground service vẫn luôn tạo notification/channel theo contract Android.
+  gate tự đạt. Home request runtime permission đúng một lần sau khi top-level tab xuất hiện và
+  full-screen ad đã đóng; trạng thái đã hỏi được persist. Foreground service vẫn luôn tạo
+  notification/channel theo contract Android.
 - `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`: chỉ dùng khi runtime signals xác nhận thiết bị cần
   exemption; mở dialog trực tiếp cho package và fallback về settings list nếu ROM không hỗ trợ.
   Trước khi phát hành Google Play phải review/khai báo use case theo power-management policy.
@@ -42,7 +44,7 @@ Thứ tự gate bắt buộc cho mọi entry point bật pet:
    việc không xảy ra;
 3. chưa có overlay access → `OPEN_OVERLAY_SETTINGS`. Đây là quyền **bắt buộc**;
 4. API 33+ chưa có `POST_NOTIFICATIONS` → mở biến thể Pet on Screen của Grant Permissions.
-   Runtime prompt chỉ được thử một lần trong mỗi phiên màn; lần tiếp theo dẫn tới App Notification
+   Runtime prompt chỉ được thử khi app chưa từng hỏi; lần tiếp theo dẫn tới App Notification
    Settings để tránh vòng lặp launcher trả kết quả ngay sau khi user đã từ chối;
 5. còn lại → `START`.
 
@@ -55,11 +57,15 @@ Battery-optimisation exemption không chặn pet start: nó là bước optional
 nghĩa trên máy giết foreground service và chỉ hiện khi `PetBatteryOptimizationPolicy.reasonFor`
 trả về nguyên nhân còn cần xử lý. Dialog package-scoped được thử trước, rồi mới fallback settings.
 
-Row đó hiện khi **bất kỳ** tín hiệu nào sau đây đúng: đã được cấp (giữ lại để user thu hồi
-được), `isBackgroundRestricted`, standby bucket `RESTRICTED`, một lần chết process ngoài ý muốn,
+Row đó hiện khi **bất kỳ** tín hiệu nào sau đây đúng: `isBackgroundRestricted`, standby bucket
+`RESTRICTED`, một lần chết process ngoài ý muốn,
 **ROM có màn power manager riêng resolve được**, hoặc brand nằm trong danh sách vendor. Thứ tự
 đó cũng là thứ tự ưu tiên của `reasonFor()`: platform nói thẳng trước, rồi cái đã ghi nhận được,
 rồi cái máy này thật sự ship, và brand cuối cùng vì nó là suy đoán duy nhất.
+
+Grant đơn lẻ không khiến một stock Android device trở thành thiết bị cần exemption. Trên ROM đã
+được policy xác nhận, dashboard Mine vẫn giữ row sau grant để thể hiện trạng thái; flow Pet thì
+ẩn vì không còn gì cần xin.
 
 Hai tín hiệu cuối tồn tại vì `isBackgroundRestricted` là API 28+, còn standby bucket và
 `getHistoricalProcessExitReasons` là API 30+ — dưới các mức đó không có gì đo được, mà

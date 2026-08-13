@@ -5,8 +5,8 @@ data class GrantPermissionsUiState(
     val isOverlayGranted: Boolean = false,
     val isBatteryOptimizationIgnored: Boolean = false,
     /**
-     * Whether the dedicated Pet on Screen flow should offer the optional exemption step. The Mine
-     * dashboard still shows the real [isBatteryOptimizationIgnored] state so users can manage it.
+     * True only when device signals indicate this ROM can benefit from the exemption. The Mine
+     * dashboard and Pet flow both hide the row on ordinary stock Android devices.
      */
     val isBatteryRowVisible: Boolean = false,
     /**
@@ -16,7 +16,9 @@ data class GrantPermissionsUiState(
     val isAutoStartRowVisible: Boolean = false,
     val isNotificationGranted: Boolean = false,
     /** Below API 33 the notification permission does not exist, so its row is hidden. */
-    val isNotificationRowVisible: Boolean = false
+    val isNotificationRowVisible: Boolean = false,
+    /** Persisted after any runtime notification prompt, so a denial routes to App Settings. */
+    val hasRequestedNotificationPermission: Boolean = false
 )
 
 internal val GrantPermissionsUiState.needsOverlayPermission: Boolean

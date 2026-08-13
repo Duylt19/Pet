@@ -26,6 +26,11 @@
 | `battery_troll_customize/{trollId}` | Battery Troll Customize | Chọn Fake/Real, phần trăm giả, cỡ chữ, emoji và mức pin của theme; Apply ghi vào cùng `BatteryStatusConfig` của status-bar cover. Back khi còn thay đổi chưa lưu sẽ hiện `BatteryDiscardChangesSheet` |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
+Trên API 33+, lần đầu một trong bốn top-level Home tab thật sự xuất hiện, app request
+`POST_NOTIFICATIONS` nếu chưa cấp. Prompt chờ full-screen ad đóng và được đánh dấu trong
+DataStore trước khi launch để không lặp khi đổi tab/recreate; nếu user từ chối, dashboard Grant
+Permissions dẫn tới App Notification Settings thay vì tự hỏi lại ở mỗi lần mở Home.
+
 ## Flow
 
 ```text

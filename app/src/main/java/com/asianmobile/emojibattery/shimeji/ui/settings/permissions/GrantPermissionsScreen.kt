@@ -332,16 +332,18 @@ internal fun GrantPermissionsContent(
                         onClick = { onTargetClicked(GrantPermissionsTarget.OVERLAY) }
                     )
                 }
-                item {
-                    PermissionCard(
-                        iconRes = R.drawable.img_permission_battery,
-                        titleRes = R.string.grant_permissions_battery_title,
-                        bodyRes = R.string.grant_permissions_battery_body,
-                        checked = uiState.isBatteryOptimizationIgnored,
-                        onClick = {
-                            onTargetClicked(GrantPermissionsTarget.BATTERY_OPTIMIZATION)
-                        }
-                    )
+                if (uiState.isBatteryRowVisible) {
+                    item {
+                        PermissionCard(
+                            iconRes = R.drawable.img_permission_battery,
+                            titleRes = R.string.grant_permissions_battery_title,
+                            bodyRes = R.string.grant_permissions_battery_body,
+                            checked = uiState.isBatteryOptimizationIgnored,
+                            onClick = {
+                                onTargetClicked(GrantPermissionsTarget.BATTERY_OPTIMIZATION)
+                            }
+                        )
+                    }
                 }
                 if (uiState.isNotificationRowVisible) {
                     item {
