@@ -73,6 +73,7 @@ import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.pet.care.PetEnergyLevel
 import com.asianmobile.emojibattery.shimeji.pet.care.PetEnergyPolicy
+import com.asianmobile.emojibattery.shimeji.ui.pet.PetFamilyCapacityDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
@@ -132,6 +133,10 @@ fun PetRoomScreen(
             viewModel.playClick()
             onOpenPetStore()
         },
+        onAddPet = {
+            viewModel.playClick()
+            if (viewModel.requestAddPet()) onOpenPetStore()
+        },
         onOpenFoodStore = {
             viewModel.playClick()
             onOpenFoodStore()
@@ -149,6 +154,7 @@ fun PetRoomScreen(
         onConfirmRemovePet = viewModel::confirmRemovePet,
         onCancelRemovePet = viewModel::cancelRemovePet,
         onDismissLastActivePetDialog = viewModel::dismissLastActivePetDialog,
+        onDismissPetCapacityDialog = viewModel::dismissPetCapacityDialog,
         onOpenSettings = viewModel::openSettings,
         onCloseSettings = viewModel::closeSettings,
         onSettingsSpeedChange = viewModel::updateSettingsSpeed,
@@ -163,6 +169,7 @@ private fun PetRoomContent(
     scene: List<PetRoomSceneEntry>,
     onNavigateBack: () -> Unit,
     onOpenPetStore: () -> Unit,
+    onAddPet: () -> Unit,
     onOpenFoodStore: () -> Unit,
     onToggleMusic: () -> Unit,
     onToggleSheet: () -> Unit,
@@ -177,6 +184,7 @@ private fun PetRoomContent(
     onConfirmRemovePet: () -> Unit = {},
     onCancelRemovePet: () -> Unit = {},
     onDismissLastActivePetDialog: () -> Unit = {},
+    onDismissPetCapacityDialog: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     onCloseSettings: () -> Unit = {},
     onSettingsSpeedChange: (Int) -> Unit = {},
@@ -260,7 +268,7 @@ private fun PetRoomContent(
                 uiState = uiState,
                 onSelectTab = onSelectTab,
                 onSelectRoom = onSelectRoom,
-                onAddPet = onOpenPetStore,
+                onAddPet = onAddPet,
                 onAddFood = onOpenFoodStore,
                 onOpenPet = onOpenPet,
                 onCloseDetail = onCloseDetail,
@@ -293,6 +301,10 @@ private fun PetRoomContent(
                 petName = petName,
                 onDismiss = onDismissLastActivePetDialog
             )
+        }
+
+        if (uiState.isPetCapacityDialogVisible) {
+            PetFamilyCapacityDialog(onDismiss = onDismissPetCapacityDialog)
         }
     }
 }
@@ -1287,6 +1299,7 @@ private fun PetRoomScreenPreview() {
         ),
         onNavigateBack = {},
         onOpenPetStore = {},
+        onAddPet = {},
         onOpenFoodStore = {},
         onToggleMusic = {},
         onToggleSheet = {},

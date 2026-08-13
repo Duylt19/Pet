@@ -61,6 +61,9 @@ chỉ để tải lại cùng tài nguyên.
 - Sau khi lưu tên pet mới, app xin Overlay nếu còn thiếu; từ chối không rollback ownership, tên
   hoặc trạng thái slot và lần unlock pet tiếp theo sẽ hỏi lại. Khi đủ Overlay + Notification bắt
   buộc, Pet on Screen tự start và switch được đồng bộ từ runtime service.
+- Family có tối đa 5 pet đã sở hữu. Pet Store chặn trước reward/premium và kiểm tra lại trước
+  download; nút Add pet trong My Pet Room dùng cùng dialog hết chỗ. Dữ liệu cũ vượt giới hạn
+  không bị xóa, nhưng không thể thêm pet mới cho tới khi roster giảm xuống dưới 5.
 - Pet đã cài không download lại; My Pet Room đọc roster đã sở hữu từ pack app-private.
 - Search chỉ dùng metadata/thumbnail và mở tab Shimeji Pets. Discover dùng metadata/thumbnail
   nhưng chạm pet sẽ chạy cùng reward/download/reveal flow của `PetStoreViewModel` ngay tại Home.

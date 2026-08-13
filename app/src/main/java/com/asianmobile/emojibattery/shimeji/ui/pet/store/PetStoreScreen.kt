@@ -111,6 +111,7 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeHeader
+import com.asianmobile.emojibattery.shimeji.ui.pet.PetFamilyCapacityDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppActionToast
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.OverlayPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
@@ -323,6 +324,15 @@ internal fun PetStoreFlowHost(
                     PetStartBlocker.NO_OWNED_PETS -> viewModel.selectTab(PetStoreTab.PETS)
                     PetStartBlocker.NO_ACTIVE_PETS -> onViewPet()
                 }
+            }
+        )
+    }
+    if (state.isPetCapacityDialogVisible) {
+        PetFamilyCapacityDialog(
+            onDismiss = viewModel::dismissPetCapacityDialog,
+            onManagePets = {
+                viewModel.dismissPetCapacityDialog()
+                onViewPet()
             }
         )
     }

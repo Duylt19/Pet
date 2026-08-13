@@ -48,6 +48,7 @@ data class PetStoreUiState(
     val revealedFood: PetStoreFood? = null,
     val acquiredFood: PetStoreFood? = null,
     val petStartBlocker: PetStartBlocker? = null,
+    val isPetCapacityDialogVisible: Boolean = false,
     val message: String? = null
 )
 

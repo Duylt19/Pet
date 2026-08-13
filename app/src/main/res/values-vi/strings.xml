@@ -694,6 +694,11 @@
     <string name="battery_category_back">Quay lại</string>
     <!-- contentDescription của nút back dùng chung với My Pet Room -->
     <string name="pet_room_back">Quay lại</string>
+    <string name="pet_family_full_title">Gia đình thú cưng đã đầy</string>
+    <string name="pet_family_full_message">Bạn có thể nuôi tối đa %1$d thú cưng. Hãy xóa một thú cưng trong My Pet Room trước khi thêm thú cưng mới.</string>
+    <string name="pet_family_full_not_now">Để sau</string>
+    <string name="pet_family_full_manage">Quản lý pet</string>
+    <string name="pet_family_full_confirm">Đã hiểu</string>
     <string name="pet_room_minimum_active_title">Hãy giữ ít nhất một thú cưng hoạt động</string>
     <string name="pet_room_minimum_active_message">Pet on Screen cần ít nhất một thú cưng đang hoạt động. Hãy bật thú cưng khác trước khi chuyển %1$s sang trạng thái không hoạt động.</string>
     <string name="pet_room_minimum_active_confirm">Đã hiểu</string>

@@ -17,6 +17,7 @@ import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayRuntime
 import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayStartResult
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackInstallResult
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
+import com.asianmobile.emojibattery.shimeji.ui.pet.PetFamilyCapacityPolicy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -89,6 +90,14 @@ class PetStoreViewModel @Inject constructor(
             _uiState.update {
                 it.copy(joinedPetName = it.customNames[pet.id] ?: pet.name)
             }
+        } else if (hasReachedPetCapacity()) {
+            _uiState.update {
+                it.copy(
+                    selectedPet = null,
+                    isPetCapacityDialogVisible = true,
+                    message = null
+                )
+            }
         } else {
             _uiState.update { it.copy(selectedPet = pet, message = null) }
         }
@@ -123,6 +132,14 @@ class PetStoreViewModel @Inject constructor(
 
     private fun downloadPet(pet: com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry) {
         if (_uiState.value.downloadingPetId != null) return
+        if (!PetStorePolicy.isUnlocked(pet, _uiState.value.installedPackKeys) &&
+            hasReachedPetCapacity()
+        ) {
+            _uiState.update {
+                it.copy(selectedPet = null, isPetCapacityDialogVisible = true, message = null)
+            }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(downloadingPetId = pet.id, message = null) }
             when (val result = ownerCatalogRepository.preparePack(pet.id)) {
@@ -249,6 +266,16 @@ class PetStoreViewModel @Inject constructor(
     }
 
     fun dismissPetStartBlocker() = _uiState.update { it.copy(petStartBlocker = null) }
+
+    fun dismissPetCapacityDialog() =
+        _uiState.update { it.copy(isPetCapacityDialogVisible = false) }
+
+    private fun hasReachedPetCapacity(): Boolean = PetFamilyCapacityPolicy.isFull(
+        PetStorePolicy.ownedPetCount(
+            pets = _uiState.value.pets,
+            installedPackKeys = _uiState.value.installedPackKeys
+        )
+    )
 
     private fun startOverlay() {
         if (petSettingsRepository.preferences.value.runtimePetCount == 0) return

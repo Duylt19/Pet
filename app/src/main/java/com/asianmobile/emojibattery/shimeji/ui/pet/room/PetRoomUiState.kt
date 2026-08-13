@@ -26,6 +26,7 @@ data class PetRoomUiState(
     val message: PetRoomMessage? = null,
     val petPendingRemoval: PetRoomPetUiState? = null,
     val lastActivePetName: String? = null,
+    val isPetCapacityDialogVisible: Boolean = false,
     val settings: PetRoomSettingsUiState? = null
 )
 

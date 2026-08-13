@@ -919,6 +919,11 @@
     <string name="pet_room_expand_sheet">Show panel</string>
     <string name="pet_room_open_store">Shimeji Pets</string>
     <string name="pet_room_add_pet">Add pet</string>
+    <string name="pet_family_full_title">Your pet family is full</string>
+    <string name="pet_family_full_message">You can keep up to %1$d pets. Remove one from My Pet Room before adding a new pet.</string>
+    <string name="pet_family_full_not_now">Not now</string>
+    <string name="pet_family_full_manage">Manage pets</string>
+    <string name="pet_family_full_confirm">Got it</string>
     <string name="pet_room_rooms_unavailable">Rooms are unavailable right now</string>
     <string name="pet_room_breed">Breed: %1$s</string>
     <string name="pet_room_active">Active</string>

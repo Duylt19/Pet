@@ -29,6 +29,7 @@ import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomMusicPlayer
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomSizePolicy
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomSoundPlayer
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PET_FOOD_CATALOG
+import com.asianmobile.emojibattery.shimeji.ui.pet.PetFamilyCapacityPolicy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
@@ -189,6 +190,15 @@ class PetRoomViewModel @Inject constructor(
 
     /** Taps the screen owns rather than the ViewModel, such as Back and the Pet Store shortcut. */
     fun playClick() = soundPlayer.playClick()
+
+    fun requestAddPet(): Boolean {
+        val isFull = PetFamilyCapacityPolicy.isFull(_uiState.value.pets.size)
+        if (isFull) _uiState.update { it.copy(isPetCapacityDialogVisible = true) }
+        return !isFull
+    }
+
+    fun dismissPetCapacityDialog() =
+        _uiState.update { it.copy(isPetCapacityDialogVisible = false) }
 
     fun toggleMusic() {
         soundPlayer.playClick()

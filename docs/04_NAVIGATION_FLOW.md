@@ -58,9 +58,11 @@ Discover ──Mine──> Mine
 My Pet ──pet card──> detail panel ──Active/Inactive──> cập nhật Pet overlay foreground service
                               └─ tắt pet Active cuối cùng──> dialog giữ tối thiểu một pet Active
 My Pet ──Shimeji Pets icon/Add pet──> Home/Shimeji Pets tab `PETS`
+My Pet ──Add pet khi đã sở hữu 5 pet──> dialog hết chỗ; không điều hướng
 My Pet ──Food+──> Home/Shimeji Pets tab `FOOD`
 Shimeji Pets ──Pet on Screen, chưa sở hữu pet──> dialog ──Browse pets──> tab `PETS`
 Shimeji Pets ──Pet on Screen, mọi pet Inactive──> dialog ──Open My Pet──> My Pet Room
+Shimeji Pets ──unlock pet mới khi đã sở hữu 5 pet──> dialog hết chỗ ──Manage pets──> My Pet Room
 Mine ──My Pet──> My Pet
 Mine ──Favourite & Recent──> Favourite & Recent ──favourite theme──> Customize Status Bar
 Mine ──Language──> Language Settings
