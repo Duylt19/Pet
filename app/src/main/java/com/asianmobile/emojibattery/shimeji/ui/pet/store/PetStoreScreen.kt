@@ -363,10 +363,10 @@ internal fun PetStoreContent(
             text = stringResource(R.string.pet_store_enable_pet),
             checked = state.isPetRunning,
             onCheckedChange = onToggle,
-            bottomPadding = dimensionResource(SdpR.dimen._2sdp)
+            bottomPadding = dimensionResource(SdpR.dimen._10sdp)
         )
         PetStoreMyPetBanner(onClick = onOpenMyPet)
-        Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
+        Spacer(Modifier.height(dimensionResource(SdpR.dimen._13sdp)))
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -422,8 +422,11 @@ internal fun PetStoreMyPetBanner(onClick: () -> Unit) {
         contentScale = ContentScale.FillBounds,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
-            .height(dimensionResource(SdpR.dimen._92sdp))
+            // The Figma frame is 328x120, while its centered 3px stroke expands the exported
+            // bitmap bounds to 334x126. Position the painted bounds at x=13 instead of squeezing
+            // them into the inner frame at x=16, which would shift and distort this banner.
+            .padding(horizontal = dimensionResource(SdpR.dimen._10sdp))
+            .aspectRatio(334f / 126f)
             .clickable(role = Role.Button, onClick = onClick)
     )
 }
