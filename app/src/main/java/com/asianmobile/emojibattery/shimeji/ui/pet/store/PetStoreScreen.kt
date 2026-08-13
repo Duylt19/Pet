@@ -294,7 +294,7 @@ internal fun PetStoreFlowHost(
     state.namingPet?.let { pet ->
         PetNameDialog(pet = pet, onSave = viewModel::savePetName)
     }
-    state.joinedPetName?.let { name ->
+    state.joinedPetName?.takeUnless { showOverlayPermissionDisclosure }?.let { name ->
         AppActionToast(
             text = stringResource(R.string.pet_store_joined, name),
             action = stringResource(R.string.pet_store_view),

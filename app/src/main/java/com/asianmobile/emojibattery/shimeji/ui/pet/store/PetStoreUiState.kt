@@ -22,6 +22,12 @@ enum class PetStartBlocker {
     NO_ACTIVE_PETS
 }
 
+internal enum class PetUnlockActivation {
+    REQUEST_OVERLAY,
+    REQUEST_REMAINING_PERMISSIONS,
+    START_PET
+}
+
 data class PetStoreUiState(
     val pets: List<OwnerPetCatalogEntry> = emptyList(),
     val installedPackKeys: Set<String> = emptySet(),
@@ -87,6 +93,15 @@ internal object PetStorePolicy {
         ownedPetCount <= 0 -> PetStartBlocker.NO_OWNED_PETS
         activePetCount <= 0 -> PetStartBlocker.NO_ACTIVE_PETS
         else -> null
+    }
+
+    fun activationAfterUnlock(
+        overlayGranted: Boolean,
+        notificationGranted: Boolean
+    ): PetUnlockActivation = when {
+        !overlayGranted -> PetUnlockActivation.REQUEST_OVERLAY
+        !notificationGranted -> PetUnlockActivation.REQUEST_REMAINING_PERMISSIONS
+        else -> PetUnlockActivation.START_PET
     }
 
     fun normalizedName(input: String, fallback: String): String =

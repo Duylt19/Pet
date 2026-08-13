@@ -58,6 +58,9 @@ chỉ để tải lại cùng tài nguyên.
 - Pet chưa mở khóa đi qua Rewarded/Premium sheet; sau đó tải đúng một ZIP, verify integrity,
   normalize/install, chạy unlock reveal và bước đặt tên. Pet mới được bật atomically ở slot
   Mixed trống đầu tiên; nếu roster đã đầy thì chỉ ghi nhận ownership, không thay pet hiện có.
+- Sau khi lưu tên pet mới, app xin Overlay nếu còn thiếu; từ chối không rollback ownership, tên
+  hoặc trạng thái slot và lần unlock pet tiếp theo sẽ hỏi lại. Khi đủ Overlay + Notification bắt
+  buộc, Pet on Screen tự start và switch được đồng bộ từ runtime service.
 - Pet đã cài không download lại; My Pet Room đọc roster đã sở hữu từ pack app-private.
 - Search chỉ dùng metadata/thumbnail và mở tab Shimeji Pets. Discover dùng metadata/thumbnail
   nhưng chạm pet sẽ chạy cùng reward/download/reveal flow của `PetStoreViewModel` ngay tại Home.

@@ -168,6 +168,20 @@ class PetStoreViewModel @Inject constructor(
             _uiState.update {
                 it.copy(namingPet = null, joinedPetName = normalized)
             }
+            when (
+                PetStorePolicy.activationAfterUnlock(
+                    overlayGranted = PetOverlay.canDraw(context),
+                    notificationGranted = isNotificationGranted()
+                )
+            ) {
+                PetUnlockActivation.REQUEST_OVERLAY ->
+                    _effects.send(PetStoreEffect.OpenOverlaySettings)
+
+                PetUnlockActivation.REQUEST_REMAINING_PERMISSIONS ->
+                    _effects.send(PetStoreEffect.OpenGrantPermissions)
+
+                PetUnlockActivation.START_PET -> startOverlay()
+            }
         }
     }
 

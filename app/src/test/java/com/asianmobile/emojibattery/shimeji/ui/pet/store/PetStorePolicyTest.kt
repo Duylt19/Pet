@@ -37,6 +37,39 @@ class PetStorePolicyTest {
     }
 
     @Test
+    fun `unlock requests overlay before any remaining permission`() {
+        assertEquals(
+            PetUnlockActivation.REQUEST_OVERLAY,
+            PetStorePolicy.activationAfterUnlock(
+                overlayGranted = false,
+                notificationGranted = false
+            )
+        )
+    }
+
+    @Test
+    fun `unlock requests remaining permission when overlay is already granted`() {
+        assertEquals(
+            PetUnlockActivation.REQUEST_REMAINING_PERMISSIONS,
+            PetStorePolicy.activationAfterUnlock(
+                overlayGranted = true,
+                notificationGranted = false
+            )
+        )
+    }
+
+    @Test
+    fun `unlock starts pet immediately when mandatory permissions are granted`() {
+        assertEquals(
+            PetUnlockActivation.START_PET,
+            PetStorePolicy.activationAfterUnlock(
+                overlayGranted = true,
+                notificationGranted = true
+            )
+        )
+    }
+
+    @Test
     fun `owned pet count only includes installed catalog pets`() {
         assertEquals(
             1,

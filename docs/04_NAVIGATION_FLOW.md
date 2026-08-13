@@ -51,6 +51,8 @@ Discover ──Search──> Search ──theme──> Customize Status Bar
 Search ──pet──> Shimeji Pets
 Discover ──More Shimeji Pets──> Shimeji Pets
 Discover ──Trending pet──> Rewarded/Premium sheet dùng chung ──> Download/verify/unlock ──> bật ở slot Mixed trống đầu tiên
+Pet unlock ──Save tên──> thiếu Overlay: disclosure/Grant Permissions ──> đủ quyền bắt buộc: tự start Pet on Screen
+                         └─ từ chối: pet vẫn owned + Active trong My Pet; pet unlock kế tiếp hỏi lại
 Discover ──Battery theme/icon──> Rewarded/Premium nếu bị khóa ──> Customize Status Bar
 Discover ──Mine──> Mine
 My Pet ──pet card──> detail panel ──Active/Inactive──> cập nhật Pet overlay foreground service
@@ -84,7 +86,11 @@ Sau khi pet được verify/cài thành công, Pet Store hiển thị unlock-suc
 clip movement `SPECIAL` của chính pack vừa cài (`SPECIAL_2`/thumbnail là fallback), rồi mới
 chuyển sang bước đặt tên khi user chạm Continue. Pet mới được bật atomically ở slot Mixed
 trống đầu tiên với trạng thái `Active`; flow không đổi cấu hình Swarm và không
-thay pet khác nếu toàn bộ roster Mixed đã đầy.
+thay pet khác nếu toàn bộ roster Mixed đã đầy. Sau khi lưu tên, nếu chưa có quyền Overlay thì
+app hiện shared disclosure và dẫn tới Pet Grant Permissions. Từ chối quyền không rollback pack,
+tên hoặc slot; mỗi pet mới tiếp theo sẽ hỏi lại khi Overlay vẫn thiếu. Khi Overlay và Notification
+(trên API có runtime permission) đều sẵn sàng, service tự start và switch `Pet on Screen` phản ánh
+trạng thái ON từ `PetOverlayRuntime`.
 
 ## Back stack
 
