@@ -140,7 +140,12 @@ class HybridBatteryTrollCatalogRepository @Inject constructor(
                     batteryOrientation = troll.batteryOrientation,
                     thumbnailPath = troll.thumbnail.path,
                     emojiPaths = troll.emoji.map(BatteryTrollAssetRecord::path),
-                    batteryPaths = troll.battery.map(BatteryTrollAssetRecord::path)
+                    batteryPaths = troll.battery.map(BatteryTrollAssetRecord::path),
+                    // First frame only: the pipeline exports every level of one troll on the same
+                    // canvas, and a level that disagreed would be a catalog defect rather than a
+                    // size the renderer should honour.
+                    emojiCanvasPx = troll.emoji.firstOrNull()?.width ?: 0,
+                    batteryCanvasPx = troll.battery.firstOrNull()?.width ?: 0
                 )
             },
             catalogVersion = document.catalogVersion,

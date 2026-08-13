@@ -38,7 +38,18 @@ data class BatteryTrollEntry(
     val batteryOrientation: BatteryTrollBatteryOrientation,
     val thumbnailPath: String,
     val emojiPaths: List<String>,
-    val batteryPaths: List<String>
+    val batteryPaths: List<String>,
+    /**
+     * Canvas width the catalog publishes for the emoji and battery frames.
+     *
+     * The two are layers of one drawing, not two independent icons: the character's placement
+     * over the shell is expressed purely as where it sits inside its own canvas. That only
+     * survives if both layers are drawn at the same scale, which is what these two make
+     * computable. `0` means the catalog did not say, and the renderer falls back to the user's
+     * emoji size.
+     */
+    val emojiCanvasPx: Int = 0,
+    val batteryCanvasPx: Int = 0
 ) {
     /** Emoji artwork for a level index produced by `BatteryTrollPolicy`; out of range clamps. */
     fun emojiPathAt(levelIndex: Int): String =

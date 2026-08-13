@@ -1845,6 +1845,8 @@ internal fun batteryPreviewLayout(
     hasEmotion: Boolean,
     hasAnimation: Boolean,
     mobileDataLabel: String? = "5G",
+    /** Troll artwork dictates the character size; null leaves the user's slider in charge. */
+    trollEmojiSizeDp: Float? = null,
     focusedComponent: BatteryStatusComponent? = null,
     deviceState: BatteryDeviceState = BatteryDeviceState(),
     powerState: BatteryPowerState = BatteryPowerState()
@@ -1943,7 +1945,7 @@ internal fun batteryPreviewLayout(
                     BatteryStatusComponent.BATTERY,
                     width = maxOf(
                         config.batterySizeDp,
-                        if (hasEmoji) config.emojiSizeDp else 0f
+                        if (hasEmoji) trollEmojiSizeDp ?: config.emojiSizeDp else 0f
                     ) + gap,
                     priority = 110,
                     required = true

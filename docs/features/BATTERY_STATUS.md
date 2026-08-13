@@ -359,6 +359,21 @@ Battery Troll là **một chế độ của chính service này**, không phải
 - **Artwork.** `trollThemeId != 0` thì emoji và pin lấy từ `BatteryTrollCatalogRepository`
   theo chỉ số mức (0 = đầy … 4 = cạn) thay vì từ battery catalog. Quyết định chọn path nằm ở
   `BatteryTrollAssetPolicy` (Kotlin thuần, có test); service chỉ materialize/decode.
+- **Hai frame là hai lớp của một bức vẽ, không phải hai icon.** Vị trí nhân vật so với vỏ pin
+  chỉ được mã hoá bằng chỗ nó nằm trong canvas của chính nó, nên hai lớp **bắt buộc** vẽ cùng
+  một scale, nếu không offset co giãn theo và nhân vật trôi khỏi vỏ. `batteryTrollEmojiSizeDp()`
+  suy scale đó từ `emojiCanvasPx / batteryCanvasPx` mà catalog công bố; `emojiSizeDp` của user
+  **không** dùng ở chế độ troll vì slider đó dành cho việc trộn pet của theme A với pin của
+  theme B, điều troll không bao giờ làm. Catalog không công bố canvas thì mới rơi về slider.
+  Luật này áp cho cả overlay thật lẫn `BatteryStatusPreviewCard`, nên preview không thể hiển
+  thị theo quy tắc mà thanh thật không theo.
+- **Yêu cầu với pipeline export.** Vì vị trí chỉ sống trong canvas, pipeline **không được**
+  trim rồi căn giữa từng frame emoji. Bản catalog hiện tại đã bị: tâm nội dung trùng tâm canvas
+  ±1px ở toàn bộ troll và toàn bộ mức, nên mọi mức đều vẽ nhân vật ở giữa vỏ pin và bản dựng
+  của designer (nhân vật ngồi *trên* pin ở mức đầy, chui *vào trong* ở mức cạn) không thể tái
+  tạo được từ dữ liệu. Cách sửa: export emoji trên **đúng canvas của pin** với nhân vật đã đặt
+  sẵn vị trí từng mức. Khi hai canvas bằng nhau, scale trên bằng `1.0` và app dựng lại bản
+  thiết kế nguyên vẹn mà không cần đổi thêm dòng code nào.
 - **Fallback bắt buộc.** Theme đã chọn nhưng vắng mặt trong catalog — chưa tải, offline, hoặc
   bị gỡ trên server — phải rơi về theme battery thường. Không bao giờ để slot trống vì lý do này.
 - **`trollShowEmoji = false` là một lựa chọn, không phải lỗi.** Lúc đó troll vẫn sở hữu slot

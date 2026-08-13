@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
+import com.asianmobile.emojibattery.shimeji.battery.troll.batteryTrollEmojiSizeDp
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollMode
 import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollServerConfig
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryDiscardChangesSheet
@@ -214,6 +215,16 @@ internal fun BatteryTrollCustomizeContent(
                 // The prank's number, not the device's — the true level still reaches the card
                 // through `powerState` and keeps the layout honest.
                 displayPercent = uiState.previewPercent,
+                // The pair is one drawing, so the character is sized off the artwork rather than
+                // off the emoji slider, exactly as the real bar does it.
+                trollEmojiSizeDp = uiState.troll?.let { troll ->
+                    batteryTrollEmojiSizeDp(
+                        batterySizeDp = uiState.previewConfig.batterySizeDp,
+                        emojiCanvasPx = troll.emojiCanvasPx,
+                        batteryCanvasPx = troll.batteryCanvasPx,
+                        fallbackEmojiSizeDp = uiState.previewConfig.emojiSizeDp
+                    )
+                },
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(SdpR.dimen._12sdp)
                 )

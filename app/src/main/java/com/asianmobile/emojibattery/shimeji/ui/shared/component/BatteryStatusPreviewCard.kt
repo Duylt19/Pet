@@ -96,8 +96,14 @@ internal fun BatteryStatusPreviewCard(
     focusedComponent: BatteryStatusComponent?,
     mobileDataLabel: String?,
     displayPercent: Int = BATTERY_PREVIEW_DEFAULT_PERCENT,
+    /**
+     * Set while a troll owns the artwork, so the preview sizes the character off the drawing the
+     * way the real bar does instead of off the user's slider. Null for a normal theme.
+     */
+    trollEmojiSizeDp: Float? = null,
     modifier: Modifier = Modifier
 ) {
+    val emojiSizeDp = trollEmojiSizeDp ?: config.emojiSizeDp
     val previewDescription = stringResource(
         R.string.battery_overlay_description,
         displayPercent
@@ -156,6 +162,7 @@ internal fun BatteryStatusPreviewCard(
                     config.leftPaddingDp -
                     config.rightPaddingDp,
                 hasEmoji = emojiPath != null,
+                trollEmojiSizeDp = trollEmojiSizeDp,
                 hasEmotion = emotionPath != null,
                 hasAnimation = animation != null,
                 mobileDataLabel = mobileDataLabel,
@@ -292,7 +299,7 @@ internal fun BatteryStatusPreviewCard(
                     BatteryStatusComponent.BATTERY -> {
                         val pairSize = maxOf(
                             config.batterySizeDp,
-                            if (emojiPath != null) config.emojiSizeDp else 0f
+                            if (emojiPath != null) emojiSizeDp else 0f
                         )
                         Box(
                             modifier = Modifier.size(pairSize.dp),
@@ -321,7 +328,7 @@ internal fun BatteryStatusPreviewCard(
                                 PreviewAsyncImage(
                                     model = path,
                                     contentScale = ContentScale.Fit,
-                                    modifier = Modifier.size(config.emojiSizeDp.dp)
+                                    modifier = Modifier.size(emojiSizeDp.dp)
                                 )
                             }
                         }

@@ -43,6 +43,15 @@ class BatteryStatusBarView(context: Context) : View(context) {
     private var focusedComponent: BatteryStatusComponent? = null
     private var powerState = BatteryPowerState()
     private var emoji: Bitmap? = null
+
+    /**
+     * Set while a troll owns the artwork, where the character size is dictated by the drawing
+     * rather than by the user's slider. Null for a normal theme, whose pet and shell come from
+     * unrelated packs and are meant to be sized independently.
+     */
+    private var trollEmojiSizeDp: Float? = null
+    private val effectiveEmojiSizeDp: Float
+        get() = trollEmojiSizeDp ?: config.emojiSizeDp
     private var battery: Bitmap? = null
     private var background: Bitmap? = null
     private var emotion: Bitmap? = null
@@ -74,8 +83,10 @@ class BatteryStatusBarView(context: Context) : View(context) {
         battery: Bitmap?,
         background: Bitmap?,
         emotion: Bitmap?,
-        animation: BatteryAnimatedAsset?
+        animation: BatteryAnimatedAsset?,
+        trollEmojiSizeDp: Float? = null
     ) {
+        this.trollEmojiSizeDp = trollEmojiSizeDp
         this.config = config
         this.deviceState = deviceState
         this.focusedComponent = focusedComponent
@@ -435,7 +446,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                     BatteryStatusComponent.BATTERY,
                     maxOf(
                         config.batterySizeDp,
-                        if (emoji != null) config.emojiSizeDp else 0f
+                        if (emoji != null) effectiveEmojiSizeDp else 0f
                     ) * density,
                     gap,
                     priority = 110,
@@ -595,7 +606,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
     ): Float {
         val pairSize = maxOf(
             config.batterySizeDp,
-            if (emoji != null) config.emojiSizeDp else 0f
+            if (emoji != null) effectiveEmojiSizeDp else 0f
         ) * density
         val pairLeft = if (fromLeft) anchor else anchor - pairSize
         val pairCenterX = pairLeft + pairSize / 2f
@@ -622,7 +633,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
                 bitmap = bitmap,
                 centerX = pairCenterX,
                 centerY = centerY,
-                sizeDp = config.emojiSizeDp
+                sizeDp = effectiveEmojiSizeDp
             )
         }
         return if (fromLeft) pairLeft + pairSize else pairLeft

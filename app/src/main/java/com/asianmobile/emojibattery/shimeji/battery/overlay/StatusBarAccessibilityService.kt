@@ -42,6 +42,7 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ads.utils.AdOverlayState
 import com.asianmobile.emojibattery.shimeji.battery.troll.BatteryTrollArtwork
 import com.asianmobile.emojibattery.shimeji.battery.troll.BatteryTrollAssetPolicy
+import com.asianmobile.emojibattery.shimeji.battery.troll.batteryTrollEmojiSizeDp
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntry
@@ -429,6 +430,23 @@ class StatusBarAccessibilityService : AccessibilityService() {
     private fun trollArtworkAt(now: Long): BatteryTrollArtwork? =
         BatteryTrollAssetPolicy.artwork(currentConfig, currentTrollEntry, now)
 
+    /**
+     * The character size a troll dictates, or null to leave the user's slider in charge.
+     *
+     * Only while a troll is actually drawing: the moment it falls back to the normal theme the
+     * pet and the shell are unrelated packs again, and the slider is the right answer.
+     */
+    private fun trollEmojiSizeDp(trollArtwork: BatteryTrollArtwork?): Float? {
+        if (trollArtwork == null) return null
+        val entry = currentTrollEntry ?: return null
+        return batteryTrollEmojiSizeDp(
+            batterySizeDp = currentConfig.batterySizeDp,
+            emojiCanvasPx = entry.emojiCanvasPx,
+            batteryCanvasPx = entry.batteryCanvasPx,
+            fallbackEmojiSizeDp = currentConfig.emojiSizeDp
+        )
+    }
+
     private fun assetKeyFor(trollArtwork: BatteryTrollArtwork?): String = listOf(
         currentBatteryTheme?.id,
         currentEmojiTheme?.id,
@@ -479,7 +497,8 @@ class StatusBarAccessibilityService : AccessibilityService() {
                 batteryBitmap,
                 backgroundBitmap,
                 emotionBitmap,
-                animatedAsset
+                animatedAsset,
+                trollEmojiSizeDp(trollArtwork)
             )
             return
         }
@@ -571,7 +590,8 @@ class StatusBarAccessibilityService : AccessibilityService() {
                 batteryBitmap,
                 backgroundBitmap,
                 emotionBitmap,
-                animatedAsset
+                animatedAsset,
+                trollEmojiSizeDp(trollArtwork)
             )
         }
     }

@@ -25,6 +25,29 @@ data class BatteryTrollArtwork(
  * server-side) has to fall back to the normal battery/emoji theme rather than leave the bar with
  * no artwork at all.
  */
+/**
+ * How tall to draw the troll character, in the same dp the battery shell is drawn in.
+ *
+ * A troll's two frames are layers of one drawing: the character's offset over the shell lives
+ * only in where it sits inside its own canvas, so the two must be drawn at the same scale or the
+ * offset scales with them and the character drifts. The user's `emojiSizeDp` is the wrong input
+ * for that — it is an independent slider meant for mixing a pet from one theme with a shell from
+ * another, which a troll never does.
+ *
+ * Returns [fallbackEmojiSizeDp] when the catalog published no canvas, which is the only case where
+ * there is nothing better than the slider to go on.
+ */
+fun batteryTrollEmojiSizeDp(
+    batterySizeDp: Float,
+    emojiCanvasPx: Int,
+    batteryCanvasPx: Int,
+    fallbackEmojiSizeDp: Float
+): Float {
+    if (emojiCanvasPx <= 0 || batteryCanvasPx <= 0) return fallbackEmojiSizeDp
+    if (!batterySizeDp.isFinite() || batterySizeDp <= 0f) return fallbackEmojiSizeDp
+    return batterySizeDp * emojiCanvasPx / batteryCanvasPx
+}
+
 object BatteryTrollAssetPolicy {
 
     /**
