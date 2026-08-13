@@ -31,6 +31,8 @@ Vertical slice hiện đã có trong source:
 - Overview có đủ picker Battery/Emoji/Animation, Color/Theme và color picker HSV + opacity.
   Preset, slider và color picker đều cập nhật draft ngay; overlay thật chỉ nhận thay đổi khi
   feature đang bật.
+- Các màn option dùng slider và palette hai hàng dùng toàn bộ chiều ngang khả dụng; sáu màu
+  trong mỗi hàng được dàn đều giữa hai padding mép để không co cụm trên viewport rộng.
 - Catalog luôn cho phép mở editor để thử bằng preview nhúng. Overlay status bar thật chỉ nhận
   draft live khi feature đã được bật; nếu feature đang tắt thì editor không tự bật overlay dù
   Accessibility đã được cấp. Apply vẫn yêu cầu Accessibility trước khi bật.

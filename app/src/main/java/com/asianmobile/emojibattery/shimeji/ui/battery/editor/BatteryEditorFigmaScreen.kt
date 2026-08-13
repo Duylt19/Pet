@@ -867,7 +867,7 @@ internal fun DesignSlider(
     val coercedValue = value.coerceIn(range)
     val pink = colorResource(R.color.colors_FB3675)
     Column(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
     ) {
         Text(

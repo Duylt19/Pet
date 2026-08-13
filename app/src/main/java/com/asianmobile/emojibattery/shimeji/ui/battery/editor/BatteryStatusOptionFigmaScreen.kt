@@ -293,15 +293,16 @@ private fun StatusOptionColorSection(
         0xFF04F000.toInt(), 0xFF39C0FF.toInt(), 0xFF394AFF.toInt(),
         0xFFFF39EF.toInt(), 0xFFFF397E.toInt()
     )
-    Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
+    ) {
         OptionSectionTitle(stringResource(R.string.battery_editor_color))
         val options = listOf<Int?>(null) + colors
         options.chunked(6).forEach { row ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(
-                    dimensionResource(SdpR.dimen._12sdp)
-                )
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 row.forEach { color ->
                     val active = color?.let { selected == it } ?: (selected !in colors)
