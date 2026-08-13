@@ -159,6 +159,8 @@ private const val FOOD_QUANTITY_Y_IN_HERO_PX = 124f
 
 @Composable
 fun PetStoreScreen(
+    requestedTab: PetStoreTab? = null,
+    onRequestedTabConsumed: () -> Unit = {},
     onSearch: () -> Unit,
     onPremium: () -> Unit,
     onViewPet: () -> Unit,
@@ -167,6 +169,13 @@ fun PetStoreScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     TrackScreenView(ScreenName.PET_STORE)
+
+    LaunchedEffect(requestedTab) {
+        requestedTab?.let {
+            viewModel.selectTab(it)
+            onRequestedTabConsumed()
+        }
+    }
 
     PetStoreFlowHost(
         state = state,
@@ -301,6 +310,19 @@ internal fun PetStoreFlowHost(
             action = null,
             onDismiss = viewModel::dismissFoodToast,
             onAction = {}
+        )
+    }
+    state.petStartBlocker?.let { blocker ->
+        PetStartAvailabilityDialog(
+            blocker = blocker,
+            onDismiss = viewModel::dismissPetStartBlocker,
+            onPrimaryAction = {
+                viewModel.dismissPetStartBlocker()
+                when (blocker) {
+                    PetStartBlocker.NO_OWNED_PETS -> viewModel.selectTab(PetStoreTab.PETS)
+                    PetStartBlocker.NO_ACTIVE_PETS -> onViewPet()
+                }
+            }
         )
     }
     state.message?.takeIf { state.selectedPet == null }?.let { message ->

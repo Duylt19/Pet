@@ -22,6 +22,32 @@ class PetStorePolicyTest {
     }
 
     @Test
+    fun `store tab navigation values are stable and safely parsed`() {
+        assertEquals("pets", PetStoreTab.PETS.navigationValue)
+        assertEquals("food", PetStoreTab.FOOD.navigationValue)
+        assertEquals(PetStoreTab.FOOD, PetStoreTab.fromNavigationValue("FOOD"))
+        assertEquals(null, PetStoreTab.fromNavigationValue("unknown"))
+    }
+
+    @Test
+    fun `pet start blocker distinguishes no pets from all inactive`() {
+        assertEquals(PetStartBlocker.NO_OWNED_PETS, PetStorePolicy.startBlocker(0, 0))
+        assertEquals(PetStartBlocker.NO_ACTIVE_PETS, PetStorePolicy.startBlocker(2, 0))
+        assertEquals(null, PetStorePolicy.startBlocker(2, 1))
+    }
+
+    @Test
+    fun `owned pet count only includes installed catalog pets`() {
+        assertEquals(
+            1,
+            PetStorePolicy.ownedPetCount(
+                categorizedPets,
+                setOf(categorizedPets.first().installedPackKey, "unknown-pack")
+            )
+        )
+    }
+
+    @Test
     fun `name is trimmed bounded and falls back to catalog name`() {
         assertEquals("Mochi", PetStorePolicy.normalizedName("  Mochi  ", pet.name))
         assertEquals("Bunny", PetStorePolicy.normalizedName("   ", pet.name))

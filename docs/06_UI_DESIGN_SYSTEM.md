@@ -393,6 +393,10 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   padding ngang 6px/dọc 2px và offset 6px;
 - roster vẫn liệt kê mọi pet đã sở hữu, nhưng scene phòng chỉ dựng pet `Active`. Đổi switch
   cập nhật cả overlay slot và scene; `Inactive` biến mất khỏi sảnh nhưng vẫn có card để bật lại;
+- shortcut Shimeji Pets và ô `+` pet mở đúng tab Pets của top-level Shimeji Pets; icon thêm Food
+  mở tab Food. Pet Store consume tab request một lần, không persist lựa chọn cưỡng bức;
+- bật Pet on Screen khi chưa sở hữu pet hoặc khi toàn bộ pet Inactive hiển thị dialog riêng. CTA
+  lần lượt dẫn tới tab Pets hoặc My Pet Room; permission flow chỉ chạy khi có pet Active;
 - detail pet chỉ thuộc tab My Pet. Chuyển sang Food hoặc Room đóng detail và render đúng nội dung
   của tab mới; state detail cũ không được phép che Room hoặc đổi title của màn;
 - pet đã sở hữu đi lại trong scene bằng `PetRoomWander`, không dùng `PetEngine`: engine overlay

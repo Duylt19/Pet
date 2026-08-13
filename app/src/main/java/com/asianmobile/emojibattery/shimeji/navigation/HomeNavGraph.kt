@@ -1,5 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.navigation
 
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -10,6 +12,7 @@ import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.CURRENT_BATTERY_S
 import com.asianmobile.emojibattery.shimeji.ui.home.discover.DiscoverScreen
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeTab
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreScreen
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreTab
 import com.asianmobile.emojibattery.shimeji.ui.premium.StartPremiumIndexes
 import com.asianmobile.emojibattery.shimeji.ui.settings.mine.SettingsScreen
 
@@ -100,7 +103,15 @@ internal fun NavGraphBuilder.homeGraph(
         }
 
         composable(Routes.PET_STORE) {
+            val homeGraphEntry = navController.getBackStackEntry(Routes.HOME_GRAPH)
+            val requestedTabValue by homeGraphEntry.savedStateHandle
+                .getStateFlow<String?>(Routes.PET_STORE_TAB_REQUEST, null)
+                .collectAsStateWithLifecycle()
             PetStoreScreen(
+                requestedTab = PetStoreTab.fromNavigationValue(requestedTabValue),
+                onRequestedTabConsumed = {
+                    homeGraphEntry.savedStateHandle[Routes.PET_STORE_TAB_REQUEST] = null
+                },
                 onSearch = {
                     navController.safeNavigate(Routes.SEARCH, ignoreDebounce = true)
                 },

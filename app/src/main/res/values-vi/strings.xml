@@ -739,6 +739,13 @@
     <string name="grant_permissions_autostart_title">Tự khởi động</string>
     <string name="grant_permissions_autostart_body">Cho phép thiết bị được hỗ trợ tự khởi chạy Cute Pet thay vì chặn ứng dụng chạy nền.</string>
     <string name="grant_permissions_pet_start_failed">Không thể khởi động thú cưng. Vui lòng thử lại.</string>
+    <string name="pet_store_no_pets_title">Chưa có thú cưng</string>
+    <string name="pet_store_no_pets_body">Hãy chọn và thêm một thú cưng trước khi bật Pet on Screen.</string>
+    <string name="pet_store_no_active_pets_title">Không có thú cưng đang hoạt động</string>
+    <string name="pet_store_no_active_pets_body">Tất cả thú cưng đang tắt. Hãy mở My Pet Room và bật ít nhất một thú cưng trước.</string>
+    <string name="pet_store_browse_pets">Chọn thú cưng</string>
+    <string name="pet_store_open_my_pet">Mở My Pet</string>
+    <string name="pet_store_dialog_not_now">Để sau</string>
     <string name="battery_troll_title">Pin troll</string>
     <string name="battery_troll_customize_title">Tùy chỉnh</string>
     <string name="battery_troll_mode">Chế độ</string>

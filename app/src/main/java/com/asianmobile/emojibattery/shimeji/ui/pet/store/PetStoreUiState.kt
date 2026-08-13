@@ -6,7 +6,21 @@ import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetAction
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
 
-enum class PetStoreTab { PETS, FOOD }
+enum class PetStoreTab(val navigationValue: String) {
+    PETS("pets"),
+    FOOD("food");
+
+    companion object {
+        fun fromNavigationValue(value: String?): PetStoreTab? = entries.firstOrNull {
+            it.navigationValue.equals(value, ignoreCase = true)
+        }
+    }
+}
+
+enum class PetStartBlocker {
+    NO_OWNED_PETS,
+    NO_ACTIVE_PETS
+}
 
 data class PetStoreUiState(
     val pets: List<OwnerPetCatalogEntry> = emptyList(),
@@ -27,6 +41,7 @@ data class PetStoreUiState(
     val selectedFood: PetStoreFood? = null,
     val revealedFood: PetStoreFood? = null,
     val acquiredFood: PetStoreFood? = null,
+    val petStartBlocker: PetStartBlocker? = null,
     val message: String? = null
 )
 
@@ -62,6 +77,17 @@ sealed interface PetStoreEffect {
 internal object PetStorePolicy {
     fun isUnlocked(pet: OwnerPetCatalogEntry, installedPackKeys: Set<String>): Boolean =
         pet.installedPackKey in installedPackKeys
+
+    fun ownedPetCount(
+        pets: List<OwnerPetCatalogEntry>,
+        installedPackKeys: Set<String>
+    ): Int = pets.count { isUnlocked(it, installedPackKeys) }
+
+    fun startBlocker(ownedPetCount: Int, activePetCount: Int): PetStartBlocker? = when {
+        ownedPetCount <= 0 -> PetStartBlocker.NO_OWNED_PETS
+        activePetCount <= 0 -> PetStartBlocker.NO_ACTIVE_PETS
+        else -> null
+    }
 
     fun normalizedName(input: String, fallback: String): String =
         input.trim().ifBlank { fallback.trim() }.take(24)

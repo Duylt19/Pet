@@ -54,7 +54,10 @@ Discover ──Trending pet──> Rewarded/Premium sheet dùng chung ──> Do
 Discover ──Battery theme/icon──> Rewarded/Premium nếu bị khóa ──> Customize Status Bar
 Discover ──Mine──> Mine
 My Pet ──pet card──> detail panel ──Active/Inactive──> cập nhật Pet overlay foreground service
-My Pet ──Add/Food+──> Shimeji Pets
+My Pet ──Shimeji Pets icon/Add pet──> Home/Shimeji Pets tab `PETS`
+My Pet ──Food+──> Home/Shimeji Pets tab `FOOD`
+Shimeji Pets ──Pet on Screen, chưa sở hữu pet──> dialog ──Browse pets──> tab `PETS`
+Shimeji Pets ──Pet on Screen, mọi pet Inactive──> dialog ──Open My Pet──> My Pet Room
 Mine ──My Pet──> My Pet
 Mine ──Favourite & Recent──> Favourite & Recent ──favourite theme──> Customize Status Bar
 Mine ──Language──> Language Settings
@@ -63,7 +66,7 @@ Mine ──Apps that hide icons──> modal picker ──switch app──> pers
 Mine ──Setting Pets──> shared speed/size dialog ──Save──> apply cho toàn bộ pet slots
 Mine ──Grant Permissions dashboard──Accessibility chưa cấp──> consent disclosure ──How to use──> Settings
                               └─ quyền đã cấp/permission khác ──> system surface tương ứng ──back──> đọc lại trạng thái
-Pet on Screen Grant Permissions ──Go to Settings──> Overlay ──> Notification ──> Battery Optimization? ──> Auto Start?
+Pet on Screen Grant Permissions ──Go to Settings──> Notification ──> Overlay ──> Battery Optimization? ──> Auto Start?
                                       └─ đủ Overlay + Notification ──> start pet ngay, không chờ hai bước optional
 Mine ──Rate/Share/Contact/Privacy──> action tương ứng
 Discover/My Pet ──Settings──> Mine ──Language──> Language Settings

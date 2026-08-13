@@ -53,6 +53,7 @@ import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorViewM
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.isStatusOptionPage
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.intro.IntroScreen
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.language.LanguageScreen
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreTab
 import com.asianmobile.emojibattery.shimeji.ui.app.MainViewModel
 import com.asianmobile.emojibattery.shimeji.ui.app.destinationAfterIntro
 import com.asianmobile.emojibattery.shimeji.ui.settings.permissions.AccessibilityHowToUseScreen
@@ -81,6 +82,7 @@ object Routes {
     const val ACCESSIBILITY_HOW_TO_USE = "accessibility_how_to_use"
     const val MY_PET = "my_pet"
     const val PET_STORE = "pet_store"
+    const val PET_STORE_TAB_REQUEST = "pet_store_tab_request"
     const val SETTINGS = "settings"
     const val BATTERY_CATALOG = "battery_catalog"
     const val BATTERY_CATEGORY = "battery_category"
@@ -445,15 +447,19 @@ fun AppNavGraph(
             }
 
             composable(Routes.MY_PET) {
+                fun openPetStore(tab: PetStoreTab) {
+                    navController.getBackStackEntry(Routes.HOME_GRAPH)
+                        .savedStateHandle[Routes.PET_STORE_TAB_REQUEST] = tab.navigationValue
+                    // Leave the room before switching tabs. navigateToHomeTab saves the current
+                    // stack under `home`; the graph-scoped request selects Pets or Food once.
+                    navController.safePopBackStack(ignoreDebounce = true)
+                    navigateToHomeTab(HomeTab.PET_STORE)
+                }
+
                 PetRoomScreen(
                     onNavigateBack = { navController.safePopBackStack() },
-                    onOpenPetStore = {
-                        // Leave the room before switching tabs. navigateToHomeTab saves the
-                        // current stack under `home`, so jumping straight from here would make
-                        // a later Discover tap restore My Pet Room instead of Discover.
-                        navController.safePopBackStack(ignoreDebounce = true)
-                        navigateToHomeTab(HomeTab.PET_STORE)
-                    }
+                    onOpenPetStore = { openPetStore(PetStoreTab.PETS) },
+                    onOpenFoodStore = { openPetStore(PetStoreTab.FOOD) }
                 )
             }
 

@@ -84,6 +84,7 @@ import com.intuit.ssp.R as SspR
 fun PetRoomScreen(
     onNavigateBack: () -> Unit = {},
     onOpenPetStore: () -> Unit = {},
+    onOpenFoodStore: () -> Unit = {},
     viewModel: PetRoomViewModel = hiltViewModel()
 ) {
     TrackScreenView(ScreenName.MY_PET)
@@ -122,6 +123,10 @@ fun PetRoomScreen(
             viewModel.playClick()
             onOpenPetStore()
         },
+        onOpenFoodStore = {
+            viewModel.playClick()
+            onOpenFoodStore()
+        },
         onToggleMusic = viewModel::toggleMusic,
         onToggleSheet = viewModel::toggleSheet,
         onSelectTab = viewModel::selectTab,
@@ -148,6 +153,7 @@ private fun PetRoomContent(
     scene: List<PetRoomSceneEntry>,
     onNavigateBack: () -> Unit,
     onOpenPetStore: () -> Unit,
+    onOpenFoodStore: () -> Unit,
     onToggleMusic: () -> Unit,
     onToggleSheet: () -> Unit,
     onSelectTab: (PetRoomTab) -> Unit,
@@ -244,6 +250,7 @@ private fun PetRoomContent(
                 onSelectTab = onSelectTab,
                 onSelectRoom = onSelectRoom,
                 onAddPet = onOpenPetStore,
+                onAddFood = onOpenFoodStore,
                 onOpenPet = onOpenPet,
                 onCloseDetail = onCloseDetail,
                 onToggleOnScreen = onToggleOnScreen,
@@ -413,6 +420,7 @@ private fun PetRoomSheet(
     onSelectTab: (PetRoomTab) -> Unit,
     onSelectRoom: (Int) -> Unit,
     onAddPet: () -> Unit,
+    onAddFood: () -> Unit,
     onOpenPet: (Int) -> Unit,
     onCloseDetail: () -> Unit,
     onToggleOnScreen: () -> Unit,
@@ -465,7 +473,7 @@ private fun PetRoomSheet(
                     uiState.selectedTab == PetRoomTab.FOOD -> FoodTabContent(
                         foods = uiState.foods,
                         onFeed = onFeed,
-                        onAddFood = onAddPet
+                        onAddFood = onAddFood
                     )
 
                     else -> RoomTabContent(uiState = uiState, onSelectRoom = onSelectRoom)
@@ -1261,6 +1269,7 @@ private fun PetRoomScreenPreview() {
         ),
         onNavigateBack = {},
         onOpenPetStore = {},
+        onOpenFoodStore = {},
         onToggleMusic = {},
         onToggleSheet = {},
         onSelectTab = {},

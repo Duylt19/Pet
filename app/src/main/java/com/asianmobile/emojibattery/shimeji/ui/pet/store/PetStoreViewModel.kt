@@ -211,7 +211,18 @@ class PetStoreViewModel @Inject constructor(
             PetOverlay.stop(context)
             return
         }
-        if (petSettingsRepository.preferences.value.runtimePetCount == 0) return
+        if (_uiState.value.isLoading) return
+        val blocker = PetStorePolicy.startBlocker(
+            ownedPetCount = PetStorePolicy.ownedPetCount(
+                pets = _uiState.value.pets,
+                installedPackKeys = _uiState.value.installedPackKeys
+            ),
+            activePetCount = petSettingsRepository.preferences.value.runtimePetCount
+        )
+        if (blocker != null) {
+            _uiState.update { it.copy(petStartBlocker = blocker) }
+            return
+        }
         if (!PetOverlay.canDraw(context)) {
             viewModelScope.launch { _effects.send(PetStoreEffect.OpenOverlaySettings) }
             return
@@ -222,6 +233,8 @@ class PetStoreViewModel @Inject constructor(
         }
         startOverlay()
     }
+
+    fun dismissPetStartBlocker() = _uiState.update { it.copy(petStartBlocker = null) }
 
     private fun startOverlay() {
         if (petSettingsRepository.preferences.value.runtimePetCount == 0) return
