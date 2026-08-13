@@ -120,7 +120,6 @@ its `master` branch over `raw.githubusercontent.com`.
 | Battery | `BatteryServerConfig` | `json/batteries.json` + `battery/**` |
 | Rooms | `RoomServerConfig` | `json/rooms.json` + `room/bg|thumb/BG_<id>.png` |
 | Battery Troll | `BatteryTrollServerConfig` | `json/battery-troll.json` + `troll/thumb|emoji|battery/TROLL_<id>*.webp` |
-| Battery Troll | `BatteryTrollServerConfig` | `json/battery-troll.json` + `troll/thumb|emoji|battery/TROLL_<id>*.webp` |
 
 Every catalog follows the same contract: the repo is **private**, so requests carry
 `Authorization: Bearer <token>` where the token comes from the Firebase Remote Config key
@@ -128,6 +127,13 @@ Every catalog follows the same contract: the repo is **private**, so requests ca
 TTL revalidation, ETag and rate-limit backoff; every downloaded asset is verified against the
 byte size and SHA-256 the catalog declares before it is used. Release only accepts `APPROVED`
 catalog entries; debug keeps the packaged snapshot as fallback.
+
+A Battery Troll's `emoji` and `battery` frames are two layers of one drawing, not two icons.
+Where the character stands over the shell is carried only by where the artwork sits inside its
+own canvas, so both layers must be drawn at one scale — `batteryTrollEmojiSizeDp()` takes it from
+the canvas sizes the catalog publishes, and `emojiSizeDp` is never used in troll mode. The
+published frames were trimmed and recentred at export, so that placement is currently absent from
+the data and no client change can recover it; the server pipeline now rejects mismatched canvases.
 
 Adding or changing catalog content is a **change in the server repository**, not here: build it
 with that repo's `tools/*_pipeline.py`, which recomputes size/SHA-256 and runs the same
