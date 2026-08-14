@@ -147,9 +147,15 @@ class GrantPermissionsViewModel @Inject constructor(
 
     private fun advancePetPermissionSequence() {
         if (!isPetPermissionSequenceActive) return
-        val target = _uiState.value.nextPetPermissionTarget(attemptedOptionalTargets)
+        val state = _uiState.value
+        val target = state.nextPetPermissionTarget(attemptedOptionalTargets)
         if (target == null) {
             stopPetPermissionSequence()
+            if (state.hasCompletedPetPermissionSequence(attemptedOptionalTargets)) {
+                viewModelScope.launch {
+                    _effects.send(GrantPermissionsEffect.PetPermissionFlowCompleted)
+                }
+            }
             return
         }
         activeSequenceTarget = target

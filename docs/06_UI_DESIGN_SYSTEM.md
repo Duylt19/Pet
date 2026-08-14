@@ -259,6 +259,9 @@ System bar:
 - `MainActivity.applyLightSystemBars()` là **nơi duy nhất** quyết định hình thức system bar.
   Không màn nào override; helper `TransparentStatusBarEffect` cũ đã bị xoá. Màn nào muốn icon
   sáng thì phải đủ tối để đọc được icon sáng, và không màn nào còn như vậy trong thiết kế mới;
+- `enableEdgeToEdge()` được cài trước `Activity.onCreate()` và tắt cả status/navigation contrast
+  protection từ API 29; thứ tự này tránh ROM tùy biến cache layout fitted-insets rồi để lại dải
+  status bar màu đặc trên toàn app;
 - navigation bar dùng immersive transient-by-swipe và tắt contrast enforcement từ API 29 để
   Samsung/three-button navigation không giữ scrim đen sau khi bar đã ẩn. Các surface nằm trực
   tiếp trong Activity không cộng `navigationBarsPadding()`: một số ROM Android 10 vẫn trả stable

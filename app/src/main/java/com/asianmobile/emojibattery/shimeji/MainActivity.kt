@@ -49,14 +49,17 @@ class MainActivity : ComponentActivity() {
     private var isExitingApp = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         // The app sits on a white sheet, so the status bar draws its clock and icons dark on
         // every screen. Nothing overrides this per screen: a screen that needs light icons
         // would have to be dark enough to read them, and none of them are any more.
+        // Install edge-to-edge before Activity/Decor creation. A few OEM Android 14 builds cache
+        // the first fitted-insets decision made by super.onCreate() and otherwise keep a solid
+        // status-bar strip for the whole Activity lifetime.
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
         )
+        super.onCreate(savedInstanceState)
         applyLightSystemBars()
 
         setContent {
@@ -170,6 +173,7 @@ class MainActivity : ComponentActivity() {
             // Android 10+ adds a contrast scrim for three-button navigation by default. Some
             // Samsung Android 10 builds retain it after immersive hide as an opaque black strip.
             window.isNavigationBarContrastEnforced = false
+            window.isStatusBarContrastEnforced = false
         }
         WindowInsetsControllerCompat(window, window.decorView).apply {
             // "Light bars" means a light background, so the platform draws dark content on them.

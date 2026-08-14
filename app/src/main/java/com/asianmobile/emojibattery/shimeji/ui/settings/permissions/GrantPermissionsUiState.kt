@@ -82,6 +82,8 @@ sealed interface GrantPermissionsEffect {
     data object RequestNotificationPermission : GrantPermissionsEffect
     data object OpenAppNotificationSettings : GrantPermissionsEffect
     data object PetOverlayStartFailed : GrantPermissionsEffect
+    /** The dedicated Pet grant sequence has no remaining required or relevant optional step. */
+    data object PetPermissionFlowCompleted : GrantPermissionsEffect
 }
 
 internal val GrantPermissionsUiState.hasMandatoryPetPermissions: Boolean
@@ -104,6 +106,10 @@ internal fun GrantPermissionsUiState.nextPetPermissionTarget(
         GrantPermissionsTarget.VENDOR_AUTO_START
     else -> null
 }
+
+internal fun GrantPermissionsUiState.hasCompletedPetPermissionSequence(
+    attempted: Set<GrantPermissionsTarget>
+): Boolean = hasMandatoryPetPermissions && nextPetPermissionTarget(attempted) == null
 
 internal fun accessibilityTargetEffect(isAccessibilityEnabled: Boolean): GrantPermissionsEffect =
     if (isAccessibilityEnabled) {

@@ -400,6 +400,9 @@ fun AppNavGraph(
                 }
                 GrantPermissionsScreen(
                     onNavigateBack = { navController.safePopBackStack() },
+                    onPermissionFlowCompleted = {
+                        navController.safePopBackStack(ignoreDebounce = true)
+                    },
                     requiredTarget = requiredTarget,
                     accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
                     onAccessibilityHowToUseResultConsumed =

@@ -176,7 +176,8 @@ route, popUpTo behavior, process-death behavior và docs này.
 - Với entry Pet on Screen, Overlay và Notification là hai gate product bắt buộc. API 33+ nếu
   Notification bị từ chối thì pet chưa start; dưới API 33 không tồn tại runtime permission nên
   gate này tự đạt. Ngay khi hai gate đạt, Grant Permissions start pet trước khi tiếp tục các bước
-  ổn định optional.
+  ổn định optional. Khi chuỗi không còn quyền liên quan cần xin, route Grant Permissions tự pop
+  về màn Home nguồn thay vì giữ user ở card hoàn tất.
 - Discover refresh Accessibility ở `ON_RESUME`; intent bật battery được tiếp tục sau khi user
   cấp service. My Pet refresh overlay permission ở `ON_RESUME`; nếu overlay bị thu hồi khi
   service đang chạy, app stop service.

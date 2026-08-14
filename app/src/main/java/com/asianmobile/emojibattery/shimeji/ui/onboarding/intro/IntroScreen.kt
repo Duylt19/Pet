@@ -150,9 +150,9 @@ fun IntroScreen(
                     NativeAdInternal(
                         screenCode = screenCode,
                         modifier = Modifier.fillMaxWidth(),
-                        // Intro content must remain stable while the SDK is loading or offline.
-                        // The ad is rendered only after a real native asset is available.
-                        showLoadingPlaceholder = false,
+                        // Keep the native slot understandable while the SDK is loading. The
+                        // shared ad layout owns the shimmer and still collapses after a failure.
+                        showLoadingPlaceholder = true,
                     )
                 }
             },

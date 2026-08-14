@@ -82,6 +82,7 @@ import com.intuit.ssp.R as SspR
 @Composable
 fun GrantPermissionsScreen(
     onNavigateBack: () -> Unit = {},
+    onPermissionFlowCompleted: () -> Unit = onNavigateBack,
     requiredTarget: GrantPermissionsTarget = GrantPermissionsTarget.ACCESSIBILITY,
     accessibilityHowToUseResult: Boolean? = null,
     onAccessibilityHowToUseResultConsumed: () -> Unit = {},
@@ -187,6 +188,10 @@ fun GrantPermissionsScreen(
                     R.string.grant_permissions_pet_start_failed,
                     Toast.LENGTH_SHORT
                 ).show()
+
+                GrantPermissionsEffect.PetPermissionFlowCompleted -> {
+                    onPermissionFlowCompleted()
+                }
             }
         }
     }

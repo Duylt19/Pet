@@ -67,6 +67,28 @@ class GrantPermissionsPetSequencePolicyTest {
     }
 
     @Test
+    fun `sequence is complete only after mandatory and relevant optional steps`() {
+        val state = readyMandatoryState(
+            isBatteryRowVisible = true,
+            isAutoStartRowVisible = true
+        )
+
+        assertFalse(state.hasCompletedPetPermissionSequence(emptySet()))
+        assertTrue(
+            state.hasCompletedPetPermissionSequence(
+                setOf(
+                    GrantPermissionsTarget.BATTERY_OPTIMIZATION,
+                    GrantPermissionsTarget.VENDOR_AUTO_START
+                )
+            )
+        )
+        assertFalse(
+            GrantPermissionsUiState(isOverlayGranted = false)
+                .hasCompletedPetPermissionSequence(emptySet())
+        )
+    }
+
+    @Test
     fun `screen only exposes permissions that still need action`() {
         val complete = GrantPermissionsUiState(
             isAccessibilityEnabled = true,
