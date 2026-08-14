@@ -288,8 +288,9 @@ Intro onboarding theo Figma nodes `8088:13113`, `8088:13148`, `8088:13201`:
 - page 1 mount placement `SCREEN_INTRO` ngay khi vào pager; page 3 chỉ kích hoạt
   `SCREEN_INTRO_SECOND` sau lần đầu settle tại page 3, cả hai cao 222 và page 2 không có ads.
   Placement đã kích hoạt được giữ lại khi swipe, không có shimmer/loading placeholder và collapse
-  hoàn toàn khi chưa có ad hoặc load fail. Native được neo đáy độc lập nên trạng thái SDK không
-  làm thay đổi vị trí title/indicator/action. Pager, analytics và completion flow không thay đổi;
+  hoàn toàn khi chưa có ad hoặc load fail. Native được neo đáy; title/indicator/action của page 1
+  và page 3 neo theo chiều cao slot chuẩn với gap 8px nên luôn sát quảng cáo và không trôi lên khi
+  compact-height scale thay đổi. Pager, analytics và completion flow không thay đổi;
 - canvas 360×800 là mốc thiết kế. Trên viewport thấp/rộng hơn, artwork và control dùng chung
   compact-height scale theo aspect ratio khả dụng để giữ đúng tương quan dọc và không chồng
   title/button lên composite; native AndroidView page 1/page 3 giữ kích thước thật, không scale.

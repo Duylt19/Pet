@@ -70,9 +70,7 @@ private val robotoSemiBoldFontFamily = FontFamily(
 
 private const val INTRO_DESIGN_WIDTH = 360f
 private const val INTRO_DESIGN_HEIGHT = 800f
-private const val INTRO_PAGE_ONE_COPY_TOP = 466f
 private const val INTRO_PAGE_TWO_COPY_TOP = 624f
-private const val INTRO_PAGE_THREE_COPY_TOP = 466f
 
 private data class IntroPage(
     val titleRes: Int,
@@ -211,6 +209,8 @@ internal fun IntroPageContent(
             heightDp = maxHeight.value,
         )
         val referenceUnit = maxWidth / INTRO_DESIGN_WIDTH
+        val nativeAdControlInset = dimensionResource(R_sdp.dimen._171sdp) +
+            dimensionResource(R_sdp.dimen._6sdp)
 
         Image(
             painter = painterResource(page.imageRes),
@@ -231,10 +231,11 @@ internal fun IntroPageContent(
                     onActionClick = onActionClick,
                     layoutScale = compactHeightScale,
                     modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .offset(
-                            y = referenceUnit * INTRO_PAGE_ONE_COPY_TOP * compactHeightScale,
-                        ),
+                        .align(Alignment.BottomCenter)
+                        // Figma leaves 8 px between the control row and the 222 px native.
+                        // Anchor to the fixed ad slot instead of scaling a top coordinate; the
+                        // latter makes the gap grow on compact/tall Android viewports.
+                        .offset(y = -nativeAdControlInset),
                 )
                 if (showNativeAd) {
                     Box(
@@ -267,10 +268,8 @@ internal fun IntroPageContent(
                     onActionClick = onActionClick,
                     layoutScale = compactHeightScale,
                     modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .offset(
-                            y = referenceUnit * INTRO_PAGE_THREE_COPY_TOP * compactHeightScale,
-                        ),
+                        .align(Alignment.BottomCenter)
+                        .offset(y = -nativeAdControlInset),
                 )
                 if (showNativeAd) {
                     Box(

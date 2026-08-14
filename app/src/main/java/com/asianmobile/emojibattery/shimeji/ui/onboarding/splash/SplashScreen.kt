@@ -169,7 +169,7 @@ internal fun SplashContent(
                             .aspectRatio(286f / 278f),
                     )
                     SplashGradientTitle(
-                        text = stringResource(R.string.splash_title),
+                        text = stringResource(R.string.app_name),
                         modifier = Modifier.fillMaxWidth(353f / 360f),
                     )
                 }
@@ -198,7 +198,8 @@ private fun SplashGradientTitle(
         ),
     )
     val titleFont = FontFamily(Font(R.font.nunito_black, FontWeight.Black))
-    val fontSize = dimensionResource(R_ssp.dimen._26ssp).value.sp
+    // The title follows app_name, so keep the longer store name on one line.
+    val fontSize = dimensionResource(R_ssp.dimen._22ssp).value.sp
     val lineHeight = dimensionResource(R_ssp.dimen._31ssp).value.sp
     val letterSpacing = dimensionResource(R_ssp.dimen._1ssp).value.sp
     val outlineWidth = with(LocalDensity.current) {
