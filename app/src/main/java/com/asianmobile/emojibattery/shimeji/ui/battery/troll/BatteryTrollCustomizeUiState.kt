@@ -110,6 +110,26 @@ data class BatteryTrollDraft(
 )
 
 /**
+ * Validation shared by the edit dialog and its tests.
+ *
+ * One extra digit is intentionally retained after the domain maximum. This lets the field show
+ * the user's invalid attempt (for example `10000`) instead of silently discarding the last digit.
+ */
+internal object BatteryTrollPercentInputPolicy {
+    private val maxInputLength = MAX_BATTERY_TROLL_FAKE_PERCENT.toString().length + 1
+
+    fun normalize(raw: String): String = raw
+        .filter(Char::isDigit)
+        .take(maxInputLength)
+
+    fun validValue(input: String): Int? = input
+        .toIntOrNull()
+        ?.takeIf { it in MIN_BATTERY_TROLL_FAKE_PERCENT..MAX_BATTERY_TROLL_FAKE_PERCENT }
+
+    fun hasError(input: String): Boolean = input.isNotEmpty() && validValue(input) == null
+}
+
+/**
  * Versioned process-death state for the Battery Troll draft, mirroring `BatteryDraftCodec` in the
  * status-bar editor: DataStore stays the source of applied settings and only the *unapplied* draft
  * travels in `SavedStateHandle`. Malformed state falls back to "no draft" instead of failing the

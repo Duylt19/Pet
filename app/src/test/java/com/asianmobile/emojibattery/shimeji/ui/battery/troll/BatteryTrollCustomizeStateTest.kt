@@ -175,4 +175,22 @@ class BatteryTrollCustomizeStateTest {
         assertEquals(fallback.percentSizeDp, restored.percentSizeDp, 0f)
         assertFalse(restored.showEmoji)
     }
+
+    @Test
+    fun percent_input_keeps_the_first_invalid_digit_so_the_dialog_can_show_an_error() {
+        val input = BatteryTrollPercentInputPolicy.normalize("99999")
+
+        assertEquals("99999", input)
+        assertTrue(BatteryTrollPercentInputPolicy.hasError(input))
+        assertNull(BatteryTrollPercentInputPolicy.validValue(input))
+    }
+
+    @Test
+    fun percent_input_accepts_the_maximum_and_ignores_non_digits() {
+        val input = BatteryTrollPercentInputPolicy.normalize("99a99")
+
+        assertEquals("9999", input)
+        assertFalse(BatteryTrollPercentInputPolicy.hasError(input))
+        assertEquals(MAX_BATTERY_TROLL_FAKE_PERCENT, BatteryTrollPercentInputPolicy.validValue(input))
+    }
 }

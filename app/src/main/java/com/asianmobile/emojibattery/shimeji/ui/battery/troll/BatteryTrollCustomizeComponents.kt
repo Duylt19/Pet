@@ -799,7 +799,11 @@ internal fun BatteryTrollEditPercentDialogCard(
     var input by rememberSaveable(initialPercent) {
         mutableStateOf(initialPercent.coerceIn(MIN_PERCENT, MAX_PERCENT).toString())
     }
-    val parsed = input.toIntOrNull()
+    val validPercent = BatteryTrollPercentInputPolicy.validValue(input)
+    val hasInputError = BatteryTrollPercentInputPolicy.hasError(input)
+    val inputBorderColor = colorResource(
+        if (hasInputError) R.color.colors_F04438 else R.color.colors_C8C8C9
+    )
     Column(
         modifier = modifier
             .fillMaxWidth(EDIT_DIALOG_WIDTH_FRACTION)
@@ -825,41 +829,60 @@ internal fun BatteryTrollEditPercentDialogCard(
                 lineHeight = dimensionResource(SspR.dimen._21ssp).value.sp,
                 textAlign = TextAlign.Center
             )
-            BasicTextField(
-                value = input,
-                onValueChange = { raw ->
-                    // Keep the field in sync with the domain ceiling when that limit changes.
-                    input = raw.filter { it.isDigit() }.take(MAX_PERCENT_DIGITS)
-                },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                textStyle = TextStyle(
-                    color = colorResource(R.color.colors_212327),
-                    fontFamily = CustomizeRobotoSemiBold,
-                    fontSize = dimensionResource(SspR.dimen._21ssp).value.sp,
-                    lineHeight = dimensionResource(SspR.dimen._27ssp).value.sp,
-                    textAlign = TextAlign.Center
-                ),
-                cursorBrush = SolidColor(colorResource(R.color.colors_FB3675)),
-                decorationBox = { field ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(dimensionResource(SdpR.dimen._46sdp))
-                            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp)))
-                            .background(colorResource(R.color.colors_FFFFFF))
-                            .border(
-                                width = 1.dp,
-                                color = colorResource(R.color.colors_C8C8C9),
-                                shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        field()
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._3sdp))
+            ) {
+                BasicTextField(
+                    value = input,
+                    onValueChange = { raw ->
+                        input = BatteryTrollPercentInputPolicy.normalize(raw)
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    textStyle = TextStyle(
+                        color = colorResource(R.color.colors_212327),
+                        fontFamily = CustomizeRobotoSemiBold,
+                        fontSize = dimensionResource(SspR.dimen._21ssp).value.sp,
+                        lineHeight = dimensionResource(SspR.dimen._27ssp).value.sp,
+                        textAlign = TextAlign.Center
+                    ),
+                    cursorBrush = SolidColor(colorResource(R.color.colors_FB3675)),
+                    decorationBox = { field ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(dimensionResource(SdpR.dimen._46sdp))
+                                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp)))
+                                .background(colorResource(R.color.colors_FFFFFF))
+                                .border(
+                                    width = 1.dp,
+                                    color = inputBorderColor,
+                                    shape = RoundedCornerShape(
+                                        dimensionResource(SdpR.dimen._9sdp)
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            field()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (hasInputError) {
+                    Text(
+                        text = stringResource(
+                            R.string.battery_troll_edit_percent_error,
+                            MAX_PERCENT
+                        ),
+                        color = colorResource(R.color.colors_F04438),
+                        fontFamily = CustomizeRobotoRegular,
+                        fontSize = dimensionResource(SspR.dimen._10ssp).value.sp,
+                        lineHeight = dimensionResource(SspR.dimen._13ssp).value.sp,
+                        modifier = Modifier.padding(horizontal = dimensionResource(SdpR.dimen._3sdp))
+                    )
+                }
+            }
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -874,9 +897,9 @@ internal fun BatteryTrollEditPercentDialogCard(
             )
             RewardGradientButton(
                 text = stringResource(R.string.battery_troll_edit_confirm),
-                onClick = { parsed?.let { onConfirm(it.coerceIn(MIN_PERCENT, MAX_PERCENT)) } },
+                onClick = { validPercent?.let(onConfirm) },
                 modifier = Modifier.weight(1f),
-                enabled = parsed != null
+                enabled = validPercent != null
             )
         }
     }
@@ -913,5 +936,4 @@ private fun TrollDialogButton(
 
 private const val MIN_PERCENT = MIN_BATTERY_TROLL_FAKE_PERCENT
 private const val MAX_PERCENT = MAX_BATTERY_TROLL_FAKE_PERCENT
-private val MAX_PERCENT_DIGITS = MAX_PERCENT.toString().length
 private const val EDIT_DIALOG_WIDTH_FRACTION = 320f / 360f

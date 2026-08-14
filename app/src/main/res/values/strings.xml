@@ -808,6 +808,7 @@
     <string name="battery_troll_random">Random</string>
     <string name="battery_troll_edit_title">Edit Battery</string>
     <string name="battery_troll_edit_confirm">Save</string>
+    <string name="battery_troll_edit_percent_error">Maximum value is %1$d.</string>
     <string name="battery_troll_theme_locked">Premium theme</string>
     <string name="battery_preview_time" translatable="false">09:41</string>
     <string name="battery_preview_percentage" translatable="false">82%</string>
