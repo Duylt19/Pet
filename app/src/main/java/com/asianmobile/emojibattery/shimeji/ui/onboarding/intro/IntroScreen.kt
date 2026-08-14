@@ -25,8 +25,12 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -101,6 +105,13 @@ fun IntroScreen(
     val pagerState = rememberPagerState(pageCount = { introPages.size })
     val coroutineScope = rememberCoroutineScope()
     val currentPage = pagerState.currentPage
+    var hasVisitedLastPage by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(pagerState.settledPage) {
+        if (pagerState.settledPage == introPages.lastIndex) {
+            hasVisitedLastPage = true
+        }
+    }
 
     // Track only after the pager settles so an aborted swipe cannot emit a page the user did
     // not actually enter.
@@ -108,6 +119,9 @@ fun IntroScreen(
 
     HorizontalPager(
         state = pagerState,
+        // Intro has only three pages. Keeping them composed preserves each loaded native view
+        // when the user swipes away and back instead of briefly showing an empty slot.
+        beyondViewportPageCount = introPages.lastIndex,
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(R.color.colors_FFFFFF)),
@@ -116,9 +130,9 @@ fun IntroScreen(
         IntroPageContent(
             pageIndex = pageIndex,
             currentPage = currentPage,
-            showNativeAd = shouldLoadIntroNativeAd(
+            showNativeAd = shouldKeepIntroNativeAdMounted(
                 pageIndex = pageIndex,
-                settledPage = pagerState.settledPage,
+                hasVisitedLastPage = hasVisitedLastPage,
             ),
             onActionClick = {
                 if (pageIndex == introPages.lastIndex) {
@@ -136,6 +150,9 @@ fun IntroScreen(
                     NativeAdInternal(
                         screenCode = screenCode,
                         modifier = Modifier.fillMaxWidth(),
+                        // Intro content must remain stable while the SDK is loading or offline.
+                        // The ad is rendered only after a real native asset is available.
+                        showLoadingPlaceholder = false,
                     )
                 }
             },
@@ -149,10 +166,14 @@ internal fun introPageScreenName(pageIndex: Int): ScreenName = when (pageIndex) 
     else -> ScreenName.INTRO_PAGE_3
 }
 
-internal fun shouldLoadIntroNativeAd(
+internal fun shouldKeepIntroNativeAdMounted(
     pageIndex: Int,
-    settledPage: Int,
-): Boolean = pageIndex == settledPage && introNativeAdScreenCode(pageIndex) != null
+    hasVisitedLastPage: Boolean,
+): Boolean = when (pageIndex) {
+    0 -> true
+    introPages.lastIndex -> hasVisitedLastPage
+    else -> false
+}
 
 internal fun introNativeAdScreenCode(pageIndex: Int): String? = when (pageIndex) {
     0 -> SCREEN_INTRO
@@ -202,17 +223,7 @@ internal fun IntroPageContent(
         )
 
         when (pageIndex) {
-            0 -> if (showNativeAd) {
-                NativeIntroPageContent(
-                    page = page,
-                    currentPage = currentPage,
-                    sideActionText = stringResource(R.string.next),
-                    onActionClick = onActionClick,
-                    adContent = adContent,
-                    layoutScale = compactHeightScale,
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                )
-            } else {
+            0 -> {
                 IntroCopyAndControls(
                     page = page,
                     currentPage = currentPage,
@@ -225,6 +236,15 @@ internal fun IntroPageContent(
                             y = referenceUnit * INTRO_PAGE_ONE_COPY_TOP * compactHeightScale,
                         ),
                 )
+                if (showNativeAd) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth(),
+                    ) {
+                        adContent()
+                    }
+                }
             }
 
             1 -> MiddleIntroPageContent(
@@ -239,17 +259,7 @@ internal fun IntroPageContent(
                     ),
             )
 
-            else -> if (showNativeAd) {
-                NativeIntroPageContent(
-                    page = page,
-                    currentPage = currentPage,
-                    sideActionText = stringResource(R.string.start),
-                    onActionClick = onActionClick,
-                    adContent = adContent,
-                    layoutScale = compactHeightScale,
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                )
-            } else {
+            else -> {
                 IntroCopyAndControls(
                     page = page,
                     currentPage = currentPage,
@@ -262,32 +272,17 @@ internal fun IntroPageContent(
                             y = referenceUnit * INTRO_PAGE_THREE_COPY_TOP * compactHeightScale,
                         ),
                 )
+                if (showNativeAd) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth(),
+                    ) {
+                        adContent()
+                    }
+                }
             }
         }
-    }
-}
-
-@Composable
-private fun NativeIntroPageContent(
-    page: IntroPage,
-    currentPage: Int,
-    sideActionText: String,
-    onActionClick: () -> Unit,
-    adContent: @Composable () -> Unit,
-    layoutScale: Float,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        IntroCopyAndControls(
-            page = page,
-            currentPage = currentPage,
-            sideActionText = sideActionText,
-            onActionClick = onActionClick,
-            layoutScale = layoutScale,
-        )
-        adContent()
     }
 }
 

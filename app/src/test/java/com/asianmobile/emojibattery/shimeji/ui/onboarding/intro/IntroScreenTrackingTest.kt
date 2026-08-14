@@ -18,12 +18,13 @@ class IntroScreenTrackingTest {
     }
 
     @Test
-    fun `native ads are mounted only on their settled intro pages`() {
-        assertTrue(shouldLoadIntroNativeAd(pageIndex = 0, settledPage = 0))
-        assertFalse(shouldLoadIntroNativeAd(pageIndex = 0, settledPage = 1))
-        assertFalse(shouldLoadIntroNativeAd(pageIndex = 1, settledPage = 1))
-        assertFalse(shouldLoadIntroNativeAd(pageIndex = 2, settledPage = 1))
-        assertTrue(shouldLoadIntroNativeAd(pageIndex = 2, settledPage = 2))
+    fun `first native stays mounted and last native starts after its first visit`() {
+        assertTrue(shouldKeepIntroNativeAdMounted(pageIndex = 0, hasVisitedLastPage = false))
+        assertTrue(shouldKeepIntroNativeAdMounted(pageIndex = 0, hasVisitedLastPage = true))
+        assertFalse(shouldKeepIntroNativeAdMounted(pageIndex = 1, hasVisitedLastPage = false))
+        assertFalse(shouldKeepIntroNativeAdMounted(pageIndex = 1, hasVisitedLastPage = true))
+        assertFalse(shouldKeepIntroNativeAdMounted(pageIndex = 2, hasVisitedLastPage = false))
+        assertTrue(shouldKeepIntroNativeAdMounted(pageIndex = 2, hasVisitedLastPage = true))
     }
 
     @Test

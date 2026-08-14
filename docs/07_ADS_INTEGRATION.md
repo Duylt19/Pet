@@ -18,10 +18,12 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
 - App Open Ad dùng Welcome Back pastel cover trong lúc chuyển sang quảng cáo. Đây là transient
   Compose content thuộc `:ads`, không phải navigation destination; Premium/ad-suppression và
   lifecycle show/dismiss hiện tại vẫn là boundary authoritative.
-- Intro page 1 mount/load native placement `SCREEN_INTRO`, page 3 dùng `SCREEN_INTRO_SECOND`,
-  còn page 2 không có ads. Mỗi placement chỉ tạo request khi pager đã settle đúng page; page
-  được HorizontalPager pre-compose ngoài viewport không load sớm. Quay lại page đã xem tái sử
-  dụng instance đã load trong cùng Intro lifecycle.
+- Intro page 1 mount/load native placement `SCREEN_INTRO` ngay khi vào pager; page 3 kích hoạt
+  `SCREEN_INTRO_SECOND` sau lần đầu pager settle tại page 3, còn page 2 không có ads. Sau khi
+  kích hoạt, placement được giữ trong composition suốt Intro lifecycle để swipe quay lại không
+  tạo khoảng trống hoặc request mới. Hai placement Intro không render shimmer: loading/fail
+  collapse hoàn toàn và native chỉ xuất hiện khi SDK đã trả về ad thật, nên offline không làm
+  nội dung bị đẩy/co lại.
 - Navigation có `navigateWithAd()` cho interstitial-aware transition.
 - MainActivity quản lý App Open Ads theo lifecycle.
 - Premium dùng BillingClient và `StartPremiumIndexes` để biết entry source.

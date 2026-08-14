@@ -68,6 +68,7 @@ fun NativeAdInternal(
     instanceKey: String? = null,
     reloadKey: Int = 0,
     adTypeOverride: AdType? = null,
+    showLoadingPlaceholder: Boolean = true,
     loadResult: (Boolean) -> Unit = {}
 ) {
     if (!MobileAds.isInitialized) {
@@ -236,6 +237,9 @@ fun NativeAdInternal(
         return
     }
     val currentAd = adViewModel.nativeAd
+    if (currentAd == null && !showLoadingPlaceholder) {
+        return
+    }
 
     Box(
         modifier = modifier

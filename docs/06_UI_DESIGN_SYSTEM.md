@@ -282,10 +282,11 @@ Intro onboarding theo Figma nodes `8088:13113`, `8088:13148`, `8088:13201`:
 - riêng page 2 dùng Next outline theo node `8446:11010`: width bằng `320/360` viewport,
   nền trắng, viền gradient `#C95DFF → #FB54BB` 2px và text Roboto Medium `20/28` màu
   `#FB3675`;
-- page 1 mount placement `SCREEN_INTRO`, page 3 mount `SCREEN_INTRO_SECOND`, cả hai cao 222;
-  page 2 không có ads. Mỗi placement chỉ được mount sau khi pager đã settle tại đúng page nên
-  việc HorizontalPager pre-compose page kế bên không làm SDK load sớm. Pager, analytics và
-  completion flow không thay đổi;
+- page 1 mount placement `SCREEN_INTRO` ngay khi vào pager; page 3 chỉ kích hoạt
+  `SCREEN_INTRO_SECOND` sau lần đầu settle tại page 3, cả hai cao 222 và page 2 không có ads.
+  Placement đã kích hoạt được giữ lại khi swipe, không có shimmer/loading placeholder và collapse
+  hoàn toàn khi chưa có ad hoặc load fail. Native được neo đáy độc lập nên trạng thái SDK không
+  làm thay đổi vị trí title/indicator/action. Pager, analytics và completion flow không thay đổi;
 - canvas 360×800 là mốc thiết kế. Trên viewport thấp/rộng hơn, artwork và control dùng chung
   compact-height scale theo aspect ratio khả dụng để giữ đúng tương quan dọc và không chồng
   title/button lên composite; native AndroidView page 1/page 3 giữ kích thước thật, không scale.
