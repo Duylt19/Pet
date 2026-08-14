@@ -303,7 +303,9 @@ internal fun PetStoreFlowHost(
             onAction = {
                 viewModel.dismissJoinedToast()
                 onViewPet()
-            }
+            },
+            leadingImageModel = state.joinedPetThumbnailPath
+                ?: R.drawable.img_pink_love_sticker_preview
         )
     }
     state.acquiredFood?.let { food ->
@@ -311,7 +313,8 @@ internal fun PetStoreFlowHost(
             text = stringResource(R.string.pet_store_food_received, food.name),
             action = null,
             onDismiss = viewModel::dismissFoodToast,
-            onAction = {}
+            onAction = {},
+            leadingImageModel = food.imageRes
         )
     }
     state.petStartBlocker?.let { blocker ->

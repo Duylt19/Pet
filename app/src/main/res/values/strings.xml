@@ -894,7 +894,7 @@
     <string name="pet_store_name_title">Your pet\'s name</string>
     <string name="pet_store_name_hint">Pet name</string>
     <string name="pet_store_save">Save</string>
-    <string name="pet_store_joined">%1$s joined your family!</string>
+    <string name="pet_store_joined">%1$s has joined your home! 💕</string>
     <string name="pet_store_view">View</string>
     <string name="pet_store_food_received">%1$s added to your food</string>
     <string name="pet_store_food_reward_title">Claim your reward now!</string>
@@ -946,7 +946,7 @@
     <string name="pet_room_minimum_active_confirm">Got it</string>
     <string name="pet_room_remove_failed">Could not remove this pet. Please try again.</string>
     <string name="pet_room_select_pet_first">Select a pet first.</string>
-    <string name="pet_room_out_of_food">You do not have any of this food left.</string>
+    <string name="pet_room_out_of_food">Out of food. Please add more food.</string>
     <string name="pet_room_already_full">This pet already has maximum energy.</string>
     <string name="pet_room_no_free_slot">Up to 12 pets can be assigned to Pet on Screen. Remove a pet before activating another one.</string>
     <string name="pet_room_settings">Pet settings</string>

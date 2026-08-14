@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
@@ -57,6 +58,8 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -80,6 +83,9 @@ import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
+import kotlinx.coroutines.delay
+
+private val PetRoomToastRobotoMedium = FontFamily(Font(R.font.roboto_medium))
 
 @Composable
 fun PetRoomScreen(
@@ -106,12 +112,12 @@ fun PetRoomScreen(
     }
 
     val context = LocalContext.current
-    LaunchedEffect(uiState.message) {
+    LaunchedEffect(uiState.message, context) {
         val messageRes = when (uiState.message) {
             PetRoomMessage.ROOM_DOWNLOAD_FAILED -> R.string.pet_room_download_failed
             PetRoomMessage.REMOVE_FAILED -> R.string.pet_room_remove_failed
             PetRoomMessage.SELECT_A_PET_FIRST -> R.string.pet_room_select_pet_first
-            PetRoomMessage.OUT_OF_FOOD -> R.string.pet_room_out_of_food
+            PetRoomMessage.OUT_OF_FOOD -> null
             PetRoomMessage.ALREADY_FULL -> R.string.pet_room_already_full
             PetRoomMessage.NO_FREE_OVERLAY_SLOT -> R.string.pet_room_no_free_slot
             null -> null
@@ -122,45 +128,126 @@ fun PetRoomScreen(
         }
     }
 
-    PetRoomContent(
-        uiState = uiState,
-        scene = scene,
-        onNavigateBack = {
-            viewModel.playClick()
-            onNavigateBack()
-        },
-        onOpenPetStore = {
-            viewModel.playClick()
-            onOpenPetStore()
-        },
-        onAddPet = {
-            viewModel.playClick()
-            if (viewModel.requestAddPet()) onOpenPetStore()
-        },
-        onOpenFoodStore = {
-            viewModel.playClick()
-            onOpenFoodStore()
-        },
-        onToggleMusic = viewModel::toggleMusic,
-        onToggleSheet = viewModel::toggleSheet,
-        onSelectTab = viewModel::selectTab,
-        onSelectRoom = viewModel::selectRoom,
-        onOpenPet = viewModel::openPet,
-        onCloseDetail = viewModel::closeDetail,
-        onToggleOnScreen = viewModel::toggleOnScreen,
-        onFeed = viewModel::feed,
-        onPetTapped = viewModel::openPetByPackKey,
-        onRemovePet = viewModel::requestRemovePet,
-        onConfirmRemovePet = viewModel::confirmRemovePet,
-        onCancelRemovePet = viewModel::cancelRemovePet,
-        onDismissLastActivePetDialog = viewModel::dismissLastActivePetDialog,
-        onDismissPetCapacityDialog = viewModel::dismissPetCapacityDialog,
-        onOpenSettings = viewModel::openSettings,
-        onCloseSettings = viewModel::closeSettings,
-        onSettingsSpeedChange = viewModel::updateSettingsSpeed,
-        onSettingsSizeChange = viewModel::updateSettingsSize,
-        onSaveSettings = viewModel::saveSettings
-    )
+    Box(Modifier.fillMaxSize()) {
+        PetRoomContent(
+            uiState = uiState,
+            scene = scene,
+            onNavigateBack = {
+                viewModel.playClick()
+                onNavigateBack()
+            },
+            onOpenPetStore = {
+                viewModel.playClick()
+                onOpenPetStore()
+            },
+            onAddPet = {
+                viewModel.playClick()
+                if (viewModel.requestAddPet()) onOpenPetStore()
+            },
+            onOpenFoodStore = {
+                viewModel.playClick()
+                onOpenFoodStore()
+            },
+            onToggleMusic = viewModel::toggleMusic,
+            onToggleSheet = viewModel::toggleSheet,
+            onSelectTab = viewModel::selectTab,
+            onSelectRoom = viewModel::selectRoom,
+            onOpenPet = viewModel::openPet,
+            onCloseDetail = viewModel::closeDetail,
+            onToggleOnScreen = viewModel::toggleOnScreen,
+            onFeed = viewModel::feed,
+            onPetTapped = viewModel::openPetByPackKey,
+            onRemovePet = viewModel::requestRemovePet,
+            onConfirmRemovePet = viewModel::confirmRemovePet,
+            onCancelRemovePet = viewModel::cancelRemovePet,
+            onDismissLastActivePetDialog = viewModel::dismissLastActivePetDialog,
+            onDismissPetCapacityDialog = viewModel::dismissPetCapacityDialog,
+            onOpenSettings = viewModel::openSettings,
+            onCloseSettings = viewModel::closeSettings,
+            onSettingsSpeedChange = viewModel::updateSettingsSpeed,
+            onSettingsSizeChange = viewModel::updateSettingsSize,
+            onSaveSettings = viewModel::saveSettings
+        )
+
+        if (uiState.message == PetRoomMessage.OUT_OF_FOOD) {
+            PetRoomFoodToast(
+                text = stringResource(R.string.pet_room_out_of_food),
+                isSheetExpanded = uiState.isSheetExpanded,
+                onDismiss = viewModel::dismissMessage
+            )
+        }
+    }
+}
+
+@Composable
+private fun PetRoomFoodToast(
+    text: String,
+    isSheetExpanded: Boolean,
+    onDismiss: () -> Unit
+) {
+    LaunchedEffect(text) {
+        delay(PET_ROOM_TOAST_DURATION_MILLIS)
+        onDismiss()
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                bottom = dimensionResource(
+                    if (isSheetExpanded) {
+                        SdpR.dimen._203sdp
+                    } else {
+                        SdpR.dimen._52sdp
+                    }
+                )
+            ),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        PetRoomFoodToastPill(text = text)
+    }
+}
+
+@Composable
+internal fun PetRoomFoodToastPill(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    val shape = CircleShape
+    Row(
+        modifier = modifier
+            .fillMaxWidth(PET_ROOM_FOOD_TOAST_WIDTH_FRACTION)
+            .shadow(
+                elevation = dimensionResource(SdpR.dimen._18sdp),
+                shape = shape,
+                ambientColor = colorResource(R.color.colors_1F666666),
+                spotColor = colorResource(R.color.colors_1F666666)
+            )
+            .clip(shape)
+            .background(colorResource(R.color.colors_F7F0E7))
+            .border(1.dp, colorResource(R.color.colors_725938), shape)
+            .padding(
+                horizontal = dimensionResource(SdpR.dimen._9sdp),
+                vertical = dimensionResource(SdpR.dimen._8sdp)
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_pet_room_toast_food),
+            contentDescription = null,
+            tint = colorResource(R.color.colors_725938),
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._14sdp))
+        )
+        Text(
+            text = text,
+            color = colorResource(R.color.colors_725938),
+            fontFamily = PetRoomToastRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
 }
 
 @Composable
@@ -1276,6 +1363,8 @@ private const val FIGMA_CARD_WIDTH = 104f
 private val TAB_DASH = 3.dp
 private const val DETAIL_RULE_DASH_PX = 5.4f
 private const val ADD_PET_CARD_KEY = "add_pet"
+private const val PET_ROOM_FOOD_TOAST_WIDTH_FRACTION = 272f / 360f
+private const val PET_ROOM_TOAST_DURATION_MILLIS = 3_000L
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable

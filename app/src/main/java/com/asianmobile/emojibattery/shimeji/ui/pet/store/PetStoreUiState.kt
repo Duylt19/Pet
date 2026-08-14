@@ -45,6 +45,7 @@ data class PetStoreUiState(
     val revealedPetPack: PetPack? = null,
     val namingPet: OwnerPetCatalogEntry? = null,
     val joinedPetName: String? = null,
+    val joinedPetThumbnailPath: String? = null,
     val selectedFood: PetStoreFood? = null,
     val revealedFood: PetStoreFood? = null,
     val acquiredFood: PetStoreFood? = null,

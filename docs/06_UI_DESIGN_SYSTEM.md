@@ -185,6 +185,10 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
 
 Pet Store visual contract:
 
+- action toast theo Figma node `8080:3070` là pill trắng rộng `305/360` viewport, padding
+  `12×8px`, thumbnail pet/food thật `24×24px`, text Roboto Regular 14/20 và action Roboto
+  Medium 14/20. Shadow dùng `#666666` 40%, blur 12px; nội dung dài chỉ ellipsize phần message,
+  không được đẩy hoặc cắt action `View`. Toast tự đóng sau ba giây;
 - Pet Home hero dùng nguyên node Figma `8634:9046` dưới dạng PNG @3x `1002×378`. Frame nominal
   là `328×120px`, nhưng stroke 3px tràn ra ngoài tạo painted bounds `334×126px`; Compose đặt theo
   painted bounds tại x=13px và giữ aspect ratio, không ép bitmap vào frame nominal hoặc clip thêm.
@@ -387,6 +391,11 @@ Input text contract:
 
 My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `8191:5950`:
 
+- cảnh báo hết thức ăn theo node `8634:7995` là Compose overlay trong phòng, không dùng Android
+  system toast: pill `272/360` viewport, nền `#F7F0E7`, viền `#725938` 1px, shadow item
+  `#6666661F`, padding `12×10px`, icon thức ăn `18×18px` và Roboto Medium 14/20. Pill nằm ngay
+  trên sheet ở cả trạng thái mở/thu và tự đóng sau ba giây; các lỗi kỹ thuật khác vẫn dùng
+  feedback hiện có vì không cùng ngữ nghĩa/icon;
 - route `my_pet` là scene phòng full-screen, background lấy từ room catalog (`bg/BG_<id>.webp`)
   và vẽ `ContentScale.Crop`; không dùng Home chrome, không có bottom navigation;
 - top bar `360×64` gồm back `32×32`, biển gỗ `178×40` (`img_pet_room_sign`) mang title, và

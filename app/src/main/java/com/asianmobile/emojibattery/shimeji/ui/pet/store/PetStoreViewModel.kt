@@ -93,7 +93,10 @@ class PetStoreViewModel @Inject constructor(
     fun selectPet(pet: com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry) {
         if (PetStorePolicy.isUnlocked(pet, _uiState.value.installedPackKeys)) {
             _uiState.update {
-                it.copy(joinedPetName = it.customNames[pet.id] ?: pet.name)
+                it.copy(
+                    joinedPetName = it.customNames[pet.id] ?: pet.name,
+                    joinedPetThumbnailPath = pet.thumbnailPath
+                )
             }
         } else if (hasReachedPetCapacity()) {
             _uiState.update {
@@ -188,7 +191,11 @@ class PetStoreViewModel @Inject constructor(
         viewModelScope.launch {
             petStoreRepository.saveCustomName(pet.id, normalized)
             _uiState.update {
-                it.copy(namingPet = null, joinedPetName = normalized)
+                it.copy(
+                    namingPet = null,
+                    joinedPetName = normalized,
+                    joinedPetThumbnailPath = pet.thumbnailPath
+                )
             }
             when (
                 PetStorePolicy.activationAfterUnlock(
@@ -207,7 +214,9 @@ class PetStoreViewModel @Inject constructor(
         }
     }
 
-    fun dismissJoinedToast() = _uiState.update { it.copy(joinedPetName = null) }
+    fun dismissJoinedToast() = _uiState.update {
+        it.copy(joinedPetName = null, joinedPetThumbnailPath = null)
+    }
     fun dismissMessage() = _uiState.update { it.copy(message = null) }
 
     fun selectFood(food: PetStoreFood) = _uiState.update { it.copy(selectedFood = food) }
