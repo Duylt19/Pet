@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -93,6 +94,18 @@ class BatteryEditorViewModel @Inject constructor(
     val effects = _effects.receiveAsFlow()
 
     init {
+        if (themeId > BUILT_IN_BATTERY_THEME_ID) {
+            viewModelScope.launch {
+                catalogRepository.snapshot
+                    .map { snapshot ->
+                        snapshot.themes.any { theme ->
+                            theme.id == themeId && !theme.isBuiltIn
+                        }
+                    }
+                    .first { themeExists -> themeExists }
+                settingsRepository.recordRecentTheme(themeId)
+            }
+        }
         viewModelScope.launch {
             combine(
                 catalogRepository.snapshot,

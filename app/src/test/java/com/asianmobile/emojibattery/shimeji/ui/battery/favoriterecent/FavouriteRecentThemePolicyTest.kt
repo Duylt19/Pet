@@ -31,6 +31,29 @@ class FavouriteRecentThemePolicyTest {
         assertEquals(listOf(2), result.map(FavouriteRecentThemeUiState::id))
     }
 
+    @Test
+    fun `recent screen keeps MRU order and current favorite state`() {
+        val result = recentThemeUiStates(
+            themes = listOf(theme(1), theme(2), theme(3)),
+            recentThemeIds = listOf(3, 1, 2),
+            favoriteThemeIds = setOf(1)
+        )
+
+        assertEquals(listOf(3, 1, 2), result.map(FavouriteRecentThemeUiState::id))
+        assertEquals(listOf(false, true, false), result.map(FavouriteRecentThemeUiState::isFavorite))
+    }
+
+    @Test
+    fun `recent screen ignores missing and unavailable themes`() {
+        val result = recentThemeUiStates(
+            themes = listOf(theme(1), theme(2, assetsReady = false)),
+            recentThemeIds = listOf(9, 2, 1),
+            favoriteThemeIds = emptySet()
+        )
+
+        assertEquals(listOf(1), result.map(FavouriteRecentThemeUiState::id))
+    }
+
     private fun theme(id: Int, assetsReady: Boolean = true) = BatteryThemeEntry(
         id = id,
         name = "Theme $id",

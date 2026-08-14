@@ -71,9 +71,9 @@ Mine visual contract theo Figma node `8080:4828`:
 - toggle điều khiển cùng `BatteryStatusConfig.enabled` và Accessibility gate với Discover;
   Language, Rate, Share, Contact và Privacy giữ flow thật. My Pet mở route `my_pet`,
 - Favourite & Recent là destination riêng: hai tab cố định, lưới ba cột dùng favorite battery
-  state thật và native ad cố định cuối màn. Recent giữ empty state cho tới khi product định nghĩa
-  action tạo lịch sử, thứ tự MRU và giới hạn retention; Apps that hide icons giữ callback chờ
-  feature riêng.
+  state thật và native ad cố định cuối màn. Recent lưu tối đa 30 theme đã thực sự mở vào editor,
+  đưa theme vừa mở lên đầu, bỏ bản trùng và phản ánh trạng thái favorite hiện tại; Apps that hide
+  icons giữ callback chờ feature riêng.
 - Favourite & Recent dùng một Material large app bar `exitUntilCollapsed` cho cả hai tab và mọi
   trạng thái dữ liệu: title 24px khi expanded, chuyển thành 20px inline khi collapsed. Tab bar
   luôn nằm ngay dưới app bar và cả empty state lẫn grid đều phát nested scroll; header không còn
