@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryEditorPreviewSession
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryEditorSystemStateMonitor
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPreviewSystemState
 import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_TROLL_LEVEL_COUNT
@@ -46,8 +47,17 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
     // preview has to read the same Battery catalog or it would show a bar the user does not have.
     private val batteryCatalogRepository: BatteryCatalogRepository,
     private val settingsRepository: BatterySettingsRepository,
-    private val systemStateMonitor: BatteryEditorSystemStateMonitor
+    private val systemStateMonitor: BatteryEditorSystemStateMonitor,
+    private val previewSession: BatteryEditorPreviewSession
 ) : ViewModel() {
+    /**
+     * The live status bar shows this screen's draft while it is open, through the same session the
+     * status-bar editor uses — one bar, one preview channel. The id keeps the two screens from
+     * overwriting each other's preview when both are on the back stack.
+     */
+    private val previewOwnerId = "battery_troll_customize"
+    private var previewClientCount = 0
+    private var previewActive = false
     private val trollId = savedStateHandle.get<Int>(ARG_TROLL_ID) ?: NO_BATTERY_TROLL_THEME_ID
 
     /**
@@ -111,10 +121,12 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
                             .firstOrNull { it.name == config.animationAssetName },
                         isBatteryEnabled = config.enabled &&
                             BatteryAccessibility.isEnabled(context),
+                        isAccessibilityEnabled = BatteryAccessibility.isEnabled(context),
                         isLoading = troll == null && catalog.isLoading,
                         catalogError = if (troll == null) catalog.error else null
                     )
                 }
+                publishPreview()
             }
         }
         viewModelScope.launch { catalogRepository.refresh() }
@@ -251,6 +263,45 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
             savedStateHandle[KEY_DIRTY] = true
             it.copy(draft = draft)
         }
+        publishPreview()
+    }
+
+    fun startPreview() {
+        previewClientCount += 1
+        publishPreview()
+    }
+
+    fun stopPreview() {
+        previewClientCount = (previewClientCount - 1).coerceAtLeast(0)
+        if (previewClientCount > 0) return
+        previewActive = false
+        previewSession.stop(previewOwnerId)
+    }
+
+    /**
+     * Mirrors the status-bar editor: the stored activation stays authoritative, so leaving this
+     * screen open can never switch a disabled bar on, and a bar the user has off is left alone.
+     */
+    private fun publishPreview() {
+        val state = _uiState.value
+        if (previewClientCount == 0 || !configuredBatteryEnabled) {
+            if (previewActive) {
+                previewActive = false
+                previewSession.stop(previewOwnerId)
+            }
+            return
+        }
+        val config = state.previewConfig
+        if (!previewActive) {
+            previewActive = true
+            previewSession.start(previewOwnerId, config)
+        }
+        previewSession.update(previewOwnerId, config, focusedComponent = null)
+    }
+
+    override fun onCleared() {
+        previewSession.stop(previewOwnerId)
+        super.onCleared()
     }
 
     /** Applied or discarded, the draft is no longer worth restoring after a process death. */

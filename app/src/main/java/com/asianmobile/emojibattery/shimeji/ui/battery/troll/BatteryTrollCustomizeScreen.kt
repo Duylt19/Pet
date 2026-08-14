@@ -101,6 +101,10 @@ fun BatteryTrollCustomizeScreen(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
+    DisposableEffect(viewModel) {
+        viewModel.startPreview()
+        onDispose { viewModel.stopPreview() }
+    }
     BackHandler(enabled = true) { viewModel.onBackRequest() }
 
     BatteryTrollCustomizeContent(

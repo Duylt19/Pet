@@ -558,12 +558,13 @@ class StatusBarAccessibilityService : AccessibilityService() {
                 decoded.recycle()
                 return@launch
             }
+            // An incomplete decode still gets drawn. The clock, the percentage and the status
+            // icons owe nothing to a missing download, and refusing to render until every asset
+            // arrives leaves the bar blank over a status bar it is already covering — which is
+            // what a revoked token or a withdrawn asset used to do, permanently.
             if (!decoded.complete) {
-                decoded.recycle()
-                loadedAssetKey = null
                 view.removeCallbacks(assetRetryTick)
                 view.postDelayed(assetRetryTick, ASSET_RETRY_DELAY_MS)
-                return@launch
             }
             emojiBitmap?.recycle()
             batteryBitmap?.recycle()
@@ -574,7 +575,9 @@ class StatusBarAccessibilityService : AccessibilityService() {
             backgroundBitmap = decoded.background
             emotionBitmap = decoded.emotion
             animatedAsset = decoded.animation
-            loadedAssetKey = assetKey
+            // Only a full decode may be cached: a partial one has to be retried, and the retry
+            // has to see a key that does not match.
+            loadedAssetKey = assetKey.takeIf { decoded.complete }
             view.render(
                 currentConfig,
                 BatteryPreviewSystemStatePolicy.deviceState(

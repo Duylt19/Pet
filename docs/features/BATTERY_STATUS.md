@@ -378,6 +378,15 @@ Battery Troll là **một chế độ của chính service này**, không phải
   tạo được từ dữ liệu. Cách sửa: export emoji trên **đúng canvas của pin** với nhân vật đã đặt
   sẵn vị trí từng mức. Khi hai canvas bằng nhau, scale trên bằng `1.0` và app dựng lại bản
   thiết kế nguyên vẹn mà không cần đổi thêm dòng code nào.
+- **Live preview dùng chung một kênh.** Màn Troll publish draft qua đúng
+  `BatteryEditorPreviewSession` mà status-bar editor dùng, owner id riêng để hai màn không ghi
+  đè nhau. Sửa gì trong Troll cũng lên thanh thật ngay, không cần Apply; ngược lại editor
+  release troll override trong lúc preview nên nó xem được đúng pet/pin thật. Trạng thái bật
+  đã lưu vẫn là quyền quyết định: mở màn không bao giờ tự bật một thanh đang tắt.
+- **Decode thiếu vẫn phải vẽ.** Đồng hồ, phần trăm và status icon không nợ gì bản tải; từ chối
+  render cho tới khi đủ asset sẽ để lại thanh **trắng trơn** đè lên status bar thật — đúng
+  chuyện xảy ra khi token bị thu hồi hoặc asset bị thay SHA. Service vẽ phần đã có rồi hẹn
+  retry; chỉ bản decode đầy đủ mới được cache vào `loadedAssetKey`.
 - **Fallback bắt buộc.** Theme đã chọn nhưng vắng mặt trong catalog — chưa tải, offline, hoặc
   bị gỡ trên server — phải rơi về theme battery thường. Không bao giờ để slot trống vì lý do này.
 - **`trollShowEmoji = false` là một lựa chọn, không phải lỗi.** Lúc đó troll vẫn sở hữu slot
