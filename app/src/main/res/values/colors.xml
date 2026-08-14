@@ -57,6 +57,9 @@
     <!-- New Figma Theme -->
     <color name="colors_005DFD">#FF005DFD</color>
     <color name="colors_F8FAFF">#F8FAFF</color>
+    <color name="colors_FFE8F8">#FFE8F8</color>
+    <color name="colors_F6FBFF">#F6FBFF</color>
+    <color name="colors_EAF7FF">#EAF7FF</color>
     <color name="colors_151515">#151515</color>
     <color name="colors_E6E6E6">#E6E6E6</color>
     <color name="colors_B3B3B3">#B3B3B3</color>

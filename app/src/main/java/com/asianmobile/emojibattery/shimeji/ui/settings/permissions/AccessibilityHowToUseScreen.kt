@@ -166,44 +166,61 @@ private fun AccessibilityHowToUseTopBar(
             (collapsedTitleSize.value - expandedTitleSize.value) * collapsedFraction
         ).sp
 
-    LargeTopAppBar(
-        title = {
-            Text(
-                text = stringResource(R.string.accessibility_how_to_use_title),
-                color = colorResource(R.color.colors_212327),
-                fontFamily = AccessibilityRobotoSemiBold,
-                fontSize = titleSize,
-                lineHeight = dimensionResource(SspR.dimen._24ssp).value.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        navigationIcon = {
-            Box(
-                modifier = Modifier
-                    .size(dimensionResource(SdpR.dimen._43sdp))
-                    .clickable(
-                        role = Role.Button,
-                        onClick = onNavigateBack
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_favorite_recent_back),
-                    contentDescription = stringResource(R.string.back),
-                    tint = colorResource(R.color.colors_212327),
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._22sdp))
+    // A transparent app bar lets lazy-list rows remain visible while they scroll underneath it.
+    // Keep the same pastel treatment as the wallpaper, but make this layer opaque so the title
+    // and navigation icon never collide visually with the instructions on compact devices.
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Brush.horizontalGradient(
+                    listOf(
+                        colorResource(R.color.colors_FFE8F8),
+                        colorResource(R.color.colors_F6FBFF),
+                        colorResource(R.color.colors_EAF7FF)
+                    )
                 )
-            }
-        },
-        collapsedHeight = dimensionResource(SdpR.dimen._43sdp),
-        expandedHeight = dimensionResource(SdpR.dimen._77sdp),
-        colors = TopAppBarDefaults.largeTopAppBarColors(
-            containerColor = Color.Transparent,
-            scrolledContainerColor = Color.Transparent
-        ),
-        scrollBehavior = scrollBehavior
-    )
+            )
+    ) {
+        LargeTopAppBar(
+            title = {
+                Text(
+                    text = stringResource(R.string.accessibility_how_to_use_title),
+                    color = colorResource(R.color.colors_212327),
+                    fontFamily = AccessibilityRobotoSemiBold,
+                    fontSize = titleSize,
+                    lineHeight = dimensionResource(SspR.dimen._24ssp).value.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            navigationIcon = {
+                Box(
+                    modifier = Modifier
+                        .size(dimensionResource(SdpR.dimen._43sdp))
+                        .clickable(
+                            role = Role.Button,
+                            onClick = onNavigateBack
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_favorite_recent_back),
+                        contentDescription = stringResource(R.string.back),
+                        tint = colorResource(R.color.colors_212327),
+                        modifier = Modifier.size(dimensionResource(SdpR.dimen._22sdp))
+                    )
+                }
+            },
+            collapsedHeight = dimensionResource(SdpR.dimen._43sdp),
+            expandedHeight = dimensionResource(SdpR.dimen._77sdp),
+            colors = TopAppBarDefaults.largeTopAppBarColors(
+                containerColor = Color.Transparent,
+                scrolledContainerColor = Color.Transparent
+            ),
+            scrollBehavior = scrollBehavior
+        )
+    }
 }
 
 @Composable

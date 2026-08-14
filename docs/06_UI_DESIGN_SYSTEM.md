@@ -397,7 +397,8 @@ Grant Permissions contract theo dashboard Mine Figma node `8080:7477`, card nề
 - màn `Accessibility How to use` theo Figma `8442:9525`: wallpaper pastel riêng, bốn bước với
   ảnh thao tác export theo từng group, số thứ tự hồng, keyword hồng và CTA gradient
   `#C95DFF → #FB54BB` ghim đáy. App bar dùng cùng `exitUntilCollapsed` contract của Customize
-  Status Bar. CTA mở Settings; chỉ khi service đã bật mới pop về source để source tiếp tục action.
+  Status Bar và có lớp pastel opaque khớp wallpaper để nội dung đang cuộn không xuyên/chồng lên
+  back + title. CTA mở Settings; chỉ khi service đã bật mới pop về source để source tiếp tục action.
 
 Input text contract:
 
