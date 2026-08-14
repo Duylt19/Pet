@@ -4,7 +4,7 @@
 
 | Thuộc tính | Giá trị |
 |---|---|
-| Display name | Emoji Battery |
+| Display name | Emoji Battery: Cute Pet |
 | Vai trò repository | Ứng dụng Android pet overlay/Shimeji |
 | Namespace/application ID | `com.asianmobile.emojibattery.shimeji` |
 | UI | Jetpack Compose Material 3 |

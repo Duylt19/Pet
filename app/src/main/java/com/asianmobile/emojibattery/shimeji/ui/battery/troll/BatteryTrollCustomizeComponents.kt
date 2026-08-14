@@ -799,8 +799,9 @@ internal fun BatteryTrollEditPercentDialogCard(
     var input by rememberSaveable(initialPercent) {
         mutableStateOf(initialPercent.coerceIn(MIN_PERCENT, MAX_PERCENT).toString())
     }
+    var rejectedOverflowInput by rememberSaveable(initialPercent) { mutableStateOf(false) }
     val validPercent = BatteryTrollPercentInputPolicy.validValue(input)
-    val hasInputError = BatteryTrollPercentInputPolicy.hasError(input)
+    val hasInputError = rejectedOverflowInput || BatteryTrollPercentInputPolicy.hasError(input)
     val inputBorderColor = colorResource(
         if (hasInputError) R.color.colors_F04438 else R.color.colors_C8C8C9
     )
@@ -836,6 +837,8 @@ internal fun BatteryTrollEditPercentDialogCard(
                 BasicTextField(
                     value = input,
                     onValueChange = { raw ->
+                        rejectedOverflowInput =
+                            BatteryTrollPercentInputPolicy.exceedsMaxInputLength(raw)
                         input = BatteryTrollPercentInputPolicy.normalize(raw)
                     },
                     singleLine = true,

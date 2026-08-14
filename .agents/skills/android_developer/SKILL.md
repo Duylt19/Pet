@@ -11,7 +11,7 @@ không còn là Private Browser.
 
 ## 0. Trạng thái project
 
-- Display name: `Emoji Battery`.
+- Display name: `Emoji Battery: Cute Pet`.
 - Namespace/application ID canonical: `com.asianmobile.emojibattery.shimeji`.
 - Không tự đổi tiếp package, namespace, root project name hoặc provider authority nếu owner chưa yêu cầu.
 - `rootProject.name = "PrivateBrowser"`, resource `Theme.PrivateBrowser` và Firebase project ID

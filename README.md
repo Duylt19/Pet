@@ -9,7 +9,7 @@ settings và các quy ước kiến trúc hiện có.
 
 ## Trạng thái hiện tại
 
-- App display name: `Emoji Battery`.
+- App display name: `Emoji Battery: Cute Pet`.
 - Namespace/application ID: `com.asianmobile.emojibattery.shimeji`.
 - Root Gradle project name hiện vẫn là `PrivateBrowser` (không ảnh hưởng package cài đặt).
 - Flow tạm thời: Splash → Language → Intro → Discover Home; bước Permission onboarding đang

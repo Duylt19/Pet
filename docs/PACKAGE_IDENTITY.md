@@ -6,7 +6,7 @@ Tài liệu này là nguồn chuẩn cho application identity sau lần đổi p
 
 | Thành phần | Giá trị canonical |
 |---|---|
-| App display name | `Emoji Battery` |
+| App display name | `Emoji Battery: Cute Pet` |
 | Application ID | `com.asianmobile.emojibattery.shimeji` |
 | App namespace | `com.asianmobile.emojibattery.shimeji` |
 | Ads namespace | `com.asianmobile.emojibattery.shimeji.ads` |

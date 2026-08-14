@@ -112,15 +112,19 @@ data class BatteryTrollDraft(
 /**
  * Validation shared by the edit dialog and its tests.
  *
- * One extra digit is intentionally retained after the domain maximum. This lets the field show
- * the user's invalid attempt (for example `10000`) instead of silently discarding the last digit.
+ * The field never displays more digits than the domain maximum. The UI separately checks the raw
+ * edit attempt so it can explain why the fifth digit was rejected without presenting an invalid
+ * value as if it had been accepted.
  */
 internal object BatteryTrollPercentInputPolicy {
-    private val maxInputLength = MAX_BATTERY_TROLL_FAKE_PERCENT.toString().length + 1
+    private val maxInputLength = MAX_BATTERY_TROLL_FAKE_PERCENT.toString().length
 
     fun normalize(raw: String): String = raw
         .filter(Char::isDigit)
         .take(maxInputLength)
+
+    fun exceedsMaxInputLength(raw: String): Boolean =
+        raw.count(Char::isDigit) > maxInputLength
 
     fun validValue(input: String): Int? = input
         .toIntOrNull()

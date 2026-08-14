@@ -177,12 +177,14 @@ class BatteryTrollCustomizeStateTest {
     }
 
     @Test
-    fun percent_input_keeps_the_first_invalid_digit_so_the_dialog_can_show_an_error() {
-        val input = BatteryTrollPercentInputPolicy.normalize("99999")
+    fun percent_input_rejects_the_fifth_digit_and_reports_the_overflow_attempt() {
+        val rawInput = "99999"
+        val input = BatteryTrollPercentInputPolicy.normalize(rawInput)
 
-        assertEquals("99999", input)
-        assertTrue(BatteryTrollPercentInputPolicy.hasError(input))
-        assertNull(BatteryTrollPercentInputPolicy.validValue(input))
+        assertEquals("9999", input)
+        assertTrue(BatteryTrollPercentInputPolicy.exceedsMaxInputLength(rawInput))
+        assertFalse(BatteryTrollPercentInputPolicy.hasError(input))
+        assertEquals(MAX_BATTERY_TROLL_FAKE_PERCENT, BatteryTrollPercentInputPolicy.validValue(input))
     }
 
     @Test
@@ -190,6 +192,7 @@ class BatteryTrollCustomizeStateTest {
         val input = BatteryTrollPercentInputPolicy.normalize("99a99")
 
         assertEquals("9999", input)
+        assertFalse(BatteryTrollPercentInputPolicy.exceedsMaxInputLength("99a99"))
         assertFalse(BatteryTrollPercentInputPolicy.hasError(input))
         assertEquals(MAX_BATTERY_TROLL_FAKE_PERCENT, BatteryTrollPercentInputPolicy.validValue(input))
     }
