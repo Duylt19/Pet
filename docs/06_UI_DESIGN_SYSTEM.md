@@ -424,10 +424,10 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
 - panel detail và tên pet trên app bar chỉ hiển thị ở tab My Pet. Pet được chọn vẫn được giữ khi
   chuyển sang Food để mọi card food feed đúng pet đó; tab Room render độc lập, không bị detail
   che và cũng không xóa selection. Chỉ action Back trong detail hoặc xóa chính pet mới bỏ chọn;
-- pet Active đang được chọn có focus arrow theo Figma node `8698:6492`, export PNG @3x để giữ
-  gradient, inner shadow và drop shadow. Painted asset `56×59px` render khoảng `43×46sdp`, canh
-  giữa và chạm ngay phía trên sprite; arrow được vẽ trong cùng scene Canvas nên đi theo pet khi
-  pet wander và vẫn chỉ đúng target khi user chuyển sang Food;
+- pet Active đang được chọn có focus arrow theo Figma node `8698:6492`, export PNG @3x với nền
+  trong suốt để giữ gradient, inner shadow và drop shadow. Painted asset `56×59px` render khoảng
+  `43×46sdp`, canh giữa và chạm ngay phía trên sprite; arrow được vẽ trong cùng scene Canvas nên
+  đi theo pet khi pet wander và vẫn chỉ đúng target khi user chuyển sang Food;
 - pet đã sở hữu đi lại trong scene bằng `PetRoomWander`, không dùng `PetEngine`: engine overlay
   dựng cho góc nhìn ngang nên trọng lực dồn mọi pet về một đường sàn. Phòng nhìn từ phía trước
   nên sàn là hình thang phối cảnh `0.50–0.72` chiều cao scene, mép sau hẹp hơn 14%; pet chọn một

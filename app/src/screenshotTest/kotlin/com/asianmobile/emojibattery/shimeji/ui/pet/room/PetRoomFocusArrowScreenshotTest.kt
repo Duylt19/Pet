@@ -23,7 +23,8 @@ fun PetRoomFocusArrowScreenshotTest() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.colors_FFFFFF)),
+            // A non-white surface catches accidental opaque backgrounds in exported PNG assets.
+            .background(colorResource(R.color.colors_FFE5C7)),
         contentAlignment = Alignment.Center
     ) {
         Image(
