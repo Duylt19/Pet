@@ -148,6 +148,22 @@ class AdConfigurationIntegrityTest {
         assertTrue("Missing Remote Config defaults: $missingKeys", missingKeys.isEmpty())
     }
 
+    @Test
+    fun `collapsible native footer places the ad badge before its title`() {
+        val layout = resourceFile(
+            "src/main/res/layout/holder_load_native_collab_banner.xml"
+        ).readText()
+
+        assertTrue(layout.contains("android:id=\"@+id/tvAdBadge\""))
+        assertTrue(layout.contains("android:text=\"@string/ad_attribution\""))
+        assertTrue(
+            layout.contains("app:layout_constraintStart_toEndOf=\"@id/tvAdBadge\"")
+        )
+        assertTrue(
+            layout.contains("app:layout_constraintStart_toStartOf=\"@id/tvAdBadge\"")
+        )
+    }
+
     private fun resourceFile(relativePath: String): File =
         sequenceOf(File(relativePath), File("ads/$relativePath"))
             .firstOrNull(File::isFile)
