@@ -35,6 +35,7 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_BATTERY_EDITOR_BOTTOM
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_CATEGORY
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_TROLL
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_EDITOR
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_CUSTOMIZE_STATUS_BAR
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
@@ -176,6 +177,7 @@ fun AppNavGraph(
     )
     val currentRoute = currentBackStackEntry?.destination?.route
     val shouldShowBatteryCategoryBottomNative = showBatteryCategoryBottomNative(currentRoute)
+    val shouldShowBatteryTrollBottomNative = showBatteryTrollBottomNative(currentRoute)
     val currentEditorPage = currentBackStackEntry?.arguments?.getString("page")
     val batteryEditorNativeScreenCode = batteryEditorCollapsibleNativeScreenCode(
         currentRoute,
@@ -688,7 +690,12 @@ fun AppNavGraph(
             }
             }
         }
-        if (shouldShowBatteryCategoryBottomNative) {
+        if (shouldShowBatteryTrollBottomNative) {
+            NativeAdInternal(
+                screenCode = SCREEN_BATTERY_TROLL,
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else if (shouldShowBatteryCategoryBottomNative) {
             NativeAdInternal(
                 screenCode = SCREEN_BATTERY_CATEGORY,
                 modifier = Modifier.fillMaxWidth()

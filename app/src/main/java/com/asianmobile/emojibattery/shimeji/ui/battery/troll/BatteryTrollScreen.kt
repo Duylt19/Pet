@@ -33,9 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,9 +61,7 @@ import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
-import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_BATTERY_CATEGORY_INLINE
 import com.asianmobile.emojibattery.shimeji.ads.config.DIALOG_BATTERY_TROLL_REWARD
-import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
 import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
@@ -100,7 +95,6 @@ fun BatteryTrollScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var isInlineBannerVisible by remember { mutableStateOf(true) }
 
     val requiresRewardAd = !state.isPremium && state.trolls.any { troll ->
         troll.entitlement == BatteryTrollEntitlement.PREMIUM &&
@@ -146,14 +140,7 @@ fun BatteryTrollScreen(
         onTroll = viewModel::requestTroll,
         onRetry = viewModel::refresh,
         onDismissReward = viewModel::dismissUnlockDialog,
-        onWatchReward = viewModel::requestRewardUnlock,
-        isInlineBannerVisible = isInlineBannerVisible,
-        bannerAdContent = {
-            BannerAd(
-                adPosition = BANNER_BATTERY_CATEGORY_INLINE,
-                onVisibilityChanged = { isInlineBannerVisible = it }
-            )
-        }
+        onWatchReward = viewModel::requestRewardUnlock
     )
 }
 
@@ -167,8 +154,6 @@ internal fun BatteryTrollContent(
     onRetry: () -> Unit,
     onDismissReward: () -> Unit,
     onWatchReward: () -> Unit,
-    isInlineBannerVisible: Boolean = true,
-    bannerAdContent: @Composable () -> Unit = { BatteryTrollInlineBannerAd() },
     nativeAdContent: @Composable () -> Unit = { BatteryTrollRewardNativeAd() }
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -207,23 +192,6 @@ internal fun BatteryTrollContent(
                     dimensionResource(SdpR.dimen._9sdp)
                 )
             ) {
-                if (isInlineBannerVisible) {
-                    item(
-                        key = "battery_troll_inline_banner",
-                        span = { GridItemSpan(maxLineSpan) }
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(
-                                    RoundedCornerShape(dimensionResource(SdpR.dimen._3sdp))
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            bannerAdContent()
-                        }
-                    }
-                }
                 when {
                     state.isLoading && state.trolls.isEmpty() -> item(
                         key = "battery_troll_loading",
@@ -456,11 +424,6 @@ internal fun BatteryTrollRewardSheetContent(
 }
 
 @Composable
-private fun BatteryTrollInlineBannerAd() {
-    BannerAd(adPosition = BANNER_BATTERY_CATEGORY_INLINE)
-}
-
-@Composable
 private fun BatteryTrollRewardNativeAd() {
     NativeAdInternal(
         screenCode = DIALOG_BATTERY_TROLL_REWARD,
@@ -544,17 +507,6 @@ private fun BatteryTrollEmpty(error: BatteryTrollCatalogError?, onRetry: () -> U
     }
 }
 
-/** Figma places a 328x50 banner as the first grid child; the stub keeps that footprint. */
-@Composable
-internal fun BatteryTrollBannerPreviewSlot() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._38sdp))
-            .background(colorResource(R.color.colors_FFEBF1))
-    )
-}
-
 internal fun previewBatteryTrollState(): BatteryTrollUiState {
     val trolls = List(6) { index ->
         BatteryTrollEntry(
@@ -595,8 +547,6 @@ private fun BatteryTrollUnpublishedPreview() {
         onRetry = {},
         onDismissReward = {},
         onWatchReward = {},
-        isInlineBannerVisible = false,
-        bannerAdContent = {},
         nativeAdContent = {}
     )
 }
@@ -612,8 +562,6 @@ private fun BatteryTrollOfflinePreview() {
         onRetry = {},
         onDismissReward = {},
         onWatchReward = {},
-        isInlineBannerVisible = false,
-        bannerAdContent = {},
         nativeAdContent = {}
     )
 }
@@ -629,7 +577,6 @@ private fun BatteryTrollContentPreview() {
         onRetry = {},
         onDismissReward = {},
         onWatchReward = {},
-        bannerAdContent = { BatteryTrollBannerPreviewSlot() },
         nativeAdContent = {}
     )
 }

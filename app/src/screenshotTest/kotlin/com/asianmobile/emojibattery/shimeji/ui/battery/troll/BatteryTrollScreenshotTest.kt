@@ -17,7 +17,6 @@ fun BatteryTrollScreenshotTest() {
         onRetry = {},
         onDismissReward = {},
         onWatchReward = {},
-        bannerAdContent = { BatteryTrollBannerPreviewSlot() },
         nativeAdContent = {}
     )
 }
@@ -37,8 +36,6 @@ fun BatteryTrollUnpublishedScreenshotTest() {
         onRetry = {},
         onDismissReward = {},
         onWatchReward = {},
-        isInlineBannerVisible = false,
-        bannerAdContent = {},
         nativeAdContent = {}
     )
 }

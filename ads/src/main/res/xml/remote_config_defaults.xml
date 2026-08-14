@@ -140,6 +140,11 @@
     </entry>
 
     <entry>
+        <key>is_show_native_battery_troll</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
         <key>is_show_native_customize_status_bar</key>
         <value>true</value>
     </entry>

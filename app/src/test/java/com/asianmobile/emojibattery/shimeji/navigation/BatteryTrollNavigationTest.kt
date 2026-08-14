@@ -22,8 +22,10 @@ class BatteryTrollNavigationTest {
     }
 
     @Test
-    fun `the themes grid keeps the shared home banner`() {
-        assertTrue(showHomeBottomBanner(Routes.BATTERY_TROLL))
+    fun `the themes grid replaces both banners with one bottom native`() {
+        assertFalse(showHomeBottomBanner(Routes.BATTERY_TROLL))
+        assertTrue(showBatteryTrollBottomNative(Routes.BATTERY_TROLL))
+        assertFalse(showBatteryCategoryBottomNative(Routes.BATTERY_TROLL))
     }
 
     @Test
@@ -46,5 +48,6 @@ class BatteryTrollNavigationTest {
     fun `the troll routes do not collide with the battery editor prefixes`() {
         assertFalse(showBatteryEditorBottomBanner(Routes.BATTERY_TROLL))
         assertFalse(showHomeBottomBanner("${Routes.BATTERY_TROLL_CUSTOMIZE}/9"))
+        assertFalse(showBatteryTrollBottomNative("${Routes.BATTERY_TROLL_CUSTOMIZE}/9"))
     }
 }

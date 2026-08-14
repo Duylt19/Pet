@@ -25,7 +25,7 @@ tự thêm quảng cáo chỉ từ tên route.
 | Customize Status Bar overview | `battery_editor` | Native `screen_customize_status_bar` dạng collapsible |
 | Battery editor library | Screen library tương ứng | Banner `battery_editor_bottom` |
 | Battery editor option/emotion/detail | Screen editor tương ứng | Native `screen_battery_editor` dạng collapsible; discard sheet dùng `dialog_battery_discard` |
-| Battery Troll | `battery_troll` | Banner inline `battery_category_inline`; reward sheet dùng `dialog_battery_troll_reward` + Rewarded |
+| Battery Troll | `battery_troll` | Native đáy collapsible `screen_battery_troll`; reward sheet dùng `dialog_battery_troll_reward` + Rewarded |
 | Premium | `premium` | Không có placement |
 | Exit dialog | Giữ screen hiện tại | Native `dialog_exit_app` |
 
@@ -45,6 +45,7 @@ tự thêm quảng cáo chỉ từ tên route.
 | Favourite & Recent | `screen_favourite_recent` | `is_show_native_favourite_recent` | `id_emoji_battery_native_favourite_recent` | `HEIGHT_222` |
 | Battery catalog | `screen_battery_catalog` | `is_show_native_battery_catalog` | `id_emoji_battery_native_battery_catalog` | `HEIGHT_150` |
 | Battery category | `screen_battery_category` | `is_show_native_battery_category` | `id_emoji_battery_native_battery_category` | `HEIGHT_222` |
+| Battery Troll | `screen_battery_troll` | `is_show_native_battery_troll` | `id_emoji_battery_native_battery_troll` | `COLLAPSE_SMALL` |
 | Customize Status Bar | `screen_customize_status_bar` | `is_show_native_customize_status_bar` | `id_emoji_battery_native_customize_status_bar` | `COLLAPSE_SMALL` |
 | Battery editor options | `screen_battery_editor` | `is_show_native_battery_editor` | `id_emoji_battery_native_battery_editor` | `COLLAPSE_SMALL` |
 | Battery reward sheet | `dialog_battery_reward` | `is_show_native_battery_reward` | `id_emoji_battery_native_battery_reward` | `HEIGHT_222` |
