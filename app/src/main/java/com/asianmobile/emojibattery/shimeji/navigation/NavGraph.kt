@@ -138,7 +138,10 @@ internal fun batteryEditorCollapsibleNativeScreenCode(route: String?, page: Stri
         (
             route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true &&
                 BatteryEditorPage.fromRoute(page)?.let { editorPage ->
-                    editorPage == BatteryEditorPage.EMOJI || editorPage.isStatusOptionPage()
+                    editorPage == BatteryEditorPage.BATTERY_TEMPLATES ||
+                        editorPage == BatteryEditorPage.EMOJI_TEMPLATES ||
+                        editorPage == BatteryEditorPage.EMOJI ||
+                        editorPage.isStatusOptionPage()
                 } == true
             ) -> SCREEN_BATTERY_EDITOR
 
