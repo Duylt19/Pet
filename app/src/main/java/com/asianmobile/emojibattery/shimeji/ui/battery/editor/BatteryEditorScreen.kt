@@ -244,8 +244,11 @@ internal fun BatteryEditorScreen(
                     }
                 }
 
-                BatteryEditorEffect.ShowApplySuccess ->
+                BatteryEditorEffect.ShowApplySuccess -> {
                     ToastHelper.show(context, applySuccessMessage)
+                    viewModel.onApplyCompletionHandled()
+                    onBack()
+                }
             }
         }
     }
@@ -574,7 +577,7 @@ private fun BatteryEditorContent(
         }
         if (page == BatteryEditorPage.OVERVIEW) {
             ApplyFooter(
-                enabled = state.isThemeAvailable,
+                enabled = state.isApplyEnabled,
                 selectionInProgress = state.assetSelectionInProgress != null,
                 isApplied = state.config.enabled,
                 onApply = onApply,

@@ -144,9 +144,7 @@ internal fun BatteryEditorFigmaContent(
             bottomBar = {
                 if (isOverview) {
                     StatusBarApplyPanel(
-                        enabled = state.isThemeAvailable &&
-                            state.assetSelectionInProgress == null &&
-                            state.backgroundSelectionInProgress == null,
+                        enabled = state.isApplyEnabled,
                         onApply = onApply
                     )
                 }

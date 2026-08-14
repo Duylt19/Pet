@@ -39,8 +39,16 @@ data class BatteryEditorUiState(
     val backgroundSelectionInProgress: Int? = null,
     val emotionSelectionInProgress: Int? = null,
     val isRewardInProgress: Boolean = false,
+    val isApplyInProgress: Boolean = false,
     val message: BatteryEditorMessage? = null
-)
+) {
+    val isApplyEnabled: Boolean get() =
+        isThemeAvailable &&
+            assetSelectionInProgress == null &&
+            backgroundSelectionInProgress == null &&
+            emotionSelectionInProgress == null &&
+            !isApplyInProgress
+}
 
 data class BatteryEditorThemeSelection(
     val themeId: Int,
@@ -61,6 +69,6 @@ enum class BatteryEditorMessage {
 sealed interface BatteryEditorEffect {
     data object ShowRewardedAd : BatteryEditorEffect
 
-    /** Apply keeps the user on the screen, so the confirmation is the only sign it worked. */
+    /** The UI shows confirmation, then returns to the destination that opened Customize. */
     data object ShowApplySuccess : BatteryEditorEffect
 }

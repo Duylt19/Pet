@@ -55,6 +55,7 @@ class BatteryTrollCustomizeStateTest {
 
         assertTrue(state.isApplyEnabled)
         assertFalse(state.isUnavailable)
+        assertFalse(state.copy(isApplyInProgress = true).isApplyEnabled)
     }
 
     @Test

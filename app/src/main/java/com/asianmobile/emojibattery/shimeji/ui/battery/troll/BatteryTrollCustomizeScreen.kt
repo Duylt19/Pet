@@ -87,8 +87,11 @@ fun BatteryTrollCustomizeScreen(
                     showAccessibilityDisclosure = true
                 }
 
-                BatteryTrollCustomizeEffect.ShowApplySuccess ->
+                BatteryTrollCustomizeEffect.ShowApplySuccess -> {
                     ToastHelper.show(context, applySuccessMessage)
+                    viewModel.onApplyCompletionHandled()
+                    onNavigateBack()
+                }
             }
         }
     }

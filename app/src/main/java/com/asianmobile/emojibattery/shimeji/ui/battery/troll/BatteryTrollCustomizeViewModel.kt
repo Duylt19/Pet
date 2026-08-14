@@ -232,6 +232,7 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
     fun apply() {
         if (!_uiState.value.isApplyEnabled) return
         val draft = _uiState.value.draft
+        _uiState.update { it.copy(isApplyInProgress = true) }
         settingsRepository.applyConfig(
             latestConfig.copy(
                 enabled = true,
@@ -256,13 +257,17 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
         emit(BatteryTrollCustomizeEffect.ShowApplySuccess)
     }
 
+    fun onApplyCompletionHandled() {
+        _uiState.update { it.copy(isApplyInProgress = false) }
+    }
+
     private fun editDraft(transform: (BatteryTrollDraft) -> BatteryTrollDraft) {
         hasLocalEdits = true
         _uiState.update {
             val draft = transform(it.draft)
             savedStateHandle[KEY_DRAFT] = BatteryTrollDraftCodec.encode(draft)
             savedStateHandle[KEY_DIRTY] = true
-            it.copy(draft = draft)
+            it.copy(draft = draft, isApplyInProgress = false)
         }
         publishPreview()
     }

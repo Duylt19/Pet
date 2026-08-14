@@ -412,9 +412,8 @@ class BatteryEditorViewModel @Inject constructor(
 
     fun apply() {
         val state = _uiState.value
-        if (!state.isThemeAvailable || state.assetSelectionInProgress != null ||
-            state.emotionSelectionInProgress != null
-        ) return
+        if (!state.isApplyEnabled) return
+        _uiState.update { it.copy(isApplyInProgress = true) }
         // Applying here takes the status bar back from Battery Troll; one bar, one config,
         // last Apply wins.
         settingsRepository.applyConfig(
@@ -429,6 +428,10 @@ class BatteryEditorViewModel @Inject constructor(
             )
         }
         emit(BatteryEditorEffect.ShowApplySuccess)
+    }
+
+    fun onApplyCompletionHandled() {
+        _uiState.update { it.copy(isApplyInProgress = false) }
     }
 
     fun disable() {
@@ -461,7 +464,8 @@ class BatteryEditorViewModel @Inject constructor(
             it.copy(
                 config = config,
                 isThemeAvailable = selectedAssetsReady(it.themes, config),
-                hasUnsavedChanges = true
+                hasUnsavedChanges = true,
+                isApplyInProgress = false
             )
         }
         publishPreview(_uiState.value.config)

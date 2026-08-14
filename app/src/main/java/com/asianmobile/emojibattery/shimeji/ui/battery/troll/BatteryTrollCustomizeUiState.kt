@@ -43,6 +43,7 @@ data class BatteryTrollCustomizeUiState(
     val isAccessibilityEnabled: Boolean = false,
     val isEditingFakePercent: Boolean = false,
     val isDiscardVisible: Boolean = false,
+    val isApplyInProgress: Boolean = false,
     val isLoading: Boolean = true,
     /** Why the catalog could not produce [troll]; `null` while it still can. */
     val catalogError: BatteryTrollCatalogError? = null
@@ -91,7 +92,8 @@ data class BatteryTrollCustomizeUiState(
      * Apply writes `trollThemeId`, so it must not run for a troll the catalog never resolved: the
      * status bar would silently fall back to the normal theme and the button would look broken.
      */
-    val isApplyEnabled: Boolean get() = isTrollResolved && !isLoading
+    val isApplyEnabled: Boolean get() =
+        isTrollResolved && !isLoading && !isApplyInProgress
 }
 
 data class BatteryTrollDraft(
@@ -176,6 +178,6 @@ sealed interface BatteryTrollCustomizeEffect {
     data object Close : BatteryTrollCustomizeEffect
     data object RequestBatteryAccessibility : BatteryTrollCustomizeEffect
 
-    /** Apply keeps the user on the screen, so the confirmation is the only sign it worked. */
+    /** The UI shows confirmation, then returns to the Battery Troll catalog. */
     data object ShowApplySuccess : BatteryTrollCustomizeEffect
 }
