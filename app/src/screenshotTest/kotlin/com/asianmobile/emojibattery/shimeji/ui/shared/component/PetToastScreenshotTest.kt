@@ -11,7 +11,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ui.pet.room.PetRoomMessageToastPill
-import com.intuit.sdp.R as SdpR
 
 @PreviewTest
 @Preview(name = "Pet Store joined toast", widthDp = 360, heightDp = 120)
@@ -22,8 +21,7 @@ fun PetStoreJoinedToastScreenshotTest() {
         action = "View",
         onDismiss = {},
         onAction = {},
-        leadingImageModel = R.drawable.img_home_brand_bunny,
-        bottomPaddingRes = SdpR.dimen._12sdp
+        leadingImageModel = R.drawable.img_home_brand_bunny
     )
 }
 

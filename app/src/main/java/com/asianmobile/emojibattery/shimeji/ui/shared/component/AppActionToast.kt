@@ -42,7 +42,8 @@ private val ToastRobotoMedium = FontFamily(Font(R.font.roboto_medium))
 
 /**
  * The white pill the app uses to confirm something happened, with an optional action. Shared by
- * Pet Store and Pet Room so a confirmation looks the same wherever it comes from.
+ * Pet Store and Pet Room so a confirmation looks the same wherever it comes from. The default
+ * offset is relative to the Home content bounds, which already end above its bottom navigation.
  */
 @Composable
 fun AppActionToast(
@@ -51,7 +52,7 @@ fun AppActionToast(
     onDismiss: () -> Unit,
     onAction: () -> Unit,
     leadingImageModel: Any? = R.drawable.img_pink_love_sticker,
-    bottomPaddingRes: Int = SdpR.dimen._125sdp
+    bottomPaddingRes: Int = SdpR.dimen._12sdp
 ) {
     LaunchedEffect(text) {
         delay(TOAST_DURATION_MILLIS)
