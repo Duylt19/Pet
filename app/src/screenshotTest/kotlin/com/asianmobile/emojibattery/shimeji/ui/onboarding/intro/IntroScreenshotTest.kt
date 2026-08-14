@@ -20,8 +20,9 @@ fun IntroPageOneScreenshotTest() {
     IntroPageContent(
         pageIndex = 0,
         currentPage = 0,
+        showNativeAd = false,
         onActionClick = {},
-        adContent = { IntroAdPlaceholder() },
+        adContent = {},
     )
 }
 
@@ -32,6 +33,7 @@ fun IntroPageTwoScreenshotTest() {
     IntroPageContent(
         pageIndex = 1,
         currentPage = 1,
+        showNativeAd = false,
         onActionClick = {},
         adContent = {},
     )
@@ -44,6 +46,33 @@ fun IntroPageThreeScreenshotTest() {
     IntroPageContent(
         pageIndex = 2,
         currentPage = 2,
+        showNativeAd = true,
+        onActionClick = {},
+        adContent = { IntroAdPlaceholder() },
+    )
+}
+
+@PreviewTest
+@Preview(widthDp = 360, heightDp = 720)
+@Composable
+fun IntroPageTwoCompactScreenshotTest() {
+    IntroPageContent(
+        pageIndex = 1,
+        currentPage = 1,
+        showNativeAd = false,
+        onActionClick = {},
+        adContent = {},
+    )
+}
+
+@PreviewTest
+@Preview(widthDp = 360, heightDp = 720)
+@Composable
+fun IntroPageThreeCompactScreenshotTest() {
+    IntroPageContent(
+        pageIndex = 2,
+        currentPage = 2,
+        showNativeAd = true,
         onActionClick = {},
         adContent = { IntroAdPlaceholder() },
     )

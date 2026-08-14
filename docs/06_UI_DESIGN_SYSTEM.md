@@ -248,8 +248,12 @@ Intro onboarding theo Figma nodes `8088:13113`, `8088:13148`, `8088:13201`:
   frame vì sẽ bake status bar iPhone, text và ad creative mẫu vào bitmap;
 - riêng page 2 dùng Next outline theo node `8446:11010`: width bằng `320/360` viewport,
   nền trắng, viền `#FF5D7D` 2px và text Roboto Medium `20/28` màu `#FB3675`;
-- page 1/3 giữ placement `SCREEN_INTRO`/`SCREEN_INTRO_SECOND` cao 222; page 2 không có ad.
-  Pager, analytics và completion flow không thay đổi.
+- chỉ page 3 mount placement `SCREEN_INTRO_SECOND` cao 222, và chỉ sau khi pager đã settle
+  tại page 3. Page 1/2 không tạo native request; việc HorizontalPager pre-compose page kế bên
+  không được phép làm SDK load sớm. Pager, analytics và completion flow không thay đổi;
+- canvas 360×800 là mốc thiết kế. Trên viewport thấp/rộng hơn, artwork và control dùng chung
+  compact-height scale theo aspect ratio khả dụng để giữ đúng tương quan dọc và không chồng
+  title/button lên composite; native AndroidView page 3 giữ kích thước thật, không scale.
 
 Overlay permission disclosure theo Figma node `8436:5998`:
 

@@ -10,7 +10,7 @@ màn con mới pop về tab đã mở màn đó.
 | `splash` | `ui/onboarding/splash/SplashScreen` | Figma pastel startup, billing/consent/banner và điều hướng bước tiếp theo |
 | `language` | `ui/onboarding/language/LanguageScreen` | Danh sách language nền trắng theo Figma, chọn rồi confirm; giữ native ad onboarding |
 | `language_settings` | `ui/onboarding/language/LanguageScreen` | Cùng UI Language, có Back; confirm rồi restart app shell |
-| `intro` | `ui/onboarding/intro/IntroScreen` | Pager ba trang theo Figma: Emoji Battery, status-bar customization và Cute Pet; giữ native ads page 1/3 theo config |
+| `intro` | `ui/onboarding/intro/IntroScreen` | Pager ba trang theo Figma: Emoji Battery, status-bar customization và Cute Pet; layout co theo chiều cao khả dụng, chỉ load/show native khi pager settle ở page 3 |
 | `permission` | `ui/onboarding/permission/PermissionScreen` | Route/class được giữ nhưng tạm loại khỏi onboarding bằng `IS_FIRST_PERMISSION_ONBOARDING_ENABLED=false`. Khi bật lại: overlay special access + notification permission, có Continue/Skip; request overlay đi qua shared disclosure rồi biến thể overlay của Grant Permissions trước Android Settings |
 | `discover` | `ui/home/discover/DiscoverScreen` | Tab Discover: Emoji Battery toggle, Battery Troll hero và pet/battery previews; không còn pet switch/quick-action frame; bottom chrome do Home shell sở hữu. Recovery card hiện trên enable card khi Accessibility bị thu hồi ngoài ý muốn |
 | `search` | `ui/search/SearchScreen` | Figma Search: tab pet/battery, banner, lưới kết quả và native ad cố định; pet mở Shimeji Pets, theme mở editor |
