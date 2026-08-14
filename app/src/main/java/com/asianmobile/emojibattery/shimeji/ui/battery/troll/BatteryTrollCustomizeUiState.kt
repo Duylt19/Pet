@@ -205,3 +205,9 @@ sealed interface BatteryTrollCustomizeEffect {
     /** The UI shows confirmation, then returns to the Battery Troll catalog. */
     data object ShowApplySuccess : BatteryTrollCustomizeEffect
 }
+
+/** A pending Apply resumes only after Android reports the Accessibility service as enabled. */
+internal fun shouldResumeBatteryTrollApply(
+    hasPendingApply: Boolean,
+    isAccessibilityEnabled: Boolean
+): Boolean = hasPendingApply && isAccessibilityEnabled

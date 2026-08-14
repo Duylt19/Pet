@@ -84,7 +84,9 @@ Customize Battery Bar ──locked pet/pin──> Rewarded hoặc Premium ──
 Customize Battery Bar ──custom icon──> Icon Editor ──chỉnh trực tiếp draft/preview ──Back──> overview
 Customize Battery Bar ──Emotion──> 8 emotion packs ──pack──> 10 emotion styles ──chọn──> cập nhật draft/preview
 Customize Battery Bar ──Apply(service on)──> persist config + accessibility overlay ──toast──> pop về source
-Battery Troll Customize ──Apply──> persist troll override ──toast──> Battery Troll Themes
+Battery Troll Customize ──Apply (Accessibility granted)──> persist troll override ──toast──> Battery Troll Themes
+                        └─ Apply (missing)──> disclosure ──How to use/Settings──> grant: resume Apply
+                                                                            └─ deny: keep disabled
 ```
 
 Sau khi pet được verify/cài thành công, Pet Store hiển thị unlock-success overlay và chạy

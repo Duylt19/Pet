@@ -17,6 +17,28 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BatteryTrollCustomizeStateTest {
+
+    @Test
+    fun `pending troll apply only resumes after accessibility is enabled`() {
+        assertTrue(
+            shouldResumeBatteryTrollApply(
+                hasPendingApply = true,
+                isAccessibilityEnabled = true
+            )
+        )
+        assertFalse(
+            shouldResumeBatteryTrollApply(
+                hasPendingApply = true,
+                isAccessibilityEnabled = false
+            )
+        )
+        assertFalse(
+            shouldResumeBatteryTrollApply(
+                hasPendingApply = false,
+                isAccessibilityEnabled = true
+            )
+        )
+    }
     private val troll = BatteryTrollEntry(
         id = 7,
         name = "Black Cat",

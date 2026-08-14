@@ -82,6 +82,8 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
 
     private var hasLocalEdits = savedStateHandle.get<Boolean>(KEY_DIRTY) == true &&
         restoredDraft != null
+    private var hasPendingApplyAfterAccessibility =
+        savedStateHandle.get<Boolean>(KEY_PENDING_APPLY_AFTER_ACCESSIBILITY) == true
     private var configuredBatteryEnabled = false
     private var latestConfig = BatteryStatusConfig()
 
@@ -126,6 +128,7 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
                         catalogError = if (troll == null) catalog.error else null
                     )
                 }
+                resumePendingApplyIfReady(BatteryAccessibility.isEnabled(context))
                 publishPreview()
             }
         }
@@ -181,6 +184,7 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
      */
     fun onBatteryToggle() {
         if (!BatteryAccessibility.isEnabled(context)) {
+            setPendingApplyAfterAccessibility(false)
             commitBatteryEnableRequest()
             emit(BatteryTrollCustomizeEffect.RequestBatteryAccessibility)
             return
@@ -193,8 +197,13 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
      * Repeated at the disclosure hand-off, because a resume in between settles pending requests.
      */
     fun commitBatteryEnableRequest() {
+        val config = if (hasPendingApplyAfterAccessibility) {
+            appliedConfig(latestConfig, _uiState.value.draft)
+        } else {
+            latestConfig
+        }
         settingsRepository.requestEnable(
-            config = latestConfig,
+            config = config,
             isAccessibilityGranted = BatteryAccessibility.isEnabled(context)
         )
     }
@@ -208,10 +217,20 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
                 isAccessibilityEnabled = accessibilityEnabled
             )
         }
+        resumePendingApplyIfReady(accessibilityEnabled)
+    }
+
+    fun onAccessibilityHowToUseResult(permissionGranted: Boolean) {
+        if (!permissionGranted || !BatteryAccessibility.isEnabled(context)) {
+            cancelPendingBatteryEnable()
+            return
+        }
+        refreshAccessibility()
     }
 
     /** Returning without the grant takes the optimistic activation back. */
     fun cancelPendingBatteryEnable() {
+        setPendingApplyAfterAccessibility(false)
         settingsRepository.settleAccessibilityGrant(BatteryAccessibility.isEnabled(context))
     }
 
@@ -245,30 +264,79 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
      */
     fun apply() {
         if (!_uiState.value.isApplyEnabled) return
+        if (!BatteryAccessibility.isEnabled(context)) {
+            setPendingApplyAfterAccessibility(true)
+            requestApplyBeforeAccessibilityGrant()
+            emit(BatteryTrollCustomizeEffect.RequestBatteryAccessibility)
+            return
+        }
+        applyGrantedDraft()
+    }
+
+    /**
+     * Mirrors Customize Status Bar: persist the exact troll draft before leaving the app so the
+     * Accessibility service can render it immediately when Android enables the service.
+     */
+    private fun requestApplyBeforeAccessibilityGrant() {
+        val state = _uiState.value
+        if (!state.isApplyEnabled) return
+        val draft = state.draft
+        settingsRepository.requestEnable(
+            config = appliedConfig(latestConfig, draft),
+            isAccessibilityGranted = false
+        )
+        markDraftApplied(draft)
+    }
+
+    private fun applyGrantedDraft() {
+        if (!_uiState.value.isApplyEnabled) return
         val draft = _uiState.value.draft
         _uiState.update { it.copy(isApplyInProgress = true) }
-        settingsRepository.applyConfig(
-            latestConfig.copy(
-                enabled = true,
-                hasApplied = true,
-                showPercentage = draft.showPercentage,
-                percentSizeDp = draft.percentSizeDp,
-                trollMode = draft.mode,
-                trollFakePercent = draft.fakePercent.coerceIn(
-                    MIN_BATTERY_TROLL_FAKE_PERCENT,
-                    MAX_BATTERY_TROLL_FAKE_PERCENT
-                ),
-                trollThemeId = trollId,
-                trollEmojiLevelIndex = draft.emojiLevelIndex,
-                trollBatteryLevelIndex = draft.batteryLevelIndex,
-                trollRandomArtwork = draft.randomArtwork,
-                trollShowEmoji = draft.showEmoji
-            )
-        )
+        settingsRepository.applyConfig(appliedConfig(latestConfig, draft))
+        setPendingApplyAfterAccessibility(false)
+        markDraftApplied(draft)
+        emit(BatteryTrollCustomizeEffect.ShowApplySuccess)
+    }
+
+    private fun resumePendingApplyIfReady(accessibilityEnabled: Boolean) {
+        if (shouldResumeBatteryTrollApply(
+                hasPendingApply = hasPendingApplyAfterAccessibility,
+                isAccessibilityEnabled = accessibilityEnabled
+            ) && _uiState.value.isApplyEnabled
+        ) {
+            applyGrantedDraft()
+        }
+    }
+
+    private fun appliedConfig(
+        base: BatteryStatusConfig,
+        draft: BatteryTrollDraft
+    ): BatteryStatusConfig = base.copy(
+        enabled = true,
+        hasApplied = true,
+        showPercentage = draft.showPercentage,
+        percentSizeDp = draft.percentSizeDp,
+        trollMode = draft.mode,
+        trollFakePercent = draft.fakePercent.coerceIn(
+            MIN_BATTERY_TROLL_FAKE_PERCENT,
+            MAX_BATTERY_TROLL_FAKE_PERCENT
+        ),
+        trollThemeId = trollId,
+        trollEmojiLevelIndex = draft.emojiLevelIndex,
+        trollBatteryLevelIndex = draft.batteryLevelIndex,
+        trollRandomArtwork = draft.randomArtwork,
+        trollShowEmoji = draft.showEmoji
+    )
+
+    private fun markDraftApplied(draft: BatteryTrollDraft) {
         hasLocalEdits = false
         clearDraft()
         _uiState.update { it.copy(applied = draft) }
-        emit(BatteryTrollCustomizeEffect.ShowApplySuccess)
+    }
+
+    private fun setPendingApplyAfterAccessibility(pending: Boolean) {
+        hasPendingApplyAfterAccessibility = pending
+        savedStateHandle[KEY_PENDING_APPLY_AFTER_ACCESSIBILITY] = pending
     }
 
     fun onApplyCompletionHandled() {
@@ -377,5 +445,7 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
         const val ARG_TROLL_ID = "trollId"
         const val KEY_DRAFT = "trollDraft"
         const val KEY_DIRTY = "trollDraftDirty"
+        const val KEY_PENDING_APPLY_AFTER_ACCESSIBILITY =
+            "trollPendingApplyAfterAccessibility"
     }
 }

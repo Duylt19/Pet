@@ -97,11 +97,7 @@ fun BatteryTrollCustomizeScreen(
     }
     LaunchedEffect(accessibilityHowToUseResult) {
         accessibilityHowToUseResult?.let { permissionGranted ->
-            if (permissionGranted) {
-                viewModel.refreshAccessibility()
-            } else {
-                viewModel.cancelPendingBatteryEnable()
-            }
+            viewModel.onAccessibilityHowToUseResult(permissionGranted)
             onAccessibilityHowToUseResultConsumed()
         }
     }
