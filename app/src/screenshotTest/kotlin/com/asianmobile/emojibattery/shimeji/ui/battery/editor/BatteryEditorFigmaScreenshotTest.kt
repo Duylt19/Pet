@@ -375,6 +375,9 @@ private fun previewEditorState(): BatteryEditorUiState {
         mobileDataBadge = BatteryMobileDataBadge.G5,
         config = BatteryStatusConfig(
             enabled = false,
+            // Keep the historical `_38sdp` golden baseline (45.6dp on this sw360 profile) while
+            // production previews remain driven by the runtime/editable barHeightDp value.
+            barHeightDp = 45.6f,
             selectedThemeId = themes[1].id,
             selectedBatteryThemeId = themes[1].id,
             selectedEmojiThemeId = themes[2].id,

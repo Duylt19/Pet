@@ -152,7 +152,10 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   tắt. Khi Accessibility đã cấp và status bar thật đang hoạt động, preview nhúng được ẩn để
   tránh hiển thị trùng. Khi preview nhúng đang hiện, Charge/Airplane/Ringer/Hotspot lấy trạng
   thái hệ thống thật; riêng màn option đang chỉnh sẽ mô phỏng trạng thái active để user luôn
-  nhìn thấy style vừa chọn. Preview dùng cùng thứ tự vật lý với renderer thật: trailing LTR là
+  nhìn thấy style vừa chọn. Chiều cao card lấy trực tiếp từ `config.barHeightDp`, nên slider
+  Height remeasure preview ngay; giá trị khởi tạo/fallback lấy chiều cao status bar thật của thiết
+  bị, đúng với overlay khi Apply. Battery Troll dùng chung card và kế thừa đúng chiều cao đã lưu.
+  Preview dùng cùng thứ tự vật lý với renderer thật: trailing LTR là
   Hotspot → Signal/Data → Wifi → Percentage → Battery/Emoji pair → Charge; Battery và Emoji
   chồng cùng tâm và mọi component cách nhau 4dp;
 - More Battery/Emoji mở grid ba cột với artwork 73.03% item; More Theme mở grid hai cột từ

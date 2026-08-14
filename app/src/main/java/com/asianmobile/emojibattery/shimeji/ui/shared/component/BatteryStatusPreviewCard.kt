@@ -45,9 +45,11 @@ import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPowerState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPreviewSystemStatePolicy
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatterySystemStatusPolicy
+import com.asianmobile.emojibattery.shimeji.battery.settings.systemStatusBarHeightDp
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFont
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
+import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_BATTERY_BAR_HEIGHT_DP
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryAnimationAsset
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.batteryPreviewLayout
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.batteryPreviewTrailingOrder
@@ -63,6 +65,13 @@ import java.util.TimeZone
  * has no better number. It is a design sample, not a reading of the device.
  */
 internal const val BATTERY_PREVIEW_DEFAULT_PERCENT = 82
+
+internal fun resolveBatteryStatusPreviewHeightDp(
+    barHeightDp: Float,
+    systemStatusBarHeightDp: Float
+): Float = barHeightDp.takeIf { it.isFinite() && it > 0f }
+    ?: systemStatusBarHeightDp.takeIf { it.isFinite() && it > 0f }
+    ?: DEFAULT_BATTERY_BAR_HEIGHT_DP
 
 /**
  * The embedded status-bar card. It is the single renderer for "what your status bar will look
@@ -103,6 +112,7 @@ internal fun BatteryStatusPreviewCard(
     trollEmojiSizeDp: Float? = null,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val emojiSizeDp = trollEmojiSizeDp ?: config.emojiSizeDp
     val previewDescription = stringResource(
         R.string.battery_overlay_description,
@@ -115,6 +125,11 @@ internal fun BatteryStatusPreviewCard(
     val previewPowerState = BatteryPreviewSystemStatePolicy.powerState(
         powerState,
         focusedComponent
+    )
+    val systemStatusBarHeightDp = remember(context) { context.systemStatusBarHeightDp() }
+    val previewHeightDp = resolveBatteryStatusPreviewHeightDp(
+        barHeightDp = config.barHeightDp,
+        systemStatusBarHeightDp = systemStatusBarHeightDp
     )
     // A preview that formats `Date()` makes every screenshot golden expire at midnight, which
     // is how seven battery-editor goldens ended up failing daily. Renders pin to a fixed day.
@@ -133,7 +148,7 @@ internal fun BatteryStatusPreviewCard(
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._38sdp))
+            .height(previewHeightDp.dp)
             .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._11sdp)))
             .background(
                 if (backgroundPath == null) {

@@ -5,6 +5,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPowerState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPreviewSystemState
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollBatteryOrientation
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollEntitlement
@@ -110,6 +111,9 @@ private fun previewTrollCustomizeState(): BatteryTrollCustomizeUiState {
         troll = troll,
         draft = draft,
         applied = draft,
+        // Match the historical `_38sdp` golden baseline (45.6dp on this sw360 profile);
+        // production inherits the user's stored dynamic height.
+        storedConfig = BatteryStatusConfig(barHeightDp = 45.6f),
         // The device really is nearly flat: Fake mode has to write 999% over a 12% bar, which is
         // the only way the golden proves the two numbers stay independent.
         systemState = BatteryPreviewSystemState(powerState = BatteryPowerState(level = 12)),
