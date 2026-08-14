@@ -160,14 +160,17 @@ ui/<domain>/<feature>/
 
 ## Navigation boundary
 
-- `AppNavGraph` sở hữu NavController và wiring toàn app; `HomeNavGraph` khai báo nested graph
-  `home_graph` với bốn destination top-level. `home_graph` không phải screen và không track
-  analytics; destination Discover dùng route `discover` đúng với tên feature.
-- Bốn top-level route `home`, `battery_catalog`, `pet_store`, `settings` nằm trong một
-  Home graph/shell dùng chung. `ui/home/shell` sở hữu bottom navigation và banner; feature
-  screen chỉ sở hữu content để đổi tab không dispose/reload quảng cáo.
-- Chuyển Home tab dùng `popUpTo(home) + saveState/restoreState + launchSingleTop` để giữ
-  ViewModel, scroll và state của từng route.
+- `AppNavGraph` sở hữu root NavController cho onboarding và mọi màn độc lập. `home_graph` là một
+  root destination opaque; bên trong `HomeRoute` có NavController thứ hai chỉ dành cho bốn tab
+  `discover`, `battery_catalog`, `pet_store`, `settings`.
+- `ui/home/shell` sở hữu bottom navigation và đúng một banner của Home. Chuyển tab dùng
+  `popUpTo(discover) + saveState/restoreState + launchSingleTop`, nên không dispose/reload banner
+  và vẫn giữ ViewModel/scroll của từng tab.
+- Search, My Pet, category, editor, permission, premium và các màn còn lại là destination của
+  root NavHost, không nằm trong Home NavHost. Destination có quảng cáo đáy tự sở hữu ad slot trong
+  composition của chính nó; mở một entry mới sẽ có ViewModel/ad lifecycle mới.
+- Root NavHost không dùng cross-fade. Mỗi destination có nền opaque để Navigation không giữ hai
+  layout nhìn thấy cùng lúc hoặc đổi chiều cao màn cũ khi ad của màn mới được mount.
 - Feature Screen nhận callback như `onBack`, `onOpenSettings`; không nhận NavController nếu không có lý do đặc biệt.
 - Back-stack behavior là một phần contract và phải được document/test.
 

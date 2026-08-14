@@ -36,6 +36,8 @@ class HomeTabNavigationTest {
         assertEquals(Routes.BATTERY_CATALOG, routeForHomeTab(HomeTab.BATTERY))
         assertEquals(Routes.PET_STORE, routeForHomeTab(HomeTab.PET_STORE))
         assertEquals(Routes.SETTINGS, routeForHomeTab(HomeTab.MINE))
+        assertEquals(HomeTab.PET_STORE, homeTabFromNavigationValue("PET_STORE"))
+        assertNull(homeTabFromNavigationValue("search"))
     }
 
     @Test
@@ -55,42 +57,23 @@ class HomeTabNavigationTest {
     }
 
     @Test
-    fun `battery category replaces the home banner with its own native placement`() {
+    fun `battery category is a root destination outside the home tabs`() {
         assertEquals("${Routes.BATTERY_CATEGORY}/17", Routes.batteryCategory(17))
-        assertEquals(true, showHomeBottomBanner(Routes.BATTERY_CATALOG))
-        assertEquals(false, showHomeBottomBanner("${Routes.BATTERY_CATEGORY}/{categoryId}"))
-        assertEquals(
-            true,
-            showBatteryCategoryBottomNative("${Routes.BATTERY_CATEGORY}/{categoryId}")
-        )
-        assertEquals(true, showBatteryCategoryBottomNative(Routes.batteryCategory(17)))
-        assertEquals(false, showBatteryCategoryBottomNative(Routes.BATTERY_CATALOG))
-        assertEquals(false, showHomeBottomBanner(Routes.SEARCH))
+        assertNull(homeTabForRoute(Routes.batteryCategory(17)))
+        assertNull(homeTabForRoute(Routes.SEARCH))
     }
 
     @Test
-    fun `battery editor family keeps one editor banner placement`() {
-        assertEquals(
-            true,
-            showBatteryEditorBottomBanner("${Routes.BATTERY_EDITOR}/{themeId}")
-        )
-        assertEquals(
-            true,
-            showBatteryEditorBottomBanner(
-                "${Routes.BATTERY_EDITOR_COMPONENT}/{themeId}/{page}"
-            )
-        )
-        assertEquals(
-            true,
-            showBatteryEditorBottomBanner(
-                "${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/{themeId}/{groupKey}"
-            )
+    fun `battery editor family stays outside the home tab host`() {
+        assertNull(homeTabForRoute("${Routes.BATTERY_EDITOR}/{themeId}"))
+        assertNull(homeTabForRoute("${Routes.BATTERY_EDITOR_COMPONENT}/{themeId}/{page}"))
+        assertNull(
+            homeTabForRoute("${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/{themeId}/{groupKey}")
         )
         assertEquals(
             "${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/3/molang",
             Routes.batteryEditorEmotionDetail(3, "molang")
         )
-        assertEquals(false, showBatteryEditorBottomBanner(Routes.BATTERY_CATALOG))
     }
 
     @Test
@@ -128,13 +111,13 @@ class HomeTabNavigationTest {
     }
 
     @Test
-    fun `each child editor back stack entry gets a fresh native reload key`() {
-        val firstEntryKey = childEditorNativeReloadKey("editor-entry-1")
-        val secondEntryKey = childEditorNativeReloadKey("editor-entry-2")
+    fun `each isolated destination gets a fresh native reload key`() {
+        val firstEntryKey = destinationAdReloadKey("destination-entry-1")
+        val secondEntryKey = destinationAdReloadKey("destination-entry-2")
 
         assertEquals(true, firstEntryKey > 0)
         assertEquals(true, secondEntryKey > 0)
         assertEquals(false, firstEntryKey == secondEntryKey)
-        assertEquals(0, childEditorNativeReloadKey(null))
+        assertEquals(0, destinationAdReloadKey(null))
     }
 }

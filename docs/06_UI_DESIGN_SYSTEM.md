@@ -182,8 +182,8 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   mở detail `8404:7179` với slider Size, switch và grid ba cột. Khi cần preview
   nhúng, nó được ghim dưới top bar ở cả hai màn. 80 frame art là PNG @3x vì nguồn Figma là raster/image-fill;
   card, selected stroke, shadow và background được dựng bằng Compose.
-- Emotion pack và detail dùng cùng native collapsible holder ở app shell. Lần đầu vào flow sẽ
-  request/bind native; chuyển pack → detail giữ nguyên Activity-scoped key nên không reload ad.
+- Emotion pack và detail là hai root destination độc lập. Mỗi entry sở hữu native collapsible
+  riêng; chuyển pack → detail request ad mới và surface opaque không để layout pack xuyên qua.
 - Template có đủ Battery, Emoji và Animation; header dùng icon Figma 16px và chevron vector
   14px. Color có custom wheel, bảy preset và ba theme preview; custom wheel mở trực tiếp một
   chế độ HSV/opacity duy nhất, không dùng segmented Grid/Sliders, và cập nhật liên tục cùng

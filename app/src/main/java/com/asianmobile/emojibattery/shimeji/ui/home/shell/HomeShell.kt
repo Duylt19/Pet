@@ -7,27 +7,20 @@ import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_HOME_BOTTOM
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 
 /**
- * Chrome owned by the Home graph rather than by any individual tab.
- *
- * A child Home route can keep the Home banner while hiding the bottom navigation by passing a
- * null [selectedTab]. Top-level tabs always provide their selected tab.
+ * Chrome owned by the four-tab Home container rather than by any individual tab.
+ * Root app destinations never compose this shell and own their own optional ad slot.
  */
 @Composable
 fun HomeShell(
-    selectedTab: HomeTab?,
-    showBottomBanner: Boolean,
+    selectedTab: HomeTab,
     onTabSelected: (HomeTab) -> Unit
 ) {
-    if (selectedTab != null) {
-        HomeBottomNavigation(
-            selectedTab = selectedTab,
-            onTabSelected = onTabSelected
-        )
-    }
-    if (showBottomBanner) {
-        BannerAd(
-            modifier = Modifier.fillMaxWidth(),
-            adPosition = BANNER_HOME_BOTTOM
-        )
-    }
+    HomeBottomNavigation(
+        selectedTab = selectedTab,
+        onTabSelected = onTabSelected
+    )
+    BannerAd(
+        modifier = Modifier.fillMaxWidth(),
+        adPosition = BANNER_HOME_BOTTOM
+    )
 }

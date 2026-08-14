@@ -20,9 +20,5 @@ internal fun routeForHomeTab(tab: HomeTab): String = when (tab) {
     HomeTab.MINE -> Routes.SETTINGS
 }
 
-internal fun showHomeBottomBanner(route: String?): Boolean =
-    homeTabForRoute(route) != null ||
-        route == Routes.BATTERY_TROLL
-
-internal fun showBatteryCategoryBottomNative(route: String?): Boolean =
-    route?.startsWith("${Routes.BATTERY_CATEGORY}/") == true
+internal fun homeTabFromNavigationValue(value: String?): HomeTab? =
+    HomeTab.entries.firstOrNull { it.name == value }

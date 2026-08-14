@@ -19,9 +19,15 @@ class HomeBackHandlingContractTest {
             "com/asianmobile/emojibattery/shimeji/MainActivity.kt"
         ).readText()
 
-        assertTrue(navGraph.contains("enabled = isHomeTopLevelRoute(currentRoute)"))
-        assertTrue(navGraph.contains("onBack = onHomeBack"))
-        assertTrue(homeNavGraph.contains("route = Routes.HOME_GRAPH"))
+        assertTrue(navGraph.contains("composable(Routes.HOME_GRAPH)"))
+        assertTrue(navGraph.contains("onHomeBack = onHomeBack"))
+        assertTrue(
+            homeNavGraph.contains(
+                "BackHandler(enabled = canHandleHomeBack, onBack = onHomeBack)"
+            )
+        )
+        assertTrue(homeNavGraph.contains("HOME_BACK_HANDOFF_DELAY_MS"))
+        assertTrue(homeNavGraph.contains("val homeNavController = rememberNavController()"))
         assertTrue(homeNavGraph.contains("startDestination = Routes.DISCOVER"))
         listOf(
             "Routes.DISCOVER",
@@ -34,6 +40,20 @@ class HomeBackHandlingContractTest {
         }
         assertTrue(mainActivity.contains("onHomeBack = { showExitDialog = true }"))
         assertFalse(mainActivity.contains("onBackPressedDispatcher.addCallback"))
+    }
+
+    @Test
+    fun `root destinations do not cross fade or share a global ad footer`() {
+        val navGraph = sourceFile(
+            "com/asianmobile/emojibattery/shimeji/navigation/NavGraph.kt"
+        ).readText()
+
+        assertTrue(navGraph.contains("enterTransition = { EnterTransition.None }"))
+        assertTrue(navGraph.contains("exitTransition = { ExitTransition.None }"))
+        assertTrue(navGraph.contains("private fun IsolatedDestination("))
+        assertTrue(navGraph.contains("bottomAd: @Composable () -> Unit"))
+        assertFalse(navGraph.contains("if (shouldShowBatteryCategoryBottomNative)"))
+        assertFalse(navGraph.contains("else if (batteryEditorNativeScreenCode != null)"))
     }
 
     private fun sourceFile(relativePath: String): File =

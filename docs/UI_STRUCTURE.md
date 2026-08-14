@@ -42,10 +42,11 @@ feature phải di chuyển test cùng lúc.
 | Flow | Route | Package sở hữu |
 |---|---|---|
 | App entry | n/a | `ui/app` |
-| Home graph | `home_graph` (internal, không phải screen) | `navigation/HomeNavGraph` + `ui/home/shell` |
+| Home container | `home_graph` (root destination, không track analytics) | `navigation/HomeNavGraph` + `ui/home/shell` |
 | Onboarding | `splash`, `language`, `intro`, `permission` | `ui/onboarding/*` |
 | Discover tab | `discover` | `ui/home/discover` |
-| Battery tab/detail | `battery_catalog`, `battery_category/{id}` | `ui/battery/catalog` |
+| Battery tab | `battery_catalog` | `ui/battery/catalog` |
+| Battery category | `battery_category/{id}` (root destination) | `ui/battery/catalog` |
 | Battery collection | `favourite_recent` | `ui/battery/favoriterecent` |
 | Status bar editor | `battery_editor/*` | `ui/battery/editor` |
 | Shimeji Pets tab | `pet_store` | `ui/pet/store` |
@@ -72,11 +73,12 @@ Bốn tab top-level vẫn thuộc các domain riêng:
 ```text
 Discover              Battery              Shimeji Pets          Mine
 ui/home/discover      ui/battery/catalog   ui/pet/store          ui/settings/mine
-        \________________ nested HomeNavGraph (`home_graph`) ______________/
+        \_______________ HomeRoute nested NavHost (4 tab) ________________/
                          ui/home/shell Home chrome
 ```
 
-`AppNavGraph` giữ một `NavController`; `HomeNavGraph` chỉ nhóm bốn destination root chứ không
-tạo NavController thứ hai. `ui/home/shell` sở hữu bottom navigation/banner ad, vì vậy không
-di chuyển các composable này vào từng tab. Việc package các tab khác nhau không làm thay đổi
-back stack hay lifetime của banner.
+`AppNavGraph` giữ root `NavController` cho onboarding và các màn độc lập. `HomeRoute` tạo
+`NavController` thứ hai chỉ cho bốn tab, còn `ui/home/shell` sở hữu bottom navigation/banner ad.
+Vì vậy đổi tab không reload banner, trong khi Search/My Pet/category/editor được push lên root
+graph như một surface mới và tự tạo lại ad của chính destination. Root transition bị tắt và
+surface luôn opaque để màn trước không xuyên/nháy phía sau màn mới.
