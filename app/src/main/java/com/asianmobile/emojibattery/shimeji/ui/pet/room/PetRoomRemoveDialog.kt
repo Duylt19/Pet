@@ -17,11 +17,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -107,7 +111,13 @@ internal fun PetRoomRemoveDialogCard(
                 textAlign = TextAlign.Center
             )
             Text(
-                text = stringResource(R.string.pet_room_remove_message, pet.name),
+                text = buildPetRemovalMessage(
+                    markedMessage = stringResource(
+                        R.string.pet_room_remove_message,
+                        markedPetName(pet.name)
+                    ),
+                    petNameColor = colorResource(R.color.colors_FB3675)
+                ),
                 color = colorResource(R.color.colors_6F7073),
                 fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
                 lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
@@ -138,6 +148,38 @@ internal fun PetRoomRemoveDialogCard(
     }
 }
 
+internal fun buildPetRemovalMessage(
+    markedMessage: String,
+    petNameColor: Color
+): AnnotatedString {
+    val petNameStart = markedMessage.indexOf(PET_NAME_START_MARKER)
+    val petNameEnd = markedMessage.indexOf(PET_NAME_END_MARKER, startIndex = petNameStart + 1)
+    if (petNameStart < 0 || petNameEnd <= petNameStart) {
+        return AnnotatedString(markedMessage)
+    }
+
+    return buildAnnotatedString {
+        append(markedMessage.substring(0, petNameStart))
+        val highlightedNameStart = length
+        append(markedMessage.substring(petNameStart + 1, petNameEnd))
+        val highlightedNameEnd = length
+        append(markedMessage.substring(petNameEnd + 1))
+        if (highlightedNameEnd > highlightedNameStart) {
+            addStyle(
+                style = SpanStyle(
+                    color = petNameColor,
+                    fontWeight = FontWeight.Medium
+                ),
+                start = highlightedNameStart,
+                end = highlightedNameEnd
+            )
+        }
+    }
+}
+
+internal fun markedPetName(petName: String): String =
+    "$PET_NAME_START_MARKER$petName$PET_NAME_END_MARKER"
+
 @Composable
 private fun RemoveDialogButton(
     labelRes: Int,
@@ -164,6 +206,8 @@ private fun RemoveDialogButton(
 }
 
 private const val REMOVE_DIALOG_WIDTH_FRACTION = 328f / 360f
+private const val PET_NAME_START_MARKER = '\uE000'
+private const val PET_NAME_END_MARKER = '\uE001'
 
 @Preview(showBackground = true, backgroundColor = 0xFF9B9C9E, widthDp = 360, heightDp = 440)
 @Composable
