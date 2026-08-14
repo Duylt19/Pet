@@ -697,19 +697,26 @@ private fun PetRoomTabStrip(
     selectedTab: PetRoomTab,
     onSelectTab: (PetRoomTab) -> Unit
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(dimensionResource(SdpR.dimen._31sdp)),
-        verticalAlignment = Alignment.Bottom
+        contentAlignment = Alignment.BottomCenter
     ) {
-        PetRoomTab.entries.forEach { tab ->
-            PetRoomTabItem(
-                tab = tab,
-                isSelected = tab == selectedTab,
-                onClick = { onSelectTab(tab) },
-                modifier = Modifier.weight(1f)
-            )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(TAB_STRIP_WIDTH_RATIO)
+                .fillMaxHeight(),
+            verticalAlignment = Alignment.Bottom
+        ) {
+            PetRoomTab.entries.forEach { tab ->
+                PetRoomTabItem(
+                    tab = tab,
+                    isSelected = tab == selectedTab,
+                    onClick = { onSelectTab(tab) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     }
 }
@@ -1455,6 +1462,8 @@ private fun PetRoomTab.labelRes(): Int = when (this) {
     PetRoomTab.ROOM -> R.string.pet_room_tab_room
 }
 
+// Figma: the 346px strip is centered in the 360px frame; every tab still gets an equal share.
+private const val TAB_STRIP_WIDTH_RATIO = 346f / 360f
 // Selected tab inner plates preserve the Figma proportions within each equal-width tab.
 private const val SELECTED_TAB_INNER_RATIO = 108f / 114f
 private const val SELECTED_TAB_DASH_RATIO = 102f / 114f
