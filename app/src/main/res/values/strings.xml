@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">Emoji Battery: Cute Pet</string>
     <string name="splash_title" translatable="false">Emoji Battery</string>
-    <string name="home_header_title" translatable="false">Emoji Battery</string>
     <string name="adjust_token" translatable="false">9m8kbvwtwh6o</string>
     <string name="facebook_app_id" translatable="false">993681063116351</string>
     <string name="facebook_token" translatable="false">84b3bdf78933f7ab12dae551e57d915c</string>
@@ -19,19 +18,12 @@
     <string name="language_af" translatable="false">Afrikaans</string>
     <string name="language_zh" translatable="false">中国</string>
     <string name="language">Language</string>
-    <string name="settings">Settings</string>
     <string name="back">Back</string>
     <string name="exit_dialog_title">Do you want to exit the app?</string>
     <string name="exit_dialog_tap_to_exit">Tap to exit</string>
     <string name="cancel">Cancel</string>
-    <string name="continue_value">Continue</string>
-    <string name="remove">Remove</string>
     <string name="rate_us">Rate us</string>
-    <string name="privacy_policy">Privacy policy</string>
     <string name="maybe_later">Maybe later</string>
-    <string name="permission_dialog_title">Grant Permissions</string>
-    <string name="permission_dialog_description">To use Emoji Battery features and ensure the best experience, the app requires a few essential system permissions.</string>
-    <string name="permission_dialog_grant">Grant Permission</string>
     <string name="next">Next</string>
     <string name="confirm">Confirm</string>
     <string name="this_action_can_contain_ads">This action can contain ads</string>
@@ -39,7 +31,6 @@
     <string name="grant_permission_later">Skip for now</string>
     <string name="permission_title">Let your pet roam anywhere</string>
     <string name="permission_subtitle">Emoji Battery needs display access to stay visible above other apps. Notifications keep you in control while it is running.</string>
-    <string name="permission_storage_title">Storage</string>
     <string name="permission_continue">CONTINUE</string>
     <string name="permission_overlay_title">Display over other apps</string>
     <string name="permission_overlay_subtitle">Required to show and move your pet outside Emoji Battery.</string>
@@ -47,10 +38,6 @@
     <string name="permission_notification_subtitle">Recommended so you can always see and stop the running pet.</string>
     <string name="permission_allow">Allow</string>
     <string name="permission_allowed">Allowed</string>
-    <string name="permission_status_allowed">Permission is allowed</string>
-    <string name="permission_status_not_allowed">Permission is not allowed</string>
-    <string name="permission_required">Permission Required</string>
-    <string name="this_feature_requires_permissions_to_function_please_grant_permissions_in_app_settings">This feature requires permissions to function. Please grant permissions in App Settings.</string>
 
     <!-- Rate App Dialog -->
     <string name="rate_do_you_like">Do you like this app?</string>
@@ -66,8 +53,6 @@
     <string name="rate_select_star">Please select a star rating first</string>
     <string name="rate_select_feedback">Please select a feedback option first</string>
     <string name="rate_enter_other_feedback">Please enter your feedback first</string>
-    <string name="rate_no_internet">No internet connection. Please try again.</string>
-    <string name="rate_feedback_send_failed">Couldn\'t send feedback. Please try again later.</string>
     <string name="rate_feedback_hint">Star your feedback here</string>
     <string name="rate_feedback_battery_not_showing">Emoji Battery isn\'t showing</string>
     <string name="rate_feedback_pet_not_showing">Pet isn\'t appearing on screen</string>
@@ -98,250 +83,29 @@
     <string name="premium_sale_79" translatable="false">Sale 79%</string>
     <string name="please_check_your_internet_connection_and_try_again">Please check your internet connection and try again.</string>
 
-    <string name="search_placeholder">Search or type a URL</string>
-
     <!-- Intro / Onboarding -->
     <string name="intro_title_1">Show your battery level\nwith playful emojis</string>
     <string name="intro_title_2">Custom your status bar to\nmatch your style</string>
     <string name="intro_title_3">Enjoy adorable pets moving\nacross your screen</string>
     <string name="start">Start</string>
 
-    <string name="share_app">Share app</string>
-    <string name="rate_app">Rate app</string>
-
     <!-- Time Ago -->
-    <string name="time_ago_just_now">Just now</string>
-    <string name="time_ago_minutes">%1$d min ago</string>
-    <string name="time_ago_hours">%1$d hours ago</string>
-    <string name="time_ago_days">%1$d days ago</string>
 
     <!-- Private Browser Strings -->
-    <string name="settings_clear_history_title">Clear History</string>
-    <string name="settings_default_browser_title">Default Browser</string>
-    <string name="settings_feedback_title">Feedback</string>
-    <string name="settings_share_title">Share with friends</string>
     <string name="settings_privacy_policy_title">Privacy Policy</string>
     <string name="settings_rate_us_title">Rate us</string>
-    <string name="settings_set_default_subtitle">Use Private Browser to open links by default</string>
-    <string name="settings_section_other_short">Other</string>
-    <string name="settings_section_app_support">App &amp; support</string>
-    <string name="premium_subscription_title">Upgrade to Premium</string>
-    <string name="files_videos_label">Videos</string>
-    <string name="common_ok_label">OK</string>
-    <string name="common_delete_label">Delete</string>
-    <string name="tab_home">Home</string>
-    <string name="tab_tab">Tab</string>
-    <string name="tab_progress">Downloads</string>
-    <string name="tab_plus">New Tab</string>
-    <string name="tab_bookmark">Bookmark</string>
-    <string name="tab_folder">Folder</string>
-    <string name="home_private_browsing_title">Private Browsing</string>
-    <string name="home_private_browsing_desc">Your browsing history, cookies, and temporary data won\'t be saved after you close all private tabs.</string>
-    <string name="home_popular_sites_title">Popular Sites</string>
-    <string name="popular_site_google" translatable="false">Google</string>
-    <string name="popular_site_gemini" translatable="false">Gemini</string>
-    <string name="popular_site_chatgpt" translatable="false">ChatGPT</string>
-    <string name="popular_site_telegram" translatable="false">Telegram</string>
-    <string name="popular_site_x" translatable="false">X</string>
-    <string name="popular_site_whatsapp" translatable="false">WhatsApp</string>
-    <string name="popular_site_reddit" translatable="false">Reddit</string>
-    <string name="popular_site_pinterest" translatable="false">Pinterest</string>
-    <string name="drawer_bookmarks_history">Bookmarks &amp; History</string>
-    <string name="quick_access_fb_label">Fb</string>
-    <string name="quick_access_ins_label">Ins</string>
-    <string name="quick_access_tic_label">Tic</string>
-    <string name="quick_access_whats_label">Whats</string>
-    <string name="quick_access_tw_label">Tw</string>
-    <string name="quick_access_vieo_label">Vieo</string>
-    <string name="quick_access_thre_label">Thre</string>
-    <string name="quick_access_daimo_label">Daimo</string>
-    <string name="home_bookmarks_button_label">Bookmarks</string>
-    <string name="tabs_empty_normal">No tabs open. Tap + to start</string>
-    <string name="tabs_empty_normal_title">No tabs open</string>
-    <string name="tabs_empty_normal_description">Tap + to start browsing.</string>
-    <string name="tabs_empty_incognito">No incognito tabs yet</string>
-    <string name="tabs_close_all_confirm_title">Close all tabs?</string>
-    <string name="tabs_close_all_confirm_message">This will close all %1$d tabs in this mode.</string>
-    <string name="tabs_max_reached_toast">Maximum %1$d tabs reached</string>
-    <string name="tabs_close_tab_confirm_title">Close this tab?</string>
-    <string name="tabs_close_tab_confirm_message">Are you sure you want to close this tab?</string>
-    <string name="tabs_header_private_tab">Private Tab</string>
-    <string name="tabs_header_normal_tab">Normal Tab</string>
-    <string name="tabs_private_browsing_title">Private Browsing</string>
-    <string name="tabs_private_browsing_description">Your browsing history, cookies, and temporary data won\'t be saved after you close all private tabs.</string>
-    <string name="tabs_search">Search</string>
-    <string name="tabs_more">More</string>
-    <string name="tabs_search_placeholder">Search</string>
-    <string name="tabs_clear_search">Clear search</string>
-    <string name="tabs_voice_search">Voice search</string>
-    <string name="tabs_voice_search_prompt">Speak to search tabs</string>
-    <string name="tabs_voice_search_unavailable">Voice search is unavailable on this device</string>
-    <string name="home_voice_search_prompt">Speak to search</string>
-    <string name="home_voice_search_unavailable">Voice search is unavailable on this device</string>
-    <string name="home_voice_search_no_result">No speech was recognized. Please try again.</string>
     <string name="search_clear_content_description">Clear search</string>
-    <string name="search_voice_content_description">Voice search</string>
-    <string name="tabs_search_no_results">No matching tabs found</string>
-    <string name="tabs_select_tabs">Select tabs</string>
-    <plurals name="tabs_selected_count">
-        <item quantity="one">%d Tab</item>
-        <item quantity="other">%d Tabs</item>
-    </plurals>
-    <string name="tabs_select_all_tabs">Select all tabs</string>
-    <string name="tabs_deselect_all">Deselect All</string>
-    <string name="tabs_close_tabs">Close tabs</string>
-    <string name="tabs_close_all_tabs">Close all tabs</string>
-    <string name="tabs_add_bookmark">Add Bookmark</string>
-    <string name="tabs_share_tabs">Share Tabs</string>
-    <string name="tabs_bookmarked_toast">%1$d tab(s) bookmarked</string>
-    <string name="tabs_no_new_bookmarks">All selected tabs are already bookmarked</string>
-    <string name="tabs_bookmark_failed">Couldn\'t add the selected bookmarks</string>
-    <string name="tabs_closed_toast">%1$d tab(s) closed</string>
-    <string name="tabs_share_item">%1$s\n%2$s</string>
-    <string name="tabs_share_chooser_title">Share tabs</string>
-    <string name="tabs_share_unavailable">No app is available to share these tabs</string>
-    <string name="bookmarks_segment_bookmarks">Bookmarks</string>
-    <string name="bookmarks_segment_history">History</string>
-    <string name="history_empty_message">No history yet</string>
-    <string name="bookmarks_search_placeholder">Search bookmarks and history</string>
-    <string name="bookmarks_search_field_placeholder">Search</string>
-    <string name="bookmarks_search_frequently_visited">Frequently Visited</string>
-    <string name="bookmarks_search_results">Search Results</string>
-    <string name="bookmarks_voice_search_prompt">Speak to search bookmarks</string>
-    <string name="history_voice_search_prompt">Speak to search history</string>
-    <string name="bookmarks_voice_search_unavailable">Voice search is unavailable on this device</string>
-    <string name="bookmarks_no_results">No matching bookmarks found</string>
-    <string name="history_group_today">Today</string>
-    <string name="history_group_yesterday">Yesterday</string>
-    <string name="history_no_results">No matching history found</string>
-    <string name="history_undo_action">Undo</string>
-    <string name="history_item_removed">History item removed</string>
-    <string name="history_information_action">Information</string>
-    <string name="history_remove_action">Remove</string>
-    <string name="history_information_title">Information</string>
-    <string name="history_information_name">Name</string>
-    <string name="history_information_url">URL</string>
-    <string name="history_information_last_visited">Last visited</string>
-    <string name="history_information_visits">Visits</string>
-    <string name="history_clear_all_title">Clear all history?</string>
-    <string name="history_clear_all_description">All normal browsing history will be permanently removed.</string>
-    <string name="history_clear_all_action">Clear all</string>
-    <string name="files_storage_usage_format">%1$s / %2$s</string>
-    <string name="progress_no_downloading">No file is downloading</string>
-    <string name="progress_how_to_download_button">How to Download</string>
-    <string name="progress_status_paused">PAUSED</string>
-    <string name="progress_status_failed">FAILED · Tap retry</string>
-    <string name="progress_status_downloading">Downloading…</string>
-    <string name="browser_ctx_save_image">Save image</string>
-    <string name="browser_ctx_copy_image">Copy image address</string>
-    <string name="browser_ctx_copy_link">Copy link</string>
-    <string name="browser_ctx_copied">Link copied</string>
-    <string name="downloads_menu_more">More options</string>
-    <string name="downloads_section_failed">Failed</string>
-    <string name="downloads_status_file_missing">File removed</string>
-    <string name="downloads_action_share">Share</string>
-    <string name="downloads_action_remove">Remove from list</string>
-    <string name="downloads_action_information">Information</string>
-    <string name="downloads_action_remove_short">Remove</string>
-    <string name="downloads_open_video">Open video</string>
-    <string name="file_type_video">VID</string>
-    <string name="file_type_image">IMG</string>
-    <string name="file_type_audio">AUD</string>
-    <string name="file_type_pdf">PDF</string>
-    <string name="file_type_document">DOC</string>
-    <string name="file_type_spreadsheet">XLS</string>
-    <string name="file_type_presentation">PPT</string>
-    <string name="file_type_text">TXT</string>
-    <string name="file_type_archive">ZIP</string>
-    <string name="file_type_rar">RAR</string>
-    <string name="file_type_executable">EXE</string>
-    <string name="file_type_apk">APK</string>
-    <string name="file_type_code">CODE</string>
-    <string name="file_type_ebook">BOOK</string>
-    <string name="file_type_file">FILE</string>
-    <string name="downloads_completed_metadata">%1$s · %2$s</string>
-    <string name="downloads_date_today">Today</string>
-    <string name="downloads_date_yesterday">Yesterday</string>
-    <string name="downloads_information_title">Information</string>
-    <string name="downloads_information_file_name">File name</string>
-    <string name="downloads_information_size">Size</string>
-    <string name="downloads_information_date_time">Date time</string>
-    <string name="downloads_information_resolution">Resolution</string>
-    <string name="downloads_information_length">Length</string>
-    <string name="downloads_information_file_type">File type</string>
-    <string name="downloads_information_unknown">Unknown</string>
-    <string name="downloads_remove_video_title">Remove video?</string>
-    <string name="downloads_remove_image_title">Remove image?</string>
-    <string name="downloads_remove_audio_title">Remove audio?</string>
-    <string name="downloads_remove_file_title">Remove file?</string>
-    <string name="downloads_remove_video_description">This video will be removed from your downloads. You can add it again later.</string>
-    <string name="downloads_remove_image_description">This image will be removed from your downloads. You can add it again later.</string>
-    <string name="downloads_remove_audio_description">This audio will be removed from your downloads. You can add it again later.</string>
-    <string name="downloads_remove_description">This file will be removed from your downloads. You can add it again later.</string>
-    <string name="downloads_cancel_title">Cancel download?</string>
-    <string name="downloads_cancel_message">The partially downloaded file will be discarded.</string>
-    <string name="downloads_cancel_confirm">Cancel download</string>
-    <string name="downloads_cancel_dismiss">Keep</string>
-    <string name="download_error_generic">Download failed</string>
-    <string name="download_error_connection">Connection interrupted</string>
-    <string name="download_error_storage">Not enough storage</string>
-    <string name="download_error_unsupported">This source can’t be downloaded</string>
-    <string name="progress_cancel_label">Cancel</string>
-    <string name="progress_pause_label">Pause</string>
-    <string name="progress_resume_label">Resume</string>
-    <string name="downloads_tab_all">All</string>
-    <string name="downloads_tab_downloading">Downloading</string>
-    <string name="downloads_tab_completed">Completed</string>
-    <string name="downloads_empty_title">No Downloads Yet</string>
-    <string name="downloads_empty_desc">Videos you download will appear here.\nStart browsing and save files for offline access.</string>
-    <string name="downloads_start_browsing">Start Browsing</string>
-    <string name="downloads_section_downloading">Downloading (%d)</string>
-    <string name="downloads_section_recent">Recent Downloads</string>
-    <string name="downloads_status_completed">Completed</string>
-    <string name="downloads_title">Downloads</string>
-    <string name="download_notification_title">Downloading…</string>
-    <string name="download_notification_summary">%1$d downloads in progress</string>
-    <string name="download_notification_failed">Download failed</string>
-    <string name="download_notification_paused">Download paused</string>
-    <string name="download_notification_channel_progress_name">Downloads</string>
-    <string name="download_notification_channel_progress_description">Download progress notifications</string>
-    <string name="download_notification_channel_results_name">Download results</string>
-    <string name="download_notification_channel_results_description">Download completion notifications</string>
-    <string name="download_error_http">Download failed (HTTP %1$d)</string>
-    <string name="download_error_empty_response">Download failed: empty response</string>
-    <string name="download_toast_started">Started download</string>
-    <string name="download_toast_completed">Download completed</string>
-    <string name="download_toast_failed">Download failed</string>
 
     <!-- Settings Screen (M9) -->
-    <string name="settings_title">Settings</string>
-    <string name="settings_section_general">General</string>
-    <string name="settings_set_default_title">Set As Default Browser</string>
     <string name="settings_language_title">Language</string>
-    <string name="settings_version_format">Version %1$s</string>
 
     <!-- Clear History Dialog -->
-    <string name="clear_history_done_toast">Browsing data cleared</string>
-    <string name="clear_history_failed_toast">Could not clear browsing data</string>
-    <string name="clear_history_site_data">Cookies and site data</string>
-    <string name="clear_history_open_tabs">Open Tabs</string>
-    <string name="clear_history_history">History</string>
-    <string name="clear_history_cache">Cache</string>
-    <string name="clear_history_confirm">Confirm</string>
-    <string name="clear_history_scope_normal">Normal</string>
-    <string name="clear_history_scope_private">Private</string>
-    <string name="clear_history_scope_all">All</string>
-    <string name="clear_history_private_tabs_note">Open private tabs will reload after private site data is cleared.</string>
-    <string name="clear_history_profile_limited_note">This WebView version shares site data between Normal and Private. Clearing it will affect both modes.</string>
-    <string name="clear_history_cache_shared_note">WebView cache is shared by the app and will be cleared for both Normal and Private tabs.</string>
-    <string name="clear_history_profile_limited_toast">Browsing data cleared with limited profile isolation</string>
 
     <!-- Share / Feedback -->
     <string name="share_app_subject">Try Emoji Battery</string>
     <string name="share_app_message"><![CDATA[Bring playful battery themes and animated pets to your screen with Emoji Battery.\n\nDownload: %1$s]]></string>
     <string name="share_app_chooser_title">Share via</string>
     <string name="feedback_email_address" translatable="false">feedback@asianmobile.ltd</string>
-    <string name="more_apps_default_url" translatable="false">https://play.google.com/store/apps/developer?id=Sanya.Studio</string>
     <string name="feedback_subject_template">Emoji Battery feedback v%1$s (Android API %2$d, %3$s %4$s)</string>
     <string name="feedback_body_template">\n\n---\nDevice info auto-filled. Please describe your issue or feedback above.</string>
     <string name="feedback_chooser_title">Send feedback via</string>
@@ -427,258 +191,35 @@
     <string name="pet_speech_celebration_8">The crowd goes wild!</string>
 
     <!-- Privacy Policy -->
-    <string name="privacy_policy_title">Privacy Policy</string>
     <string name="privacy_policy_default_url" translatable="false">https://sites.google.com/view/sanya-studio/home</string>
 
     <!-- Set Default Browser (M10) -->
-    <string name="setdefault_header_title">Set as the default browser</string>
-    <string name="setdefault_header_subtitle">Optimize experience, better protection</string>
-    <string name="setdefault_benefit_private_title">Private Browser</string>
-    <string name="setdefault_benefit_private_desc">Browse anonymously, no history saved, and protect personal data.</string>
-    <string name="setdefault_benefit_download_title">Fast Download</string>
-    <string name="setdefault_benefit_download_desc">Download files smoother with high speed, stability, and safety.</string>
-    <string name="setdefault_benefit_easy_title">Easy to use</string>
-    <string name="setdefault_benefit_easy_desc">Simple, friendly interface, suitable for everyone.</string>
-    <string name="setdefault_set_button_label">Set as default</string>
-    <string name="setdefault_later_button_label">Maybe later</string>
-    <string name="setdefault_fallback_toast">Open Settings > Apps > Default apps to set</string>
 
     <!-- Polish (M12) -->
-    <string name="drawer_subtitle">Safe &amp; Secure Browser</string>
-    <string name="premium_go_ad_free">Go Ad-Free</string>
 
     <!-- Browser Screen -->
-    <string name="browser_home">Home</string>
-    <string name="browser_add_bookmark">Add bookmark</string>
-    <string name="browser_remove_bookmark">Remove bookmark</string>
-    <string name="browser_bookmark_added">Bookmark added</string>
-    <string name="browser_bookmark_removed">Bookmark removed</string>
-    <string name="browser_bookmark_restored">Bookmark restored</string>
-    <string name="browser_bookmark_unavailable">This page cannot be bookmarked</string>
-    <string name="browser_bookmark_failed">Couldn\'t update bookmark</string>
-    <string name="browser_bookmark_undo">Undo</string>
-    <string name="browser_notice_dismiss">Dismiss</string>
-    <string name="browser_normal_tab_limit">You can open up to %1$d tabs</string>
-    <string name="browser_incognito_tab_limit">You can open up to %1$d incognito tabs</string>
-    <string name="browser_share_chooser_title">Share page</string>
-    <string name="browser_share_page_text">%1$s\n%2$s</string>
-    <string name="browser_share_unavailable">This page cannot be shared</string>
-    <string name="browser_share_no_app">No app is available to share this page</string>
-    <string name="browser_tabs">Tabs</string>
-    <string name="browser_more_menu">More</string>
-    <string name="browser_back">Back</string>
-    <string name="browser_forward">Forward</string>
-    <string name="browser_shield">Security</string>
 
     <!-- File Manager - Media List -->
-    <string name="files_file_deleted">File has been deleted</string>
-    <string name="files_open_error">Cannot open this file</string>
-    <string name="media_list_images_title">Photos</string>
-    <string name="media_list_select_photo">Select photo</string>
-    <string name="media_list_select_all_photos">Select all photos</string>
-    <string name="media_list_deselect_all_photos">Deselect all photos</string>
-    <plurals name="media_list_selected_photos">
-        <item quantity="one">%1$d photo</item>
-        <item quantity="other">%1$d photos</item>
-    </plurals>
-    <plurals name="media_list_remove_photos_title">
-        <item quantity="one">Remove photo?</item>
-        <item quantity="other">Remove %1$d photos?</item>
-    </plurals>
-    <plurals name="media_list_remove_photos_message">
-        <item quantity="one">This photo will be removed from your phone. You can add it again later.</item>
-        <item quantity="other">These %1$d photos will be removed from your phone. You can add them again later.</item>
-    </plurals>
-    <string name="media_list_video_title">Videos</string>
-    <string name="media_list_select_video">Select video</string>
-    <string name="media_list_select_all_videos">Select all videos</string>
-    <string name="media_list_deselect_all_videos">Deselect all videos</string>
-    <plurals name="media_list_selected_videos">
-        <item quantity="one">%1$d video</item>
-        <item quantity="other">%1$d videos</item>
-    </plurals>
-    <plurals name="media_list_remove_videos_title">
-        <item quantity="one">Remove video?</item>
-        <item quantity="other">Remove %1$d videos?</item>
-    </plurals>
-    <plurals name="media_list_remove_videos_message">
-        <item quantity="one">This video will be removed from your phone. You can add it again later.</item>
-        <item quantity="other">These %1$d videos will be removed from your phone. You can add them again later.</item>
-    </plurals>
-    <string name="media_list_music_title">Audio</string>
-    <string name="media_list_select_audio">Select audio</string>
-    <string name="media_list_select_all_audio">Select all audio</string>
-    <string name="media_list_deselect_all_audio">Deselect all audio</string>
-    <plurals name="media_list_selected_audio">
-        <item quantity="one">%1$d audio</item>
-        <item quantity="other">%1$d audio</item>
-    </plurals>
-    <plurals name="media_list_remove_audio_title">
-        <item quantity="one">Remove audio?</item>
-        <item quantity="other">Remove %1$d audio?</item>
-    </plurals>
-    <plurals name="media_list_remove_audio_message">
-        <item quantity="one">This audio will be removed from your phone. You can add it again later.</item>
-        <item quantity="other">These %1$d audio files will be removed from your phone. You can add them again later.</item>
-    </plurals>
-    <string name="media_list_select_file">Select files</string>
-    <string name="media_list_select_all_files">Select all files</string>
-    <string name="media_list_deselect_all_files">Deselect all files</string>
-    <plurals name="media_list_selected_files">
-        <item quantity="one">%1$d file</item>
-        <item quantity="other">%1$d files</item>
-    </plurals>
-    <plurals name="media_list_remove_files_title">
-        <item quantity="one">Remove file?</item>
-        <item quantity="other">Remove %1$d files?</item>
-    </plurals>
-    <plurals name="media_list_remove_files_message">
-        <item quantity="one">This file will be permanently removed from your phone.</item>
-        <item quantity="other">These %1$d files will be permanently removed from your phone.</item>
-    </plurals>
-    <string name="media_list_empty">No files found</string>
-    <string name="media_list_search">Search files</string>
-    <string name="media_list_search_no_results">No matching files</string>
-    <string name="media_list_more">Media options</string>
-    <string name="media_list_sort">Sort by</string>
-    <string name="media_list_sort_newest">Newest first</string>
-    <string name="media_list_sort_oldest">Oldest first</string>
-    <string name="media_list_sort_name">Name</string>
-    <string name="media_list_sort_size">Largest first</string>
-    <string name="media_list_grid_view">Grid view</string>
-    <string name="media_list_list_view">List view</string>
-    <string name="media_list_open">Open</string>
-    <string name="media_list_share">Share</string>
-    <string name="media_list_details">Details</string>
-    <string name="media_list_delete">Delete</string>
-    <string name="media_list_delete_title">Delete this file?</string>
-    <string name="media_list_delete_message">This file will be permanently removed from your device.</string>
-    <string name="media_list_delete_failed">Could not delete this file</string>
-    <string name="media_list_share_failed">No app is available to share this file</string>
-    <string name="media_list_cancel">Cancel</string>
-    <string name="media_list_permission_title">Storage access needed</string>
-    <string name="media_list_permission_description">Allow access to display and manage this content on your device.</string>
-    <string name="media_list_grant_access">Allow access</string>
-    <string name="media_list_load_error">Files could not be loaded</string>
-    <string name="media_list_retry">Try again</string>
-    <string name="media_list_images_empty_description">Images on your device will appear here.</string>
-    <string name="media_list_videos_empty_description">Videos on your device will appear here.</string>
-    <string name="media_list_audio_empty_description">Audio tracks on your device will appear here.</string>
-    <string name="media_list_files_empty_description">Files downloaded with Private Browser will appear here.</string>
-    <string name="media_list_browse_device">Browse device files</string>
-    <string name="media_list_detail_name">Name</string>
-    <string name="media_list_detail_type">Type</string>
-    <string name="media_list_detail_size">Size</string>
-    <string name="media_list_detail_modified">Modified</string>
-    <string name="media_list_detail_resolution">Resolution</string>
-    <string name="media_list_detail_duration">Duration</string>
-    <string name="media_list_close">Close</string>
-    <string name="media_list_metadata_separator"> · </string>
-    <string name="media_list_resolution_format">%1$d × %2$d</string>
-    <plurals name="media_list_item_count">
-        <item quantity="one">%1$d item</item>
-        <item quantity="other">%1$d items</item>
-    </plurals>
 
     <!-- Folder Screen (Dark Theme Redesign) -->
-    <string name="folder_file_manager">File Manager</string>
-    <string name="folder_photos">Photos</string>
-    <string name="folder_audio">Audio</string>
-    <string name="folder_files">Files</string>
-    <string name="folder_storage_format">Storage: %1$s</string>
-    <string name="folder_vault_title">Vault</string>
-    <string name="folder_vault_locked">Locked</string>
-    <string name="folder_vault_description">Hide and protect your private files</string>
-    <string name="folder_open_vault">Open Vault</string>
-    <string name="feature_coming_soon">Feature coming soon</string>
-    <string name="folder_other">Other</string>
 
     <!-- Bookmark Screen (Dark Theme) -->
-    <string name="bookmark_no_bookmarks_title">No Bookmarks Yet</string>
-    <string name="bookmark_no_bookmarks_desc">Save your favorite websites to access them quickly anytime.</string>
-    <string name="bookmark_add">Add Bookmark</string>
-    <string name="bookmark_field_name">Name</string>
-    <string name="bookmark_field_name_hint">Enter name</string>
-    <string name="bookmark_field_url">URL</string>
-    <string name="bookmark_field_url_hint">https://www.example.com</string>
-    <string name="bookmark_save">Save</string>
-    <string name="bookmark_error_name_required">Name is required</string>
-    <string name="bookmark_error_url_required">URL is required</string>
-    <string name="bookmark_error_url_invalid">Invalid URL format</string>
-    <string name="bookmark_cancel">Cancel</string>
-    <string name="bookmark_menu_edit">Edit</string>
-    <string name="bookmark_menu_remove">Remove</string>
-    <string name="bookmark_remove_title">Remove Bookmark?</string>
-    <string name="bookmark_remove_desc">This website will be removed from your bookmarks. You can add it again later.</string>
     <!-- Video Download -->
-    <string name="video_select_title">Select items</string>
-    <string name="video_select_all">Select All</string>
-    <string name="video_deselect_all">Deselect All</string>
-    <string name="video_download_btn">Download</string>
 
     <!-- Browser More Popup Menu -->
-    <string name="browser_menu_new_tab">New Tab</string>
-    <string name="browser_menu_new_incognito_tab">New Incognito Tab</string>
-    <string name="browser_menu_history">History</string>
-    <string name="browser_menu_downloads">Downloads</string>
-    <string name="browser_menu_find_in_page">Find in Page</string>
-    <string name="browser_menu_share">Share</string>
-    <string name="browser_menu_desktop_site">Desktop Site</string>
-    <string name="browser_menu_settings">Settings</string>
-    <string name="browser_menu_help_feedback">Help &amp; Feedback</string>
-    <string name="browser_menu_reload">Reload</string>
-    <string name="browser_menu_download_action">Download</string>
 
     <!-- Find in Page -->
-    <string name="browser_find_in_page_hint">Find in page</string>
-    <string name="browser_find_in_page_result">%1$d / %2$d</string>
-    <string name="browser_find_in_page_no_results">No results</string>
-    <string name="browser_find_in_page_close">Close</string>
-    <string name="browser_find_in_page_next">Next</string>
-    <string name="browser_find_in_page_previous">Previous</string>
-    <string name="browser_website_permission_title">Site permission</string>
-    <string name="browser_website_permission_message">%1$s wants to use your %2$s.</string>
-    <string name="browser_location_permission_message">%1$s wants to know your location.</string>
-    <string name="browser_permission_camera">camera</string>
-    <string name="browser_permission_microphone">microphone</string>
-    <string name="browser_permission_camera_and_microphone">camera and microphone</string>
-    <string name="browser_permission_allow">Allow</string>
-    <string name="browser_permission_block">Block</string>
 
     <!-- Media Viewer -->
-    <string name="media_viewer_back">Back</string>
-    <string name="media_viewer_more">More options</string>
-    <string name="media_viewer_play">Play</string>
-    <string name="media_viewer_pause">Pause</string>
-    <string name="media_viewer_rewind">Rewind 5 seconds</string>
-    <string name="media_viewer_forward">Forward 5 seconds</string>
-    <string name="media_viewer_volume">Mute or unmute</string>
-    <string name="media_viewer_crop_video">Crop video to fill screen</string>
-    <string name="media_viewer_fit_video">Fit video to screen</string>
-    <string name="media_viewer_picture_in_picture">Picture in picture</string>
-    <string name="media_viewer_fullscreen">Fullscreen</string>
-    <string name="media_viewer_time_format">%1$s / %2$s</string>
-    <string name="media_viewer_playback_error">Unable to play this media.</string>
-    <string name="media_viewer_action_failed">This action could not be completed.</string>
-    <string name="media_viewer_remove_device_description">This file will be permanently removed from your device.</string>
     <!-- Battery status capsule -->
-    <string name="battery_catalog_title">Battery styles</string>
-    <string name="battery_catalog_subtitle">Choose a status capsule, then fine-tune its size and content.</string>
     <string name="battery_catalog_all">All</string>
-    <string name="battery_search">Search battery styles</string>
     <string name="battery_builtin_category">🌱 Starter</string>
-    <string name="battery_builtin_theme">Cute Mint</string>
-    <string name="battery_current_style">Current</string>
-    <string name="battery_current_custom_mix">Custom mix</string>
     <string name="battery_catalog_empty">No battery styles match this filter.</string>
     <string name="data_empty_message">Nothing to show yet</string>
     <string name="data_load_failed_title">Couldn’t load this content</string>
     <string name="data_load_failed_message">Check your connection and try again.</string>
     <string name="data_retry">Try again</string>
-    <string name="battery_catalog_local_data_hint">The Battery server is unavailable. Tap to retry.</string>
-    <string name="battery_retry">Tap to refresh</string>
     <string name="battery_favorite_action">Add or remove favorite</string>
-    <string name="battery_premium_theme">Premium style</string>
     <string name="battery_reward_unlock_title">Claim your reward now!</string>
     <string name="battery_reward_watch">Get it free</string>
     <string name="battery_reward_loading">Loading…</string>
@@ -811,10 +352,6 @@
     <string name="battery_troll_edit_percent_error">Maximum value is %1$d.</string>
     <string name="battery_troll_theme_locked">Premium theme</string>
     <string name="battery_preview_time" translatable="false">09:41</string>
-    <string name="battery_preview_percentage" translatable="false">82%</string>
-    <string name="battery_preview_date" translatable="false">Thu 30</string>
-    <string name="battery_preview_signal" translatable="false">▂▄▆</string>
-    <string name="battery_preview_wifi" translatable="false">⌁</string>
     <string name="battery_accessibility_required">Accessibility access is required to keep this bar visible above other apps.</string>
     <string name="battery_accessibility_ready">Accessibility access is on. Changes will apply to the overlay.</string>
     <!-- Android drops an accessibility service from the enabled list whenever the package is
@@ -866,13 +403,7 @@
     <string name="discover_customize_status_bar">Customize Status Bar</string>
     <string name="search_battery_hint">Search battery</string>
     <string name="search_cancel">Cancel</string>
-    <string name="search_tag_anime" translatable="false">Anime</string>
-    <string name="search_tag_sanrio" translatable="false">Sanrio</string>
-    <string name="search_tag_kpop" translatable="false">Kpop</string>
-    <string name="search_tag_cute">Cute</string>
-    <string name="search_tag_animal">Animal</string>
     <string name="search_no_results">No matching battery themes</string>
-    <string name="search_load_error">Unable to load battery themes</string>
     <string name="discover_battery_troll_banner" translatable="false">Battery Troll – Fake Battery</string>
     <string name="discover_shimeji_pets">🐰 Shimeji Pets</string>
     <string name="discover_pet_category">Breed: %1$s</string>
@@ -905,7 +436,6 @@
     <string name="pet_store_food_received">%1$s added to your food</string>
     <string name="pet_store_food_reward_title">Claim your reward now!</string>
     <string name="pet_store_food_quantity">x%1$d</string>
-    <string name="pet_store_close">Close</string>
     <string name="pet_store_no_pets_title">No pets yet</string>
     <string name="pet_store_no_pets_body">Choose and add a pet before turning on Pet on Screen.</string>
     <string name="pet_store_no_active_pets_title">No active pets</string>
