@@ -27,7 +27,15 @@ data class PetRoomUiState(
     val petPendingRemoval: PetRoomPetUiState? = null,
     val lastActivePetName: String? = null,
     val isPetCapacityDialogVisible: Boolean = false,
-    val settings: PetRoomSettingsUiState? = null
+    val settings: PetRoomSettingsUiState? = null,
+    val foodReward: PetRoomFoodRewardUiState = PetRoomFoodRewardUiState()
+)
+
+data class PetRoomFoodRewardUiState(
+    val selectedFood: PetRoomFoodUiState? = null,
+    val revealedFood: PetRoomFoodUiState? = null,
+    val acquiredFood: PetRoomFoodUiState? = null,
+    val isRequesting: Boolean = false
 )
 
 /** The panel that replaces the sheet body once the user taps a pet. */
@@ -56,7 +64,14 @@ enum class PetRoomMessage {
     SELECT_A_PET_FIRST,
     OUT_OF_FOOD,
     ALREADY_FULL,
-    NO_FREE_OVERLAY_SLOT
+    NO_FREE_OVERLAY_SLOT,
+    FOOD_REWARD_NOT_EARNED,
+    FOOD_REWARD_FAILED
+}
+
+sealed interface PetRoomEffect {
+    data object ShowFoodRewardedAd : PetRoomEffect
+    data object OpenPremium : PetRoomEffect
 }
 
 /** One pet the user already owns. Ownership is the installed pack, as in Pet Store. */
@@ -148,11 +163,67 @@ object PetRoomSheetPolicy {
         else -> current to !isExpanded
     }
 
-    /** Pet detail belongs exclusively to My Pet and must never cover Food or Room content. */
+    /** The detail panel is visible only in My Pet; the retained state still targets feeding. */
     fun detailForTab(
         selectedTab: PetRoomTab,
         detail: PetRoomDetailUiState?
     ): PetRoomDetailUiState? = detail.takeIf { selectedTab == PetRoomTab.MY_PET }
+
+    /** Switching the visible tab must not discard the pet selected for feeding. */
+    fun stateAfterTabSelected(
+        state: PetRoomUiState,
+        requested: PetRoomTab
+    ): PetRoomUiState {
+        val (selected, expanded) = onTabSelected(
+            current = state.selectedTab,
+            requested = requested,
+            isExpanded = state.isSheetExpanded
+        )
+        return state.copy(
+            selectedTab = selected,
+            isSheetExpanded = expanded,
+            message = null
+        )
+    }
+}
+
+internal object PetRoomFoodRewardPolicy {
+    fun select(
+        state: PetRoomFoodRewardUiState,
+        food: PetRoomFoodUiState
+    ): PetRoomFoodRewardUiState = if (state.isRequesting || state.revealedFood != null) {
+        state
+    } else {
+        state.copy(selectedFood = food, acquiredFood = null)
+    }
+
+    fun begin(state: PetRoomFoodRewardUiState): PetRoomFoodRewardUiState =
+        if (state.selectedFood == null || state.isRequesting) state
+        else state.copy(isRequesting = true)
+
+    fun cancel(state: PetRoomFoodRewardUiState): PetRoomFoodRewardUiState =
+        if (state.isRequesting) state else state.copy(selectedFood = null)
+
+    fun reject(state: PetRoomFoodRewardUiState): PetRoomFoodRewardUiState =
+        state.copy(isRequesting = false)
+
+    fun reveal(
+        state: PetRoomFoodRewardUiState,
+        food: PetRoomFoodUiState
+    ): PetRoomFoodRewardUiState = state.copy(
+        selectedFood = null,
+        revealedFood = food,
+        acquiredFood = null,
+        isRequesting = false
+    )
+
+    fun continueAfterReveal(state: PetRoomFoodRewardUiState): PetRoomFoodRewardUiState {
+        val food = state.revealedFood ?: return state
+        return state.copy(revealedFood = null, acquiredFood = food)
+    }
+
+    fun dismissAcquired(state: PetRoomFoodRewardUiState): PetRoomFoodRewardUiState =
+        state.copy(acquiredFood = null)
 }
 
 /** Speed and size shared by every pet until the design gives each pet its own profile. */

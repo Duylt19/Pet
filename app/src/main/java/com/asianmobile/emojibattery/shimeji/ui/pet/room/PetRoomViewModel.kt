@@ -3,6 +3,7 @@ package com.asianmobile.emojibattery.shimeji.ui.pet.room
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_PET_SLOTS
 import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
 import com.asianmobile.emojibattery.shimeji.data.model.PetRoomCatalogSnapshot
@@ -28,14 +29,15 @@ import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomBundledBackground
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomMusicPlayer
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomSizePolicy
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomSoundPlayer
-import com.asianmobile.emojibattery.shimeji.ui.pet.store.PET_FOOD_CATALOG
 import com.asianmobile.emojibattery.shimeji.ui.pet.PetFamilyCapacityPolicy
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PET_FOOD_CATALOG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -45,6 +47,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -69,11 +72,15 @@ class PetRoomViewModel @Inject constructor(
     val uiState: StateFlow<PetRoomUiState> = _uiState.asStateFlow()
     private val _scene = MutableStateFlow<List<PetRoomSceneEntry>>(emptyList())
     val scene: StateFlow<List<PetRoomSceneEntry>> = _scene.asStateFlow()
+    private val _effects = Channel<PetRoomEffect>(Channel.BUFFERED)
+    val effects = _effects.receiveAsFlow()
 
     private var selectedPetId: Int? = null
     private var isScreenResumed = false
     private var restoreOverlayOnExit = false
     private var energyRefreshJob: Job? = null
+    private var foodGrantJob: Job? = null
+    private var isFoodRewardAdActive = false
     private var roomPacks: List<PetPack> = emptyList()
     private var downloadingRoomId: Int? = null
 
@@ -167,18 +174,7 @@ class PetRoomViewModel @Inject constructor(
     }
 
     private fun selectTabInternal(tab: PetRoomTab) = _uiState.update { state ->
-        val (selected, expanded) = PetRoomSheetPolicy.onTabSelected(
-            current = state.selectedTab,
-            requested = tab,
-            isExpanded = state.isSheetExpanded
-        )
-        if (selected != PetRoomTab.MY_PET) selectedPetId = null
-        state.copy(
-            selectedTab = selected,
-            isSheetExpanded = expanded,
-            detail = PetRoomSheetPolicy.detailForTab(selected, state.detail),
-            message = null
-        )
+        PetRoomSheetPolicy.stateAfterTabSelected(state, tab)
     }
 
     fun toggleSheet() {
@@ -219,6 +215,17 @@ class PetRoomViewModel @Inject constructor(
             restoreOverlayOnExit = true
             PetOverlay.stop(context)
         }
+        val reward = _uiState.value.foodReward
+        if (reward.isRequesting && !isFoodRewardAdActive && foodGrantJob?.isActive != true) {
+            val food = reward.selectedFood
+            if (food != null && SharedPreferencesUtils.getIsPremium(context)) {
+                grantFood(food)
+            } else {
+                _uiState.update {
+                    it.copy(foodReward = PetRoomFoodRewardPolicy.reject(it.foodReward))
+                }
+            }
+        }
     }
 
     fun onScreenPaused() {
@@ -226,7 +233,7 @@ class PetRoomViewModel @Inject constructor(
         energyRefreshJob?.cancel()
         energyRefreshJob = null
         musicPlayer.pause()
-        if (restoreOverlayOnExit) {
+        if (restoreOverlayOnExit && !isFoodRewardAdActive) {
             restoreOverlayOnExit = false
             PetOverlay.start(context)
         }
@@ -348,6 +355,96 @@ class PetRoomViewModel @Inject constructor(
             )
             refreshDetail()
         }
+    }
+
+    fun selectFoodReward(foodId: String) {
+        soundPlayer.playClick()
+        val food = _uiState.value.foods.firstOrNull { it.id == foodId } ?: return
+        _uiState.update {
+            it.copy(
+                foodReward = PetRoomFoodRewardPolicy.select(it.foodReward, food),
+                message = null
+            )
+        }
+    }
+
+    fun dismissFoodRewardSheet() = _uiState.update {
+        it.copy(foodReward = PetRoomFoodRewardPolicy.cancel(it.foodReward))
+    }
+
+    fun requestFoodReward() {
+        val current = _uiState.value.foodReward
+        val next = PetRoomFoodRewardPolicy.begin(current)
+        if (next === current) return
+        _uiState.update { it.copy(foodReward = next, message = null) }
+        viewModelScope.launch { _effects.send(PetRoomEffect.ShowFoodRewardedAd) }
+    }
+
+    fun requestUnlimitedFood() {
+        val current = _uiState.value.foodReward
+        val food = current.selectedFood ?: return
+        val next = PetRoomFoodRewardPolicy.begin(current)
+        if (next === current) return
+        _uiState.update { it.copy(foodReward = next, message = null) }
+        if (SharedPreferencesUtils.getIsPremium(context)) {
+            grantFood(food)
+        } else {
+            viewModelScope.launch { _effects.send(PetRoomEffect.OpenPremium) }
+        }
+    }
+
+    /** Prevent the room lifecycle from restoring floating pets on top of a full-screen ad. */
+    fun onFoodRewardAdOpening() {
+        isFoodRewardAdActive = true
+    }
+
+    fun onFoodRewardResult(canContinue: Boolean) {
+        isFoodRewardAdActive = false
+        val food = _uiState.value.foodReward.selectedFood ?: run {
+            _uiState.update {
+                it.copy(foodReward = PetRoomFoodRewardPolicy.reject(it.foodReward))
+            }
+            return
+        }
+        if (!canContinue) {
+            _uiState.update {
+                it.copy(
+                    foodReward = PetRoomFoodRewardPolicy.reject(it.foodReward),
+                    message = PetRoomMessage.FOOD_REWARD_NOT_EARNED
+                )
+            }
+            return
+        }
+        grantFood(food)
+    }
+
+    private fun grantFood(food: PetRoomFoodUiState) {
+        if (foodGrantJob?.isActive == true) return
+        foodGrantJob = viewModelScope.launch {
+            try {
+                foodRepository.grant(food.id)
+                _uiState.update {
+                    it.copy(foodReward = PetRoomFoodRewardPolicy.reveal(it.foodReward, food))
+                }
+            } catch (_: Exception) {
+                _uiState.update {
+                    it.copy(
+                        foodReward = PetRoomFoodRewardPolicy.reject(it.foodReward),
+                        message = PetRoomMessage.FOOD_REWARD_FAILED
+                    )
+                }
+            } finally {
+                foodGrantJob = null
+            }
+        }
+    }
+
+    fun continueAfterFoodReveal() = _uiState.update {
+        it.copy(foodReward = PetRoomFoodRewardPolicy.continueAfterReveal(it.foodReward))
+    }
+
+    fun dismissAcquiredFood() = _uiState.update {
+        it.copy(foodReward = PetRoomFoodRewardPolicy.dismissAcquired(it.foodReward))
     }
 
     /** Slot one carries the shared values; the dialog edits those and Save fans them out. */

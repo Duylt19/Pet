@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.ui.pet.room
 
+import android.app.Activity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -74,9 +75,15 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedAdResult
+import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.pet.care.PetEnergyLevel
 import com.asianmobile.emojibattery.shimeji.pet.care.PetEnergyPolicy
 import com.asianmobile.emojibattery.shimeji.ui.pet.PetFamilyCapacityDialog
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.FoodRewardSheet
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.FoodUnlockReveal
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFood
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppActionToast
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
@@ -91,7 +98,7 @@ private val PetRoomToastRobotoMedium = FontFamily(Font(R.font.roboto_medium))
 fun PetRoomScreen(
     onNavigateBack: () -> Unit = {},
     onOpenPetStore: () -> Unit = {},
-    onOpenFoodStore: () -> Unit = {},
+    onPremium: () -> Unit = {},
     viewModel: PetRoomViewModel = hiltViewModel()
 ) {
     TrackScreenView(ScreenName.MY_PET)
@@ -112,6 +119,31 @@ fun PetRoomScreen(
     }
 
     val context = LocalContext.current
+    LaunchedEffect(context) {
+        RewardedVideoAds.getInstance().loadRewardedVideo(context.applicationContext)
+    }
+    LaunchedEffect(viewModel, context) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                PetRoomEffect.ShowFoodRewardedAd -> {
+                    val activity = context as? Activity
+                    val rewardedAds = RewardedVideoAds.getInstance()
+                    if (activity == null || rewardedAds.isShowing) {
+                        viewModel.onFoodRewardResult(
+                            RewardedAdResult.UNAVAILABLE.shouldContinueFlow
+                        )
+                    } else {
+                        viewModel.onFoodRewardAdOpening()
+                        rewardedAds.showRewardedAd(activity) { result ->
+                            viewModel.onFoodRewardResult(result.shouldContinueFlow)
+                        }
+                    }
+                }
+
+                PetRoomEffect.OpenPremium -> onPremium()
+            }
+        }
+    }
     LaunchedEffect(uiState.message, context) {
         val messageRes = when (uiState.message) {
             PetRoomMessage.ROOM_DOWNLOAD_FAILED -> R.string.pet_room_download_failed
@@ -120,6 +152,8 @@ fun PetRoomScreen(
             PetRoomMessage.OUT_OF_FOOD -> null
             PetRoomMessage.ALREADY_FULL -> R.string.pet_room_already_full
             PetRoomMessage.NO_FREE_OVERLAY_SLOT -> R.string.pet_room_no_free_slot
+            PetRoomMessage.FOOD_REWARD_NOT_EARNED -> R.string.pet_room_food_reward_not_earned
+            PetRoomMessage.FOOD_REWARD_FAILED -> R.string.pet_room_food_reward_failed
             null -> null
         }
         messageRes?.let {
@@ -144,10 +178,7 @@ fun PetRoomScreen(
                 viewModel.playClick()
                 if (viewModel.requestAddPet()) onOpenPetStore()
             },
-            onOpenFoodStore = {
-                viewModel.playClick()
-                onOpenFoodStore()
-            },
+            onAddFood = viewModel::selectFoodReward,
             onToggleMusic = viewModel::toggleMusic,
             onToggleSheet = viewModel::toggleSheet,
             onSelectTab = viewModel::selectTab,
@@ -174,6 +205,36 @@ fun PetRoomScreen(
                 text = stringResource(R.string.pet_room_out_of_food),
                 isSheetExpanded = uiState.isSheetExpanded,
                 onDismiss = viewModel::dismissMessage
+            )
+        }
+
+        uiState.foodReward.selectedFood?.let { food ->
+            FoodRewardSheet(
+                food = food.toStoreFood(),
+                isProcessing = uiState.foodReward.isRequesting,
+                onDismiss = viewModel::dismissFoodRewardSheet,
+                onPremium = viewModel::requestUnlimitedFood,
+                onAcquire = viewModel::requestFoodReward
+            )
+        }
+        uiState.foodReward.revealedFood?.let { food ->
+            FoodUnlockReveal(
+                food = food.toStoreFood(),
+                onContinue = viewModel::continueAfterFoodReveal
+            )
+        }
+        uiState.foodReward.acquiredFood?.let { food ->
+            AppActionToast(
+                text = stringResource(R.string.pet_store_food_received, food.name),
+                action = null,
+                onDismiss = viewModel::dismissAcquiredFood,
+                onAction = {},
+                leadingImageModel = food.imageRes,
+                bottomPaddingRes = if (uiState.isSheetExpanded) {
+                    SdpR.dimen._203sdp
+                } else {
+                    SdpR.dimen._52sdp
+                }
             )
         }
     }
@@ -257,7 +318,7 @@ private fun PetRoomContent(
     onNavigateBack: () -> Unit,
     onOpenPetStore: () -> Unit,
     onAddPet: () -> Unit,
-    onOpenFoodStore: () -> Unit,
+    onAddFood: (String) -> Unit,
     onToggleMusic: () -> Unit,
     onToggleSheet: () -> Unit,
     onSelectTab: (PetRoomTab) -> Unit,
@@ -278,6 +339,7 @@ private fun PetRoomContent(
     onSettingsSizeChange: (Int) -> Unit = {},
     onSaveSettings: () -> Unit = {}
 ) {
+    val visibleDetail = PetRoomSheetPolicy.detailForTab(uiState.selectedTab, uiState.detail)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -307,7 +369,7 @@ private fun PetRoomContent(
 
         Column(modifier = Modifier.fillMaxSize()) {
             PetRoomTopBar(
-                title = uiState.detail?.name ?: stringResource(R.string.pet_room_title),
+                title = visibleDetail?.name ?: stringResource(R.string.pet_room_title),
                 onNavigateBack = onNavigateBack,
                 onOpenSettings = onOpenSettings,
                 modifier = Modifier.statusBarsPadding()
@@ -356,7 +418,7 @@ private fun PetRoomContent(
                 onSelectTab = onSelectTab,
                 onSelectRoom = onSelectRoom,
                 onAddPet = onAddPet,
-                onAddFood = onOpenFoodStore,
+                onAddFood = onAddFood,
                 onOpenPet = onOpenPet,
                 onCloseDetail = onCloseDetail,
                 onToggleOnScreen = onToggleOnScreen,
@@ -537,7 +599,7 @@ private fun PetRoomSheet(
     onSelectTab: (PetRoomTab) -> Unit,
     onSelectRoom: (Int) -> Unit,
     onAddPet: () -> Unit,
-    onAddFood: () -> Unit,
+    onAddFood: (String) -> Unit,
     onOpenPet: (Int) -> Unit,
     onCloseDetail: () -> Unit,
     onToggleOnScreen: () -> Unit,
@@ -1050,7 +1112,7 @@ private fun EnergyBar(percent: Int) {
 private fun FoodTabContent(
     foods: List<PetRoomFoodUiState>,
     onFeed: (String) -> Unit,
-    onAddFood: () -> Unit
+    onAddFood: (String) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(ROOM_GRID_COLUMNS),
@@ -1060,7 +1122,11 @@ private fun FoodTabContent(
         modifier = Modifier.fillMaxSize()
     ) {
         items(foods, key = PetRoomFoodUiState::id) { food ->
-            FoodCard(food = food, onFeed = { onFeed(food.id) }, onAdd = onAddFood)
+            FoodCard(
+                food = food,
+                onFeed = { onFeed(food.id) },
+                onAdd = { onAddFood(food.id) }
+            )
         }
     }
 }
@@ -1366,6 +1432,13 @@ private const val ADD_PET_CARD_KEY = "add_pet"
 private const val PET_ROOM_FOOD_TOAST_WIDTH_FRACTION = 272f / 360f
 private const val PET_ROOM_TOAST_DURATION_MILLIS = 3_000L
 
+private fun PetRoomFoodUiState.toStoreFood() = PetStoreFood(
+    id = id,
+    name = name,
+    energyValue = energyValue,
+    imageRes = imageRes
+)
+
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 private fun PetRoomScreenPreview() {
@@ -1389,7 +1462,7 @@ private fun PetRoomScreenPreview() {
         onNavigateBack = {},
         onOpenPetStore = {},
         onAddPet = {},
-        onOpenFoodStore = {},
+        onAddFood = {},
         onToggleMusic = {},
         onToggleSheet = {},
         onSelectTab = {},

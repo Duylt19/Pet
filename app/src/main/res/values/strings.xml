@@ -947,6 +947,8 @@
     <string name="pet_room_remove_failed">Could not remove this pet. Please try again.</string>
     <string name="pet_room_select_pet_first">Select a pet first.</string>
     <string name="pet_room_out_of_food">Out of food. Please add more food.</string>
+    <string name="pet_room_food_reward_not_earned">Watch the full video to receive this food.</string>
+    <string name="pet_room_food_reward_failed">Could not add this food. Please try again.</string>
     <string name="pet_room_already_full">This pet already has maximum energy.</string>
     <string name="pet_room_no_free_slot">Up to 12 pets can be assigned to Pet on Screen. Remove a pet before activating another one.</string>
     <string name="pet_room_settings">Pet settings</string>

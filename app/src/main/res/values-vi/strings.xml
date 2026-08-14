@@ -705,6 +705,8 @@
     <string name="pet_room_remove_failed">Không thể xóa thú cưng này. Vui lòng thử lại.</string>
     <string name="pet_room_select_pet_first">Hãy chọn một thú cưng trước.</string>
     <string name="pet_room_out_of_food">Đã hết thức ăn. Hãy thêm thức ăn.</string>
+    <string name="pet_room_food_reward_not_earned">Hãy xem hết video để nhận món ăn này.</string>
+    <string name="pet_room_food_reward_failed">Không thể thêm thức ăn. Vui lòng thử lại.</string>
     <string name="pet_room_already_full">Thú cưng này đã có năng lượng tối đa.</string>
     <string name="pet_room_no_free_slot">Pet on Screen hỗ trợ tối đa 12 thú cưng được gán. Hãy xóa một thú cưng trước khi kích hoạt thú cưng khác.</string>
     <string name="grant_permissions_nav">Quản lý quyền</string>

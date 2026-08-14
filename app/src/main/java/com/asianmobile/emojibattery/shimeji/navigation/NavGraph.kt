@@ -447,19 +447,19 @@ fun AppNavGraph(
             }
 
             composable(Routes.MY_PET) {
-                fun openPetStore(tab: PetStoreTab) {
+                fun openPetStore() {
                     navController.getBackStackEntry(Routes.HOME_GRAPH)
-                        .savedStateHandle[Routes.PET_STORE_TAB_REQUEST] = tab.navigationValue
-                    // Leave the room before switching tabs. navigateToHomeTab saves the current
-                    // stack under `home`; the graph-scoped request selects Pets or Food once.
+                        .savedStateHandle[Routes.PET_STORE_TAB_REQUEST] =
+                        PetStoreTab.PETS.navigationValue
+                    // Leave the room before switching tabs. Food rewards stay inside My Pet Room.
                     navController.safePopBackStack(ignoreDebounce = true)
                     navigateToHomeTab(HomeTab.PET_STORE)
                 }
 
                 PetRoomScreen(
                     onNavigateBack = { navController.safePopBackStack() },
-                    onOpenPetStore = { openPetStore(PetStoreTab.PETS) },
-                    onOpenFoodStore = { openPetStore(PetStoreTab.FOOD) }
+                    onOpenPetStore = ::openPetStore,
+                    onPremium = { navigateFromHome(Routes.PREMIUM) }
                 )
             }
 

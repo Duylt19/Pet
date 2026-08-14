@@ -415,12 +415,14 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   padding ngang 6px/dọc 2px và offset 6px;
 - roster vẫn liệt kê mọi pet đã sở hữu, nhưng scene phòng chỉ dựng pet `Active`. Đổi switch
   cập nhật cả overlay slot và scene; `Inactive` biến mất khỏi sảnh nhưng vẫn có card để bật lại;
-- shortcut Shimeji Pets và ô `+` pet mở đúng tab Pets của top-level Shimeji Pets; icon thêm Food
-  mở tab Food. Pet Store consume tab request một lần, không persist lựa chọn cưỡng bức;
+- shortcut Shimeji Pets và ô `+` pet mở đúng tab Pets của top-level Shimeji Pets. Nút `+` trên
+  từng food không điều hướng khỏi phòng: nó mở `dialog_food_reward` cho đúng món, chạy
+  Rewarded/Premium gate, cộng inventory rồi hiển thị reveal và toast xác nhận ngay tại Pet Room;
 - bật Pet on Screen khi chưa sở hữu pet hoặc khi toàn bộ pet Inactive hiển thị dialog riêng. CTA
   lần lượt dẫn tới tab Pets hoặc My Pet Room; permission flow chỉ chạy khi có pet Active;
-- detail pet chỉ thuộc tab My Pet. Chuyển sang Food hoặc Room đóng detail và render đúng nội dung
-  của tab mới; state detail cũ không được phép che Room hoặc đổi title của màn;
+- panel detail và tên pet trên app bar chỉ hiển thị ở tab My Pet. Pet được chọn vẫn được giữ khi
+  chuyển sang Food để mọi card food feed đúng pet đó; tab Room render độc lập, không bị detail
+  che và cũng không xóa selection. Chỉ action Back trong detail hoặc xóa chính pet mới bỏ chọn;
 - pet đã sở hữu đi lại trong scene bằng `PetRoomWander`, không dùng `PetEngine`: engine overlay
   dựng cho góc nhìn ngang nên trọng lực dồn mọi pet về một đường sàn. Phòng nhìn từ phía trước
   nên sàn là hình thang phối cảnh `0.50–0.72` chiều cao scene, mép sau hẹp hơn 14%; pet chọn một
@@ -453,8 +455,9 @@ My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `819
   12 slot đã gán, bật pet chưa có slot hiển thị toast thay vì im lặng;
 - Energy tụt 1%/phút kể cả khi app đóng và chỉ hồi khi cho ăn. Pet chưa có record thức ăn dùng
   thời điểm nhận nuôi làm mốc 100%, không dùng thời điểm UI vừa đọc; khi panel đang mở, ticker
-  cập nhật giá trị mỗi giây để mốc phút mới hiện ngay. Food card tiêu một phần, nút `+` đưa về
-  Pet Store vì đó là nơi nhận thêm food bằng Rewarded;
+  cập nhật giá trị mỗi giây để mốc phút mới hiện ngay. Tap thân Food card tiêu một phần cho pet
+  đang chọn; nút `+` mở reward flow tại chỗ. Trong lúc rewarded fullscreen, lifecycle Pet Room
+  không khởi động lại overlay pet trên quảng cáo; callback lặp/double tap không thể cộng hai lần;
 - chạm một pet trong scene mở đúng panel của pet đó; pet vẽ trên cùng thắng nên tap không mở
   nhầm con nằm dưới. Title bar đổi thành tên pet khi panel mở;
 - nút music phát `res/raw/bgm_pet_room.ogg` lặp, persist trạng thái và chỉ phát khi màn đang

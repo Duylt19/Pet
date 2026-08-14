@@ -955,13 +955,31 @@ internal fun ColumnScope.PetRewardSheetContent(
 }
 
 @Composable
-private fun FoodRewardSheet(food: PetStoreFood, onDismiss: () -> Unit, onPremium: () -> Unit, onAcquire: () -> Unit) {
+internal fun FoodRewardSheet(
+    food: PetStoreFood,
+    onDismiss: () -> Unit,
+    onPremium: () -> Unit,
+    onAcquire: () -> Unit,
+    isProcessing: Boolean = false
+) {
     RewardOfferSheet(onDismiss) {
         RewardFoodPreview(food)
         Text(stringResource(R.string.pet_store_food_reward_title), color = colorResource(R.color.colors_212327), fontFamily = StoreRobotoMedium, fontSize = dimensionResource(SspR.dimen._14ssp).value.sp, lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
-            RewardOutlineButton(stringResource(R.string.pet_store_unlimited), onPremium, Modifier.weight(1f), iconRes = R.drawable.img_pet_store_premium_crown)
-            RewardGradientButton(stringResource(R.string.pet_store_get_free), onAcquire, Modifier.weight(1f), iconRes = R.drawable.ic_pet_store_reward_video)
+            RewardOutlineButton(
+                text = stringResource(R.string.pet_store_unlimited),
+                onClick = onPremium,
+                modifier = Modifier.weight(1f),
+                enabled = !isProcessing,
+                iconRes = R.drawable.img_pet_store_premium_crown
+            )
+            RewardGradientButton(
+                text = stringResource(R.string.pet_store_get_free),
+                onClick = onAcquire,
+                modifier = Modifier.weight(1f),
+                enabled = !isProcessing,
+                iconRes = R.drawable.ic_pet_store_reward_video
+            )
         }
         NativeAdInternal(
             screenCode = DIALOG_FOOD_REWARD,
@@ -1361,7 +1379,7 @@ private fun PetSpecialSkillSprite(
 }
 
 @Composable
-private fun FoodUnlockReveal(food: PetStoreFood, onContinue: () -> Unit) {
+internal fun FoodUnlockReveal(food: PetStoreFood, onContinue: () -> Unit) {
     Dialog(
         onDismissRequest = {},
         properties = DialogProperties(

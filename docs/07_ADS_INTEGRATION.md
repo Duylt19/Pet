@@ -100,9 +100,15 @@ Mọi Android string resource chứa publisher/ad-unit ID dùng prefix
 - Battery Rewarded là unlock trigger đã được owner duyệt. Editor có bottom banner đã được
   Figma chỉ định; reward sheet dùng `dialog_battery_reward`, còn discard-changes sheet dùng
   `dialog_battery_discard`; cả hai có template native `HEIGHT_222` riêng.
-- Pet Store reward sheet dùng `dialog_pet_reward`; Food reward sheet dùng `dialog_food_reward`.
-  Favourite & Recent dùng `screen_favourite_recent`. Mỗi placement có Remote Config và string
-  ad-unit riêng dù production ID hiện có thể đang dùng chung trong AdMob.
+- Pet Store reward sheet dùng `dialog_pet_reward`; Food reward sheet dùng `dialog_food_reward`
+  và được tái sử dụng nguyên placement khi mở từ Pet Store hoặc nút `+` trong My Pet Room — đây
+  là cùng một dialog/intent nhận food nên không tạo ID hay Remote Config mới. Trong Pet Room,
+  `Get it free` dùng Rewarded chung và Premium bypass video; `DISMISSED` giữ sheet để retry,
+  `UNAVAILABLE` tiếp tục theo fallback chung, và callback/double tap chỉ cộng một portion. Khi
+  Rewarded fullscreen mở từ Pet Room, room không restore floating-pet overlay lên trên creative.
+  Favourite & Recent
+  dùng `screen_favourite_recent`. Mỗi placement có Remote Config và string ad-unit riêng dù
+  production ID hiện có thể đang dùng chung trong AdMob.
 - Banner wrapper phát trạng thái visibility cho placement inline cần layout động. Battery More
   xóa toàn bộ grid item khi banner không đủ điều kiện hoặc load fail; không giữ placeholder 50dp.
 - Screen code phải là constant trong ads config, không hardcode rải rác.
