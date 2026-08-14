@@ -144,7 +144,7 @@ khi mở Accessibility Settings:
 - nút đồng ý/từ chối rõ, không pre-check, không gộp vào Terms/Privacy;
 - Privacy Policy/Data Safety và Play listing mô tả cùng một use case.
 
-Cute Pet không phải accessibility tool:
+Emoji Battery không phải accessibility tool:
 
 - `isAccessibilityTool=false`;
 - phải hoàn thành Accessibility declaration và review video;

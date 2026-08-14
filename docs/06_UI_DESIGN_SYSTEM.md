@@ -1,11 +1,11 @@
 # 06 — UI Design System Contract
 
 Base giữ infrastructure/theme và component pattern. Product screens từ Home trở đi dùng
-visual system Cute Pet. Splash, App Open Welcome Back và Language đã theo Figma;
+visual system Emoji Battery. Splash, App Open Welcome Back và Language đã theo Figma;
 Intro và Premium vẫn giữ UI hiện tại. Permission giữ nguyên UI/source nhưng tạm không nằm trong
 flow onboarding cho tới khi policy first-permission được bật lại.
 
-## Cute Pet product direction
+## Emoji Battery product direction
 
 - Discover Home và Mine dùng nền trắng/gradient pastel, primary pink `#FB3675`, card trắng
   và typography Roboto theo Figma. My Pet mode dùng nền xanh-trắng nhẹ, primary teal và
@@ -416,7 +416,8 @@ Grant Permissions contract theo dashboard Mine Figma node `8080:7477`, card nề
   disclosure này. Khi quyền đã bật, row Accessibility trong Grant Permissions mở thẳng Settings
   để user quản lý/tắt quyền, không hỏi consent lại.
 - màn `Accessibility How to use` theo Figma `8442:9525`: wallpaper pastel riêng, bốn bước với
-  ảnh thao tác export theo từng group, số thứ tự hồng, keyword hồng và CTA gradient
+  ảnh thao tác export theo từng group ở PNG 4× để không bị mờ trên màn hình mật độ cao, số thứ
+  tự hồng, keyword hồng và CTA gradient
   `#C95DFF → #FB54BB` ghim đáy. App bar dùng cùng `exitUntilCollapsed` contract của Customize
   Status Bar và có lớp pastel opaque khớp wallpaper để nội dung đang cuộn không xuyên/chồng lên
   back + title. CTA mở Settings; chỉ khi service đã bật mới pop về source để source tiếp tục action.

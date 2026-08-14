@@ -204,7 +204,7 @@ Mọi control update trực tiếp parent draft và preview. Back chỉ quay v�
 
 ## Design tokens
 
-- Tái sử dụng Cute Pet light/cozy palette.
+- Tái sử dụng Emoji Battery light/cozy palette.
 - User-facing string trong resources.
 - Color token trong `colors.xml`; custom selected color là validated data, ngoại lệ có chủ đích.
 - Sizing dùng SDP/SSP theo project; screenshot raster không được đoán thành exact Figma px.

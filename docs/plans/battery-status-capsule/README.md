@@ -6,7 +6,7 @@ Current source contract và trạng thái thật:
 [`../../features/BATTERY_STATUS.md`](../../features/BATTERY_STATUS.md).
 
 Tài liệu này chuyển 14 screenshot tham chiếu thành một kế hoạch production-ready cho
-Cute Pet. Tên sản phẩm dùng trong spec là **Battery Status Capsule**: một thanh trang trí
+Emoji Battery. Tên sản phẩm dùng trong spec là **Battery Status Capsule**: một thanh trang trí
 che trực quan status bar bằng Accessibility. Sau quyết định sản phẩm ngày 2026-07-30,
 source ship luồng cover-only; giá trị below-bar legacy được migrate. App không sửa
 SystemUI thật.

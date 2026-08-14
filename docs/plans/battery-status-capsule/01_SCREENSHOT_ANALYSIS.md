@@ -7,7 +7,7 @@
 
 14 ảnh đều có kích thước 1440×2960. Đây là screenshot runtime của một app khác, được dùng
 để phân tích information architecture và capability, không phải nguồn pixel/asset để sao
-chép. Cute Pet sẽ giữ cozy visual system hiện tại và chỉ học cấu trúc thao tác.
+chép. Emoji Battery sẽ giữ cozy visual system hiện tại và chỉ học cấu trúc thao tác.
 
 ## Screen 1 — Battery catalog
 
@@ -23,7 +23,7 @@ chép. Cute Pet sẽ giữ cozy visual system hiện tại và chỉ học cấu
 
 ### Contract đề xuất
 
-- Header tái sử dụng `Cute Pet`, Premium và Settings; Favorites chỉ xuất hiện khi catalog
+- Header tái sử dụng `Emoji Battery`, Premium và Settings; Favorites chỉ xuất hiện khi catalog
   có dữ liệu.
 - Category được localize hoàn toàn; không trộn tiếng Anh/Vietnamese như reference.
 - Theme card có bốn trạng thái: free, rewarded locked, premium locked, selected.
@@ -64,7 +64,7 @@ Full editor có preview capsule cố định phía trên, nội dung cuộn và 
 
 ### Vấn đề cần sửa so với reference
 
-- Các label dưới grid bị cắt ở cạnh trái/phải; Cute Pet dùng grid responsive 2–4 cột và
+- Các label dưới grid bị cắt ở cạnh trái/phải; Emoji Battery dùng grid responsive 2–4 cột và
   text tối đa hai dòng.
 - Nhiều slider không nói rõ đơn vị. UI mới luôn hiển thị `dp`, `%` hoặc mô tả semantic.
 - `Áp dụng` phải phân biệt draft với configuration đang chạy; Back khi dirty có confirm.
@@ -172,9 +172,9 @@ Kết quả nhìn như “thay status bar”, nhưng status bar hệ thống v�
 là hypothesis có cơ sở từ permission + Android layer policy, không phải reverse-engineering
 source của app reference.
 
-## Visual direction cho Cute Pet
+## Visual direction cho Emoji Battery
 
-- Nền `colors_F4F8FC`, card trắng, primary teal và typography hiện tại của Cute Pet.
+- Nền `colors_F4F8FC`, card trắng, primary teal và typography hiện tại của Emoji Battery.
 - Radius lớn 16–24 sdp, shadow nhẹ, hierarchy rõ.
 - Capsule preview là một component dùng chung giữa Catalog detail, Full Editor và
   Component Editor.

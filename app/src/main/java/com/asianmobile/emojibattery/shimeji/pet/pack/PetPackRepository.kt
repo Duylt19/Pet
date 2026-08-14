@@ -183,7 +183,7 @@ class FilePetPackRepository @Inject constructor(
                 id = "builtin.orange-cat",
                 version = 1,
                 name = "Orange Cat",
-                author = "Cute Pet",
+                author = "Emoji Battery",
                 canvas = PetPackCanvas(128, 128, 1f),
                 anchor = PetPackAnchor(0.5f, 1f),
                 interaction = PetPackInteraction(PetAction.TAPPED),

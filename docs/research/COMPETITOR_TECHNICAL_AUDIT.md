@@ -18,7 +18,7 @@ JADX reported 95 decompilation errors across 15,801 APK classes. Core product cl
 
 The supplied app contains a catalog dominated by anime, game and internet characters. At the start of this audit, its redistribution scope had not been established, so no binary assets were imported into the Android app or committed to source control. On 2026-07-22, the project owner represented that the demo app and its complete pet dataset are owner-controlled and fully authorized for this project. Based on that authorization, the upstream data repository was captured separately under ignored `private_data/` storage with a pinned commit and SHA-256 inventory.
 
-This authorization applies to the requested data snapshot. Decompiled implementation code, branding, translated copy, ad configuration, product IDs, credentials and backend identity remain excluded from Cute Pet. The reusable implementation output of this audit remains limited to behavior contracts, file-format observations and platform architecture.
+This authorization applies to the requested data snapshot. Decompiled implementation code, branding, translated copy, ad configuration, product IDs, credentials and backend identity remain excluded from Emoji Battery. The reusable implementation output of this audit remains limited to behavior contracts, file-format observations and platform architecture.
 
 ## Executive architecture
 
@@ -64,7 +64,7 @@ Product-facing components recovered from the manifest:
 - File provider: supports file sharing/import plumbing.
 - WorkManager workers: delayed pet refresh and marketing notification scheduling.
 
-The competitor service and boot receiver are exported. Cute Pet keeps service entry points non-exported and will only add boot behavior as explicit opt-in after a separate policy decision.
+The competitor service and boot receiver are exported. Emoji Battery keeps service entry points non-exported and will only add boot behavior as explicit opt-in after a separate policy decision.
 
 ## Catalog and persistent data
 
@@ -89,7 +89,7 @@ Room duplicates a small subset of catalog metadata in `db_shimeji_pets`:
 PetsEntity(id: Int, name: String, category: String, author: String)
 ```
 
-It uses destructive migration. No evidence shows that Room is essential to overlay rendering. Cute Pet should continue using its validated pack repository and only add a database when a real searchable/offline catalog requires it.
+It uses destructive migration. No evidence shows that Room is essential to overlay rendering. Emoji Battery should continue using its validated pack repository and only add a database when a real searchable/offline catalog requires it.
 
 ### Preferences
 
@@ -112,7 +112,7 @@ The competitor uses one untyped SharedPreferences file named `data_my_app_shared
 | VIP/swarm slot | `getVipPetPosition_<slot>=-1` |
 | Change interval | `getTimeChange=5` minutes |
 
-Other keys are UI counters, first-use dialogs, rating prompts, ad state and cancellation counters. Cute Pet already models durable user settings with typed DataStore and sanitizes corrupt/out-of-range values; that contract is safer than copying these keys.
+Other keys are UI counters, first-use dialogs, rating prompts, ad state and cancellation counters. Emoji Battery already models durable user settings with typed DataStore and sanitizes corrupt/out-of-range values; that contract is safer than copying these keys.
 
 ## Remote asset contract
 
@@ -146,7 +146,7 @@ Missing numbered frames are logged and tolerated. There is no per-pack manifest,
 - Download state is a boolean preference and can diverge from files on disk.
 - Product traffic allows cleartext at application level even though the observed catalog endpoint is HTTPS.
 
-Cute Pet pack v1 already improves all of these areas with staging, traversal prevention, file/type/size/pixel budgets, validation and atomic promotion. The competitor transport/backend must not be reused.
+Emoji Battery pack v1 already improves all of these areas with staging, traversal prevention, file/type/size/pixel budgets, validation and atomic promotion. The competitor transport/backend must not be reused.
 
 ## Sprite and animation contract
 
@@ -173,7 +173,7 @@ The competitor assumes every compatible pet uses the same numbered PNG semantics
 | Special 1 | `0, 37, 38, 39` plus a generated final frame call |
 | Special 2 | `41, 42, 43, 44, 45, 44, 43, 42` |
 
-The mapping demonstrates why importing the competitor's raw ZIPs into Cute Pet pack v1 would be incorrect even aside from licensing: their format has implicit global meaning, while ours has explicit clips, source rectangles, timing, velocity and interaction metadata.
+The mapping demonstrates why importing the competitor's raw ZIPs into Emoji Battery pack v1 would be incorrect even aside from licensing: their format has implicit global meaning, while ours has explicit clips, source rectangles, timing, velocity and interaction metadata.
 
 ### State machine
 
@@ -233,7 +233,7 @@ Normal mode reads up to nine selected slots, shuffles them and uses the configur
 - Sprite sets are cached by pet ID.
 - `SCREEN_OFF` pauses the render loop and `SCREEN_ON` resumes it.
 
-This validates Cute Pet's shared-clock/shared-visual design. Cute Pet uses `Choreographer`, bounded bitmap cache and a 24 FPS degradation tier, avoiding the competitor's raw thread and `SurfaceView.lockCanvas()` complexity.
+This validates Emoji Battery's shared-clock/shared-visual design. Emoji Battery uses `Choreographer`, bounded bitmap cache and a 24 FPS degradation tier, avoiding the competitor's raw thread and `SurfaceView.lockCanvas()` complexity.
 
 ### Gestures and popup
 
@@ -252,7 +252,7 @@ This validates Cute Pet's shared-clock/shared-visual design. Cute Pet uses `Chor
 - A separate one-time worker schedules daily marketing notifications with one of ten predefined creative variants.
 - Hungry opens an immersive promotional/interstitial screen; take-care is an unfinished static activity. No durable hunger simulation or care domain model was found.
 
-The pet-change worker is effectively periodic work implemented as self-rescheduling one-time work. Cute Pet must not use WorkManager as an animation keep-alive mechanism.
+The pet-change worker is effectively periodic work implemented as self-rescheduling one-time work. Emoji Battery must not use WorkManager as an animation keep-alive mechanism.
 
 ## UI and business flows
 
@@ -272,7 +272,7 @@ The app combines subscriptions/one-time billing, rewarded unlocks, app-open, int
 
 | Severity | Finding | Clean-room decision |
 |---|---|---|
-| High | ZIP extraction permits path traversal and has no resource budgets | Keep Cute Pet's validated atomic installer |
+| High | ZIP extraction permits path traversal and has no resource budgets | Keep Emoji Battery's validated atomic installer |
 | High | Foreground service and boot receiver are exported | Keep internal components `exported=false` |
 | High | Character catalog/assets require explicit redistribution authority | Owner authorization recorded for the 2026-07-22 snapshot; keep provenance and licensing metadata with server imports |
 | Medium | `allowBackup=true` and cleartext traffic enabled globally | Do not inherit; minimize backup/network surface |
@@ -283,11 +283,11 @@ The app combines subscriptions/one-time billing, rewarded unlocks, app-open, int
 | Low | Room uses destructive migration for a trivial catalog copy | Avoid database until product data needs it |
 | Low | Hungry/take-care feature is mostly promotional/unfinished | Do not treat it as core parity |
 
-Credential-bearing configuration, ad unit values and service-specific identifiers were inspected only to classify dependencies. They are intentionally omitted from this document and must not enter the Cute Pet repository.
+Credential-bearing configuration, ad unit values and service-specific identifiers were inspected only to classify dependencies. They are intentionally omitted from this document and must not enter the Emoji Battery repository.
 
 ## Clean capability mapping
 
-| Competitor capability | Cute Pet status | Decision |
+| Competitor capability | Emoji Battery status | Decision |
 |---|---|---|
 | Small transparent overlay window | Implemented | Keep |
 | Shared render clock for multiple pets | Implemented | Keep |
@@ -302,7 +302,7 @@ Credential-bearing configuration, ad unit values and service-specific identifier
 | Nine slots / large swarm | Intentionally absent | Preserve device performance budget; do not clone limits blindly |
 | Remote catalog/download | Missing by design | Build only against the owner-controlled backend and authorized snapshot |
 | Boot restart | Deferred | Explicit opt-in plus Android policy review only |
-| Ads/billing entitlement | Phase 6 | Use Cute Pet policy/config, never competitor IDs |
+| Ads/billing entitlement | Phase 6 | Use Emoji Battery policy/config, never competitor IDs |
 | Hungry/take-care | Not implemented | Low-value/non-core until product requirement exists |
 
 ## Confidence and open evidence

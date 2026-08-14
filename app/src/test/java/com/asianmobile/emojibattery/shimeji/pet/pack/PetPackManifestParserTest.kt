@@ -68,7 +68,7 @@ internal fun validManifestJson(frameFile: String = "sprites/cat.png"): String =
       "id": "demo.orange-cat",
       "version": 1,
       "name": "Orange Cat",
-      "author": "Cute Pet",
+      "author": "Emoji Battery",
       "canvas": { "width": 128, "height": 128, "defaultScale": 1.0 },
       "anchor": { "x": 0.5, "y": 1.0 },
       "interaction": { "tapAction": "tapped" },

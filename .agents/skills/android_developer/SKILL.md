@@ -1,17 +1,17 @@
 ---
 name: android-developer
-description: Quy tắc kiến trúc, coding, UI và verification cho ứng dụng Cute Pet/Shimeji Android.
+description: Quy tắc kiến trúc, coding, UI và verification cho ứng dụng Emoji Battery/Shimeji Android.
 ---
 
-# Android Developer Skill — Cute Pet/Shimeji
+# Android Developer Skill — Emoji Battery/Shimeji
 
 Agent làm việc trong repository này PHẢI tuân thủ các contract dưới đây. Đây là app
-Cute Pet/Shimeji đang phát triển trên app shell đã được làm sạch, không còn là base trống và
+Emoji Battery/Shimeji đang phát triển trên app shell đã được làm sạch, không còn là base trống và
 không còn là Private Browser.
 
 ## 0. Trạng thái project
 
-- Display name: `Cute Pet`.
+- Display name: `Emoji Battery`.
 - Namespace/application ID canonical: `com.asianmobile.emojibattery.shimeji`.
 - Không tự đổi tiếp package, namespace, root project name hoặc provider authority nếu owner chưa yêu cầu.
 - `rootProject.name = "PrivateBrowser"`, resource `Theme.PrivateBrowser` và Firebase project ID

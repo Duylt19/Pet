@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name" translatable="false">Cute Pet</string>
+    <string name="app_name" translatable="false">Emoji Battery</string>
     <string name="splash_title" translatable="false">Emoji Battery</string>
-    <string name="home_header_title" translatable="false">Cute Pet</string>
+    <string name="home_header_title" translatable="false">Emoji Battery</string>
     <string name="adjust_token" translatable="false">9m8kbvwtwh6o</string>
     <string name="facebook_app_id" translatable="false">993681063116351</string>
     <string name="facebook_token" translatable="false">84b3bdf78933f7ab12dae551e57d915c</string>
@@ -38,11 +38,11 @@
     <string name="setting_up_your_app_experience_please_wait_a_moment">Setting up your app experience, please wait a moment...</string>
     <string name="grant_permission_later">Skip for now</string>
     <string name="permission_title">Let your pet roam anywhere</string>
-    <string name="permission_subtitle">Cute Pet needs display access to stay visible above other apps. Notifications keep you in control while it is running.</string>
+    <string name="permission_subtitle">Emoji Battery needs display access to stay visible above other apps. Notifications keep you in control while it is running.</string>
     <string name="permission_storage_title">Storage</string>
     <string name="permission_continue">CONTINUE</string>
     <string name="permission_overlay_title">Display over other apps</string>
-    <string name="permission_overlay_subtitle">Required to show and move your pet outside Cute Pet.</string>
+    <string name="permission_overlay_subtitle">Required to show and move your pet outside Emoji Battery.</string>
     <string name="permission_notification_title">Pet running notification</string>
     <string name="permission_notification_subtitle">Recommended so you can always see and stop the running pet.</string>
     <string name="permission_allow">Allow</string>
@@ -79,7 +79,7 @@
     <string name="rate_feedback_crashed">App crashed or froze</string>
     <string name="rate_feedback_others">Others</string>
     <string name="rate_star_content_description">Star %1$d</string>
-    <string name="premium_subtitle">Unlock the complete Cute Pet experience</string>
+    <string name="premium_subtitle">Unlock the complete Emoji Battery experience</string>
     <string name="premium_all_features">All Premium features</string>
     <string name="premium_free">Free</string>
     <string name="premium_pro">Pro</string>
@@ -337,12 +337,12 @@
     <string name="clear_history_profile_limited_toast">Browsing data cleared with limited profile isolation</string>
 
     <!-- Share / Feedback -->
-    <string name="share_app_subject">Try Cute Pet</string>
-    <string name="share_app_message"><![CDATA[Bring a cute animated pet to your screen with Cute Pet.\n\nDownload: %1$s]]></string>
+    <string name="share_app_subject">Try Emoji Battery</string>
+    <string name="share_app_message"><![CDATA[Bring playful battery themes and animated pets to your screen with Emoji Battery.\n\nDownload: %1$s]]></string>
     <string name="share_app_chooser_title">Share via</string>
     <string name="feedback_email_address" translatable="false">feedback@asianmobile.ltd</string>
     <string name="more_apps_default_url" translatable="false">https://play.google.com/store/apps/developer?id=Sanya.Studio</string>
-    <string name="feedback_subject_template">Cute Pet feedback v%1$s (Android API %2$d, %3$s %4$s)</string>
+    <string name="feedback_subject_template">Emoji Battery feedback v%1$s (Android API %2$d, %3$s %4$s)</string>
     <string name="feedback_body_template">\n\n---\nDevice info auto-filled. Please describe your issue or feedback above.</string>
     <string name="feedback_chooser_title">Send feedback via</string>
     <string name="feedback_no_email_app">No email app installed</string>
@@ -373,8 +373,8 @@
     <!-- Pet overlay foreground service -->
     <string name="pet_overlay_notification_channel_name">Screen pet</string>
     <string name="pet_overlay_notification_channel_description">Keeps your animated pet visible on top of other apps</string>
-    <string name="pet_overlay_notification_title">Cute Pet is on your screen</string>
-    <string name="pet_overlay_notification_text">Tap to open Cute Pet or stop the pet from this notification.</string>
+    <string name="pet_overlay_notification_title">Emoji Battery pet is on your screen</string>
+    <string name="pet_overlay_notification_text">Tap to open Emoji Battery or stop the pet from this notification.</string>
     <string name="pet_overlay_notification_stop">Stop pet</string>
     <string name="pet_overlay_content_description">Animated screen pet</string>
     <string name="pet_speech_affection_1">Hi! I missed you 💕</string>
@@ -828,10 +828,10 @@
     <string name="battery_overlay_notification_text">Your battery bar stays on screen. Tap to change or turn it off.</string>
     <string name="battery_overlay_notification_channel_name">Battery bar</string>
     <string name="battery_overlay_notification_channel_description">Shown only while your battery bar is turned on.</string>
-    <string name="battery_accessibility_service_label">Cute Pet battery status</string>
+    <string name="battery_accessibility_service_label">Emoji Battery status bar</string>
     <string name="battery_accessibility_service_description">Displays the selected battery capsule and checks the foreground app package locally to apply your hidden-app list. It does not read screen content or control other apps.</string>
     <!-- Shown next to the on/off state in the system Accessibility list, so it has to say why the service must be turned on and what it never touches. -->
-    <string name="battery_accessibility_service_summary">Turn this on so Cute Pet can draw your chosen battery bar over the status bar. It only checks which app is in the foreground, to hide the bar in the apps you pick. It does not read screen content, and no personal data is collected or shared.</string>
+    <string name="battery_accessibility_service_summary">Turn this on so Emoji Battery can draw your chosen battery bar over the status bar. It only checks which app is in the foreground, to hide the bar in the apps you pick. It does not read screen content, and no personal data is collected or shared.</string>
     <string name="battery_overlay_description">Battery status, %1$d percent</string>
     <string name="battery_overlay_percentage">%1$d%%</string>
     <string name="battery_overlay_unavailable_short">--</string>
@@ -1015,7 +1015,7 @@
     <string name="grant_permissions_notification_title">Notification access</string>
     <string name="grant_permissions_notification_body">Allows Pet on Screen to show its ongoing service notification and pet reminders.</string>
     <string name="grant_permissions_autostart_title">Auto Start</string>
-    <string name="grant_permissions_autostart_body">Allows supported devices to start Cute Pet automatically instead of blocking it in the background.</string>
+    <string name="grant_permissions_autostart_body">Allows supported devices to start Emoji Battery automatically instead of blocking it in the background.</string>
     <string name="grant_permissions_pet_start_failed">Unable to start your pet. Please try again.</string>
     <string name="battery_category_back">Back</string>
     <string name="battery_emotion_style_title">Emotion Style</string>

@@ -225,7 +225,7 @@ Nguồn platform: [Android foreground-service types](https://developer.android.c
   khởi động overlap sâu tại X 964/998 px nhưng tiếp tục hành trình độc lập, không bị
   crowd resolver ép quay đầu. Tap trong wall traversal không tạo speech window và pet
   tiếp tục đổi từ wall phải sang wall trái. Một poll runtime ghi nhận đồng thời
-  `Cute Pet speech 1` và `Cute Pet speech 2`, xác nhận controller giữ hai window theo
+  `Emoji Battery speech 1` và `Emoji Battery speech 2`, xác nhận controller giữ hai window theo
   owner ID. Không có fatal/window error; force-stop kết thúc với 0 overlay, 0 speech
   window và 0 service.
 - Semantic cadence V3.15 đã cài đè và smoke-test với ba `Satoru Gojo` ở speed 150%:

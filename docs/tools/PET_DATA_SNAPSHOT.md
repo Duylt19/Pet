@@ -4,7 +4,7 @@
 
 `tools/pet_data_snapshot.py` creates and audits an owner-authorized snapshot of the external Anime Shimeji data repository. Large binary data is written under `private_data/`, which is intentionally excluded from Git.
 
-The tool does not feed remote data directly into the Android runtime. Server import and conversion into the validated Cute Pet pack contract remain separate steps.
+The tool does not feed remote data directly into the Android runtime. Server import and conversion into the validated Emoji Battery pack contract remain separate steps.
 
 ## Clone
 

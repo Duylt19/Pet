@@ -206,7 +206,7 @@ Pixel 3 XL / Android 12 / API 31:
 - owner pack `Natsu` từ `4.zip` được convert thành `owner.shimeji.4@4`;
 - manifest app-private chứa đúng clip loop
   `shime34 → shime35 → shime34 → shime36`, 240 ms/frame;
-- baseline V3.10 dùng `Cute Pet speech` window 770×294 px, tương ứng 220×84 dp ở
+- baseline V3.10 dùng `Emoji Battery speech` window 770×294 px, tương ứng 220×84 dp ở
   density thiết bị, có `NOT_TOUCHABLE`; fixed size này đã được thay bằng adaptive
   V3.12;
 - tap không tạo window trong `TAPPED/IDLE`; window chỉ xuất hiện khi Natsu chuyển sang
@@ -244,10 +244,10 @@ không reinstall:
 Independent multi-pet speech V3.14 được xác minh tiếp trên cùng thiết bị:
 
 - APK mới chạy với ba pet, giữ nguyên size 75% và speed 150%;
-- tap pet đang wall traversal không tạo `Cute Pet speech`; pet tiếp tục wall movement,
+- tap pet đang wall traversal không tạo `Emoji Battery speech`; pet tiếp tục wall movement,
   xác nhận ground guard không cắt climb thành TALK;
 - khi hai grounded pet được trigger sát nhau, `dumpsys window` ghi nhận đồng thời hai
-  title riêng `Cute Pet speech 1` và `Cute Pet speech 2`; window của pet sau không remove
+  title riêng `Emoji Battery speech 1` và `Emoji Battery speech 2`; window của pet sau không remove
   window của pet trước;
 - smoke test không có `FATAL EXCEPTION`, `BadTokenException` hoặc lỗi add/remove speech
   window; force-stop dọn sạch toàn bộ overlay/service.

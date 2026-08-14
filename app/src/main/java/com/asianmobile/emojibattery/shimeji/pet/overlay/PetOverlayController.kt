@@ -987,8 +987,8 @@ internal class PetOverlayController(
 
     private companion object {
         const val START_MARGIN_DP = 20
-        const val OVERLAY_WINDOW_TITLE = "Cute Pet overlay"
-        const val SPEECH_WINDOW_TITLE = "Cute Pet speech"
+        const val OVERLAY_WINDOW_TITLE = "Emoji Battery overlay"
+        const val SPEECH_WINDOW_TITLE = "Emoji Battery speech"
         const val SPEECH_MARGIN_DP = 6
         const val SPEECH_ATTACHMENT_OVERLAP_DP = 3
         const val SCREEN_EDGE_OVERFLOW_DIVISOR = 3f

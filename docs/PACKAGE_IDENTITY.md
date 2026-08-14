@@ -1,4 +1,4 @@
-# Package Identity — Cute Pet/Shimeji
+# Package Identity — Emoji Battery/Shimeji
 
 Tài liệu này là nguồn chuẩn cho application identity sau lần đổi package ngày 2026-07-27.
 
@@ -6,7 +6,7 @@ Tài liệu này là nguồn chuẩn cho application identity sau lần đổi p
 
 | Thành phần | Giá trị canonical |
 |---|---|
-| App display name | `Cute Pet` |
+| App display name | `Emoji Battery` |
 | Application ID | `com.asianmobile.emojibattery.shimeji` |
 | App namespace | `com.asianmobile.emojibattery.shimeji` |
 | Ads namespace | `com.asianmobile.emojibattery.shimeji.ads` |

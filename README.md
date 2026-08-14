@@ -1,6 +1,7 @@
-# Cute Pet — Android Shimeji App
+# Emoji Battery — Android Shimeji App
 
-Cute Pet là ứng dụng Android pet animation chạy nổi trên màn hình theo mô hình Shimeji.
+Emoji Battery là ứng dụng Android tùy biến thanh pin và pet animation chạy nổi trên màn hình
+theo mô hình Shimeji.
 Project kế thừa app shell ổn định gồm onboarding, quảng cáo, billing, localization,
 settings và các quy ước kiến trúc hiện có.
 
@@ -8,7 +9,7 @@ settings và các quy ước kiến trúc hiện có.
 
 ## Trạng thái hiện tại
 
-- App display name: `Cute Pet`.
+- App display name: `Emoji Battery`.
 - Namespace/application ID: `com.asianmobile.emojibattery.shimeji`.
 - Root Gradle project name hiện vẫn là `PrivateBrowser` (không ảnh hưởng package cài đặt).
 - Flow tạm thời: Splash → Language → Intro → Discover Home; bước Permission onboarding đang

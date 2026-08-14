@@ -75,7 +75,7 @@ Service contract:
 
 - khai báo `android.permission.BIND_ACCESSIBILITY_SERVICE`;
 - `android:exported="true"` để Android có thể bind qua intent filter của accessibility;
-- `android:isAccessibilityTool="false"` vì Cute Pet không phải disability-support tool;
+- `android:isAccessibilityTool="false"` vì Emoji Battery không phải disability-support tool;
 - `android:canRetrieveWindowContent="false"`;
 - không đọc accessibility node tree;
 - không log package/window content;
@@ -120,14 +120,14 @@ Apply COVER_SYSTEM_BAR
   → in-app prominent disclosure
   → user đồng ý riêng
   → ACTION_ACCESSIBILITY_SETTINGS
-  → user bật Cute Pet service
+  → user bật Emoji Battery service
   → app/service xác nhận enabled
   → persist mode + start accessibility backend
 ```
 
 Disclosure phải xuất hiện ngay trước khi mở Settings và nói rõ:
 
-- Cute Pet dùng Accessibility để đặt thanh trang trí lên status bar;
+- Emoji Battery dùng Accessibility để đặt thanh trang trí lên status bar;
 - service không đọc nội dung màn hình, không thực hiện thao tác thay user và không thu thập
   dữ liệu accessibility;
 - user có thể tắt trong Accessibility Settings bất kỳ lúc nào;

@@ -4,13 +4,14 @@
 
 | Thuộc tính | Giá trị |
 |---|---|
-| Display name | Cute Pet |
+| Display name | Emoji Battery |
 | Vai trò repository | Ứng dụng Android pet overlay/Shimeji |
 | Namespace/application ID | `com.asianmobile.emojibattery.shimeji` |
 | UI | Jetpack Compose Material 3 |
 | Architecture | Single-Activity + MVVM + Hilt + Flow |
 
-Cute Pet có domain chính thức: một hoặc nhiều pet animation có thể hiển thị và tương tác
+Emoji Battery có hai domain chính: tùy biến battery/status bar và một hoặc nhiều pet animation
+có thể hiển thị và tương tác
 trên các ứng dụng khác bằng Android overlay. Mixed hỗ trợ tối đa 12 pet khác nhau; Swarm
 hỗ trợ tối đa 12 bản sao cùng pet (6 trên low-RAM) theo performance budget. App cũng có
 Battery Status Capsule vertical slice: catalog/editor và Accessibility overlay opt-in;

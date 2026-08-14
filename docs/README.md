@@ -1,4 +1,4 @@
-# Cute Pet/Shimeji — Documentation Index
+# Emoji Battery/Shimeji — Documentation Index
 
 Đây là nguồn tài liệu hiện hành cho AI agent và developer. Bộ docs cũ mô tả Private Browser đã được loại bỏ để tránh tham chiếu class, route và feature không còn trong source.
 
@@ -34,7 +34,7 @@ contract từng loại data, migration, publish và rollback.
 | [06_UI_DESIGN_SYSTEM.md](06_UI_DESIGN_SYSTEM.md) | Resource, sizing, component rules |
 | [07_ADS_INTEGRATION.md](07_ADS_INTEGRATION.md) | Ads/billing integration contract |
 | [08_AGENT_CODING_GUIDELINES.md](08_AGENT_CODING_GUIDELINES.md) | Checklist bắt buộc cho agent |
-| [09_IMPLEMENTATION_ROADMAP.md](09_IMPLEMENTATION_ROADMAP.md) | Roadmap phát triển Cute Pet/Shimeji |
+| [09_IMPLEMENTATION_ROADMAP.md](09_IMPLEMENTATION_ROADMAP.md) | Roadmap phát triển Emoji Battery/Shimeji |
 | [10_SCREEN_TRACKING.md](10_SCREEN_TRACKING.md) | Analytics screen names hiện tại |
 
 ## Runtime specs

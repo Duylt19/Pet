@@ -1,6 +1,6 @@
-# 09 — Cute Pet Implementation Roadmap
+# 09 — Emoji Battery Implementation Roadmap
 
-Roadmap này theo dõi quá trình phát triển app Cute Pet/Shimeji chạy nổi trên màn hình.
+Roadmap này theo dõi quá trình phát triển app Emoji Battery/Shimeji chạy nổi trên màn hình.
 Mỗi phase là một commit độc lập, phải compile/test/docs pass trước khi chuyển phase.
 
 ## Quyết định đã chốt
@@ -17,8 +17,8 @@ Mỗi phase là một commit độc lập, phải compile/test/docs pass trướ
 
 - Xóa search engine, clear browsing data, default-browser helper và broad storage permission legacy.
 - Thu gọn Permission thành product-neutral shell; Settings chỉ giữ language/share/rate/feedback/version.
-- Đổi active splash/intro/premium/share/feedback copy sang Cute Pet.
-- Locale chưa có bản dịch Cute Pet fallback về English thay vì hiện branding browser cũ.
+- Đổi active splash/intro/premium/share/feedback copy sang Emoji Battery.
+- Locale chưa có bản dịch Emoji Battery fallback về English thay vì hiện branding browser cũ.
 
 Definition of done: Manifest không còn storage permission; source active không phụ thuộc browser/storage capability; compile và unit test pass.
 

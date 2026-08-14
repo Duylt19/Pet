@@ -1,9 +1,9 @@
-# Project Rules — Cute Pet/Shimeji Android App
+# Project Rules — Emoji Battery/Shimeji Android App
 
 ## Trạng thái bắt buộc phải hiểu
 
-- Đây là ứng dụng Cute Pet/Shimeji đang phát triển, không phải codebase Private Browser.
-- App name hiện tại là `Cute Pet`.
+- Đây là ứng dụng Emoji Battery/Shimeji đang phát triển, không phải codebase Private Browser.
+- App name hiện tại là `Emoji Battery`.
 - Package/application ID canonical: `com.asianmobile.emojibattery.shimeji`.
 - `PrivateBrowser` trong `rootProject.name`, `Theme.PrivateBrowser` và Firebase project ID
   `privatebrower-7168d` là legacy identifier còn giữ có chủ đích; chúng không phải package name.
