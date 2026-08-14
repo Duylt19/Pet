@@ -6,6 +6,57 @@ import org.junit.Test
 
 class LanguageLoadingVisualPolicyTest {
     @Test
+    fun `disabled placement neither loads ad nor shows loading layer`() {
+        val shouldLoadAd = shouldLoadLanguageNativeAd(
+            isNativeEligible = true,
+            isPlacementEnabled = false,
+        )
+
+        assertEquals(false, shouldLoadAd)
+        assertEquals(
+            false,
+            shouldShowLanguageAdLoading(
+                shouldLoadAd = shouldLoadAd,
+                isLoadComplete = false,
+            )
+        )
+    }
+
+    @Test
+    fun `ineligible native policy suppresses enabled placement`() {
+        assertEquals(
+            false,
+            shouldLoadLanguageNativeAd(
+                isNativeEligible = false,
+                isPlacementEnabled = true,
+            )
+        )
+    }
+
+    @Test
+    fun `eligible enabled placement shows loading until callback completes`() {
+        val shouldLoadAd = shouldLoadLanguageNativeAd(
+            isNativeEligible = true,
+            isPlacementEnabled = true,
+        )
+
+        assertEquals(
+            true,
+            shouldShowLanguageAdLoading(
+                shouldLoadAd = shouldLoadAd,
+                isLoadComplete = false,
+            )
+        )
+        assertEquals(
+            false,
+            shouldShowLanguageAdLoading(
+                shouldLoadAd = shouldLoadAd,
+                isLoadComplete = true,
+            )
+        )
+    }
+
+    @Test
     fun `supported api blurs content while loading`() {
         assertEquals(
             8.dp,

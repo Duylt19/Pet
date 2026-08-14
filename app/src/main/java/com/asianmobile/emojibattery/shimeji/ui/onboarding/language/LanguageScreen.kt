@@ -61,6 +61,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_LANGUAGE
 import com.asianmobile.emojibattery.shimeji.ads.config.IS_SHOW_NATIVE_LANGUAGE_SECOND
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_LANGUAGE
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_LANGUAGE_SECOND
@@ -87,7 +88,29 @@ fun LanguageScreen(
         mutableStateOf("")
     }
     var isShowCheckedLanguage by remember { mutableStateOf(false) }
-    var loadAdsComplete by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val checkShowNative = remember(context) {
+        context.findActivity()?.let(CheckShowAdsUtil::checkShowNativeAd) ?: false
+    }
+    val shouldLoadPrimaryAd = remember(checkShowNative) {
+        shouldLoadLanguageNativeAd(
+            isNativeEligible = checkShowNative,
+            isPlacementEnabled = SafeRemoteConfig.getBoolean(IS_SHOW_NATIVE_LANGUAGE),
+        )
+    }
+    val shouldLoadSecondaryAd = remember(checkShowNative) {
+        shouldLoadLanguageNativeAd(
+            isNativeEligible = checkShowNative,
+            isPlacementEnabled = SafeRemoteConfig.getBoolean(IS_SHOW_NATIVE_LANGUAGE_SECOND),
+        )
+    }
+    var isPrimaryAdLoadComplete by remember(shouldLoadPrimaryAd) {
+        mutableStateOf(!shouldLoadPrimaryAd)
+    }
+    var isSecondaryAdLoadComplete by remember(shouldLoadSecondaryAd) {
+        mutableStateOf(!shouldLoadSecondaryAd)
+    }
 
     val animLoading by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.anim_loading_language)
@@ -98,11 +121,16 @@ fun LanguageScreen(
     )
     var reloadCounter by remember { mutableIntStateOf(0) }
     val isSupportBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    val context = LocalContext.current
-    val checkShowNative = remember {
-        context.findActivity()?.let {
-            CheckShowAdsUtil.checkShowNativeAd(it)
-        } ?: run { false }
+    val isActiveAdLoading = if (isShowCheckedLanguage) {
+        shouldShowLanguageAdLoading(
+            shouldLoadAd = shouldLoadSecondaryAd,
+            isLoadComplete = isSecondaryAdLoadComplete,
+        )
+    } else {
+        shouldShowLanguageAdLoading(
+            shouldLoadAd = shouldLoadPrimaryAd,
+            isLoadComplete = isPrimaryAdLoadComplete,
+        )
     }
 
     LanguageContent(
@@ -110,7 +138,7 @@ fun LanguageScreen(
         selectedKey = selectedKey,
         showConfirm = isShowCheckedLanguage,
         isSettings = isSettings,
-        isLoading = !loadAdsComplete,
+        isLoading = isActiveAdLoading,
         isSupportBlur = isSupportBlur,
         onLanguageSelected = { language ->
             if (language.key != selectedKey) {
@@ -118,33 +146,32 @@ fun LanguageScreen(
                 selectedKey = language.key
                 isShowCheckedLanguage = true
                 if (
-                    loadAdsComplete &&
+                    isSecondaryAdLoadComplete &&
                     Utils.isNetworkAvailable(context) &&
-                    SafeRemoteConfig.getBoolean(IS_SHOW_NATIVE_LANGUAGE_SECOND) &&
-                    checkShowNative
+                    shouldLoadSecondaryAd
                 ) {
                     reloadCounter++
-                    loadAdsComplete = false
+                    isSecondaryAdLoadComplete = false
                 }
             }
         },
         onConfirm = { viewModel.updateLanguage(onConfirm) },
         onBack = onBack,
         adContent = {
-            if (!isShowCheckedLanguage) {
+            if (!isShowCheckedLanguage && shouldLoadPrimaryAd) {
                 NativeAdInternal(
                     screenCode = SCREEN_LANGUAGE,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    loadAdsComplete = true
+                    isPrimaryAdLoadComplete = true
                 }
-            } else {
+            } else if (isShowCheckedLanguage && shouldLoadSecondaryAd) {
                 NativeAdInternal(
                     screenCode = SCREEN_LANGUAGE_SECOND,
                     modifier = Modifier.fillMaxWidth(),
                     reloadKey = reloadCounter
                 ) {
-                    loadAdsComplete = true
+                    isSecondaryAdLoadComplete = true
                 }
             }
         },
@@ -330,6 +357,16 @@ private fun LanguageLoadingContent(
 }
 
 internal const val LANGUAGE_LOADING_SCRIM_ALPHA = 0.6f
+
+internal fun shouldLoadLanguageNativeAd(
+    isNativeEligible: Boolean,
+    isPlacementEnabled: Boolean,
+): Boolean = isNativeEligible && isPlacementEnabled
+
+internal fun shouldShowLanguageAdLoading(
+    shouldLoadAd: Boolean,
+    isLoadComplete: Boolean,
+): Boolean = shouldLoadAd && !isLoadComplete
 
 internal fun languageLoadingBlurRadius(
     isLoading: Boolean,
