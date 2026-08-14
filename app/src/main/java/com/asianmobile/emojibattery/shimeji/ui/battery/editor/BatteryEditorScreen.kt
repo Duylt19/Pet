@@ -114,6 +114,7 @@ import com.asianmobile.emojibattery.shimeji.ui.shared.component.CutePetTopBar
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockSheet
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
+import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
@@ -192,6 +193,7 @@ internal fun BatteryEditorScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDisclosure by remember { mutableStateOf(false) }
     var showDiscardConfirmation by rememberSaveable { mutableStateOf(false) }
+    val applySuccessMessage = stringResource(R.string.battery_apply_success)
     val requestBack = {
         if (page == BatteryEditorPage.OVERVIEW && state.hasUnsavedChanges) {
             showDiscardConfirmation = true
@@ -240,6 +242,9 @@ internal fun BatteryEditorScreen(
                         }
                     }
                 }
+
+                BatteryEditorEffect.ShowApplySuccess ->
+                    ToastHelper.show(context, applySuccessMessage)
             }
         }
     }

@@ -378,6 +378,12 @@ Battery Troll là **một chế độ của chính service này**, không phải
   tạo được từ dữ liệu. Cách sửa: export emoji trên **đúng canvas của pin** với nhân vật đã đặt
   sẵn vị trí từng mức. Khi hai canvas bằng nhau, scale trên bằng `1.0` và app dựng lại bản
   thiết kế nguyên vẹn mà không cần đổi thêm dòng code nào.
+- **Slider dùng chung.** `BatteryValueSlider` (Slider Material3 hồng + nhãn `Ndp`) là control
+  duy nhất cho mọi chỗ chỉnh kích thước component, kể cả Percentage size của Troll. Không dựng
+  bản nhìn-giống-nhau thứ hai: sửa một bên là bên kia lệch ngay.
+- **Apply xác nhận bằng toast.** Cả hai màn giữ user ở lại sau Apply nên toast
+  `battery_apply_success` là dấu hiệu duy nhất cho biết nó đã ăn; phát qua effect
+  `ShowApplySuccess` chứ không phải ViewModel tự gọi Toast.
 - **Live preview dùng chung một kênh.** Màn Troll publish draft qua đúng
   `BatteryEditorPreviewSession` mà status-bar editor dùng, owner id riêng để hai màn không ghi
   đè nhau. Sửa gì trong Troll cũng lên thanh thật ngay, không cần Apply; ngược lại editor

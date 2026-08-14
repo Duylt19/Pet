@@ -422,6 +422,7 @@ class BatteryEditorViewModel @Inject constructor(
                 hasUnsavedChanges = false
             )
         }
+        emit(BatteryEditorEffect.ShowApplySuccess)
     }
 
     fun disable() {

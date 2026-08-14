@@ -877,34 +877,66 @@ internal fun DesignSlider(
             fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
             lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp
         )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Slider(
-                value = coercedValue,
-                onValueChange = onValueChange,
-                valueRange = range,
-                colors = SliderDefaults.colors(
-                    thumbColor = pink,
-                    activeTrackColor = pink,
-                    inactiveTrackColor = colorResource(R.color.colors_FFEBF1),
-                    activeTickColor = Color.Transparent,
-                    inactiveTickColor = Color.Transparent
-                ),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(dimensionResource(SdpR.dimen._38sdp))
-            )
-            Spacer(Modifier.width(dimensionResource(SdpR.dimen._12sdp)))
-            Text(
-                text = stringResource(R.string.battery_editor_dp_value, value.toInt()),
-                color = colorResource(R.color.colors_212327),
-                fontFamily = StatusBarRobotoMedium,
-                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-                lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
-                textAlign = TextAlign.End,
-                maxLines = 1,
-                modifier = Modifier.width(dimensionResource(SdpR.dimen._25sdp))
-            )
-        }
+        BatteryValueSlider(
+            value = coercedValue,
+            range = range,
+            onValueChange = onValueChange
+        )
+    }
+}
+
+/**
+ * The slider plus its `Ndp` readout, shared so every screen that resizes a status-bar component
+ * shows the same control. Battery Troll draws the same one: its Percentage size is the same kind
+ * of edit, and a second look-alike would drift the moment either is retouched.
+ *
+ * [enabled] only stops the interaction. Callers already dim the whole row they own, and dimming
+ * again here would darken it twice.
+ */
+@Composable
+internal fun BatteryValueSlider(
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    onValueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    val pink = colorResource(R.color.colors_FB3675)
+    val inactive = colorResource(R.color.colors_FFEBF1)
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Slider(
+            value = value.coerceIn(range),
+            onValueChange = onValueChange,
+            valueRange = range,
+            enabled = enabled,
+            colors = SliderDefaults.colors(
+                thumbColor = pink,
+                activeTrackColor = pink,
+                inactiveTrackColor = inactive,
+                activeTickColor = Color.Transparent,
+                inactiveTickColor = Color.Transparent,
+                disabledThumbColor = pink,
+                disabledActiveTrackColor = pink,
+                disabledInactiveTrackColor = inactive
+            ),
+            modifier = Modifier
+                .weight(1f)
+                .height(dimensionResource(SdpR.dimen._38sdp))
+        )
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._12sdp)))
+        Text(
+            text = stringResource(R.string.battery_editor_dp_value, value.toInt()),
+            color = colorResource(R.color.colors_212327),
+            fontFamily = StatusBarRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            modifier = Modifier.width(dimensionResource(SdpR.dimen._25sdp))
+        )
     }
 }
 

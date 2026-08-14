@@ -175,4 +175,7 @@ object BatteryTrollDraftCodec {
 sealed interface BatteryTrollCustomizeEffect {
     data object Close : BatteryTrollCustomizeEffect
     data object RequestBatteryAccessibility : BatteryTrollCustomizeEffect
+
+    /** Apply keeps the user on the screen, so the confirmation is the only sign it worked. */
+    data object ShowApplySuccess : BatteryTrollCustomizeEffect
 }

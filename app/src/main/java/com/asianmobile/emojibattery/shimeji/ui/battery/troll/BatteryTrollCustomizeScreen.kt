@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -39,11 +40,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
+import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.asianmobile.emojibattery.shimeji.battery.troll.batteryTrollEmojiSizeDp
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollMode
 import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollServerConfig
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryDiscardChangesSheet
+import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryValueSlider
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorPreviewVisibilityPolicy
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.StatusBarEditorWallpaper
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
@@ -72,6 +75,8 @@ fun BatteryTrollCustomizeScreen(
     TrackScreenView(ScreenName.BATTERY_TROLL_CUSTOMIZE)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
+    val applySuccessMessage = stringResource(R.string.battery_apply_success)
     var showAccessibilityDisclosure by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
@@ -81,6 +86,9 @@ fun BatteryTrollCustomizeScreen(
                 BatteryTrollCustomizeEffect.RequestBatteryAccessibility -> {
                     showAccessibilityDisclosure = true
                 }
+
+                BatteryTrollCustomizeEffect.ShowApplySuccess ->
+                    ToastHelper.show(context, applySuccessMessage)
             }
         }
     }
@@ -383,34 +391,15 @@ private fun TrollPercentageGroup(
                     onCheckedChange = onShowPercentageToggle
                 )
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .alpha(
-                        if (uiState.draft.showPercentage) 1f else TROLL_DISABLED_ALPHA
-                    ),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._12sdp))
-            ) {
-                TrollSizeSlider(
-                    value = uiState.draft.percentSizeDp,
-                    range = PERCENT_SIZE_RANGE,
-                    enabled = uiState.draft.showPercentage,
-                    onValueChange = onPercentSizeChange,
-                    modifier = Modifier.weight(1f)
+            BatteryValueSlider(
+                value = uiState.draft.percentSizeDp,
+                range = PERCENT_SIZE_RANGE,
+                onValueChange = onPercentSizeChange,
+                enabled = uiState.draft.showPercentage,
+                modifier = Modifier.alpha(
+                    if (uiState.draft.showPercentage) 1f else TROLL_DISABLED_ALPHA
                 )
-                Text(
-                    text = stringResource(
-                        R.string.battery_editor_dp_value,
-                        uiState.draft.percentSizeDp.toInt()
-                    ),
-                    color = colorResource(R.color.colors_212327),
-                    fontFamily = CustomizeRobotoMedium,
-                    fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-                    lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
-                    maxLines = 1
-                )
-            }
+            )
         }
     }
 }

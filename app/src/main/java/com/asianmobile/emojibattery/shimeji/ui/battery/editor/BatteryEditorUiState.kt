@@ -58,4 +58,7 @@ enum class BatteryEditorMessage {
 
 sealed interface BatteryEditorEffect {
     data object ShowRewardedAd : BatteryEditorEffect
+
+    /** Apply keeps the user on the screen, so the confirmation is the only sign it worked. */
+    data object ShowApplySuccess : BatteryEditorEffect
 }

@@ -253,6 +253,7 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
         hasLocalEdits = false
         clearDraft()
         _uiState.update { it.copy(applied = draft) }
+        emit(BatteryTrollCustomizeEffect.ShowApplySuccess)
     }
 
     private fun editDraft(transform: (BatteryTrollDraft) -> BatteryTrollDraft) {

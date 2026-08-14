@@ -1025,4 +1025,5 @@
     <string name="battery_troll_error_invalid">Troll themes couldn’t be read. Please try again later.</string>
     <string name="battery_troll_unpublished">Troll themes are coming soon.</string>
     <string name="battery_troll_retry">Try again</string>
+    <string name="battery_apply_success">Applied to your status bar</string>
 </resources>
