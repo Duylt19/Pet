@@ -19,7 +19,7 @@ tự thêm quảng cáo chỉ từ tên route.
 | Battery category | `battery_category` | Banner shell Home + banner inline `battery_category_inline` |
 | Shimeji Pets | `pet_store` | Banner shell Home; pet reward dùng `dialog_pet_reward`, food reward dùng `dialog_food_reward` + Rewarded |
 | My Pet | `my_pet` | Banner shell Home |
-| Mine/Settings | `settings` | Banner shell Home; disclosure dùng `dialog_accessibility_disclosure` hoặc `dialog_overlay_permission` |
+| Mine/Settings | `settings` | Banner shell Home; disclosure dùng `dialog_accessibility_disclosure` hoặc `dialog_overlay_permission`; Apps hidden sheet dùng `dialog_apps_hidden` |
 | Search | `search` | Native `screen_search` + banner inline `search_inline` |
 | Favourite & Recent | `favourite_recent` | Native `screen_favourite_recent` |
 | Customize Status Bar overview | `battery_editor` | Native `screen_customize_status_bar` dạng collapsible |
@@ -51,7 +51,12 @@ tự thêm quảng cáo chỉ từ tên route.
 | Pet reward sheet | `dialog_pet_reward` | `is_show_native_pet_reward` | `id_emoji_battery_native_pet_reward` | `HEIGHT_222` |
 | Food reward sheet | `dialog_food_reward` | `is_show_native_food_reward` | `id_emoji_battery_native_food_reward` | `HEIGHT_222` |
 | Battery Troll reward | `dialog_battery_troll_reward` | `is_show_native_battery_troll_reward` | `id_emoji_battery_native_battery_troll_reward` | `HEIGHT_222` |
+| Apps hidden sheet | `dialog_apps_hidden` | `is_show_native_apps_hidden` | `id_emoji_battery_native_apps_hidden` | `HEIGHT_222` |
 | Exit dialog | `dialog_exit_app` | `is_show_native_exit_dialog` | `id_emoji_battery_native_exit_dialog` | `HEIGHT_222` |
+
+`dialog_food_reward`, `dialog_battery_troll_reward`, `dialog_apps_hidden` và `dialog_exit_app` hiện dùng chung
+AdMob unit với `dialog_pet_reward` theo placement sheet production. Các surface vẫn giữ resource
+name và Remote Config key riêng để có thể tách inventory sau này mà không đổi code feature.
 
 ## Configuration contract
 

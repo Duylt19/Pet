@@ -14,9 +14,9 @@ Vertical slice hiện đã có trong source:
   `categoryName` của tất cả theme được sinh cùng display name để parser validation khớp.
 - Promo Customize Status Bar và DIY FAB mở editor bằng config hiện tại. Theme đang áp dụng được
   đánh dấu bằng nền/stroke hồng trong category detail; không còn card `Current` demo ở landing.
-- Theme Premium mở bottom sheet full-width có preview, `Unlimited`, `Get it free` và native ad;
-  earned reward mở khóa vĩnh viễn đúng theme ID trên thiết bị rồi tự mở editor. Premium bypass
-  toàn bộ theme gate.
+- Theme Premium mở bottom sheet full-width có preview, CTA Rewarded full-width và native ad;
+  action `Unlimited` tạm ẩn trong v1. Earned reward mở khóa vĩnh viễn đúng theme ID trên thiết bị
+  rồi tự mở editor. Entitlement Premium vẫn được giữ trong domain để bật lại ở release sau.
 - Chọn một theme trong catalog khởi tạo đúng cặp pet + pin của theme đó. Editor có hai
   picker category độc lập để mix pet của theme A với pin của theme B; entitlement
   Rewarded/Premium được kiểm tra cho từng lựa chọn.
@@ -52,6 +52,8 @@ Vertical slice hiện đã có trong source:
 - Mine có bottom sheet `Apps that hide icons` lấy danh sách app launchable qua package
   visibility intent query. Package được chọn chỉ lưu cục bộ; khi Accessibility báo app đó
   đang foreground, service tháo battery window và tự gắn lại khi user chuyển sang app khác.
+  Native `HEIGHT_222` nằm dưới danh sách, dùng placement/config riêng và collapse hoàn toàn khi
+  không đủ điều kiện hiển thị; ad unit v1 tạm dùng chung để có thể thay riêng về sau.
   Danh sách app cuộn độc lập; khi list đã ở đầu, sheet nhận gesture kéo xuống và chỉ dismiss
   sau khi kéo tối thiểu 25% chiều cao, cùng contract với các permission disclosure sheet.
   Service chỉ dùng package name của window event cho rule này, không đọc node/content và

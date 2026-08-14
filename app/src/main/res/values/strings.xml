@@ -341,6 +341,7 @@
     <string name="share_app_message"><![CDATA[Bring a cute animated pet to your screen with Cute Pet.\n\nDownload: %1$s]]></string>
     <string name="share_app_chooser_title">Share via</string>
     <string name="feedback_email_address" translatable="false">feedback@asianmobile.ltd</string>
+    <string name="more_apps_default_url" translatable="false">https://play.google.com/store/apps/developer?id=Sanya.Studio</string>
     <string name="feedback_subject_template">Cute Pet feedback v%1$s (Android API %2$d, %3$s %4$s)</string>
     <string name="feedback_body_template">\n\n---\nDevice info auto-filled. Please describe your issue or feedback above.</string>
     <string name="feedback_chooser_title">Send feedback via</string>
@@ -427,7 +428,7 @@
 
     <!-- Privacy Policy -->
     <string name="privacy_policy_title">Privacy Policy</string>
-    <string name="privacy_policy_default_url" translatable="false">https://sites.google.com/view/aseanlabstudio/home</string>
+    <string name="privacy_policy_default_url" translatable="false">https://sites.google.com/view/sanya-studio/home</string>
 
     <!-- Set Default Browser (M10) -->
     <string name="setdefault_header_title">Set as the default browser</string>

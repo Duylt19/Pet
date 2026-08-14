@@ -8,6 +8,10 @@ Mọi Android string resource chứa publisher/ad-unit ID dùng prefix
 `id_emoji_battery_`; không giữ identifier legacy `id_private_browser_` hoặc `id_pub`.
 Đổi tên resource không được tự ý đổi giá trị AdMob production/test bên trong.
 
+AdMob app ID và ad-unit ID là cấu hình public được lưu ở `ads/src/main/res/values/strings.xml`.
+Credential nhạy cảm như `app_password_mail` không được đặt trong resource/default XML; source chỉ
+giữ key rỗng và giá trị production phải được cấp từ Firebase Remote Config.
+
 ## Base behavior còn giữ
 
 - Splash khởi tạo consent/config liên quan.
@@ -56,6 +60,10 @@ Mọi Android string resource chứa publisher/ad-unit ID dùng prefix
 - Search dùng native placement `screen_search` ở đáy màn hình và banner SDK
   `search_inline` trong content theo Figma; cả hai vẫn tuân theo remote key, frequency/ad-free
   policy và failure fallback chung của module ads.
+- Bottom sheet `Apps that hide icons` dùng native `dialog_apps_hidden`/`HEIGHT_222` nằm dưới
+  danh sách app. Slot collapse khi ads bị tắt, user ad-free hoặc load fail. Placement có screen
+  code, Remote Config key và resource ID riêng; trong v1 resource này tạm dùng chung AdMob unit
+  `9967933431` với nhóm reward/exit để sau này đổi ID mà không sửa UI.
 - Battery landing dùng native placement `screen_battery_catalog` với template `HEIGHT_150` sau
   section đầu tiên. Category detail có banner inline `battery_category_inline`; creative do SDK
   tải, không đóng gói ảnh quảng cáo mẫu trong Figma. Bottom banner vẫn là holder của shell.
@@ -76,8 +84,8 @@ Mọi Android string resource chứa publisher/ad-unit ID dùng prefix
 ## Battery style Rewarded unlock
 
 - Theme `FREE`, theme đã reward-unlock và toàn bộ theme của user Premium mở trực tiếp.
-- Chạm theme `PREMIUM` chưa mở sẽ hiện bottom sheet với preview, hai action `Unlimited` và
-  `Get it free`, cùng native `HEIGHT_222`; đóng bằng Back hoặc chạm scrim khi chưa loading.
+- Chạm theme `PREMIUM` chưa mở sẽ hiện bottom sheet với preview, một CTA Rewarded full-width và
+  native `HEIGHT_222`; `Unlimited`/Premium entry tạm ẩn trong v1. Đóng bằng Back hoặc chạm scrim khi chưa loading.
   Sheet dùng placement `dialog_battery_reward`, tách khỏi native `HEIGHT_150` của landing.
 - Rewarded chỉ được preload khi free user còn ít nhất một theme Premium chưa mở; Premium
   không tạo ad request. `EARNED` persist đúng theme ID vào
@@ -87,7 +95,8 @@ Mọi Android string resource chứa publisher/ad-unit ID dùng prefix
   không tạo dead-end.
 - Callback chỉ được consume khi đúng dialog đang pending và đang chờ reward; callback lặp
   không thể unlock hoặc navigate lần hai.
-- Premium bypass Rewarded. Khi quay lại Catalog sau mua Premium, pending theme tự mở.
+- Premium bypass Rewarded vẫn được giữ ở domain để tương thích entitlement, nhưng v1 không hiển
+  thị PRO trên app bar hoặc `Unlimited` trong reward sheet.
 
 ## Rules
 

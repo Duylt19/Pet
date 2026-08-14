@@ -38,6 +38,7 @@ class NativeAdPlacementCatalogTest {
             DIALOG_PET_REWARD,
             DIALOG_FOOD_REWARD,
             DIALOG_BATTERY_TROLL_REWARD,
+            DIALOG_APPS_HIDDEN,
             DIALOG_EXIT_APP
         )
 
@@ -83,7 +84,8 @@ class NativeAdPlacementCatalogTest {
             DIALOG_BATTERY_DISCARD,
             DIALOG_PET_REWARD,
             DIALOG_FOOD_REWARD,
-            DIALOG_BATTERY_TROLL_REWARD
+            DIALOG_BATTERY_TROLL_REWARD,
+            DIALOG_APPS_HIDDEN
         ).forEach { screenCode ->
             assertEquals(screenCode, AdType.HEIGHT_222, placementType(screenCode))
         }

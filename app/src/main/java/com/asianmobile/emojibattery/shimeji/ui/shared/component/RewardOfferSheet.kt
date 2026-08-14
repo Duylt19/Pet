@@ -47,6 +47,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ui.shared.policy.PremiumUiPolicy
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
 
@@ -199,6 +200,46 @@ internal fun RewardOutlineButton(
         contentAlignment = Alignment.Center
     ) {
         RewardButtonContent(text = text, iconRes = iconRes, textStyle = textStyle)
+    }
+}
+
+/**
+ * Shared unlock action row. V1 only exposes the rewarded path, while later releases can restore
+ * the Premium entry through [PremiumUiPolicy] without changing each feature sheet separately.
+ */
+@Composable
+internal fun RewardUnlockActions(
+    premiumText: String,
+    rewardText: String,
+    onPremium: () -> Unit,
+    onReward: () -> Unit,
+    enabled: Boolean = true,
+    rewardIconRes: Int? = R.drawable.ic_pet_store_reward_video
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
+    ) {
+        if (PremiumUiPolicy.isPremiumEntryVisible) {
+            RewardOutlineButton(
+                text = premiumText,
+                onClick = onPremium,
+                modifier = Modifier.weight(1f),
+                enabled = enabled,
+                iconRes = R.drawable.img_pet_store_premium_crown
+            )
+        }
+        RewardGradientButton(
+            text = rewardText,
+            onClick = onReward,
+            modifier = if (PremiumUiPolicy.isPremiumEntryVisible) {
+                Modifier.weight(1f)
+            } else {
+                Modifier.fillMaxWidth()
+            },
+            enabled = enabled,
+            iconRes = rewardIconRes
+        )
     }
 }
 
