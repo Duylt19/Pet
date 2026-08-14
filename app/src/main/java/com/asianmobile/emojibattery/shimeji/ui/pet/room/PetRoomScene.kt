@@ -12,13 +12,17 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetAction
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetClip
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackVisual
@@ -26,6 +30,7 @@ import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomFloor
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomRest
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomWanderState
 import com.asianmobile.emojibattery.shimeji.pet.room.PetRoomWanderer
+import com.intuit.sdp.R as SdpR
 import kotlin.math.roundToInt
 
 /**
@@ -36,8 +41,11 @@ import kotlin.math.roundToInt
 fun PetRoomScene(
     pets: List<PetRoomSceneEntry>,
     modifier: Modifier = Modifier,
+    focusedPackKey: String? = null,
     onPetTapped: (String) -> Unit = {}
 ) {
+    val focusArrow = ImageBitmap.imageResource(R.drawable.img_pet_room_focus_arrow)
+    val focusArrowWidth = dimensionResource(SdpR.dimen._43sdp)
     var sceneSize by remember { mutableStateOf(IntSize.Zero) }
     val runtimes = remember(pets, sceneSize) {
         if (sceneSize == IntSize.Zero) {
@@ -87,7 +95,34 @@ fun PetRoomScene(
         frame
         // Painter's order by depth: a pet standing further back cannot cover one in front.
         runtimes.sortedBy { it.state.y }.forEach { drawPet(it) }
+        runtimes.firstOrNull { it.packKey == focusedPackKey }?.let { focusedPet ->
+            drawFocusArrow(
+                runtime = focusedPet,
+                image = focusArrow,
+                width = focusArrowWidth.toPx()
+            )
+        }
     }
+}
+
+private fun DrawScope.drawFocusArrow(
+    runtime: PetRoomSceneRuntime,
+    image: ImageBitmap,
+    width: Float
+) {
+    val bounds = runtime.bounds()
+    val height = width * image.height / image.width.toFloat()
+    drawImage(
+        image = image,
+        srcOffset = IntOffset.Zero,
+        srcSize = IntSize(image.width, image.height),
+        dstOffset = IntOffset(
+            x = (bounds.centerX - width / 2f).roundToInt(),
+            y = (bounds.bottom - bounds.height - height).roundToInt()
+        ),
+        dstSize = IntSize(width.roundToInt(), height.roundToInt()),
+        filterQuality = FilterQuality.High
+    )
 }
 
 private fun DrawScope.drawPet(runtime: PetRoomSceneRuntime) {

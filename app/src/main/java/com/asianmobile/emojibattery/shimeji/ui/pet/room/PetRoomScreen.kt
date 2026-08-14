@@ -364,6 +364,7 @@ private fun PetRoomContent(
         PetRoomScene(
             pets = scene,
             modifier = Modifier.fillMaxSize(),
+            focusedPackKey = uiState.detail?.packKey,
             onPetTapped = onPetTapped
         )
 
