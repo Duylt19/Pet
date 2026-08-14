@@ -423,15 +423,17 @@ fun AppNavGraph(
             composable(Routes.SEARCH) {
                 SearchScreen(
                     onCancel = { navController.safePopBackStack(ignoreDebounce = true) },
-                    onOpenPetStore = {
-                        navigateToHomeTab(HomeTab.PET_STORE)
-                    },
                     onOpenTheme = { themeId ->
                         navController.safeNavigate(
                             Routes.batteryEditor(themeId),
                             ignoreDebounce = true
                         )
-                    }
+                    },
+                    onPremium = { navigateFromHome(Routes.PREMIUM) },
+                    onViewPet = {
+                        navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
+                    },
+                    onNavigateToGrantPermissions = ::navigateToOverlayGrantPermissions
                 )
             }
 

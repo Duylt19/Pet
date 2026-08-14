@@ -58,6 +58,7 @@ class PetStoreViewModel @Inject constructor(
             ) { catalog, packs, names, runtimeState ->
                 CatalogState(
                     pets = catalog.entries,
+                    trendingPetIds = catalog.trendingPetIds,
                     installedKeys = packs.mapTo(mutableSetOf()) { it.key },
                     names = names,
                     isLoading = catalog.isLoading,
@@ -70,6 +71,7 @@ class PetStoreViewModel @Inject constructor(
                     it.copy(
                         pets = source.pets,
                         categories = categories,
+                        trendingPetIds = source.trendingPetIds,
                         installedPackKeys = source.installedKeys,
                         customNames = source.names,
                         selectedCategory = PetStorePolicy.selectedCategory(
@@ -331,6 +333,7 @@ class PetStoreViewModel @Inject constructor(
 
     private data class CatalogState(
         val pets: List<com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry>,
+        val trendingPetIds: List<Int>,
         val installedKeys: Set<String>,
         val names: Map<Int, String>,
         val isLoading: Boolean,

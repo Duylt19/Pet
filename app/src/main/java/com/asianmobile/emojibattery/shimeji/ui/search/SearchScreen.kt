@@ -78,6 +78,10 @@ import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PRE
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentState
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogFlowHost
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogViewModel
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFlowHost
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreViewModel
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -91,10 +95,16 @@ private val SearchRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
 fun SearchScreen(
     onCancel: () -> Unit,
     onOpenTheme: (Int) -> Unit,
+    onPremium: () -> Unit,
+    onViewPet: () -> Unit,
+    onNavigateToGrantPermissions: () -> Unit,
     viewModel: SearchViewModel = hiltViewModel(),
-    onOpenPetStore: () -> Unit = {},
+    batteryCatalogViewModel: BatteryCatalogViewModel = hiltViewModel(),
+    petStoreViewModel: PetStoreViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val batteryCatalogState by batteryCatalogViewModel.uiState.collectAsStateWithLifecycle()
+    val petStoreState by petStoreViewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner, viewModel) {
@@ -106,16 +116,37 @@ fun SearchScreen(
     }
 
     TrackScreenView(ScreenName.SEARCH)
-    SearchContent(
-        uiState = uiState,
-        onQueryChanged = viewModel::updateQuery,
-        onCancel = onCancel,
+    BatteryCatalogFlowHost(
+        state = batteryCatalogState,
+        viewModel = batteryCatalogViewModel,
         onOpenTheme = onOpenTheme,
-        onToggleFavorite = viewModel::toggleFavorite,
-        onSelectTab = viewModel::selectTab,
-        onOpenPetStore = onOpenPetStore,
-        onRetry = viewModel::retry
-    )
+        onNavigateToPremium = onPremium
+    ) {
+        PetStoreFlowHost(
+            state = petStoreState,
+            viewModel = petStoreViewModel,
+            onPremium = onPremium,
+            onViewPet = onViewPet,
+            onNavigateToGrantPermissions = onNavigateToGrantPermissions
+        ) {
+            SearchContent(
+                uiState = uiState,
+                onQueryChanged = viewModel::updateQuery,
+                onCancel = onCancel,
+                onOpenTheme = { themeId ->
+                    batteryCatalogState.themes.firstOrNull { it.id == themeId }
+                        ?.let(batteryCatalogViewModel::requestTheme)
+                },
+                onToggleFavorite = viewModel::toggleFavorite,
+                onSelectTab = viewModel::selectTab,
+                onOpenPet = { petId ->
+                    petStoreState.pets.firstOrNull { it.id == petId }
+                        ?.let(petStoreViewModel::selectPet)
+                },
+                onRetry = viewModel::retry
+            )
+        }
+    }
 }
 
 @Composable
@@ -126,7 +157,7 @@ private fun SearchContent(
     onOpenTheme: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
     onSelectTab: (SearchTab) -> Unit = {},
-    onOpenPetStore: () -> Unit = {},
+    onOpenPet: (Int) -> Unit = {},
     onRetry: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
@@ -175,7 +206,7 @@ private fun SearchContent(
                         uiState = uiState,
                         onOpenTheme = onOpenTheme,
                         onToggleFavorite = onToggleFavorite,
-                        onOpenPetStore = onOpenPetStore,
+                        onOpenPet = onOpenPet,
                         onRetry = onRetry
                     )
                 }
@@ -396,7 +427,7 @@ private fun ResultsSection(
     uiState: SearchUiState,
     onOpenTheme: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
-    onOpenPetStore: () -> Unit,
+    onOpenPet: (Int) -> Unit,
     onRetry: () -> Unit
 ) {
     Column(
@@ -440,7 +471,7 @@ private fun ResultsSection(
                         rowPets.forEach { pet ->
                             SearchPetCard(
                                 pet = pet,
-                                onOpen = onOpenPetStore,
+                                onOpen = { onOpenPet(pet.id) },
                                 modifier = Modifier.weight(1f)
                             )
                         }

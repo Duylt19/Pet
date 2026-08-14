@@ -416,7 +416,8 @@ internal fun PetStoreContent(
                         state = state,
                         pets = PetStorePolicy.petsInCategory(
                             pets = state.pets,
-                            category = state.selectedCategory
+                            category = state.selectedCategory,
+                            trendingPetIds = state.trendingPetIds
                         ),
                         onPet = onPet,
                         onRetry = onRetryCatalog

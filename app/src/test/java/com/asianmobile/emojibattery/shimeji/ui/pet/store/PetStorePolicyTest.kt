@@ -101,11 +101,25 @@ class PetStorePolicyTest {
         val firstSession = PetStorePolicy.randomizedCategories(pets, sessionSeed = 42L)
 
         assertEquals(firstSession, PetStorePolicy.randomizedCategories(pets, sessionSeed = 42L))
-        assertEquals(pets.map { it.category }.toSet(), firstSession.toSet())
+        assertEquals("Trending", firstSession[1])
+        assertEquals(pets.map { it.category }.toSet() + "Trending", firstSession.toSet())
         assertTrue(
             (43L..60L)
                 .map { PetStorePolicy.randomizedCategories(pets, sessionSeed = it) }
+                .onEach { assertEquals("Trending", it[1]) }
                 .any { it != firstSession }
+        )
+    }
+
+    @Test
+    fun `trending category follows curated pet order and ignores missing ids`() {
+        assertEquals(
+            listOf(3, 1),
+            PetStorePolicy.petsInCategory(
+                pets = categorizedPets,
+                category = "trending",
+                trendingPetIds = listOf(3, 999, 1, 3)
+            ).map { it.id }
         )
     }
 

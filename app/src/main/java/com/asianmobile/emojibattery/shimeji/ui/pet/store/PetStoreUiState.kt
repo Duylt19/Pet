@@ -32,6 +32,7 @@ internal enum class PetUnlockActivation {
 data class PetStoreUiState(
     val pets: List<OwnerPetCatalogEntry> = emptyList(),
     val categories: List<String> = emptyList(),
+    val trendingPetIds: List<Int> = emptyList(),
     val installedPackKeys: Set<String> = emptySet(),
     val customNames: Map<Int, String> = emptyMap(),
     val selectedTab: PetStoreTab = PetStoreTab.PETS,
@@ -121,10 +122,15 @@ internal object PetStorePolicy {
     fun randomizedCategories(
         pets: List<OwnerPetCatalogEntry>,
         sessionSeed: Long
-    ): List<String> = categories(pets)
-        .map { category -> category to categorySessionRank(category, sessionSeed) }
-        .sortedWith(compareBy<Pair<String, Long>> { it.second }.thenBy { it.first.lowercase() })
-        .map { it.first }
+    ): List<String> {
+        val randomized = categories(pets)
+            .filterNot(::isTrendingCategory)
+            .map { category -> category to categorySessionRank(category, sessionSeed) }
+            .sortedWith(compareBy<Pair<String, Long>> { it.second }.thenBy { it.first.lowercase() })
+            .mapTo(mutableListOf()) { it.first }
+        randomized.add(index = minOf(TRENDING_CATEGORY_INDEX, randomized.size), TRENDING_CATEGORY)
+        return randomized
+    }
 
     fun selectedCategory(
         categories: List<String>,
@@ -136,11 +142,19 @@ internal object PetStorePolicy {
 
     fun petsInCategory(
         pets: List<OwnerPetCatalogEntry>,
-        category: String?
+        category: String?,
+        trendingPetIds: List<Int> = emptyList()
     ): List<OwnerPetCatalogEntry> {
         val selected = category?.trim()?.takeIf(String::isNotEmpty) ?: return emptyList()
+        if (isTrendingCategory(selected)) {
+            val petsById = pets.associateBy(OwnerPetCatalogEntry::id)
+            return trendingPetIds.distinct().mapNotNull(petsById::get)
+        }
         return pets.filter { it.category.trim().equals(selected, ignoreCase = true) }
     }
+
+    private fun isTrendingCategory(category: String): Boolean =
+        category.trim().equals(TRENDING_CATEGORY, ignoreCase = true)
 
     private fun categorySessionRank(category: String, sessionSeed: Long): Long =
         Random(sessionSeed xor category.lowercase().hashCode().toLong()).nextLong()
@@ -150,4 +164,7 @@ internal object PetStorePolicy {
         PetAction.SPECIAL_2 in availableActions -> PetAction.SPECIAL_2
         else -> null
     }
+
+    private const val TRENDING_CATEGORY = "Trending"
+    private const val TRENDING_CATEGORY_INDEX = 1
 }

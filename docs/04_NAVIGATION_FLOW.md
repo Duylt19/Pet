@@ -10,7 +10,7 @@
 | `intro` | Intro pager | First-run |
 | `permission` | Permission | Route/class được giữ nhưng tạm không nằm trong onboarding; request overlay/notification, có Continue/Skip |
 | `discover` | Discover | Tab 1 của Home shell: battery toggle, Battery Troll hero và catalog preview |
-| `search` | Search | Tìm pet hoặc battery theme; pet mở Shimeji Pets, theme mở Status Bar Editor |
+| `search` | Search | Tìm pet hoặc battery theme; item chạy chung reward/premium/download/access flow của Pet Store/Battery Catalog rồi mới mở destination tiếp theo |
 | `favourite_recent` | Favourite & Recent | Favourite battery theme đã lưu; Recent giữ empty state cho tới khi có contract MRU |
 | `grant_permissions?requiredTarget={accessibility\|overlay}` | Grant Permissions | Destination độc lập, **không phải** tab Home: `homeTabForRoute` trả `null` nên bottom navigation ẩn. Entry từ Mine mở dashboard trạng thái quyền (`accessibility` mặc định); `overlay` là flow Pet on Screen sau shared Draw over apps disclosure, với Overlay + Notification bắt buộc và hai bước ổn định optional. Back pop về đúng feature source. Khác hẳn `permission` (bước onboarding) |
 | `accessibility_how_to_use` | Accessibility How to use | Hướng dẫn bốn bước sau consent và trước Android Accessibility Settings; app bar `exitUntilCollapsed`, CTA cố định dưới đáy |
@@ -47,8 +47,8 @@ Home shell tabs: Discover ⇄ Battery Styles ⇄ Shimeji Pets ⇄ Mine/Settings
 
 Discover ──Emoji Battery toggle(no access)──> Accessibility disclosure ──How to use──> Settings ──back──> enable battery overlay
 Discover ──Battery/Theme/Emoji──> Battery Styles hoặc Customize Status Bar
-Discover ──Search──> Search ──theme──> Customize Status Bar
-Search ──pet──> Shimeji Pets
+Discover ──Search──> Search ──theme──> Battery access flow ──> Customize Status Bar
+Search ──pet──> Pet Store unlock/download/name/permission flow
 Discover ──More Shimeji Pets──> Shimeji Pets
 Discover ──Trending pet──> Rewarded/Premium sheet dùng chung ──> Download/verify/unlock ──> bật ở slot Mixed trống đầu tiên
 Pet unlock ──Save tên──> thiếu Overlay: disclosure/Grant Permissions ──> đủ quyền bắt buộc: tự start Pet on Screen
@@ -112,7 +112,7 @@ ngay ở `PetOverlayRuntime.STARTING`, bỏ qua tap lặp trong lúc khởi đ�
   cạnh tranh với Navigation vì thứ tự đăng ký callback có thể đổi sau recomposition.
 - Search, My Pet và Premium là destination con và pop về destination đã mở chúng;
   My Pet không thay thế root Discover.
-- Search `Cancel`/Back pop về Discover; chọn theme mở Battery Editor và Back quay lại Search.
+- Search `Cancel`/Back pop về màn đã mở Search; chọn theme hợp lệ mở Battery Editor và Back quay lại Search.
 - Pet Store là top-level tab; chọn Discover chuyển tab về root thay vì tạo thêm route.
   Pet tải từ Store được cài/mở khóa và bật ở slot Mixed trống đầu tiên. Nếu roster đã đầy,
   ownership vẫn được giữ nhưng không thay selection hiện có. `View` sau khi đặt tên mở My Pet
