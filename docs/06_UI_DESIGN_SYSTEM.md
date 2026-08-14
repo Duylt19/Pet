@@ -254,6 +254,13 @@ System bar:
 - `MainActivity.applyLightSystemBars()` là **nơi duy nhất** quyết định hình thức system bar.
   Không màn nào override; helper `TransparentStatusBarEffect` cũ đã bị xoá. Màn nào muốn icon
   sáng thì phải đủ tối để đọc được icon sáng, và không màn nào còn như vậy trong thiết kế mới;
+- navigation bar dùng immersive transient-by-swipe và tắt contrast enforcement từ API 29 để
+  Samsung/three-button navigation không giữ scrim đen sau khi bar đã ẩn. Các surface nằm trực
+  tiếp trong Activity không cộng `navigationBarsPadding()`: một số ROM Android 10 vẫn trả stable
+  inset sau `hide()`, khiến banner/native ad bị đẩy lên và lộ background đáy. Dialog là window
+  riêng nên tự quản lý immersive/inset theo nhu cầu IME;
+- window/root surface dùng nền trắng khi app hiển thị bình thường; chỉ chuyển nền host sang đen
+  trong thời gian `AdOverlayState` xác nhận full-screen ad đang sở hữu màn hình;
 - helper được gọi lại ở `onCreate`, `onResume` và mỗi lần đổi window focus, vì màn system
   settings, full-screen ad hay system dialog trả window về kèm appearance của chính nó;
 - **nợ đã biết**: onboarding Permission (`ui/onboarding/permission/PermissionScreen`)

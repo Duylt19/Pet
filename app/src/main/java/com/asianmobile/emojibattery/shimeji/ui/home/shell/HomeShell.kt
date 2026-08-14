@@ -1,8 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.ui.home.shell
 
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_HOME_BOTTOM
@@ -31,6 +29,5 @@ fun HomeShell(
             modifier = Modifier.fillMaxWidth(),
             adPosition = BANNER_HOME_BOTTOM
         )
-        Spacer(Modifier.navigationBarsPadding())
     }
 }

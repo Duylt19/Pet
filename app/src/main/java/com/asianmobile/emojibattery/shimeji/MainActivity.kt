@@ -2,6 +2,7 @@ package com.asianmobile.emojibattery.shimeji
 
 import android.content.Context
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +12,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -71,7 +72,9 @@ class MainActivity : ComponentActivity() {
             BaseAppTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    // The legacy Material scheme is dark, while every current app screen is
+                    // light. Keep transparent/stale OEM insets from exposing that old black base.
+                    color = colorResource(R.color.colors_FFFFFF)
                 ) {
                     if (mainUiState.isReady()) {
                         val nextScreen = remember(mainUiState) {
@@ -115,12 +118,15 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun setupAdOverlay() {
-        window.setBackgroundDrawableResource(android.R.color.black)
+        window.setBackgroundDrawableResource(R.color.colors_FFFFFF)
         val contentFrame = findViewById<ViewGroup>(android.R.id.content)
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 AdOverlayState.isAdShowing.collect { isShowing ->
+                    window.setBackgroundDrawableResource(
+                        if (isShowing) android.R.color.black else R.color.colors_FFFFFF
+                    )
                     for (index in 0 until contentFrame.childCount) {
                         contentFrame.getChildAt(index).visibility =
                             if (isShowing) View.INVISIBLE else View.VISIBLE
@@ -160,6 +166,11 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = Color.TRANSPARENT
+        if (AppWindowPolicy.shouldDisableNavigationBarContrast(Build.VERSION.SDK_INT)) {
+            // Android 10+ adds a contrast scrim for three-button navigation by default. Some
+            // Samsung Android 10 builds retain it after immersive hide as an opaque black strip.
+            window.isNavigationBarContrastEnforced = false
+        }
         WindowInsetsControllerCompat(window, window.decorView).apply {
             // "Light bars" means a light background, so the platform draws dark content on them.
             isAppearanceLightStatusBars = true

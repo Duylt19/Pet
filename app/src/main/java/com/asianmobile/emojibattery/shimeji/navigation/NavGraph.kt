@@ -10,10 +10,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -695,20 +693,17 @@ fun AppNavGraph(
                 screenCode = SCREEN_BATTERY_CATEGORY,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.navigationBarsPadding())
         } else if (batteryEditorNativeScreenCode != null) {
             NativeAdInternal(
                 screenCode = batteryEditorNativeScreenCode,
                 reloadKey = batteryEditorNativeReloadKey,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.navigationBarsPadding())
         } else if (shouldShowBatteryEditorBottomBanner) {
             BannerAd(
                 modifier = Modifier.fillMaxWidth(),
                 adPosition = BANNER_BATTERY_EDITOR_BOTTOM
             )
-            Spacer(Modifier.navigationBarsPadding())
         } else {
             HomeShell(
                 selectedTab = selectedHomeTab,

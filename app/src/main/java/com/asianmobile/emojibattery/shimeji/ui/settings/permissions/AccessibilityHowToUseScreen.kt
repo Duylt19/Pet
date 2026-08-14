@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -356,7 +355,6 @@ private fun AccessibilityHowToUseActionBar(onGoToSettings: () -> Unit) {
                 spotColor = colorResource(R.color.colors_1F666666)
             )
             .background(colorResource(R.color.colors_FFFFFF))
-            .navigationBarsPadding()
             .padding(dimensionResource(SdpR.dimen._12sdp))
     ) {
         Box(

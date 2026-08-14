@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -286,7 +285,6 @@ internal fun GrantPermissionsContent(
                 screenCode = SCREEN_GRANT_PERMISSIONS,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .navigationBarsPadding()
             )
         }
     ) { innerPadding ->
