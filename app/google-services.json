@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "259565980311",
-    "project_id": "privatebrower-7168d",
-    "storage_bucket": "privatebrower-7168d.firebasestorage.app"
+    "project_number": "178186336097",
+    "project_id": "shimejibattery",
+    "storage_bucket": "shimejibattery.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:259565980311:android:5af813e037f17b2a7077d2",
+        "mobilesdk_app_id": "1:178186336097:android:e2a8853aeef0bcc46bf720",
         "android_client_info": {
           "package_name": "com.asianmobile.emojibattery.shimeji"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAVpsKMRpcpKbLkaRdxMop2vkHRspfM3l8"
+          "current_key": "AIzaSyDLDGoQXjaSXlitwWaa5DCp1DeSHgWTNww"
         }
       ],
       "services": {
