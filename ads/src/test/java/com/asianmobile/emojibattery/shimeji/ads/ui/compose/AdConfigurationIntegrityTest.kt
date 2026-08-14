@@ -150,18 +150,17 @@ class AdConfigurationIntegrityTest {
 
     @Test
     fun `collapsible native footer places the ad badge before its title`() {
-        val layout = resourceFile(
-            "src/main/res/layout/holder_load_native_collab_banner.xml"
-        ).readText()
+        val layouts = listOf(
+            "src/main/res/layout/holder_load_native_collab_banner.xml",
+            "src/main/res/layout/holder_load_native_collab.xml"
+        ).map { relativePath -> resourceFile(relativePath).readText() }
 
-        assertTrue(layout.contains("android:id=\"@+id/ivAdsLogo\""))
-        assertTrue(layout.contains("android:src=\"@drawable/ic_ads_logo_collapse\""))
-        assertTrue(
-            layout.contains("app:layout_constraintStart_toEndOf=\"@id/ivAdsLogo\"")
-        )
-        assertTrue(
-            layout.contains("app:layout_constraintStart_toStartOf=\"@id/ivAdsLogo\"")
-        )
+        layouts.forEach { layout ->
+            assertTrue(
+                layout.contains("android:drawableStart=\"@drawable/ic_ads_logo_collapse\"")
+            )
+            assertFalse(layout.contains("android:id=\"@+id/ivAdsLogo\""))
+        }
     }
 
     private fun resourceFile(relativePath: String): File =

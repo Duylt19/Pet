@@ -62,25 +62,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@id/vContent" />
 
-            <ImageView
-                android:id="@+id/ivAdsLogo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/_6sdp"
-                android:elevation="6dp"
-                android:importantForAccessibility="no"
-                android:src="@drawable/ic_ads_logo_collapse"
-                app:layout_constraintBottom_toBottomOf="@id/tvTitleAds"
-                app:layout_constraintStart_toEndOf="@id/imgIcon"
-                app:layout_constraintTop_toTopOf="@id/tvTitleAds" />
-
             <TextView
                 android:id="@+id/tvTitleAds"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="@dimen/_6sdp"
                 android:layout_marginEnd="@dimen/_12sdp"
                 android:background="@drawable/bg_in_loading_ads_content"
+                android:drawableStart="@drawable/ic_ads_logo_collapse"
                 android:drawablePadding="4dp"
                 android:elevation="6dp"
                 android:ellipsize="end"
@@ -91,7 +80,7 @@
                 android:textSize="@dimen/_11sdp"
                 app:layout_constraintBottom_toTopOf="@+id/tvMessageAds"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/ivAdsLogo"
+                app:layout_constraintStart_toEndOf="@id/imgIcon"
                 app:layout_constraintTop_toTopOf="@id/imgIcon" />
 
             <TextView

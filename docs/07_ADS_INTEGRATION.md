@@ -27,9 +27,10 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
 - Premium dùng BillingClient và `StartPremiumIndexes` để biết entry source.
 - Native Ad templates dùng light pink-white surface theo Figma node `8047:2973`; các
   biến thể height/item/collapsible chia sẻ cùng background, border, text và CTA palette.
-  Footer của native collapsible luôn dùng vector attribution `ic_ads_logo_collapse` ngay trước
-  headline ở cả trạng thái expanded và collapsed; body căn theo đầu badge để attribution không
-  làm lệch cột nội dung và badge không biến thành placeholder trắng khi shimmer đang chạy.
+  Footer của native collapsible luôn gắn vector attribution `ic_ads_logo_collapse` bằng
+  `drawableStart` trực tiếp trên headline ở cả trạng thái expanded và collapsed. Không đặt badge
+  thành view rời vì Mobile Ads có thể giữ khoảng trống nhưng không composite view đó; body vẫn
+  căn theo đầu headline để attribution không làm lệch cột nội dung.
 - Home shell trong `AppNavGraph` sở hữu đúng một `BannerAd` cho placement
   `home_mode_bottom`, nằm dưới bottom navigation. Banner giữ nguyên composition/ViewModel
   khi chuyển giữa Discover, Battery, Pet Store và Mine nên không request/reload lại theo tab.
