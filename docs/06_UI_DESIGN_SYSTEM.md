@@ -90,7 +90,10 @@ Discover Home contract:
   favorite state thật.
 - Search field theo Figma `8287:6560`: khi query khác rỗng hiện clear icon 16px ở trailing;
   clear chỉ xoá query và giữ focus, còn tap ngắn ngoài toàn bộ field mới clear focus + ẩn IME.
-  Gesture cuộn không được xem là outside tap.
+  Gesture cuộn không được xem là outside tap. Native ad cố định của Search bám trực tiếp đáy
+  vùng content đã được `adjustResize` xử lý; screen không cộng thêm navigation-bar inset bên
+  dưới ad vì app shell đang immersive và IME trên một số OEM vẫn báo inset navigation tạm thời,
+  nếu cộng tiếp sẽ tạo một dải trắng sau khi bàn phím xuất hiện.
 - Discover section Emoji/DIY Battery theo Figma `8019:1628` và `8019:1689` dùng text thuần
   `Emoji`/`DIY Battery` cùng artwork 16px thật ở leading; không ghép emoji vào string.
 
