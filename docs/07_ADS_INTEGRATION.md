@@ -8,6 +8,10 @@ Mọi Android string resource chứa publisher/ad-unit ID dùng prefix
 `id_emoji_battery_`; không giữ identifier legacy `id_private_browser_` hoặc `id_pub`.
 Đổi tên resource không được tự ý đổi giá trị AdMob production/test bên trong.
 
+AdMob app ID và ad-unit ID là cấu hình public được lưu ở `ads/src/main/res/values/strings.xml`.
+Credential nhạy cảm như `app_password_mail` không được đặt trong resource/default XML; source chỉ
+giữ key rỗng và giá trị production phải được cấp từ Firebase Remote Config.
+
 ## Base behavior còn giữ
 
 - Splash khởi tạo consent/config liên quan.

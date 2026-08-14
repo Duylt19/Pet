@@ -15,6 +15,9 @@ Tài liệu này là nguồn chuẩn cho application identity sau lần đổi p
 | Ads source root | `ads/src/main/java/com/asianmobile/emojibattery/shimeji/` |
 | Legacy debug catalog root | `/sdcard/Android/data/com.asianmobile.emojibattery.shimeji/files/pet_catalog/` |
 | Production catalog cache | `files/pet_catalog/pets.json` under canonical app sandbox |
+| Feedback email | `feedback@asianmobile.ltd` |
+| Privacy policy | `https://sites.google.com/view/sanya-studio/home` |
+| More apps | `https://play.google.com/store/apps/developer?id=Sanya.Studio` |
 
 Mọi package declaration, import, fully qualified custom view, ProGuard rule, tool default và
 tài liệu mới phải dùng identity canonical ở trên.
@@ -45,6 +48,10 @@ Trước release:
 3. Thay config trong module `:app`; rà lại file cùng tên trong `:ads`.
 4. Xác minh Analytics, Crashlytics và Remote Config trên thiết bị thật.
 5. Rà API-key restrictions, SHA fingerprints và Facebook/Adjust dashboard nếu chúng khóa theo package.
+
+Mail app password là credential production của feedback flow. Giá trị này chỉ được cấu hình ở
+Firebase Remote Config key `app_password_mail`; không ghi vào Android resource, default XML,
+tài liệu hoặc Git history.
 
 Không chỉnh tay `mobilesdk_app_id` hoặc API key để giả lập Firebase registration mới.
 

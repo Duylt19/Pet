@@ -53,6 +53,10 @@ tự thêm quảng cáo chỉ từ tên route.
 | Battery Troll reward | `dialog_battery_troll_reward` | `is_show_native_battery_troll_reward` | `id_emoji_battery_native_battery_troll_reward` | `HEIGHT_222` |
 | Exit dialog | `dialog_exit_app` | `is_show_native_exit_dialog` | `id_emoji_battery_native_exit_dialog` | `HEIGHT_222` |
 
+`dialog_food_reward`, `dialog_battery_troll_reward` và `dialog_exit_app` hiện dùng chung
+AdMob unit với `dialog_pet_reward` theo placement sheet production. Các surface vẫn giữ resource
+name và Remote Config key riêng để có thể tách inventory sau này mà không đổi code feature.
+
 ## Configuration contract
 
 - Ad-unit production/test nằm trong `ads/src/main/res/values/strings.xml` và không được rỗng
