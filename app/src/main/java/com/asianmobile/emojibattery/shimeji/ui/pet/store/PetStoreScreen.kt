@@ -407,21 +407,16 @@ internal fun PetStoreContent(
             StoreTabs(state.selectedTab, onTab)
             when (state.selectedTab) {
                 PetStoreTab.PETS -> {
-                    val categories = PetStorePolicy.categories(state.pets)
-                    val selectedCategory = PetStorePolicy.selectedCategory(
-                        pets = state.pets,
-                        requestedCategory = state.selectedCategory
-                    )
                     PetCategoryTabs(
-                        categories = categories,
-                        selectedCategory = selectedCategory,
+                        categories = state.categories,
+                        selectedCategory = state.selectedCategory,
                         onCategory = onCategory
                     )
                     PetGrid(
                         state = state,
                         pets = PetStorePolicy.petsInCategory(
                             pets = state.pets,
-                            category = selectedCategory
+                            category = state.selectedCategory
                         ),
                         onPet = onPet,
                         onRetry = onRetryCatalog
@@ -1496,14 +1491,18 @@ private fun PetNameDialog(pet: OwnerPetCatalogEntry, onSave: (String) -> Unit) {
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 private fun PetStorePreview() {
+    val pets = listOf(
+        OwnerPetCatalogEntry(1, "Cattey", "Cat", null, null, false),
+        OwnerPetCatalogEntry(2, "Bunny", "Rabbit", null, null, false),
+        OwnerPetCatalogEntry(3, "Bunny", "Rabbit", null, null, false)
+    )
+    val categories = PetStorePolicy.categories(pets)
     PetStoreContent(
         state = PetStoreUiState(
             isLoading = false,
-            pets = listOf(
-                OwnerPetCatalogEntry(1, "Cattey", "Cat", null, null, false),
-                OwnerPetCatalogEntry(2, "Bunny", "Rabbit", null, null, false),
-                OwnerPetCatalogEntry(3, "Bunny", "Rabbit", null, null, false)
-            )
+            pets = pets,
+            categories = categories,
+            selectedCategory = categories.firstOrNull()
         ),
         onSearch = {},
         onPremium = {},

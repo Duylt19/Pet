@@ -22,6 +22,7 @@ private val previewPets = listOf(
     OwnerPetCatalogEntry(5, "Bunny", "Rabbit", null, null, false),
     OwnerPetCatalogEntry(6, "Bunny", "Rabbit", null, null, false)
 )
+private val previewCategories = PetStorePolicy.categories(previewPets)
 
 @PreviewTest
 @Preview(widthDp = 360, heightDp = 800)
@@ -158,6 +159,8 @@ private fun PreviewStore(tab: PetStoreTab) {
     PetStoreContent(
         state = PetStoreUiState(
             pets = previewPets,
+            categories = previewCategories,
+            selectedCategory = previewCategories.firstOrNull(),
             installedPackKeys = setOf(previewPets[2].installedPackKey),
             selectedTab = tab,
             isLoading = false

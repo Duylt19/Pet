@@ -93,14 +93,32 @@ class PetStorePolicyTest {
     }
 
     @Test
+    fun `category randomization is stable for one session and varies across session seeds`() {
+        val pets = listOf("Cat", "Rabbit", "Pokemon", "Anime", "Game")
+            .mapIndexed { index, category ->
+                OwnerPetCatalogEntry(index, category, category, null, null, false)
+            }
+        val firstSession = PetStorePolicy.randomizedCategories(pets, sessionSeed = 42L)
+
+        assertEquals(firstSession, PetStorePolicy.randomizedCategories(pets, sessionSeed = 42L))
+        assertEquals(pets.map { it.category }.toSet(), firstSession.toSet())
+        assertTrue(
+            (43L..60L)
+                .map { PetStorePolicy.randomizedCategories(pets, sessionSeed = it) }
+                .any { it != firstSession }
+        )
+    }
+
+    @Test
     fun `category selection retains a valid request and falls back to first category`() {
+        val categories = PetStorePolicy.categories(categorizedPets)
         assertEquals(
             "Rabbit",
-            PetStorePolicy.selectedCategory(categorizedPets, requestedCategory = "rabbit")
+            PetStorePolicy.selectedCategory(categories, requestedCategory = "rabbit")
         )
         assertEquals(
             "Cat",
-            PetStorePolicy.selectedCategory(categorizedPets, requestedCategory = "Bird")
+            PetStorePolicy.selectedCategory(categories, requestedCategory = "Bird")
         )
     }
 

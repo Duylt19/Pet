@@ -39,7 +39,8 @@ class PetStoreViewModel @Inject constructor(
     private val petPackRepository: PetPackRepository,
     private val petStoreRepository: PetStoreRepository,
     private val petFoodRepository: PetFoodRepository,
-    private val petSettingsRepository: PetSettingsRepository
+    private val petSettingsRepository: PetSettingsRepository,
+    private val categorySessionOrder: PetCategorySessionOrder
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PetStoreUiState())
     val uiState: StateFlow<PetStoreUiState> = _uiState.asStateFlow()
@@ -64,13 +65,15 @@ class PetStoreViewModel @Inject constructor(
                     runtimeState = runtimeState
                 )
             }.collect { source ->
+                val categories = categorySessionOrder.arrange(source.pets)
                 _uiState.update {
                     it.copy(
                         pets = source.pets,
+                        categories = categories,
                         installedPackKeys = source.installedKeys,
                         customNames = source.names,
                         selectedCategory = PetStorePolicy.selectedCategory(
-                            pets = source.pets,
+                            categories = categories,
                             requestedCategory = it.selectedCategory
                         ),
                         isLoading = source.isLoading,
@@ -93,7 +96,7 @@ class PetStoreViewModel @Inject constructor(
     }
 
     fun selectCategory(category: String) = _uiState.update { state ->
-        val selected = PetStorePolicy.selectedCategory(state.pets, category)
+        val selected = PetStorePolicy.selectedCategory(state.categories, category)
         if (selected == null) state else state.copy(selectedCategory = selected)
     }
 

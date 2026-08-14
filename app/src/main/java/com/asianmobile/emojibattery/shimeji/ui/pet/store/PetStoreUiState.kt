@@ -5,6 +5,7 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogEntry
 import com.asianmobile.emojibattery.shimeji.pet.engine.PetAction
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPack
+import kotlin.random.Random
 
 enum class PetStoreTab(val navigationValue: String) {
     PETS("pets"),
@@ -30,6 +31,7 @@ internal enum class PetUnlockActivation {
 
 data class PetStoreUiState(
     val pets: List<OwnerPetCatalogEntry> = emptyList(),
+    val categories: List<String> = emptyList(),
     val installedPackKeys: Set<String> = emptySet(),
     val customNames: Map<Int, String> = emptyMap(),
     val selectedTab: PetStoreTab = PetStoreTab.PETS,
@@ -116,11 +118,18 @@ internal object PetStorePolicy {
         .filter(String::isNotEmpty)
         .distinctBy { it.lowercase() }
 
-    fun selectedCategory(
+    fun randomizedCategories(
         pets: List<OwnerPetCatalogEntry>,
+        sessionSeed: Long
+    ): List<String> = categories(pets)
+        .map { category -> category to categorySessionRank(category, sessionSeed) }
+        .sortedWith(compareBy<Pair<String, Long>> { it.second }.thenBy { it.first.lowercase() })
+        .map { it.first }
+
+    fun selectedCategory(
+        categories: List<String>,
         requestedCategory: String?
     ): String? {
-        val categories = categories(pets)
         return categories.firstOrNull { it.equals(requestedCategory, ignoreCase = true) }
             ?: categories.firstOrNull()
     }
@@ -129,9 +138,12 @@ internal object PetStorePolicy {
         pets: List<OwnerPetCatalogEntry>,
         category: String?
     ): List<OwnerPetCatalogEntry> {
-        val selected = selectedCategory(pets, category) ?: return emptyList()
+        val selected = category?.trim()?.takeIf(String::isNotEmpty) ?: return emptyList()
         return pets.filter { it.category.trim().equals(selected, ignoreCase = true) }
     }
+
+    private fun categorySessionRank(category: String, sessionSeed: Long): Long =
+        Random(sessionSeed xor category.lowercase().hashCode().toLong()).nextLong()
 
     fun specialSkillAction(availableActions: Set<PetAction>): PetAction? = when {
         PetAction.SPECIAL in availableActions -> PetAction.SPECIAL
