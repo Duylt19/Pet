@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -39,6 +40,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -519,7 +521,18 @@ private fun TemplatePickerRow(
         EditorCatalogStatePanel(state = state, onRetry = onRetry)
         return
     }
+    val listState = rememberLazyListState()
+    var hasPositionedInitialSelection by remember(component) { mutableStateOf(false) }
+    val displayedThemeIds = themes.map(BatteryThemeEntry::id)
+    LaunchedEffect(state.isInitialized, selectedThemeId, displayedThemeIds) {
+        if (hasPositionedInitialSelection || !state.isInitialized) return@LaunchedEffect
+        BatteryEditorThemeDisplayPolicy.selectedIndex(themes, selectedThemeId)?.let { index ->
+            listState.scrollToItem(index)
+            hasPositionedInitialSelection = true
+        }
+    }
     LazyRow(
+        state = listState,
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
     ) {
         items(

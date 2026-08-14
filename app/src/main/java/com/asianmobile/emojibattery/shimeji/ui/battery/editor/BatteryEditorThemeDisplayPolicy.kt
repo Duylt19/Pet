@@ -14,4 +14,10 @@ internal object BatteryEditorThemeDisplayPolicy {
         val trendingIds = trending.mapTo(mutableSetOf(), BatteryThemeEntry::id)
         return trending + selectable.filterNot { theme -> theme.id in trendingIds }
     }
+
+    /**
+     * Resolves against the displayed order because trending themes may move ahead of catalog order.
+     */
+    fun selectedIndex(themes: List<BatteryThemeEntry>, selectedThemeId: Int): Int? =
+        themes.indexOfFirst { it.id == selectedThemeId }.takeIf { it >= 0 }
 }
