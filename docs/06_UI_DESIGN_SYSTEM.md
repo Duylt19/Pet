@@ -185,7 +185,8 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
 
 Pet Store visual contract:
 
-- action toast theo Figma node `8080:3070` là pill trắng rộng `305/360` viewport, padding
+- action toast theo Figma node `8080:3070` là pill trắng wrap theo nội dung và không vượt quá
+  `305/360` viewport, padding
   `12×8px`, thumbnail pet/food thật `24×24px`, text Roboto Regular 14/20 và action Roboto
   Medium 14/20. Shadow dùng `#666666` 40%, blur 12px; nội dung dài chỉ ellipsize phần message,
   không được đẩy hoặc cắt action `View`. Toast tự đóng sau ba giây;
@@ -391,11 +392,11 @@ Input text contract:
 
 My Pet Room contract theo Figma node `8177:3972`, `8185:4332`, `8185:4379`, `8191:5950`:
 
-- cảnh báo hết thức ăn theo node `8634:7995` là Compose overlay trong phòng, không dùng Android
-  system toast: pill `272/360` viewport, nền `#F7F0E7`, viền `#725938` 1px, shadow item
-  `#6666661F`, padding `12×10px`, icon thức ăn `18×18px` và Roboto Medium 14/20. Pill nằm ngay
-  trên sheet ở cả trạng thái mở/thu và tự đóng sau ba giây; các lỗi kỹ thuật khác vẫn dùng
-  feedback hiện có vì không cùng ngữ nghĩa/icon;
+- feedback trong Pet Room dùng chung Compose overlay, không dùng Android system toast. Theo node
+  `8634:7995`, pill wrap theo nội dung và không vượt quá `272/360` viewport, nền `#F7F0E7`,
+  viền `#725938` 1px, shadow item `#6666661F`, padding `12×10px` và Roboto Medium 14/20.
+  Message food dùng icon thức ăn `18×18px`, message khác dùng icon thông tin; nội dung dài tối đa
+  hai dòng. Pill nằm ngay trên sheet ở cả trạng thái mở/thu và tự đóng sau ba giây;
 - route `my_pet` là scene phòng full-screen, background lấy từ room catalog (`bg/BG_<id>.webp`)
   và vẽ `ContentScale.Crop`; không dùng Home chrome, không có bottom navigation;
 - top bar `360×64` gồm back `32×32`, biển gỗ `178×40` (`img_pet_room_sign`) mang title, và

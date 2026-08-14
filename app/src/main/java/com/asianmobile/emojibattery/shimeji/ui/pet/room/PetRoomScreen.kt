@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -86,7 +87,6 @@ import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFood
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppActionToast
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
-import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
@@ -144,24 +144,6 @@ fun PetRoomScreen(
             }
         }
     }
-    LaunchedEffect(uiState.message, context) {
-        val messageRes = when (uiState.message) {
-            PetRoomMessage.ROOM_DOWNLOAD_FAILED -> R.string.pet_room_download_failed
-            PetRoomMessage.REMOVE_FAILED -> R.string.pet_room_remove_failed
-            PetRoomMessage.SELECT_A_PET_FIRST -> R.string.pet_room_select_pet_first
-            PetRoomMessage.OUT_OF_FOOD -> null
-            PetRoomMessage.ALREADY_FULL -> R.string.pet_room_already_full
-            PetRoomMessage.NO_FREE_OVERLAY_SLOT -> R.string.pet_room_no_free_slot
-            PetRoomMessage.FOOD_REWARD_NOT_EARNED -> R.string.pet_room_food_reward_not_earned
-            PetRoomMessage.FOOD_REWARD_FAILED -> R.string.pet_room_food_reward_failed
-            null -> null
-        }
-        messageRes?.let {
-            ToastHelper.show(context, context.getString(it))
-            viewModel.dismissMessage()
-        }
-    }
-
     Box(Modifier.fillMaxSize()) {
         PetRoomContent(
             uiState = uiState,
@@ -200,9 +182,10 @@ fun PetRoomScreen(
             onSaveSettings = viewModel::saveSettings
         )
 
-        if (uiState.message == PetRoomMessage.OUT_OF_FOOD) {
-            PetRoomFoodToast(
-                text = stringResource(R.string.pet_room_out_of_food),
+        uiState.message?.let { message ->
+            PetRoomMessageToast(
+                text = stringResource(message.stringRes),
+                leadingIconRes = message.leadingIconRes,
                 isSheetExpanded = uiState.isSheetExpanded,
                 onDismiss = viewModel::dismissMessage
             )
@@ -241,8 +224,9 @@ fun PetRoomScreen(
 }
 
 @Composable
-private fun PetRoomFoodToast(
+private fun PetRoomMessageToast(
     text: String,
+    leadingIconRes: Int,
     isSheetExpanded: Boolean,
     onDismiss: () -> Unit
 ) {
@@ -264,52 +248,82 @@ private fun PetRoomFoodToast(
             ),
         contentAlignment = Alignment.BottomCenter
     ) {
-        PetRoomFoodToastPill(text = text)
+        PetRoomMessageToastPill(
+            text = text,
+            leadingIconRes = leadingIconRes
+        )
     }
 }
 
 @Composable
-internal fun PetRoomFoodToastPill(
+internal fun PetRoomMessageToastPill(
     text: String,
+    leadingIconRes: Int = R.drawable.ic_pet_room_toast_food,
     modifier: Modifier = Modifier
 ) {
     val shape = CircleShape
-    Row(
-        modifier = modifier
-            .fillMaxWidth(PET_ROOM_FOOD_TOAST_WIDTH_FRACTION)
-            .shadow(
-                elevation = dimensionResource(SdpR.dimen._18sdp),
-                shape = shape,
-                ambientColor = colorResource(R.color.colors_1F666666),
-                spotColor = colorResource(R.color.colors_1F666666)
-            )
-            .clip(shape)
-            .background(colorResource(R.color.colors_F7F0E7))
-            .border(1.dp, colorResource(R.color.colors_725938), shape)
-            .padding(
-                horizontal = dimensionResource(SdpR.dimen._9sdp),
-                vertical = dimensionResource(SdpR.dimen._8sdp)
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
+    BoxWithConstraints(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_pet_room_toast_food),
-            contentDescription = null,
-            tint = colorResource(R.color.colors_725938),
-            modifier = Modifier.size(dimensionResource(SdpR.dimen._14sdp))
-        )
-        Text(
-            text = text,
-            color = colorResource(R.color.colors_725938),
-            fontFamily = PetRoomToastRobotoMedium,
-            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        Row(
+            modifier = Modifier
+                .widthIn(max = maxWidth * PET_ROOM_TOAST_WIDTH_FRACTION)
+                .shadow(
+                    elevation = dimensionResource(SdpR.dimen._18sdp),
+                    shape = shape,
+                    ambientColor = colorResource(R.color.colors_1F666666),
+                    spotColor = colorResource(R.color.colors_1F666666)
+                )
+                .clip(shape)
+                .background(colorResource(R.color.colors_F7F0E7))
+                .border(1.dp, colorResource(R.color.colors_725938), shape)
+                .padding(
+                    horizontal = dimensionResource(SdpR.dimen._9sdp),
+                    vertical = dimensionResource(SdpR.dimen._8sdp)
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
+        ) {
+            Icon(
+                painter = painterResource(leadingIconRes),
+                contentDescription = null,
+                tint = colorResource(R.color.colors_725938),
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._14sdp))
+            )
+            Text(
+                text = text,
+                color = colorResource(R.color.colors_725938),
+                fontFamily = PetRoomToastRobotoMedium,
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
+
+private val PetRoomMessage.stringRes: Int
+    get() = when (this) {
+        PetRoomMessage.ROOM_DOWNLOAD_FAILED -> R.string.pet_room_download_failed
+        PetRoomMessage.REMOVE_FAILED -> R.string.pet_room_remove_failed
+        PetRoomMessage.SELECT_A_PET_FIRST -> R.string.pet_room_select_pet_first
+        PetRoomMessage.OUT_OF_FOOD -> R.string.pet_room_out_of_food
+        PetRoomMessage.ALREADY_FULL -> R.string.pet_room_already_full
+        PetRoomMessage.NO_FREE_OVERLAY_SLOT -> R.string.pet_room_no_free_slot
+        PetRoomMessage.FOOD_REWARD_NOT_EARNED -> R.string.pet_room_food_reward_not_earned
+        PetRoomMessage.FOOD_REWARD_FAILED -> R.string.pet_room_food_reward_failed
+    }
+
+private val PetRoomMessage.leadingIconRes: Int
+    get() = when (this) {
+        PetRoomMessage.OUT_OF_FOOD,
+        PetRoomMessage.FOOD_REWARD_NOT_EARNED,
+        PetRoomMessage.FOOD_REWARD_FAILED -> R.drawable.ic_pet_room_toast_food
+
+        else -> R.drawable.ic_info_rounded
+    }
 
 @Composable
 private fun PetRoomContent(
@@ -1430,7 +1444,7 @@ private const val FIGMA_CARD_WIDTH = 104f
 private val TAB_DASH = 3.dp
 private const val DETAIL_RULE_DASH_PX = 5.4f
 private const val ADD_PET_CARD_KEY = "add_pet"
-private const val PET_ROOM_FOOD_TOAST_WIDTH_FRACTION = 272f / 360f
+private const val PET_ROOM_TOAST_WIDTH_FRACTION = 272f / 360f
 private const val PET_ROOM_TOAST_DURATION_MILLIS = 3_000L
 
 private fun PetRoomFoodUiState.toStoreFood() = PetStoreFood(

@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.ui.pet.room.PetRoomFoodToastPill
+import com.asianmobile.emojibattery.shimeji.ui.pet.room.PetRoomMessageToastPill
 import com.intuit.sdp.R as SdpR
 
 @PreviewTest
@@ -37,6 +37,23 @@ fun PetRoomFoodToastScreenshotTest() {
             .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
-        PetRoomFoodToastPill(text = "Out of food. Please add more food.")
+        PetRoomMessageToastPill(text = "Out of food. Please add more food.")
+    }
+}
+
+@PreviewTest
+@Preview(name = "Pet Room short toast", widthDp = 360, heightDp = 96)
+@Composable
+fun PetRoomShortToastScreenshotTest() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        contentAlignment = Alignment.Center
+    ) {
+        PetRoomMessageToastPill(
+            text = "Select a pet first.",
+            leadingIconRes = R.drawable.ic_info_rounded
+        )
     }
 }
