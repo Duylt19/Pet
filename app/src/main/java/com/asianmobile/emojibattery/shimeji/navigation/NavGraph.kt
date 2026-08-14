@@ -49,6 +49,7 @@ import com.asianmobile.emojibattery.shimeji.ui.battery.troll.BatteryTrollScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCategoryScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorPage
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorScreen
+import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BATTERY_EDITOR_INITIAL_BACKGROUND_ID_ARG
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryEditorViewModel
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.isStatusOptionPage
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.intro.IntroScreen
@@ -93,7 +94,10 @@ object Routes {
     const val BATTERY_TROLL_CUSTOMIZE = "battery_troll_customize"
     const val PREMIUM = "premium"
 
-    fun batteryEditor(themeId: Int): String = "$BATTERY_EDITOR/$themeId"
+    fun batteryEditor(themeId: Int, backgroundId: Int? = null): String =
+        "$BATTERY_EDITOR/$themeId" + backgroundId?.let {
+            "?$BATTERY_EDITOR_INITIAL_BACKGROUND_ID_ARG=$it"
+        }.orEmpty()
     fun grantPermissionsForOverlay(): String =
         "$GRANT_PERMISSIONS?$GRANT_PERMISSIONS_REQUIRED_TARGET=" +
             GRANT_PERMISSIONS_OVERLAY_TARGET
@@ -503,8 +507,16 @@ fun AppNavGraph(
             }
 
             composable(
-                route = "${Routes.BATTERY_EDITOR}/{themeId}",
-                arguments = listOf(navArgument("themeId") { type = NavType.IntType })
+                route = "${Routes.BATTERY_EDITOR}/{themeId}?" +
+                    "$BATTERY_EDITOR_INITIAL_BACKGROUND_ID_ARG=" +
+                    "{$BATTERY_EDITOR_INITIAL_BACKGROUND_ID_ARG}",
+                arguments = listOf(
+                    navArgument("themeId") { type = NavType.IntType },
+                    navArgument(BATTERY_EDITOR_INITIAL_BACKGROUND_ID_ARG) {
+                        type = NavType.IntType
+                        defaultValue = -1
+                    }
+                )
             ) { backStackEntry ->
                 val themeId = backStackEntry.arguments?.getInt("themeId") ?: 0
                 BatteryEditorScreen(

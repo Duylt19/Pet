@@ -55,6 +55,15 @@ internal fun NavGraphBuilder.homeGraph(
                         ignoreDebounce = true
                     )
                 },
+                onOpenStatusBarTheme = { backgroundId ->
+                    navController.safeNavigate(
+                        Routes.batteryEditor(
+                            themeId = CURRENT_BATTERY_STYLE_ID,
+                            backgroundId = backgroundId
+                        ),
+                        ignoreDebounce = true
+                    )
+                },
                 onCustomizeStatusBar = {
                     navController.safeNavigate(
                         Routes.batteryEditor(CURRENT_BATTERY_STYLE_ID),

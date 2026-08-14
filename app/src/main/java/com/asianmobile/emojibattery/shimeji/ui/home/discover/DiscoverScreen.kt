@@ -76,6 +76,8 @@ import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogUiS
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogViewModel
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryThemeAccess
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryThemeAccessPolicy
+import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryBackgroundAccess
+import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryBackgroundAccessPolicy
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFlowHost
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreUiState
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreViewModel
@@ -105,6 +107,7 @@ fun DiscoverScreen(
     onNavigateToMyPet: () -> Unit,
     onNavigateToGrantPermissions: () -> Unit,
     onOpenBatteryTheme: (Int) -> Unit,
+    onOpenStatusBarTheme: (Int) -> Unit,
     onCustomizeStatusBar: () -> Unit,
     accessibilityHowToUseResult: Boolean? = null,
     onAccessibilityHowToUseResultConsumed: () -> Unit = {},
@@ -157,11 +160,16 @@ fun DiscoverScreen(
         batteryCatalogState.themes.firstOrNull { it.id == themeId }
             ?.let(batteryCatalogViewModel::requestTheme)
     }
+    val requestBackground: (Int) -> Unit = { backgroundId ->
+        batteryCatalogState.backgrounds.firstOrNull { it.id == backgroundId }
+            ?.let(batteryCatalogViewModel::requestBackground)
+    }
 
     BatteryCatalogFlowHost(
         state = batteryCatalogState,
         viewModel = batteryCatalogViewModel,
         onOpenTheme = onOpenBatteryTheme,
+        onOpenBackground = onOpenStatusBarTheme,
         onNavigateToPremium = onNavigateToPremium
     ) {
         PetStoreFlowHost(
@@ -184,6 +192,7 @@ fun DiscoverScreen(
                         ?.let(petStoreViewModel::selectPet)
                 },
                 onOpenTheme = requestTheme,
+                onOpenStatusBarTheme = requestBackground,
                 onToggleFavorite = viewModel::toggleFavorite,
                 onCustomizeStatusBar = onCustomizeStatusBar,
                 onDismissRecovery = viewModel::dismissAccessibilityRecovery,
@@ -215,6 +224,9 @@ internal fun discoverPresentationState(
 ): DiscoverUiState {
     val accessPolicy = BatteryThemeAccessPolicy()
     val themeById = batteryState.themes.associateBy { it.id }
+    val backgroundIndexById = batteryState.backgrounds
+        .mapIndexed { index, background -> background.id to index }
+        .toMap()
     fun isThemeLocked(themeId: Int): Boolean = themeById[themeId]?.let { theme ->
         accessPolicy.resolve(
             theme = theme,
@@ -222,6 +234,16 @@ internal fun discoverPresentationState(
             rewardUnlockedThemeIds = batteryState.rewardUnlockedThemeIds
         ) == BatteryThemeAccess.REWARD_OR_PREMIUM
     } == true
+    fun isBackgroundLocked(backgroundId: Int): Boolean {
+        val index = backgroundIndexById[backgroundId] ?: return false
+        val background = batteryState.backgrounds.getOrNull(index) ?: return false
+        return BatteryBackgroundAccessPolicy.resolve(
+            background = background,
+            catalogIndex = index,
+            isPremium = batteryState.isPremium,
+            rewardUnlockedBackgroundIds = batteryState.rewardUnlockedBackgroundIds
+        ) == BatteryBackgroundAccess.REWARD_OR_PREMIUM
+    }
 
     return state.copy(
         trendingPets = state.trendingPets.map { pet ->
@@ -229,6 +251,9 @@ internal fun discoverPresentationState(
         },
         batteryThemes = state.batteryThemes.map { theme ->
             theme.copy(isLocked = isThemeLocked(theme.id))
+        },
+        statusBarThemes = state.statusBarThemes.map { background ->
+            background.copy(isLocked = isBackgroundLocked(background.id))
         },
         emojiThemes = state.emojiThemes.map { asset ->
             asset.copy(isLocked = isThemeLocked(asset.id))
@@ -324,6 +349,7 @@ private fun DiscoverContent(
     onPetStore: () -> Unit,
     onOpenPet: (String) -> Unit,
     onOpenTheme: (Int) -> Unit,
+    onOpenStatusBarTheme: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
     onCustomizeStatusBar: () -> Unit,
     onDismissRecovery: () -> Unit,
@@ -430,7 +456,7 @@ private fun DiscoverContent(
                                 isEmpty = uiState.statusBarThemes.isEmpty()
                             ),
                             onMore = onCustomizeStatusBar,
-                            onOpen = onCustomizeStatusBar,
+                            onOpen = { asset -> onOpenStatusBarTheme(asset.id) },
                             onRetry = onRetryBattery
                         )
                     }
@@ -777,7 +803,7 @@ private fun StatusBarThemesSection(
     assets: List<DiscoverAssetUiState>,
     contentState: AsyncContentState,
     onMore: () -> Unit,
-    onOpen: () -> Unit,
+    onOpen: (DiscoverAssetUiState) -> Unit,
     onRetry: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
@@ -797,7 +823,10 @@ private fun StatusBarThemesSection(
                 items(columns) { column ->
                     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
                         column.forEach { asset ->
-                            StatusBarThemeCard(asset = asset, onClick = onOpen)
+                            StatusBarThemeCard(
+                                asset = asset,
+                                onClick = { asset?.let(onOpen) }
+                            )
                         }
                     }
                 }
@@ -818,7 +847,7 @@ private fun StatusBarThemeCard(asset: DiscoverAssetUiState?, onClick: () -> Unit
             .clip(shape)
             .background(colorResource(R.color.colors_FFFFFF))
             .border(dimensionResource(SdpR.dimen._1sdp), colorResource(R.color.colors_DEDEDF), shape)
-            .clickable(onClick = onClick),
+            .clickable(enabled = asset != null, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         if (asset == null) {
@@ -841,6 +870,14 @@ private fun StatusBarThemeCard(asset: DiscoverAssetUiState?, onClick: () -> Unit
                     .height(dimensionResource(SdpR.dimen._28sdp))
                     .padding(horizontal = dimensionResource(SdpR.dimen._10sdp))
             )
+            if (asset.isLocked) {
+                PetPremiumBadge(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(dimensionResource(SdpR.dimen._5sdp))
+                        .size(dimensionResource(SdpR.dimen._18sdp))
+                )
+            }
         }
     }
 }
@@ -1037,6 +1074,7 @@ private fun DiscoverContentPreview() {
         onPetStore = {},
         onOpenPet = {},
         onOpenTheme = {},
+        onOpenStatusBarTheme = {},
         onToggleFavorite = {},
         onCustomizeStatusBar = {},
         onDismissRecovery = {}

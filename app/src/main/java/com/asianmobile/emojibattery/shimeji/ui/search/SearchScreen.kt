@@ -120,6 +120,7 @@ fun SearchScreen(
         state = batteryCatalogState,
         viewModel = batteryCatalogViewModel,
         onOpenTheme = onOpenTheme,
+        onOpenBackground = {},
         onNavigateToPremium = onPremium
     ) {
         PetStoreFlowHost(

@@ -42,6 +42,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+const val BATTERY_EDITOR_INITIAL_BACKGROUND_ID_ARG = "backgroundId"
+
 @HiltViewModel
 class BatteryEditorViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -53,6 +55,9 @@ class BatteryEditorViewModel @Inject constructor(
     private val previewSession: BatteryEditorPreviewSession
 ) : ViewModel() {
     private val themeId = savedStateHandle.get<Int>("themeId") ?: BUILT_IN_BATTERY_THEME_ID
+    private val initialBackgroundId = savedStateHandle
+        .get<Int>(BATTERY_EDITOR_INITIAL_BACKGROUND_ID_ARG)
+        ?.takeIf { it >= 0 }
     private val previewOwnerId = savedStateHandle.get<String>(KEY_PREVIEW_OWNER)
         ?: UUID.randomUUID().toString().also { savedStateHandle[KEY_PREVIEW_OWNER] = it }
     private val accessPolicy = BatteryThemeAccessPolicy()
@@ -73,6 +78,8 @@ class BatteryEditorViewModel @Inject constructor(
         restoredDraft != null
     private var hasInitializedSelection = restoredDraft != null ||
         savedStateHandle.get<Boolean>(KEY_SELECTION_INITIALIZED) == true
+    private var hasHandledInitialBackground =
+        savedStateHandle.get<Boolean>(KEY_INITIAL_BACKGROUND_HANDLED) == true
     private var latestStored = BatteryStatusConfig(barHeightDp = barHeightRange.defaultDp)
     private var previewActive = false
     private var previewClientCount = 0
@@ -157,7 +164,8 @@ class BatteryEditorViewModel @Inject constructor(
                 )
             }.collect { state ->
                 _uiState.value = state
-                publishPreview(state.config)
+                requestInitialBackgroundIfReady(state)
+                publishPreview(_uiState.value.config)
             }
         }
         viewModelScope.launch {
@@ -223,6 +231,15 @@ class BatteryEditorViewModel @Inject constructor(
                 it.copy(message = BatteryEditorMessage.THEME_UNAVAILABLE)
             }
         }
+    }
+
+    private fun requestInitialBackgroundIfReady(state: BatteryEditorUiState) {
+        if (hasHandledInitialBackground) return
+        val backgroundId = initialBackgroundId ?: return
+        val background = state.backgrounds.firstOrNull { it.id == backgroundId } ?: return
+        hasHandledInitialBackground = true
+        savedStateHandle[KEY_INITIAL_BACKGROUND_HANDLED] = true
+        requestBackground(background)
     }
 
     private fun prepareAndSelectBackground(background: BatteryDecorationEntry) {
@@ -693,6 +710,8 @@ class BatteryEditorViewModel @Inject constructor(
         const val KEY_DIRTY = "battery_editor_dirty"
         const val KEY_PREVIEW_OWNER = "battery_editor_preview_owner"
         const val KEY_SELECTION_INITIALIZED = "battery_editor_selection_initialized"
+        const val KEY_INITIAL_BACKGROUND_HANDLED =
+            "battery_editor_initial_background_handled"
         const val BUILT_IN_ASSET_MARKER = "built-in"
     }
 

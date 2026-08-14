@@ -2,6 +2,8 @@ package com.asianmobile.emojibattery.shimeji.ui.home.discover
 
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationType
 import com.asianmobile.emojibattery.shimeji.data.model.BUILT_IN_BATTERY_THEME
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_DISCOVER_TRENDING_EMOJI_THEME_IDS
 import com.asianmobile.emojibattery.shimeji.data.model.DEFAULT_DISCOVER_TRENDING_PET_IDS
@@ -65,6 +67,11 @@ class DiscoverPresentationStateTest {
                 DiscoverThemeUiState(2, "Reward unlocked", null, false),
                 DiscoverThemeUiState(3, "Free", null, false)
             ),
+            statusBarThemes = listOf(
+                DiscoverAssetUiState(1, "Free background", "background/1.webp"),
+                DiscoverAssetUiState(6, "Locked background", "background/6.webp"),
+                DiscoverAssetUiState(7, "Reward background", "background/7.webp")
+            ),
             emojiThemes = listOf(DiscoverAssetUiState(1, "Emoji", "emoji.webp")),
             batteryIcons = listOf(DiscoverAssetUiState(2, "Battery", "battery.webp"))
         )
@@ -74,7 +81,9 @@ class DiscoverPresentationStateTest {
                 theme(2, BatteryThemeEntitlement.PREMIUM),
                 theme(3, BatteryThemeEntitlement.FREE)
             ),
+            backgrounds = (1..7).map(::background),
             rewardUnlockedThemeIds = setOf(2),
+            rewardUnlockedBackgroundIds = setOf(7),
             isPremium = false
         )
         val result = discoverPresentationState(
@@ -88,6 +97,9 @@ class DiscoverPresentationStateTest {
         assertTrue(result.batteryThemes[0].isLocked)
         assertFalse(result.batteryThemes[1].isLocked)
         assertFalse(result.batteryThemes[2].isLocked)
+        assertFalse(result.statusBarThemes[0].isLocked)
+        assertTrue(result.statusBarThemes[1].isLocked)
+        assertFalse(result.statusBarThemes[2].isLocked)
         assertTrue(result.emojiThemes.single().isLocked)
         assertFalse(result.batteryIcons.single().isLocked)
     }
@@ -115,5 +127,12 @@ class DiscoverPresentationStateTest {
         author = null,
         thumbnailPath = null,
         hasLocalArchive = false
+    )
+
+    private fun background(id: Int) = BatteryDecorationEntry(
+        id = id,
+        name = "Background $id",
+        assetPath = "background/$id.webp",
+        type = BatteryDecorationType.BACKGROUND
     )
 }

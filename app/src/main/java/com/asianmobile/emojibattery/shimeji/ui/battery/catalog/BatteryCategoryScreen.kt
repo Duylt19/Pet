@@ -26,6 +26,7 @@ fun BatteryCategoryScreen(
         state = state,
         viewModel = viewModel,
         onOpenTheme = onOpenTheme,
+        onOpenBackground = {},
         onNavigateToPremium = onNavigateToPremium,
         accessibilityHowToUseResult = accessibilityHowToUseResult,
         onAccessibilityHowToUseResultConsumed = onAccessibilityHowToUseResultConsumed,

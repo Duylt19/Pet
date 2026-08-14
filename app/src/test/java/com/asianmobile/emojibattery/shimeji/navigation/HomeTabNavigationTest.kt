@@ -118,6 +118,10 @@ class HomeTabNavigationTest {
             batteryEditorCollapsibleNativeScreenCode(editorRoute, null)
         )
         assertEquals(
+            "${Routes.BATTERY_EDITOR}/-1?backgroundId=23",
+            Routes.batteryEditor(themeId = -1, backgroundId = 23)
+        )
+        assertEquals(
             SCREEN_BATTERY_EDITOR,
             batteryEditorCollapsibleNativeScreenCode(componentRoute, "EMOJI")
         )

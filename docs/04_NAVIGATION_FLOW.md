@@ -53,7 +53,7 @@ Discover ──More Shimeji Pets──> Shimeji Pets
 Discover ──Trending pet──> Rewarded/Premium sheet dùng chung ──> Download/verify/unlock ──> bật ở slot Mixed trống đầu tiên
 Pet unlock ──Save tên──> thiếu Overlay: disclosure/Grant Permissions ──> đủ quyền bắt buộc: tự start Pet on Screen
                          └─ từ chối: pet vẫn owned + Active trong My Pet; pet unlock kế tiếp hỏi lại
-Discover ──Battery theme/icon──> Rewarded/Premium nếu bị khóa ──> Customize Status Bar
+Discover ──Battery theme/icon/status-bar background──> Rewarded/Premium nếu bị khóa ──> Customize Status Bar với item vừa chọn
 Discover ──Mine──> Mine
 My Pet ──pet card──> detail panel ──Active/Inactive──> cập nhật Pet overlay foreground service
                               └─ tắt pet Active cuối cùng──> dialog giữ tối thiểu một pet Active
