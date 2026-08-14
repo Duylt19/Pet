@@ -154,13 +154,13 @@ class AdConfigurationIntegrityTest {
             "src/main/res/layout/holder_load_native_collab_banner.xml"
         ).readText()
 
-        assertTrue(layout.contains("android:id=\"@+id/tvAdBadge\""))
-        assertTrue(layout.contains("android:text=\"@string/ad_attribution\""))
+        assertTrue(layout.contains("android:id=\"@+id/ivAdsLogo\""))
+        assertTrue(layout.contains("android:src=\"@drawable/ic_ads_logo_collapse\""))
         assertTrue(
-            layout.contains("app:layout_constraintStart_toEndOf=\"@id/tvAdBadge\"")
+            layout.contains("app:layout_constraintStart_toEndOf=\"@id/ivAdsLogo\"")
         )
         assertTrue(
-            layout.contains("app:layout_constraintStart_toStartOf=\"@id/tvAdBadge\"")
+            layout.contains("app:layout_constraintStart_toStartOf=\"@id/ivAdsLogo\"")
         )
     }
 
