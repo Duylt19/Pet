@@ -118,7 +118,8 @@ Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
   luôn có thể kéo ngang mà không dựng hoặc tải trước toàn bộ catalog;
 - category header dùng trực tiếp emoji ở đầu `category.name`; không ghép thêm drawable/icon riêng
   để tránh hiển thị trùng khi catalog cập nhật tên category;
-- More mở child route có header Back/title/PRO, inline banner SDK thật và grid ba cột. Card detail giữ
+- More mở child route có header Back/title, inline banner SDK thật và grid ba cột. PRO action được
+  ẩn tập trung bởi `PremiumUiPolicy` trong v1. Card detail giữ
   tỷ lệ vuông, preview `74/101.333`, selected dùng `#FFEBF1` + stroke `#FB3675`, không hiện heart;
 - inline banner chỉ giữ grid item khi placement đủ điều kiện và chưa load fail. Khi SDK/config/
   ad-free policy không cho hiển thị hoặc load fail, xóa cả holder lẫn grid item để card đầu tiên
@@ -130,7 +131,7 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
 `8227:6510`, `8155:4852`, `8345:6797`, `8227:6044`, `8240:8590`, `8345:7719`:
 
 - overview dùng Material large app bar `exitUntilCollapsed`: title lớn khi expanded và title
-  inline khi collapsed; Back và PRO luôn pinned;
+  inline khi collapsed; Back luôn pinned, còn PRO action tạm ẩn trên toàn bộ app bar v1;
 - preview `328×50px` được ghim ngay dưới app bar khi Accessibility chưa cấp hoặc feature đang
   tắt. Khi Accessibility đã cấp và status bar thật đang hoạt động, preview nhúng được ẩn để
   tránh hiển thị trùng. Khi preview nhúng đang hiện, Charge/Airplane/Ringer/Hotspot lấy trạng
@@ -207,8 +208,9 @@ Pet Store visual contract:
   premium 20px tại top-end;
 - food card giữ tỷ lệ `104/122`, image area `104/90`, artwork `70/104`; badge giá tại
   `(6,6)` dùng coin artwork PNG @3x, badge số lượng tại `(62,66)`, title Roboto 12/16;
-- reward sheet dùng Roboto Medium cho title và action; gradient và stroke nút là
-  `#C95DFF → #FB54BB`. Selected Pet Store, video và tape giữ asset vector gốc. Pet Store và
+- reward sheet dùng Roboto Medium cho title và action. V1 ẩn action `Unlimited` cùng crown và
+  để CTA xem Rewarded gradient `#C95DFF → #FB54BB` chiếm toàn bộ chiều ngang; policy dùng chung
+  cho Pet, Food, Battery và Battery Troll. Selected Pet Store, video và tape giữ asset vector gốc. Pet Store và
   Battery dùng chung `RewardOfferSheet` full-width; Battery có preview `110×110px` và native
   slot `336×222px` theo Figma `8145:4924`.
   Trong lúc pet pack đang download/verify, preview pet phủ scrim 28% + progress trắng, CTA đổi

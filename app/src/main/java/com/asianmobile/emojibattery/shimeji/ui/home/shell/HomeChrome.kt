@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PinkLoveSticker
+import com.asianmobile.emojibattery.shimeji.ui.shared.policy.PremiumUiPolicy
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
@@ -103,8 +104,10 @@ fun HomeHeader(
                 modifier = Modifier.size(dimensionResource(SdpR.dimen._15sdp))
             )
         }
-        Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
-        HomePremiumButton(onClick = onPremium)
+        if (PremiumUiPolicy.isPremiumEntryVisible) {
+            Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
+            HomePremiumButton(onClick = onPremium)
+        }
     }
 }
 
@@ -113,6 +116,8 @@ fun HomePremiumButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (!PremiumUiPolicy.isPremiumEntryVisible) return
+
     Row(
         modifier = modifier
             .shadow(dimensionResource(SdpR.dimen._6sdp), CircleShape)

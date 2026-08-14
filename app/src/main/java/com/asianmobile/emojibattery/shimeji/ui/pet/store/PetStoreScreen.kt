@@ -118,7 +118,7 @@ import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PinkLoveSticker
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardGradientButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOfferSheet
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOutlineButton
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardUnlockActions
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -923,29 +923,18 @@ internal fun ColumnScope.PetRewardSheetContent(
             textAlign = TextAlign.Center
         )
     }
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
-    ) {
-        RewardOutlineButton(
-            text = stringResource(R.string.pet_store_unlimited),
-            onClick = onPremium,
-            modifier = Modifier.weight(1f),
-            enabled = !isDownloading,
-            iconRes = R.drawable.img_pet_store_premium_crown
-        )
-        RewardGradientButton(
-            text = if (isDownloading) {
-                stringResource(R.string.pet_store_downloading)
-            } else {
-                stringResource(R.string.pet_store_get_free)
-            },
-            onClick = onReward,
-            modifier = Modifier.weight(1f),
-            enabled = !isDownloading,
-            iconRes = if (isDownloading) null else R.drawable.ic_pet_store_reward_video
-        )
-    }
+    RewardUnlockActions(
+        premiumText = stringResource(R.string.pet_store_unlimited),
+        rewardText = if (isDownloading) {
+            stringResource(R.string.pet_store_downloading)
+        } else {
+            stringResource(R.string.pet_store_get_free)
+        },
+        onPremium = onPremium,
+        onReward = onReward,
+        enabled = !isDownloading,
+        rewardIconRes = if (isDownloading) null else R.drawable.ic_pet_store_reward_video
+    )
     if (showNativeAd) {
         NativeAdInternal(
             screenCode = DIALOG_PET_REWARD,
@@ -965,22 +954,13 @@ internal fun FoodRewardSheet(
     RewardOfferSheet(onDismiss) {
         RewardFoodPreview(food)
         Text(stringResource(R.string.pet_store_food_reward_title), color = colorResource(R.color.colors_212327), fontFamily = StoreRobotoMedium, fontSize = dimensionResource(SspR.dimen._14ssp).value.sp, lineHeight = dimensionResource(SspR.dimen._20ssp).value.sp)
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
-            RewardOutlineButton(
-                text = stringResource(R.string.pet_store_unlimited),
-                onClick = onPremium,
-                modifier = Modifier.weight(1f),
-                enabled = !isProcessing,
-                iconRes = R.drawable.img_pet_store_premium_crown
-            )
-            RewardGradientButton(
-                text = stringResource(R.string.pet_store_get_free),
-                onClick = onAcquire,
-                modifier = Modifier.weight(1f),
-                enabled = !isProcessing,
-                iconRes = R.drawable.ic_pet_store_reward_video
-            )
-        }
+        RewardUnlockActions(
+            premiumText = stringResource(R.string.pet_store_unlimited),
+            rewardText = stringResource(R.string.pet_store_get_free),
+            onPremium = onPremium,
+            onReward = onAcquire,
+            enabled = !isProcessing
+        )
         NativeAdInternal(
             screenCode = DIALOG_FOOD_REWARD,
             modifier = Modifier.fillMaxWidth()

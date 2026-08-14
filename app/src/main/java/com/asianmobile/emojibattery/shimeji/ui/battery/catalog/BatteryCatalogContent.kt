@@ -62,9 +62,8 @@ import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomePremiumButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardGradientButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOfferSheet
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardOutlineButton
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.RewardUnlockActions
 import com.asianmobile.emojibattery.shimeji.ui.home.discover.HomeDiyFab
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
@@ -579,28 +578,16 @@ internal fun BatteryRewardUnlockSheetContent(
             modifier = Modifier.fillMaxWidth()
         )
     }
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))
-    ) {
-        RewardOutlineButton(
-            text = stringResource(R.string.battery_reward_get_premium),
-            onClick = onPremium,
-            modifier = Modifier.weight(1f),
-            enabled = !isLoading,
-            iconRes = R.drawable.img_pet_store_premium_crown
-        )
-        RewardGradientButton(
-            text = stringResource(
-                if (isLoading) R.string.battery_reward_loading
-                else R.string.battery_reward_watch
-            ),
-            onClick = onWatchReward,
-            modifier = Modifier.weight(1f),
-            enabled = !isLoading,
-            iconRes = if (isLoading) null else R.drawable.ic_pet_store_reward_video
-        )
-    }
+    RewardUnlockActions(
+        premiumText = stringResource(R.string.battery_reward_get_premium),
+        rewardText = stringResource(
+            if (isLoading) R.string.battery_reward_loading else R.string.battery_reward_watch
+        ),
+        onPremium = onPremium,
+        onReward = onWatchReward,
+        enabled = !isLoading,
+        rewardIconRes = if (isLoading) null else R.drawable.ic_pet_store_reward_video
+    )
     nativeAdContent()
 }
 

@@ -77,8 +77,8 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
 ## Battery style Rewarded unlock
 
 - Theme `FREE`, theme đã reward-unlock và toàn bộ theme của user Premium mở trực tiếp.
-- Chạm theme `PREMIUM` chưa mở sẽ hiện bottom sheet với preview, hai action `Unlimited` và
-  `Get it free`, cùng native `HEIGHT_222`; đóng bằng Back hoặc chạm scrim khi chưa loading.
+- Chạm theme `PREMIUM` chưa mở sẽ hiện bottom sheet với preview, một CTA Rewarded full-width và
+  native `HEIGHT_222`; `Unlimited`/Premium entry tạm ẩn trong v1. Đóng bằng Back hoặc chạm scrim khi chưa loading.
   Sheet dùng placement `dialog_battery_reward`, tách khỏi native `HEIGHT_150` của landing.
 - Rewarded chỉ được preload khi free user còn ít nhất một theme Premium chưa mở; Premium
   không tạo ad request. `EARNED` persist đúng theme ID vào
@@ -88,7 +88,8 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
   không tạo dead-end.
 - Callback chỉ được consume khi đúng dialog đang pending và đang chờ reward; callback lặp
   không thể unlock hoặc navigate lần hai.
-- Premium bypass Rewarded. Khi quay lại Catalog sau mua Premium, pending theme tự mở.
+- Premium bypass Rewarded vẫn được giữ ở domain để tương thích entitlement, nhưng v1 không hiển
+  thị PRO trên app bar hoặc `Unlimited` trong reward sheet.
 
 ## Rules
 
