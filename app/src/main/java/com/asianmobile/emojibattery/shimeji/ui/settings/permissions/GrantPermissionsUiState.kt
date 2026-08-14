@@ -44,6 +44,17 @@ internal fun GrantPermissionsUiState.hasStabilityPermissionToRequest(
     needsBatteryOptimizationExemption || isAutoStartRowVisible
 
 /**
+ * The dedicated Pet flow normally removes rows as they are granted. Once every relevant row is
+ * complete, keep one explicit success card instead of leaving a blank screen after Settings
+ * returns. Optional vendor steps still take precedence and remain visible until attempted.
+ */
+internal fun GrantPermissionsUiState.shouldShowOverlayCompletionCard(
+    requiredTarget: GrantPermissionsTarget
+): Boolean = requiredTarget == GrantPermissionsTarget.OVERLAY &&
+    hasMandatoryPetPermissions &&
+    !hasStabilityPermissionToRequest(requiredTarget)
+
+/**
  * Which permission a row on the Grant Permissions screen represents. Special permissions hand
  * the user to a system surface; notification is the only runtime permission requested in-app.
  */

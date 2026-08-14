@@ -260,7 +260,9 @@ internal fun GrantPermissionsContent(
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val needsRequiredCard = uiState.needsRequiredCard(requiredTarget)
-    val needsRequiredSection = needsRequiredCard ||
+    val showsOverlayCompletion = uiState.shouldShowOverlayCompletionCard(requiredTarget)
+    val showsRequiredCard = needsRequiredCard || showsOverlayCompletion
+    val needsRequiredSection = showsRequiredCard ||
         (requiredTarget == GrantPermissionsTarget.OVERLAY &&
             uiState.needsNotificationPermission)
     val needsStabilityPermission = uiState.hasStabilityPermissionToRequest(requiredTarget)
@@ -381,12 +383,21 @@ internal fun GrantPermissionsContent(
                         )
                     }
                 }
-                if (needsRequiredCard) {
+                if (showsRequiredCard) {
                     item {
                         RequiredPermissionCard(
                             requiredTarget = requiredTarget,
-                            isEnabled = false,
-                            onClick = onPrimaryAction
+                            isEnabled = uiState.isOverlayGranted,
+                            actionLabelRes = if (showsOverlayCompletion) {
+                                R.string.common_done
+                            } else {
+                                R.string.grant_permissions_go_to_settings
+                            },
+                            onClick = if (showsOverlayCompletion) {
+                                onNavigateBack
+                            } else {
+                                onPrimaryAction
+                            }
                         )
                     }
                 }
@@ -572,6 +583,7 @@ private fun SectionHeading(
 private fun RequiredPermissionCard(
     requiredTarget: GrantPermissionsTarget,
     isEnabled: Boolean,
+    actionLabelRes: Int = R.string.grant_permissions_go_to_settings,
     onClick: () -> Unit
 ) {
     val isOverlayRequired = requiredTarget == GrantPermissionsTarget.OVERLAY
@@ -684,7 +696,7 @@ private fun RequiredPermissionCard(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = stringResource(R.string.grant_permissions_go_to_settings),
+                text = stringResource(actionLabelRes),
                 color = colorResource(R.color.colors_FFFFFF),
                 fontWeight = FontWeight.Medium,
                 fontSize = dimensionResource(SspR.dimen._14ssp).value.sp

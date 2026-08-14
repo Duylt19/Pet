@@ -111,6 +111,39 @@ class GrantPermissionsPetSequencePolicyTest {
         assertTrue(onlyNotificationMissing.needsNotificationPermission)
     }
 
+    @Test
+    fun `completed overlay flow keeps a success card instead of rendering an empty list`() {
+        val complete = readyMandatoryState()
+
+        assertTrue(
+            complete.shouldShowOverlayCompletionCard(GrantPermissionsTarget.OVERLAY)
+        )
+        assertFalse(
+            complete.shouldShowOverlayCompletionCard(GrantPermissionsTarget.ACCESSIBILITY)
+        )
+    }
+
+    @Test
+    fun `overlay completion waits while a relevant permission still needs action`() {
+        assertFalse(
+            GrantPermissionsUiState(
+                isOverlayGranted = false,
+                isNotificationGranted = true
+            ).shouldShowOverlayCompletionCard(GrantPermissionsTarget.OVERLAY)
+        )
+        assertFalse(
+            readyMandatoryState(isBatteryRowVisible = true)
+                .shouldShowOverlayCompletionCard(GrantPermissionsTarget.OVERLAY)
+        )
+        assertFalse(
+            GrantPermissionsUiState(
+                isOverlayGranted = true,
+                isNotificationGranted = false,
+                isNotificationRowVisible = true
+            ).shouldShowOverlayCompletionCard(GrantPermissionsTarget.OVERLAY)
+        )
+    }
+
     private fun readyMandatoryState(
         isBatteryRowVisible: Boolean = false,
         isAutoStartRowVisible: Boolean = false
