@@ -51,7 +51,7 @@ fun AppActionToast(
     onDismiss: () -> Unit,
     onAction: () -> Unit,
     leadingImageModel: Any? = R.drawable.img_pink_love_sticker,
-    bottomPaddingRes: Int = SdpR.dimen._115sdp
+    bottomPaddingRes: Int = SdpR.dimen._125sdp
 ) {
     LaunchedEffect(text) {
         delay(TOAST_DURATION_MILLIS)
