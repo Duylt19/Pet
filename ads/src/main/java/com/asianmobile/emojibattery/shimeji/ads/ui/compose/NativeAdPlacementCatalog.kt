@@ -122,6 +122,12 @@ internal object NativeAdPlacementCatalog {
             R.string.id_emoji_battery_native_battery_troll_reward
         ),
         NativeAdPlacement(
+            DIALOG_APPS_HIDDEN,
+            AdType.HEIGHT_222,
+            IS_SHOW_NATIVE_APPS_HIDDEN,
+            R.string.id_emoji_battery_native_apps_hidden
+        ),
+        NativeAdPlacement(
             DIALOG_EXIT_APP,
             AdType.HEIGHT_222,
             IS_SHOW_NATIVE_EXIT_DIALOG,

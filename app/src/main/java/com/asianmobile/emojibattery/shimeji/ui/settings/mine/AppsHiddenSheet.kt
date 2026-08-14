@@ -42,6 +42,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.config.DIALOG_APPS_HIDDEN
+import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.DismissThresholdBottomSheet
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
@@ -65,7 +67,13 @@ fun AppsHiddenSheet(
             isLoading = state.isInstalledAppsLoading,
             loadFailed = state.installedAppsLoadFailed,
             onToggleApp = onToggleApp,
-            onRetry = onRetry
+            onRetry = onRetry,
+            nativeAdContent = {
+                NativeAdInternal(
+                    screenCode = DIALOG_APPS_HIDDEN,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         )
     }
 }
@@ -77,6 +85,7 @@ internal fun AppsHiddenSheetContent(
     loadFailed: Boolean,
     onToggleApp: (String) -> Unit,
     onRetry: () -> Unit,
+    nativeAdContent: @Composable () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -174,6 +183,7 @@ internal fun AppsHiddenSheetContent(
                 }
             }
         }
+        nativeAdContent()
     }
 }
 
@@ -276,7 +286,15 @@ private fun AppsHiddenSheetContentPreview() {
             isLoading = false,
             loadFailed = false,
             onToggleApp = {},
-            onRetry = {}
+            onRetry = {},
+            nativeAdContent = {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(dimensionResource(SdpR.dimen._171sdp))
+                        .background(colorResource(R.color.colors_E6E6E6))
+                )
+            }
         )
     }
 }

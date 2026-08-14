@@ -36,6 +36,7 @@
     <string name="id_emoji_battery_native_pet_reward" translatable="false">ca-app-pub-7219501334514633/9967933431</string>
     <string name="id_emoji_battery_native_food_reward" translatable="false">ca-app-pub-7219501334514633/9967933431</string>
     <string name="id_emoji_battery_native_battery_troll_reward" translatable="false">ca-app-pub-7219501334514633/9967933431</string>
+    <string name="id_emoji_battery_native_apps_hidden" translatable="false">ca-app-pub-7219501334514633/9967933431</string>
     <string name="id_emoji_battery_native_exit_dialog" translatable="false">ca-app-pub-7219501334514633/9967933431</string>
 
     <!-- Full intro native ads -->

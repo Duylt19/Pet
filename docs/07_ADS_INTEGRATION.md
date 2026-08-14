@@ -57,6 +57,10 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
 - Search dùng native placement `screen_search` ở đáy màn hình và banner SDK
   `search_inline` trong content theo Figma; cả hai vẫn tuân theo remote key, frequency/ad-free
   policy và failure fallback chung của module ads.
+- Bottom sheet `Apps that hide icons` dùng native `dialog_apps_hidden`/`HEIGHT_222` nằm dưới
+  danh sách app. Slot collapse khi ads bị tắt, user ad-free hoặc load fail. Placement có screen
+  code, Remote Config key và resource ID riêng; trong v1 resource này tạm dùng chung AdMob unit
+  `9967933431` với nhóm reward/exit để sau này đổi ID mà không sửa UI.
 - Battery landing dùng native placement `screen_battery_catalog` với template `HEIGHT_150` sau
   section đầu tiên. Category detail có banner inline `battery_category_inline`; creative do SDK
   tải, không đóng gói ảnh quảng cáo mẫu trong Figma. Bottom banner vẫn là holder của shell.

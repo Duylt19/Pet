@@ -50,6 +50,7 @@ const val DIALOG_BATTERY_DISCARD = "dialog_battery_discard"
 const val DIALOG_PET_REWARD = "dialog_pet_reward"
 const val DIALOG_FOOD_REWARD = "dialog_food_reward"
 const val DIALOG_BATTERY_TROLL_REWARD = "dialog_battery_troll_reward"
+const val DIALOG_APPS_HIDDEN = "dialog_apps_hidden"
 
 // User Analytics
 const val NUMBER_CLICK_ADS_TO_LIMIT = "number_click_ads_to_limit"
@@ -81,6 +82,7 @@ const val IS_SHOW_NATIVE_BATTERY_DISCARD = "is_show_native_battery_discard"
 const val IS_SHOW_NATIVE_PET_REWARD = "is_show_native_pet_reward"
 const val IS_SHOW_NATIVE_FOOD_REWARD = "is_show_native_food_reward"
 const val IS_SHOW_NATIVE_BATTERY_TROLL_REWARD = "is_show_native_battery_troll_reward"
+const val IS_SHOW_NATIVE_APPS_HIDDEN = "is_show_native_apps_hidden"
 
 // rule show inters
 const val SHOW_DISTANCE_TIME = 1L

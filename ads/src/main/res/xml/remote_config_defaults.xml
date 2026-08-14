@@ -169,4 +169,9 @@
         <value>true</value>
     </entry>
 
+    <entry>
+        <key>is_show_native_apps_hidden</key>
+        <value>true</value>
+    </entry>
+
 </defaultsMap>

@@ -58,6 +58,7 @@ class AdConfigurationIntegrityTest {
             "id_emoji_battery_native_pet_reward",
             "id_emoji_battery_native_food_reward",
             "id_emoji_battery_native_battery_troll_reward",
+            "id_emoji_battery_native_apps_hidden",
             "id_emoji_battery_native_exit_dialog"
         )
 
@@ -103,6 +104,7 @@ class AdConfigurationIntegrityTest {
             "id_emoji_battery_native_pet_reward" to SHARED_REWARD_NATIVE_AD_UNIT,
             "id_emoji_battery_native_food_reward" to SHARED_REWARD_NATIVE_AD_UNIT,
             "id_emoji_battery_native_battery_troll_reward" to SHARED_REWARD_NATIVE_AD_UNIT,
+            "id_emoji_battery_native_apps_hidden" to SHARED_REWARD_NATIVE_AD_UNIT,
             "id_emoji_battery_native_exit_dialog" to SHARED_REWARD_NATIVE_AD_UNIT
         )
 
