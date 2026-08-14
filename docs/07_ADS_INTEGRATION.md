@@ -57,10 +57,9 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
   native riêng `dialog_battery_troll_reward`/`HEIGHT_222` để số liệu không lẫn với grid themes.
   Màn Customize không có native ad: giống Full/Component Editor, không chen quảng cáo vào
   thao tác tinh chỉnh và không che preview/Apply. Nó dùng chung banner đáy
-  `battery_editor_bottom` do shell sở hữu (`showBatteryEditorBottomBanner` nhận cả route
-  `battery_troll_customize/*`), đúng như Figma vẽ banner collapsed 50px dưới nút Apply.
-  Grid theme dùng `showBatteryTrollBottomNative`; các predicate shell loại trừ nhau để một màn
-  không render hai quảng cáo chồng nhau.
+  `battery_editor_bottom` do root destination sở hữu, đúng như Figma vẽ banner collapsed 50px
+  dưới nút Apply. Grid theme là root destination riêng và tự sở hữu native
+  `screen_battery_troll`; nó không mượn holder `home_mode_bottom` của bốn tab.
 - Search dùng native placement `screen_search` ở đáy màn hình và banner SDK
   `search_inline` trong content theo Figma; cả hai vẫn tuân theo remote key, frequency/ad-free
   policy và failure fallback chung của module ads.
@@ -70,18 +69,19 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
   `9967933431` với nhóm reward/exit để sau này đổi ID mà không sửa UI.
 - Battery landing dùng native placement `screen_battery_catalog` với template `HEIGHT_150` sau
   section đầu tiên. Category detail không còn banner inline ở đầu grid và cũng không dùng Home
-  banner. Một holder native `screen_battery_category`/`HEIGHT_222` nằm ngoài `NavHost` ở đáy;
+  banner. Root destination sở hữu holder native `screen_battery_category`/`HEIGHT_222` ở đáy;
   resource ID riêng hiện tạm dùng chung AdMob unit với Battery catalog để có thể tách sau này.
   Khi native không đủ điều kiện hoặc load fail, holder collapse hoàn toàn.
-- Customize Status Bar và các child library dùng holder shell nằm ngoài NavHost. Overview,
-  Emotion group/detail cùng mười editor option dùng một native `COLLAPSE_SMALL`; các library
-  Battery/Emoji/Theme vẫn giữ banner `battery_editor_bottom`. Hai loại loại trừ nhau nên không
-  double-render ad và Apply luôn reflow ngay phía trên chiều cao collapsed/expanded thực tế.
+- Customize Status Bar và từng child library đặt holder trong root destination tương ứng.
+  Overview, Emotion group/detail cùng mười editor option dùng native `COLLAPSE_SMALL`; các library
+  Battery/Emoji/Theme giữ banner `battery_editor_bottom`. Mỗi entry mới có ViewModelStoreOwner
+  riêng nên request ad mới, không rebind ad của màn trước; Apply vẫn reflow ngay phía trên chiều
+  cao collapsed/expanded thực tế.
 - Overview Customize Status Bar dùng placement riêng `screen_customize_status_bar`, Remote Config
   `is_show_native_customize_status_bar` và ad-unit resource
   `id_emoji_battery_native_customize_status_bar`. Các màn con option/emotion/detail dùng
-  `screen_battery_editor`; mỗi `NavBackStackEntry` mới truyền một `reloadKey` mới để hủy ad cũ và
-  request native mới thay vì rebind lại cùng ad object.
+  `screen_battery_editor`; mỗi `NavBackStackEntry` có ad owner và `reloadKey` riêng để hủy ad cũ,
+  request native mới và không làm thay đổi chiều cao layout của destination phía sau.
 - Các banner inline `discover_inline` và `search_inline` có ViewModel key riêng để không dùng
   chung ad object với banner shell. Holder căn giữa creative SDK 320×50,
   dùng nền trắng và shimmer `#E6E6E6`; khi ads bị tắt/Premium/load fail thì slot collapse, không

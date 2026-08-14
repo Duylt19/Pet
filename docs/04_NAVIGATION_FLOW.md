@@ -104,14 +104,15 @@ ngay ở `PetOverlayRuntime.STARTING`, bỏ qua tap lặp trong lúc khởi đ�
 
 - Splash, Language và Intro được remove khỏi stack sau khi hoàn tất bước tương ứng. Permission
   vẫn có destination đầy đủ nhưng tạm không được đưa vào first-run stack.
-- Sau onboarding, app đi vào nested route `home_graph`; đây là graph nội bộ, không phải một
-  screen analytics. Start destination của graph là Discover với route `discover`.
-  Battery Styles, Pet Store và Settings là ba top-level destination còn lại của cùng Home graph.
-  Mỗi lần đổi tab dùng `saveState/restoreState` và `launchSingleTop`,
-  vì vậy ViewModel, scroll và navigation state của tab được giữ lại. System Back tại bất kỳ
-  tab top-level nào cũng được `AppNavGraph` chặn trước default NavHost pop và mở Exit dialog
-  ngay; chỉ destination con mới pop về tab nguồn. `MainActivity` không tự cài callback Back
-  cạnh tranh với Navigation vì thứ tự đăng ký callback có thể đổi sau recomposition.
+- Sau onboarding, root NavHost đi vào destination opaque `home_graph`. `HomeRoute` bên trong tạo
+  NavHost thứ hai chỉ chứa Discover, Battery Styles, Pet Store và Settings. Mỗi lần đổi tab dùng
+  `saveState/restoreState` và `launchSingleTop`, vì vậy ViewModel, scroll và banner Home được giữ
+  lại. System Back tại bất kỳ tab nào do `HomeRoute` chặn và mở Exit dialog ngay.
+- Search, My Pet, Favourite/Recent, category, editor, permission và premium nằm ở root NavHost,
+  không phải child của Home NavHost. Chúng phủ toàn bộ Home bằng surface opaque; root navigation
+  không cross-fade nên layout Home không còn xuyên hoặc nháy phía sau. Khi một root destination
+  có ad đáy được mở, ad nằm trong composition/ViewModel owner của entry đó và request lại như một
+  màn Activity mới. `MainActivity` không tự cài callback Back cạnh tranh với Navigation.
 - Search, My Pet và Premium là destination con và pop về destination đã mở chúng;
   My Pet không thay thế root Discover.
 - Search `Cancel`/Back pop về màn đã mở Search; chọn theme hợp lệ mở Battery Editor và Back quay lại Search.
@@ -130,8 +131,7 @@ ngay ở `PetOverlayRuntime.STARTING`, bỏ qua tap lặp trong lúc khởi đ�
   size/màu với Date. Không có CTA Done ở các editor con.
 - Emotion overview và detail cũng dùng ViewModel của `battery_editor/{themeId}` thay vì scope
   theo destination trung gian. Chọn style cập nhật draft/preview; Back từ detail quay về đúng
-  danh sách tám pack. Hai route giữ cùng một native collapsible holder/key ở shell nên không
-  reload ad khi push/pop detail.
+  danh sách tám pack. Mỗi entry sở hữu native collapsible riêng nên mở detail sẽ request ad mới.
 - Theme selection trong Battery Styles mở editor ngay cả khi chưa có Accessibility. Preview
   nhúng vẫn hoạt động. Mọi chỉnh sửa ở child cập nhật ngay draft chung và preview; Back chỉ pop
   về overview, không rollback. Chỉ Apply tại overview mới hiện disclosure và persist.
@@ -158,8 +158,8 @@ route, popUpTo behavior, process-death behavior và docs này.
 - Dùng `safeNavigate`/`safePopBackStack`.
 - Full-screen ad transition dùng `navigateWithAd` theo policy.
 - Bottom navigation và placement `home_mode_bottom` do `ui/home/shell/HomeShell` sở hữu.
-  Child `battery_category/{categoryId}` ẩn cả bottom navigation lẫn Home banner; route này dùng
-  một native `screen_battery_category` cố định bên ngoài `NavHost`.
+  Chỉ bốn tab được render trong Home NavHost. `battery_category/{categoryId}` nằm ở root graph,
+  ẩn toàn bộ Home shell và tự sở hữu native `screen_battery_category` cố định ở đáy.
 - String argument phải encode; enum argument phải parse an toàn với fallback.
 - Không phục hồi route Private Browser cũ nếu chưa có feature spec mới.
 - Mọi hand-off sang Accessibility Settings để cấp quyền đi qua màn How to use rồi dùng

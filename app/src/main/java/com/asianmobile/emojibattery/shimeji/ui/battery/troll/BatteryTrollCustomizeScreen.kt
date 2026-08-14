@@ -60,9 +60,9 @@ import com.intuit.ssp.R as SspR
  * Battery Troll — Customize (Figma `8315:8232` default, `8359:6992` Real + Random,
  * `8359:7165` discard).
  *
- * The screen reports itself as [ScreenName.BATTERY_TROLL_CUSTOMIZE]. The bottom banner is not a
- * parameter: `NavGraph.showBatteryEditorBottomBanner` already covers this route from the shell, so
- * a slot here would either render nothing or duplicate that banner.
+ * The screen reports itself as [ScreenName.BATTERY_TROLL_CUSTOMIZE]. Its root navigation
+ * destination owns the bottom banner so the ad is recreated when this screen is opened; keeping
+ * the slot outside this feature Composable also preserves deterministic screenshot previews.
  */
 @Composable
 fun BatteryTrollCustomizeScreen(

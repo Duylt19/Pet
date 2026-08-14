@@ -5,14 +5,17 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +24,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,7 +44,6 @@ import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_EDITOR
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_CUSTOMIZE_STATUS_BAR
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ads.utils.AdOverlayState
-import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeShell
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeTab
 import com.asianmobile.emojibattery.shimeji.ui.battery.favoriterecent.FavouriteRecentScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogViewModel
@@ -74,6 +77,7 @@ object Routes {
     const val INTRO = "intro"
     const val PERMISSION = "permission"
     const val HOME_GRAPH = "home_graph"
+    const val HOME_TAB_REQUEST = "home_tab_request"
     const val DISCOVER = "discover"
     const val SEARCH = "search"
     const val FAVOURITE_RECENT = "favourite_recent"
@@ -123,12 +127,6 @@ internal fun NavBackStackEntry.consumeAccessibilityHowToUseResult() {
     savedStateHandle[ACCESSIBILITY_HOW_TO_USE_RESULT] = null
 }
 
-internal fun showBatteryEditorBottomBanner(route: String?): Boolean =
-    route?.startsWith("${Routes.BATTERY_TROLL_CUSTOMIZE}/") == true ||
-        route?.startsWith("${Routes.BATTERY_EDITOR}/") == true ||
-        route?.startsWith("${Routes.BATTERY_EDITOR_COMPONENT}/") == true ||
-        route?.startsWith("${Routes.BATTERY_EDITOR_EMOTION_DETAIL}/") == true
-
 internal fun batteryEditorCollapsibleNativeScreenCode(route: String?, page: String?): String? =
     when {
         route?.startsWith("${Routes.BATTERY_EDITOR}/") == true ->
@@ -150,12 +148,41 @@ internal fun batteryEditorCollapsibleNativeScreenCode(route: String?, page: Stri
 internal fun showBatteryEditorCollapsibleNative(route: String?, page: String?): Boolean =
     batteryEditorCollapsibleNativeScreenCode(route, page) != null
 
-internal fun childEditorNativeReloadKey(backStackEntryId: String?): Int =
+internal fun destinationAdReloadKey(backStackEntryId: String?): Int =
     backStackEntryId
         ?.hashCode()
         ?.and(Int.MAX_VALUE)
         ?.coerceAtLeast(1)
         ?: 0
+
+/**
+ * Gives every non-Home destination an opaque, isolated surface and a destination-scoped ad slot.
+ * The ad Composable inherits the destination's ViewModelStoreOwner, so a newly pushed screen
+ * performs a new load instead of reusing the Home or previous screen holder.
+ */
+@Composable
+private fun IsolatedDestination(
+    bottomAd: @Composable () -> Unit = {},
+    content: @Composable () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(com.asianmobile.emojibattery.shimeji.R.color.colors_FFFFFF))
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .background(
+                    colorResource(com.asianmobile.emojibattery.shimeji.R.color.colors_FFFFFF)
+                )
+        ) {
+            content()
+        }
+        bottomAd()
+    }
+}
 
 @Composable
 fun AppNavGraph(
@@ -175,26 +202,7 @@ fun AppNavGraph(
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { }
-    val selectedHomeTab = homeTabForRoute(currentBackStackEntry?.destination?.route)
-    val shouldShowHomeBottomBanner = showHomeBottomBanner(
-        currentBackStackEntry?.destination?.route
-    )
     val currentRoute = currentBackStackEntry?.destination?.route
-    val shouldShowBatteryCategoryBottomNative = showBatteryCategoryBottomNative(currentRoute)
-    val shouldShowBatteryTrollBottomNative = showBatteryTrollBottomNative(currentRoute)
-    val currentEditorPage = currentBackStackEntry?.arguments?.getString("page")
-    val batteryEditorNativeScreenCode = batteryEditorCollapsibleNativeScreenCode(
-        currentRoute,
-        currentEditorPage
-    )
-    val batteryEditorNativeReloadKey = if (batteryEditorNativeScreenCode == SCREEN_BATTERY_EDITOR) {
-        childEditorNativeReloadKey(currentBackStackEntry?.id)
-    } else {
-        0
-    }
-    val shouldShowBatteryEditorBottomBanner =
-        showBatteryEditorBottomBanner(currentRoute) &&
-            batteryEditorNativeScreenCode == null
 
     LaunchedEffect(
         currentRoute,
@@ -213,7 +221,7 @@ fun AppNavGraph(
                 sdkInt = Build.VERSION.SDK_INT,
                 isGranted = isNotificationGranted,
                 hasRequestedBefore = hasRequestedNotificationPermission,
-                isHomeTopLevelVisible = selectedHomeTab != null,
+                isHomeTopLevelVisible = currentRoute == Routes.HOME_GRAPH,
                 isFullScreenAdShowing = isFullScreenAdShowing
             )
         ) {
@@ -224,28 +232,8 @@ fun AppNavGraph(
         }
     }
 
-    fun navigateToHomeTab(tab: HomeTab) {
-        val route = routeForHomeTab(tab)
-        if (currentBackStackEntry?.destination?.route == route) return
-
-        val navigate = {
-            navController.safeNavigate(route, ignoreDebounce = true) {
-                popUpTo(Routes.DISCOVER) { saveState = true }
-                launchSingleTop = true
-                restoreState = true
-            }
-        }
-        if (tab == HomeTab.MINE) {
-            navigateWithAd(context, route, navigate)
-        } else {
-            navigate()
-        }
-    }
-
     fun navigateFromHome(route: String) {
         when (route) {
-            Routes.SETTINGS -> navigateToHomeTab(HomeTab.MINE)
-
             Routes.LANGUAGE_SETTINGS -> navigateWithAd(context, route) {
                 navController.safeNavigate(Routes.LANGUAGE_SETTINGS, ignoreDebounce = true)
             }
@@ -254,7 +242,23 @@ fun AppNavGraph(
                 "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
                 ignoreDebounce = true
             )
+
+            else -> navController.safeNavigate(route, ignoreDebounce = true) {
+                launchSingleTop = true
+            }
         }
+    }
+
+    fun returnToHomeTab(tab: HomeTab, petStoreTab: PetStoreTab? = null) {
+        val homeEntry = runCatching {
+            navController.getBackStackEntry(Routes.HOME_GRAPH)
+        }.getOrNull() ?: return
+        homeEntry.savedStateHandle[Routes.HOME_TAB_REQUEST] = tab.name
+        if (petStoreTab != null) {
+            homeEntry.savedStateHandle[Routes.PET_STORE_TAB_REQUEST] =
+                petStoreTab.navigationValue
+        }
+        navController.popBackStack(Routes.HOME_GRAPH, inclusive = false)
     }
 
     fun navigateToAccessibilityHowToUse(source: NavBackStackEntry) {
@@ -270,19 +274,24 @@ fun AppNavGraph(
         }
     }
 
-    LaunchedEffect(navController) {
-        navController.addOnDestinationChangedListener { _, destination, _ ->
+    DisposableEffect(navController, onDestinationChanged) {
+        val listener = androidx.navigation.NavController.OnDestinationChangedListener {
+                _, destination, _ ->
             onDestinationChanged(destination.route)
         }
+        navController.addOnDestinationChangedListener(listener)
+        onDispose { navController.removeOnDestinationChangedListener(listener) }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.weight(1f)) {
-            NavHost(
-                navController = navController,
-                startDestination = startDestination,
-                modifier = Modifier.fillMaxSize()
-            ) {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination,
+        modifier = Modifier.fillMaxSize(),
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
+        popEnterTransition = { EnterTransition.None },
+        popExitTransition = { ExitTransition.None }
+    ) {
             composable(Routes.SPLASH) {
                 SplashScreen(
                     viewModel = viewModel,
@@ -371,13 +380,18 @@ fun AppNavGraph(
                 )
             }
 
-            homeGraph(
-                navController = navController,
-                onNavigateToHomeTab = ::navigateToHomeTab,
-                onNavigateFromHome = ::navigateFromHome,
-                onNavigateToOverlayGrantPermissions = ::navigateToOverlayGrantPermissions,
-                onNavigateToAccessibilityHowToUse = ::navigateToAccessibilityHowToUse
-            )
+            composable(Routes.HOME_GRAPH) { homeEntry ->
+                HomeRoute(
+                    homeEntry = homeEntry,
+                    onNavigateOutsideHome = ::navigateFromHome,
+                    onNavigateToOverlayGrantPermissions = ::navigateToOverlayGrantPermissions,
+                    onNavigateToAccessibilityHowToUse = {
+                        navigateToAccessibilityHowToUse(homeEntry)
+                    },
+                    onHomeBack = onHomeBack,
+                    onDestinationChanged = onDestinationChanged
+                )
+            }
 
             composable(
                 route = "${Routes.GRANT_PERMISSIONS}?" +
@@ -459,12 +473,8 @@ fun AppNavGraph(
 
             composable(Routes.MY_PET) {
                 fun openPetStore() {
-                    navController.getBackStackEntry(Routes.HOME_GRAPH)
-                        .savedStateHandle[Routes.PET_STORE_TAB_REQUEST] =
-                        PetStoreTab.PETS.navigationValue
                     // Leave the room before switching tabs. Food rewards stay inside My Pet Room.
-                    navController.safePopBackStack(ignoreDebounce = true)
-                    navigateToHomeTab(HomeTab.PET_STORE)
+                    returnToHomeTab(HomeTab.PET_STORE, PetStoreTab.PETS)
                 }
 
                 PetRoomScreen(
@@ -479,34 +489,45 @@ fun AppNavGraph(
                 arguments = listOf(navArgument("categoryId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val catalogEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry(Routes.BATTERY_CATALOG)
+                    navController.getBackStackEntry(Routes.HOME_GRAPH)
                 }
                 val catalogViewModel = hiltViewModel<BatteryCatalogViewModel>(catalogEntry)
-                BatteryCategoryScreen(
-                    categoryId = backStackEntry.arguments?.getInt("categoryId") ?: 0,
-                    onBack = {
-                        navController.safePopBackStack(ignoreDebounce = true)
-                    },
-                    onNavigateToPremium = {
-                        navController.safeNavigate(
-                            "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
-                            ignoreDebounce = true
+                IsolatedDestination(
+                    bottomAd = {
+                        NativeAdInternal(
+                            screenCode = SCREEN_BATTERY_CATEGORY,
+                            reloadKey = destinationAdReloadKey(backStackEntry.id),
+                            modifier = Modifier.fillMaxWidth()
                         )
-                    },
-                    onOpenTheme = { themeId ->
-                        navController.safeNavigate(
-                            Routes.batteryEditor(themeId),
-                            ignoreDebounce = true
-                        )
-                    },
-                    accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
-                    onAccessibilityHowToUseResultConsumed =
-                        backStackEntry::consumeAccessibilityHowToUseResult,
-                    onNavigateToAccessibilityHowToUse = {
-                        navigateToAccessibilityHowToUse(backStackEntry)
-                    },
-                    viewModel = catalogViewModel
-                )
+                    }
+                ) {
+                    BatteryCategoryScreen(
+                        categoryId = backStackEntry.arguments?.getInt("categoryId") ?: 0,
+                        onBack = {
+                            navController.safePopBackStack(ignoreDebounce = true)
+                        },
+                        onNavigateToPremium = {
+                            navController.safeNavigate(
+                                "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
+                                ignoreDebounce = true
+                            )
+                        },
+                        onOpenTheme = { themeId ->
+                            navController.safeNavigate(
+                                Routes.batteryEditor(themeId),
+                                ignoreDebounce = true
+                            )
+                        },
+                        accessibilityHowToUseResult =
+                            backStackEntry.accessibilityHowToUseResult(),
+                        onAccessibilityHowToUseResultConsumed =
+                            backStackEntry::consumeAccessibilityHowToUseResult,
+                        onNavigateToAccessibilityHowToUse = {
+                            navigateToAccessibilityHowToUse(backStackEntry)
+                        },
+                        viewModel = catalogViewModel
+                    )
+                }
             }
 
             composable(
@@ -522,28 +543,39 @@ fun AppNavGraph(
                 )
             ) { backStackEntry ->
                 val themeId = backStackEntry.arguments?.getInt("themeId") ?: 0
-                BatteryEditorScreen(
-                    page = BatteryEditorPage.OVERVIEW,
-                    onBack = { navController.safePopBackStack(ignoreDebounce = true) },
-                    onOpenPage = { page ->
-                        navController.safeNavigate(
-                            Routes.batteryEditorComponent(themeId, page.name),
-                            ignoreDebounce = true
+                IsolatedDestination(
+                    bottomAd = {
+                        NativeAdInternal(
+                            screenCode = SCREEN_CUSTOMIZE_STATUS_BAR,
+                            reloadKey = destinationAdReloadKey(backStackEntry.id),
+                            modifier = Modifier.fillMaxWidth()
                         )
-                    },
-                    onNavigateToPremium = {
-                        navController.safeNavigate(
-                            "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
-                            ignoreDebounce = true
-                        )
-                    },
-                    accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
-                    onAccessibilityHowToUseResultConsumed =
-                        backStackEntry::consumeAccessibilityHowToUseResult,
-                    onNavigateToAccessibilityHowToUse = {
-                        navigateToAccessibilityHowToUse(backStackEntry)
                     }
-                )
+                ) {
+                    BatteryEditorScreen(
+                        page = BatteryEditorPage.OVERVIEW,
+                        onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                        onOpenPage = { page ->
+                            navController.safeNavigate(
+                                Routes.batteryEditorComponent(themeId, page.name),
+                                ignoreDebounce = true
+                            )
+                        },
+                        onNavigateToPremium = {
+                            navController.safeNavigate(
+                                "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
+                                ignoreDebounce = true
+                            )
+                        },
+                        accessibilityHowToUseResult =
+                            backStackEntry.accessibilityHowToUseResult(),
+                        onAccessibilityHowToUseResultConsumed =
+                            backStackEntry::consumeAccessibilityHowToUseResult,
+                        onNavigateToAccessibilityHowToUse = {
+                            navigateToAccessibilityHowToUse(backStackEntry)
+                        }
+                    )
+                }
             }
 
             composable(
@@ -562,30 +594,52 @@ fun AppNavGraph(
                     }
                 }
                 val editorViewModel = hiltViewModel<BatteryEditorViewModel>(overviewEntry)
-                BatteryEditorScreen(
-                    page = page,
-                    onBack = { navController.safePopBackStack(ignoreDebounce = true) },
-                    onNavigateToPremium = {
-                        navController.safeNavigate(
-                            "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
-                            ignoreDebounce = true
-                        )
-                    },
-                    onOpenEmotionGroup = { groupKey ->
-                        val themeId = backStackEntry.arguments?.getInt("themeId") ?: 0
-                        navController.safeNavigate(
-                            Routes.batteryEditorEmotionDetail(themeId, groupKey),
-                            ignoreDebounce = true
-                        )
-                    },
-                    accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
-                    onAccessibilityHowToUseResultConsumed =
-                        backStackEntry::consumeAccessibilityHowToUseResult,
-                    onNavigateToAccessibilityHowToUse = {
-                        navigateToAccessibilityHowToUse(backStackEntry)
-                    },
-                    viewModel = editorViewModel
+                val nativeScreenCode = batteryEditorCollapsibleNativeScreenCode(
+                    backStackEntry.destination.route,
+                    page.name
                 )
+                IsolatedDestination(
+                    bottomAd = {
+                        if (nativeScreenCode != null) {
+                            NativeAdInternal(
+                                screenCode = nativeScreenCode,
+                                reloadKey = destinationAdReloadKey(backStackEntry.id),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        } else {
+                            BannerAd(
+                                modifier = Modifier.fillMaxWidth(),
+                                adPosition = BANNER_BATTERY_EDITOR_BOTTOM
+                            )
+                        }
+                    }
+                ) {
+                    BatteryEditorScreen(
+                        page = page,
+                        onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                        onNavigateToPremium = {
+                            navController.safeNavigate(
+                                "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
+                                ignoreDebounce = true
+                            )
+                        },
+                        onOpenEmotionGroup = { groupKey ->
+                            val themeId = backStackEntry.arguments?.getInt("themeId") ?: 0
+                            navController.safeNavigate(
+                                Routes.batteryEditorEmotionDetail(themeId, groupKey),
+                                ignoreDebounce = true
+                            )
+                        },
+                        accessibilityHowToUseResult =
+                            backStackEntry.accessibilityHowToUseResult(),
+                        onAccessibilityHowToUseResultConsumed =
+                            backStackEntry::consumeAccessibilityHowToUseResult,
+                        onNavigateToAccessibilityHowToUse = {
+                            navigateToAccessibilityHowToUse(backStackEntry)
+                        },
+                        viewModel = editorViewModel
+                    )
+                }
             }
 
             composable(
@@ -599,53 +653,83 @@ fun AppNavGraph(
                 val overviewEntry = remember(backStackEntry, themeId) {
                     navController.getBackStackEntry(Routes.batteryEditor(themeId))
                 }
-                BatteryEditorScreen(
-                    page = BatteryEditorPage.EMOTION_DETAIL,
-                    emotionGroupKey = backStackEntry.arguments?.getString("groupKey"),
-                    onBack = { navController.safePopBackStack(ignoreDebounce = true) },
-                    onNavigateToPremium = {
-                        navController.safeNavigate(
-                            "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
-                            ignoreDebounce = true
+                IsolatedDestination(
+                    bottomAd = {
+                        NativeAdInternal(
+                            screenCode = SCREEN_BATTERY_EDITOR,
+                            reloadKey = destinationAdReloadKey(backStackEntry.id),
+                            modifier = Modifier.fillMaxWidth()
                         )
-                    },
-                    accessibilityHowToUseResult = backStackEntry.accessibilityHowToUseResult(),
-                    onAccessibilityHowToUseResultConsumed =
-                        backStackEntry::consumeAccessibilityHowToUseResult,
-                    onNavigateToAccessibilityHowToUse = {
-                        navigateToAccessibilityHowToUse(backStackEntry)
-                    },
-                    viewModel = hiltViewModel<BatteryEditorViewModel>(overviewEntry)
-                )
+                    }
+                ) {
+                    BatteryEditorScreen(
+                        page = BatteryEditorPage.EMOTION_DETAIL,
+                        emotionGroupKey = backStackEntry.arguments?.getString("groupKey"),
+                        onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                        onNavigateToPremium = {
+                            navController.safeNavigate(
+                                "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
+                                ignoreDebounce = true
+                            )
+                        },
+                        accessibilityHowToUseResult =
+                            backStackEntry.accessibilityHowToUseResult(),
+                        onAccessibilityHowToUseResultConsumed =
+                            backStackEntry::consumeAccessibilityHowToUseResult,
+                        onNavigateToAccessibilityHowToUse = {
+                            navigateToAccessibilityHowToUse(backStackEntry)
+                        },
+                        viewModel = hiltViewModel<BatteryEditorViewModel>(overviewEntry)
+                    )
+                }
             }
 
-            composable(Routes.BATTERY_TROLL) {
-                BatteryTrollScreen(
-                    onNavigateBack = { navController.safePopBackStack() },
-                    onNavigateToCustomize = { trollId ->
-                        navController.safeNavigate(
-                            Routes.batteryTrollCustomize(trollId),
-                            ignoreDebounce = true
+            composable(Routes.BATTERY_TROLL) { backStackEntry ->
+                IsolatedDestination(
+                    bottomAd = {
+                        NativeAdInternal(
+                            screenCode = SCREEN_BATTERY_TROLL,
+                            reloadKey = destinationAdReloadKey(backStackEntry.id),
+                            modifier = Modifier.fillMaxWidth()
                         )
-                    },
-                    onPremium = { navigateFromHome(Routes.PREMIUM) }
-                )
+                    }
+                ) {
+                    BatteryTrollScreen(
+                        onNavigateBack = { navController.safePopBackStack() },
+                        onNavigateToCustomize = { trollId ->
+                            navController.safeNavigate(
+                                Routes.batteryTrollCustomize(trollId),
+                                ignoreDebounce = true
+                            )
+                        },
+                        onPremium = { navigateFromHome(Routes.PREMIUM) }
+                    )
+                }
             }
 
             composable(
                 route = "${Routes.BATTERY_TROLL_CUSTOMIZE}/{trollId}",
                 arguments = listOf(navArgument("trollId") { type = NavType.IntType })
             ) { backStackEntry ->
-                BatteryTrollCustomizeScreen(
-                    onNavigateBack = { navController.safePopBackStack() },
-                    accessibilityHowToUseResult =
-                        backStackEntry.accessibilityHowToUseResult(),
-                    onAccessibilityHowToUseResultConsumed =
-                        backStackEntry::consumeAccessibilityHowToUseResult,
-                    onNavigateToAccessibilityHowToUse = {
-                        navigateToAccessibilityHowToUse(backStackEntry)
+                IsolatedDestination(
+                    bottomAd = {
+                        BannerAd(
+                            modifier = Modifier.fillMaxWidth(),
+                            adPosition = BANNER_BATTERY_EDITOR_BOTTOM
+                        )
                     }
-                )
+                ) {
+                    BatteryTrollCustomizeScreen(
+                        onNavigateBack = { navController.safePopBackStack() },
+                        accessibilityHowToUseResult =
+                            backStackEntry.accessibilityHowToUseResult(),
+                        onAccessibilityHowToUseResultConsumed =
+                            backStackEntry::consumeAccessibilityHowToUseResult,
+                        onNavigateToAccessibilityHowToUse = {
+                            navigateToAccessibilityHowToUse(backStackEntry)
+                        }
+                    )
+                }
             }
 
             composable(
@@ -705,42 +789,5 @@ fun AppNavGraph(
                     }
                 )
             }
-            }
-        }
-        if (shouldShowBatteryTrollBottomNative) {
-            NativeAdInternal(
-                screenCode = SCREEN_BATTERY_TROLL,
-                modifier = Modifier.fillMaxWidth()
-            )
-        } else if (shouldShowBatteryCategoryBottomNative) {
-            NativeAdInternal(
-                screenCode = SCREEN_BATTERY_CATEGORY,
-                modifier = Modifier.fillMaxWidth()
-            )
-        } else if (batteryEditorNativeScreenCode != null) {
-            NativeAdInternal(
-                screenCode = batteryEditorNativeScreenCode,
-                reloadKey = batteryEditorNativeReloadKey,
-                modifier = Modifier.fillMaxWidth()
-            )
-        } else if (shouldShowBatteryEditorBottomBanner) {
-            BannerAd(
-                modifier = Modifier.fillMaxWidth(),
-                adPosition = BANNER_BATTERY_EDITOR_BOTTOM
-            )
-        } else {
-            HomeShell(
-                selectedTab = selectedHomeTab,
-                showBottomBanner = shouldShowHomeBottomBanner,
-                onTabSelected = ::navigateToHomeTab
-            )
-        }
     }
-
-    // Register after NavHost so this callback has priority over Navigation's default pop.
-    // All four bottom-navigation destinations are equivalent Home roots.
-    BackHandler(
-        enabled = isHomeTopLevelRoute(currentRoute),
-        onBack = onHomeBack
-    )
 }
