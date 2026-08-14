@@ -31,6 +31,7 @@ class NativeAdPlacementCatalogTest {
             SCREEN_SEARCH,
             SCREEN_FAVOURITE_RECENT,
             SCREEN_BATTERY_CATALOG,
+            SCREEN_BATTERY_CATEGORY,
             SCREEN_CUSTOMIZE_STATUS_BAR,
             SCREEN_BATTERY_EDITOR,
             DIALOG_BATTERY_REWARD,
@@ -71,6 +72,7 @@ class NativeAdPlacementCatalogTest {
     @Test
     fun `feature placements keep their designed native layouts`() {
         assertEquals(AdType.HEIGHT_150, placementType(SCREEN_BATTERY_CATALOG))
+        assertEquals(AdType.HEIGHT_222, placementType(SCREEN_BATTERY_CATEGORY))
         assertEquals(AdType.COLLAPSE_SMALL, placementType(SCREEN_CUSTOMIZE_STATUS_BAR))
         assertEquals(AdType.COLLAPSE_SMALL, placementType(SCREEN_BATTERY_EDITOR))
 

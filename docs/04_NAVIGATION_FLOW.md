@@ -155,8 +155,8 @@ route, popUpTo behavior, process-death behavior và docs này.
 - Dùng `safeNavigate`/`safePopBackStack`.
 - Full-screen ad transition dùng `navigateWithAd` theo policy.
 - Bottom navigation và placement `home_mode_bottom` do `ui/home/shell/HomeShell` sở hữu.
-  Child `battery_category/{categoryId}` ẩn bottom navigation nhưng tiếp tục dùng cùng
-  banner holder để không request/reload banner khi đi từ Battery Styles sang category.
+  Child `battery_category/{categoryId}` ẩn cả bottom navigation lẫn Home banner; route này dùng
+  một native `screen_battery_category` cố định bên ngoài `NavHost`.
 - String argument phải encode; enum argument phải parse an toàn với fallback.
 - Không phục hồi route Private Browser cũ nếu chưa có feature spec mới.
 - Mọi hand-off sang Accessibility Settings để cấp quyền đi qua màn How to use rồi dùng

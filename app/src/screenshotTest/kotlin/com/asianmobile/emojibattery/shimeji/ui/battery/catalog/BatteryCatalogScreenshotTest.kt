@@ -45,30 +45,7 @@ fun BatteryCategoryScreenshotTest() {
         rewardUnlockedThemeIds = emptySet(),
         onBack = {},
         onPremium = {},
-        onTheme = {},
-        isInlineBannerVisible = true,
-        inlineBannerContent = { BatteryInlineBannerPreviewSlot() }
-    )
-}
-
-@PreviewTest
-@Preview(name = "Battery category banner unavailable", widthDp = 360, heightDp = 800)
-@Composable
-fun BatteryCategoryWithoutBannerScreenshotTest() {
-    val state = previewBatteryCatalogState()
-    val section = state.sections.first()
-    val themes = previewBatteryDetailThemes(section)
-    BatteryCategoryContent(
-        category = section.category,
-        themes = themes,
-        selectedThemeId = themes[1].id,
-        isPremium = false,
-        rewardUnlockedThemeIds = emptySet(),
-        onBack = {},
-        onPremium = {},
-        onTheme = {},
-        isInlineBannerVisible = false,
-        inlineBannerContent = {}
+        onTheme = {}
     )
 }
 

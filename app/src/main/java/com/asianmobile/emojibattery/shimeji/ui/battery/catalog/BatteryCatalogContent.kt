@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
@@ -340,9 +339,7 @@ internal fun BatteryCategoryContent(
     onBack: () -> Unit,
     onPremium: () -> Unit,
     onTheme: (BatteryThemeEntry) -> Unit,
-    onRetry: () -> Unit = {},
-    isInlineBannerVisible: Boolean,
-    inlineBannerContent: @Composable () -> Unit
+    onRetry: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -389,25 +386,6 @@ internal fun BatteryCategoryContent(
                     dimensionResource(SdpR.dimen._12sdp)
                 )
             ) {
-                if (isInlineBannerVisible) {
-                    item(
-                        key = "battery_category_inline_banner",
-                        span = { GridItemSpan(maxLineSpan) }
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(
-                                    RoundedCornerShape(
-                                        dimensionResource(SdpR.dimen._3sdp)
-                                    )
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            inlineBannerContent()
-                        }
-                    }
-                }
                 items(themes, key = BatteryThemeEntry::id) { theme ->
                     BatteryDetailThemeCard(
                         theme = theme,
@@ -697,16 +675,6 @@ internal fun BatteryAdPreviewSlot(modifier: Modifier = Modifier) {
 }
 
 @Composable
-internal fun BatteryInlineBannerPreviewSlot() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._38sdp))
-            .background(colorResource(R.color.colors_FFEBF1))
-    )
-}
-
-@Composable
 internal fun BatteryRewardAdPreviewSlot() {
     Column(
         modifier = Modifier
@@ -796,9 +764,7 @@ private fun BatteryCategoryContentPreview() {
         rewardUnlockedThemeIds = emptySet(),
         onBack = {},
         onPremium = {},
-        onTheme = {},
-        isInlineBannerVisible = true,
-        inlineBannerContent = { BatteryInlineBannerPreviewSlot() }
+        onTheme = {}
     )
 }
 

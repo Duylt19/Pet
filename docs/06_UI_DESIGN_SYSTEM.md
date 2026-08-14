@@ -135,13 +135,12 @@ Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
   luôn có thể kéo ngang mà không dựng hoặc tải trước toàn bộ catalog;
 - category header dùng trực tiếp emoji ở đầu `category.name`; không ghép thêm drawable/icon riêng
   để tránh hiển thị trùng khi catalog cập nhật tên category;
-- More mở child route có header Back/title, inline banner SDK thật và grid ba cột. PRO action được
-  ẩn tập trung bởi `PremiumUiPolicy` trong v1. Card detail giữ
+- More mở child route có header Back/title và grid ba cột bắt đầu ngay dưới header; không còn
+  banner ở đầu grid. PRO action được ẩn tập trung bởi `PremiumUiPolicy` trong v1. Card detail giữ
   tỷ lệ vuông, preview `74/101.333`, selected dùng `#FFEBF1` + stroke `#FB3675`, không hiện heart;
-- inline banner chỉ giữ grid item khi placement đủ điều kiện và chưa load fail. Khi SDK/config/
-  ad-free policy không cho hiển thị hoặc load fail, xóa cả holder lẫn grid item để card đầu tiên
-  dồn lên ngay dưới header, không để lại vùng trắng;
-- landing giữ Home bottom navigation; detail ẩn navigation nhưng giữ cùng bottom banner holder.
+- landing giữ Home bottom navigation; detail ẩn navigation/Home banner và dùng native
+  `HEIGHT_222` cố định ở đáy. Khi SDK/config/ad-free policy không cho hiện hoặc load fail, native
+  collapse hoàn toàn, không để lại khoảng trắng.
   DIY FAB và Lottie star bling dùng lại component Discover.
 
 Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:7466`,

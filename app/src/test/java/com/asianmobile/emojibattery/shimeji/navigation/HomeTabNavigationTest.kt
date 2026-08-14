@@ -55,10 +55,16 @@ class HomeTabNavigationTest {
     }
 
     @Test
-    fun `battery category keeps the shared banner without showing as a home tab`() {
+    fun `battery category replaces the home banner with its own native placement`() {
         assertEquals("${Routes.BATTERY_CATEGORY}/17", Routes.batteryCategory(17))
         assertEquals(true, showHomeBottomBanner(Routes.BATTERY_CATALOG))
-        assertEquals(true, showHomeBottomBanner("${Routes.BATTERY_CATEGORY}/{categoryId}"))
+        assertEquals(false, showHomeBottomBanner("${Routes.BATTERY_CATEGORY}/{categoryId}"))
+        assertEquals(
+            true,
+            showBatteryCategoryBottomNative("${Routes.BATTERY_CATEGORY}/{categoryId}")
+        )
+        assertEquals(true, showBatteryCategoryBottomNative(Routes.batteryCategory(17)))
+        assertEquals(false, showBatteryCategoryBottomNative(Routes.BATTERY_CATALOG))
         assertEquals(false, showHomeBottomBanner(Routes.SEARCH))
     }
 

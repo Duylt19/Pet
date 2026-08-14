@@ -30,8 +30,7 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
 - Home shell trong `AppNavGraph` sở hữu đúng một `BannerAd` cho placement
   `home_mode_bottom`, nằm dưới bottom navigation. Banner giữ nguyên composition/ViewModel
   khi chuyển giữa Discover, Battery, Pet Store và Mine nên không request/reload lại theo tab.
-  Battery category ẩn bottom navigation nhưng vẫn giữ cùng holder/banner key khi mở từ Battery.
-  Banner chỉ dispose khi đi khỏi toàn bộ nhóm này. Settings khi chạy trong shell
+  Battery category rời Home holder để dùng native riêng ở đáy. Settings khi chạy trong shell
   không render thêm native ad để tránh hai placement xếp chồng. Hero Battery Troll là asset
   presentational; slot promo thấp hơn dùng banner SDK `discover_inline`.
 - Grant Permissions dùng native placement `screen_grant_permissions`, ghim cố định dưới danh
@@ -65,8 +64,10 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
   code, Remote Config key và resource ID riêng; trong v1 resource này tạm dùng chung AdMob unit
   `9967933431` với nhóm reward/exit để sau này đổi ID mà không sửa UI.
 - Battery landing dùng native placement `screen_battery_catalog` với template `HEIGHT_150` sau
-  section đầu tiên. Category detail có banner inline `battery_category_inline`; creative do SDK
-  tải, không đóng gói ảnh quảng cáo mẫu trong Figma. Bottom banner vẫn là holder của shell.
+  section đầu tiên. Category detail không còn banner inline ở đầu grid và cũng không dùng Home
+  banner. Một holder native `screen_battery_category`/`HEIGHT_222` nằm ngoài `NavHost` ở đáy;
+  resource ID riêng hiện tạm dùng chung AdMob unit với Battery catalog để có thể tách sau này.
+  Khi native không đủ điều kiện hoặc load fail, holder collapse hoàn toàn.
 - Customize Status Bar và các child library dùng holder shell nằm ngoài NavHost. Overview,
   Emotion group/detail cùng mười editor option dùng một native `COLLAPSE_SMALL`; các library
   Battery/Emoji/Theme vẫn giữ banner `battery_editor_bottom`. Hai loại loại trừ nhau nên không
@@ -76,8 +77,8 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
   `id_emoji_battery_native_customize_status_bar`. Các màn con option/emotion/detail dùng
   `screen_battery_editor`; mỗi `NavBackStackEntry` mới truyền một `reloadKey` mới để hủy ad cũ và
   request native mới thay vì rebind lại cùng ad object.
-- Các banner inline `discover_inline`, `search_inline` và `battery_category_inline` có ViewModel
-  key riêng để không dùng chung ad object với banner shell. Holder căn giữa creative SDK 320×50,
+- Các banner inline `discover_inline`, `search_inline` và `battery_category_inline` (chỉ Battery
+  Troll) có ViewModel key riêng để không dùng chung ad object với banner shell. Holder căn giữa creative SDK 320×50,
   dùng nền trắng và shimmer `#E6E6E6`; khi ads bị tắt/Premium/load fail thì slot collapse, không
   thay thế bằng ảnh creative mẫu.
 

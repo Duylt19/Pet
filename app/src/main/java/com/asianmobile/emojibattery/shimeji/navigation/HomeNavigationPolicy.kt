@@ -22,5 +22,7 @@ internal fun routeForHomeTab(tab: HomeTab): String = when (tab) {
 
 internal fun showHomeBottomBanner(route: String?): Boolean =
     homeTabForRoute(route) != null ||
-        route?.startsWith("${Routes.BATTERY_CATEGORY}/") == true ||
         route == Routes.BATTERY_TROLL
+
+internal fun showBatteryCategoryBottomNative(route: String?): Boolean =
+    route?.startsWith("${Routes.BATTERY_CATEGORY}/") == true

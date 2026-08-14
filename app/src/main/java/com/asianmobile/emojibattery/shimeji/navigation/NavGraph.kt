@@ -36,6 +36,7 @@ import androidx.navigation.navArgument
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_BATTERY_EDITOR_BOTTOM
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_CATEGORY
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_EDITOR
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_CUSTOMIZE_STATUS_BAR
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
@@ -176,6 +177,7 @@ fun AppNavGraph(
         currentBackStackEntry?.destination?.route
     )
     val currentRoute = currentBackStackEntry?.destination?.route
+    val shouldShowBatteryCategoryBottomNative = showBatteryCategoryBottomNative(currentRoute)
     val currentEditorPage = currentBackStackEntry?.arguments?.getString("page")
     val batteryEditorNativeScreenCode = batteryEditorCollapsibleNativeScreenCode(
         currentRoute,
@@ -688,7 +690,13 @@ fun AppNavGraph(
             }
             }
         }
-        if (batteryEditorNativeScreenCode != null) {
+        if (shouldShowBatteryCategoryBottomNative) {
+            NativeAdInternal(
+                screenCode = SCREEN_BATTERY_CATEGORY,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.navigationBarsPadding())
+        } else if (batteryEditorNativeScreenCode != null) {
             NativeAdInternal(
                 screenCode = batteryEditorNativeScreenCode,
                 reloadKey = batteryEditorNativeReloadKey,

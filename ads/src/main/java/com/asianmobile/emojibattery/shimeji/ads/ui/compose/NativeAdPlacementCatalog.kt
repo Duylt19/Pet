@@ -80,6 +80,12 @@ internal object NativeAdPlacementCatalog {
             R.string.id_emoji_battery_native_battery_catalog
         ),
         NativeAdPlacement(
+            SCREEN_BATTERY_CATEGORY,
+            AdType.HEIGHT_222,
+            IS_SHOW_NATIVE_BATTERY_CATEGORY,
+            R.string.id_emoji_battery_native_battery_category
+        ),
+        NativeAdPlacement(
             SCREEN_CUSTOMIZE_STATUS_BAR,
             AdType.COLLAPSE_SMALL,
             IS_SHOW_NATIVE_CUSTOMIZE_STATUS_BAR,

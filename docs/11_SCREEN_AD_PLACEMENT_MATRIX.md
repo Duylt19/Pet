@@ -16,7 +16,7 @@ tự thêm quảng cáo chỉ từ tên route.
 | Accessibility How to use | `accessibility_how_to_use` | Không thêm placement; disclosure trước đó dùng `dialog_accessibility_disclosure` |
 | Discover | `home` | Banner shell Home + banner inline `discover_inline` |
 | Battery styles | `battery_catalog` | Banner shell Home, native `screen_battery_catalog`; reward sheet dùng `dialog_battery_reward` + Rewarded |
-| Battery category | `battery_category` | Banner shell Home + banner inline `battery_category_inline` |
+| Battery category | `battery_category` | Native đáy `screen_battery_category` |
 | Shimeji Pets | `pet_store` | Banner shell Home; pet reward dùng `dialog_pet_reward`, food reward dùng `dialog_food_reward` + Rewarded |
 | My Pet | `my_pet` | Banner shell Home |
 | Mine/Settings | `settings` | Banner shell Home; disclosure dùng `dialog_accessibility_disclosure` hoặc `dialog_overlay_permission`; Apps hidden sheet dùng `dialog_apps_hidden` |
@@ -44,6 +44,7 @@ tự thêm quảng cáo chỉ từ tên route.
 | Search | `screen_search` | `is_show_native_search` | `id_emoji_battery_native_search` | `HEIGHT_222` |
 | Favourite & Recent | `screen_favourite_recent` | `is_show_native_favourite_recent` | `id_emoji_battery_native_favourite_recent` | `HEIGHT_222` |
 | Battery catalog | `screen_battery_catalog` | `is_show_native_battery_catalog` | `id_emoji_battery_native_battery_catalog` | `HEIGHT_150` |
+| Battery category | `screen_battery_category` | `is_show_native_battery_category` | `id_emoji_battery_native_battery_category` | `HEIGHT_222` |
 | Customize Status Bar | `screen_customize_status_bar` | `is_show_native_customize_status_bar` | `id_emoji_battery_native_customize_status_bar` | `COLLAPSE_SMALL` |
 | Battery editor options | `screen_battery_editor` | `is_show_native_battery_editor` | `id_emoji_battery_native_battery_editor` | `COLLAPSE_SMALL` |
 | Battery reward sheet | `dialog_battery_reward` | `is_show_native_battery_reward` | `id_emoji_battery_native_battery_reward` | `HEIGHT_222` |
