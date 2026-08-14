@@ -35,7 +35,9 @@ Vertical slice hiện đã có trong source:
   trong mỗi hàng được dàn đều giữa hai padding mép để không co cụm trên viewport rộng.
 - Catalog luôn cho phép mở editor để thử bằng preview nhúng. Overlay status bar thật chỉ nhận
   draft live khi feature đã được bật; nếu feature đang tắt thì editor không tự bật overlay dù
-  Accessibility đã được cấp. Apply vẫn yêu cầu Accessibility trước khi bật.
+  Accessibility đã được cấp. Apply khi chưa có quyền vẫn lưu nguyên draft kèm `enabled = true`
+  **trước** khi mở disclosure, nên thanh pin hiện ra đúng bản user vừa Apply ngay lúc họ bật
+  service trong Android Settings (xem “Bật thanh pin trước khi có quyền”).
 - `StatusBarAccessibilityService` vẽ một `TYPE_ACCESSIBILITY_OVERLAY` full-width,
   non-touchable ở cạnh trên; cập nhật pin, charging, time/date, network, airplane, ringer,
   hotspot và dùng theme/nền/emotion/animation đã chọn.
@@ -85,7 +87,10 @@ Home → Battery styles → chọn theme → Customize status bar
                                       ├─ feature đang bật → live preview trên status bar
                                       ├─ feature đang tắt → chỉ preview nhúng
                                       ├─ child edit → cập nhật draft/preview ngay; Back giữ thay đổi
-                                      └─ Apply → nếu thiếu quyền thì disclosure → persist + render
+                                      └─ Apply → đủ quyền: persist + render
+                                                → thiếu quyền: persist draft đã bật → disclosure
+                                                  → How to use → Settings → bar hiện ngay khi
+                                                    service bind; quay về mà không cấp thì revert
 ```
 
 Premium theme chưa mở hiển thị dialog Rewarded/Premium. Theme thiếu hoặc sai checksum
@@ -165,6 +170,7 @@ typed, không làm crash UI hoặc overlay đang chạy.
 | Field | Ý nghĩa |
 |---|---|
 | `enabled` | User đã Apply và muốn render |
+| `pendingAccessibilityGrant` | `enabled` được ghi trước khi có quyền Accessibility và chưa được xác nhận; chỉ `BatteryEnableIntentPolicy` ghi/xóa |
 | `selectedThemeId` | ID style gốc đã mở editor; giữ để migration/analytics |
 | `selectedBatteryThemeId` | Theme cung cấp asset pin; fallback từ `selectedThemeId` |
 | `selectedEmojiThemeId` | Theme cung cấp asset pet/emoji; fallback từ `selectedThemeId` |
@@ -222,6 +228,39 @@ Các guardrail bắt buộc:
 - Chỉ mở Settings sau disclosure chủ động; không tự bật service.
 - User có thể tắt service bất cứ lúc nào trong Android Settings.
 
+### Bật thanh pin trước khi có quyền
+
+`StatusBarAccessibilityService` gắn overlay ngay khi nó được bind và
+`shouldAttachBatteryStatusOverlay(...)` thỏa — điều kiện đó **không** đòi app đang foreground.
+Nghĩa là thứ duy nhất từng chặn thanh pin hiện ra ngay lúc user gạt switch trong Android Settings
+là `config.enabled` khi đó vẫn `false`. Nên thứ tự bị lật lại: **ý định của user được ghi vào
+DataStore trước khi rời app**, không phải lúc quay lại.
+
+- `BatteryEnableIntentPolicy` (pure, unit test ở `BatteryEnableIntentPolicyTest`) là nơi duy nhất
+  quyết định: `requestEnable()` trả về intent cần lưu lúc hand-off, `settle()` trả về intent cần
+  lưu khi đọc lại được trạng thái quyền, `setEnabled()` cho thao tác bật/tắt tường minh.
+- Mọi entry point “bật thanh pin” — toggle ở Discover, Mine, Battery catalog, Battery Troll
+  Customize và Apply của editor — gọi `BatterySettingsRepository.requestEnable(config, granted)`
+  trước khi mở disclosure. Editor truyền nguyên draft nên bar hiện lên đúng bản vừa Apply, không
+  phải theme đang lưu. Lệnh này idempotent và được gọi lại ở nút Allow của disclosure, vì một lần
+  resume xen giữa sẽ settle intent đang chờ.
+- Ghi lạc quan được đánh dấu bằng `pendingAccessibilityGrant`. Cấp quyền rồi thì
+  `settleAccessibilityGrant(true)` xóa cờ và giữ bar bật; quay lại mà chưa cấp thì
+  `settleAccessibilityGrant(false)` trả `enabled` về `false`. Các screen gọi nó ở `ON_RESUME` và
+  ở nhánh `accessibilityHowToUseResult == false`/`Maybe later`, còn `onServiceConnected()` gọi
+  `settleAccessibilityGrant(true)` vì được bind chính là bằng chứng quyền đã có — kể cả khi user
+  không bao giờ quay lại app.
+- Cờ nằm trong DataStore chứ không phải flag in-memory, nên process bị giết trong Settings vẫn
+  giữ nguyên ý định: cấp quyền thì bar hiện ra sau cold start, bỏ ngang thì lần resume kế tiếp
+  revert. Không có cơ chế thứ hai; `SavedStateHandle` của Battery Troll Customize chỉ còn giữ
+  draft.
+- UI không được sáng switch khi chưa có quyền: mọi màn tính toggle bằng
+  `config.enabled && BatteryAccessibility.isEnabled()`, và footer editor tính `isApplied` theo
+  cùng công thức. `config.enabled` là **setting của user**, `BatteryAccessibility.isEnabled()` là
+  **thứ hệ thống cho phép**; không được lẫn hai nghĩa này.
+- User tự tắt thanh pin đi qua `setEnabled(false)`, luôn xóa cờ pending, nên không có đường nào
+  bật lại giúp họ.
+
 ### Giữ process sống
 
 `StatusBarAccessibilityService` khai `android:foregroundServiceType="specialUse"` và tự
@@ -252,6 +291,8 @@ không thể ngăn, cũng không có API xin lại quyền, nên hợp đồng l
 - `batteryAccessibilityRecovery()` so `config.enabled` (ý định đã lưu, sống sót qua cú kill) với
   `BatteryAccessibility.isEnabled()` (thứ hệ thống cho phép lúc này). Hai cái lệch nhau là tín
   hiệu duy nhất cần; user tự tắt thì `config.enabled` cũng false nên không thể nhầm.
+  `DiscoverViewModel` truyền `config.enabled && !config.pendingAccessibilityGrant`: một yêu cầu
+  bật còn đang chờ lần cấp quyền đầu tiên không phải là quyền bị thu hồi.
 - Nguyên nhân lấy từ `PetBackgroundRestrictionReader.lastOverlayKill()` (`ApplicationExitInfo`,
   API 30+): `USER` → user đóng app, khác `USER` → thiết bị giết, không có bản ghi → không đổ lỗi.
   Đọc **một lần** cho mỗi ViewModel vì nó mô tả cái chết đã xảy ra và là một binder call.

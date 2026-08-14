@@ -43,6 +43,7 @@
 | `pet_position_reset_revisions` | JSON String | 12 reset revision độc lập |
 | `pet_position_reset_revision` | Int | Legacy global fallback cho migration |
 | `battery_status_enabled` | Boolean | User đã Apply battery overlay |
+| `battery_status_pending_accessibility_grant` | Boolean | `enabled` được ghi lạc quan trước khi có quyền Accessibility; `BatteryEnableIntentPolicy` xác nhận hoặc revert khi đọc lại được trạng thái quyền |
 | `battery_status_has_applied` | Boolean | Đã từng Apply; điều khiển card Current độc lập với trạng thái bật/tắt |
 | `battery_status_selected_theme_id` | Int | Style gốc/legacy theme ID; mặc định user-visible là `1`, `0` chỉ là renderer fallback |
 | `battery_status_selected_battery_theme_id` | Int | Theme ID cung cấp asset pin |
@@ -188,6 +189,11 @@ nên trạng thái running không được restore sau process death/reboot.
   để reset lựa chọn cũ thay vì âm thầm đổi nghĩa ID.
 - `BatteryStatusConfig` là persistent source of truth. `BatterySettingsPolicy` clamp
   geometry/color/favorite/reward unlock trước khi ghi và sau khi decode DataStore.
+- Ý định bật thanh pin cũng nằm ở đây chứ không phải flag in-memory: mọi entry point ghi
+  `enabled = true` **trước** khi chuyển user sang Accessibility Settings, nên service gắn overlay
+  ngay lúc được bind. `pendingAccessibilityGrant` đánh dấu lần ghi đó cho tới khi quyền xác nhận
+  (hoặc bị revert nếu user quay lại mà không cấp) và sống sót qua process death. Luật nằm trong
+  `BatteryEnableIntentPolicy`; xem `docs/features/BATTERY_STATUS.md`.
 - Wi‑Fi, signal, airplane, hotspot và ringer mỗi nhóm persist `iconStyleIndex` độc lập
   trong khoảng 1–4. Config mới mặc định Wi‑Fi dùng style 2, hotspot dùng style 3; signal,
   airplane và ringer dùng style 1. Runtime vẫn lấy trạng thái thật từ Android; style chỉ

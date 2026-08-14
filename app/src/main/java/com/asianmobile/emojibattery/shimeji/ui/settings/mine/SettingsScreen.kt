@@ -157,6 +157,7 @@ fun SettingsScreen(
         GrantPermissionDialog(
             onGrantPermission = {
                 showPermissionDisclosure = false
+                viewModel.commitBatteryEnableRequest()
                 onNavigateToAccessibilityHowToUse()
             },
             onMaybeLater = {

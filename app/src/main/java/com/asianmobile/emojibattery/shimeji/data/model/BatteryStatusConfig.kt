@@ -2,6 +2,13 @@ package com.asianmobile.emojibattery.shimeji.data.model
 
 data class BatteryStatusConfig(
     val enabled: Boolean = false,
+    /**
+     * True while [enabled] was stored ahead of the Accessibility grant, so the service can attach
+     * the bar the instant it is bound instead of waiting for the user to walk back into the app.
+     * `BatteryEnableIntentPolicy` owns both writing and clearing it; UI reads it only to avoid
+     * treating an unfinished request as a permission the platform revoked.
+     */
+    val pendingAccessibilityGrant: Boolean = false,
     val hasApplied: Boolean = false,
     val selectedThemeId: Int = DEFAULT_BATTERY_THEME_ID,
     val selectedBatteryThemeId: Int = selectedThemeId,

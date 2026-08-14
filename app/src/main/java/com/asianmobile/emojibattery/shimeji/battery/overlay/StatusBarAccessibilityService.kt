@@ -176,6 +176,10 @@ class StatusBarAccessibilityService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        // Being bound *is* the permission. Confirming it here settles an enable that was stored
+        // ahead of the grant even when the user never walks back into the app, so nothing later
+        // mistakes a completed request for one that was abandoned.
+        settingsRepository.settleAccessibilityGrant(isAccessibilityGranted = true)
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         createNotificationChannel()
         if (!receiverRegistered) registerSystemReceiver()

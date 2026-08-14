@@ -62,9 +62,11 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
 
     /**
      * Enabling the status bar sends the user to system Accessibility settings, which is where this
-     * process is most likely to be killed. Everything the user cannot retype from memory — the
-     * unapplied draft and the "switch it on when you come back" intent — therefore survives in
-     * [SavedStateHandle], exactly like `BatteryEditorViewModel` does with `BatteryDraftCodec`.
+     * process is most likely to be killed. The unapplied draft is what the user cannot retype from
+     * memory, so it survives in [SavedStateHandle] exactly like `BatteryEditorViewModel` does with
+     * `BatteryDraftCodec`. The "switch it on" intent is no longer kept here at all — it is written
+     * straight to the settings store before the hand-off, which is what lets the bar appear while
+     * the user is still in system settings and is also the only copy that survives a process death.
      */
     private val restoredDraft = BatteryTrollDraftCodec
         .decode(savedStateHandle[KEY_DRAFT], BatteryTrollDraft(trollId = trollId))
@@ -81,8 +83,6 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
     private var hasLocalEdits = savedStateHandle.get<Boolean>(KEY_DIRTY) == true &&
         restoredDraft != null
     private var configuredBatteryEnabled = false
-    private var enableBatteryAfterAccessibility =
-        savedStateHandle.get<Boolean>(KEY_PENDING_ENABLE) == true
     private var latestConfig = BatteryStatusConfig()
 
     init {
@@ -174,31 +174,45 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
         _uiState.update { it.copy(isEditingFakePercent = false) }
     }
 
+    /**
+     * The switch means the stored bar, not this screen's draft: Apply is still the only thing that
+     * publishes the draft. Only the activation is written ahead of the grant, so the bar that comes
+     * up in system settings is the one the user already had configured.
+     */
     fun onBatteryToggle() {
         if (!BatteryAccessibility.isEnabled(context)) {
-            setPendingBatteryEnable(true)
+            commitBatteryEnableRequest()
             emit(BatteryTrollCustomizeEffect.RequestBatteryAccessibility)
             return
         }
         settingsRepository.setEnabled(!_uiState.value.isBatteryEnabled)
     }
 
+    /**
+     * Stored before the hand-off so the bar comes up while the user is still in system settings.
+     * Repeated at the disclosure hand-off, because a resume in between settles pending requests.
+     */
+    fun commitBatteryEnableRequest() {
+        settingsRepository.requestEnable(
+            config = latestConfig,
+            isAccessibilityGranted = BatteryAccessibility.isEnabled(context)
+        )
+    }
+
     fun refreshAccessibility() {
         val accessibilityEnabled = BatteryAccessibility.isEnabled(context)
+        settingsRepository.settleAccessibilityGrant(accessibilityEnabled)
         _uiState.update {
             it.copy(
                 isBatteryEnabled = configuredBatteryEnabled && accessibilityEnabled,
                 isAccessibilityEnabled = accessibilityEnabled
             )
         }
-        if (accessibilityEnabled && enableBatteryAfterAccessibility) {
-            setPendingBatteryEnable(false)
-            settingsRepository.setEnabled(true)
-        }
     }
 
+    /** Returning without the grant takes the optimistic activation back. */
     fun cancelPendingBatteryEnable() {
-        setPendingBatteryEnable(false)
+        settingsRepository.settleAccessibilityGrant(BatteryAccessibility.isEnabled(context))
     }
 
     fun onBackRequest() {
@@ -316,11 +330,6 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
         savedStateHandle[KEY_DIRTY] = false
     }
 
-    private fun setPendingBatteryEnable(pending: Boolean) {
-        enableBatteryAfterAccessibility = pending
-        savedStateHandle[KEY_PENDING_ENABLE] = pending
-    }
-
     /**
      * What "already applied" means for *this* troll. A different troll being live means nothing
      * of this one is applied yet, so the baseline is the fresh draft — otherwise Back would ask
@@ -368,6 +377,5 @@ class BatteryTrollCustomizeViewModel @Inject constructor(
         const val ARG_TROLL_ID = "trollId"
         const val KEY_DRAFT = "trollDraft"
         const val KEY_DIRTY = "trollDraftDirty"
-        const val KEY_PENDING_ENABLE = "trollPendingBatteryEnable"
     }
 }

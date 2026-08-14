@@ -140,6 +140,7 @@ internal fun BatteryCatalogFlowHost(
         GrantPermissionDialog(
             onGrantPermission = {
                 showAccessibilityDisclosure = false
+                viewModel.commitBatteryEnableRequest()
                 onNavigateToAccessibilityHowToUse()
             },
             onMaybeLater = {

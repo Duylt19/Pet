@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryEditorPreviewSession
 import com.asianmobile.emojibattery.shimeji.battery.troll.BatteryTrollPolicy
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
@@ -428,6 +429,36 @@ class BatteryEditorViewModel @Inject constructor(
             )
         }
         emit(BatteryEditorEffect.ShowApplySuccess)
+    }
+
+    /**
+     * Apply pressed while the Accessibility permission is still missing.
+     *
+     * The draft is stored in full, activated, *before* the user is sent to the disclosure and on to
+     * system settings — so the bar the service raises the instant it is bound is the one they
+     * pressed Apply on, not the theme that happened to be stored before. No success effect: the
+     * screen stays open behind the disclosure, and [cancelPendingBatteryEnable] undoes the
+     * activation if the grant never arrives.
+     */
+    fun requestApplyBeforeAccessibilityGrant() {
+        val state = _uiState.value
+        if (!state.isApplyEnabled) return
+        settingsRepository.requestEnable(
+            config = BatteryTrollPolicy.releaseOverride(state.config).copy(hasApplied = true),
+            isAccessibilityGranted = false
+        )
+        clearDraft()
+        _uiState.update {
+            it.copy(
+                config = it.config.copy(enabled = true, hasApplied = true),
+                hasUnsavedChanges = false
+            )
+        }
+    }
+
+    /** The permission state is observable again: confirm or take back the optimistic apply. */
+    fun cancelPendingBatteryEnable() {
+        settingsRepository.settleAccessibilityGrant(BatteryAccessibility.isEnabled(context))
     }
 
     fun onApplyCompletionHandled() {

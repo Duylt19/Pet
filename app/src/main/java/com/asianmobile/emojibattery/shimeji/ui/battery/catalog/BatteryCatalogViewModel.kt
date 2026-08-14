@@ -35,7 +35,6 @@ class BatteryCatalogViewModel @Inject constructor(
     private val _effects = Channel<BatteryCatalogEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
     private var configuredBatteryEnabled = false
-    private var enableBatteryAfterAccessibility = false
 
     init {
         viewModelScope.launch {
@@ -53,26 +52,36 @@ class BatteryCatalogViewModel @Inject constructor(
 
     fun onBatteryToggle() {
         if (!BatteryAccessibility.isEnabled(context)) {
-            enableBatteryAfterAccessibility = true
+            commitBatteryEnableRequest()
             emit(BatteryCatalogEffect.RequestBatteryAccessibility)
             return
         }
         settingsRepository.setEnabled(!_uiState.value.isBatteryEnabled)
     }
 
+    /**
+     * Stored before the hand-off so the bar attaches the moment the service is bound, while the
+     * user is still inside system Accessibility settings. Repeated at the disclosure hand-off,
+     * because a resume in between settles pending requests.
+     */
+    fun commitBatteryEnableRequest() {
+        settingsRepository.requestEnable(
+            config = settingsRepository.config.value,
+            isAccessibilityGranted = BatteryAccessibility.isEnabled(context)
+        )
+    }
+
     fun refreshAccessibility() {
         val accessibilityEnabled = BatteryAccessibility.isEnabled(context)
+        settingsRepository.settleAccessibilityGrant(accessibilityEnabled)
         _uiState.update {
             it.copy(isBatteryEnabled = configuredBatteryEnabled && accessibilityEnabled)
         }
-        if (accessibilityEnabled && enableBatteryAfterAccessibility) {
-            enableBatteryAfterAccessibility = false
-            settingsRepository.setEnabled(true)
-        }
     }
 
+    /** Back without a grant takes the optimistic enable away again. */
     fun cancelPendingBatteryEnable() {
-        enableBatteryAfterAccessibility = false
+        settingsRepository.settleAccessibilityGrant(BatteryAccessibility.isEnabled(context))
     }
 
     fun requestCurrentStyle() {

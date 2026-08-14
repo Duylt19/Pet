@@ -9,6 +9,8 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import com.asianmobile.emojibattery.shimeji.battery.settings.BatteryEnableIntent
+import com.asianmobile.emojibattery.shimeji.battery.settings.BatteryEnableIntentPolicy
 import com.asianmobile.emojibattery.shimeji.battery.settings.BatterySettingsPolicy
 import com.asianmobile.emojibattery.shimeji.battery.settings.resolveBatteryStatusBarHeightRange
 import com.asianmobile.emojibattery.shimeji.battery.settings.systemStatusBarHeightDp
@@ -85,87 +87,134 @@ class DataStoreBatterySettingsRepository @Inject constructor(
     override fun applyConfig(config: BatteryStatusConfig) {
         val sanitized = policy.sanitize(config).copy(hasApplied = true)
         edit { preferences ->
-            val rewardUnlockedThemeIds =
-                decodeRewardUnlockedIds(preferences) + sanitized.rewardUnlockedThemeIds
-            preferences[ENABLED] = sanitized.enabled
-            preferences[HAS_APPLIED] = sanitized.hasApplied
-            preferences[SELECTED_THEME_ID] = sanitized.selectedThemeId
-            preferences[SELECTED_BATTERY_THEME_ID] = sanitized.selectedBatteryThemeId
-            preferences[SELECTED_EMOJI_THEME_ID] = sanitized.selectedEmojiThemeId
-            preferences[DISPLAY_MODE] = sanitized.displayMode.name
-            preferences[SHOW_TIME] = sanitized.showTime
-            preferences[SHOW_PERCENTAGE] = sanitized.showPercentage
-            preferences[BACKGROUND_DECORATION_ID] = sanitized.backgroundDecorationId
-            preferences[SHOW_EMOTION] = sanitized.showEmotion
-            preferences[EMOTION_DECORATION_ID] = sanitized.emotionDecorationId
-            preferences[SHOW_ANIMATION] = sanitized.showAnimation
-            preferences[ANIMATION_ASSET_NAME] = sanitized.animationAssetName
-            preferences[BAR_HEIGHT_DP] = sanitized.barHeightDp
-            preferences[HORIZONTAL_PADDING_DP] = sanitized.horizontalPaddingDp
-            preferences[LEFT_PADDING_DP] = sanitized.leftPaddingDp
-            preferences[RIGHT_PADDING_DP] = sanitized.rightPaddingDp
-            preferences[PERCENT_SIZE_DP] = sanitized.percentSizeDp
-            preferences[EMOJI_SIZE_DP] = sanitized.emojiSizeDp
-            preferences[ANIMATION_SIZE_DP] = sanitized.animationSizeDp
-            preferences[BATTERY_SIZE_DP] = sanitized.batterySizeDp
-            preferences[BACKGROUND_COLOR] = sanitized.backgroundColorArgb
-            preferences[FOREGROUND_COLOR] = sanitized.foregroundColorArgb
-            preferences[PERCENT_COLOR] = sanitized.percentColorArgb
-            preferences[SHOW_WIFI] = sanitized.showWifi
-            preferences[WIFI_SIZE_DP] = sanitized.wifiSizeDp
-            preferences[WIFI_COLOR] = sanitized.wifiColorArgb
-            preferences[WIFI_ICON_STYLE_INDEX] = sanitized.wifiIconStyleIndex
-            preferences[DATA_TYPE] = sanitized.dataType.name
-            preferences[SHOW_DATA] = sanitized.showData
-            preferences[DATA_SIZE_DP] = sanitized.dataSizeDp
-            preferences[DATA_COLOR] = sanitized.dataColorArgb
-            preferences[SHOW_SIGNAL] = sanitized.showSignal
-            preferences[SIGNAL_SIZE_DP] = sanitized.signalSizeDp
-            preferences[SIGNAL_COLOR] = sanitized.signalColorArgb
-            preferences[SIGNAL_ICON_STYLE_INDEX] = sanitized.signalIconStyleIndex
-            preferences[AIRPLANE_SIZE_DP] = sanitized.airplaneSizeDp
-            preferences[SHOW_AIRPLANE] = sanitized.showAirplane
-            preferences[AIRPLANE_COLOR] = sanitized.airplaneColorArgb
-            preferences[AIRPLANE_ICON_STYLE_INDEX] = sanitized.airplaneIconStyleIndex
-            preferences[HOTSPOT_SIZE_DP] = sanitized.hotspotSizeDp
-            preferences[SHOW_HOTSPOT] = sanitized.showHotspot
-            preferences[HOTSPOT_COLOR] = sanitized.hotspotColorArgb
-            preferences[HOTSPOT_ICON_STYLE_INDEX] = sanitized.hotspotIconStyleIndex
-            preferences[RINGER_SIZE_DP] = sanitized.ringerSizeDp
-            preferences[SHOW_RINGER] = sanitized.showRinger
-            preferences[RINGER_COLOR] = sanitized.ringerColorArgb
-            preferences[RINGER_ICON_STYLE_INDEX] = sanitized.ringerIconStyleIndex
-            preferences[CHARGE_SIZE_DP] = sanitized.chargeSizeDp
-            preferences[SHOW_CHARGE] = sanitized.showCharge
-            preferences[CHARGE_ICON_INDEX] = sanitized.chargeIconIndex
-            preferences[CHARGE_COLOR] = sanitized.chargeColorArgb
-            preferences[SHOW_DATE_TIME] = sanitized.showDateTime
-            preferences[DATE_TIME_COLOR] = sanitized.dateTimeColorArgb
-            preferences[DATE_TIME_SIZE_DP] = sanitized.dateTimeSizeDp
-            preferences[DATE_FORMAT] = sanitized.dateFormat.name
-            preferences[DATE_TIME_FONT] = sanitized.dateTimeFont.name
-            preferences[CLOCK_COLOR] = sanitized.clockColorArgb
-            preferences[CLOCK_SIZE_DP] = sanitized.clockSizeDp
-            preferences[PRIVACY_RESERVE_DP] = sanitized.privacyReserveDp
-            preferences[FAVORITE_THEME_IDS] =
-                sanitized.favoriteThemeIds.map(Int::toString).toSet()
-            preferences[REWARD_UNLOCKED_THEME_IDS] =
-                rewardUnlockedThemeIds.map(Int::toString).toSet()
-            preferences[TROLL_MODE] = sanitized.trollMode.name
-            preferences[TROLL_FAKE_PERCENT] = sanitized.trollFakePercent
-            preferences[TROLL_THEME_ID] = sanitized.trollThemeId
-            preferences[TROLL_EMOJI_LEVEL_INDEX] = sanitized.trollEmojiLevelIndex
-            preferences[TROLL_BATTERY_LEVEL_INDEX] = sanitized.trollBatteryLevelIndex
-            preferences[TROLL_RANDOM_ARTWORK] = sanitized.trollRandomArtwork
-            preferences[TROLL_SHOW_EMOJI] = sanitized.trollShowEmoji
-            preferences[REWARD_UNLOCKED_TROLL_IDS] =
-                (decodeRewardUnlockedTrollIds(preferences) + sanitized.rewardUnlockedTrollIds)
-                    .map(Int::toString).toSet()
+            writeConfig(
+                preferences = preferences,
+                sanitized = sanitized,
+                intent = BatteryEnableIntentPolicy.setEnabled(sanitized.enabled)
+            )
         }
     }
 
+    override fun requestEnable(config: BatteryStatusConfig, isAccessibilityGranted: Boolean) {
+        val sanitized = policy.sanitize(config).copy(hasApplied = true)
+        edit { preferences ->
+            writeConfig(
+                preferences = preferences,
+                sanitized = sanitized,
+                intent = BatteryEnableIntentPolicy.requestEnable(
+                    stored = storedIntent(preferences),
+                    isAccessibilityGranted = isAccessibilityGranted
+                )
+            )
+        }
+    }
+
+    /**
+     * Read and write inside one `edit` so the settle can never race a concurrent toggle: several
+     * screens observe the same resume and each of them asks for this.
+     */
+    override fun settleAccessibilityGrant(isAccessibilityGranted: Boolean) = edit { preferences ->
+        val settled = BatteryEnableIntentPolicy.settle(
+            stored = storedIntent(preferences),
+            isAccessibilityGranted = isAccessibilityGranted
+        ) ?: return@edit
+        preferences[ENABLED] = settled.enabled
+        preferences[PENDING_ACCESSIBILITY_GRANT] = settled.pendingAccessibilityGrant
+    }
+
+    private fun storedIntent(preferences: Preferences): BatteryEnableIntent = BatteryEnableIntent(
+        enabled = preferences[ENABLED] == true,
+        pendingAccessibilityGrant = preferences[PENDING_ACCESSIBILITY_GRANT] == true
+    )
+
+    private fun writeConfig(
+        preferences: androidx.datastore.preferences.core.MutablePreferences,
+        sanitized: BatteryStatusConfig,
+        intent: BatteryEnableIntent
+    ) {
+        val rewardUnlockedThemeIds =
+            decodeRewardUnlockedIds(preferences) + sanitized.rewardUnlockedThemeIds
+        preferences[ENABLED] = intent.enabled
+        preferences[PENDING_ACCESSIBILITY_GRANT] = intent.pendingAccessibilityGrant
+        preferences[HAS_APPLIED] = sanitized.hasApplied
+        preferences[SELECTED_THEME_ID] = sanitized.selectedThemeId
+        preferences[SELECTED_BATTERY_THEME_ID] = sanitized.selectedBatteryThemeId
+        preferences[SELECTED_EMOJI_THEME_ID] = sanitized.selectedEmojiThemeId
+        preferences[DISPLAY_MODE] = sanitized.displayMode.name
+        preferences[SHOW_TIME] = sanitized.showTime
+        preferences[SHOW_PERCENTAGE] = sanitized.showPercentage
+        preferences[BACKGROUND_DECORATION_ID] = sanitized.backgroundDecorationId
+        preferences[SHOW_EMOTION] = sanitized.showEmotion
+        preferences[EMOTION_DECORATION_ID] = sanitized.emotionDecorationId
+        preferences[SHOW_ANIMATION] = sanitized.showAnimation
+        preferences[ANIMATION_ASSET_NAME] = sanitized.animationAssetName
+        preferences[BAR_HEIGHT_DP] = sanitized.barHeightDp
+        preferences[HORIZONTAL_PADDING_DP] = sanitized.horizontalPaddingDp
+        preferences[LEFT_PADDING_DP] = sanitized.leftPaddingDp
+        preferences[RIGHT_PADDING_DP] = sanitized.rightPaddingDp
+        preferences[PERCENT_SIZE_DP] = sanitized.percentSizeDp
+        preferences[EMOJI_SIZE_DP] = sanitized.emojiSizeDp
+        preferences[ANIMATION_SIZE_DP] = sanitized.animationSizeDp
+        preferences[BATTERY_SIZE_DP] = sanitized.batterySizeDp
+        preferences[BACKGROUND_COLOR] = sanitized.backgroundColorArgb
+        preferences[FOREGROUND_COLOR] = sanitized.foregroundColorArgb
+        preferences[PERCENT_COLOR] = sanitized.percentColorArgb
+        preferences[SHOW_WIFI] = sanitized.showWifi
+        preferences[WIFI_SIZE_DP] = sanitized.wifiSizeDp
+        preferences[WIFI_COLOR] = sanitized.wifiColorArgb
+        preferences[WIFI_ICON_STYLE_INDEX] = sanitized.wifiIconStyleIndex
+        preferences[DATA_TYPE] = sanitized.dataType.name
+        preferences[SHOW_DATA] = sanitized.showData
+        preferences[DATA_SIZE_DP] = sanitized.dataSizeDp
+        preferences[DATA_COLOR] = sanitized.dataColorArgb
+        preferences[SHOW_SIGNAL] = sanitized.showSignal
+        preferences[SIGNAL_SIZE_DP] = sanitized.signalSizeDp
+        preferences[SIGNAL_COLOR] = sanitized.signalColorArgb
+        preferences[SIGNAL_ICON_STYLE_INDEX] = sanitized.signalIconStyleIndex
+        preferences[AIRPLANE_SIZE_DP] = sanitized.airplaneSizeDp
+        preferences[SHOW_AIRPLANE] = sanitized.showAirplane
+        preferences[AIRPLANE_COLOR] = sanitized.airplaneColorArgb
+        preferences[AIRPLANE_ICON_STYLE_INDEX] = sanitized.airplaneIconStyleIndex
+        preferences[HOTSPOT_SIZE_DP] = sanitized.hotspotSizeDp
+        preferences[SHOW_HOTSPOT] = sanitized.showHotspot
+        preferences[HOTSPOT_COLOR] = sanitized.hotspotColorArgb
+        preferences[HOTSPOT_ICON_STYLE_INDEX] = sanitized.hotspotIconStyleIndex
+        preferences[RINGER_SIZE_DP] = sanitized.ringerSizeDp
+        preferences[SHOW_RINGER] = sanitized.showRinger
+        preferences[RINGER_COLOR] = sanitized.ringerColorArgb
+        preferences[RINGER_ICON_STYLE_INDEX] = sanitized.ringerIconStyleIndex
+        preferences[CHARGE_SIZE_DP] = sanitized.chargeSizeDp
+        preferences[SHOW_CHARGE] = sanitized.showCharge
+        preferences[CHARGE_ICON_INDEX] = sanitized.chargeIconIndex
+        preferences[CHARGE_COLOR] = sanitized.chargeColorArgb
+        preferences[SHOW_DATE_TIME] = sanitized.showDateTime
+        preferences[DATE_TIME_COLOR] = sanitized.dateTimeColorArgb
+        preferences[DATE_TIME_SIZE_DP] = sanitized.dateTimeSizeDp
+        preferences[DATE_FORMAT] = sanitized.dateFormat.name
+        preferences[DATE_TIME_FONT] = sanitized.dateTimeFont.name
+        preferences[CLOCK_COLOR] = sanitized.clockColorArgb
+        preferences[CLOCK_SIZE_DP] = sanitized.clockSizeDp
+        preferences[PRIVACY_RESERVE_DP] = sanitized.privacyReserveDp
+        preferences[FAVORITE_THEME_IDS] =
+            sanitized.favoriteThemeIds.map(Int::toString).toSet()
+        preferences[REWARD_UNLOCKED_THEME_IDS] =
+            rewardUnlockedThemeIds.map(Int::toString).toSet()
+        preferences[TROLL_MODE] = sanitized.trollMode.name
+        preferences[TROLL_FAKE_PERCENT] = sanitized.trollFakePercent
+        preferences[TROLL_THEME_ID] = sanitized.trollThemeId
+        preferences[TROLL_EMOJI_LEVEL_INDEX] = sanitized.trollEmojiLevelIndex
+        preferences[TROLL_BATTERY_LEVEL_INDEX] = sanitized.trollBatteryLevelIndex
+        preferences[TROLL_RANDOM_ARTWORK] = sanitized.trollRandomArtwork
+        preferences[TROLL_SHOW_EMOJI] = sanitized.trollShowEmoji
+        preferences[REWARD_UNLOCKED_TROLL_IDS] =
+            (decodeRewardUnlockedTrollIds(preferences) + sanitized.rewardUnlockedTrollIds)
+                .map(Int::toString).toSet()
+    }
+
     override fun setEnabled(enabled: Boolean) = edit { preferences ->
-        preferences[ENABLED] = enabled
+        val intent = BatteryEnableIntentPolicy.setEnabled(enabled)
+        preferences[ENABLED] = intent.enabled
+        preferences[PENDING_ACCESSIBILITY_GRANT] = intent.pendingAccessibilityGrant
     }
 
     override fun setAppHidden(packageName: String, hidden: Boolean) {
@@ -214,6 +263,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         return policy.sanitize(
             BatteryStatusConfig(
                 enabled = enabled,
+                pendingAccessibilityGrant = preferences[PENDING_ACCESSIBILITY_GRANT] == true,
                 hasApplied = resolveBatteryHasApplied(preferences[HAS_APPLIED], enabled),
                 selectedThemeId = selectedThemeId,
                 selectedBatteryThemeId = normalizeSelectableBatteryThemeId(
@@ -356,6 +406,8 @@ class DataStoreBatterySettingsRepository @Inject constructor(
 
     private companion object {
         val ENABLED = booleanPreferencesKey("battery_status_enabled")
+        val PENDING_ACCESSIBILITY_GRANT =
+            booleanPreferencesKey("battery_status_pending_accessibility_grant")
         val HAS_APPLIED = booleanPreferencesKey("battery_status_has_applied")
         val SELECTED_THEME_ID = intPreferencesKey("battery_status_selected_theme_id")
         val SELECTED_BATTERY_THEME_ID =

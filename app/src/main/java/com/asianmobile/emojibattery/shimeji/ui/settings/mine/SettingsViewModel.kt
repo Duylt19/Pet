@@ -46,7 +46,6 @@ class SettingsViewModel @Inject constructor(
 
     private val _effects = Channel<SettingsEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
-    private var enableBatteryAfterAccessibility = false
     private var configuredBatteryEnabled = false
 
     init {
@@ -78,33 +77,41 @@ class SettingsViewModel @Inject constructor(
 
     fun onBatteryToggle() {
         if (!BatteryAccessibility.isEnabled(context)) {
-            requestBatteryAccessibility(enableAfterGrant = true)
+            commitBatteryEnableRequest()
+            _effects.trySend(SettingsEffect.RequestBatteryAccessibility)
             return
         }
         batterySettingsRepository.setEnabled(!_uiState.value.isBatteryEnabled)
     }
 
-    fun requestBatteryAccessibility(enableAfterGrant: Boolean) {
-        enableBatteryAfterAccessibility = enableAfterGrant
-        _effects.trySend(SettingsEffect.RequestBatteryAccessibility)
+    /**
+     * The intent is stored now, not on the way back: the bar then appears while the user is still
+     * on the Accessibility screen they just switched us on in. Repeated at the disclosure hand-off,
+     * because a resume in between settles pending requests.
+     */
+    fun commitBatteryEnableRequest() {
+        batterySettingsRepository.requestEnable(
+            config = batterySettingsRepository.config.value,
+            isAccessibilityGranted = BatteryAccessibility.isEnabled(context)
+        )
     }
 
     fun refreshAccessibility() {
         val enabled = BatteryAccessibility.isEnabled(context)
+        batterySettingsRepository.settleAccessibilityGrant(enabled)
         _uiState.update {
             it.copy(
                 isBatteryEnabled = configuredBatteryEnabled && enabled,
                 isAccessibilityEnabled = enabled
             )
         }
-        if (enabled && enableBatteryAfterAccessibility) {
-            enableBatteryAfterAccessibility = false
-            batterySettingsRepository.setEnabled(true)
-        }
     }
 
+    /** Declining the disclosure, or coming back without the grant, reverts the optimistic write. */
     fun cancelPendingBatteryEnable() {
-        enableBatteryAfterAccessibility = false
+        batterySettingsRepository.settleAccessibilityGrant(
+            BatteryAccessibility.isEnabled(context)
+        )
     }
 
     fun openAppsHidden() {

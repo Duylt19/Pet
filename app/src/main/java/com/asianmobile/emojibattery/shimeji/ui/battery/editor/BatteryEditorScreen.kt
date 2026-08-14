@@ -219,7 +219,13 @@ internal fun BatteryEditorScreen(
     LaunchedEffect(accessibilityHowToUseResult) {
         accessibilityHowToUseResult?.let { permissionGranted ->
             accessibilityEnabled = BatteryAccessibility.isEnabled(context)
-            if (permissionGranted && accessibilityEnabled) viewModel.apply()
+            if (permissionGranted && accessibilityEnabled) {
+                // The draft is already stored and live; re-applying it is what confirms the
+                // Apply the user pressed, shows the success toast and closes the editor.
+                viewModel.apply()
+            } else {
+                viewModel.cancelPendingBatteryEnable()
+            }
             onAccessibilityHowToUseResultConsumed()
         }
     }
@@ -267,6 +273,10 @@ internal fun BatteryEditorScreen(
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 accessibilityEnabled = BatteryAccessibility.isEnabled(context)
+                // Settles an Apply that was stored ahead of the grant, including after a process
+                // death in system settings, where the navigation result no longer exists. Safe
+                // while the disclosure is still up: its Allow stores the request again.
+                viewModel.cancelPendingBatteryEnable()
                 viewModel.refreshEntitlement()
             }
         }
@@ -301,6 +311,9 @@ internal fun BatteryEditorScreen(
             if (accessibilityEnabled) {
                 viewModel.apply()
             } else {
+                // Store the draft activated first, then hand off: the bar comes up showing
+                // exactly this while the user is still inside Accessibility settings.
+                viewModel.requestApplyBeforeAccessibilityGrant()
                 showDisclosure = true
             }
         },
@@ -362,9 +375,13 @@ internal fun BatteryEditorScreen(
         GrantPermissionDialog(
             onGrantPermission = {
                 showDisclosure = false
+                viewModel.requestApplyBeforeAccessibilityGrant()
                 onNavigateToAccessibilityHowToUse()
             },
-            onMaybeLater = { showDisclosure = false }
+            onMaybeLater = {
+                showDisclosure = false
+                viewModel.cancelPendingBatteryEnable()
+            }
         )
     }
 
@@ -579,7 +596,9 @@ private fun BatteryEditorContent(
             ApplyFooter(
                 enabled = state.isApplyEnabled,
                 selectionInProgress = state.assetSelectionInProgress != null,
-                isApplied = state.config.enabled,
+                // A stored enable the permission has not confirmed yet is not a bar on screen,
+                // so the footer must not offer to disable one.
+                isApplied = state.config.enabled && accessibilityEnabled,
                 onApply = onApply,
                 onDisable = onDisable
             )

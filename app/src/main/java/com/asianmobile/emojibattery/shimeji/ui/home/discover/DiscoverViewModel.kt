@@ -81,8 +81,14 @@ class DiscoverViewModel @Inject constructor(
 
     private val _effects = Channel<DiscoverEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
-    private var enableBatteryAfterAccessibility = false
     private var configuredBatteryEnabled = false
+
+    /**
+     * The stored enable is optimistic: it was written on the way *to* Accessibility settings and
+     * the permission has not confirmed it yet. Recovery must stay quiet until it does, or a user
+     * who simply has not granted anything yet is told the platform took their bar away.
+     */
+    private var isBatteryEnablePending = false
 
     init {
         viewModelScope.launch {
@@ -93,6 +99,7 @@ class DiscoverViewModel @Inject constructor(
             ) { pets, batteryCatalog, batteryConfig ->
                 val accessibilityEnabled = BatteryAccessibility.isEnabled(context)
                 configuredBatteryEnabled = batteryConfig.enabled
+                isBatteryEnablePending = batteryConfig.pendingAccessibilityGrant
                 DiscoverUiState(
                     isPetCatalogLoading = pets.isLoading,
                     petCatalogLoadFailed = pets.error != null,
@@ -161,25 +168,37 @@ class DiscoverViewModel @Inject constructor(
 
     fun onBatteryToggle() {
         if (!BatteryAccessibility.isEnabled(context)) {
-            enableBatteryAfterAccessibility = true
+            commitBatteryEnableRequest()
             _effects.trySend(DiscoverEffect.RequestBatteryAccessibility)
             return
         }
         batterySettingsRepository.setEnabled(!_uiState.value.isBatteryEnabled)
     }
 
+    /**
+     * Commits "the user wants the bar on" to storage. The service attaches as soon as Android binds
+     * it, so committing before the hand-off is what makes the bar appear while the user is still in
+     * system settings instead of after they walk back into the app.
+     *
+     * Called again when the disclosure hands off, because a resume in between settles pending
+     * requests and this one has to survive that.
+     */
+    fun commitBatteryEnableRequest() {
+        batterySettingsRepository.requestEnable(
+            config = batterySettingsRepository.config.value,
+            isAccessibilityGranted = BatteryAccessibility.isEnabled(context)
+        )
+    }
+
     fun refreshAccessibility() {
         val enabled = BatteryAccessibility.isEnabled(context)
+        batterySettingsRepository.settleAccessibilityGrant(enabled)
         _uiState.update {
             it.copy(
                 isBatteryEnabled = configuredBatteryEnabled && enabled,
                 isAccessibilityEnabled = enabled,
                 accessibilityRecovery = resolveRecovery(configuredBatteryEnabled, enabled)
             )
-        }
-        if (enabled && enableBatteryAfterAccessibility) {
-            enableBatteryAfterAccessibility = false
-            batterySettingsRepository.setEnabled(true)
         }
     }
 
@@ -199,14 +218,21 @@ class DiscoverViewModel @Inject constructor(
     ): BatteryAccessibilityRecovery {
         if (isRecoveryDismissed) return BatteryAccessibilityRecovery.NONE
         return batteryAccessibilityRecovery(
-            isBatteryConfigured = batteryConfigured,
+            // An enable that is still waiting for its first grant is not a revocation.
+            isBatteryConfigured = batteryConfigured && !isBatteryEnablePending,
             isAccessibilityEnabled = accessibilityEnabled,
             wasProcessEndedByUser = wasProcessEndedByUser
         )
     }
 
+    /**
+     * The user came back from the hand-off, or declined it outright. Whatever was stored ahead of
+     * the grant is taken back unless the permission actually arrived.
+     */
     fun cancelPendingBatteryEnable() {
-        enableBatteryAfterAccessibility = false
+        batterySettingsRepository.settleAccessibilityGrant(
+            BatteryAccessibility.isEnabled(context)
+        )
     }
 
     fun toggleFavorite(themeId: Int) {

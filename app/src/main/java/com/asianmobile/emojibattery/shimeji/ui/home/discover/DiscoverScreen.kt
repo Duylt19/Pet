@@ -197,6 +197,7 @@ fun DiscoverScreen(
         GrantPermissionDialog(
             onGrantPermission = {
                 showAccessibilityDisclosure = false
+                viewModel.commitBatteryEnableRequest()
                 onNavigateToAccessibilityHowToUse()
             },
             onMaybeLater = {

@@ -86,7 +86,9 @@ Discover Home contract:
 - route `home` là root sau onboarding và hiển thị dữ liệu thật từ owner/battery catalog;
 - toggle chính điều khiển `BatteryStatusConfig.enabled`, có disclosure và Accessibility gate;
   Discover và Battery cùng tính trạng thái switch từ config đã lưu + trạng thái Accessibility
-  hiện tại mỗi lần app resume, nên việc cấp hoặc thu hồi quyền không làm hai tab lệch nhau;
+  hiện tại mỗi lần app resume, nên việc cấp hoặc thu hồi quyền không làm hai tab lệch nhau.
+  Bật khi chưa có quyền ghi `enabled = true` ngay trước khi mở disclosure — switch vẫn tắt cho tới
+  khi quyền có thật, vì cả hai tab luôn nhân với `BatteryAccessibility.isEnabled()`;
 - Home shell có bốn tab Discover/Battery/Shimeji Pets/Mine. `HomeBottomNavigation` cố định
   trên bottom banner hiện có; từng screen không tự tạo lại bottom chrome. Battery selected dùng
   glyph filled 24×24 export từ frame Figma `8017:3666`, không tái sử dụng icon outline unselected;
