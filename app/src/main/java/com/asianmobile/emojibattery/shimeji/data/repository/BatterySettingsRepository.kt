@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface BatterySettingsRepository {
     val config: StateFlow<BatteryStatusConfig>
     val hiddenAppPackages: StateFlow<Set<String>>
+    val recentThemeIds: StateFlow<List<Int>>
 
     fun applyConfig(config: BatteryStatusConfig)
 
@@ -32,6 +33,8 @@ interface BatterySettingsRepository {
     fun setAppHidden(packageName: String, hidden: Boolean)
 
     fun toggleFavorite(themeId: Int)
+
+    fun recordRecentTheme(themeId: Int)
 
     fun unlockThemeByReward(themeId: Int)
 

@@ -43,3 +43,23 @@ internal fun favouriteThemeUiStates(
         )
     }
     .toList()
+
+internal fun recentThemeUiStates(
+    themes: List<BatteryThemeEntry>,
+    recentThemeIds: List<Int>,
+    favoriteThemeIds: Set<Int>
+): List<FavouriteRecentThemeUiState> {
+    val themesById = themes.associateBy(BatteryThemeEntry::id)
+    return recentThemeIds.mapNotNull { themeId ->
+        themesById[themeId]
+            ?.takeIf(BatteryThemeEntry::assetsReady)
+            ?.let { theme ->
+                FavouriteRecentThemeUiState(
+                    id = theme.id,
+                    name = theme.name,
+                    thumbnailPath = theme.thumbnailPath,
+                    isFavorite = theme.id in favoriteThemeIds
+                )
+            }
+    }
+}

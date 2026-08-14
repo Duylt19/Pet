@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.asianmobile.emojibattery.shimeji.battery.settings.BatteryEnableIntent
 import com.asianmobile.emojibattery.shimeji.battery.settings.BatteryEnableIntentPolicy
 import com.asianmobile.emojibattery.shimeji.battery.settings.BatterySettingsPolicy
+import com.asianmobile.emojibattery.shimeji.battery.settings.BatteryRecentThemePolicy
 import com.asianmobile.emojibattery.shimeji.battery.settings.resolveBatteryStatusBarHeightRange
 import com.asianmobile.emojibattery.shimeji.battery.settings.systemStatusBarHeightDp
 import com.asianmobile.emojibattery.shimeji.data.local.dataStore
@@ -82,6 +83,19 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             scope = scope,
             started = SharingStarted.Eagerly,
             initialValue = emptySet()
+        )
+
+    override val recentThemeIds: StateFlow<List<Int>> = context.dataStore.data
+        .catch { error ->
+            if (error is IOException) emit(emptyPreferences()) else throw error
+        }
+        .map { preferences ->
+            BatteryRecentThemePolicy.decode(preferences[RECENT_THEME_IDS])
+        }
+        .stateIn(
+            scope = scope,
+            started = SharingStarted.Eagerly,
+            initialValue = emptyList()
         )
 
     override fun applyConfig(config: BatteryStatusConfig) {
@@ -238,6 +252,17 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             val current = decodeFavoriteIds(preferences).toMutableSet()
             if (!current.add(themeId)) current.remove(themeId)
             preferences[FAVORITE_THEME_IDS] = current.map(Int::toString).toSet()
+        }
+    }
+
+    override fun recordRecentTheme(themeId: Int) {
+        if (themeId <= BUILT_IN_BATTERY_THEME_ID) return
+        edit { preferences ->
+            val updated = BatteryRecentThemePolicy.record(
+                currentThemeIds = BatteryRecentThemePolicy.decode(preferences[RECENT_THEME_IDS]),
+                openedThemeId = themeId
+            )
+            preferences[RECENT_THEME_IDS] = BatteryRecentThemePolicy.encode(updated)
         }
     }
 
@@ -501,6 +526,7 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         val CLOCK_SIZE_DP = floatPreferencesKey("battery_status_clock_size_dp")
         val PRIVACY_RESERVE_DP = floatPreferencesKey("battery_status_privacy_reserve_dp")
         val FAVORITE_THEME_IDS = stringSetPreferencesKey("battery_status_favorite_theme_ids")
+        val RECENT_THEME_IDS = stringPreferencesKey("battery_status_recent_theme_ids")
         val REWARD_UNLOCKED_THEME_IDS =
             stringSetPreferencesKey("battery_status_reward_unlocked_theme_ids")
         val REWARD_UNLOCKED_BACKGROUND_IDS =

@@ -106,6 +106,20 @@ persisted preference. `state` phân biệt yêu cầu UI `STARTING` với contro
 hoặc swarm count theo mode hiện hành. Service dùng `START_NOT_STICKY` và không có boot receiver
 nên trạng thái running không được restore sau process death/reboot.
 
+Foreground handshake là invariant của service: mọi `onStartCommand`, kể cả lệnh Stop hoặc một
+lệnh Start đã bị UI hủy trước khi callback chạy, phải gọi `startForeground()` trước mọi nhánh
+`stopSelf()`. Điều này tránh race `ForegroundServiceDidNotStartInTimeException` khi user bật/tắt
+pet nhanh. Các repository/cache có thể quét file hoặc khởi tạo catalog được inject qua `Lazy`,
+để công việc đó chỉ bắt đầu sau khi notification foreground đã được đăng.
+
+## Battery recent themes
+
+Recent Battery là MRU persisted riêng khỏi `BatteryStatusConfig` draft. DataStore lưu chuỗi ID có
+thứ tự; mở một theme catalog hợp lệ trong Customize Status Bar sẽ đưa ID đó lên đầu, loại bản
+trùng và giữ tối đa 30 mục. Theme built-in/ID không hợp lệ không được ghi. Khi catalog thay đổi,
+ID đã mất hoặc asset chưa sẵn sàng bị bỏ khỏi UI nhưng không làm hỏng phần còn lại của lịch sử.
+Việc mở route Current Style không tạo bản ghi mới vì đó không phải một lựa chọn theme catalog.
+
 ## Pet pack model
 
 - `PetPackManifest` là schema v1 versioned gồm identity, canvas, anchor, interaction và action clips/frame metadata.

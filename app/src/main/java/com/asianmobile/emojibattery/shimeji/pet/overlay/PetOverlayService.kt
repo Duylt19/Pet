@@ -29,6 +29,7 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetBitmapCache
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
 import com.asianmobile.emojibattery.shimeji.pet.settings.PetSettingsPolicy
 import com.asianmobile.emojibattery.shimeji.pet.speech.OwnerPetSpeechAnchorPolicy
+import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -44,10 +45,19 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 @AndroidEntryPoint
 class PetOverlayService : Service() {
-    @Inject lateinit var petPackRepository: PetPackRepository
-    @Inject lateinit var petBitmapCache: PetBitmapCache
-    @Inject lateinit var petSettingsRepository: PetSettingsRepository
-    @Inject lateinit var ownerPetCatalogRepository: OwnerPetCatalogRepository
+    @Inject lateinit var petPackRepositoryLazy: Lazy<PetPackRepository>
+    @Inject lateinit var petBitmapCacheLazy: Lazy<PetBitmapCache>
+    @Inject lateinit var petSettingsRepositoryLazy: Lazy<PetSettingsRepository>
+    @Inject lateinit var ownerPetCatalogRepositoryLazy: Lazy<OwnerPetCatalogRepository>
+
+    private val petPackRepository: PetPackRepository
+        get() = petPackRepositoryLazy.get()
+    private val petBitmapCache: PetBitmapCache
+        get() = petBitmapCacheLazy.get()
+    private val petSettingsRepository: PetSettingsRepository
+        get() = petSettingsRepositoryLazy.get()
+    private val ownerPetCatalogRepository: OwnerPetCatalogRepository
+        get() = ownerPetCatalogRepositoryLazy.get()
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val settingsPolicy = PetSettingsPolicy()
@@ -74,6 +84,19 @@ class PetOverlayService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Every command delivered after startForegroundService() must complete the foreground
+        // handshake before any early stop. A fast user toggle can move the process-local state
+        // back to STOPPED before this callback runs; stopping first leaves Android waiting for
+        // startForeground() and ends in ForegroundServiceDidNotStartInTimeException.
+        try {
+            promoteToForeground()
+        } catch (error: RuntimeException) {
+            Log.e(TAG, "Unable to promote pet overlay service", error)
+            PetOverlayRuntime.updateRunning(false)
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         if (intent?.action == ACTION_STOP) {
             PetOverlayRuntime.updateStopRequested()
             stopSelf()
@@ -81,15 +104,6 @@ class PetOverlayService : Service() {
         }
 
         if (!PetOverlayRuntime.state.value.shouldStartService()) {
-            stopSelf()
-            return START_NOT_STICKY
-        }
-
-        try {
-            promoteToForeground()
-        } catch (error: RuntimeException) {
-            Log.e(TAG, "Unable to promote pet overlay service", error)
-            PetOverlayRuntime.updateRunning(false)
             stopSelf()
             return START_NOT_STICKY
         }

@@ -23,21 +23,33 @@ class FavouriteRecentViewModel @Inject constructor(
     val uiState: StateFlow<FavouriteRecentUiState> = combine(
         catalogRepository.snapshot,
         settingsRepository.config,
+        settingsRepository.recentThemeIds,
         selectedTab
-    ) { catalog, config, tab ->
+    ) { catalog, config, recentThemeIds, tab ->
         val favourites = favouriteThemeUiStates(
             themes = catalog.themes,
             favoriteThemeIds = config.favoriteThemeIds
         )
+        val recent = recentThemeUiStates(
+            themes = catalog.themes,
+            recentThemeIds = recentThemeIds,
+            favoriteThemeIds = config.favoriteThemeIds
+        )
+        val requestedIds = when (tab) {
+            FavouriteRecentTab.FAVOURITE -> config.favoriteThemeIds
+            FavouriteRecentTab.RECENT -> recentThemeIds.toSet()
+        }
+        val visibleThemes = when (tab) {
+            FavouriteRecentTab.FAVOURITE -> favourites
+            FavouriteRecentTab.RECENT -> recent
+        }
         FavouriteRecentUiState(
             selectedTab = tab,
             favouriteThemes = favourites,
-            // TODO(FavouriteRecent): add ordered MRU persistence when product defines
-            // which battery actions count as a recent item and the retention limit.
-            recentThemes = emptyList(),
+            recentThemes = recent,
             isLoading = catalog.isLoading,
             catalogLoadFailed = catalog.error != null &&
-                config.favoriteThemeIds.isNotEmpty() && favourites.isEmpty()
+                requestedIds.isNotEmpty() && visibleThemes.isEmpty()
         )
     }.stateIn(
         scope = viewModelScope,
