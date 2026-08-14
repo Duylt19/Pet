@@ -169,7 +169,6 @@ internal fun BatteryEditorFigmaContent(
                     state = state,
                     page = page,
                     innerPadding = innerPadding,
-                    onPremium = onPremium,
                     onSelectTheme = onSelectTheme,
                     onBackgroundDecoration = onBackgroundDecoration,
                     showEmbeddedPreview = showEmbeddedPreview,
@@ -1125,7 +1124,6 @@ private fun StatusBarPicker(
     state: BatteryEditorUiState,
     page: BatteryEditorPage,
     innerPadding: PaddingValues,
-    onPremium: () -> Unit,
     onSelectTheme: (BatteryThemeEntry, BatteryThemeComponent) -> Unit,
     onBackgroundDecoration: (Int) -> Unit,
     showEmbeddedPreview: Boolean,
@@ -1169,8 +1167,13 @@ private fun StatusBarPicker(
             if (page == BatteryEditorPage.BACKGROUND_THEMES) {
                 items(state.backgrounds.size, key = { state.backgrounds[it].id }) { index ->
                     val background = state.backgrounds[index]
-                    // TODO: replace this policy when background entitlement is catalog data.
-                    val locked = index >= FIGMA_FREE_BACKGROUND_COUNT && !state.isPremium
+                    val locked = BatteryBackgroundAccessPolicy.resolve(
+                        background = background,
+                        catalogIndex = index,
+                        isPremium = state.isPremium,
+                        rewardUnlockedBackgroundIds =
+                            state.config.rewardUnlockedBackgroundIds
+                    ) == BatteryBackgroundAccess.REWARD_OR_PREMIUM
                     BackgroundThemeOption(
                         background = background,
                         selected = state.config.backgroundDecorationId == background.id,
@@ -1180,9 +1183,7 @@ private fun StatusBarPicker(
                         showSelectionBorder = true,
                         locked = locked,
                         loading = state.backgroundSelectionInProgress == background.id,
-                        onClick = {
-                            if (locked) onPremium() else onBackgroundDecoration(background.id)
-                        }
+                        onClick = { onBackgroundDecoration(background.id) }
                     )
                 }
             } else {
@@ -1361,6 +1362,5 @@ private enum class StatusBarColorTarget {
 }
 
 private const val PICKER_ART_FRACTION = 0.7303f
-private const val FIGMA_FREE_BACKGROUND_COUNT = 5
 private const val INLINE_BACKGROUND_PREVIEW_COUNT = 5
 private const val ANDROID_ASSET_URI_PREFIX = "file:///android_asset/"

@@ -55,7 +55,8 @@ class BatterySettingsPolicyTest {
                 animationAssetName = "../bad.json",
                 privacyReserveDp = 200f,
                 favoriteThemeIds = setOf(-1, 0, 7),
-                rewardUnlockedThemeIds = setOf(-1, 0, 8)
+                rewardUnlockedThemeIds = setOf(-1, 0, 8),
+                rewardUnlockedBackgroundIds = setOf(-1, 0, 9)
             )
         )
 
@@ -82,6 +83,7 @@ class BatterySettingsPolicyTest {
         assertEquals(128f, sanitized.privacyReserveDp)
         assertEquals(setOf(0, 7), sanitized.favoriteThemeIds)
         assertEquals(setOf(8), sanitized.rewardUnlockedThemeIds)
+        assertEquals(setOf(9), sanitized.rewardUnlockedBackgroundIds)
     }
 
     @Test

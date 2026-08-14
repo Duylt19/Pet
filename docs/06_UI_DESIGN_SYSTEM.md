@@ -176,6 +176,9 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   illustration Animation thay vì để trống;
 - Hàng Theme ở overview hiển thị trước năm background. Nếu background đang chọn nằm ngoài năm
   item đầu, hàng giữ bốn item đầu và đưa item đang chọn vào vị trí thứ năm;
+- Background Theme giữ năm item đầu miễn phí trong baseline catalog v1. Item còn lại mở shared
+  Rewarded/Premium offer như Battery/Emoji, chỉ materialize asset sau khi user đủ quyền truy cập
+  và lưu reward unlock trong namespace background riêng để không trùng ID theme;
 - Background Color và Theme là hai mode loại trừ nhau: chọn Color đặt decoration ID về `0` và
   chỉ hiện viền selected ở palette; chọn Theme chỉ hiện selected ở theme, không tiếp tục tô màu
   nền phía dưới asset;

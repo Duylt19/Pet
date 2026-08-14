@@ -75,7 +75,8 @@ class BatteryDraftCodecTest {
             clockSizeDp = 21f,
             privacyReserveDp = 88f,
             favoriteThemeIds = setOf(1, 9, 42),
-            rewardUnlockedThemeIds = setOf(4, 8, 42)
+            rewardUnlockedThemeIds = setOf(4, 8, 42),
+            rewardUnlockedBackgroundIds = setOf(9, 18, 38)
         )
 
         assertEquals(config, BatteryDraftCodec.decode(BatteryDraftCodec.encode(config)))

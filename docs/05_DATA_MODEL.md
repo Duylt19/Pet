@@ -189,6 +189,10 @@ nên trạng thái running không được restore sau process death/reboot.
   để reset lựa chọn cũ thay vì âm thầm đổi nghĩa ID.
 - `BatteryStatusConfig` là persistent source of truth. `BatterySettingsPolicy` clamp
   geometry/color/favorite/reward unlock trước khi ghi và sau khi decode DataStore.
+- Reward unlock của Battery/Emoji theme, Background theme và Battery Troll được lưu trong ba
+  namespace ID độc lập: `rewardUnlockedThemeIds`, `rewardUnlockedBackgroundIds` và
+  `rewardUnlockedTrollIds`. Không dùng chung set vì các catalog có thể trùng ID; Background đã
+  nhận reward tiếp tục mở sau khi khởi động lại app và không làm mở nhầm Battery/Emoji theme.
 - Ý định bật thanh pin cũng nằm ở đây chứ không phải flag in-memory: mọi entry point ghi
   `enabled = true` **trước** khi chuyển user sang Accessibility Settings, nên service gắn overlay
   ngay lúc được bind. `pendingAccessibilityGrant` đánh dấu lần ghi đó cho tới khi quyền xác nhận

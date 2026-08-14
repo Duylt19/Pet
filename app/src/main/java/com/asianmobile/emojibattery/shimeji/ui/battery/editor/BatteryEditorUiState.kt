@@ -35,6 +35,7 @@ data class BatteryEditorUiState(
     val hasUnsavedChanges: Boolean = false,
     val isPremium: Boolean = false,
     val pendingSelection: BatteryEditorThemeSelection? = null,
+    val pendingBackgroundSelectionId: Int? = null,
     val assetSelectionInProgress: BatteryEditorThemeSelection? = null,
     val backgroundSelectionInProgress: Int? = null,
     val emotionSelectionInProgress: Int? = null,

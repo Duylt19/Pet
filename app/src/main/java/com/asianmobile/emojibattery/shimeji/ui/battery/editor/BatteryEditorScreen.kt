@@ -106,6 +106,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_STYLE_INDEX
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryBackgroundRewardUnlockSheet
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockSheet
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.BATTERY_PREVIEW_DEFAULT_PERCENT
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.BatteryStatusPreviewCard
@@ -113,7 +115,6 @@ import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStat
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CutePetTopBar
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
-import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockSheet
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.ToastHelper
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -209,11 +210,20 @@ internal fun BatteryEditorScreen(
         accessibilityEnabled = accessibilityEnabled,
         statusBarEnabled = state.config.enabled
     )
-    val requiresRewardAd = !state.isPremium && state.themes.any { theme ->
-        theme.assetsReady &&
-            theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
-            theme.id !in state.config.rewardUnlockedThemeIds
-    }
+    val requiresRewardAd = !state.isPremium && (
+        state.themes.any { theme ->
+            theme.assetsReady &&
+                theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
+                theme.id !in state.config.rewardUnlockedThemeIds
+        } || state.backgrounds.withIndex().any { (index, background) ->
+            BatteryBackgroundAccessPolicy.resolve(
+                background = background,
+                catalogIndex = index,
+                isPremium = false,
+                rewardUnlockedBackgroundIds = state.config.rewardUnlockedBackgroundIds
+            ) == BatteryBackgroundAccess.REWARD_OR_PREMIUM
+        }
+    )
 
     TrackScreenView(page.analyticsScreen())
     LaunchedEffect(accessibilityHowToUseResult) {
@@ -333,6 +343,19 @@ internal fun BatteryEditorScreen(
             onWatchReward = viewModel::requestRewardUnlock,
             onPremium = onNavigateToPremium
         )
+    } else if (state.pendingBackgroundSelectionId != null) {
+        state.backgrounds.firstOrNull {
+            it.id == state.pendingBackgroundSelectionId
+        }?.let { background ->
+            BatteryBackgroundRewardUnlockSheet(
+                background = background,
+                isLoading = state.isRewardInProgress,
+                rewardNotEarned = state.message == BatteryEditorMessage.REWARD_NOT_EARNED,
+                onDismiss = viewModel::dismissUnlockDialog,
+                onWatchReward = viewModel::requestRewardUnlock,
+                onPremium = onNavigateToPremium
+            )
+        }
     } else if (
         state.message == BatteryEditorMessage.THEME_UNAVAILABLE ||
         state.message == BatteryEditorMessage.ASSET_DOWNLOAD_FAILED

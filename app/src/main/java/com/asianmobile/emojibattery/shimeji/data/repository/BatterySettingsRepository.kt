@@ -35,5 +35,7 @@ interface BatterySettingsRepository {
 
     fun unlockThemeByReward(themeId: Int)
 
+    fun unlockBackgroundByReward(backgroundId: Int)
+
     fun unlockTrollByReward(trollId: Int)
 }

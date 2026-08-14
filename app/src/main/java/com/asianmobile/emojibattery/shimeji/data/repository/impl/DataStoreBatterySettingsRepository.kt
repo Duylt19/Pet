@@ -134,6 +134,9 @@ class DataStoreBatterySettingsRepository @Inject constructor(
     ) {
         val rewardUnlockedThemeIds =
             decodeRewardUnlockedIds(preferences) + sanitized.rewardUnlockedThemeIds
+        val rewardUnlockedBackgroundIds =
+            decodeRewardUnlockedBackgroundIds(preferences) +
+                sanitized.rewardUnlockedBackgroundIds
         preferences[ENABLED] = intent.enabled
         preferences[PENDING_ACCESSIBILITY_GRANT] = intent.pendingAccessibilityGrant
         preferences[HAS_APPLIED] = sanitized.hasApplied
@@ -199,6 +202,8 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             sanitized.favoriteThemeIds.map(Int::toString).toSet()
         preferences[REWARD_UNLOCKED_THEME_IDS] =
             rewardUnlockedThemeIds.map(Int::toString).toSet()
+        preferences[REWARD_UNLOCKED_BACKGROUND_IDS] =
+            rewardUnlockedBackgroundIds.map(Int::toString).toSet()
         preferences[TROLL_MODE] = sanitized.trollMode.name
         preferences[TROLL_FAKE_PERCENT] = sanitized.trollFakePercent
         preferences[TROLL_THEME_ID] = sanitized.trollThemeId
@@ -251,6 +256,16 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             val current = decodeRewardUnlockedIds(preferences).toMutableSet()
             current += themeId
             preferences[REWARD_UNLOCKED_THEME_IDS] = current.map(Int::toString).toSet()
+        }
+    }
+
+    override fun unlockBackgroundByReward(backgroundId: Int) {
+        if (backgroundId <= 0) return
+        edit { preferences ->
+            val current = decodeRewardUnlockedBackgroundIds(preferences).toMutableSet()
+            current += backgroundId
+            preferences[REWARD_UNLOCKED_BACKGROUND_IDS] =
+                current.map(Int::toString).toSet()
         }
     }
 
@@ -364,6 +379,8 @@ class DataStoreBatterySettingsRepository @Inject constructor(
                     ?: DEFAULT_BATTERY_PRIVACY_RESERVE_DP,
                 favoriteThemeIds = decodeFavoriteIds(preferences),
                 rewardUnlockedThemeIds = decodeRewardUnlockedIds(preferences),
+                rewardUnlockedBackgroundIds =
+                    decodeRewardUnlockedBackgroundIds(preferences),
                 trollMode = preferences[TROLL_MODE]
                     ?.let { name -> BatteryTrollMode.entries.firstOrNull { it.name == name } }
                     ?: defaults.trollMode,
@@ -397,6 +414,12 @@ class DataStoreBatterySettingsRepository @Inject constructor(
             .orEmpty()
             .mapNotNull(String::toIntOrNull)
             .filterTo(mutableSetOf()) { it > BUILT_IN_BATTERY_THEME_ID }
+
+    private fun decodeRewardUnlockedBackgroundIds(preferences: Preferences): Set<Int> =
+        preferences[REWARD_UNLOCKED_BACKGROUND_IDS]
+            .orEmpty()
+            .mapNotNull(String::toIntOrNull)
+            .filterTo(mutableSetOf()) { it > 0 }
 
     private fun edit(block: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
         scope.launch {
@@ -480,6 +503,8 @@ class DataStoreBatterySettingsRepository @Inject constructor(
         val FAVORITE_THEME_IDS = stringSetPreferencesKey("battery_status_favorite_theme_ids")
         val REWARD_UNLOCKED_THEME_IDS =
             stringSetPreferencesKey("battery_status_reward_unlocked_theme_ids")
+        val REWARD_UNLOCKED_BACKGROUND_IDS =
+            stringSetPreferencesKey("battery_status_reward_unlocked_background_ids")
         val HIDDEN_APP_PACKAGES = stringSetPreferencesKey("battery_status_hidden_app_packages")
         val TROLL_MODE = stringPreferencesKey("battery_troll_mode")
         val TROLL_FAKE_PERCENT = intPreferencesKey("battery_troll_fake_percent")

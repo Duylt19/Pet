@@ -139,7 +139,8 @@ class BatteryEditorViewModel @Inject constructor(
                     trendingEmojiThemeIds = catalog.trendingEmojiThemeIds,
                     categories = catalog.categories,
                     config = draft.copy(
-                        rewardUnlockedThemeIds = stored.rewardUnlockedThemeIds
+                        rewardUnlockedThemeIds = stored.rewardUnlockedThemeIds,
+                        rewardUnlockedBackgroundIds = stored.rewardUnlockedBackgroundIds
                     ),
                     backgrounds = catalog.backgrounds,
                     emotions = catalog.emotions,
@@ -198,7 +199,33 @@ class BatteryEditorViewModel @Inject constructor(
         BatteryBackgroundSelectionPolicy.selectColor(this, value)
     }
     fun setForegroundColor(value: Int) = update { copy(foregroundColorArgb = value) }
-    fun selectBackground(background: BatteryDecorationEntry) {
+    fun requestBackground(background: BatteryDecorationEntry) {
+        val state = _uiState.value
+        val index = state.backgrounds.indexOfFirst { it.id == background.id }
+        when (
+            BatteryBackgroundAccessPolicy.resolve(
+                background = background,
+                catalogIndex = index,
+                isPremium = state.isPremium,
+                rewardUnlockedBackgroundIds = state.config.rewardUnlockedBackgroundIds
+            )
+        ) {
+            BatteryBackgroundAccess.OPEN -> prepareAndSelectBackground(background)
+            BatteryBackgroundAccess.REWARD_OR_PREMIUM -> _uiState.update {
+                it.copy(
+                    pendingSelection = null,
+                    pendingBackgroundSelectionId = background.id,
+                    isRewardInProgress = false,
+                    message = null
+                )
+            }
+            BatteryBackgroundAccess.UNAVAILABLE -> _uiState.update {
+                it.copy(message = BatteryEditorMessage.THEME_UNAVAILABLE)
+            }
+        }
+    }
+
+    private fun prepareAndSelectBackground(background: BatteryDecorationEntry) {
         val state = _uiState.value
         if (state.backgroundSelectionInProgress != null) return
         if (state.config.backgroundDecorationId == background.id) return
@@ -239,7 +266,7 @@ class BatteryEditorViewModel @Inject constructor(
             update { copy(backgroundDecorationId = 0) }
             return
         }
-        _uiState.value.backgrounds.firstOrNull { it.id == value }?.let(::selectBackground)
+        _uiState.value.backgrounds.firstOrNull { it.id == value }?.let(::requestBackground)
     }
     fun setShowEmotion(value: Boolean) = update { copy(showEmotion = value) }
     fun selectEmotion(emotion: BatteryDecorationEntry) {
@@ -320,6 +347,7 @@ class BatteryEditorViewModel @Inject constructor(
             BatteryThemeAccess.REWARD_OR_PREMIUM -> _uiState.update {
                 it.copy(
                     pendingSelection = BatteryEditorThemeSelection(theme.id, component),
+                    pendingBackgroundSelectionId = null,
                     isRewardInProgress = false,
                     message = null
                 )
@@ -332,28 +360,25 @@ class BatteryEditorViewModel @Inject constructor(
 
     fun dismissUnlockDialog() {
         if (_uiState.value.isRewardInProgress) return
-        _uiState.update { it.copy(pendingSelection = null, message = null) }
+        _uiState.update {
+            it.copy(
+                pendingSelection = null,
+                pendingBackgroundSelectionId = null,
+                message = null
+            )
+        }
     }
 
     fun requestRewardUnlock() {
         val state = _uiState.value
-        val pending = state.pendingSelection ?: return
-        val theme = state.themes.firstOrNull { it.id == pending.themeId } ?: return
-        if (state.isRewardInProgress ||
-            accessPolicy.resolve(theme, state.isPremium, state.config.rewardUnlockedThemeIds) !=
-            BatteryThemeAccess.REWARD_OR_PREMIUM
-        ) {
-            return
-        }
+        if (state.isRewardInProgress || !hasRewardUnlockPending(state)) return
         _uiState.update { it.copy(isRewardInProgress = true, message = null) }
         emit(BatteryEditorEffect.ShowRewardedAd)
     }
 
     fun onRewardResult(canContinue: Boolean) {
         val state = _uiState.value
-        val pending = state.pendingSelection ?: return
         if (!state.isRewardInProgress) return
-        val theme = state.themes.firstOrNull { it.id == pending.themeId }
         if (!canContinue) {
             _uiState.update {
                 it.copy(
@@ -363,6 +388,36 @@ class BatteryEditorViewModel @Inject constructor(
             }
             return
         }
+        val pendingBackgroundId = state.pendingBackgroundSelectionId
+        if (pendingBackgroundId != null) {
+            val background = state.backgrounds.firstOrNull { it.id == pendingBackgroundId }
+            if (background == null) {
+                _uiState.update {
+                    it.copy(
+                        pendingBackgroundSelectionId = null,
+                        isRewardInProgress = false,
+                        message = BatteryEditorMessage.THEME_UNAVAILABLE
+                    )
+                }
+                return
+            }
+            settingsRepository.unlockBackgroundByReward(background.id)
+            _uiState.update {
+                it.copy(
+                    config = it.config.copy(
+                        rewardUnlockedBackgroundIds =
+                            it.config.rewardUnlockedBackgroundIds + background.id
+                    ),
+                    pendingBackgroundSelectionId = null,
+                    isRewardInProgress = false,
+                    message = null
+                )
+            }
+            prepareAndSelectBackground(background)
+            return
+        }
+        val pending = state.pendingSelection ?: return
+        val theme = state.themes.firstOrNull { it.id == pending.themeId }
         if (theme?.assetsReady != true) {
             _uiState.update {
                 it.copy(
@@ -391,6 +446,7 @@ class BatteryEditorViewModel @Inject constructor(
         val premium = SharedPreferencesUtils.getIsPremium(context)
         val state = _uiState.value
         val pending = state.pendingSelection
+        val pendingBackgroundId = state.pendingBackgroundSelectionId
         _uiState.update { it.copy(isPremium = premium) }
         if (premium && pending != null) {
             val theme = state.themes.firstOrNull { it.id == pending.themeId }
@@ -403,6 +459,18 @@ class BatteryEditorViewModel @Inject constructor(
                     )
                 }
                 prepareAndSelectTheme(theme, pending.component)
+            }
+        }
+        if (premium && pendingBackgroundId != null) {
+            state.backgrounds.firstOrNull { it.id == pendingBackgroundId }?.let { background ->
+                _uiState.update {
+                    it.copy(
+                        pendingBackgroundSelectionId = null,
+                        isRewardInProgress = false,
+                        message = null
+                    )
+                }
+                prepareAndSelectBackground(background)
             }
         }
     }
@@ -572,6 +640,26 @@ class BatteryEditorViewModel @Inject constructor(
 
     private fun emit(effect: BatteryEditorEffect) {
         viewModelScope.launch { _effects.send(effect) }
+    }
+
+    private fun hasRewardUnlockPending(state: BatteryEditorUiState): Boolean {
+        state.pendingSelection?.let { pending ->
+            val theme = state.themes.firstOrNull { it.id == pending.themeId } ?: return false
+            return accessPolicy.resolve(
+                theme,
+                state.isPremium,
+                state.config.rewardUnlockedThemeIds
+            ) == BatteryThemeAccess.REWARD_OR_PREMIUM
+        }
+        val backgroundId = state.pendingBackgroundSelectionId ?: return false
+        val index = state.backgrounds.indexOfFirst { it.id == backgroundId }
+        val background = state.backgrounds.getOrNull(index) ?: return false
+        return BatteryBackgroundAccessPolicy.resolve(
+            background = background,
+            catalogIndex = index,
+            isPremium = state.isPremium,
+            rewardUnlockedBackgroundIds = state.config.rewardUnlockedBackgroundIds
+        ) == BatteryBackgroundAccess.REWARD_OR_PREMIUM
     }
 
     private fun clearDraft() {

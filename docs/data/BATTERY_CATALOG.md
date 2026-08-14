@@ -32,6 +32,12 @@ JSON giữ nguyên. Path trong catalog là source of truth; app không tự thay
 Asset record có `path`, `sizeBytes`, `sha256`, `width`, `height`. Preview phải nhẹ hơn full.
 Theme entitlement là `FREE|PREMIUM`; source status là `REVIEW_REQUIRED|APPROVED`.
 
+Trong baseline debug v1, background chưa có field entitlement riêng: năm item đầu theo catalog
+order là miễn phí; phần còn lại đi qua cùng Rewarded/Premium offer flow của Battery theme.
+Reward unlock được persist bằng `rewardUnlockedBackgroundIds` riêng biệt và full asset chỉ được
+materialize/verify sau khi access policy cho phép chọn. Khi server bổ sung entitlement cho
+background, parser/policy phải chuyển sang field catalog thay vì suy luận từ vị trí.
+
 Baseline debug schema v1 có optional ordered `trendingEmojiThemeIds` dùng chung cho Discover và
 tab Battery. Catalog cũ thiếu field dùng fallback đóng gói trong app; field có mặt giữ thứ tự
 catalog, bỏ ID không dương/trùng và cho phép `[]` để ẩn section. Ranking này đồng thời điều khiển

@@ -86,6 +86,10 @@ object BatteryDraftCodec {
             "rewardUnlockedThemeIds",
             JSONArray().apply { config.rewardUnlockedThemeIds.sorted().forEach(::put) }
         )
+        .put(
+            "rewardUnlockedBackgroundIds",
+            JSONArray().apply { config.rewardUnlockedBackgroundIds.sorted().forEach(::put) }
+        )
         .toString()
 
     fun decode(
@@ -225,6 +229,10 @@ object BatteryDraftCodec {
                 rewardUnlockedThemeIds = json.intSet(
                     "rewardUnlockedThemeIds",
                     fallback.rewardUnlockedThemeIds
+                ),
+                rewardUnlockedBackgroundIds = json.intSet(
+                    "rewardUnlockedBackgroundIds",
+                    fallback.rewardUnlockedBackgroundIds
                 )
             )
         }.getOrNull()

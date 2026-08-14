@@ -70,6 +70,8 @@ data class BatteryStatusConfig(
     val privacyReserveDp: Float = DEFAULT_BATTERY_PRIVACY_RESERVE_DP,
     val favoriteThemeIds: Set<Int> = emptySet(),
     val rewardUnlockedThemeIds: Set<Int> = emptySet(),
+    // Background IDs are a separate catalog namespace from Battery theme IDs.
+    val rewardUnlockedBackgroundIds: Set<Int> = emptySet(),
     // Battery Troll rides this same config: it only changes which number is written and
     // which artwork is drawn, never how the status bar is attached.
     val trollMode: BatteryTrollMode = BatteryTrollMode.REAL,

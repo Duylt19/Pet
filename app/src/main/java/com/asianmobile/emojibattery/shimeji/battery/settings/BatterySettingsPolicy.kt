@@ -102,6 +102,8 @@ class BatterySettingsPolicy(
         favoriteThemeIds = config.favoriteThemeIds.filterTo(mutableSetOf()) { it >= 0 },
         rewardUnlockedThemeIds = config.rewardUnlockedThemeIds
             .filterTo(mutableSetOf()) { it > BUILT_IN_BATTERY_THEME_ID },
+        rewardUnlockedBackgroundIds = config.rewardUnlockedBackgroundIds
+            .filterTo(mutableSetOf()) { it > 0 },
         trollThemeId = config.trollThemeId.coerceAtLeast(NO_BATTERY_TROLL_THEME_ID),
         trollFakePercent = config.trollFakePercent.coerceIn(
             MIN_BATTERY_TROLL_FAKE_PERCENT,

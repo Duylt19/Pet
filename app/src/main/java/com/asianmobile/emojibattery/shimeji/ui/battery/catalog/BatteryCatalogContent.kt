@@ -53,6 +53,7 @@ import com.asianmobile.emojibattery.shimeji.ads.config.DIALOG_BATTERY_REWARD
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_CATALOG
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
@@ -537,6 +538,34 @@ internal fun BatteryRewardUnlockSheet(
 }
 
 @Composable
+internal fun BatteryBackgroundRewardUnlockSheet(
+    background: BatteryDecorationEntry,
+    isLoading: Boolean,
+    rewardNotEarned: Boolean,
+    onDismiss: () -> Unit,
+    onWatchReward: () -> Unit,
+    onPremium: () -> Unit
+) {
+    RewardOfferSheet(onDismiss = if (isLoading) ({}) else onDismiss) {
+        BatteryRewardUnlockContent(
+            isLoading = isLoading,
+            rewardNotEarned = rewardNotEarned,
+            onWatchReward = onWatchReward,
+            onPremium = onPremium,
+            previewContent = {
+                AsyncImage(
+                    model = background.pickerPath,
+                    contentDescription = background.name,
+                    contentScale = ContentScale.Crop,
+                    filterQuality = FilterQuality.High,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        )
+    }
+}
+
+@Composable
 internal fun BatteryRewardUnlockSheetContent(
     theme: BatteryThemeEntry,
     isLoading: Boolean,
@@ -544,6 +573,30 @@ internal fun BatteryRewardUnlockSheetContent(
     onWatchReward: () -> Unit,
     onPremium: () -> Unit,
     nativeAdContent: @Composable () -> Unit = { BatteryRewardNativeAd() }
+) {
+    BatteryRewardUnlockContent(
+        isLoading = isLoading,
+        rewardNotEarned = rewardNotEarned,
+        onWatchReward = onWatchReward,
+        onPremium = onPremium,
+        nativeAdContent = nativeAdContent,
+        previewContent = {
+            BatteryThemePreview(
+                theme = theme,
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._74sdp))
+            )
+        }
+    )
+}
+
+@Composable
+private fun BatteryRewardUnlockContent(
+    isLoading: Boolean,
+    rewardNotEarned: Boolean,
+    onWatchReward: () -> Unit,
+    onPremium: () -> Unit,
+    nativeAdContent: @Composable () -> Unit = { BatteryRewardNativeAd() },
+    previewContent: @Composable () -> Unit
 ) {
     val previewShape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
     Box(
@@ -558,10 +611,7 @@ internal fun BatteryRewardUnlockSheetContent(
             ),
         contentAlignment = Alignment.Center
     ) {
-        BatteryThemePreview(
-            theme = theme,
-            modifier = Modifier.size(dimensionResource(SdpR.dimen._74sdp))
-        )
+        previewContent()
     }
     Text(
         text = stringResource(R.string.battery_reward_unlock_title),
