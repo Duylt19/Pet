@@ -18,6 +18,20 @@ flow onboarding cho tới khi policy first-permission được bật lại.
 - Shared primitives nằm ở `ui/shared/component/CutePetComponents.kt`; component dark cũ không được
   dùng cho product screen mới nếu không có lý do tương thích.
 
+## Async data states
+
+- Mọi vùng nội dung lấy từ owner pet, battery hoặc room catalog dùng cùng thứ tự ưu tiên:
+  content cache/runtime đang có → loading khi chưa có content → load failed/offline → empty thật.
+  Một lần refresh lỗi không được xoá hoặc che dữ liệu cache vẫn dùng được.
+- `AsyncContentStatePanel` là surface loading/empty/error dùng chung. Trạng thái lỗi phải có
+  `Try again` nối về đúng repository của vùng hiện tại; empty thật không hiện retry giả.
+- Discover xử lý độc lập Pet và Battery để một catalog lỗi không chặn catalog còn lại. Search
+  retry theo tab đang chọn. Pet Store, Pet Room (roster/room), Battery landing/category và
+  Favourite dùng cùng contract. Các picker remote trong Customize Status Bar và bảng giá
+  Premium cũng không được để row/card rỗng khi catalog hoặc Billing lỗi. Battery Troll, Troll
+  Customize và Apps that hide icons giữ error UI chuyên biệt sẵn có vì chúng cần diễn giải
+  policy/platform cụ thể.
+
 Intro và Premium cố ý chưa đổi trong refresh hiện tại. Permission hiện là destination inactive.
 
 Splash và App Open Welcome Back theo Figma node `8088:12715`/`8088:12986`:

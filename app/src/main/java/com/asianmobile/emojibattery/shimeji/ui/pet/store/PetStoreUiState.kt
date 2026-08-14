@@ -35,6 +35,7 @@ data class PetStoreUiState(
     val selectedTab: PetStoreTab = PetStoreTab.PETS,
     val selectedCategory: String? = null,
     val isLoading: Boolean = true,
+    val catalogLoadFailed: Boolean = false,
     val isPetOnScreenEnabled: Boolean = false,
     val isPetOnScreenStarting: Boolean = false,
     val overlayGranted: Boolean = false,

@@ -73,7 +73,9 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomePremiumButton
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.resolveAsyncContentState
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -101,7 +103,8 @@ internal fun BatteryEditorFigmaContent(
     onBackgroundDecoration: (Int) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
     onApply: () -> Unit,
-    showEmbeddedPreview: Boolean = true
+    showEmbeddedPreview: Boolean = true,
+    onRetry: () -> Unit = {}
 ) {
     val isOverview = page == BatteryEditorPage.OVERVIEW
     val scrollBehavior = if (isOverview) {
@@ -158,7 +161,8 @@ internal fun BatteryEditorFigmaContent(
                     onBackgroundColor = onBackgroundColor,
                     onBackgroundDecoration = onBackgroundDecoration,
                     onConfig = onConfig,
-                    showEmbeddedPreview = showEmbeddedPreview
+                    showEmbeddedPreview = showEmbeddedPreview,
+                    onRetry = onRetry
                 )
             } else {
                 StatusBarPicker(
@@ -168,7 +172,8 @@ internal fun BatteryEditorFigmaContent(
                     onPremium = onPremium,
                     onSelectTheme = onSelectTheme,
                     onBackgroundDecoration = onBackgroundDecoration,
-                    showEmbeddedPreview = showEmbeddedPreview
+                    showEmbeddedPreview = showEmbeddedPreview,
+                    onRetry = onRetry
                 )
             }
         }
@@ -293,7 +298,8 @@ private fun StatusBarOverview(
     onBackgroundColor: (Int) -> Unit,
     onBackgroundDecoration: (Int) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
-    showEmbeddedPreview: Boolean
+    showEmbeddedPreview: Boolean,
+    onRetry: () -> Unit
 ) {
     var activeColorTarget by remember { mutableStateOf<StatusBarColorTarget?>(null) }
     Column(
@@ -321,7 +327,8 @@ private fun StatusBarOverview(
                         component = BatteryThemeComponent.BATTERY,
                         selectedThemeId = state.config.selectedBatteryThemeId,
                         onMore = { onOpenPage(BatteryEditorPage.BATTERY_TEMPLATES) },
-                        onSelectTheme = onSelectTheme
+                        onSelectTheme = onSelectTheme,
+                        onRetry = onRetry
                     )
                     Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
                     TemplatePickerRow(
@@ -331,13 +338,15 @@ private fun StatusBarOverview(
                         component = BatteryThemeComponent.EMOJI,
                         selectedThemeId = state.config.selectedEmojiThemeId,
                         onMore = { onOpenPage(BatteryEditorPage.EMOJI_TEMPLATES) },
-                        onSelectTheme = onSelectTheme
+                        onSelectTheme = onSelectTheme,
+                        onRetry = onRetry
                     )
                     Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
                     AnimationPickerRow(
                         state = state,
                         onMore = { onOpenPage(BatteryEditorPage.ANIMATION) },
-                        onConfig = onConfig
+                        onConfig = onConfig,
+                        onRetry = onRetry
                     )
                 }
             }
@@ -358,12 +367,16 @@ private fun StatusBarOverview(
                         titleEmoji = stringResource(R.string.battery_editor_theme_icon),
                         onMore = { onOpenPage(BatteryEditorPage.BACKGROUND_THEMES) }
                     )
-                    BackgroundThemeRow(
-                        backgrounds = state.backgrounds,
-                        selectedId = state.config.backgroundDecorationId,
-                        loadingId = state.backgroundSelectionInProgress,
-                        onSelected = onBackgroundDecoration
-                    )
+                    if (state.backgrounds.isEmpty()) {
+                        EditorCatalogStatePanel(state = state, onRetry = onRetry)
+                    } else {
+                        BackgroundThemeRow(
+                            backgrounds = state.backgrounds,
+                            selectedId = state.config.backgroundDecorationId,
+                            loadingId = state.backgroundSelectionInProgress,
+                            onSelected = onBackgroundDecoration
+                        )
+                    }
                 }
             }
             item {
@@ -495,18 +508,24 @@ private fun TemplatePickerRow(
     component: BatteryThemeComponent,
     selectedThemeId: Int,
     onMore: () -> Unit,
-    onSelectTheme: (BatteryThemeEntry, BatteryThemeComponent) -> Unit
+    onSelectTheme: (BatteryThemeEntry, BatteryThemeComponent) -> Unit,
+    onRetry: () -> Unit
 ) {
     DesignRowHeader(title = title, titleIcon = titleIcon, onMore = onMore)
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+    val themes = BatteryEditorThemeDisplayPolicy.selectableThemes(
+        themes = state.themes,
+        trendingThemeIds = state.trendingEmojiThemeIds
+    )
+    if (themes.isEmpty()) {
+        EditorCatalogStatePanel(state = state, onRetry = onRetry)
+        return
+    }
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
     ) {
         items(
-            BatteryEditorThemeDisplayPolicy.selectableThemes(
-                themes = state.themes,
-                trendingThemeIds = state.trendingEmojiThemeIds
-            ),
+            themes,
             key = { it.id }
         ) { theme ->
             val locked = theme.entitlement == BatteryThemeEntitlement.PREMIUM &&
@@ -529,7 +548,8 @@ private fun TemplatePickerRow(
 private fun AnimationPickerRow(
     state: BatteryEditorUiState,
     onMore: () -> Unit,
-    onConfig: (BatteryStatusConfig) -> Unit
+    onConfig: (BatteryStatusConfig) -> Unit,
+    onRetry: () -> Unit
 ) {
     DesignRowHeader(
         title = stringResource(R.string.battery_component_animation),
@@ -537,6 +557,10 @@ private fun AnimationPickerRow(
         onMore = onMore
     )
     Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+    if (state.animations.isEmpty()) {
+        EditorCatalogStatePanel(state = state, onRetry = onRetry)
+        return
+    }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
         items(state.animations, key = { it.id }) { animation ->
             AnimationTemplateOption(
@@ -554,6 +578,24 @@ private fun AnimationPickerRow(
             )
         }
     }
+}
+
+@Composable
+private fun EditorCatalogStatePanel(
+    state: BatteryEditorUiState,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AsyncContentStatePanel(
+        state = resolveAsyncContentState(
+            isLoading = state.isCatalogLoading,
+            hasError = state.catalogLoadFailed,
+            isEmpty = true
+        ),
+        modifier = modifier,
+        minHeight = dimensionResource(SdpR.dimen._69sdp),
+        onRetry = onRetry
+    )
 }
 
 @Composable
@@ -1075,9 +1117,18 @@ private fun StatusBarPicker(
     onPremium: () -> Unit,
     onSelectTheme: (BatteryThemeEntry, BatteryThemeComponent) -> Unit,
     onBackgroundDecoration: (Int) -> Unit,
-    showEmbeddedPreview: Boolean
+    showEmbeddedPreview: Boolean,
+    onRetry: () -> Unit
 ) {
     val columns = if (page == BatteryEditorPage.BACKGROUND_THEMES) 2 else 3
+    val pickerIsEmpty = if (page == BatteryEditorPage.BACKGROUND_THEMES) {
+        state.backgrounds.isEmpty()
+    } else {
+        BatteryEditorThemeDisplayPolicy.selectableThemes(
+            themes = state.themes,
+            trendingThemeIds = state.trendingEmojiThemeIds
+        ).isEmpty()
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -1088,6 +1139,14 @@ private fun StatusBarPicker(
         if (showEmbeddedPreview) {
             BatteryPreview(state = state, page = page)
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
+        }
+        if (pickerIsEmpty) {
+            EditorCatalogStatePanel(
+                state = state,
+                onRetry = onRetry,
+                modifier = Modifier.weight(1f)
+            )
+            return@Column
         }
         LazyVerticalGrid(
             columns = GridCells.Fixed(columns),

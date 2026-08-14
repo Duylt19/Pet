@@ -18,7 +18,8 @@ data class FavouriteRecentUiState(
     val selectedTab: FavouriteRecentTab = FavouriteRecentTab.FAVOURITE,
     val favouriteThemes: List<FavouriteRecentThemeUiState> = emptyList(),
     val recentThemes: List<FavouriteRecentThemeUiState> = emptyList(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val catalogLoadFailed: Boolean = false
 ) {
     val visibleThemes: List<FavouriteRecentThemeUiState>
         get() = when (selectedTab) {

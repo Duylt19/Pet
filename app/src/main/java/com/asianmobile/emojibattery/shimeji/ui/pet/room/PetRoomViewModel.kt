@@ -122,13 +122,14 @@ class PetRoomViewModel @Inject constructor(
                         )
                     )
                 }
-                roster to packs
-            }.collect { (roster, packs) ->
+                Triple(roster, packs, catalog)
+            }.collect { (roster, packs, catalog) ->
                 rememberAdoptions(roster)
                 _uiState.update {
                     it.copy(
                         pets = roster,
-                        isRosterLoading = ownerCatalogRepository.snapshot.value.isLoading
+                        isRosterLoading = catalog.isLoading,
+                        rosterLoadFailed = catalog.error != null
                     )
                 }
                 refreshDetail()
@@ -166,6 +167,14 @@ class PetRoomViewModel @Inject constructor(
                 .distinctUntilChanged()
                 .collect { _scene.value = buildScene(roomPacks) }
         }
+    }
+
+    fun retryRoster() {
+        viewModelScope.launch { ownerCatalogRepository.refresh(force = true) }
+    }
+
+    fun retryRooms() {
+        viewModelScope.launch { catalogRepository.refresh() }
     }
 
     fun selectTab(tab: PetRoomTab): Unit = run {
@@ -626,7 +635,7 @@ class PetRoomViewModel @Inject constructor(
                 ) ?: PetRoomBundledBackground.backgroundRes.takeIf { backgroundPath == null },
                 rooms = thumbnails,
                 isRoomCatalogLoading = snapshot.isLoading,
-                roomCatalogFailed = !snapshot.isLoading && snapshot.rooms.isEmpty()
+                roomCatalogFailed = snapshot.error != null
             )
         }
     }

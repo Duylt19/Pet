@@ -60,6 +60,7 @@ class PetStoreViewModel @Inject constructor(
                     installedKeys = packs.mapTo(mutableSetOf()) { it.key },
                     names = names,
                     isLoading = catalog.isLoading,
+                    catalogLoadFailed = catalog.error != null,
                     runtimeState = runtimeState
                 )
             }.collect { source ->
@@ -73,6 +74,7 @@ class PetStoreViewModel @Inject constructor(
                             requestedCategory = it.selectedCategory
                         ),
                         isLoading = source.isLoading,
+                        catalogLoadFailed = source.catalogLoadFailed,
                         isPetOnScreenEnabled = source.runtimeState.isEnabled,
                         isPetOnScreenStarting = source.runtimeState ==
                             PetOverlayRuntimeState.STARTING
@@ -81,9 +83,14 @@ class PetStoreViewModel @Inject constructor(
             }
         }
         refreshPermissions()
+        viewModelScope.launch { ownerCatalogRepository.refresh() }
     }
 
     fun selectTab(tab: PetStoreTab) = _uiState.update { it.copy(selectedTab = tab) }
+
+    fun retryCatalog() {
+        viewModelScope.launch { ownerCatalogRepository.refresh(force = true) }
+    }
 
     fun selectCategory(category: String) = _uiState.update { state ->
         val selected = PetStorePolicy.selectedCategory(state.pets, category)
@@ -324,6 +331,7 @@ class PetStoreViewModel @Inject constructor(
         val installedKeys: Set<String>,
         val names: Map<Int, String>,
         val isLoading: Boolean,
+        val catalogLoadFailed: Boolean,
         val runtimeState: PetOverlayRuntimeState
     )
 }

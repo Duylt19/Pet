@@ -86,6 +86,8 @@ import com.asianmobile.emojibattery.shimeji.ui.pet.store.FoodUnlockReveal
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFood
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppActionToast
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentState
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -179,7 +181,9 @@ fun PetRoomScreen(
             onCloseSettings = viewModel::closeSettings,
             onSettingsSpeedChange = viewModel::updateSettingsSpeed,
             onSettingsSizeChange = viewModel::updateSettingsSize,
-            onSaveSettings = viewModel::saveSettings
+            onSaveSettings = viewModel::saveSettings,
+            onRetryRoster = viewModel::retryRoster,
+            onRetryRooms = viewModel::retryRooms
         )
 
         uiState.message?.let { message ->
@@ -351,7 +355,9 @@ private fun PetRoomContent(
     onCloseSettings: () -> Unit = {},
     onSettingsSpeedChange: (Int) -> Unit = {},
     onSettingsSizeChange: (Int) -> Unit = {},
-    onSaveSettings: () -> Unit = {}
+    onSaveSettings: () -> Unit = {},
+    onRetryRoster: () -> Unit = {},
+    onRetryRooms: () -> Unit = {}
 ) {
     val visibleDetail = PetRoomSheetPolicy.detailForTab(uiState.selectedTab, uiState.detail)
     Box(
@@ -438,7 +444,9 @@ private fun PetRoomContent(
                 onCloseDetail = onCloseDetail,
                 onToggleOnScreen = onToggleOnScreen,
                 onFeed = onFeed,
-                onRemovePet = onRemovePet
+                onRemovePet = onRemovePet,
+                onRetryRoster = onRetryRoster,
+                onRetryRooms = onRetryRooms
             )
         }
 
@@ -619,7 +627,9 @@ private fun PetRoomSheet(
     onCloseDetail: () -> Unit,
     onToggleOnScreen: () -> Unit,
     onFeed: (String) -> Unit,
-    onRemovePet: (Int) -> Unit
+    onRemovePet: (Int) -> Unit,
+    onRetryRoster: () -> Unit,
+    onRetryRooms: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         PetRoomTabStrip(selectedTab = uiState.selectedTab, onSelectTab = onSelectTab)
@@ -659,9 +669,12 @@ private fun PetRoomSheet(
 
                     uiState.selectedTab == PetRoomTab.MY_PET -> MyPetTabContent(
                         pets = uiState.pets,
+                        isLoading = uiState.isRosterLoading,
+                        loadFailed = uiState.rosterLoadFailed,
                         onAddPet = onAddPet,
                         onOpenPet = onOpenPet,
-                        onRemovePet = onRemovePet
+                        onRemovePet = onRemovePet,
+                        onRetry = onRetryRoster
                     )
 
                     uiState.selectedTab == PetRoomTab.FOOD -> FoodTabContent(
@@ -670,7 +683,11 @@ private fun PetRoomSheet(
                         onAddFood = onAddFood
                     )
 
-                    else -> RoomTabContent(uiState = uiState, onSelectRoom = onSelectRoom)
+                    else -> RoomTabContent(
+                        uiState = uiState,
+                        onSelectRoom = onSelectRoom,
+                        onRetry = onRetryRooms
+                    )
                 }
             }
         }
@@ -770,10 +787,21 @@ private fun PetRoomTabItem(
 @Composable
 private fun MyPetTabContent(
     pets: List<PetRoomPetUiState>,
+    isLoading: Boolean,
+    loadFailed: Boolean,
     onAddPet: () -> Unit,
     onOpenPet: (Int) -> Unit,
-    onRemovePet: (Int) -> Unit
+    onRemovePet: (Int) -> Unit,
+    onRetry: () -> Unit
 ) {
+    if (pets.isEmpty() && isLoading) {
+        AsyncContentStatePanel(state = AsyncContentState.LOADING)
+        return
+    }
+    if (pets.isEmpty() && loadFailed) {
+        AsyncContentStatePanel(state = AsyncContentState.LOAD_FAILED, onRetry = onRetry)
+        return
+    }
     LazyVerticalGrid(
         columns = GridCells.Fixed(ROOM_GRID_COLUMNS),
         contentPadding = PaddingValues(dimensionResource(SdpR.dimen._12sdp)),
@@ -1266,20 +1294,22 @@ private fun FoodCard(food: PetRoomFoodUiState, onFeed: () -> Unit, onAdd: () -> 
 @Composable
 private fun RoomTabContent(
     uiState: PetRoomUiState,
-    onSelectRoom: (Int) -> Unit
+    onSelectRoom: (Int) -> Unit,
+    onRetry: () -> Unit
 ) {
+    if (uiState.isRoomCatalogLoading && uiState.rooms.isEmpty()) {
+        AsyncContentStatePanel(state = AsyncContentState.LOADING)
+        return
+    }
     if (uiState.roomCatalogFailed) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = stringResource(R.string.pet_room_rooms_unavailable),
-                color = colorResource(R.color.colors_725938),
-                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-                textAlign = TextAlign.Center
-            )
-        }
+        AsyncContentStatePanel(state = AsyncContentState.LOAD_FAILED, onRetry = onRetry)
+        return
+    }
+    if (uiState.rooms.isEmpty()) {
+        AsyncContentStatePanel(
+            state = AsyncContentState.EMPTY,
+            emptyMessageRes = R.string.pet_room_rooms_unavailable
+        )
         return
     }
     LazyVerticalGrid(

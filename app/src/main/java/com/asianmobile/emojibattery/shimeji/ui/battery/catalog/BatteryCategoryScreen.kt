@@ -40,12 +40,15 @@ fun BatteryCategoryScreen(
         BatteryCategoryContent(
             category = category,
             themes = themes,
+            isLoading = state.isLoading,
+            loadFailed = state.error != null,
             selectedThemeId = state.selectedThemeId,
             isPremium = state.isPremium,
             rewardUnlockedThemeIds = state.rewardUnlockedThemeIds,
             onBack = onBack,
             onPremium = onNavigateToPremium,
             onTheme = viewModel::requestTheme,
+            onRetry = viewModel::refresh,
             isInlineBannerVisible = isInlineBannerVisible,
             inlineBannerContent = {
                 BannerAd(

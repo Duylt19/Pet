@@ -110,6 +110,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_S
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.BATTERY_PREVIEW_DEFAULT_PERCENT
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.BatteryStatusPreviewCard
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentState
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CutePetTopBar
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockSheet
@@ -300,7 +302,8 @@ internal fun BatteryEditorScreen(
                 showDisclosure = true
             }
         },
-        onDisable = viewModel::disable
+        onDisable = viewModel::disable,
+        onRetryCatalog = viewModel::retryCatalog
     )
 
     val pendingTheme = state.themes.firstOrNull {
@@ -400,7 +403,8 @@ private fun BatteryEditorContent(
     onSelectTheme: (BatteryThemeEntry, BatteryThemeComponent) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
     onApply: () -> Unit,
-    onDisable: () -> Unit
+    onDisable: () -> Unit,
+    onRetryCatalog: () -> Unit = {}
 ) {
     if (page == BatteryEditorPage.EMOJI || page == BatteryEditorPage.EMOTION_DETAIL) {
         BatteryEmotionFigmaScreen(
@@ -411,7 +415,8 @@ private fun BatteryEditorContent(
             onOpenGroup = onOpenEmotionGroup,
             onSelectEmotion = onSelectEmotion,
             onConfig = onConfig,
-            showEmbeddedPreview = showEmbeddedPreview
+            showEmbeddedPreview = showEmbeddedPreview,
+            onRetry = onRetryCatalog
         )
         return
     }
@@ -437,7 +442,8 @@ private fun BatteryEditorContent(
             onBackgroundDecoration = onBackgroundDecoration,
             onConfig = onConfig,
             onApply = onApply,
-            showEmbeddedPreview = showEmbeddedPreview
+            showEmbeddedPreview = showEmbeddedPreview,
+            onRetry = onRetryCatalog
         )
         return
     }
@@ -499,7 +505,11 @@ private fun BatteryEditorContent(
                     onBatterySize = onBatterySize,
                     onConfig = onConfig
                 )
-                BatteryEditorPage.ANIMATION -> AnimationEditor(state, onConfig)
+                BatteryEditorPage.ANIMATION -> AnimationEditor(
+                    state = state,
+                    onConfig = onConfig,
+                    onRetry = onRetryCatalog
+                )
                 BatteryEditorPage.WIFI -> StatusComponentEditor(
                     state.config,
                     state.config.wifiSizeDp,
@@ -1131,7 +1141,8 @@ private fun StatusComponentEditor(
 @Composable
 private fun AnimationEditor(
     state: BatteryEditorUiState,
-    onConfig: (BatteryStatusConfig) -> Unit
+    onConfig: (BatteryStatusConfig) -> Unit,
+    onRetry: () -> Unit
 ) {
     val config = state.config
     EditorPageHint(stringResource(R.string.battery_animation_hint))
@@ -1147,7 +1158,16 @@ private fun AnimationEditor(
             range = 12f..36f,
             onValue = { onConfig(config.copy(animationSizeDp = it)) }
         )
-        if (state.animations.isNotEmpty()) {
+        if (state.animations.isEmpty()) {
+            AsyncContentStatePanel(
+                state = when {
+                    state.isCatalogLoading -> AsyncContentState.LOADING
+                    state.catalogLoadFailed -> AsyncContentState.LOAD_FAILED
+                    else -> AsyncContentState.EMPTY
+                },
+                onRetry = onRetry
+            )
+        } else {
             Text(
                 text = stringResource(R.string.battery_animation_style),
                 color = colorResource(R.color.colors_776D84),

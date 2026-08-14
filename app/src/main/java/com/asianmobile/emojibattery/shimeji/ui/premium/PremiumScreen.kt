@@ -84,6 +84,8 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentState
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
 import com.asianmobile.emojibattery.shimeji.ads.utils.Utils
@@ -120,6 +122,8 @@ fun PremiumScreen(
 
         val purchaseSuccess by viewModel.purchaseSuccess.collectAsState()
         val isLoading by viewModel.isLoading.collectAsState()
+        val areProductsLoading by viewModel.areProductsLoading.collectAsState()
+        val productsLoadFailed by viewModel.productsLoadFailed.collectAsState()
 
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
@@ -320,53 +324,72 @@ fun PremiumScreen(
 
                 Spacer(modifier = Modifier.height(dimensionResource(id = R_dimen.dimen._13sdp)))
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = dimensionResource(id = R_dimen.dimen._13sdp)),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    PackageCard(
-                        title = stringResource(id = R.string.premium_weekly),
-                        price = priceWeekly,
-                        desc = null,
-                        isSelected = selectedPackage == 0,
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            viewModel.tagPlanId = BASE_WEEKLY_COST_ID
-                            selectedPackage = 0
-                        }
+                if (areProductsLoading || productsLoadFailed) {
+                    AsyncContentStatePanel(
+                        state = if (areProductsLoading) {
+                            AsyncContentState.LOADING
+                        } else {
+                            AsyncContentState.LOAD_FAILED
+                        },
+                        onRetry = viewModel::retryProducts
                     )
-                    Spacer(modifier = Modifier.width(dimensionResource(id = R_dimen.dimen._9sdp)))
-                    PackageCard(
-                        title = stringResource(id = R.string.premium_monthly),
-                        price = priceMonthly,
-                        desc = priceWeekInMonth?.let {
-                            stringResource(id = R.string.premium_desc_in_week, it)
-                        } ?: "",
-                        isSelected = selectedPackage == 1,
-                        saleIcon = R.drawable.ic_premium_sales_monthly,
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            viewModel.tagPlanId = BASE_MONTHLY_COST_ID
-                            selectedPackage = 1
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(dimensionResource(id = R_dimen.dimen._9sdp)))
-                    PackageCard(
-                        title = stringResource(id = R.string.premium_yearly),
-                        price = priceYearly,
-                        desc = priceWeekInYear?.let {
-                            stringResource(id = R.string.premium_desc_in_week, it)
-                        } ?: "",
-                        isSelected = selectedPackage == 2,
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            viewModel.tagPlanId = BASE_YEARLY_COST_ID
-                            selectedPackage = 2
-                        }
-                    )
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = dimensionResource(id = R_dimen.dimen._13sdp)),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        PackageCard(
+                            title = stringResource(id = R.string.premium_weekly),
+                            price = priceWeekly,
+                            desc = null,
+                            isSelected = selectedPackage == 0,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                viewModel.tagPlanId = BASE_WEEKLY_COST_ID
+                                selectedPackage = 0
+                            }
+                        )
+                        Spacer(
+                            modifier = Modifier.width(
+                                dimensionResource(id = R_dimen.dimen._9sdp)
+                            )
+                        )
+                        PackageCard(
+                            title = stringResource(id = R.string.premium_monthly),
+                            price = priceMonthly,
+                            desc = priceWeekInMonth?.let {
+                                stringResource(id = R.string.premium_desc_in_week, it)
+                            } ?: "",
+                            isSelected = selectedPackage == 1,
+                            saleIcon = R.drawable.ic_premium_sales_monthly,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                viewModel.tagPlanId = BASE_MONTHLY_COST_ID
+                                selectedPackage = 1
+                            }
+                        )
+                        Spacer(
+                            modifier = Modifier.width(
+                                dimensionResource(id = R_dimen.dimen._9sdp)
+                            )
+                        )
+                        PackageCard(
+                            title = stringResource(id = R.string.premium_yearly),
+                            price = priceYearly,
+                            desc = priceWeekInYear?.let {
+                                stringResource(id = R.string.premium_desc_in_week, it)
+                            } ?: "",
+                            isSelected = selectedPackage == 2,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                viewModel.tagPlanId = BASE_YEARLY_COST_ID
+                                selectedPackage = 2
+                            }
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(dimensionResource(id = R_dimen.dimen._16sdp)))
@@ -391,6 +414,7 @@ fun PremiumScreen(
                             shape = shape
                         )
                         .clickable(
+                            enabled = !areProductsLoading && !productsLoadFailed,
                             interactionSource = remember { MutableInteractionSource() },
                             indication = ripple(
                                 bounded = true,

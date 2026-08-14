@@ -51,6 +51,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryDecorationEntry
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryEmotionGroup
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryStatusConfig
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.resolveAsyncContentState
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomePremiumButton
 import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.intuit.sdp.R as SdpR
@@ -65,7 +67,8 @@ internal fun BatteryEmotionFigmaScreen(
     onOpenGroup: (String) -> Unit,
     onSelectEmotion: (BatteryDecorationEntry) -> Unit,
     onConfig: (BatteryStatusConfig) -> Unit,
-    showEmbeddedPreview: Boolean = true
+    showEmbeddedPreview: Boolean = true,
+    onRetry: () -> Unit = {}
 ) {
     val selectedGroup = state.emotionGroups.firstOrNull { it.key == groupKey }
     Box(Modifier.fillMaxSize()) {
@@ -95,7 +98,17 @@ internal fun BatteryEmotionFigmaScreen(
                 )
             }
             Spacer(Modifier.height(dimensionResource(SdpR.dimen._12sdp)))
-            if (selectedGroup == null) {
+            if (state.emotions.isEmpty()) {
+                AsyncContentStatePanel(
+                    state = resolveAsyncContentState(
+                        isLoading = state.isCatalogLoading,
+                        hasError = state.catalogLoadFailed,
+                        isEmpty = true
+                    ),
+                    modifier = Modifier.weight(1f),
+                    onRetry = onRetry
+                )
+            } else if (selectedGroup == null) {
                 EmotionGroupList(
                     state = state,
                     onOpenGroup = onOpenGroup,

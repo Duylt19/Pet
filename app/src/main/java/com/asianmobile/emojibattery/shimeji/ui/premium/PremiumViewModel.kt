@@ -57,6 +57,12 @@ class PremiumViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _areProductsLoading = MutableStateFlow(true)
+    val areProductsLoading: StateFlow<Boolean> = _areProductsLoading.asStateFlow()
+
+    private val _productsLoadFailed = MutableStateFlow(false)
+    val productsLoadFailed: StateFlow<Boolean> = _productsLoadFailed.asStateFlow()
+
     fun setLoading(loading: Boolean) {
         _isLoading.value = loading
     }
@@ -129,11 +135,14 @@ class PremiumViewModel @Inject constructor(
                 isConnecting = false
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     showProducts()
+                } else {
+                    markProductsFailed()
                 }
             }
 
             override fun onBillingServiceDisconnected() {
                 isConnecting = false
+                if (!hasLoadedProducts()) markProductsFailed()
                 billingHandler.postDelayed({
                     establishConnection()
                 }, 3000)
@@ -164,10 +173,33 @@ class PremiumViewModel @Inject constructor(
                 .setProductType(BillingClient.ProductType.SUBS).build()
         )
         val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
-        billingClient.queryProductDetailsAsync(params) { _, prodDetailsList ->
-            setProduct(prodDetailsList.productDetailsList)
+        billingClient.queryProductDetailsAsync(params) { billingResult, prodDetailsList ->
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK &&
+                prodDetailsList.productDetailsList.isNotEmpty()
+            ) {
+                setProduct(prodDetailsList.productDetailsList)
+            } else {
+                markProductsFailed()
+            }
         }
     }
+
+    fun retryProducts() {
+        _areProductsLoading.value = true
+        _productsLoadFailed.value = false
+        if (billingClient.isReady) showProducts() else establishConnection()
+    }
+
+    private fun markProductsFailed() {
+        if (hasLoadedProducts()) return
+        _areProductsLoading.value = false
+        _productsLoadFailed.value = true
+    }
+
+    private fun hasLoadedProducts(): Boolean = productDetailsList.isNotEmpty() &&
+        _priceWeeklyCost.value.isNotEmpty() &&
+        _priceMonthlyCost.value.isNotEmpty() &&
+        _priceYearlyCost.value.isNotEmpty()
 
     internal fun onClickBuyPremium(activity: Activity) {
         if (Utils.isNetworkAvailable(context)) {
@@ -210,9 +242,16 @@ class PremiumViewModel @Inject constructor(
     }
 
     internal fun setProduct(prodDetailsList: MutableList<ProductDetails>) {
-        if (prodDetailsList.isEmpty()) return
+        if (prodDetailsList.isEmpty()) {
+            markProductsFailed()
+            return
+        }
         productDetailsList.clear()
-        productDetailsList.addAll(prodDetailsList)
+        _priceWeeklyCost.value = ""
+        _priceMonthlyCost.value = ""
+        _priceYearlyCost.value = ""
+        _priceWeekInMonthCost.value = null
+        _priceWeekInYearCost.value = null
         prodDetailsList[0].subscriptionOfferDetails?.apply {
             for (i in 0 until size) {
                 for (j in 0 until get(i).pricingPhases.pricingPhaseList.size) {
@@ -241,6 +280,16 @@ class PremiumViewModel @Inject constructor(
                 }
             }
         }
+        if (_priceWeeklyCost.value.isEmpty() ||
+            _priceMonthlyCost.value.isEmpty() ||
+            _priceYearlyCost.value.isEmpty()
+        ) {
+            markProductsFailed()
+            return
+        }
+        productDetailsList.addAll(prodDetailsList)
+        _areProductsLoading.value = false
+        _productsLoadFailed.value = false
     }
 
     private fun calculatorPrice(
@@ -395,4 +444,3 @@ class PremiumViewModel @Inject constructor(
         return prefixRaw + formattedNumber + suffixRaw
     }
 }
-

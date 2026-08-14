@@ -28,7 +28,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,6 +57,8 @@ import com.asianmobile.emojibattery.shimeji.data.model.BatteryCatalogCategory
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntry
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentState
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomePremiumButton
@@ -136,11 +137,21 @@ internal fun BatteryCatalogContent(
 
                     when {
                         state.isLoading && state.sections.isEmpty() -> item {
-                            BatteryCatalogLoading()
+                            AsyncContentStatePanel(state = AsyncContentState.LOADING)
+                        }
+
+                        state.error != null && state.sections.isEmpty() -> item {
+                            AsyncContentStatePanel(
+                                state = AsyncContentState.LOAD_FAILED,
+                                onRetry = onRetry
+                            )
                         }
 
                         state.sections.isEmpty() -> item {
-                            BatteryCatalogEmpty(onRetry = onRetry)
+                            AsyncContentStatePanel(
+                                state = AsyncContentState.EMPTY,
+                                emptyMessageRes = R.string.battery_catalog_empty
+                            )
                         }
 
                         else -> state.sections.forEachIndexed { index, section ->
@@ -322,12 +333,15 @@ private fun BatteryLandingThemeCard(
 internal fun BatteryCategoryContent(
     category: BatteryCatalogCategory?,
     themes: List<BatteryThemeEntry>,
+    isLoading: Boolean = false,
+    loadFailed: Boolean = false,
     selectedThemeId: Int,
     isPremium: Boolean,
     rewardUnlockedThemeIds: Set<Int>,
     onBack: () -> Unit,
     onPremium: () -> Unit,
     onTheme: (BatteryThemeEntry) -> Unit,
+    onRetry: () -> Unit = {},
     isInlineBannerVisible: Boolean,
     inlineBannerContent: @Composable () -> Unit
 ) {
@@ -347,6 +361,19 @@ internal fun BatteryCategoryContent(
                 onBack = onBack,
                 onPremium = onPremium
             )
+            if (themes.isEmpty()) {
+                AsyncContentStatePanel(
+                    state = when {
+                        isLoading -> AsyncContentState.LOADING
+                        loadFailed -> AsyncContentState.LOAD_FAILED
+                        else -> AsyncContentState.EMPTY
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    emptyMessageRes = R.string.battery_catalog_empty,
+                    onRetry = onRetry
+                )
+                return@Column
+            }
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 modifier = Modifier.fillMaxSize(),
@@ -617,33 +644,6 @@ private fun BatteryCatalogNativeAd() {
     NativeAdInternal(
         screenCode = SCREEN_BATTERY_CATALOG,
         modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
-private fun BatteryCatalogLoading() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._115sdp)),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator(color = colorResource(R.color.colors_FB3675))
-    }
-}
-
-@Composable
-private fun BatteryCatalogEmpty(onRetry: () -> Unit) {
-    Text(
-        text = stringResource(R.string.battery_catalog_empty),
-        color = colorResource(R.color.colors_6F7073),
-        fontFamily = BatteryRobotoMedium,
-        fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
-        textAlign = TextAlign.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onRetry)
-            .padding(dimensionResource(SdpR.dimen._24sdp))
     )
 }
 

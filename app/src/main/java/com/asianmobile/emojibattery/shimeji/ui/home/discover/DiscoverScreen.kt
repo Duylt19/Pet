@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -82,9 +81,12 @@ import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreUiState
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreViewModel
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentState
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.resolveAsyncContentState
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -184,7 +186,9 @@ fun DiscoverScreen(
                 onOpenTheme = requestTheme,
                 onToggleFavorite = viewModel::toggleFavorite,
                 onCustomizeStatusBar = onCustomizeStatusBar,
-                onDismissRecovery = viewModel::dismissAccessibilityRecovery
+                onDismissRecovery = viewModel::dismissAccessibilityRecovery,
+                onRetryPets = viewModel::retryPetCatalog,
+                onRetryBattery = viewModel::retryBatteryCatalog
             )
         }
     }
@@ -321,7 +325,9 @@ private fun DiscoverContent(
     onOpenTheme: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
     onCustomizeStatusBar: () -> Unit,
-    onDismissRecovery: () -> Unit
+    onDismissRecovery: () -> Unit,
+    onRetryPets: () -> Unit = {},
+    onRetryBattery: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -376,18 +382,29 @@ private fun DiscoverContent(
                         Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
                         BatteryThemesSection(
                             themes = uiState.batteryThemes,
+                            contentState = resolveAsyncContentState(
+                                isLoading = uiState.isBatteryCatalogLoading,
+                                hasError = uiState.batteryCatalogLoadFailed,
+                                isEmpty = uiState.batteryThemes.isEmpty()
+                            ),
                             onMore = onBattery,
                             onOpenTheme = onOpenTheme,
-                            onToggleFavorite = onToggleFavorite
+                            onToggleFavorite = onToggleFavorite,
+                            onRetry = onRetryBattery
                         )
                     }
                     item {
                         Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
                         TrendingPetsSection(
                             pets = uiState.trendingPets,
-                            isLoading = uiState.isLoading,
+                            contentState = resolveAsyncContentState(
+                                isLoading = uiState.isPetCatalogLoading,
+                                hasError = uiState.petCatalogLoadFailed,
+                                isEmpty = uiState.trendingPets.isEmpty()
+                            ),
                             onMore = onPetStore,
-                            onOpenPet = onOpenPet
+                            onOpenPet = onOpenPet,
+                            onRetry = onRetryPets
                         )
                     }
                     item {
@@ -406,8 +423,14 @@ private fun DiscoverContent(
                         Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
                         StatusBarThemesSection(
                             assets = uiState.statusBarThemes,
+                            contentState = resolveAsyncContentState(
+                                isLoading = uiState.isBatteryCatalogLoading,
+                                hasError = uiState.batteryCatalogLoadFailed,
+                                isEmpty = uiState.statusBarThemes.isEmpty()
+                            ),
                             onMore = onCustomizeStatusBar,
-                            onOpen = onCustomizeStatusBar
+                            onOpen = onCustomizeStatusBar,
+                            onRetry = onRetryBattery
                         )
                     }
                     item {
@@ -416,9 +439,15 @@ private fun DiscoverContent(
                             title = stringResource(R.string.discover_emoji_title),
                             titleIcon = R.drawable.img_statusbar_template_emoji,
                             assets = uiState.emojiThemes,
+                            contentState = resolveAsyncContentState(
+                                isLoading = uiState.isBatteryCatalogLoading,
+                                hasError = uiState.batteryCatalogLoadFailed,
+                                isEmpty = uiState.emojiThemes.isEmpty()
+                            ),
                             fallbackRes = R.drawable.img_home_brand_bunny,
                             onMore = onBattery,
-                            onOpen = { asset -> onOpenTheme(asset.id) }
+                            onOpen = { asset -> onOpenTheme(asset.id) },
+                            onRetry = onRetryBattery
                         )
                     }
                     item {
@@ -427,9 +456,15 @@ private fun DiscoverContent(
                             title = stringResource(R.string.discover_battery_title),
                             titleIcon = R.drawable.ic_statusbar_template_battery,
                             assets = uiState.batteryIcons,
+                            contentState = resolveAsyncContentState(
+                                isLoading = uiState.isBatteryCatalogLoading,
+                                hasError = uiState.batteryCatalogLoadFailed,
+                                isEmpty = uiState.batteryIcons.isEmpty()
+                            ),
                             fallbackRes = R.drawable.ic_home_battery,
                             onMore = onBattery,
-                            onOpen = { asset -> onOpenTheme(asset.id) }
+                            onOpen = { asset -> onOpenTheme(asset.id) },
+                            onRetry = onRetryBattery
                         )
                     }
                 }
@@ -532,27 +567,22 @@ internal fun DiscoverBatteryTrollBanner(onClick: () -> Unit) {
 @Composable
 private fun TrendingPetsSection(
     pets: List<DiscoverPetUiState>,
-    isLoading: Boolean,
+    contentState: AsyncContentState,
     onMore: () -> Unit,
-    onOpenPet: (String) -> Unit
+    onOpenPet: (String) -> Unit,
+    onRetry: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
         SectionHeader(
             title = stringResource(R.string.discover_shimeji_pets),
             onMore = onMore
         )
-        if (isLoading && pets.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(dimensionResource(SdpR.dimen._118sdp)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = colorResource(R.color.colors_FB3675),
-                    modifier = Modifier.size(dimensionResource(SdpR.dimen._24sdp))
-                )
-            }
+        if (contentState != AsyncContentState.CONTENT) {
+            AsyncContentStatePanel(
+                state = contentState,
+                minHeight = dimensionResource(SdpR.dimen._118sdp),
+                onRetry = onRetry
+            )
         } else {
             LazyRow(
                 contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._12sdp)),
@@ -625,9 +655,11 @@ internal fun TrendingPetCard(pet: DiscoverPetUiState, onClick: () -> Unit) {
 @Composable
 private fun BatteryThemesSection(
     themes: List<DiscoverThemeUiState>,
+    contentState: AsyncContentState,
     onMore: () -> Unit,
     onOpenTheme: (Int) -> Unit,
-    onToggleFavorite: (Int) -> Unit
+    onToggleFavorite: (Int) -> Unit,
+    onRetry: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
         SectionHeader(
@@ -635,24 +667,25 @@ private fun BatteryThemesSection(
             onMore = onMore,
             underline = true
         )
-        val columns = if (themes.isEmpty()) {
-            List(BATTERY_THEME_PLACEHOLDER_COUNT) { null }.chunked(PREVIEW_COLUMN_ITEM_COUNT)
+        if (contentState != AsyncContentState.CONTENT) {
+            AsyncContentStatePanel(state = contentState, onRetry = onRetry)
         } else {
-            themes.map { it as DiscoverThemeUiState? }.chunked(PREVIEW_COLUMN_ITEM_COUNT)
-        }
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
-        ) {
-            items(columns) { column ->
-                Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
-                    column.forEach { theme ->
-                        BatteryThemeCard(
-                            theme = theme,
-                            onOpen = { theme?.let { onOpenTheme(it.id) } },
-                            onFavorite = { theme?.let { onToggleFavorite(it.id) } },
-                            modifier = Modifier.size(dimensionResource(SdpR.dimen._85sdp))
-                        )
+            val columns = themes.map { it as DiscoverThemeUiState? }
+                .chunked(PREVIEW_COLUMN_ITEM_COUNT)
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._12sdp)),
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+            ) {
+                items(columns) { column ->
+                    Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
+                        column.forEach { theme ->
+                            BatteryThemeCard(
+                                theme = theme,
+                                onOpen = { theme?.let { onOpenTheme(it.id) } },
+                                onFavorite = { theme?.let { onToggleFavorite(it.id) } },
+                                modifier = Modifier.size(dimensionResource(SdpR.dimen._85sdp))
+                            )
+                        }
                     }
                 }
             }
@@ -741,27 +774,30 @@ internal fun BatteryThemeCard(
 @Composable
 private fun StatusBarThemesSection(
     assets: List<DiscoverAssetUiState>,
+    contentState: AsyncContentState,
     onMore: () -> Unit,
-    onOpen: () -> Unit
+    onOpen: () -> Unit,
+    onRetry: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
         SectionHeader(
             title = stringResource(R.string.discover_status_bar_themes),
             onMore = onMore
         )
-        val columns = if (assets.isEmpty()) {
-            List(4) { null }.chunked(PREVIEW_COLUMN_ITEM_COUNT)
+        if (contentState != AsyncContentState.CONTENT) {
+            AsyncContentStatePanel(state = contentState, onRetry = onRetry)
         } else {
-            assets.map { it as DiscoverAssetUiState? }.chunked(PREVIEW_COLUMN_ITEM_COUNT)
-        }
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
-        ) {
-            items(columns) { column ->
-                Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
-                    column.forEach { asset ->
-                        StatusBarThemeCard(asset = asset, onClick = onOpen)
+            val columns = assets.map { it as DiscoverAssetUiState? }
+                .chunked(PREVIEW_COLUMN_ITEM_COUNT)
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._12sdp)),
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+            ) {
+                items(columns) { column ->
+                    Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
+                        column.forEach { asset ->
+                            StatusBarThemeCard(asset = asset, onClick = onOpen)
+                        }
                     }
                 }
             }
@@ -813,29 +849,31 @@ private fun ComponentAssetsSection(
     title: String,
     @DrawableRes titleIcon: Int? = null,
     assets: List<DiscoverAssetUiState>,
+    contentState: AsyncContentState,
     fallbackRes: Int,
     onMore: () -> Unit,
-    onOpen: (DiscoverAssetUiState) -> Unit
+    onOpen: (DiscoverAssetUiState) -> Unit,
+    onRetry: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp))) {
         SectionHeader(title = title, titleIcon = titleIcon, onMore = onMore)
-        val display = if (assets.isEmpty()) {
-            List(8) { null }
+        if (contentState != AsyncContentState.CONTENT) {
+            AsyncContentStatePanel(state = contentState, onRetry = onRetry)
         } else {
-            assets.map { it as DiscoverAssetUiState? }
-        }
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._12sdp)),
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
-        ) {
-            items(display.chunked(PREVIEW_COLUMN_ITEM_COUNT)) { column ->
-                Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
-                    column.forEach { asset ->
-                        ComponentAssetCard(
-                            asset = asset,
-                            fallbackRes = fallbackRes,
-                            onClick = { asset?.let(onOpen) }
-                        )
+            val display = assets.map { it as DiscoverAssetUiState? }
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = dimensionResource(SdpR.dimen._12sdp)),
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+            ) {
+                items(display.chunked(PREVIEW_COLUMN_ITEM_COUNT)) { column ->
+                    Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
+                        column.forEach { asset ->
+                            ComponentAssetCard(
+                                asset = asset,
+                                fallbackRes = fallbackRes,
+                                onClick = { asset?.let(onOpen) }
+                            )
+                        }
                     }
                 }
             }
@@ -980,7 +1018,8 @@ internal fun SectionHeader(
 private fun DiscoverContentPreview() {
     DiscoverContent(
         uiState = DiscoverUiState(
-            isLoading = false,
+            isPetCatalogLoading = false,
+            isBatteryCatalogLoading = false,
             trendingPets = listOf(
                 DiscoverPetUiState("cat", "Cattey", "Cat", null),
                 DiscoverPetUiState("bunny", "Bunny", "Rabbit", null)
@@ -1003,5 +1042,4 @@ private fun DiscoverContentPreview() {
     )
 }
 
-private const val BATTERY_THEME_PLACEHOLDER_COUNT = 6
 private const val PREVIEW_COLUMN_ITEM_COUNT = 2

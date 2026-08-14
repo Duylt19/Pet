@@ -3,7 +3,10 @@ package com.asianmobile.emojibattery.shimeji.ui.home.discover
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibilityRecovery
 
 data class DiscoverUiState(
-    val isLoading: Boolean = true,
+    val isPetCatalogLoading: Boolean = true,
+    val petCatalogLoadFailed: Boolean = false,
+    val isBatteryCatalogLoading: Boolean = true,
+    val batteryCatalogLoadFailed: Boolean = false,
     val isBatteryEnabled: Boolean = false,
     val isAccessibilityEnabled: Boolean = false,
     /**

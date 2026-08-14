@@ -131,6 +131,8 @@ class BatteryEditorViewModel @Inject constructor(
                 }
                 _uiState.value.copy(
                     isInitialized = true,
+                    isCatalogLoading = catalog.isLoading,
+                    catalogLoadFailed = catalog.error != null,
                     theme = theme ?: BUILT_IN_BATTERY_THEME,
                     themes = catalog.themes,
                     trendingEmojiThemeIds = catalog.trendingEmojiThemeIds,
@@ -162,6 +164,10 @@ class BatteryEditorViewModel @Inject constructor(
                 .distinctUntilChanged()
                 .collectLatest(::materializeAnimationPreviews)
         }
+    }
+
+    fun retryCatalog() {
+        viewModelScope.launch { catalogRepository.refresh() }
     }
 
     private suspend fun materializeAnimationPreviews(animations: List<BatteryAnimationEntry>) {

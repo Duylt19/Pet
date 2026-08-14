@@ -29,7 +29,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,6 +76,8 @@ import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_SEARCH
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentState
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
@@ -113,7 +114,8 @@ fun SearchScreen(
         onOpenTheme = onOpenTheme,
         onToggleFavorite = viewModel::toggleFavorite,
         onSelectTab = viewModel::selectTab,
-        onOpenPetStore = onOpenPetStore
+        onOpenPetStore = onOpenPetStore,
+        onRetry = viewModel::retry
     )
 }
 
@@ -125,7 +127,8 @@ private fun SearchContent(
     onOpenTheme: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
     onSelectTab: (SearchTab) -> Unit = {},
-    onOpenPetStore: () -> Unit = {}
+    onOpenPetStore: () -> Unit = {},
+    onRetry: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -173,7 +176,8 @@ private fun SearchContent(
                         uiState = uiState,
                         onOpenTheme = onOpenTheme,
                         onToggleFavorite = onToggleFavorite,
-                        onOpenPetStore = onOpenPetStore
+                        onOpenPetStore = onOpenPetStore,
+                        onRetry = onRetry
                     )
                 }
             }
@@ -394,7 +398,8 @@ private fun ResultsSection(
     uiState: SearchUiState,
     onOpenTheme: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
-    onOpenPetStore: () -> Unit
+    onOpenPetStore: () -> Unit,
+    onRetry: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -412,32 +417,19 @@ private fun ResultsSection(
         )
         when {
             uiState.isLoading && uiState.isEmpty -> {
-                SearchMessage {
-                    CircularProgressIndicator(
-                        color = colorResource(R.color.colors_FB3675),
-                        modifier = Modifier.size(dimensionResource(SdpR.dimen._24sdp))
-                    )
-                }
+                AsyncContentStatePanel(state = AsyncContentState.LOADING)
             }
             uiState.hasError -> {
-                SearchMessage {
-                    Text(
-                        text = stringResource(R.string.search_load_error),
-                        color = colorResource(R.color.colors_212327),
-                        fontFamily = SearchRobotoRegular,
-                        fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
-                    )
-                }
+                AsyncContentStatePanel(
+                    state = AsyncContentState.LOAD_FAILED,
+                    onRetry = onRetry
+                )
             }
             uiState.isEmpty -> {
-                SearchMessage {
-                    Text(
-                        text = stringResource(R.string.search_no_results),
-                        color = colorResource(R.color.colors_212327),
-                        fontFamily = SearchRobotoRegular,
-                        fontSize = dimensionResource(SspR.dimen._11ssp).value.sp
-                    )
-                }
+                AsyncContentStatePanel(
+                    state = AsyncContentState.EMPTY,
+                    emptyMessageRes = R.string.search_no_results
+                )
             }
             uiState.selectedTab == SearchTab.PETS -> {
                 uiState.pets.chunked(SEARCH_COLUMN_COUNT).forEach { rowPets ->
@@ -637,18 +629,6 @@ internal fun SearchThemeCard(
                 modifier = Modifier.size(dimensionResource(SdpR.dimen._12sdp))
             )
         }
-    }
-}
-
-@Composable
-private fun SearchMessage(content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(SdpR.dimen._78sdp)),
-        contentAlignment = Alignment.Center
-    ) {
-        content()
     }
 }
 

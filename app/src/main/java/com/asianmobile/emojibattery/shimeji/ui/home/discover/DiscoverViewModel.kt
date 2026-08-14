@@ -94,7 +94,10 @@ class DiscoverViewModel @Inject constructor(
                 val accessibilityEnabled = BatteryAccessibility.isEnabled(context)
                 configuredBatteryEnabled = batteryConfig.enabled
                 DiscoverUiState(
-                    isLoading = pets.isLoading || batteryCatalog.isLoading,
+                    isPetCatalogLoading = pets.isLoading,
+                    petCatalogLoadFailed = pets.error != null,
+                    isBatteryCatalogLoading = batteryCatalog.isLoading,
+                    batteryCatalogLoadFailed = batteryCatalog.error != null,
                     isBatteryEnabled = batteryConfig.enabled && accessibilityEnabled,
                     isAccessibilityEnabled = accessibilityEnabled,
                     accessibilityRecovery = resolveRecovery(
@@ -208,6 +211,14 @@ class DiscoverViewModel @Inject constructor(
 
     fun toggleFavorite(themeId: Int) {
         batterySettingsRepository.toggleFavorite(themeId)
+    }
+
+    fun retryPetCatalog() {
+        viewModelScope.launch { petCatalogRepository.refresh(force = true) }
+    }
+
+    fun retryBatteryCatalog() {
+        viewModelScope.launch { batteryCatalogRepository.refresh() }
     }
 
     private companion object {

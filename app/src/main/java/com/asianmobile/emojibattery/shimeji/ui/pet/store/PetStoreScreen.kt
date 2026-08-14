@@ -113,6 +113,8 @@ import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeEnableCard
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeHeader
 import com.asianmobile.emojibattery.shimeji.ui.pet.PetFamilyCapacityDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppActionToast
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentState
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.OverlayPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PinkLoveSticker
@@ -195,7 +197,8 @@ fun PetStoreScreen(
             onTab = viewModel::selectTab,
             onCategory = viewModel::selectCategory,
             onPet = viewModel::selectPet,
-            onFood = viewModel::selectFood
+            onFood = viewModel::selectFood,
+            onRetryCatalog = viewModel::retryCatalog
         )
     }
 }
@@ -359,7 +362,8 @@ internal fun PetStoreContent(
     onTab: (PetStoreTab) -> Unit,
     onCategory: (String) -> Unit,
     onPet: (OwnerPetCatalogEntry) -> Unit,
-    onFood: (PetStoreFood) -> Unit
+    onFood: (PetStoreFood) -> Unit,
+    onRetryCatalog: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -419,7 +423,8 @@ internal fun PetStoreContent(
                             pets = state.pets,
                             category = selectedCategory
                         ),
-                        onPet = onPet
+                        onPet = onPet,
+                        onRetry = onRetryCatalog
                     )
                 }
                 PetStoreTab.FOOD -> FoodGrid(onFood)
@@ -588,12 +593,29 @@ private fun PetCategoryTabs(
 private fun PetGrid(
     state: PetStoreUiState,
     pets: List<OwnerPetCatalogEntry>,
-    onPet: (OwnerPetCatalogEntry) -> Unit
+    onPet: (OwnerPetCatalogEntry) -> Unit,
+    onRetry: () -> Unit
 ) {
     if (state.isLoading && state.pets.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = colorResource(R.color.colors_FB3675))
-        }
+        AsyncContentStatePanel(
+            state = AsyncContentState.LOADING,
+            modifier = Modifier.fillMaxSize()
+        )
+        return
+    }
+    if (state.catalogLoadFailed && state.pets.isEmpty()) {
+        AsyncContentStatePanel(
+            state = AsyncContentState.LOAD_FAILED,
+            modifier = Modifier.fillMaxSize(),
+            onRetry = onRetry
+        )
+        return
+    }
+    if (pets.isEmpty()) {
+        AsyncContentStatePanel(
+            state = AsyncContentState.EMPTY,
+            modifier = Modifier.fillMaxSize()
+        )
         return
     }
     LazyVerticalGrid(

@@ -55,6 +55,8 @@ import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_FAVOURITE_RECENT
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomePremiumButton
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentState
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -80,7 +82,8 @@ fun FavouriteRecentScreen(
         onPremium = onPremium,
         onSelectTab = viewModel::selectTab,
         onOpenTheme = onOpenTheme,
-        onToggleFavorite = viewModel::toggleFavorite
+        onToggleFavorite = viewModel::toggleFavorite,
+        onRetry = viewModel::retry
     )
 }
 
@@ -93,6 +96,7 @@ internal fun FavouriteRecentContent(
     onSelectTab: (FavouriteRecentTab) -> Unit,
     onOpenTheme: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
+    onRetry: () -> Unit = {},
     showNativeAd: Boolean = true
 ) {
     val themes = uiState.visibleThemes
@@ -142,9 +146,17 @@ internal fun FavouriteRecentContent(
 
                 when {
                     uiState.isLoading && themes.isEmpty() -> {
-                        FavouriteRecentEmptyBody(
-                            showEmptyState = false,
+                        AsyncContentStatePanel(
+                            state = AsyncContentState.LOADING,
                             modifier = Modifier.weight(1f)
+                        )
+                    }
+                    uiState.selectedTab == FavouriteRecentTab.FAVOURITE &&
+                        uiState.catalogLoadFailed && themes.isEmpty() -> {
+                        AsyncContentStatePanel(
+                            state = AsyncContentState.LOAD_FAILED,
+                            modifier = Modifier.weight(1f),
+                            onRetry = onRetry
                         )
                     }
                     themes.isEmpty() -> {

@@ -25,16 +25,19 @@ class FavouriteRecentViewModel @Inject constructor(
         settingsRepository.config,
         selectedTab
     ) { catalog, config, tab ->
+        val favourites = favouriteThemeUiStates(
+            themes = catalog.themes,
+            favoriteThemeIds = config.favoriteThemeIds
+        )
         FavouriteRecentUiState(
             selectedTab = tab,
-            favouriteThemes = favouriteThemeUiStates(
-                themes = catalog.themes,
-                favoriteThemeIds = config.favoriteThemeIds
-            ),
+            favouriteThemes = favourites,
             // TODO(FavouriteRecent): add ordered MRU persistence when product defines
             // which battery actions count as a recent item and the retention limit.
             recentThemes = emptyList(),
-            isLoading = catalog.isLoading
+            isLoading = catalog.isLoading,
+            catalogLoadFailed = catalog.error != null &&
+                config.favoriteThemeIds.isNotEmpty() && favourites.isEmpty()
         )
     }.stateIn(
         scope = viewModelScope,
@@ -52,6 +55,10 @@ class FavouriteRecentViewModel @Inject constructor(
 
     fun toggleFavorite(themeId: Int) {
         settingsRepository.toggleFavorite(themeId)
+    }
+
+    fun retry() {
+        viewModelScope.launch { catalogRepository.refresh() }
     }
 
     private companion object {

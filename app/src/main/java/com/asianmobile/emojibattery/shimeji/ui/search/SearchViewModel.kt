@@ -80,7 +80,10 @@ class SearchViewModel @Inject constructor(
                 SearchTab.PETS -> petCatalog.isLoading
                 SearchTab.BATTERY -> catalog.isLoading
             },
-            hasError = catalog.error != null && themes.isEmpty()
+            hasError = when (tab) {
+                SearchTab.PETS -> petCatalog.error != null && pets.isEmpty()
+                SearchTab.BATTERY -> catalog.error != null && themes.isEmpty()
+            }
         )
     }.stateIn(
         scope = viewModelScope,
@@ -90,6 +93,7 @@ class SearchViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { catalogRepository.refresh() }
+        viewModelScope.launch { petCatalogRepository.refresh() }
     }
 
     fun updateQuery(value: String) {
@@ -106,6 +110,13 @@ class SearchViewModel @Inject constructor(
 
     fun toggleFavorite(themeId: Int) {
         settingsRepository.toggleFavorite(themeId)
+    }
+
+    fun retry() {
+        when (selectedTab.value) {
+            SearchTab.PETS -> viewModelScope.launch { petCatalogRepository.refresh(force = true) }
+            SearchTab.BATTERY -> viewModelScope.launch { catalogRepository.refresh() }
+        }
     }
 
     private companion object {

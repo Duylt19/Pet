@@ -18,6 +18,7 @@ data class PetRoomUiState(
     val backgroundRes: Int? = null,
     val pets: List<PetRoomPetUiState> = emptyList(),
     val isRosterLoading: Boolean = true,
+    val rosterLoadFailed: Boolean = false,
     val rooms: List<PetRoomThumbnailUiState> = emptyList(),
     val isRoomCatalogLoading: Boolean = true,
     val roomCatalogFailed: Boolean = false,
