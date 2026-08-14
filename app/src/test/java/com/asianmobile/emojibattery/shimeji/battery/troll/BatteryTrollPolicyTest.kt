@@ -70,14 +70,14 @@ class BatteryTrollPolicyTest {
 
     @Test
     fun `fake mode ignores the real level entirely`() {
-        val fake = config(trollMode = BatteryTrollMode.FAKE, trollFakePercent = 999)
-        assertEquals(999, BatteryTrollPolicy.displayPercent(fake, realLevel = 7))
+        val fake = config(trollMode = BatteryTrollMode.FAKE, trollFakePercent = 9_999)
+        assertEquals(9_999, BatteryTrollPolicy.displayPercent(fake, realLevel = 7))
     }
 
     @Test
     fun `a fake percentage past the prank ceiling is brought back into range`() {
-        val tooHigh = config(trollMode = BatteryTrollMode.FAKE, trollFakePercent = 5_000)
-        assertEquals(999, BatteryTrollPolicy.displayPercent(tooHigh, realLevel = 50))
+        val tooHigh = config(trollMode = BatteryTrollMode.FAKE, trollFakePercent = 50_000)
+        assertEquals(9_999, BatteryTrollPolicy.displayPercent(tooHigh, realLevel = 50))
         val negative = config(trollMode = BatteryTrollMode.FAKE, trollFakePercent = -8)
         assertEquals(0, BatteryTrollPolicy.displayPercent(negative, realLevel = 50))
     }

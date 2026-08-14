@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
  * Drives Battery Troll Customize (Figma `8315:8232`).
  *
  * The screen edits a [BatteryTrollDraft] rather than the stored config, because Apply is the only
- * moment the status bar is allowed to change: a user experimenting with a 999% prank must not
+ * moment the status bar is allowed to change: a user experimenting with a fake percentage must not
  * leak half-finished states onto their own status bar.
  */
 @HiltViewModel

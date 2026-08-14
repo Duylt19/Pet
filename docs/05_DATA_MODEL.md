@@ -62,7 +62,7 @@
 | `battery_status_hidden_app_packages` | String set | Package của app mà user chọn để tạm ẩn Emoji Battery; lưu cục bộ trên thiết bị |
 | `battery_status_favorite_theme_ids` | String set | Favorite local |
 | `battery_troll_mode` | String enum | `REAL` giữ mức pin thật, `FAKE` ghi số giả lên status bar |
-| `battery_troll_fake_percent` | Int | Số phần trăm giả, clamp 0–999 |
+| `battery_troll_fake_percent` | Int | Số phần trăm giả, clamp 0–9999 |
 | `battery_troll_theme_id` | Int | Theme troll đang dùng; `0` nghĩa là không dùng, artwork quay về theme battery thường |
 | `battery_troll_emoji_level_index`, `battery_troll_battery_level_index` | Int | Chỉ số 0–4 trong năm asset của theme, 0 = đầy … 4 = cạn |
 | `battery_troll_random_artwork` | Boolean | `true` thì emoji và pin tự xoay vòng theo chu kỳ và user không chọn tay được nữa |

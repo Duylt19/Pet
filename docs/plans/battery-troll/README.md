@@ -73,7 +73,7 @@ xuống còn "một chế độ của runtime đã có".
 | Q1 | **Bản quyền.** 6/10 theme là IP có bản quyền: Spider-Man, Zoro (One Piece), Doraemon, SpongeBob, Messi, bộ sticker corgi "KEJI". Chỉ 4 theme (mèo Xiêm, mèo đen, hải cẩu xanh, gấu mũ đỏ) là nguyên bản. | **Publish cả 10.** `distributionStatus = REVIEW_REQUIRED` làm chốt chặn. Tên hiển thị dùng mô tả trung tính (`Spider Hero`, `Green Swordsman`, `Blue Robot Cat`, `Football Star`, `Yellow Sponge`) chứ không dùng tên thương hiệu. |
 | Q2 | Troll chạy trên status-bar cover hiện có? | **Đúng.** Dùng chung quyền Accessibility và `BatteryStatusConfig`. `BATTERY_STATUS_ENABLED` giữ nguyên `false` ở release. |
 | Q3 | **Mô hình khoá.** | Giống Battery theme hiện tại: FREE mở thẳng, PREMIUM hiện crown ở góc tile rồi mở reward sheet khi tap. Dùng lại `BatteryThemeAccessPolicy`. Danh sách khoá do agent bốc ngẫu nhiên (seed `battery-troll-2026-08-12`): **FREE = 1, 6, 7, 9**; PREMIUM = 2, 3, 4, 5, 8, 10. |
-| Q4 | **Ngữ nghĩa `Random`/`Edit`.** | `Random` = **xoay vòng emoji theo chu kỳ thời gian**, không phụ thuộc mức pin thật. `Edit` mở dialog nhập số 0–999, dựng theo style dialog sẵn có. |
+| Q4 | **Ngữ nghĩa `Random`/`Edit`.** | `Random` = **xoay vòng emoji theo chu kỳ thời gian**, không phụ thuộc mức pin thật. `Edit` mở dialog nhập số 0–9999, dựng theo style dialog sẵn có. |
 
 > ⚠️ Rủi ro còn treo: kết quả bốc ngẫu nhiên đặt 4 theme IP (Zoro, Doraemon, Messi,
 > SpongeBob) vào nhóm **trả phí**. Thu tiền trực tiếp trên nhân vật có bản quyền nặng hơn

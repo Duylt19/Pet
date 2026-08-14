@@ -351,9 +351,9 @@ Battery Troll là **một chế độ của chính service này**, không phải
 Đọc mục này trước khi sửa `StatusBarAccessibilityService` hoặc `BatteryStatusBarView`.
 
 - **Chỉ con số bị làm giả.** `trollMode = FAKE` đổi chuỗi phần trăm sang `trollFakePercent`
-  (0–999). `powerState.level` vẫn `coerceIn(0, 100)` và vẫn điều khiển độ đầy icon pin.
-  Tách hai thứ này là lý do 999% là trò đùa chứ không phải bug render. Layout được đo lại mỗi
-  `render()` (`cachedLayout = null`) nên chuỗi ba chữ số không phá cơ chế rớt component
+  (0–9999). `powerState.level` vẫn `coerceIn(0, 100)` và vẫn điều khiển độ đầy icon pin.
+  Tách hai thứ này là lý do phần trăm giả vượt 100% là trò đùa chứ không phải bug render. Layout được đo lại mỗi
+  `render()` (`cachedLayout = null`) nên chuỗi bốn chữ số không phá cơ chế rớt component
   theo priority.
 - **Một thanh, một config, Apply sau thắng.** Battery Troll và Customize Status Bar ghi vào
   cùng một `BatteryStatusConfig` — cố ý, vì chỉ có đúng một thanh status bar. Để điều đó

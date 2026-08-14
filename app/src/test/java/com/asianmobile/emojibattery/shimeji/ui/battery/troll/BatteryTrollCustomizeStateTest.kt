@@ -150,7 +150,7 @@ class BatteryTrollCustomizeStateTest {
     fun codec_clamps_out_of_range_values_instead_of_restoring_them() {
         val restored = BatteryTrollDraftCodec.decode(
             """
-            {"schema":1,"trollId":7,"mode":"FAKE","fakePercent":9999,
+            {"schema":1,"trollId":7,"mode":"FAKE","fakePercent":99999,
              "emojiLevelIndex":99,"batteryLevelIndex":-4}
             """.trimIndent()
         )

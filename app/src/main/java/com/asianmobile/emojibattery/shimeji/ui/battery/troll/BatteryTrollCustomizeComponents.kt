@@ -792,7 +792,7 @@ internal fun BatteryTrollEditPercentDialogCard(
             BasicTextField(
                 value = input,
                 onValueChange = { raw ->
-                    // Digits only, three at most: the prank tops out at 999%.
+                    // Keep the field in sync with the domain ceiling when that limit changes.
                     input = raw.filter { it.isDigit() }.take(MAX_PERCENT_DIGITS)
                 },
                 singleLine = true,
@@ -877,5 +877,5 @@ private fun TrollDialogButton(
 
 private const val MIN_PERCENT = MIN_BATTERY_TROLL_FAKE_PERCENT
 private const val MAX_PERCENT = MAX_BATTERY_TROLL_FAKE_PERCENT
-private const val MAX_PERCENT_DIGITS = 3
+private val MAX_PERCENT_DIGITS = MAX_PERCENT.toString().length
 private const val EDIT_DIALOG_WIDTH_FRACTION = 320f / 360f

@@ -159,7 +159,7 @@ const val NO_BATTERY_TROLL_THEME_ID = 0
 // Every troll theme ships exactly five emoji states and five battery levels, full to empty.
 const val BATTERY_TROLL_LEVEL_COUNT = 5
 const val MIN_BATTERY_TROLL_FAKE_PERCENT = 0
-const val MAX_BATTERY_TROLL_FAKE_PERCENT = 999
+const val MAX_BATTERY_TROLL_FAKE_PERCENT = 9_999
 const val DEFAULT_BATTERY_TROLL_FAKE_PERCENT = 999
 // Random mode rotates the emoji on a timer rather than tracking the real charge level.
 const val BATTERY_TROLL_RANDOM_ROTATION_MS = 60_000L
