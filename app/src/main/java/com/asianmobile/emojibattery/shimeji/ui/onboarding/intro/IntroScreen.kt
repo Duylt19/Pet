@@ -30,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_INTRO
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_INTRO_SECOND
 import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
@@ -110,6 +112,7 @@ fun IntroScreen(
             .fillMaxSize()
             .background(colorResource(R.color.colors_FFFFFF)),
     ) { pageIndex ->
+        val nativeAdScreenCode = introNativeAdScreenCode(pageIndex)
         IntroPageContent(
             pageIndex = pageIndex,
             currentPage = currentPage,
@@ -129,10 +132,12 @@ fun IntroScreen(
                 }
             },
             adContent = {
-                NativeAdInternal(
-                    screenCode = SCREEN_INTRO_SECOND,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                nativeAdScreenCode?.let { screenCode ->
+                    NativeAdInternal(
+                        screenCode = screenCode,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             },
         )
     }
@@ -147,7 +152,13 @@ internal fun introPageScreenName(pageIndex: Int): ScreenName = when (pageIndex) 
 internal fun shouldLoadIntroNativeAd(
     pageIndex: Int,
     settledPage: Int,
-): Boolean = pageIndex == introPages.lastIndex && settledPage == introPages.lastIndex
+): Boolean = pageIndex == settledPage && introNativeAdScreenCode(pageIndex) != null
+
+internal fun introNativeAdScreenCode(pageIndex: Int): String? = when (pageIndex) {
+    0 -> SCREEN_INTRO
+    introPages.lastIndex -> SCREEN_INTRO_SECOND
+    else -> null
+}
 
 internal fun introCompactHeightScale(
     widthDp: Float,
@@ -191,18 +202,30 @@ internal fun IntroPageContent(
         )
 
         when (pageIndex) {
-            0 -> IntroCopyAndControls(
-                page = page,
-                currentPage = currentPage,
-                sideActionText = stringResource(R.string.next),
-                onActionClick = onActionClick,
-                layoutScale = compactHeightScale,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .offset(
-                        y = referenceUnit * INTRO_PAGE_ONE_COPY_TOP * compactHeightScale,
-                    ),
-            )
+            0 -> if (showNativeAd) {
+                NativeIntroPageContent(
+                    page = page,
+                    currentPage = currentPage,
+                    sideActionText = stringResource(R.string.next),
+                    onActionClick = onActionClick,
+                    adContent = adContent,
+                    layoutScale = compactHeightScale,
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                )
+            } else {
+                IntroCopyAndControls(
+                    page = page,
+                    currentPage = currentPage,
+                    sideActionText = stringResource(R.string.next),
+                    onActionClick = onActionClick,
+                    layoutScale = compactHeightScale,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .offset(
+                            y = referenceUnit * INTRO_PAGE_ONE_COPY_TOP * compactHeightScale,
+                        ),
+                )
+            }
 
             1 -> MiddleIntroPageContent(
                 page = page,
@@ -220,6 +243,7 @@ internal fun IntroPageContent(
                 NativeIntroPageContent(
                     page = page,
                     currentPage = currentPage,
+                    sideActionText = stringResource(R.string.start),
                     onActionClick = onActionClick,
                     adContent = adContent,
                     layoutScale = compactHeightScale,
@@ -247,6 +271,7 @@ internal fun IntroPageContent(
 private fun NativeIntroPageContent(
     page: IntroPage,
     currentPage: Int,
+    sideActionText: String,
     onActionClick: () -> Unit,
     adContent: @Composable () -> Unit,
     layoutScale: Float,
@@ -258,7 +283,7 @@ private fun NativeIntroPageContent(
         IntroCopyAndControls(
             page = page,
             currentPage = currentPage,
-            sideActionText = stringResource(R.string.start),
+            sideActionText = sideActionText,
             onActionClick = onActionClick,
             layoutScale = layoutScale,
         )
@@ -404,7 +429,12 @@ private fun IntroPrimaryButton(
             .background(colorResource(R.color.colors_FFFFFF))
             .border(
                 width = dimensionResource(R_sdp.dimen._2sdp) * layoutScale,
-                color = colorResource(R.color.colors_FF5D7D),
+                brush = Brush.horizontalGradient(
+                    listOf(
+                        colorResource(R.color.colors_C95DFF),
+                        colorResource(R.color.colors_FB54BB),
+                    ),
+                ),
                 shape = CircleShape,
             )
             .clickable(onClick = onClick),

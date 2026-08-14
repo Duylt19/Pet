@@ -1,5 +1,7 @@
 package com.asianmobile.emojibattery.shimeji.ui.onboarding.intro
 
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_INTRO
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_INTRO_SECOND
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -16,10 +18,19 @@ class IntroScreenTrackingTest {
     }
 
     @Test
-    fun `native ad is mounted only after the pager settles on intro three`() {
-        assertFalse(shouldLoadIntroNativeAd(pageIndex = 0, settledPage = 0))
+    fun `native ads are mounted only on their settled intro pages`() {
+        assertTrue(shouldLoadIntroNativeAd(pageIndex = 0, settledPage = 0))
+        assertFalse(shouldLoadIntroNativeAd(pageIndex = 0, settledPage = 1))
+        assertFalse(shouldLoadIntroNativeAd(pageIndex = 1, settledPage = 1))
         assertFalse(shouldLoadIntroNativeAd(pageIndex = 2, settledPage = 1))
         assertTrue(shouldLoadIntroNativeAd(pageIndex = 2, settledPage = 2))
+    }
+
+    @Test
+    fun `each ad supported intro page uses its own placement`() {
+        assertEquals(SCREEN_INTRO, introNativeAdScreenCode(0))
+        assertEquals(null, introNativeAdScreenCode(1))
+        assertEquals(SCREEN_INTRO_SECOND, introNativeAdScreenCode(2))
     }
 
     @Test

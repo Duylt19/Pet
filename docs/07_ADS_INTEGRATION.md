@@ -14,9 +14,10 @@ Mọi Android string resource chứa publisher/ad-unit ID dùng prefix
 - App Open Ad dùng Welcome Back pastel cover trong lúc chuyển sang quảng cáo. Đây là transient
   Compose content thuộc `:ads`, không phải navigation destination; Premium/ad-suppression và
   lifecycle show/dismiss hiện tại vẫn là boundary authoritative.
-- Intro chỉ mount/load native placement `SCREEN_INTRO_SECOND` khi pager đã settle ở page 3.
-  Page 1/2 và page 3 đang được pre-compose ngoài viewport không tạo request; quay lại page 3
-  tái sử dụng instance đã load trong cùng Intro lifecycle.
+- Intro page 1 mount/load native placement `SCREEN_INTRO`, page 3 dùng `SCREEN_INTRO_SECOND`,
+  còn page 2 không có ads. Mỗi placement chỉ tạo request khi pager đã settle đúng page; page
+  được HorizontalPager pre-compose ngoài viewport không load sớm. Quay lại page đã xem tái sử
+  dụng instance đã load trong cùng Intro lifecycle.
 - Navigation có `navigateWithAd()` cho interstitial-aware transition.
 - MainActivity quản lý App Open Ads theo lifecycle.
 - Premium dùng BillingClient và `StartPremiumIndexes` để biết entry source.
