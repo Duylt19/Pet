@@ -663,9 +663,9 @@ private fun PetCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    start = dimensionResource(SdpR.dimen._6sdp),
+                    start = dimensionResource(SdpR.dimen._2sdp),
                     top = dimensionResource(SdpR.dimen._3sdp),
-                    end = dimensionResource(SdpR.dimen._6sdp),
+                    end = dimensionResource(SdpR.dimen._2sdp),
                     bottom = dimensionResource(SdpR.dimen._9sdp)
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
