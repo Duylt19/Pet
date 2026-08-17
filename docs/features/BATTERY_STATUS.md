@@ -60,7 +60,11 @@ Vertical slice hiện đã có trong source:
   Danh sách app cuộn độc lập; khi list đã ở đầu, sheet nhận gesture kéo xuống và chỉ dismiss
   sau khi kéo tối thiểu 25% chiều cao, cùng contract với các permission disclosure sheet.
   Service chỉ dùng package name của window event cho rule này, không đọc node/content và
-  không ghi hay gửi lịch sử app foreground. Accessibility disclosure nêu rõ boundary này.
+  không ghi hay gửi lịch sử app foreground. Event tạm từ System UI (status/navigation bar,
+  recents/shade), IME hiện tại và Samsung Edge Panel không được thay thế package app gần nhất;
+  nhờ vậy thao tác lộ system bar trong một app đã chọn ẩn không làm overlay chớp hiện lại. Các app
+  thật, kể cả launcher dùng framework window class, vẫn thay thế foreground package bình thường.
+  Accessibility disclosure nêu rõ boundary này.
 - Pet và pin được renderer như một pair: cùng anchor ở cụm battery phía trailing, pin
   vẽ trước và pet vẽ chồng lên trên theo hai kích thước độc lập. Màn hình hẹp tự bỏ date,
   emotion/animation trước khi bỏ status cốt lõi; nhóm leading/trailing được mirror đúng

@@ -255,9 +255,13 @@ class StatusBarAccessibilityService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
-        val packageName = event.packageName?.toString()?.trim().orEmpty()
-        if (packageName.isEmpty() || packageName == currentForegroundPackage) return
-        currentForegroundPackage = packageName
+        val foregroundPackage = BatteryAppExclusionPolicy.resolveForegroundPackage(
+            currentForegroundPackage = currentForegroundPackage,
+            eventPackage = event.packageName?.toString(),
+            transientWindowPackages = transientWindowPackages()
+        )
+        if (foregroundPackage == currentForegroundPackage) return
+        currentForegroundPackage = foregroundPackage
         updateOverlay()
     }
 
@@ -423,6 +427,16 @@ class StatusBarAccessibilityService : AccessibilityService() {
             return
         }
         render()
+    }
+
+    private fun transientWindowPackages(): Set<String> = buildSet {
+        add(SYSTEM_UI_PACKAGE)
+        add(SAMSUNG_EDGE_PANEL_PACKAGE)
+        Settings.Secure.getString(contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD)
+            ?.substringBefore('/')
+            ?.trim()
+            ?.takeIf(String::isNotEmpty)
+            ?.let(::add)
     }
 
     /**
@@ -811,6 +825,8 @@ class StatusBarAccessibilityService : AccessibilityService() {
         applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
 
     private companion object {
+        const val SYSTEM_UI_PACKAGE = "com.android.systemui"
+        const val SAMSUNG_EDGE_PANEL_PACKAGE = "com.samsung.android.app.cocktailbarservice"
         const val TAG = "BatteryStatusService"
         const val ANDROID_ASSET_URI_PREFIX = "file:///android_asset/"
         const val ANDROID_RESOURCE_URI_PREFIX = "android.resource://"
