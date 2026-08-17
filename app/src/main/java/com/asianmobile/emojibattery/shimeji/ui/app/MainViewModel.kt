@@ -10,9 +10,10 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -43,14 +44,9 @@ class MainViewModel @Inject constructor(
     private val dataStoreManager: DataStoreManager
 ) : ViewModel() {
 
-    internal val hasRequestedNotificationPermission: StateFlow<Boolean?> =
-        dataStoreManager.hasRequestedNotificationPermission
-            .map<Boolean, Boolean?> { it }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.Eagerly,
-                initialValue = null
-            )
+    private val _hasRequestedHomeNotificationThisSession = MutableStateFlow(false)
+    internal val hasRequestedHomeNotificationThisSession: StateFlow<Boolean> =
+        _hasRequestedHomeNotificationThisSession.asStateFlow()
 
     internal val uiState: StateFlow<MainUiState> = combine(
         dataStoreManager.isLanguageCompleted,
@@ -101,6 +97,8 @@ class MainViewModel @Inject constructor(
     }
 
     internal fun markNotificationPermissionRequested() {
+        if (_hasRequestedHomeNotificationThisSession.value) return
+        _hasRequestedHomeNotificationThisSession.value = true
         viewModelScope.launch {
             dataStoreManager.saveNotificationPermissionRequested(true)
         }

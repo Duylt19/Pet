@@ -20,9 +20,9 @@ Platform và product vertical slice đã hoàn tất. `PetOverlay.start(context)
 - `SYSTEM_ALERT_WINDOW`: tạo `TYPE_APPLICATION_OVERLAY`; user phải cấp qua system settings.
 - `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_SPECIAL_USE`: service target SDK 36 khai báo `specialUse` và property giải thích use case.
 - `POST_NOTIFICATIONS`: gate product bắt buộc của flow Pet on Screen trên API 33+; dưới API 33
-  gate tự đạt. Home request runtime permission đúng một lần sau khi top-level tab xuất hiện và
-  full-screen ad đã đóng; trạng thái đã hỏi được persist. Foreground service vẫn luôn tạo
-  notification/channel theo contract Android.
+  gate tự đạt. Home request runtime permission tối đa một lần mỗi phiên app sau khi top-level tab
+  xuất hiện và full-screen ad đã đóng; trạng thái lịch sử vẫn persist cho dashboard quyền.
+  Foreground service luôn tạo notification/channel theo contract Android.
 - `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`: chỉ dùng khi runtime signals xác nhận thiết bị cần
   exemption; mở dialog trực tiếp cho package và fallback về settings list nếu ROM không hỗ trợ.
   Trước khi phát hành Google Play phải review/khai báo use case theo power-management policy.

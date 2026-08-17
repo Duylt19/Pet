@@ -7,12 +7,12 @@ import org.junit.Test
 
 class HomeNotificationPermissionPolicyTest {
     @Test
-    fun `requests once when an Android 13 user reaches a Home tab`() {
+    fun `requests when an Android 13 user reaches Home in a fresh app session`() {
         assertTrue(
             shouldRequestHomeNotificationPermission(
                 sdkInt = Build.VERSION_CODES.TIRAMISU,
                 isGranted = false,
-                hasRequestedBefore = false,
+                hasRequestedThisSession = false,
                 isHomeTopLevelVisible = true,
                 isFullScreenAdShowing = false
             )
@@ -20,14 +20,13 @@ class HomeNotificationPermissionPolicyTest {
     }
 
     @Test
-    fun `waits until DataStore is loaded and Home is visible`() {
-        assertFalse(policy(hasRequestedBefore = null))
+    fun `waits until Home is visible`() {
         assertFalse(policy(isHomeTopLevelVisible = false))
     }
 
     @Test
-    fun `never repeats a handled prompt or asks for an existing grant`() {
-        assertFalse(policy(hasRequestedBefore = true))
+    fun `never repeats within a session or asks for an existing grant`() {
+        assertFalse(policy(hasRequestedThisSession = true))
         assertFalse(policy(isGranted = true))
     }
 
@@ -44,13 +43,13 @@ class HomeNotificationPermissionPolicyTest {
     private fun policy(
         sdkInt: Int = Build.VERSION_CODES.TIRAMISU,
         isGranted: Boolean = false,
-        hasRequestedBefore: Boolean? = false,
+        hasRequestedThisSession: Boolean = false,
         isHomeTopLevelVisible: Boolean = true,
         isFullScreenAdShowing: Boolean = false
     ) = shouldRequestHomeNotificationPermission(
         sdkInt = sdkInt,
         isGranted = isGranted,
-        hasRequestedBefore = hasRequestedBefore,
+        hasRequestedThisSession = hasRequestedThisSession,
         isHomeTopLevelVisible = isHomeTopLevelVisible,
         isFullScreenAdShowing = isFullScreenAdShowing
     )

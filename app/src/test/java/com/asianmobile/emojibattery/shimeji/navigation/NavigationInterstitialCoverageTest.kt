@@ -48,6 +48,21 @@ class NavigationInterstitialCoverageTest {
     }
 
     @Test
+    fun `accessibility guide is removed before opening system settings`() {
+        val navGraph = navigationSource("NavGraph.kt")
+        val handoff = Regex(
+            """accessibilitySettingsResultTarget\s*=\s*source\s*""" +
+                """navController\.safePopBackStack\(ignoreDebounce\s*=\s*true\)\s*""" +
+                """openAccessibilitySettings\(\)"""
+        )
+
+        assertTrue(
+            "Accessibility guide must leave the back stack before Android Settings opens",
+            handoff.containsMatchIn(navGraph)
+        )
+    }
+
+    @Test
     fun `direct root navigation remains limited to documented completion paths`() {
         val navGraph = navigationSource("NavGraph.kt")
 

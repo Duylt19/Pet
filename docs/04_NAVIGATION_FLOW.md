@@ -26,10 +26,10 @@
 | `battery_troll_customize/{trollId}` | Battery Troll Customize | Chọn Fake/Real, phần trăm giả, cỡ chữ, emoji và mức pin của theme; Apply ghi vào cùng `BatteryStatusConfig` của status-bar cover. Back khi còn thay đổi chưa lưu sẽ hiện `BatteryDiscardChangesSheet` |
 | `premium/{startByIndex}` | Premium | Typed source behavior |
 
-Trên API 33+, lần đầu một trong bốn top-level Home tab thật sự xuất hiện, app request
-`POST_NOTIFICATIONS` nếu chưa cấp. Prompt chờ full-screen ad đóng và được đánh dấu trong
-DataStore trước khi launch để không lặp khi đổi tab/recreate; nếu user từ chối, dashboard Grant
-Permissions dẫn tới App Notification Settings thay vì tự hỏi lại ở mỗi lần mở Home.
+Trên API 33+, mỗi phiên app khi một trong bốn top-level Home tab thật sự xuất hiện, app request
+`POST_NOTIFICATIONS` nếu chưa cấp. Prompt chờ full-screen ad đóng và dùng gate trong
+`MainViewModel` để không lặp khi đổi tab/recreate trong cùng phiên. DataStore chỉ giữ lịch sử đã
+hỏi cho dashboard Grant Permissions; phiên app mới được phép hiển thị runtime prompt lại.
 
 ## Flow
 
@@ -139,8 +139,9 @@ ngay ở `PetOverlayRuntime.STARTING`, bỏ qua tap lặp trong lúc khởi đ�
 - Mọi action xin Accessibility trong Discover, Battery Styles, Mine, Status Bar Editor và Grant
   Permissions dùng cùng bottom-sheet disclosure. `Allow` không mở Settings cho tới khi checkbox
   consent được chọn, sau đó đi qua `accessibility_how_to_use`. CTA tại màn hướng dẫn mới mở
-  Android Settings; launcher tắt App Open Ad trước khi rời app. Cấp quyền thành công tự pop về
-  đúng source và tiếp tục intent đang chờ; nếu chưa cấp thì giữ màn hướng dẫn để retry.
+  Android Settings; launcher tắt App Open Ad trước khi rời app. CTA đồng thời pop màn hướng dẫn
+  khỏi back stack, nên khi quay lại app user luôn về đúng source. Launcher cấp app gửi trạng thái
+  quyền mới về source để tiếp tục hoặc hủy intent đang chờ.
 - Premium onboarding close/success đi thẳng Home trong thời gian bước Permission bị tắt.
 - Premium splash-return close/success đi Home.
 - Language settings restart activity với `skip_splash=true` sau confirm.

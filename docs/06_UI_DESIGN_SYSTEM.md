@@ -418,9 +418,9 @@ Grant Permissions contract theo dashboard Mine Figma node `8080:7477`, card nề
   mũi tên thay switch và intent được resolve lại đúng lúc chạm. Vì không đọc được grant state,
   đây là row duy nhất không thể tự ẩn chính xác sau khi user quay lại;
 - runtime Notification prompt không còn phụ thuộc onboarding Permission đang tắt: trên API 33+
-  Home shell hỏi đúng một lần khi top-level Home đầu tiên xuất hiện, chỉ sau khi full-screen ad đã
-  đóng. DataStore giữ việc prompt đã từng hiển thị; nếu user từ chối, thao tác tại dashboard mở
-  App Notification Settings thay vì spam lại prompt mỗi lần vào Home;
+  Home shell hỏi tối đa một lần mỗi phiên app khi top-level Home đầu tiên xuất hiện, chỉ sau khi
+  full-screen ad đã đóng. Gate in-memory sống qua recreate nhưng reset ở phiên mới; DataStore giữ
+  lịch sử cho dashboard Grant Permissions;
 - disclosure Accessibility (`GrantPermissionDialog`) theo Figma `8437:7570` và `8437:9099`
   là bottom sheet full-width bo hai góc trên 24px, scrim 50%, handle `32×4`, title Roboto
   SemiBold 18/26 và body Roboto Regular 14/20. Nội dung dài là phần duy nhất được cuộn; hàng

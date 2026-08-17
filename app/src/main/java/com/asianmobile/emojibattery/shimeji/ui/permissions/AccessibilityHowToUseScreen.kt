@@ -37,7 +37,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -55,8 +54,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
-import com.asianmobile.emojibattery.shimeji.ui.shared.component.rememberAccessibilitySettingsLauncher
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -68,14 +65,10 @@ private val AccessibilityRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold
 @Composable
 fun AccessibilityHowToUseScreen(
     onNavigateBack: () -> Unit,
-    onPermissionGranted: () -> Unit,
+    onGoToSettings: () -> Unit,
     viewModel: AccessibilityHowToUseViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    val openAccessibilitySettings = rememberAccessibilitySettingsLauncher {
-        if (BatteryAccessibility.isEnabled(context)) onPermissionGranted()
-    }
 
     TrackScreenView(ScreenName.ACCESSIBILITY_HOW_TO_USE)
     BackHandler(onBack = onNavigateBack)
@@ -83,7 +76,7 @@ fun AccessibilityHowToUseScreen(
     AccessibilityHowToUseContent(
         uiState = uiState,
         onNavigateBack = onNavigateBack,
-        onGoToSettings = openAccessibilitySettings
+        onGoToSettings = onGoToSettings
     )
 }
 

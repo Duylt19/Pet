@@ -20,7 +20,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -69,6 +68,8 @@ import com.asianmobile.emojibattery.shimeji.ui.pet.room.PetRoomScreen
 import com.asianmobile.emojibattery.shimeji.ui.premium.StartPremiumIndexes
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.splash.SplashScreen
 import com.asianmobile.emojibattery.shimeji.ui.search.SearchScreen
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibility
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.rememberAccessibilitySettingsLauncher
 
 object Routes {
     const val SPLASH = "splash"
@@ -198,20 +199,28 @@ fun AppNavGraph(
     val context = LocalContext.current
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    val hasRequestedNotificationPermission by
-        viewModel.hasRequestedNotificationPermission.collectAsStateWithLifecycle()
+    val hasRequestedHomeNotificationThisSession by
+        viewModel.hasRequestedHomeNotificationThisSession.collectAsStateWithLifecycle()
     val isFullScreenAdShowing by AdOverlayState.isAdShowing.collectAsStateWithLifecycle()
-    var hasLaunchedHomeNotificationPrompt by rememberSaveable { mutableStateOf(false) }
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { }
+    var accessibilitySettingsResultTarget by remember {
+        mutableStateOf<NavBackStackEntry?>(null)
+    }
+    val openAccessibilitySettings = rememberAccessibilitySettingsLauncher {
+        accessibilitySettingsResultTarget?.savedStateHandle?.set(
+            ACCESSIBILITY_HOW_TO_USE_RESULT,
+            BatteryAccessibility.isEnabled(context)
+        )
+        accessibilitySettingsResultTarget = null
+    }
     val currentRoute = currentBackStackEntry?.destination?.route
 
     LaunchedEffect(
         currentRoute,
-        hasRequestedNotificationPermission,
+        hasRequestedHomeNotificationThisSession,
         isFullScreenAdShowing,
-        hasLaunchedHomeNotificationPrompt
     ) {
         val isNotificationGranted = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             ContextCompat.checkSelfPermission(
@@ -219,17 +228,16 @@ fun AppNavGraph(
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         if (
-            !hasLaunchedHomeNotificationPrompt &&
             shouldRequestHomeNotificationPermission(
                 sdkInt = Build.VERSION.SDK_INT,
                 isGranted = isNotificationGranted,
-                hasRequestedBefore = hasRequestedNotificationPermission,
+                hasRequestedThisSession = hasRequestedHomeNotificationThisSession,
                 isHomeTopLevelVisible = currentRoute == Routes.HOME_GRAPH,
                 isFullScreenAdShowing = isFullScreenAdShowing
             )
         ) {
-            // Persist before launching so recreation or tab changes cannot show a second prompt.
-            hasLaunchedHomeNotificationPrompt = true
+            // The in-memory gate prevents repeats in this session; DataStore remains history for
+            // the explicit Grant Permissions flow after a denial.
             viewModel.markNotificationPermissionRequested()
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -459,31 +467,27 @@ fun AppNavGraph(
             }
 
             composable(Routes.ACCESSIBILITY_HOW_TO_USE) {
-                fun returnToSource(permissionGranted: Boolean, requestInterstitial: Boolean) {
-                    val publishResult: () -> Unit = {
-                        navController.previousBackStackEntry?.savedStateHandle?.set(
-                            ACCESSIBILITY_HOW_TO_USE_RESULT,
-                            permissionGranted
-                        )
-                        Unit
-                    }
-                    if (requestInterstitial) {
-                        navController.safePopBackStackWithAd(
-                            context = context,
-                            currentRoute = Routes.ACCESSIBILITY_HOW_TO_USE,
-                            onBeforePop = publishResult
-                        )
-                    } else {
-                        publishResult()
-                        navController.safePopBackStack(ignoreDebounce = true)
-                    }
+                fun returnToSourceFromAppBar() {
+                    navController.safePopBackStackWithAd(
+                        context = context,
+                        currentRoute = Routes.ACCESSIBILITY_HOW_TO_USE,
+                        onBeforePop = {
+                            navController.previousBackStackEntry?.savedStateHandle?.set(
+                                ACCESSIBILITY_HOW_TO_USE_RESULT,
+                                false
+                            )
+                        }
+                    )
                 }
                 AccessibilityHowToUseScreen(
-                    onNavigateBack = {
-                        returnToSource(permissionGranted = false, requestInterstitial = true)
-                    },
-                    onPermissionGranted = {
-                        returnToSource(permissionGranted = true, requestInterstitial = false)
+                    onNavigateBack = ::returnToSourceFromAppBar,
+                    onGoToSettings = {
+                        val source = navController.previousBackStackEntry
+                        if (source != null) {
+                            accessibilitySettingsResultTarget = source
+                            navController.safePopBackStack(ignoreDebounce = true)
+                            openAccessibilitySettings()
+                        }
                     }
                 )
             }
