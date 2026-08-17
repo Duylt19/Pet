@@ -76,10 +76,10 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
   resource ID riêng hiện tạm dùng chung AdMob unit với Battery catalog để có thể tách sau này.
   Khi native không đủ điều kiện hoặc load fail, holder collapse hoàn toàn.
 - Customize Status Bar và từng child library đặt holder trong root destination tương ứng.
-  Overview, Emotion group/detail cùng mười editor option dùng native `COLLAPSE_SMALL`; các library
-  Battery/Emoji/Theme giữ banner `battery_editor_bottom`. Mỗi entry mới có ViewModelStoreOwner
-  riêng nên request ad mới, không rebind ad của màn trước; Apply vẫn reflow ngay phía trên chiều
-  cao collapsed/expanded thực tế.
+  Overview, Emotion group/detail, library Battery/Emoji cùng mười editor option (bao gồm Animation)
+  dùng native `COLLAPSE_SMALL`; chỉ library Theme giữ banner `battery_editor_bottom`. Mỗi entry mới
+  có ViewModelStoreOwner riêng nên request ad mới, không rebind ad của màn trước; Apply vẫn reflow
+  ngay phía trên chiều cao collapsed/expanded thực tế.
 - Overview Customize Status Bar dùng placement riêng `screen_customize_status_bar`, Remote Config
   `is_show_native_customize_status_bar` và ad-unit resource
   `id_emoji_battery_native_customize_status_bar`. Các màn con option/emotion/detail dùng

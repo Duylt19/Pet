@@ -47,7 +47,7 @@ tự thêm quảng cáo chỉ từ tên route.
 | Battery category | `screen_battery_category` | `is_show_native_battery_category` | `id_emoji_battery_native_battery_category` | `HEIGHT_222` |
 | Battery Troll | `screen_battery_troll` | `is_show_native_battery_troll` | `id_emoji_battery_native_battery_troll` | `COLLAPSE_SMALL` |
 | Customize Status Bar | `screen_customize_status_bar` | `is_show_native_customize_status_bar` | `id_emoji_battery_native_customize_status_bar` | `COLLAPSE_SMALL` |
-| Battery editor options | `screen_battery_editor` | `is_show_native_battery_editor` | `id_emoji_battery_native_battery_editor` | `COLLAPSE_SMALL` |
+| Battery/Emoji libraries and editor options (including Animation) | `screen_battery_editor` | `is_show_native_battery_editor` | `id_emoji_battery_native_battery_editor` | `COLLAPSE_SMALL` |
 | Battery reward sheet | `dialog_battery_reward` | `is_show_native_battery_reward` | `id_emoji_battery_native_battery_reward` | `HEIGHT_222` |
 | Battery discard sheet | `dialog_battery_discard` | `is_show_native_battery_discard` | `id_emoji_battery_native_battery_discard` | `HEIGHT_222` |
 | Pet reward sheet | `dialog_pet_reward` | `is_show_native_pet_reward` | `id_emoji_battery_native_pet_reward` | `HEIGHT_222` |

@@ -77,9 +77,11 @@ class HomeTabNavigationTest {
     }
 
     @Test
-    fun `status option pages replace the editor banner with one collapsible native`() {
+    fun `battery emoji and status option pages use one collapsible native`() {
         val route = "${Routes.BATTERY_EDITOR_COMPONENT}/{themeId}/{page}"
 
+        assertEquals(true, showBatteryEditorCollapsibleNative(route, "BATTERY_TEMPLATES"))
+        assertEquals(true, showBatteryEditorCollapsibleNative(route, "EMOJI_TEMPLATES"))
         assertEquals(true, showBatteryEditorCollapsibleNative(route, "AIRPLANE"))
         assertEquals(true, showBatteryEditorCollapsibleNative(route, "CLOCK"))
         assertEquals(true, showBatteryEditorCollapsibleNative(route, "ANIMATION"))
