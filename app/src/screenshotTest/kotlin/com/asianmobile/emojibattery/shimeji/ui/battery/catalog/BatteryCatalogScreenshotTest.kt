@@ -26,7 +26,25 @@ fun BatteryCatalogScreenshotTest() {
         onFavorite = {},
         onTheme = {},
         onRetry = {},
-        nativeAdContent = { BatteryAdPreviewSlot() }
+        nativeAdContent = { modifier -> BatteryAdPreviewSlot(modifier) }
+    )
+}
+
+@PreviewTest
+@Preview(name = "Battery catalog without ad", widthDp = 360, heightDp = 800)
+@Composable
+fun BatteryCatalogWithoutAdScreenshotTest() {
+    BatteryCatalogContent(
+        state = previewBatteryCatalogState(),
+        onSearch = {},
+        onPremium = {},
+        onBatteryToggle = {},
+        onCustomizeStatusBar = {},
+        onOpenCategory = {},
+        onFavorite = {},
+        onTheme = {},
+        onRetry = {},
+        nativeAdContent = {}
     )
 }
 

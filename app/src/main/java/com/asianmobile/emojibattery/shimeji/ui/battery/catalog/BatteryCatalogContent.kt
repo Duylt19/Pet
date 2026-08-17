@@ -85,7 +85,9 @@ internal fun BatteryCatalogContent(
     onFavorite: (Int) -> Unit,
     onTheme: (BatteryThemeEntry) -> Unit,
     onRetry: () -> Unit,
-    nativeAdContent: @Composable () -> Unit = { BatteryCatalogNativeAd() }
+    nativeAdContent: @Composable (Modifier) -> Unit = { modifier ->
+        BatteryCatalogNativeAd(modifier)
+    }
 ) {
     Box(
         modifier = Modifier
@@ -168,16 +170,13 @@ internal fun BatteryCatalogContent(
                             }
                             if (index == 0) {
                                 item(key = "battery_native_ad") {
-                                    Spacer(
-                                        Modifier.height(dimensionResource(SdpR.dimen._15sdp))
-                                    )
-                                    Box(
-                                        modifier = Modifier.padding(
-                                            horizontal = dimensionResource(SdpR.dimen._12sdp)
+                                    nativeAdContent(
+                                        Modifier.padding(
+                                            start = dimensionResource(SdpR.dimen._12sdp),
+                                            top = dimensionResource(SdpR.dimen._15sdp),
+                                            end = dimensionResource(SdpR.dimen._12sdp)
                                         )
-                                    ) {
-                                        nativeAdContent()
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -655,10 +654,10 @@ private fun BatteryRewardNativeAd() {
 }
 
 @Composable
-private fun BatteryCatalogNativeAd() {
+private fun BatteryCatalogNativeAd(modifier: Modifier = Modifier) {
     NativeAdInternal(
         screenCode = SCREEN_BATTERY_CATALOG,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     )
 }
 
@@ -796,7 +795,7 @@ private fun BatteryCatalogContentPreview() {
         onFavorite = {},
         onTheme = {},
         onRetry = {},
-        nativeAdContent = { BatteryAdPreviewSlot() }
+        nativeAdContent = { modifier -> BatteryAdPreviewSlot(modifier) }
     )
 }
 
