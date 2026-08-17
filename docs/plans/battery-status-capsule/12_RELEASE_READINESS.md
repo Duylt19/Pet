@@ -22,7 +22,7 @@ compile thành công để thay thế device test, license approval hoặc Play 
 | Whitespace/patch integrity | Automated | `git diff --check` |
 | Snapshot schema/hash/size/dimension | Automated debug tooling | `./gradlew auditDebugBatterySnapshot` |
 | Release rejects `REVIEW_REQUIRED` catalog | Implemented fail-closed | `HybridBatteryCatalogRepository` parser/source policy |
-| Unapproved release runtime | Hard-disabled | `BuildConfig.BATTERY_STATUS_ENABLED=false` hides entry and blocks service window |
+| Release runtime switch | Owner-enabled | `BuildConfig.BATTERY_STATUS_ENABLED=true`; service attach vẫn phụ thuộc user setting, Accessibility grant và runtime visibility policy |
 | Narrow-width overlap prevention | JVM covered | `BatteryStatusLayoutPolicyTest` |
 | RTL leading/trailing mirror | JVM policy + Canvas implementation | `BatteryStatusPhysicalSides` |
 | Draft process-death serialization | JVM covered | `BatteryDraftCodecTest` |
@@ -46,7 +46,7 @@ compile thành công để thay thế device test, license approval hoặc Play 
 
 ## Release decision
 
-Feature đủ để build và QA trong repository, nhưng **không release-enable catalog crawl
-hoặc tuyên bố Play-ready** cho tới khi tất cả external gates áp dụng ở trên có evidence.
+Runtime đã được owner bật trong release để QA end-to-end. Điều này không đồng nghĩa feature đã
+Play-ready; các external gate áp dụng ở trên vẫn cần evidence trước khi phát hành Store.
 Nếu Play/accessibility gate không đạt, Battery entry phải bị loại khỏi release thay vì
 chuyển âm thầm sang một overlay mode khác.

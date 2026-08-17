@@ -78,10 +78,11 @@ Vertical slice hiện đã có trong source:
   `R.drawable` compile-time để resource cleanup không thể xóa icon còn được runtime chọn rồi âm
   thầm rơi về fallback hình tròn.
 
-Đây chưa phải release-complete: cần asset ownership approval, device/OEM matrix, Play
-Accessibility declaration và UX validation trước khi bật catalog ngoài debug.
-`BuildConfig.BATTERY_STATUS_ENABLED=false` ở release là hard kill switch hiện tại: ẩn
-Battery entry và ngăn service attach window cho tới khi các gate được duyệt.
+Runtime đã được owner bật cho cả debug và release bằng
+`BuildConfig.BATTERY_STATUS_ENABLED=true`. Các gate bên ngoài như device/OEM matrix, Play
+Accessibility declaration và UX validation vẫn phải hoàn tất trước khi phát hành Play; chúng
+không còn được biểu diễn bằng một build-time kill switch khiến UI báo active nhưng service từ
+chối attach window.
 
 ## Luồng người dùng
 
