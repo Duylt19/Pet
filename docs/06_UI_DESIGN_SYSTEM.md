@@ -94,7 +94,9 @@ Discover Home contract:
   khi quyền có thật, vì cả hai tab luôn nhân với `BatteryAccessibility.isEnabled()`;
 - Home shell có bốn tab Discover/Battery/Shimeji Pets/Mine. `HomeBottomNavigation` cố định
   trên bottom banner hiện có; từng screen không tự tạo lại bottom chrome. Battery selected dùng
-  glyph filled 24×24 export từ frame Figma `8017:3666`, không tái sử dụng icon outline unselected;
+  glyph filled 24×24 export từ frame Figma `8017:3666`, không tái sử dụng icon outline unselected.
+  Bốn tab luôn chia đều chiều ngang; label giữ một dòng, căn giữa và chỉ marquee khi bản dịch dài
+  hơn viewport của chính tab để không clip hoặc vẽ đè sang tab bên cạnh;
 - Discover, Shimeji Pets và Mine dùng chung `HomeHeader` và `HomeEnableCard`: header `43sdp`, search
   `25sdp`, enable card `37sdp`, switch `34×18sdp`. Discover chỉ render Battery enable card;
   pet switch được quản lý ở flow pet. Không copy component rồi đổi metric riêng;

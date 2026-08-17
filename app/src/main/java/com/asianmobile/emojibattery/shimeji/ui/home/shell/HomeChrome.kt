@@ -3,6 +3,7 @@ package com.asianmobile.emojibattery.shimeji.ui.home.shell
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -300,7 +302,14 @@ private fun HomeBottomItem(
             ),
             fontFamily = if (selected) HomeRobotoSemiBold else HomeRobotoMedium,
             fontSize = dimensionResource(SspR.dimen._9ssp).value.sp,
-            maxLines = 1
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Clip,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = dimensionResource(SdpR.dimen._2sdp))
+                .basicMarquee(iterations = Int.MAX_VALUE)
         )
     }
 }
