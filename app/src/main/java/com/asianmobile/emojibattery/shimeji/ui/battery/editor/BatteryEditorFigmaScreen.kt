@@ -44,6 +44,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,6 +85,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.intuit.sdp.R as SdpR
 import com.intuit.ssp.R as SspR
+import kotlinx.coroutines.flow.first
 
 private val StatusBarRobotoRegular = FontFamily(Font(R.font.roboto_regular))
 private val StatusBarRobotoMedium = FontFamily(Font(R.font.roboto_medium))
@@ -882,7 +884,34 @@ private fun BackgroundThemeRow(
     val previewBackgrounds = remember(backgrounds, selectedId) {
         statusBarBackgroundPreviewItems(backgrounds, selectedId)
     }
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))) {
+    val listState = rememberLazyListState()
+    val previewIds = previewBackgrounds.map(BatteryDecorationEntry::id)
+    LaunchedEffect(selectedId, previewIds) {
+        val selectedIndex = previewBackgrounds.indexOfFirst { it.id == selectedId }
+            .takeIf { it >= 0 }
+            ?: return@LaunchedEffect
+        val layoutInfo = snapshotFlow { listState.layoutInfo }
+            .first { info ->
+                info.totalItemsCount == previewBackgrounds.size &&
+                    info.visibleItemsInfo.isNotEmpty()
+            }
+        val selectedItem = layoutInfo.visibleItemsInfo
+            .firstOrNull { it.index == selectedIndex }
+        if (
+            shouldScrollToStatusBarBackgroundSelection(
+                itemOffset = selectedItem?.offset,
+                itemSize = selectedItem?.size,
+                viewportStartOffset = layoutInfo.viewportStartOffset,
+                viewportEndOffset = layoutInfo.viewportEndOffset
+            )
+        ) {
+            listState.animateScrollToItem(selectedIndex)
+        }
+    }
+    LazyRow(
+        state = listState,
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+    ) {
         items(previewBackgrounds, key = { it.id }) { background ->
             BackgroundThemeOption(
                 background = background,
@@ -896,6 +925,14 @@ private fun BackgroundThemeRow(
         }
     }
 }
+
+internal fun shouldScrollToStatusBarBackgroundSelection(
+    itemOffset: Int?,
+    itemSize: Int?,
+    viewportStartOffset: Int,
+    viewportEndOffset: Int
+): Boolean = itemOffset == null || itemSize == null ||
+    itemOffset < viewportStartOffset || itemOffset + itemSize > viewportEndOffset
 
 internal fun statusBarBackgroundPreviewItems(
     backgrounds: List<BatteryDecorationEntry>,

@@ -188,7 +188,8 @@ Customize Status Bar theo Figma `8227:4332`, `8345:6256`, `8240:7335`, `8240:746
   Lottie server render từ file cache đã materialize; khi đang tải/parse hoặc gặp lỗi, card dùng
   illustration Animation thay vì để trống;
 - Hàng Theme ở overview hiển thị trước năm background. Nếu background đang chọn nằm ngoài năm
-  item đầu, hàng giữ bốn item đầu và đưa item đang chọn vào vị trí thứ năm;
+  item đầu, hàng giữ bốn item đầu và đưa item đang chọn vào vị trí thứ năm. Khi quay lại overview
+  sau khi unlock/chọn từ More, hàng tự cuộn đến item selected nếu item chưa hiển thị trọn vẹn;
 - Background Theme giữ năm item đầu miễn phí trong baseline catalog v1. Item còn lại mở shared
   Rewarded/Premium offer như Battery/Emoji, chỉ materialize asset sau khi user đủ quyền truy cập
   và lưu reward unlock trong namespace background riêng để không trùng ID theme;

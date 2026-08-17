@@ -30,4 +30,39 @@ class StatusBarBackgroundPreviewPolicyTest {
             statusBarBackgroundPreviewItems(backgrounds, selectedId = 7).map { it.id }
         )
     }
+
+    @Test
+    fun `scrolls when selected preview is missing or clipped by viewport`() {
+        assertEquals(
+            true,
+            shouldScrollToStatusBarBackgroundSelection(
+                itemOffset = null,
+                itemSize = null,
+                viewportStartOffset = 0,
+                viewportEndOffset = 336
+            )
+        )
+        assertEquals(
+            true,
+            shouldScrollToStatusBarBackgroundSelection(
+                itemOffset = 300,
+                itemSize = 77,
+                viewportStartOffset = 0,
+                viewportEndOffset = 336
+            )
+        )
+    }
+
+    @Test
+    fun `keeps list position when selected preview is fully visible`() {
+        assertEquals(
+            false,
+            shouldScrollToStatusBarBackgroundSelection(
+                itemOffset = 172,
+                itemSize = 77,
+                viewportStartOffset = 0,
+                viewportEndOffset = 336
+            )
+        )
+    }
 }
