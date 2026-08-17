@@ -435,12 +435,14 @@ private fun DiscoverContent(
                         )
                     }
                     item {
-                        Spacer(Modifier.height(dimensionResource(SdpR.dimen._15sdp)))
                         Box(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
                             BannerAd(
+                                modifier = Modifier.padding(
+                                    top = dimensionResource(SdpR.dimen._15sdp)
+                                ),
                                 adPosition = BANNER_DISCOVER_INLINE,
                                 showContainerShadow = false
                             )

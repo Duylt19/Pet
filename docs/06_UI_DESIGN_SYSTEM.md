@@ -101,7 +101,9 @@ Discover Home contract:
   `25sdp`, enable card `37sdp`, switch `34×18sdp`. Discover chỉ render Battery enable card;
   pet switch được quản lý ở flow pet. Không copy component rồi đổi metric riêng;
 - Discover hero dùng composite `Battery Troll` PNG @3x tại tỉ lệ `328×100px`; banner thấp hơn
-  dùng placement SDK thật `discover_inline`, không đóng gói creative quảng cáo mẫu;
+  dùng placement SDK thật `discover_inline`, không đóng gói creative quảng cáo mẫu. Khoảng cách
+  phía trước thuộc chính slot banner; khi ads không đủ điều kiện hoặc load fail, cả banner lẫn
+  spacing của nó collapse để hai catalog kề nhau vẫn chỉ cách đúng một gap `15sdp`;
 - Thứ tự nhóm đầu sau hero là `Trending Emoji Battery` → `Shimeji Pets` → inline banner;
   `Status bar themes` tiếp tục nằm ngay sau banner, đúng hierarchy node Figma `8015:1035`;
 - section header dành vùng co giãn riêng cho title và giữ `More` cố định bên phải; bản dịch dài
