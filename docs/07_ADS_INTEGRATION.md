@@ -127,6 +127,9 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
   `UNAVAILABLE` tiếp tục flow, riêng `DISMISSED` dừng để không thưởng khi user đóng
   quảng cáo sớm. `UNAVAILABLE` hiện toast giải thích không có quảng cáo nhưng item vẫn được dùng,
   rồi mới callback về feature; mọi placement Rewarded nhận cùng behavior này.
+- Rewarded manager chỉ giữ tối đa một request đang load hoặc một ad đã sẵn sàng. Các màn có thể
+  cùng yêu cầu preload nhưng manager phải coalesce chúng; chỉ sau khi ad được consume/dismiss/fail
+  mới tạo đúng một request chuẩn bị cho lượt kế tiếp.
 - `AdOverlayState.isAdShowing` phản ánh lifecycle callback thật của App Open, Interstitial và
   Rewarded, không tự reset theo timeout; `StatusBarAccessibilityService` dùng state này để tháo
   custom status-bar overlay khỏi creative/nút Close. Trạng thái ẩn Activity được tách riêng:

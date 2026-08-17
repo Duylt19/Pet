@@ -23,10 +23,14 @@ import com.google.android.libraries.ads.mobile.sdk.rewarded.RewardedAd
 import com.google.android.libraries.ads.mobile.sdk.rewarded.RewardedAdEventCallback
 
 class RewardedVideoAds {
+    @Volatile
     private var rewardedAd: RewardedAd? = null
     private var resultListener: RewardedResultListener? = null
     private var rewardEarned = false
+
+    @Volatile
     var isLoading = false
+        private set
 
     private var _isShowing = false
     val isShowing: Boolean get() = _isShowing
@@ -43,8 +47,9 @@ class RewardedVideoAds {
         }
     }
 
+    @Synchronized
     fun loadRewardedVideo(context: Context) {
-        if (isLoading) return
+        if (!shouldStartRewardedLoad(isLoading, rewardedAd != null)) return
         isLoading = true
         if (!MobileAds.isInitialized) {
             isLoading = false
@@ -63,7 +68,6 @@ class RewardedVideoAds {
         val adRequest = AdRequest.Builder(id).build()
         RewardedAd.load(adRequest, object : AdLoadCallback<RewardedAd> {
             override fun onAdFailedToLoad(adError: LoadAdError) {
-                isLoading = false
                 AdsIdLogger.failed(
                     format = "REWARDED",
                     adUnitId = id,
@@ -72,13 +76,14 @@ class RewardedVideoAds {
                 )
                 Log.d(TAG, adError.toString())
                 rewardedAd = null
+                isLoading = false
             }
 
             override fun onAdLoaded(ad: RewardedAd) {
+                this@RewardedVideoAds.rewardedAd = ad
                 isLoading = false
                 AdsIdLogger.loaded(format = "REWARDED", adUnitId = id, placement = "rewarded")
                 Log.d(TAG, "Ad was loaded.")
-                this@RewardedVideoAds.rewardedAd = ad
             }
         })
     }
@@ -203,3 +208,8 @@ enum class RewardedAdResult {
     val showsFallbackMessage: Boolean
         get() = this == UNAVAILABLE
 }
+
+internal fun shouldStartRewardedLoad(
+    isLoading: Boolean,
+    isAdReady: Boolean,
+): Boolean = !isLoading && !isAdReady

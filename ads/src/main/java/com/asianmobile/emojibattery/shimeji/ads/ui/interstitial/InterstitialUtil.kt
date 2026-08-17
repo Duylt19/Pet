@@ -29,7 +29,6 @@ import com.asianmobile.emojibattery.shimeji.ads.tracking.Tracking
 import com.asianmobile.emojibattery.shimeji.ads.tracking.AdFormat
 import com.asianmobile.emojibattery.shimeji.ads.tracking.AdPlacement
 import com.asianmobile.emojibattery.shimeji.ads.ui.openads.AppOpenManager
-import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ads.utils.AdOverlayState
 import com.asianmobile.emojibattery.shimeji.ads.utils.AdsIdLogger
@@ -125,7 +124,6 @@ class InterstitialUtil {
                     loadOpenAd(application)
                 }
                 loadAdmob(application)
-//                    loadRewarded(application)
                 InterstitialLauncherUtil.getInstance().loadAdmobLauncher(
                     application,
                     shouldLoadAds,
@@ -139,11 +137,6 @@ class InterstitialUtil {
             }
         }
         Tracking.setTrackEventByAdjust(APPLOVIN)
-    }
-
-    private fun loadRewarded(context: Context) {
-        RewardedVideoAds.getInstance().loadRewardedVideo(context)
-        RewardedVideoAds.getInstance().isLoading = false
     }
 
     fun requestConsentForm(
