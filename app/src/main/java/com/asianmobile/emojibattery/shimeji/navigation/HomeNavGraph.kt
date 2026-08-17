@@ -62,12 +62,9 @@ internal fun HomeRoute(
     val requestedTabValue by homeEntry.savedStateHandle
         .getStateFlow<String?>(Routes.HOME_TAB_REQUEST, null)
         .collectAsStateWithLifecycle()
-    val requestedPetStoreTab by homeEntry.savedStateHandle
-        .getStateFlow<String?>(Routes.PET_STORE_TAB_REQUEST, null)
-        .collectAsStateWithLifecycle()
-    val requestedPetStoreCategory by homeEntry.savedStateHandle
-        .getStateFlow<String?>(Routes.PET_STORE_CATEGORY_REQUEST, null)
-        .collectAsStateWithLifecycle()
+    val petStoreRequestState = remember(homeEntry) {
+        PetStoreHomeRequestState(homeEntry.savedStateHandle)
+    }
     val accessibilityResult = homeEntry.accessibilityHowToUseResult()
     var canHandleHomeBack by remember(homeEntry.id) { mutableStateOf(false) }
 
@@ -83,10 +80,7 @@ internal fun HomeRoute(
 
     fun navigateToTrendingPets() {
         val request = trendingPetsHomeRequest()
-        homeEntry.savedStateHandle[Routes.PET_STORE_TAB_REQUEST] =
-            request.tabValue
-        homeEntry.savedStateHandle[Routes.PET_STORE_CATEGORY_REQUEST] =
-            request.category
+        petStoreRequestState.request(request)
         navigateToTab(HomeTab.PET_STORE)
     }
 
@@ -140,14 +134,7 @@ internal fun HomeRoute(
                     onNavigateToAccessibilityHowToUse =
                         onNavigateToAccessibilityHowToUse,
                     onNavigateToTrendingPets = ::navigateToTrendingPets,
-                    requestedPetStoreTab = requestedPetStoreTab,
-                    onRequestedPetStoreTabConsumed = {
-                        homeEntry.savedStateHandle[Routes.PET_STORE_TAB_REQUEST] = null
-                    },
-                    requestedPetStoreCategory = requestedPetStoreCategory,
-                    onRequestedPetStoreCategoryConsumed = {
-                        homeEntry.savedStateHandle[Routes.PET_STORE_CATEGORY_REQUEST] = null
-                    },
+                    petStoreRequestState = petStoreRequestState,
                     homeEntry = homeEntry
                 )
             }
@@ -173,10 +160,7 @@ private fun NavGraphBuilder.homeTabs(
     onAccessibilityHowToUseResultConsumed: () -> Unit,
     onNavigateToAccessibilityHowToUse: () -> Unit,
     onNavigateToTrendingPets: () -> Unit,
-    requestedPetStoreTab: String?,
-    onRequestedPetStoreTabConsumed: () -> Unit,
-    requestedPetStoreCategory: String?,
-    onRequestedPetStoreCategoryConsumed: () -> Unit,
+    petStoreRequestState: PetStoreHomeRequestState,
     homeEntry: NavBackStackEntry
 ) {
     composable(Routes.DISCOVER) {
@@ -239,11 +223,15 @@ private fun NavGraphBuilder.homeTabs(
     }
 
     composable(Routes.PET_STORE) {
+        val requestedPetStoreTab by petStoreRequestState.requestedTab
+            .collectAsStateWithLifecycle()
+        val requestedPetStoreCategory by petStoreRequestState.requestedCategory
+            .collectAsStateWithLifecycle()
         ShimejiPetsScreen(
             requestedTab = PetStoreTab.fromNavigationValue(requestedPetStoreTab),
-            onRequestedTabConsumed = onRequestedPetStoreTabConsumed,
+            onRequestedTabConsumed = petStoreRequestState::consumeTab,
             requestedCategory = requestedPetStoreCategory,
-            onRequestedCategoryConsumed = onRequestedPetStoreCategoryConsumed,
+            onRequestedCategoryConsumed = petStoreRequestState::consumeCategory,
             onSearch = { onNavigateOutsideHome(Routes.SEARCH) },
             onPremium = {
                 onNavigateOutsideHome(

@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.navigation
 
+import androidx.lifecycle.SavedStateHandle
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_BATTERY_EDITOR
 import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_CUSTOMIZE_STATUS_BAR
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeTab
@@ -54,6 +55,25 @@ class HomeTabNavigationTest {
         assertEquals("Trending", request.category)
         assertEquals("pet_store_tab_request", Routes.PET_STORE_TAB_REQUEST)
         assertEquals("pet_store_category_request", Routes.PET_STORE_CATEGORY_REQUEST)
+    }
+
+    @Test
+    fun `pet store destination observes and consumes requests after graph creation`() {
+        val requestState = PetStoreHomeRequestState(SavedStateHandle())
+
+        assertNull(requestState.requestedTab.value)
+        assertNull(requestState.requestedCategory.value)
+
+        requestState.request(trendingPetsHomeRequest())
+
+        assertEquals("pets", requestState.requestedTab.value)
+        assertEquals("Trending", requestState.requestedCategory.value)
+
+        requestState.consumeTab()
+        requestState.consumeCategory()
+
+        assertNull(requestState.requestedTab.value)
+        assertNull(requestState.requestedCategory.value)
     }
 
     @Test
