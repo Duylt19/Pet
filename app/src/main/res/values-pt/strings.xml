@@ -303,7 +303,7 @@
     <string name="battery_overlay_notification_text">A barra da bateria permanece na tela. Toque para alterar ou desligá-lo.</string>
     <string name="battery_overlay_notification_channel_name">Barra de bateria</string>
     <string name="battery_overlay_notification_channel_description">Exibido apenas enquanto a barra da bateria está ligada.</string>
-    <string name="battery_accessibility_service_label">Emoji Battery barra de status</string>
+    <string name="battery_accessibility_service_label">Emoji Battery: Cute Pet — Barra de status</string>
     <string name="battery_accessibility_service_description">Exibe a cápsula da bateria selecionada e verifica localmente o pacote de aplicativos em primeiro plano para aplicar sua lista de aplicativos ocultos. Ele não lê o conteúdo da tela nem controla outros aplicativos.</string>
     <string name="battery_accessibility_service_summary">Ligue isso então Emoji Battery pode desenhar a barra de bateria escolhida sobre a barra de status. Ele apenas verifica qual aplicativo está em primeiro plano, para ocultar a barra nos aplicativos que você escolher. Ele não lê o conteúdo da tela e nenhum dado pessoal é coletado ou compartilhado.</string>
     <string name="battery_overlay_description">Status da bateria, %1$d por cento</string>

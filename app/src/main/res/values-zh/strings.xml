@@ -303,7 +303,7 @@
     <string name="battery_overlay_notification_text">您的电池条保留在屏幕上。点击即可更改或关闭它。</string>
     <string name="battery_overlay_notification_channel_name">电池条</string>
     <string name="battery_overlay_notification_channel_description">仅当电池条打开时显示。</string>
-    <string name="battery_accessibility_service_label">Emoji Battery 状态栏</string>
+    <string name="battery_accessibility_service_label">Emoji Battery: Cute Pet — 状态栏</string>
     <string name="battery_accessibility_service_description">显示所选的电池盒并在本地检查前台应用程序包以应用您的隐藏应用程序列表。它不读取屏幕内容或控制其他应用程序。</string>
     <string name="battery_accessibility_service_summary">打开这个 Emoji Battery 可以在状态栏上绘制您选择的电池栏。它仅检查哪个应用程序位于前台，以隐藏您选择的应用程序中的栏。它不会读取屏幕内容，也不会收集或共享任何个人数据。</string>
     <string name="battery_overlay_description">电池状态，%1$d%%</string>

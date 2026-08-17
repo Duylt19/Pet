@@ -303,7 +303,7 @@
     <string name="battery_overlay_notification_text">يبقى شريط البطارية على الشاشة. انقر لتغييره أو إيقاف تشغيله.</string>
     <string name="battery_overlay_notification_channel_name">شريط البطارية</string>
     <string name="battery_overlay_notification_channel_description">يظهر فقط أثناء تشغيل شريط البطارية.</string>
-    <string name="battery_accessibility_service_label">Emoji Battery شريط الحالة</string>
+    <string name="battery_accessibility_service_label">Emoji Battery: Cute Pet — شريط الحالة</string>
     <string name="battery_accessibility_service_description">يعرض كبسولة البطارية المحددة ويتحقق من حزمة التطبيق الأمامي محليًا لتطبيق قائمة التطبيقات المخفية. ولا يقرأ محتوى الشاشة أو يتحكم في التطبيقات الأخرى.</string>
     <string name="battery_accessibility_service_summary">قم بتشغيل هذا هكذا Emoji Battery يمكنك رسم شريط البطارية الذي اخترته فوق شريط الحالة. إنه يتحقق فقط من التطبيق الموجود في المقدمة، لإخفاء الشريط في التطبيقات التي تختارها. ولا يقرأ محتوى الشاشة، ولا يتم جمع أو مشاركة أي بيانات شخصية.</string>
     <string name="battery_overlay_description">حالة البطارية، %1$d بالمائة</string>

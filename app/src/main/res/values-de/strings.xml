@@ -303,7 +303,7 @@
     <string name="battery_overlay_notification_text">Ihre Batterieleiste bleibt auf dem Bildschirm. Tippen Sie, um es zu ändern oder auszuschalten.</string>
     <string name="battery_overlay_notification_channel_name">Batterieleiste</string>
     <string name="battery_overlay_notification_channel_description">Wird nur angezeigt, wenn die Akkuleiste eingeschaltet ist.</string>
-    <string name="battery_accessibility_service_label">Emoji Battery Statusleiste</string>
+    <string name="battery_accessibility_service_label">Emoji Battery: Cute Pet — Statusleiste</string>
     <string name="battery_accessibility_service_description">Zeigt die ausgewählte Batteriekapsel an und überprüft das Vordergrund-App-Paket lokal, um Ihre Liste der ausgeblendeten Apps anzuwenden. Es liest weder Bildschirminhalte noch steuert es andere Apps.</string>
     <string name="battery_accessibility_service_summary">Schalten Sie dies ein Emoji Battery Sie können den von Ihnen gewählten Batteriebalken über die Statusleiste ziehen. Es prüft nur, welche App im Vordergrund ist, um die Leiste in den von Ihnen ausgewählten Apps auszublenden. Es werden keine Bildschirminhalte ausgelesen und es werden keine personenbezogenen Daten erhoben oder weitergegeben.</string>
     <string name="battery_overlay_description">Batteriestatus, %1$d Prozent</string>

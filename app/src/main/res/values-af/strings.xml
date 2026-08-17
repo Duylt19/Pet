@@ -303,7 +303,7 @@
     <string name="battery_overlay_notification_text">Jou batterybalk bly op die skerm. Tik om dit te verander of af te skakel.</string>
     <string name="battery_overlay_notification_channel_name">Batterybalk</string>
     <string name="battery_overlay_notification_channel_description">Word net gewys terwyl jou batterybalk aangeskakel is.</string>
-    <string name="battery_accessibility_service_label">Emoji Battery statusbalk</string>
+    <string name="battery_accessibility_service_label">Emoji Battery: Cute Pet — Statusbalk</string>
     <string name="battery_accessibility_service_description">Vertoon die geselekteerde batterykapsule en kontroleer die voorgrond-toepassingspakket plaaslik om jou versteekte toepassing-lys toe te pas. Dit lees nie skerminhoud of beheer ander toepassings nie.</string>
     <string name="battery_accessibility_service_summary">Skakel dit so aan Emoji Battery kan u gekose batterybalk oor die statusbalk teken. Dit kyk net watter toepassing op die voorgrond is, om die balk te versteek in die toepassings wat u kies. Dit lees nie skerminhoud nie, en geen persoonlike data word ingesamel of gedeel nie.</string>
     <string name="battery_overlay_description">Batterystatus, %1$d persent</string>

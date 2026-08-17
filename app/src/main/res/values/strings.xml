@@ -366,7 +366,7 @@
     <string name="battery_overlay_notification_text">Your battery bar stays on screen. Tap to change or turn it off.</string>
     <string name="battery_overlay_notification_channel_name">Battery bar</string>
     <string name="battery_overlay_notification_channel_description">Shown only while your battery bar is turned on.</string>
-    <string name="battery_accessibility_service_label">Emoji Battery status bar</string>
+    <string name="battery_accessibility_service_label">Emoji Battery: Cute Pet — Status bar</string>
     <string name="battery_accessibility_service_description">Displays the selected battery capsule and checks the foreground app package locally to apply your hidden-app list. It does not read screen content or control other apps.</string>
     <!-- Shown next to the on/off state in the system Accessibility list, so it has to say why the service must be turned on and what it never touches. -->
     <string name="battery_accessibility_service_summary">Turn this on so Emoji Battery can draw your chosen battery bar over the status bar. It only checks which app is in the foreground, to hide the bar in the apps you pick. It does not read screen content, and no personal data is collected or shared.</string>

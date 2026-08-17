@@ -303,7 +303,7 @@
     <string name="battery_overlay_notification_text">आपकी बैटरी बार स्क्रीन पर रहती है। इसे बदलने या बंद करने के लिए टैप करें.</string>
     <string name="battery_overlay_notification_channel_name">बैटरी बार</string>
     <string name="battery_overlay_notification_channel_description">केवल तब दिखाया जाता है जब आपका बैटरी बार चालू होता है।</string>
-    <string name="battery_accessibility_service_label">Emoji Battery स्टेटस बार</string>
+    <string name="battery_accessibility_service_label">Emoji Battery: Cute Pet — स्टेटस बार</string>
     <string name="battery_accessibility_service_description">चयनित बैटरी कैप्सूल प्रदर्शित करता है और आपकी छिपी-ऐप सूची को लागू करने के लिए स्थानीय रूप से अग्रभूमि ऐप पैकेज की जांच करता है। यह स्क्रीन सामग्री को नहीं पढ़ता है या अन्य ऐप्स को नियंत्रित नहीं करता है।</string>
     <string name="battery_accessibility_service_summary">इसे ऐसे चालू करें Emoji Battery आपके द्वारा चुनी गई बैटरी बार को स्टेटस बार के ऊपर खींच सकते हैं। यह केवल यह जांचता है कि आपके द्वारा चुने गए ऐप्स में बार को छिपाने के लिए कौन सा ऐप अग्रभूमि में है। यह स्क्रीन सामग्री नहीं पढ़ता है, और कोई व्यक्तिगत डेटा एकत्र या साझा नहीं किया जाता है।</string>
     <string name="battery_overlay_description">बैटरी स्थिति, %1$d प्रतिशत</string>

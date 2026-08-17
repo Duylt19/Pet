@@ -53,6 +53,26 @@ class LocalizedStringContractTest {
         }
     }
 
+    @Test
+    fun `accessibility service labels start with the canonical app name`() {
+        val resources = resourceRoot()
+        val appName = readStrings(resources.resolve("values/strings.xml"))
+            .getValue("app_name")
+            .value
+        val expectedPrefix = "$appName — "
+
+        (listOf("") + SUPPORTED_LOCALES).forEach { locale ->
+            val directory = if (locale.isEmpty()) "values" else "values-$locale"
+            val label = readStrings(resources.resolve("$directory/strings.xml"))
+                .getValue("battery_accessibility_service_label")
+                .value
+            assertTrue(
+                "Accessibility label does not start with app name in $directory: $label",
+                label.startsWith(expectedPrefix)
+            )
+        }
+    }
+
     private fun readStrings(file: File): LinkedHashMap<String, StringValue> {
         val factory = DocumentBuilderFactory.newInstance().apply {
             setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)

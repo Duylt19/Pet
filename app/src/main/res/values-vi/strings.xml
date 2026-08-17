@@ -303,7 +303,7 @@
     <string name="battery_overlay_notification_text">Thanh pin của bạn vẫn ở trên màn hình. Nhấn để thay đổi hoặc tắt nó.</string>
     <string name="battery_overlay_notification_channel_name">Thanh pin</string>
     <string name="battery_overlay_notification_channel_description">Chỉ hiển thị khi thanh pin của bạn được bật.</string>
-    <string name="battery_accessibility_service_label"> Thanh trạng thái Emoji Battery</string>
+    <string name="battery_accessibility_service_label">Emoji Battery: Cute Pet — Thanh trạng thái</string>
     <string name="battery_accessibility_service_description">Hiển thị hộp pin đã chọn và kiểm tra cục bộ gói ứng dụng nền trước để áp dụng danh sách ứng dụng ẩn của bạn. Nó không đọc nội dung màn hình hoặc kiểm soát các ứng dụng khác.</string>
     <string name="battery_accessibility_service_summary">Bật dịch vụ này để Emoji Battery có thể hiển thị thanh pin bạn đã chọn trên thanh trạng thái. Ứng dụng chỉ kiểm tra ứng dụng nào đang ở phía trước để ẩn thanh trong những ứng dụng bạn chọn. Ứng dụng không đọc nội dung màn hình, thu thập hay chia sẻ dữ liệu cá nhân.</string>
     <string name="battery_overlay_description">Trạng thái pin, %1$d phần trăm</string>

@@ -303,7 +303,7 @@
     <string name="battery_overlay_notification_text">Mashin baturin ku yana kan allo. Matsa don canza ko kashe shi.</string>
     <string name="battery_overlay_notification_channel_name">Bar baturi</string>
     <string name="battery_overlay_notification_channel_description">Ana nunawa kawai yayin da sandar baturin ku ke kunne.</string>
-    <string name="battery_accessibility_service_label">Emoji Battery matsayi bar</string>
+    <string name="battery_accessibility_service_label">Emoji Battery: Cute Pet — Matsayi bar</string>
     <string name="battery_accessibility_service_description">Yana nuna capsule ɗin baturi da aka zaɓa kuma yana bincika fakitin app na gaba a gida don amfani da jerin ɓoyayyun ƙa\'idodin ku. Ba ya karanta abun ciki na allo ko sarrafa wasu ƙa\'idodi.</string>
     <string name="battery_accessibility_service_summary">Kunna wannan haka Emoji Battery zai iya zana sandar baturin da kuka zaɓa akan ma\'aunin matsayi. Yana bincika kawai wanne app ne a gaba, don ɓoye mashaya a cikin ƙa\'idodin da kuka zaɓa. Ba ya karanta abun ciki na allo, kuma ba a tattara ko raba bayanan sirri ba.</string>
     <string name="battery_overlay_description">Halin baturi, %1$d bisa dari</string>

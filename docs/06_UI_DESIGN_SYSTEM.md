@@ -432,7 +432,9 @@ Grant Permissions contract theo dashboard Mine Figma node `8080:7477`, card nề
   Settings;
 - toàn bộ Discover, Battery Catalog, Mine, Status Bar Editor và Grant Permissions dùng chung
   disclosure này. Khi quyền đã bật, row Accessibility trong Grant Permissions mở thẳng Settings
-  để user quản lý/tắt quyền, không hỏi consent lại.
+  để user quản lý/tắt quyền, không hỏi consent lại. Label service trong system Settings luôn dùng
+  mẫu `Emoji Battery: Cute Pet — <tên tính năng đã dịch>` để giữ đúng app name, dễ nhận biết và
+  được sắp xếp nhất quán theo brand thay vì theo trật tự từ của từng locale;
 - màn `Accessibility How to use` theo Figma `8442:9525`: wallpaper pastel riêng, bốn bước với
   ảnh thao tác export theo từng group ở PNG 4× để không bị mờ trên màn hình mật độ cao, số thứ
   tự hồng, keyword hồng và CTA gradient
