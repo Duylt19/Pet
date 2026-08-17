@@ -19,8 +19,9 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
   Compose content thuộc `:ads`, không phải navigation destination; Premium/ad-suppression và
   lifecycle show/dismiss hiện tại vẫn là boundary authoritative. Cover dùng chính wallpaper làm
   window background để không lộ nền đen trước frame Compose đầu tiên; `AdOverlayState` chỉ bật từ
-  callback fullscreen thật của SDK. Khi ads đóng/fail, Activity được phục hồi trước một frame rồi
-  cover mới dismiss để không chớp đen khi user quay lại màn đang dùng.
+  callback fullscreen thật của SDK. Trong lúc App Open Ad hiển thị, màn Activity vẫn được render
+  phía sau SDK window nhưng custom status-bar overlay vẫn bị tháo. Vì vậy khi ads đóng/fail có sẵn
+  frame của màn app để hiển thị ngay và không chớp đen.
 - Intro page 1 mount/load native placement `SCREEN_INTRO` ngay khi vào pager; page 3 kích hoạt
   `SCREEN_INTRO_SECOND` sau lần đầu pager settle tại page 3, còn page 2 không có ads. Sau khi
   kích hoạt, placement được giữ trong composition suốt Intro lifecycle để swipe quay lại không
@@ -112,10 +113,12 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
 - Rewarded trả ba trạng thái `EARNED`, `DISMISSED`, `UNAVAILABLE`: `EARNED` và
   `UNAVAILABLE` tiếp tục flow, riêng `DISMISSED` dừng để không thưởng khi user đóng
   quảng cáo sớm.
-- `AdOverlayState` phản ánh lifecycle callback thật của App Open, Interstitial và Rewarded,
-  không tự reset theo timeout. Trong suốt fullscreen ad, MainActivity ẩn content phía sau và
-  `StatusBarAccessibilityService` tháo custom status-bar overlay để overlay không che creative
-  hoặc nút Close; callback dismiss/fail gắn lại overlay theo config hiện hành.
+- `AdOverlayState.isAdShowing` phản ánh lifecycle callback thật của App Open, Interstitial và
+  Rewarded, không tự reset theo timeout; `StatusBarAccessibilityService` dùng state này để tháo
+  custom status-bar overlay khỏi creative/nút Close. Trạng thái ẩn Activity được tách riêng:
+  Interstitial/Rewarded tiếp tục ẩn content phía sau, còn App Open giữ content render sẵn để việc
+  đóng SDK window không lộ một frame nền đen. Callback dismiss/fail gắn lại overlay theo config
+  hiện hành.
 - Tránh chồng App Open Ads với interstitial/premium/full-screen flow.
 - Không thêm placement mới nếu chưa có product/UX decision.
 - Battery Rewarded là unlock trigger đã được owner duyệt. Editor có bottom banner đã được

@@ -16,8 +16,18 @@ class AdOverlayStateTest {
         AdOverlayState.show()
 
         assertTrue(AdOverlayState.isAdShowing.value)
+        assertTrue(AdOverlayState.shouldHideActivityContent.value)
 
         AdOverlayState.hide()
         assertFalse(AdOverlayState.isAdShowing.value)
+        assertFalse(AdOverlayState.shouldHideActivityContent.value)
+    }
+
+    @Test
+    fun `app open can protect overlays without hiding activity content`() {
+        AdOverlayState.show(hideActivityContent = false)
+
+        assertTrue(AdOverlayState.isAdShowing.value)
+        assertFalse(AdOverlayState.shouldHideActivityContent.value)
     }
 }

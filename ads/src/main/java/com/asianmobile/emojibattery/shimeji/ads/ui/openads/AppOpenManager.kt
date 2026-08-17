@@ -104,7 +104,7 @@ class AppOpenManager() : LifecycleObserver {
                             appOpenAd = null
                             isShowingAd = false
                             fetchAd(activity)
-                            restoreAppBeforeDismissingCover(activity) {
+                            finishAppOpenPresentation(activity) {
                                 InterstitialUtil.getInstance().lastTimeOpenAd =
                                     System.currentTimeMillis()
                                 adCloseListener?.onAdClosed()
@@ -114,7 +114,7 @@ class AppOpenManager() : LifecycleObserver {
                         override fun onAdFailedToShowFullScreenContent(fullScreenContentError: FullScreenContentError) {
                             appOpenAd = null
                             isShowingAd = false
-                            restoreAppBeforeDismissingCover(activity) {
+                            finishAppOpenPresentation(activity) {
                                 adCloseListener?.onAdClosed()
                             }
                         }
@@ -310,32 +310,24 @@ class AppOpenManager() : LifecycleObserver {
         }
     }
 
-    /**
-     * Restore app-owned surfaces before removing the Welcome Back cover.
-     *
-     * MainActivity observes [AdOverlayState] and makes its content visible asynchronously. If the
-     * dialog is dismissed first, the black anti-bleed window background becomes visible for one
-     * frame. Waiting for the next animation frame keeps the cover in place until that restoration
-     * has been applied.
-     */
-    private fun restoreAppBeforeDismissingCover(
+    /** Completes the SDK lifecycle while the already-rendered host screen is ready underneath. */
+    private fun finishAppOpenPresentation(
         activity: Activity,
         onRestored: () -> Unit
     ) {
         updatePresentationStage(AppOpenPresentationStage.IDLE)
         if (activity.isFinishing || activity.isDestroyed) return
         activity.runOnUiThread {
-            activity.window.decorView.postOnAnimation {
-                if (activity.isFinishing || activity.isDestroyed) return@postOnAnimation
-                dismissProgressDialog(activity)
-                onRestored()
-            }
+            if (activity.isFinishing || activity.isDestroyed) return@runOnUiThread
+            dismissProgressDialog(activity)
+            onRestored()
         }
     }
 
     private fun updatePresentationStage(stage: AppOpenPresentationStage) {
-        if (AppOpenOverlayPolicy.shouldHideAppContent(stage)) {
-            AdOverlayState.show()
+        val directive = AppOpenOverlayPolicy.directive(stage)
+        if (directive.isFullscreenAdShowing) {
+            AdOverlayState.show(hideActivityContent = directive.hideActivityContent)
         } else {
             AdOverlayState.hide()
         }

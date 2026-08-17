@@ -1,24 +1,39 @@
 package com.asianmobile.emojibattery.shimeji.ads.ui.openads
 
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AppOpenOverlayPolicyTest {
     @Test
-    fun `welcome back cover keeps the app content available behind its branded window`() {
-        assertFalse(
-            AppOpenOverlayPolicy.shouldHideAppContent(
-                AppOpenPresentationStage.WELCOME_BACK_COVER
-            )
+    fun `welcome back cover does not activate fullscreen overlay state`() {
+        assertEquals(
+            AppOpenOverlayDirective(
+                isFullscreenAdShowing = false,
+                hideActivityContent = false
+            ),
+            AppOpenOverlayPolicy.directive(AppOpenPresentationStage.WELCOME_BACK_COVER)
         )
     }
 
     @Test
-    fun `only the actual fullscreen ad hides app owned content`() {
-        assertFalse(AppOpenOverlayPolicy.shouldHideAppContent(AppOpenPresentationStage.IDLE))
-        assertTrue(
-            AppOpenOverlayPolicy.shouldHideAppContent(AppOpenPresentationStage.FULLSCREEN_AD)
+    fun `fullscreen app open protects overlays while keeping host screen rendered`() {
+        assertEquals(
+            AppOpenOverlayDirective(
+                isFullscreenAdShowing = true,
+                hideActivityContent = false
+            ),
+            AppOpenOverlayPolicy.directive(AppOpenPresentationStage.FULLSCREEN_AD)
+        )
+    }
+
+    @Test
+    fun `idle restores all app owned surfaces`() {
+        assertEquals(
+            AppOpenOverlayDirective(
+                isFullscreenAdShowing = false,
+                hideActivityContent = false
+            ),
+            AppOpenOverlayPolicy.directive(AppOpenPresentationStage.IDLE)
         )
     }
 }

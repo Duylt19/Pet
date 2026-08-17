@@ -6,8 +6,24 @@ internal enum class AppOpenPresentationStage {
     FULLSCREEN_AD
 }
 
-/** Keeps the branded pre-ad cover separate from the actual fullscreen ad lifecycle. */
+internal data class AppOpenOverlayDirective(
+    val isFullscreenAdShowing: Boolean,
+    val hideActivityContent: Boolean
+)
+
+/** Keeps the branded cover, SDK overlay and host Activity rendering as separate concerns. */
 internal object AppOpenOverlayPolicy {
-    fun shouldHideAppContent(stage: AppOpenPresentationStage): Boolean =
-        stage == AppOpenPresentationStage.FULLSCREEN_AD
+    fun directive(stage: AppOpenPresentationStage): AppOpenOverlayDirective =
+        when (stage) {
+            AppOpenPresentationStage.IDLE,
+            AppOpenPresentationStage.WELCOME_BACK_COVER -> AppOpenOverlayDirective(
+                isFullscreenAdShowing = false,
+                hideActivityContent = false
+            )
+
+            AppOpenPresentationStage.FULLSCREEN_AD -> AppOpenOverlayDirective(
+                isFullscreenAdShowing = true,
+                hideActivityContent = false
+            )
+        }
 }

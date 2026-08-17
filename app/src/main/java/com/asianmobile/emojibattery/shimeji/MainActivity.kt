@@ -126,13 +126,13 @@ class MainActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                AdOverlayState.isAdShowing.collect { isShowing ->
+                AdOverlayState.shouldHideActivityContent.collect { shouldHide ->
                     window.setBackgroundDrawableResource(
-                        if (isShowing) android.R.color.black else R.color.colors_FFFFFF
+                        if (shouldHide) android.R.color.black else R.color.colors_FFFFFF
                     )
                     for (index in 0 until contentFrame.childCount) {
                         contentFrame.getChildAt(index).visibility =
-                            if (isShowing) View.INVISIBLE else View.VISIBLE
+                            if (shouldHide) View.INVISIBLE else View.VISIBLE
                     }
                 }
             }
