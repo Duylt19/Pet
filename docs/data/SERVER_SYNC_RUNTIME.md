@@ -9,24 +9,36 @@ https://raw.githubusercontent.com/Asian-Mobile-Inc/
 Server-Emoji-Battery-Shimeji-Pet-AM/master
 ```
 
-Catalog production là `json/pets.json`, `json/batteries.json` và `json/rooms.json`.
+Catalog production là `json/pets.json`, `json/batteries.json`, `json/rooms.json` và
+`json/battery-troll.json`.
 Private repository cần `Authorization: Bearer <github token>`. Token chỉ lấy từ Firebase
 Remote Config key `github_token_pet_server` qua `SafeRemoteConfig`; không đặt token trong
 source, docs, test, log, analytics hoặc crash message. Coil interceptor chỉ được gắn token
 cho đúng raw host và repository allowlist.
 
+Splash luôn thử fetch/activate Remote Config nhưng không chặn onboarding khi thiết bị offline.
+Vì vậy mỗi catalog refresh và verified asset download đi qua
+`EnsurePetServerAccessUseCase`: token đã có thì tiếp tục ngay; token rỗng thì fetch/activate
+Remote Config lại với timeout 5 giây, kiểm tra token lần hai rồi mới gọi private server. Các
+request đồng thời dùng chung mutex nên chỉ tạo một lần fetch phục hồi. Nếu credential vừa được
+phục hồi, request catalog/asset tiếp theo mới được phép chạy. Nếu token vẫn rỗng, cache hợp lệ
+tiếp tục được giữ và state rỗng trả lỗi để nút Try again có thể chạy lại flow này sau khi mạng
+phục hồi.
+
 ## Luồng catalog chung
 
-Pet, Battery và Room dùng cùng `PetCatalogRefreshPolicy`:
+Pet, Battery, Room và Battery Troll dùng cùng `PetCatalogRefreshPolicy`:
 
-1. Đọc catalog JSON app-private cuối cùng đã hợp lệ và publish ngay để UI không chờ mạng.
-2. Đọc `metadata.json`: ETag, thời điểm validation và rate-limit deadline.
-3. Nếu catalog mới được validate trong 24 giờ thì không gọi GitHub lại.
-4. Hết TTL thì gửi `If-None-Match`.
-5. `200`: parse/validate toàn document trước rồi atomic replace cache.
-6. `304`: giữ JSON, chỉ cập nhật ETag/thời gian validation.
-7. `403/429`: đọc `Retry-After`/`X-RateLimit-Reset`, giữ cache và hoãn retry tối đa 24 giờ.
-8. Network/parse/hash lỗi không xóa dữ liệu đang dùng; repository fallback theo từng loại.
+1. Đọc và parse catalog JSON app-private cuối cùng đã hợp lệ.
+2. Bảo đảm token server; token rỗng sẽ kích hoạt Remote Config recovery nêu trên.
+3. Publish cache hợp lệ; nếu credential vẫn thiếu thì dừng trước request GitHub.
+4. Đọc `metadata.json`: ETag, thời điểm validation và rate-limit deadline.
+5. Nếu catalog mới được validate trong 24 giờ thì không gọi GitHub lại.
+6. Hết TTL thì gửi `If-None-Match`.
+7. `200`: parse/validate toàn document trước rồi atomic replace cache.
+8. `304`: giữ JSON, chỉ cập nhật ETag/thời gian validation.
+9. `403/429`: đọc `Retry-After`/`X-RateLimit-Reset`, giữ cache và hoãn retry tối đa 24 giờ.
+10. Network/parse/hash lỗi không xóa dữ liệu đang dùng; repository fallback theo từng loại.
 
 Debug nhận catalog `REVIEW_REQUIRED`; release chỉ nhận `APPROVED`.
 

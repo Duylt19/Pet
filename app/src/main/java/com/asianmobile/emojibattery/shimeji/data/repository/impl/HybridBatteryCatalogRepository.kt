@@ -21,6 +21,7 @@ import com.asianmobile.emojibattery.shimeji.data.remote.BatteryCatalogFetchResul
 import com.asianmobile.emojibattery.shimeji.data.remote.BatteryServerConfig
 import com.asianmobile.emojibattery.shimeji.data.remote.GithubBatteryCatalogClient
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogRepository
+import com.asianmobile.emojibattery.shimeji.data.usecase.EnsurePetServerAccessUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.IOException
@@ -43,7 +44,8 @@ import kotlinx.coroutines.withContext
 class HybridBatteryCatalogRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val parser: BatteryCatalogParser,
-    private val remoteClient: GithubBatteryCatalogClient
+    private val remoteClient: GithubBatteryCatalogClient,
+    private val ensurePetServerAccess: EnsurePetServerAccessUseCase,
 ) : BatteryCatalogRepository {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val refreshMutex = Mutex()
@@ -62,11 +64,18 @@ class HybridBatteryCatalogRepository @Inject constructor(
             _snapshot.value = _snapshot.value.copy(isLoading = true, error = null)
             val cached = remoteClient.readCachedCatalog()
             val cachedDocument = cached?.json?.let(::parseAllowedRemote)
+            val serverAccess = ensurePetServerAccess()
             var cachedPublished = false
             if (cachedDocument != null) {
                 cachedPublished = publishRemote(cachedDocument)
             }
 
+            if (!serverAccess) {
+                if (!cachedPublished) {
+                    refreshLocalFallback(BatteryCatalogError.REMOTE_CATALOG_UNAVAILABLE)
+                }
+                return@withLock
+            }
             val metadata = cached?.metadata ?: remoteClient.readCatalogCacheMetadata()
             if (remoteClient.shouldRefreshCatalog(metadata)) {
                 when (val result = remoteClient.fetchCatalog(metadata.etag)) {
@@ -110,6 +119,7 @@ class HybridBatteryCatalogRepository @Inject constructor(
     override suspend fun materializeAsset(path: String?): String? = withContext(Dispatchers.IO) {
         if (path == null) return@withContext null
         val record = remoteAssetRecords[path] ?: return@withContext path
+        if (!ensurePetServerAccess()) return@withContext null
         remoteClient.materializeAsset(
             url = path,
             relativePath = record.path,

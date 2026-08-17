@@ -7,6 +7,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.PetRoomEntry
 import com.asianmobile.emojibattery.shimeji.data.remote.GithubRoomCatalogClient
 import com.asianmobile.emojibattery.shimeji.data.remote.RoomCatalogFetchResult
 import com.asianmobile.emojibattery.shimeji.data.repository.PetRoomCatalogRepository
+import com.asianmobile.emojibattery.shimeji.data.usecase.EnsurePetServerAccessUseCase
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +27,8 @@ import kotlinx.coroutines.withContext
 @Singleton
 class RemotePetRoomCatalogRepository @Inject constructor(
     private val client: GithubRoomCatalogClient,
-    private val parser: RoomCatalogParser
+    private val parser: RoomCatalogParser,
+    private val ensurePetServerAccess: EnsurePetServerAccessUseCase,
 ) : PetRoomCatalogRepository {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val state = MutableStateFlow(PetRoomCatalogSnapshot())
@@ -43,12 +45,21 @@ class RemotePetRoomCatalogRepository @Inject constructor(
         val cachedDocument = cached?.json?.let { json ->
             runCatching { parser.parse(json) }.getOrNull()
         }
+        val serverAccess = ensurePetServerAccess()
         if (cachedDocument != null) {
             publish(cachedDocument)
         }
 
+        if (!serverAccess) {
+            if (cachedDocument == null) failIfEmpty(PetRoomCatalogError.CATALOG_UNAVAILABLE)
+            return@withContext
+        }
         val metadata = cached?.metadata
-        if (cachedDocument != null && metadata != null && !client.shouldRefreshCatalog(metadata)) {
+        if (
+            cachedDocument != null &&
+            metadata != null &&
+            !client.shouldRefreshCatalog(metadata)
+        ) {
             return@withContext
         }
 
@@ -80,6 +91,7 @@ class RemotePetRoomCatalogRepository @Inject constructor(
 
     override suspend fun materializeAsset(path: String?): String? = withContext(Dispatchers.IO) {
         val record = path?.let(assetsByPath::get) ?: return@withContext null
+        if (!ensurePetServerAccess()) return@withContext null
         client.materializeAsset(
             relativePath = record.path,
             expectedSizeBytes = record.sizeBytes,

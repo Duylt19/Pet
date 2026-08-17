@@ -91,6 +91,10 @@ ui/<domain>/<feature>/
   được chọn tiếp tục normalize/cài vào app-private storage.
 - Coil chỉ gắn GitHub `Authorization` cho đúng host + repository path của Pet; token đọc
   bằng sensitive Remote Config key và không được log/commit.
+- `RemoteConfigRepository` là boundary Firebase dùng chung. `EnsurePetServerAccessUseCase`
+  single-flight việc fetch/activate lại Remote Config khi token private server còn rỗng; mọi
+  catalog refresh và asset materialization phải qua gate này để Try again sau Splash offline
+  không lặp lại request thiếu Authorization.
 - Implementation không leak entity/SDK object lên UI nếu model đó không thuộc UI contract.
 - Use case không bắt buộc cho CRUD một dòng; dùng khi logic phối hợp nhiều nguồn, có policy hoặc cần reuse/test riêng.
 - DataStore cho key-value nhỏ; Room chỉ thêm lại khi có requirement về dữ liệu quan hệ/offline.

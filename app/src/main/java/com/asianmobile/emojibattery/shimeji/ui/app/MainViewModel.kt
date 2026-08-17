@@ -2,11 +2,9 @@ package com.asianmobile.emojibattery.shimeji.ui.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.asianmobile.emojibattery.shimeji.ads.R
 import com.asianmobile.emojibattery.shimeji.data.local.DataStoreManager
+import com.asianmobile.emojibattery.shimeji.data.repository.RemoteConfigRepository
 import com.asianmobile.emojibattery.shimeji.navigation.Routes
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,8 +13,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withTimeout
 
 data class MainUiState(
     val isLanguageCompleted: Boolean? = null,
@@ -40,7 +36,8 @@ data class MainUiState(
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val dataStoreManager: DataStoreManager
+    private val dataStoreManager: DataStoreManager,
+    private val remoteConfigRepository: RemoteConfigRepository,
 ) : ViewModel() {
 
     internal val hasRequestedNotificationPermission: StateFlow<Boolean?> =
@@ -71,20 +68,7 @@ class MainViewModel @Inject constructor(
 
     internal fun refreshRemoteConfig(onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val result = runCatching {
-                val remoteConfig = FirebaseRemoteConfig.getInstance()
-                val configSettings = FirebaseRemoteConfigSettings.Builder()
-                    .setMinimumFetchIntervalInSeconds(0L)
-                    .build()
-
-                remoteConfig.setConfigSettingsAsync(configSettings).await()
-                remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults).await()
-
-                withTimeout(5_000) {
-                    remoteConfig.fetchAndActivate().await()
-                }
-            }
-            onComplete(result.isSuccess)
+            onComplete(remoteConfigRepository.refresh())
         }
     }
 
