@@ -46,7 +46,7 @@ import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
 import com.asianmobile.emojibattery.shimeji.ads.utils.AdOverlayState
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeTab
 import com.asianmobile.emojibattery.shimeji.ui.battery.favoriterecent.FavouriteRecentScreen
-import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogViewModel
+import com.asianmobile.emojibattery.shimeji.ui.home.battery.BatteryHomeViewModel
 import com.asianmobile.emojibattery.shimeji.ui.battery.troll.BatteryTrollCustomizeScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.troll.BatteryTrollScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCategoryScreen
@@ -555,7 +555,7 @@ fun AppNavGraph(
                 val catalogEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(Routes.HOME_GRAPH)
                 }
-                val catalogViewModel = hiltViewModel<BatteryCatalogViewModel>(catalogEntry)
+                val catalogViewModel = hiltViewModel<BatteryHomeViewModel>(catalogEntry)
                 IsolatedDestination(
                     bottomAd = {
                         NativeAdInternal(

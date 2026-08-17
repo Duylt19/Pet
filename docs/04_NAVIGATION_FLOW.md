@@ -120,7 +120,8 @@ ngay ở `PetOverlayRuntime.STARTING`, bỏ qua tap lặp trong lúc khởi đ�
   Pet tải từ Store được cài/mở khóa và bật ở slot Mixed trống đầu tiên. Nếu roster đã đầy,
   ownership vẫn được giữ nhưng không thay selection hiện có. `View` sau khi đặt tên mở My Pet
   như một destination con; Pet Store không đổi cấu hình Swarm.
-- Battery category dùng chung catalog ViewModel; Editor mở từ category sẽ pop về category,
+- Battery category dùng chung `BatteryHomeViewModel` được scope theo `home_graph`; ViewModel này
+  chỉ được tạo sau lần đầu user thực sự mở tab Battery. Editor mở từ category sẽ pop về category,
   sau đó Back pop về đúng scroll của Battery Styles. Battery Editor mở trực tiếp từ landing
   pop về Battery Styles; Battery Styles là top-level Home tab. Premium mở từ
   catalog hoặc picker component trong editor rồi quay lại đúng destination theo back stack;

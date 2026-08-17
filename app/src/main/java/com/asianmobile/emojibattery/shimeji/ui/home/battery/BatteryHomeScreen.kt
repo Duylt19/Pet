@@ -6,7 +6,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogContent
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogFlowHost
-import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogViewModel
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 
@@ -20,9 +19,10 @@ fun BatteryHomeScreen(
     accessibilityHowToUseResult: Boolean? = null,
     onAccessibilityHowToUseResultConsumed: () -> Unit = {},
     onNavigateToAccessibilityHowToUse: () -> Unit = {},
-    viewModel: BatteryCatalogViewModel = hiltViewModel()
+    viewModel: BatteryHomeViewModel = hiltViewModel()
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val state = uiState.catalog
 
     TrackScreenView(ScreenName.BATTERY_CATALOG)
     BatteryCatalogFlowHost(

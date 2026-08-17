@@ -3,6 +3,7 @@ package com.asianmobile.emojibattery.shimeji.ui.battery.catalog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.asianmobile.emojibattery.shimeji.ui.home.battery.BatteryHomeViewModel
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 
@@ -15,9 +16,10 @@ fun BatteryCategoryScreen(
     accessibilityHowToUseResult: Boolean? = null,
     onAccessibilityHowToUseResultConsumed: () -> Unit = {},
     onNavigateToAccessibilityHowToUse: () -> Unit = {},
-    viewModel: BatteryCatalogViewModel
+    viewModel: BatteryHomeViewModel
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val state = uiState.catalog
     val category = state.categories.firstOrNull { it.id == categoryId }
     val themes = state.sections.firstOrNull { it.category.id == categoryId }?.themes.orEmpty()
 

@@ -85,9 +85,11 @@ ui/<domain>/<feature>/
   `ui/shared/component` chỉ khi thật sự cross-feature.
 - Test source và screenshot test phải mirror package của source để tìm feature nhanh và
   tiếp tục truy cập được các policy/composable `internal`.
-- Bốn entry screen gắn trực tiếp với bottom navigation là ngoại lệ có chủ đích và nằm tại
-  `ui/home/<tab>`. Catalog/store flow mà Discover/Search cũng sử dụng vẫn ở `ui/battery/catalog`
-  và `ui/pet/store`; Home entry chỉ collect state, tracking và compose flow đó.
+- Bốn entry gắn trực tiếp với bottom navigation đều nằm tại `ui/home/<tab>` và mỗi tab sở hữu
+  đủ bộ `Screen + ViewModel + UiState`. Battery/Pet không dùng ViewModel của Discover/Search:
+  ViewModel tab chỉ kế thừa flow owner dùng chung ở `ui/battery/catalog` hoặc `ui/pet/store` để
+  tái sử dụng unlock/download/permission orchestration. Discover và Search nhận flow ViewModel
+  riêng theo destination, nên state/effect không bị sở hữu chéo giữa các surface.
 
 ## Data boundary
 

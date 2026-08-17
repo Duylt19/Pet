@@ -20,9 +20,6 @@ import com.asianmobile.emojibattery.shimeji.pet.overlay.PetOverlayStartResult
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackInstallResult
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
 import com.asianmobile.emojibattery.shimeji.ui.pet.PetFamilyCapacityPolicy
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,9 +29,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class PetStoreViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+abstract class PetStoreViewModel(
+    private val context: Context,
     private val ownerCatalogRepository: OwnerPetCatalogRepository,
     private val petPackRepository: PetPackRepository,
     private val petStoreRepository: PetStoreRepository,
@@ -43,7 +39,7 @@ class PetStoreViewModel @Inject constructor(
     private val categorySessionOrder: PetCategorySessionOrder
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PetStoreUiState())
-    val uiState: StateFlow<PetStoreUiState> = _uiState.asStateFlow()
+    val storeState: StateFlow<PetStoreUiState> = _uiState.asStateFlow()
     private val _effects = Channel<PetStoreEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
     private var lastPetOverlayToggleAtMillis: Long? = null

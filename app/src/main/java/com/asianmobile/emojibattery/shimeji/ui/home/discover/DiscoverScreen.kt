@@ -73,14 +73,14 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryAccessibilityRecovery
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogFlowHost
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogUiState
-import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogViewModel
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogFlowViewModel
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryThemeAccess
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryThemeAccessPolicy
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryBackgroundAccess
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryBackgroundAccessPolicy
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFlowHost
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreUiState
-import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreViewModel
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFlowViewModel
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentState
@@ -113,12 +113,12 @@ fun DiscoverScreen(
     onAccessibilityHowToUseResultConsumed: () -> Unit = {},
     onNavigateToAccessibilityHowToUse: () -> Unit = {},
     viewModel: DiscoverViewModel = hiltViewModel(),
-    batteryCatalogViewModel: BatteryCatalogViewModel = hiltViewModel(),
-    petStoreViewModel: PetStoreViewModel = hiltViewModel()
+    batteryCatalogViewModel: BatteryCatalogFlowViewModel = hiltViewModel(),
+    petStoreViewModel: PetStoreFlowViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val batteryCatalogState by batteryCatalogViewModel.uiState.collectAsStateWithLifecycle()
-    val petStoreState by petStoreViewModel.uiState.collectAsStateWithLifecycle()
+    val batteryCatalogState by batteryCatalogViewModel.catalogState.collectAsStateWithLifecycle()
+    val petStoreState by petStoreViewModel.storeState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     var showAccessibilityDisclosure by remember { mutableStateOf(false) }
     TrackScreenView(ScreenName.DISCOVER)

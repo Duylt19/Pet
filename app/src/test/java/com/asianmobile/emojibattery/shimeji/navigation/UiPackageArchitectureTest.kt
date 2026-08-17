@@ -8,13 +8,17 @@ import org.junit.Test
 class UiPackageArchitectureTest {
 
     @Test
-    fun `all Home tab entry screens are owned by the home package`() {
+    fun `every Home tab owns its screen view model and ui state`() {
         val sourceRoot = sourceRoot()
-        HOME_TAB_ENTRIES.forEach { relativePath ->
-            assertTrue(
-                "Missing Home tab entry: $relativePath",
-                sourceRoot.resolve(relativePath).isFile
-            )
+        HOME_TAB_FEATURES.forEach { feature ->
+            listOf("Screen", "ViewModel", "UiState").forEach { role ->
+                val relativePath = "ui/home/${feature.packageName}/" +
+                    "${feature.typePrefix}$role.kt"
+                assertTrue(
+                    "Missing Home ${feature.packageName} $role: $relativePath",
+                    sourceRoot.resolve(relativePath).isFile
+                )
+            }
         }
     }
 
@@ -37,11 +41,13 @@ class UiPackageArchitectureTest {
             ?: error("Cannot find app source root from ${File(".").absolutePath}")
 
     private companion object {
-        val HOME_TAB_ENTRIES = listOf(
-            "ui/home/discover/DiscoverScreen.kt",
-            "ui/home/battery/BatteryHomeScreen.kt",
-            "ui/home/pet/ShimejiPetsScreen.kt",
-            "ui/home/mine/MineScreen.kt"
+        val HOME_TAB_FEATURES = listOf(
+            HomeFeature("discover", "Discover"),
+            HomeFeature("battery", "BatteryHome"),
+            HomeFeature("pet", "ShimejiPets"),
+            HomeFeature("mine", "Mine")
         )
     }
+
+    private data class HomeFeature(val packageName: String, val typePrefix: String)
 }

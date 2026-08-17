@@ -26,9 +26,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogViewModel
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.CURRENT_BATTERY_STYLE_ID
 import com.asianmobile.emojibattery.shimeji.ui.home.battery.BatteryHomeScreen
+import com.asianmobile.emojibattery.shimeji.ui.home.battery.BatteryHomeViewModel
 import com.asianmobile.emojibattery.shimeji.ui.home.discover.DiscoverScreen
 import com.asianmobile.emojibattery.shimeji.ui.home.mine.MineScreen
 import com.asianmobile.emojibattery.shimeji.ui.home.pet.ShimejiPetsScreen
@@ -66,7 +66,6 @@ internal fun HomeRoute(
         .getStateFlow<String?>(Routes.PET_STORE_TAB_REQUEST, null)
         .collectAsStateWithLifecycle()
     val accessibilityResult = homeEntry.accessibilityHowToUseResult()
-    val catalogViewModel = hiltViewModel<BatteryCatalogViewModel>(homeEntry)
     var canHandleHomeBack by remember(homeEntry.id) { mutableStateOf(false) }
 
     fun navigateToTab(tab: HomeTab) {
@@ -132,7 +131,7 @@ internal fun HomeRoute(
                     onRequestedPetStoreTabConsumed = {
                         homeEntry.savedStateHandle[Routes.PET_STORE_TAB_REQUEST] = null
                     },
-                    catalogViewModel = catalogViewModel
+                    homeEntry = homeEntry
                 )
             }
         }
@@ -158,7 +157,7 @@ private fun NavGraphBuilder.homeTabs(
     onNavigateToAccessibilityHowToUse: () -> Unit,
     requestedPetStoreTab: String?,
     onRequestedPetStoreTabConsumed: () -> Unit,
-    catalogViewModel: BatteryCatalogViewModel
+    homeEntry: NavBackStackEntry
 ) {
     composable(Routes.DISCOVER) {
         DiscoverScreen(
@@ -195,6 +194,9 @@ private fun NavGraphBuilder.homeTabs(
     }
 
     composable(Routes.BATTERY_CATALOG) {
+        // Scope to Home so the root category destination can reuse the same selection/scroll data,
+        // but create it only after the Battery tab is actually visited.
+        val batteryHomeViewModel = hiltViewModel<BatteryHomeViewModel>(homeEntry)
         BatteryHomeScreen(
             onSearch = { onNavigateOutsideHome(Routes.SEARCH) },
             onOpenCategory = { categoryId ->
@@ -212,7 +214,7 @@ private fun NavGraphBuilder.homeTabs(
             onAccessibilityHowToUseResultConsumed =
                 onAccessibilityHowToUseResultConsumed,
             onNavigateToAccessibilityHowToUse = onNavigateToAccessibilityHowToUse,
-            viewModel = catalogViewModel
+            viewModel = batteryHomeViewModel
         )
     }
 

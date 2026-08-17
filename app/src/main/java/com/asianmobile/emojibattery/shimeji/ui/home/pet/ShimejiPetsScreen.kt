@@ -8,7 +8,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreContent
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFlowHost
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreTab
-import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreViewModel
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 
@@ -21,9 +20,10 @@ fun ShimejiPetsScreen(
     onPremium: () -> Unit,
     onViewPet: () -> Unit,
     onNavigateToGrantPermissions: () -> Unit,
-    viewModel: PetStoreViewModel = hiltViewModel()
+    viewModel: ShimejiPetsViewModel = hiltViewModel()
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val state = uiState.store
     TrackScreenView(ScreenName.PET_STORE)
 
     LaunchedEffect(requestedTab) {

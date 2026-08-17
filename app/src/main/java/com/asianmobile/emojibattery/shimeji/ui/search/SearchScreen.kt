@@ -79,9 +79,9 @@ import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStat
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogFlowHost
-import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogViewModel
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogFlowViewModel
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFlowHost
-import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreViewModel
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFlowViewModel
 import com.asianmobile.emojibattery.shimeji.utils.ScreenName
 import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 import com.intuit.sdp.R as SdpR
@@ -99,12 +99,12 @@ fun SearchScreen(
     onViewPet: () -> Unit,
     onNavigateToGrantPermissions: () -> Unit,
     viewModel: SearchViewModel = hiltViewModel(),
-    batteryCatalogViewModel: BatteryCatalogViewModel = hiltViewModel(),
-    petStoreViewModel: PetStoreViewModel = hiltViewModel()
+    batteryCatalogViewModel: BatteryCatalogFlowViewModel = hiltViewModel(),
+    petStoreViewModel: PetStoreFlowViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val batteryCatalogState by batteryCatalogViewModel.uiState.collectAsStateWithLifecycle()
-    val petStoreState by petStoreViewModel.uiState.collectAsStateWithLifecycle()
+    val batteryCatalogState by batteryCatalogViewModel.catalogState.collectAsStateWithLifecycle()
+    val petStoreState by petStoreViewModel.storeState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner, viewModel) {

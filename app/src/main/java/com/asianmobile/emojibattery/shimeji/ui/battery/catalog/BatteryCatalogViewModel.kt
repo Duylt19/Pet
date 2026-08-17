@@ -13,9 +13,6 @@ import com.asianmobile.emojibattery.shimeji.data.repository.BatteryCatalogReposi
 import com.asianmobile.emojibattery.shimeji.data.repository.BatterySettingsRepository
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryBackgroundAccess
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryBackgroundAccessPolicy
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,16 +22,15 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class BatteryCatalogViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+abstract class BatteryCatalogViewModel(
+    private val context: Context,
     private val catalogRepository: BatteryCatalogRepository,
     private val settingsRepository: BatterySettingsRepository
 ) : ViewModel() {
     private val accessPolicy = BatteryThemeAccessPolicy()
     private val displayPolicy = BatteryCatalogDisplayPolicy()
     private val _uiState = MutableStateFlow(BatteryCatalogUiState())
-    val uiState: StateFlow<BatteryCatalogUiState> = _uiState.asStateFlow()
+    val catalogState: StateFlow<BatteryCatalogUiState> = _uiState.asStateFlow()
     private val _effects = Channel<BatteryCatalogEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
     private var configuredBatteryEnabled = false
