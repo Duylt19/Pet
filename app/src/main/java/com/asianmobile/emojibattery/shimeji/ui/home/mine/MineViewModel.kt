@@ -231,6 +231,14 @@ class MineViewModel @Inject constructor(
         runCatching { context.startActivity(intent) }
     }
 
+    fun onMoreAppsClicked(context: Context) {
+        val intent = Intent(
+            Intent.ACTION_VIEW,
+            context.getString(R.string.more_apps_developer_url).toUri()
+        )
+        runCatching { context.startActivity(intent) }
+    }
+
     internal fun sendRateFeedback(
         context: Context,
         feedbackState: RateAppUiState

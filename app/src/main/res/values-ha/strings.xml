@@ -98,6 +98,7 @@
     <string name="mine_apps_hidden_switch_content_description">Boye Emoji Battery a cikin %1$s</string>
     <string name="mine_share_app">Raba wannan app</string>
     <string name="mine_contact_us">Tuntube mu</string>
+    <string name="mine_more_apps">Ƙarin ƙa\'idodi</string>
     <string name="mine_current_version">Sigar Yanzu: %1$s</string>
     <string name="pet_overlay_notification_channel_name">Dabbobin allo</string>
     <string name="pet_overlay_notification_channel_description">Yana sa dabbobin ku mai rai a ganuwa a saman sauran aikace-aikacen</string>

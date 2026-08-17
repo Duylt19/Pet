@@ -98,6 +98,7 @@
     <string name="mine_apps_hidden_switch_content_description">Cacher Emoji Battery en %1$s</string>
     <string name="mine_share_app">Partager cette application</string>
     <string name="mine_contact_us">Contactez-nous</string>
+    <string name="mine_more_apps">Plus d’applications</string>
     <string name="mine_current_version">Version actuelle : %1$s</string>
     <string name="pet_overlay_notification_channel_name">Écran pour animaux de compagnie</string>
     <string name="pet_overlay_notification_channel_description">Garde votre animal animé visible au-dessus des autres applications</string>

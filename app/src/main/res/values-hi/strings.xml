@@ -98,6 +98,7 @@
     <string name="mine_apps_hidden_switch_content_description">छिपाना Emoji Battery %1$s में</string>
     <string name="mine_share_app">इस ऐप को साझा करें</string>
     <string name="mine_contact_us">हमसे संपर्क करें</string>
+    <string name="mine_more_apps">और ऐप्स</string>
     <string name="mine_current_version">वर्तमान संस्करण: %1$s</string>
     <string name="pet_overlay_notification_channel_name">स्क्रीन पालतू</string>
     <string name="pet_overlay_notification_channel_description">आपके एनिमेटेड पालतू जानवर को अन्य ऐप्स के शीर्ष पर दृश्यमान रखता है</string>

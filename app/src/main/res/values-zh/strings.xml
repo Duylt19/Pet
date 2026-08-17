@@ -98,6 +98,7 @@
     <string name="mine_apps_hidden_switch_content_description">隐藏 Emoji Battery 在 %1$s 内</string>
     <string name="mine_share_app">分享这个应用程序</string>
     <string name="mine_contact_us">联系我们</string>
+    <string name="mine_more_apps">更多应用</string>
     <string name="mine_current_version">当前版本：%1$s</string>
     <string name="pet_overlay_notification_channel_name">屏幕宠物</string>
     <string name="pet_overlay_notification_channel_description">让您的动画宠物在其他应用程序之上可见</string>

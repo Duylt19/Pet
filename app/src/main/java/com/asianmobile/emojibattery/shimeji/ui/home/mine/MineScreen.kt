@@ -150,6 +150,7 @@ fun MineScreen(
         onRate = { rateAppState = RateAppUiState(isDialogVisible = true) },
         onShare = { viewModel.onShareClicked(context) },
         onContact = { viewModel.onContactClicked(context) },
+        onMoreApps = { viewModel.onMoreAppsClicked(context) },
         onPrivacy = { viewModel.onPrivacyClicked(context) }
     )
 
@@ -204,6 +205,7 @@ internal fun MineContent(
     onRate: () -> Unit,
     onShare: () -> Unit,
     onContact: () -> Unit,
+    onMoreApps: () -> Unit,
     onPrivacy: () -> Unit
 ) {
     Box(
@@ -303,6 +305,12 @@ internal fun MineContent(
                             iconRes = R.drawable.ic_mine_contact,
                             title = stringResource(R.string.mine_contact_us),
                             onClick = onContact
+                        )
+                        MineDivider()
+                        MineRow(
+                            iconRes = R.drawable.ic_mine_more_apps,
+                            title = stringResource(R.string.mine_more_apps),
+                            onClick = onMoreApps
                         )
                         MineDivider()
                         MineRow(
@@ -670,6 +678,7 @@ private fun MineContentPreview() {
         onRate = {},
         onShare = {},
         onContact = {},
+        onMoreApps = {},
         onPrivacy = {}
     )
 }

@@ -133,6 +133,7 @@
     <string name="mine_apps_hidden_switch_content_description">Hide Emoji Battery in %1$s</string>
     <string name="mine_share_app">Share this app</string>
     <string name="mine_contact_us">Contact us</string>
+    <string name="mine_more_apps">More apps</string>
     <string name="mine_current_version">Current Version: %1$s</string>
 
     <!-- Pet overlay foreground service -->
@@ -193,6 +194,7 @@
 
     <!-- Privacy Policy -->
     <string name="privacy_policy_default_url" translatable="false">https://sites.google.com/view/sanya-studio/home</string>
+    <string name="more_apps_developer_url" translatable="false">https://play.google.com/store/apps/developer?id=Sanya.Studio</string>
 
     <!-- Set Default Browser (M10) -->
 

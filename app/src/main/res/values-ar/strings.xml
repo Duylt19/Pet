@@ -98,6 +98,7 @@
     <string name="mine_apps_hidden_switch_content_description">يخفي Emoji Battery في %1$s</string>
     <string name="mine_share_app">مشاركة هذا التطبيق</string>
     <string name="mine_contact_us">اتصل بنا</string>
+    <string name="mine_more_apps">المزيد من التطبيقات</string>
     <string name="mine_current_version">الإصدار الحالي: %1$s</string>
     <string name="pet_overlay_notification_channel_name">شاشة الحيوانات الأليفة</string>
     <string name="pet_overlay_notification_channel_description">يبقي حيوانك الأليف المتحرك مرئيًا أعلى التطبيقات الأخرى</string>
