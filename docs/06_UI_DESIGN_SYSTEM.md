@@ -122,6 +122,9 @@ Language loading contract theo Figma `8421:9356`:
 
 - loading phủ scrim đen `60%` toàn màn và dùng text trắng; Android 12/API 31 trở lên blur
   content phía sau `8dp`, API thấp hơn không dùng blur và chỉ giữ scrim tối tương đương Figma.
+- App bật RTL theo locale. Mọi vector mang ý nghĩa điều hướng ngang như Back, More và Chevron
+  phải đặt `android:autoMirrored="true"` để tự đổi hướng trong tiếng Ả Rập; icon không mang ý
+  nghĩa hướng như Close, Download hoặc artwork trang trí giữ nguyên hình học.
 
 Battery catalog contract theo Figma `8102:2729` và `8286:5017`:
 
