@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -324,7 +325,7 @@ internal fun TrollEditChip(
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp))
     Row(
         modifier = modifier
-            .width(dimensionResource(SdpR.dimen._65sdp))
+            .widthIn(min = dimensionResource(SdpR.dimen._65sdp))
             .height(dimensionResource(SdpR.dimen._25sdp))
             .clip(shape)
             .background(colorResource(R.color.colors_FFFFFF))

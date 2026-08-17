@@ -19,6 +19,19 @@ fun BatteryTrollCustomizeScreenshotTest() {
     PreviewTrollCustomize(previewTrollCustomizeState())
 }
 
+/** Long translations must expand the Edit chip instead of clipping its label. */
+@PreviewTest
+@Preview(
+    name = "Battery troll customize Vietnamese",
+    widthDp = 360,
+    heightDp = 800,
+    locale = "vi"
+)
+@Composable
+fun BatteryTrollCustomizeVietnameseScreenshotTest() {
+    PreviewTrollCustomize(previewTrollCustomizeState())
+}
+
 /** The two state deltas Figma calls out: Real Battery greys the Edit chip, Random dims both pickers. */
 @PreviewTest
 @Preview(name = "Battery troll customize real random", widthDp = 360, heightDp = 800)
