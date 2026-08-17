@@ -20,6 +20,8 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.asianmobile.emojibattery.shimeji.MainActivity
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.data.local.AppLanguagePreference
+import com.asianmobile.emojibattery.shimeji.data.local.DataStoreManager
 import com.asianmobile.emojibattery.shimeji.data.model.OwnerPetCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.model.PetDisplayMode
 import com.asianmobile.emojibattery.shimeji.data.model.PetPreferences
@@ -29,6 +31,7 @@ import com.asianmobile.emojibattery.shimeji.pet.pack.PetBitmapCache
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackRepository
 import com.asianmobile.emojibattery.shimeji.pet.settings.PetSettingsPolicy
 import com.asianmobile.emojibattery.shimeji.pet.speech.OwnerPetSpeechAnchorPolicy
+import com.asianmobile.emojibattery.shimeji.utils.LanguageUtil
 import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -49,6 +52,7 @@ class PetOverlayService : Service() {
     @Inject lateinit var petBitmapCacheLazy: Lazy<PetBitmapCache>
     @Inject lateinit var petSettingsRepositoryLazy: Lazy<PetSettingsRepository>
     @Inject lateinit var ownerPetCatalogRepositoryLazy: Lazy<OwnerPetCatalogRepository>
+    @Inject lateinit var dataStoreManager: DataStoreManager
 
     private val petPackRepository: PetPackRepository
         get() = petPackRepositoryLazy.get()
@@ -67,6 +71,7 @@ class PetOverlayService : Service() {
     private var sessionPositionResetRevisions: List<Int>? = null
     private var activeSessionSignature: PetOverlaySessionSignature? = null
     private var activeSessionMode: PetDisplayMode? = null
+    private var activeAppLanguage: AppLanguagePreference? = null
     private var isScreenReceiverRegistered = false
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -81,6 +86,7 @@ class PetOverlayService : Service() {
         super.onCreate()
         createNotificationChannel()
         registerScreenStateReceiver()
+        observeAppLanguage()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -255,6 +261,23 @@ class PetOverlayService : Service() {
         }
     }
 
+    private fun observeAppLanguage() {
+        serviceScope.launch {
+            dataStoreManager.appLanguage.collect { language ->
+                val previous = activeAppLanguage
+                activeAppLanguage = language
+                if (previous == null || previous == language) return@collect
+                val controller = overlayController ?: return@collect
+                createNotificationChannel()
+                getSystemService(NotificationManager::class.java).notify(
+                    NOTIFICATION_ID,
+                    createNotification(),
+                )
+                controller.refreshSpeechLanguage()
+            }
+        }
+    }
+
     private suspend fun restartOverlay(preferences: PetPreferences) {
         if (preferences.runtimePetCount == 0) {
             stopSelf()
@@ -364,6 +387,7 @@ class PetOverlayService : Service() {
         sessionPositionResetRevisions = null
         activeSessionSignature = null
         activeSessionMode = null
+        activeAppLanguage = null
         liveSettingsJob = null
         PetOverlayRuntime.updateRunning(false)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
@@ -387,6 +411,7 @@ class PetOverlayService : Service() {
     }
 
     private fun createNotification(): Notification {
+        val localizedContext = LanguageUtil.contextWithCachedAppLocale(this)
         val contentIntent = PendingIntent.getActivity(
             this,
             CONTENT_REQUEST_CODE,
@@ -401,10 +426,10 @@ class PetOverlayService : Service() {
             Intent(this, PetOverlayService::class.java).setAction(ACTION_STOP),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+        return NotificationCompat.Builder(localizedContext, NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_pet)
-            .setContentTitle(getString(R.string.pet_overlay_notification_title))
-            .setContentText(getString(R.string.pet_overlay_notification_text))
+            .setContentTitle(localizedContext.getString(R.string.pet_overlay_notification_title))
+            .setContentText(localizedContext.getString(R.string.pet_overlay_notification_text))
             .setContentIntent(contentIntent)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -412,7 +437,7 @@ class PetOverlayService : Service() {
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .addAction(
                 R.drawable.ic_notification_pet,
-                getString(R.string.pet_overlay_notification_stop),
+                localizedContext.getString(R.string.pet_overlay_notification_stop),
                 stopIntent
             )
             .build()
@@ -420,12 +445,15 @@ class PetOverlayService : Service() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val localizedContext = LanguageUtil.contextWithCachedAppLocale(this)
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
-            getString(R.string.pet_overlay_notification_channel_name),
+            localizedContext.getString(R.string.pet_overlay_notification_channel_name),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = getString(R.string.pet_overlay_notification_channel_description)
+            description = localizedContext.getString(
+                R.string.pet_overlay_notification_channel_description
+            )
             setShowBadge(false)
         }
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)

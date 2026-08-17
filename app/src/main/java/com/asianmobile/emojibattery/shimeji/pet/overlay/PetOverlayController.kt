@@ -436,6 +436,15 @@ internal class PetOverlayController(
         }
     }
 
+    fun refreshSpeechLanguage() {
+        if (isSwarm) return
+        speechDirectors.values.forEach(PetSpeechDirector::reset)
+        speechDirectors.clear()
+        removeAllSpeechWindows()
+        rebuildSpeechRuntime()
+        socialDirector?.reset()
+    }
+
     fun updateVisibilitySettings(slotPreferences: List<PetSlotPreferences>) {
         if (isSwarm) return
         instances.forEach { instance ->

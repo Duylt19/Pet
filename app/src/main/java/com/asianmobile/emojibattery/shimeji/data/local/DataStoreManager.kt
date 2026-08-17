@@ -12,9 +12,15 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+
+internal data class AppLanguagePreference(
+    val key: String,
+    val country: String,
+)
 
 @Singleton
 class DataStoreManager @Inject constructor(
@@ -37,6 +43,15 @@ class DataStoreManager @Inject constructor(
     val isLanguageCompleted: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[IS_LANGUAGE_COMPLETED] ?: false
     }
+
+    internal val appLanguage: Flow<AppLanguagePreference> = context.dataStore.data
+        .map { preferences ->
+            AppLanguagePreference(
+                key = preferences[KEY_LANGUAGE].orEmpty(),
+                country = preferences[COUNTRY_LANGUAGE].orEmpty(),
+            )
+        }
+        .distinctUntilChanged()
 
     val isPermissionCompleted: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[IS_PERMISSION_COMPLETED] ?: false

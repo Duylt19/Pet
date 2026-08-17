@@ -158,7 +158,10 @@ Mỗi pet bật message dùng một `TYPE_APPLICATION_OVERLAY` phụ. Window đ�
   `SIT → LOOK → SPRAWL → EMOTE → IDLE`, không có TALK.
 
 Catalog có sẵn hiện có 48 câu trong Android resources: tám câu cho mỗi tone, với English
-base và Vietnamese. `Pet messages` trong Settings được persist bằng
+base và bản dịch cho toàn bộ ngôn ngữ app đang hỗ trợ. Overlay resolve resource bằng locale
+được lưu trong `language_cache`, không dùng locale hệ thống của `applicationContext`. Khi user
+đổi ngôn ngữ trong lúc pet đang chạy, service rebuild speech catalog và các câu tiếp theo dùng
+ngôn ngữ mới mà không cần tắt/bật lại pet. `Pet messages` trong Settings được persist bằng
 `pet_messages_enabled`, mặc định bật.
 
 `Custom message list` cho nhập mỗi câu một dòng, tối đa 30 câu và 80 Unicode code
@@ -167,6 +170,7 @@ khi vượt giới hạn. DataStore lưu qua `pet_custom_messages`; parser chu�
 bỏ câu rỗng/trùng và không cắt giữa surrogate pair/emoji. Khi list không rỗng, mọi
 trigger dùng list này và pet chọn ngẫu nhiên không lặp ngay; `Use built-in` xóa list để
 trở lại catalog 48 câu. Cả toggle và list mới áp dụng ở lần Start pet kế tiếp.
+Custom message là nội dung do user nhập nên được giữ nguyên, không tự động dịch khi đổi locale.
 
 ## Hướng mở rộng server
 

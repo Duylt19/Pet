@@ -4,6 +4,7 @@ import android.content.Context
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.pet.speech.PetSpeechCatalog
 import com.asianmobile.emojibattery.shimeji.pet.speech.PetSpeechTone
+import com.asianmobile.emojibattery.shimeji.utils.LanguageUtil
 
 internal fun Context.petSpeechCatalog(customMessages: List<String>): PetSpeechCatalog {
     if (customMessages.isNotEmpty()) {
@@ -11,9 +12,10 @@ internal fun Context.petSpeechCatalog(customMessages: List<String>): PetSpeechCa
             PetSpeechTone.entries.associateWith { customMessages }
         )
     }
+    val localizedContext = LanguageUtil.contextWithCachedAppLocale(this)
     return PetSpeechCatalog(
         mapOf(
-            PetSpeechTone.AFFECTION to strings(
+            PetSpeechTone.AFFECTION to localizedContext.strings(
                 R.string.pet_speech_affection_1,
                 R.string.pet_speech_affection_2,
                 R.string.pet_speech_affection_3,
@@ -23,7 +25,7 @@ internal fun Context.petSpeechCatalog(customMessages: List<String>): PetSpeechCa
                 R.string.pet_speech_affection_7,
                 R.string.pet_speech_affection_8
             ),
-            PetSpeechTone.CHATTER to strings(
+            PetSpeechTone.CHATTER to localizedContext.strings(
                 R.string.pet_speech_chatter_1,
                 R.string.pet_speech_chatter_2,
                 R.string.pet_speech_chatter_3,
@@ -33,7 +35,7 @@ internal fun Context.petSpeechCatalog(customMessages: List<String>): PetSpeechCa
                 R.string.pet_speech_chatter_7,
                 R.string.pet_speech_chatter_8
             ),
-            PetSpeechTone.SOCIAL_HELLO to strings(
+            PetSpeechTone.SOCIAL_HELLO to localizedContext.strings(
                 R.string.pet_speech_social_hello_1,
                 R.string.pet_speech_social_hello_2,
                 R.string.pet_speech_social_hello_3,
@@ -43,7 +45,7 @@ internal fun Context.petSpeechCatalog(customMessages: List<String>): PetSpeechCa
                 R.string.pet_speech_social_hello_7,
                 R.string.pet_speech_social_hello_8
             ),
-            PetSpeechTone.SOCIAL_REPLY to strings(
+            PetSpeechTone.SOCIAL_REPLY to localizedContext.strings(
                 R.string.pet_speech_social_reply_1,
                 R.string.pet_speech_social_reply_2,
                 R.string.pet_speech_social_reply_3,
@@ -53,7 +55,7 @@ internal fun Context.petSpeechCatalog(customMessages: List<String>): PetSpeechCa
                 R.string.pet_speech_social_reply_7,
                 R.string.pet_speech_social_reply_8
             ),
-            PetSpeechTone.SKILL to strings(
+            PetSpeechTone.SKILL to localizedContext.strings(
                 R.string.pet_speech_skill_1,
                 R.string.pet_speech_skill_2,
                 R.string.pet_speech_skill_3,
@@ -63,7 +65,7 @@ internal fun Context.petSpeechCatalog(customMessages: List<String>): PetSpeechCa
                 R.string.pet_speech_skill_7,
                 R.string.pet_speech_skill_8
             ),
-            PetSpeechTone.CELEBRATION to strings(
+            PetSpeechTone.CELEBRATION to localizedContext.strings(
                 R.string.pet_speech_celebration_1,
                 R.string.pet_speech_celebration_2,
                 R.string.pet_speech_celebration_3,

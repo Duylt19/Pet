@@ -7,6 +7,18 @@ import java.util.Locale
 
 object LanguageUtil {
 
+    fun contextWithCachedAppLocale(context: Context): Context {
+        val preferences = context.getSharedPreferences(
+            LANGUAGE_CACHE_NAME,
+            Context.MODE_PRIVATE,
+        )
+        return updateBaseContextLocale(
+            context = context,
+            keyLanguage = preferences.getString(KEY_LANGUAGE, "").orEmpty(),
+            country = preferences.getString(COUNTRY_LANGUAGE, "").orEmpty(),
+        )
+    }
+
     fun updateBaseContextLocale(context: Context, keyLanguage: String, country: String): Context {
         val locale = Locale.Builder()
             .setLanguage(keyLanguage)
@@ -35,6 +47,9 @@ object LanguageUtil {
         resources.updateConfiguration(configuration, resources.displayMetrics)
         return context
     }
-}
 
+    private const val LANGUAGE_CACHE_NAME = "language_cache"
+    private const val KEY_LANGUAGE = "key_language"
+    private const val COUNTRY_LANGUAGE = "country_language"
+}
 
