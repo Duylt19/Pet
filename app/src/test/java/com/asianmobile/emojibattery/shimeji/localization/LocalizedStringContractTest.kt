@@ -57,17 +57,90 @@ class LocalizedStringContractTest {
     fun `Vietnamese status bar labels use sentence case and contextual wording`() {
         val strings = readStrings(resourceRoot().resolve("values-vi/strings.xml"))
         val expectedLabels = mapOf(
+            "premium_free" to "Miễn phí",
+            "premium_pro" to "Pro",
+            "premium_weekly" to "Hàng tuần",
+            "premium_monthly" to "Hàng tháng",
+            "favourite_recent_favourite_tab" to "Yêu thích",
             "battery_editor_template" to "Mẫu",
             "battery_editor_theme_picker" to "Chủ đề",
             "battery_component_signal" to "Tín hiệu",
             "battery_component_data_short" to "Dữ liệu",
             "battery_component_charge_short" to "Sạc",
             "battery_component_ringer" to "Chế độ âm thanh",
+            "battery_background_solid" to "Màu trơn",
+            "battery_troll_custom" to "Tùy chỉnh",
+            "pet_room_tab_room" to "Phòng",
+            "battery_emotion_group_classic" to "Cổ điển",
+            "battery_emotion_group_kiiroitori" to "Kiiroitori",
+            "battery_emotion_group_molang" to "Molang",
+            "battery_emotion_group_tobi" to "Tobi",
         )
 
         expectedLabels.forEach { (key, expected) ->
             assertEquals("Unexpected Vietnamese label for $key", expected, strings.getValue(key).value)
         }
+    }
+
+    @Test
+    fun `Vietnamese battery overlay terminology is contextual and readable`() {
+        val strings = readStrings(resourceRoot().resolve("values-vi/strings.xml"))
+        val expectedStates = mapOf(
+            "battery_overlay_state_charging" to "Đang sạc",
+            "battery_overlay_state_full" to "Đã sạc đầy",
+            "battery_overlay_state_not_charging" to "Đã cắm nguồn nhưng không sạc",
+            "battery_overlay_state_discharging" to "Đang sử dụng pin",
+            "battery_overlay_state_unknown" to "Trạng thái sạc không xác định",
+            "battery_overlay_power_ac" to "Nguồn AC",
+            "battery_overlay_power_usb" to "Nguồn USB",
+            "battery_overlay_power_wireless" to "Sạc không dây",
+            "battery_overlay_power_dock" to "Nguồn từ đế sạc",
+            "battery_overlay_wifi_limited" to "Kết nối Wi-Fi bị hạn chế",
+            "battery_overlay_wifi_disabled" to "Wi-Fi đã tắt",
+            "battery_overlay_wifi_disconnected" to "Wi-Fi đã ngắt kết nối",
+            "battery_overlay_cellular_connected" to "Đã kết nối dữ liệu di động",
+            "battery_overlay_cellular_limited" to "Kết nối dữ liệu di động bị hạn chế",
+            "battery_overlay_airplane_enabled" to "Đã bật chế độ máy bay",
+            "battery_overlay_ringer_vibrate" to "Chế độ rung",
+            "battery_overlay_ringer_silent" to "Chế độ im lặng",
+            "battery_overlay_hotspot_enabled" to "Điểm phát sóng đang bật",
+        )
+
+        expectedStates.forEach { (key, expected) ->
+            assertEquals("Unexpected Vietnamese overlay text for $key", expected, strings.getValue(key).value)
+        }
+    }
+
+    @Test
+    fun `Vietnamese platform names are separated from surrounding words`() {
+        val strings = readStrings(resourceRoot().resolve("values-vi/strings.xml"))
+        val joinedPlatformName = Regex("(?:Android|Google Play)\\p{L}")
+
+        strings.forEach { (key, value) ->
+            assertTrue(
+                "Platform name is joined to adjacent text in $key: ${value.value}",
+                !joinedPlatformName.containsMatchIn(value.value)
+            )
+        }
+    }
+
+    @Test
+    fun `Vietnamese standalone text starts with sentence case`() {
+        val strings = readStrings(resourceRoot().resolve("values-vi/strings.xml"))
+        val lowercaseQuantityKeys = setOf(
+            "pet_store_food_quantity",
+            "pet_room_food_portions",
+        )
+
+        strings
+            .filterKeys { it !in lowercaseQuantityKeys }
+            .forEach { (key, value) ->
+                val firstCharacter = value.value.trimStart().firstOrNull()
+                assertTrue(
+                    "Vietnamese text starts with lowercase in $key: ${value.value}",
+                    firstCharacter == null || !firstCharacter.isLowerCase()
+                )
+            }
     }
 
     @Test
