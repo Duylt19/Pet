@@ -62,9 +62,9 @@
     <string name="premium_privacy_policy">Chính sách bảo mật</string>
     <string name="premium_disclaimer">Tài khoản của bạn sẽ bị tính phí trong vòng 24 giờ trước khi giai đoạn hiện tại kết thúc. Bạn có thể quản lý hoặc hủy đăng ký bất kỳ lúc nào trong phần cài đặt Google Play.</string>
     <string name="please_check_your_internet_connection_and_try_again">Vui lòng kiểm tra kết nối internet của bạn và thử lại.</string>
-    <string name="intro_title_1">Hiển thị mức pin của bạn\nvới những biểu tượng cảm xúc vui tươi</string>
-    <string name="intro_title_2">Tùy chỉnh thanh trạng thái của bạn để\nphù hợp với phong cách của bạn</string>
-    <string name="intro_title_3">Thưởng thức thú cưng đáng yêu di chuyển\ntrên màn hình của bạn</string>
+    <string name="intro_title_1">Hiển thị mức pin của bạn với những biểu tượng cảm xúc vui tươi</string>
+    <string name="intro_title_2">Tùy chỉnh thanh trạng thái của bạn để phù hợp với phong cách của bạn</string>
+    <string name="intro_title_3">Thưởng thức thú cưng đáng yêu di chuyển trên màn hình của bạn</string>
     <string name="start">Bắt đầu</string>
     <string name="settings_privacy_policy_title">Chính sách bảo mật</string>
     <string name="settings_rate_us_title">Đánh giá ứng dụng</string>

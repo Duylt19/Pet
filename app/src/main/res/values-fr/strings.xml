@@ -62,9 +62,9 @@
     <string name="premium_privacy_policy">Politique de confidentialité</string>
     <string name="premium_disclaimer">Votre compte sera débité dans les 24 heures avant la fin de la période en cours. Vous pouvez gérer ou annuler votre abonnement à tout moment dansGoogle Playparamètres.</string>
     <string name="please_check_your_internet_connection_and_try_again">Veuillez vérifier votre connexion Internet et réessayer.</string>
-    <string name="intro_title_1">Afficher le niveau de votre batterie\navec des émojis ludiques</string>
-    <string name="intro_title_2">Personnalisez votre barre d\'état pour\ncorrespond à votre style</string>
-    <string name="intro_title_3">Profitez d\'adorables animaux de compagnie en mouvement\nsur votre écran</string>
+    <string name="intro_title_1">Afficher le niveau de votre batterie avec des émojis ludiques</string>
+    <string name="intro_title_2">Personnalisez votre barre d\'état pour correspond à votre style</string>
+    <string name="intro_title_3">Profitez d\'adorables animaux de compagnie en mouvement sur votre écran</string>
     <string name="start">Commencer</string>
     <string name="settings_privacy_policy_title">Politique de confidentialité</string>
     <string name="settings_rate_us_title">Évaluez-nous</string>

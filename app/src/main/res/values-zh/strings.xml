@@ -62,9 +62,9 @@
     <string name="premium_privacy_policy">隐私政策</string>
     <string name="premium_disclaimer">您的帐户将在当前期间结束前 24 小时内扣款。您可以随时管理或取消您的订阅Google Play设置。</string>
     <string name="please_check_your_internet_connection_and_try_again">请检查您的互联网连接，然后重试。</string>
-    <string name="intro_title_1">显示您的电池电量\n带有俏皮的表情符号</string>
-    <string name="intro_title_2">自定义您的状态栏\n符合你的风格</string>
-    <string name="intro_title_3">享受可爱宠物的移动\n在你的屏幕上</string>
+    <string name="intro_title_1">显示您的电池电量带有俏皮的表情符号</string>
+    <string name="intro_title_2">自定义您的状态栏符合你的风格</string>
+    <string name="intro_title_3">享受可爱宠物的移动在你的屏幕上</string>
     <string name="start">开始</string>
     <string name="settings_privacy_policy_title">隐私政策</string>
     <string name="settings_rate_us_title">评价我们</string>

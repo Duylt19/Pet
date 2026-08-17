@@ -85,9 +85,9 @@
     <string name="please_check_your_internet_connection_and_try_again">Please check your internet connection and try again.</string>
 
     <!-- Intro / Onboarding -->
-    <string name="intro_title_1">Show your battery level\nwith playful emojis</string>
-    <string name="intro_title_2">Custom your status bar to\nmatch your style</string>
-    <string name="intro_title_3">Enjoy adorable pets moving\nacross your screen</string>
+    <string name="intro_title_1">Show your battery level with playful emojis</string>
+    <string name="intro_title_2">Custom your status bar to match your style</string>
+    <string name="intro_title_3">Enjoy adorable pets moving across your screen</string>
     <string name="start">Start</string>
 
     <!-- Time Ago -->

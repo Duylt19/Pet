@@ -356,10 +356,6 @@ private fun IntroCopyAndControls(
                 .fillMaxWidth()
                 .heightIn(
                     min = dimensionResource(R_sdp.dimen._46sdp) * layoutScale,
-                )
-                .padding(
-                    start = dimensionResource(R_sdp.dimen._24sdp) * layoutScale,
-                    end = dimensionResource(R_sdp.dimen._24sdp) * layoutScale,
                 ),
             color = colorResource(R.color.colors_333538),
             fontFamily = nunitoBlackFontFamily,
