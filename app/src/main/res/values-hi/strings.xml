@@ -229,7 +229,7 @@
     <string name="battery_component_signal">संकेत</string>
     <string name="battery_component_data">मोबाइल डेटा</string>
     <string name="battery_component_date">दिनांक एवं समय</string>
-    <string name="battery_component_ringer">घंटी बजाने वाला</string>
+    <string name="battery_component_ringer">ध्वनि मोड</string>
     <string name="battery_component_airplane">हवाई जहाज</string>
     <string name="battery_component_hotspot">हॉटस्पॉट</string>
     <string name="battery_component_animation">एनीमेशन</string>

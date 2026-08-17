@@ -3,6 +3,7 @@ package com.asianmobile.emojibattery.shimeji.ui.battery.editor
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -641,10 +642,16 @@ private fun DesignRowHeader(
             color = colorResource(R.color.colors_212327),
             fontFamily = StatusBarRobotoMedium,
             fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
-            lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp
+            lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Clip,
+            modifier = Modifier
+                .weight(1f)
+                .basicMarquee(iterations = Int.MAX_VALUE)
         )
-        Spacer(Modifier.weight(1f))
         if (onMore != null) {
+            Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._6sdp)))
@@ -1094,8 +1101,12 @@ private fun FigmaComponentTile(
             fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
             lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
+            softWrap = false,
+            overflow = TextOverflow.Clip,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .basicMarquee(iterations = Int.MAX_VALUE)
         )
     }
 }

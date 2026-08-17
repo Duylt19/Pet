@@ -229,7 +229,7 @@
     <string name="battery_component_signal">Sein</string>
     <string name="battery_component_data">Mobiele data</string>
     <string name="battery_component_date">Datum en tyd</string>
-    <string name="battery_component_ringer">Ringer</string>
+    <string name="battery_component_ringer">Klankmodus</string>
     <string name="battery_component_airplane">Vliegtuig</string>
     <string name="battery_component_hotspot">Warmkol</string>
     <string name="battery_component_animation">Animasie</string>

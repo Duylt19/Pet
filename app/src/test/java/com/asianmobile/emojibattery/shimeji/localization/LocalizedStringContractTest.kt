@@ -54,6 +54,23 @@ class LocalizedStringContractTest {
     }
 
     @Test
+    fun `Vietnamese status bar labels use sentence case and contextual wording`() {
+        val strings = readStrings(resourceRoot().resolve("values-vi/strings.xml"))
+        val expectedLabels = mapOf(
+            "battery_editor_template" to "Mẫu",
+            "battery_editor_theme_picker" to "Chủ đề",
+            "battery_component_signal" to "Tín hiệu",
+            "battery_component_data_short" to "Dữ liệu",
+            "battery_component_charge_short" to "Sạc",
+            "battery_component_ringer" to "Chế độ âm thanh",
+        )
+
+        expectedLabels.forEach { (key, expected) ->
+            assertEquals("Unexpected Vietnamese label for $key", expected, strings.getValue(key).value)
+        }
+    }
+
+    @Test
     fun `accessibility service labels start with the canonical app name`() {
         val resources = resourceRoot()
         val appName = readStrings(resources.resolve("values/strings.xml"))

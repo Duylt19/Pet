@@ -229,7 +229,7 @@
     <string name="battery_component_signal">信号</string>
     <string name="battery_component_data">移动数据</string>
     <string name="battery_component_date">日期和时间</string>
-    <string name="battery_component_ringer">林格</string>
+    <string name="battery_component_ringer">声音模式</string>
     <string name="battery_component_airplane">飞机</string>
     <string name="battery_component_hotspot">热点</string>
     <string name="battery_component_animation">动画</string>

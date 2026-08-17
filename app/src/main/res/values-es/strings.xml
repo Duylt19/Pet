@@ -229,7 +229,7 @@
     <string name="battery_component_signal">señal</string>
     <string name="battery_component_data">Datos móviles</string>
     <string name="battery_component_date">Fecha y hora</string>
-    <string name="battery_component_ringer">timbre</string>
+    <string name="battery_component_ringer">Modo de sonido</string>
     <string name="battery_component_airplane">Avion</string>
     <string name="battery_component_hotspot">Punto de acceso</string>
     <string name="battery_component_animation">Animación</string>

@@ -229,7 +229,7 @@
     <string name="battery_component_signal">Signal</string>
     <string name="battery_component_data">Mobile Daten</string>
     <string name="battery_component_date">Datum und Uhrzeit</string>
-    <string name="battery_component_ringer">Klingelton</string>
+    <string name="battery_component_ringer">Tonmodus</string>
     <string name="battery_component_airplane">Flugzeug</string>
     <string name="battery_component_hotspot">Hotspot</string>
     <string name="battery_component_animation">Animation</string>

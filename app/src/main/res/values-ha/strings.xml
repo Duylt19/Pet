@@ -229,7 +229,7 @@
     <string name="battery_component_signal">Sigina</string>
     <string name="battery_component_data">Bayanan wayar hannu</string>
     <string name="battery_component_date">Kwanan wata &amp; lokaci</string>
-    <string name="battery_component_ringer">Ringer</string>
+    <string name="battery_component_ringer">Yanayin sauti</string>
     <string name="battery_component_airplane">Jirgin sama</string>
     <string name="battery_component_hotspot">Hotspot</string>
     <string name="battery_component_animation">Animation</string>

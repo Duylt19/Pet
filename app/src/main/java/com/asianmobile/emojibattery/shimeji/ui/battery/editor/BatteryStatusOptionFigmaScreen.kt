@@ -3,6 +3,7 @@ package com.asianmobile.emojibattery.shimeji.ui.battery.editor
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +48,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryConnectivityState
@@ -272,9 +274,15 @@ private fun StatusOptionTopBar(
             fontFamily = RobotoFontFamily,
             fontWeight = FontWeight.SemiBold,
             fontSize = dimensionResource(SspR.dimen._15ssp).value.sp,
-            lineHeight = dimensionResource(SspR.dimen._22ssp).value.sp
+            lineHeight = dimensionResource(SspR.dimen._22ssp).value.sp,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Clip,
+            modifier = Modifier
+                .weight(1f)
+                .basicMarquee(iterations = Int.MAX_VALUE)
         )
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._6sdp)))
         AppSwitch(
             checked = checked,
             onCheckedChange = { onCheckedChange(!checked) }
