@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.facebook.shimmer.ShimmerFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    app:shimmer_auto_start="true"
+    app:shimmer_base_color="@color/colors_E6E6E6"
+    app:shimmer_highlight_color="@color/colors_FEFEFE">
+
+    <com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView
+        android:id="@+id/unifiedAdView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/br_border_ads_view"
+            android:layoutDirection="ltr"
+            android:paddingBottom="@dimen/_6sdp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_label_ad_primary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.asianmobile.emojibattery.shimeji.ads.customview.BorderImageView
+                android:id="@+id/imgIcon"
+                android:layout_width="@dimen/_37sdp"
+                android:layout_height="@dimen/_37sdp"
+                android:layout_marginStart="@dimen/_15sdp"
+                android:background="@drawable/bg_in_loading_ads_content"
+                android:contentDescription="@string/app_name"
+                android:scaleType="fitXY"
+                android:visibility="visible"
+                app:cbivRadius="4dp"
+                app:layout_constraintBottom_toBottomOf="@+id/mediaView"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.45" />
+
+            <TextView
+                android:id="@+id/tvTitleAds"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_2sdp"
+                android:background="@drawable/bg_in_loading_ads_content"
+                android:ellipsize="end"
+                android:fontFamily="@font/inter_semi_bold"
+                android:gravity="center_vertical"
+                android:includeFontPadding="false"
+                android:singleLine="true"
+                android:textColor="@color/colors_000000"
+                android:textSize="@dimen/_12sdp"
+                app:layout_constraintEnd_toEndOf="@+id/mediaView"
+                app:layout_constraintStart_toStartOf="@+id/mediaView"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvMessageAds"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_1sdp"
+                android:background="@drawable/bg_in_loading_ads_content"
+                android:ellipsize="end"
+                android:fontFamily="@font/inter_regular"
+                android:includeFontPadding="false"
+                android:singleLine="true"
+                android:textColor="@color/colors_000000"
+                android:textSize="@dimen/_9sdp"
+                app:layout_constraintEnd_toEndOf="@+id/mediaView"
+                app:layout_constraintStart_toStartOf="@+id/mediaView"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleAds" />
+
+            <com.google.android.libraries.ads.mobile.sdk.nativead.MediaView
+                android:id="@+id/mediaView"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/_92sdp"
+                android:layout_marginStart="@dimen/_6sdp"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:layout_marginEnd="@dimen/_15sdp"
+                android:layout_marginBottom="18dp"
+                android:background="@drawable/bg_in_loading_ads_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/imgIcon"
+                app:layout_constraintTop_toBottomOf="@+id/tvMessageAds" />
+
+            <TextView
+                android:id="@+id/tvOpenAds"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/_37sdp"
+                android:layout_marginHorizontal="@dimen/_15sdp"
+                android:layout_marginTop="@dimen/_6sdp"
+                android:background="@drawable/bg_button_open_ads"
+                android:fontFamily="@font/inter_semi_bold"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/_30sdp"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_13sdp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mediaView" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView>
+</com.facebook.shimmer.ShimmerFrameLayout>

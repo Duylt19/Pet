@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="welcome_back">欢迎回来</string>
+    <string name="loading_ads_inter">加载广告中…</string>
+    <string name="rewarded_unavailable_continue">暂无可用广告。你仍然可以使用此项目。</string>
+</resources>

@@ -1,0 +1,693 @@
+package com.asianmobile.emojibattery.shimeji.ui.search
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.ui.shared.theme.RobotoFontFamily
+import com.asianmobile.emojibattery.shimeji.ads.config.BANNER_SEARCH_INLINE
+import com.asianmobile.emojibattery.shimeji.ads.config.SCREEN_SEARCH
+import com.asianmobile.emojibattery.shimeji.ads.ui.compose.BannerAd
+import com.asianmobile.emojibattery.shimeji.ads.ui.compose.NativeAdInternal
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.CATALOG_ITEM_PREVIEW_FRACTION
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentState
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentStatePanel
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.PetPremiumBadge
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogFlowHost
+import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogFlowViewModel
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFlowHost
+import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreFlowViewModel
+import com.asianmobile.emojibattery.shimeji.utils.ScreenName
+import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
+import com.intuit.sdp.R as SdpR
+import com.intuit.ssp.R as SspR
+
+private val SearchRobotoRegular = RobotoFontFamily
+private val SearchRobotoMedium = FontFamily(Font(R.font.roboto_medium))
+private val SearchRobotoSemiBold = FontFamily(Font(R.font.roboto_semibold))
+
+@Composable
+fun SearchScreen(
+    onCancel: () -> Unit,
+    onOpenTheme: (Int) -> Unit,
+    onPremium: () -> Unit,
+    onViewPet: () -> Unit,
+    onNavigateToGrantPermissions: () -> Unit,
+    viewModel: SearchViewModel = hiltViewModel(),
+    batteryCatalogViewModel: BatteryCatalogFlowViewModel = hiltViewModel(),
+    petStoreViewModel: PetStoreFlowViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val batteryCatalogState by batteryCatalogViewModel.catalogState.collectAsStateWithLifecycle()
+    val petStoreState by petStoreViewModel.storeState.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshEntitlement()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    TrackScreenView(ScreenName.SEARCH)
+    BatteryCatalogFlowHost(
+        state = batteryCatalogState,
+        viewModel = batteryCatalogViewModel,
+        onOpenTheme = onOpenTheme,
+        onOpenBackground = {},
+        onNavigateToPremium = onPremium
+    ) {
+        PetStoreFlowHost(
+            state = petStoreState,
+            viewModel = petStoreViewModel,
+            onPremium = onPremium,
+            onViewPet = onViewPet,
+            onNavigateToGrantPermissions = onNavigateToGrantPermissions
+        ) {
+            SearchContent(
+                uiState = uiState,
+                onQueryChanged = viewModel::updateQuery,
+                onCancel = onCancel,
+                onOpenTheme = { themeId ->
+                    batteryCatalogState.themes.firstOrNull { it.id == themeId }
+                        ?.let(batteryCatalogViewModel::requestTheme)
+                },
+                onToggleFavorite = viewModel::toggleFavorite,
+                onSelectTab = viewModel::selectTab,
+                onOpenPet = { petId ->
+                    petStoreState.pets.firstOrNull { it.id == petId }
+                        ?.let(petStoreViewModel::selectPet)
+                },
+                onRetry = viewModel::retry
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchContent(
+    uiState: SearchUiState,
+    onQueryChanged: (String) -> Unit,
+    onCancel: () -> Unit,
+    onOpenTheme: (Int) -> Unit,
+    onToggleFavorite: (Int) -> Unit,
+    onSelectTab: (SearchTab) -> Unit = {},
+    onOpenPet: (Int) -> Unit = {},
+    onRetry: () -> Unit = {}
+) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var searchFieldBounds by remember { mutableStateOf<Rect?>(null) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.colors_FFFFFF))
+            .dismissKeyboardOnTapOutside(searchFieldBounds) {
+                focusManager.clearFocus()
+                keyboardController?.hide()
+            }
+    ) {
+        Image(
+            painter = painterResource(R.drawable.img_home_wallpaper),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+        ) {
+            SearchHeader(
+                query = uiState.query,
+                onQueryChanged = onQueryChanged,
+                onCancel = onCancel,
+                onFieldBoundsChanged = { searchFieldBounds = it }
+            )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    bottom = dimensionResource(SdpR.dimen._177sdp)
+                )
+            ) {
+                item {
+                    SearchTabStrip(selected = uiState.selectedTab, onSelectTab = onSelectTab)
+                    Spacer(Modifier.height(dimensionResource(SdpR.dimen._9sdp)))
+                }
+                item {
+                    ResultsSection(
+                        uiState = uiState,
+                        onOpenTheme = onOpenTheme,
+                        onToggleFavorite = onToggleFavorite,
+                        onOpenPet = onOpenPet,
+                        onRetry = onRetry
+                    )
+                }
+            }
+        }
+
+        NativeAdInternal(
+            screenCode = SCREEN_SEARCH,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun SearchTabStrip(selected: SearchTab, onSelectTab: (SearchTab) -> Unit) {
+    Row(
+        modifier = Modifier
+            .padding(horizontal = dimensionResource(SdpR.dimen._12sdp))
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._43sdp))
+            .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._12sdp)))
+            .background(colorResource(R.color.colors_FFFFFF))
+            .padding(dimensionResource(SdpR.dimen._3sdp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        SearchTabItem(
+            labelRes = R.string.search_tab_pets,
+            iconRes = R.drawable.img_search_tab_pet,
+            isSelected = selected == SearchTab.PETS,
+            onClick = { onSelectTab(SearchTab.PETS) },
+            modifier = Modifier.weight(1f)
+        )
+        SearchTabItem(
+            labelRes = R.string.search_tab_battery,
+            iconRes = R.drawable.img_search_tab_battery,
+            isSelected = selected == SearchTab.BATTERY,
+            onClick = { onSelectTab(SearchTab.BATTERY) },
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun SearchTabItem(
+    labelRes: Int,
+    iconRes: Int,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+    Row(
+        modifier = modifier
+            .fillMaxHeight()
+            .clip(shape)
+            .background(
+                if (isSelected) {
+                    colorResource(R.color.colors_FFEBF1)
+                } else {
+                    androidx.compose.ui.graphics.Color.Transparent
+                }
+            )
+            .clickable(onClick = onClick),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
+        )
+        Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
+        Text(
+            text = stringResource(labelRes),
+            color = colorResource(
+                if (isSelected) R.color.colors_FB3675 else R.color.colors_6F7073
+            ),
+            fontFamily = SearchRobotoMedium,
+            fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+private fun SearchHeader(
+    query: String,
+    onQueryChanged: (String) -> Unit,
+    onCancel: () -> Unit,
+    onFieldBoundsChanged: (Rect) -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(SdpR.dimen._51sdp))
+            .padding(
+                horizontal = dimensionResource(SdpR.dimen._12sdp),
+                vertical = dimensionResource(SdpR.dimen._9sdp)
+            ),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .height(dimensionResource(SdpR.dimen._32sdp))
+                .shadow(
+                    elevation = dimensionResource(SdpR.dimen._6sdp),
+                    shape = CircleShape,
+                    clip = false
+                )
+                .clip(CircleShape)
+                .background(colorResource(R.color.colors_FFFFFF))
+                .padding(horizontal = dimensionResource(SdpR.dimen._9sdp))
+                .onGloballyPositioned { onFieldBoundsChanged(it.boundsInRoot()) },
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._6sdp)),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_home_search),
+                contentDescription = null,
+                tint = colorResource(R.color.colors_212327),
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._18sdp))
+            )
+            BasicTextField(
+                value = query,
+                onValueChange = onQueryChanged,
+                singleLine = true,
+                textStyle = androidx.compose.ui.text.TextStyle(
+                    color = colorResource(R.color.colors_212327),
+                    fontFamily = SearchRobotoRegular,
+                    fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                    lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp
+                ),
+                cursorBrush = SolidColor(colorResource(R.color.colors_FB3675)),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                decorationBox = { innerTextField ->
+                    Box(contentAlignment = Alignment.CenterStart) {
+                        if (query.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.search_battery_hint),
+                                color = colorResource(R.color.colors_C8C8C9),
+                                fontFamily = SearchRobotoRegular,
+                                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                                lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp
+                            )
+                        }
+                        innerTextField()
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            )
+            if (query.isNotEmpty()) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_search_clear),
+                    contentDescription = stringResource(R.string.search_clear_content_description),
+                    tint = colorResource(R.color.colors_6F7073),
+                    modifier = Modifier
+                        .size(dimensionResource(SdpR.dimen._12sdp))
+                        .clip(CircleShape)
+                        .clickable { onQueryChanged("") }
+                )
+            }
+        }
+        Text(
+            text = stringResource(R.string.search_cancel),
+            color = colorResource(R.color.colors_212327),
+            fontFamily = SearchRobotoSemiBold,
+            fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+            lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+            modifier = Modifier
+                .clip(RoundedCornerShape(dimensionResource(SdpR.dimen._4sdp)))
+                .clickable(onClick = onCancel)
+                .padding(vertical = dimensionResource(SdpR.dimen._4sdp))
+        )
+    }
+}
+
+private fun Modifier.dismissKeyboardOnTapOutside(
+    inputBounds: Rect?,
+    onDismissKeyboard: () -> Unit
+): Modifier = pointerInput(inputBounds, onDismissKeyboard) {
+    awaitEachGesture {
+        val down = awaitFirstDown(
+            requireUnconsumed = false,
+            pass = PointerEventPass.Initial
+        )
+        val pointerId = down.id
+        val startPosition = down.position
+        var isTap = true
+
+        while (true) {
+            val event = awaitPointerEvent(PointerEventPass.Initial)
+            val change = event.changes.firstOrNull { it.id == pointerId } ?: break
+            if ((change.position - startPosition).getDistance() > viewConfiguration.touchSlop) {
+                isTap = false
+            }
+            if (!change.pressed) {
+                if (shouldDismissSearchKeyboard(inputBounds, startPosition, isTap)) {
+                    onDismissKeyboard()
+                }
+                break
+            }
+        }
+    }
+}
+
+internal fun shouldDismissSearchKeyboard(
+    inputBounds: Rect?,
+    tapPosition: Offset,
+    isTap: Boolean
+): Boolean = isTap && inputBounds?.contains(tapPosition) == false
+
+@Composable
+private fun ResultsSection(
+    uiState: SearchUiState,
+    onOpenTheme: (Int) -> Unit,
+    onToggleFavorite: (Int) -> Unit,
+    onOpenPet: (Int) -> Unit,
+    onRetry: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = dimensionResource(SdpR.dimen._12sdp),
+                vertical = dimensionResource(SdpR.dimen._6sdp)
+            ),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+    ) {
+        SearchSectionTitle(text = stringResource(R.string.search_results))
+        BannerAd(
+            adPosition = BANNER_SEARCH_INLINE,
+            showContainerShadow = false
+        )
+        when {
+            uiState.isLoading && uiState.isEmpty -> {
+                AsyncContentStatePanel(state = AsyncContentState.LOADING)
+            }
+            uiState.hasError -> {
+                AsyncContentStatePanel(
+                    state = AsyncContentState.LOAD_FAILED,
+                    onRetry = onRetry
+                )
+            }
+            uiState.isEmpty -> {
+                AsyncContentStatePanel(
+                    state = AsyncContentState.EMPTY,
+                    emptyMessageRes = R.string.search_no_results
+                )
+            }
+            uiState.selectedTab == SearchTab.PETS -> {
+                uiState.pets.chunked(SEARCH_COLUMN_COUNT).forEach { rowPets ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            dimensionResource(SdpR.dimen._9sdp)
+                        )
+                    ) {
+                        rowPets.forEach { pet ->
+                            SearchPetCard(
+                                pet = pet,
+                                onOpen = { onOpenPet(pet.id) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        repeat(SEARCH_COLUMN_COUNT - rowPets.size) {
+                            Spacer(Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+
+            else -> {
+                uiState.recommendedThemes.chunked(SEARCH_COLUMN_COUNT).forEach { rowThemes ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(dimensionResource(SdpR.dimen._9sdp))
+                    ) {
+                        rowThemes.forEach { theme ->
+                            SearchThemeCard(
+                                theme = theme,
+                                onOpen = { onOpenTheme(theme.id) },
+                                onFavorite = { onToggleFavorite(theme.id) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        repeat(SEARCH_COLUMN_COUNT - rowThemes.size) {
+                            Spacer(Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Figma: 101x142 card, art on top of a 101x90 area, name and breed below. */
+@Composable
+private fun SearchPetCard(
+    pet: SearchPetUiState,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+    Column(
+        modifier = modifier
+            .aspectRatio(SEARCH_PET_CARD_ASPECT_RATIO)
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFFFFF))
+            .border(1.dp, colorResource(R.color.colors_DEDEDF), shape)
+            .clickable(onClick = onOpen)
+    ) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(SEARCH_PET_IMAGE_WEIGHT)
+        ) {
+            val unit = maxWidth / SEARCH_PET_CARD_WIDTH
+            pet.thumbnailPath?.let { path ->
+                AsyncImage(
+                    model = path,
+                    contentDescription = pet.name,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(unit * 64f)
+                )
+            }
+            if (pet.isLocked) {
+                PetPremiumBadge(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(unit * 8f)
+                        .size(unit * 24f)
+                )
+            }
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(SEARCH_PET_TEXT_WEIGHT),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = pet.name,
+                color = colorResource(R.color.colors_212327),
+                fontFamily = SearchRobotoMedium,
+                fontSize = dimensionResource(SspR.dimen._11ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._15ssp).value.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = stringResource(R.string.pet_room_breed, pet.breed),
+                color = colorResource(R.color.colors_FDA3C0),
+                fontFamily = SearchRobotoRegular,
+                fontSize = dimensionResource(SspR.dimen._8ssp).value.sp,
+                lineHeight = dimensionResource(SspR.dimen._12ssp).value.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchSectionTitle(text: String) {
+    Text(
+        text = text,
+        color = colorResource(R.color.colors_212327),
+        fontFamily = SearchRobotoMedium,
+        fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
+        lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+internal fun SearchThemeCard(
+    theme: SearchThemeUiState,
+    onOpen: () -> Unit,
+    onFavorite: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .clip(shape)
+            .background(colorResource(R.color.colors_FFFFFF))
+            .border(
+                dimensionResource(SdpR.dimen._1sdp),
+                colorResource(R.color.colors_DEDEDF),
+                shape
+            )
+            .clickable(onClick = onOpen)
+    ) {
+        AsyncImage(
+            model = theme.thumbnailPath ?: R.drawable.ic_home_battery,
+            contentDescription = theme.name,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxSize(CATALOG_ITEM_PREVIEW_FRACTION)
+        )
+        if (theme.isLocked) {
+            PetPremiumBadge(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(dimensionResource(SdpR.dimen._6sdp))
+                    .size(dimensionResource(SdpR.dimen._18sdp))
+            )
+        }
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(dimensionResource(SdpR.dimen._6sdp))
+                .size(dimensionResource(SdpR.dimen._18sdp))
+                .clip(CircleShape)
+                .background(
+                    colorResource(
+                        if (theme.isFavorite) R.color.colors_FFEBF1 else R.color.colors_F0F0F0
+                    )
+                )
+                .clickable(onClick = onFavorite),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(
+                    if (theme.isFavorite) {
+                        R.drawable.ic_favorite_filled
+                    } else {
+                        R.drawable.ic_favorite_outline
+                    }
+                ),
+                contentDescription = stringResource(R.string.discover_favorite_theme),
+                tint = colorResource(
+                    if (theme.isFavorite) R.color.colors_FB3675 else R.color.colors_C8C8C9
+                ),
+                modifier = Modifier.size(dimensionResource(SdpR.dimen._12sdp))
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+private fun SearchContentPreview() {
+    SearchContent(
+        uiState = SearchUiState(
+            isLoading = false,
+            recommendedThemes = List(6) { index ->
+                SearchThemeUiState(
+                    id = index,
+                    name = "Theme ${index + 1}",
+                    category = "Cute",
+                    thumbnailPath = null,
+                    isFavorite = index == 0,
+                    isLocked = index % 2 == 0
+                )
+            }
+        ),
+        onQueryChanged = {},
+        onCancel = {},
+        onOpenTheme = {},
+        onToggleFavorite = {}
+    )
+}
+
+private const val SEARCH_PET_CARD_ASPECT_RATIO = 101f / 142f
+private const val SEARCH_PET_IMAGE_WEIGHT = 90f / 142f
+private const val SEARCH_PET_TEXT_WEIGHT = 52f / 142f
+private const val SEARCH_PET_CARD_WIDTH = 101f
+private const val SEARCH_COLUMN_COUNT = 3

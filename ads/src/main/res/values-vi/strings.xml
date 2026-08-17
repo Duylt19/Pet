@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="welcome_back">Chào mừng trở lại</string>
+    <string name="loading_ads_inter">Đang tải quảng cáo…</string>
+    <string name="rewarded_unavailable_continue">Không có quảng cáo phù hợp. Bạn vẫn có thể sử dụng mục này.</string>
+</resources>

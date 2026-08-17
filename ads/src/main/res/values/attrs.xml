@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomBorderImageView">
+        <attr name="cbivRadius" format="dimension" />
+        <attr name="cbivLeftTopRadius" format="dimension" />
+        <attr name="cbivLeftBottomRadius" format="dimension" />
+        <attr name="cbivTopRightRadius" format="dimension" />
+        <attr name="cbivBottomRightRadius" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="CustomInclude">
+        <attr name="customLayout" format="reference"/>
+    </declare-styleable>
+</resources>

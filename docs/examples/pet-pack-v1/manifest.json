@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "sample.sunny-cat",
+  "version": 1,
+  "name": "Sunny Cat",
+  "author": "Emoji Battery",
+  "canvas": {
+    "width": 128,
+    "height": 128,
+    "defaultScale": 1.0
+  },
+  "anchor": {
+    "x": 0.5,
+    "y": 1.0
+  },
+  "interaction": {
+    "tapAction": "tapped"
+  },
+  "clips": [
+    {
+      "action": "idle",
+      "loop": true,
+      "frames": [
+        {
+          "file": "sprites/sunny-cat.png",
+          "rect": { "x": 0, "y": 0, "width": 1254, "height": 1254 },
+          "durationMs": 220
+        }
+      ]
+    },
+    {
+      "action": "walk",
+      "loop": true,
+      "frames": [
+        {
+          "file": "sprites/sunny-cat.png",
+          "rect": { "x": 0, "y": 0, "width": 1254, "height": 1254 },
+          "durationMs": 140,
+          "velocity": { "x": 42, "y": 0 }
+        }
+      ]
+    },
+    {
+      "action": "tapped",
+      "loop": false,
+      "nextAction": "idle",
+      "frames": [
+        {
+          "file": "sprites/sunny-cat.png",
+          "rect": { "x": 0, "y": 0, "width": 1254, "height": 1254 },
+          "durationMs": 240
+        }
+      ]
+    },
+    {
+      "action": "dragged",
+      "loop": true,
+      "frames": [
+        {
+          "file": "sprites/sunny-cat.png",
+          "rect": { "x": 0, "y": 0, "width": 1254, "height": 1254 },
+          "durationMs": 180
+        }
+      ]
+    },
+    {
+      "action": "flung",
+      "loop": true,
+      "frames": [
+        {
+          "file": "sprites/sunny-cat.png",
+          "rect": { "x": 0, "y": 0, "width": 1254, "height": 1254 },
+          "durationMs": 120
+        }
+      ]
+    }
+  ]
+}

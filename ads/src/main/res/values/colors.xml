@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFF</color>
+    <color name="gray_444444">#444444</color>
+    <color name="black_141414">#141414</color>
+    <color name="blue_007bfd">#0061FD</color>
+    <color name="red_FB2C36">#FB2C36</color>
+
+    <!-- Native ad surfaces (Figma 8047:2973) -->
+    <color name="colors_000000">#000000</color>
+    <color name="colors_FEFEFE">#FEFEFE</color>
+    <color name="colors_E6E6E6">#E6E6E6</color>
+    <color name="colors_FF5D7D">#FF5D7D</color>
+    <color name="colors_FB54BB">#FB54BB</color>
+
+    <!-- Legacy ad colors retained for non-native surfaces. -->
+    <color name="colors_FFFFFF">#FFFFFF</color>
+    <color name="colors_161718">#161718</color>
+    <color name="colors_222222">#222222</color>
+    <color name="colors_9B9C9E">#9B9C9E</color>
+    <color name="colors_1AFFFFFF">#1AFFFFFF</color>
+    <color name="colors_0D1DFF">#0D1DFF</color>
+    <color name="colors_5FADFF">#5FADFF</color>
+    <color name="colors_FF96B8">#FF96B8</color>
+    <color name="colors_FF417E">#FF417E</color>
+    <color name="colors_FF0044">#FF0044</color>
+</resources>

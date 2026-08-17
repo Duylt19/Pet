@@ -1,0 +1,171 @@
+# 07 — Ads and Premium Integration
+
+## Boundary
+
+Module `:ads` sở hữu SDK integration, remote config, ad loading và ad UI/utilities. Feature trong `:app` chỉ gọi public API của module; không khởi tạo SDK adapter trực tiếp.
+
+Mọi Android string resource chứa publisher/ad-unit ID dùng prefix
+`id_emoji_battery_`; không giữ identifier legacy `id_private_browser_` hoặc `id_pub`.
+Đổi tên resource không được tự ý đổi giá trị AdMob production/test bên trong.
+
+AdMob app ID và ad-unit ID là cấu hình public được lưu ở `ads/src/main/res/values/strings.xml`.
+Credential nhạy cảm như `app_password_mail` không được đặt trong resource/default XML; source chỉ
+giữ key rỗng và giá trị production phải được cấp từ Firebase Remote Config.
+
+## Base behavior còn giữ
+
+- Splash khởi tạo consent/config liên quan. Launcher interstitial chỉ được load/show khi cả
+  `show_inter_launcher` và master gate `is_show_inter_ads` đều bật, user còn ads và consent cho
+  phép request; tắt một trong hai Remote Config phải tiếp tục navigation ngay.
+- Language kiểm tra cả policy native chung và Remote Config của placement trước khi tạo ad slot.
+  `screen_language` và `screen_language_second` giữ trạng thái tải độc lập; placement bị tắt
+  collapse ngay từ composition đầu tiên, không render shimmer/loading scrim một frame rồi mới ẩn.
+- App Open Ad dùng Welcome Back pastel cover trong lúc chuyển sang quảng cáo. Đây là transient
+  Compose content thuộc `:ads`, không phải navigation destination; Premium/ad-suppression và
+  lifecycle show/dismiss hiện tại vẫn là boundary authoritative. Cover dùng chính wallpaper làm
+  window background để không lộ nền đen trước frame Compose đầu tiên; `AdOverlayState` chỉ bật từ
+  callback fullscreen thật của SDK. Trong lúc App Open Ad hiển thị, màn Activity vẫn được render
+  phía sau SDK window nhưng custom status-bar overlay vẫn bị tháo. Vì vậy khi ads đóng/fail có sẵn
+  frame của màn app để hiển thị ngay và không chớp đen.
+  Các lời gọi preload đồng thời được coalesce thành một request; khi đang load hoặc đã có ad hợp
+  lệ, `fetchAd()` không tạo request SDK thứ hai.
+- Intro page 1 mount/load native placement `SCREEN_INTRO` ngay khi vào pager; page 3 kích hoạt
+  `SCREEN_INTRO_SECOND` sau lần đầu pager settle tại page 3, còn page 2 không có ads. Sau khi
+  kích hoạt, placement được giữ trong composition suốt Intro lifecycle để swipe quay lại không
+  tạo khoảng trống hoặc request mới. Hai placement Intro không render shimmer: loading/fail
+  collapse hoàn toàn và native chỉ xuất hiện khi SDK đã trả về ad thật, nên offline không làm
+  nội dung bị đẩy/co lại.
+- Chuyển sang destination khác do user chủ động và Back/Close trên app bar đi qua
+  `navigateWithAd()` trước khi thay đổi back stack. SDK boundary vẫn quyết định có hiển thị thật
+  hay tiếp tục ngay dựa trên Premium, Remote Config, click/time cap,
+  trạng thái SDK và inventory. Placement analytics ổn định theo
+  `navigation_{forward|back}_{route}` và loại dynamic argument khỏi route.
+- Chuyển giữa bốn Home tab không request Interstitial để bottom navigation phản hồi ngay.
+- Không request interstitial cho Splash tự quyết định bước tiếp theo, callback hoàn tất quyền,
+  callback mua Premium thành công, dialog/bottom sheet hay tab nội bộ không tạo destination.
+  Những flow này tiếp tục trực tiếp để không chặn system/purchase completion. Launcher
+  interstitial của Splash vẫn giữ policy riêng hiện có.
+- MainActivity quản lý App Open Ads theo lifecycle.
+- Premium dùng BillingClient và `StartPremiumIndexes` để biết entry source.
+- Native Ad templates dùng light pink-white surface theo Figma node `8047:2973`; các
+  biến thể height/item/collapsible chia sẻ cùng background, border, text và CTA palette.
+  Footer của native collapsible luôn gắn vector attribution `ic_ads_logo_collapse` bằng
+  `drawableStart` trực tiếp trên headline ở cả trạng thái expanded và collapsed. Không đặt badge
+  thành view rời vì Mobile Ads có thể giữ khoảng trống nhưng không composite view đó; body vẫn
+  căn theo đầu headline để attribution không làm lệch cột nội dung.
+- Home shell trong `AppNavGraph` sở hữu đúng một `BannerAd` cho placement
+  `home_mode_bottom`, nằm dưới bottom navigation. Banner giữ nguyên composition/ViewModel
+  khi chuyển giữa Discover, Battery, Pet Store và Mine nên không request/reload lại theo tab.
+  Battery category rời Home holder để dùng native riêng ở đáy. Settings khi chạy trong shell
+  không render thêm native ad để tránh hai placement xếp chồng. Hero Battery Troll là asset
+  presentational; slot promo thấp hơn dùng banner SDK `discover_inline`.
+- Grant Permissions dùng native placement `screen_grant_permissions`, ghim cố định dưới danh
+  sách quyền chứ không cuộn theo. Mọi row rời sang màn hệ thống đều tắt `needShowOpenAds` trong
+  `openSettings()` — quay lại sau khi vừa cấp quyền mà ăn app-open ad là trả giá cho đúng hành
+  động mình vừa yêu cầu user làm. Đặt trong helper chứ không ở từng call site để không có row
+  nào lọt.
+- Accessibility disclosure trên mọi feature dùng placement `dialog_accessibility_disclosure`
+  với `AdType.HEIGHT_222`. Native nằm sát đáy sheet theo
+  Figma; nếu placement không load/đã Premium thì slot collapse. Sau consent, màn How to use không
+  thêm placement mới; CTA Settings dùng cùng launcher contract tắt App Open Ad trước khi rời app.
+- Overlay disclosure dùng placement `dialog_overlay_permission`, template `AdType.HEIGHT_222`.
+  Sheet dùng chung cho onboarding Permission, Grant
+  Permissions và switch Pet Store; native collapse theo policy chung khi không có ad/Premium.
+- Battery Troll Themes không render banner inline hoặc banner Home. Route dùng đúng một native
+  collapsible đáy `screen_battery_troll`/`COLLAPSE_SMALL`, với Remote Config và resource ad-unit
+  riêng; slot collapse hoàn toàn khi không đủ điều kiện hoặc load fail. Reward sheet tiếp tục dùng
+  native riêng `dialog_battery_troll_reward`/`HEIGHT_222` để số liệu không lẫn với grid themes.
+  Màn Customize không có native ad: giống Full/Component Editor, không chen quảng cáo vào
+  thao tác tinh chỉnh và không che preview/Apply. Nó dùng chung banner đáy
+  `battery_editor_bottom` do root destination sở hữu, đúng như Figma vẽ banner collapsed 50px
+  dưới nút Apply. Grid theme là root destination riêng và tự sở hữu native
+  `screen_battery_troll`; nó không mượn holder `home_mode_bottom` của bốn tab.
+- Search dùng native placement `screen_search` ở đáy màn hình và banner SDK
+  `search_inline` trong content theo Figma; cả hai vẫn tuân theo remote key, frequency/ad-free
+  policy và failure fallback chung của module ads.
+- Bottom sheet `Apps that hide icons` dùng native `dialog_apps_hidden`/`HEIGHT_222` nằm dưới
+  danh sách app. Slot collapse khi ads bị tắt, user ad-free hoặc load fail. Placement có screen
+  code, Remote Config key và resource ID riêng; trong v1 resource này tạm dùng chung AdMob unit
+  `9967933431` với nhóm reward/exit để sau này đổi ID mà không sửa UI.
+- Battery landing dùng native placement `screen_battery_catalog` với template `HEIGHT_150` sau
+  section đầu tiên. Category detail không còn banner inline ở đầu grid và cũng không dùng Home
+  banner. Root destination sở hữu holder native `screen_battery_category`/`HEIGHT_222` ở đáy;
+  resource ID riêng hiện tạm dùng chung AdMob unit với Battery catalog để có thể tách sau này.
+  Khi native không đủ điều kiện hoặc load fail, holder collapse hoàn toàn.
+- Customize Status Bar và từng child library đặt holder trong root destination tương ứng.
+  Overview, Emotion group/detail, library Battery/Emoji cùng mười editor option (bao gồm Animation)
+  dùng native `COLLAPSE_SMALL`; chỉ library Theme giữ banner `battery_editor_bottom`. Mỗi entry mới
+  có ViewModelStoreOwner riêng nên request ad mới, không rebind ad của màn trước; Apply vẫn reflow
+  ngay phía trên chiều cao collapsed/expanded thực tế.
+- Overview Customize Status Bar dùng placement riêng `screen_customize_status_bar`, Remote Config
+  `is_show_native_customize_status_bar` và ad-unit resource
+  `id_emoji_battery_native_customize_status_bar`. Các màn con option/emotion/detail dùng
+  `screen_battery_editor`; mỗi `NavBackStackEntry` có ad owner và `reloadKey` riêng để hủy ad cũ,
+  request native mới và không làm thay đổi chiều cao layout của destination phía sau.
+- Các banner inline `discover_inline` và `search_inline` có ViewModel key riêng để không dùng
+  chung ad object với banner shell. Holder căn giữa creative SDK 320×50,
+  dùng nền trắng và shimmer `#E6E6E6`; khi ads bị tắt/Premium/load fail thì slot collapse, không
+  thay thế bằng ảnh creative mẫu.
+
+## Battery style Rewarded unlock
+
+- Theme `FREE`, theme đã reward-unlock và toàn bộ theme của user Premium mở trực tiếp.
+- Chạm theme `PREMIUM` chưa mở sẽ hiện bottom sheet với preview, một CTA Rewarded full-width và
+  native `HEIGHT_222`; `Unlimited`/Premium entry tạm ẩn trong v1. Đóng bằng Back hoặc chạm scrim khi chưa loading.
+  Sheet dùng placement `dialog_battery_reward`, tách khỏi native `HEIGHT_150` của landing.
+- Rewarded chỉ được preload khi free user còn ít nhất một theme Premium chưa mở; Premium
+  không tạo ad request. `EARNED` persist đúng theme ID vào
+  `battery_status_reward_unlocked_theme_ids` rồi tự mở editor; `DISMISSED` giữ dialog và
+  yêu cầu xem hết video.
+- `UNAVAILABLE` tiếp tục/unlock theo fallback Rewarded chung hiện tại để lỗi SDK/inventory
+  không tạo dead-end.
+- Callback chỉ được consume khi đúng dialog đang pending và đang chờ reward; callback lặp
+  không thể unlock hoặc navigate lần hai.
+- Premium bypass Rewarded vẫn được giữ ở domain để tương thích entitlement, nhưng v1 không hiển
+  thị PRO trên app bar hoặc `Unlimited` trong reward sheet.
+
+## Rules
+
+- Rewarded trả ba trạng thái `EARNED`, `DISMISSED`, `UNAVAILABLE`: `EARNED` và
+  `UNAVAILABLE` tiếp tục flow, riêng `DISMISSED` dừng để không thưởng khi user đóng
+  quảng cáo sớm. `UNAVAILABLE` hiện toast giải thích không có quảng cáo nhưng item vẫn được dùng,
+  rồi mới callback về feature; mọi placement Rewarded nhận cùng behavior này.
+- Rewarded manager chỉ giữ tối đa một request đang load hoặc một ad đã sẵn sàng. Các màn có thể
+  cùng yêu cầu preload nhưng manager phải coalesce chúng; chỉ sau khi ad được consume/dismiss/fail
+  mới tạo đúng một request chuẩn bị cho lượt kế tiếp.
+- `AdOverlayState.isAdShowing` phản ánh lifecycle callback thật của App Open, Interstitial và
+  Rewarded, không tự reset theo timeout; `StatusBarAccessibilityService` dùng state này để tháo
+  custom status-bar overlay khỏi creative/nút Close. Trạng thái ẩn Activity được tách riêng:
+  Interstitial/Rewarded tiếp tục ẩn content phía sau, còn App Open giữ content render sẵn để việc
+  đóng SDK window không lộ một frame nền đen. Callback dismiss/fail gắn lại overlay theo config
+  hiện hành.
+- Tránh chồng App Open Ads với interstitial/premium/full-screen flow.
+- Không thêm placement mới nếu chưa có product/UX decision.
+- Battery Rewarded là unlock trigger đã được owner duyệt. Editor có bottom banner đã được
+  Figma chỉ định; reward sheet dùng `dialog_battery_reward`, còn discard-changes sheet dùng
+  `dialog_battery_discard`; cả hai có template native `HEIGHT_222` riêng.
+- Pet Store reward sheet dùng `dialog_pet_reward`; Food reward sheet dùng `dialog_food_reward`
+  và được tái sử dụng nguyên placement khi mở từ Pet Store hoặc nút `+` trong My Pet Room — đây
+  là cùng một dialog/intent nhận food nên không tạo ID hay Remote Config mới. Trong Pet Room,
+  `Get it free` dùng Rewarded chung và Premium bypass video; `DISMISSED` giữ sheet để retry,
+  `UNAVAILABLE` tiếp tục theo fallback chung, và callback/double tap chỉ cộng một portion. Khi
+  Rewarded fullscreen mở từ Pet Room, room không restore floating-pet overlay lên trên creative.
+  Favourite & Recent
+  dùng `screen_favourite_recent`. Mỗi placement có Remote Config và string ad-unit riêng dù
+  production ID hiện có thể đang dùng chung trong AdMob.
+- Banner wrapper phát trạng thái visibility cho placement inline cần layout động. Battery More
+  xóa toàn bộ grid item khi banner không đủ điều kiện hoặc load fail; không giữ placeholder 50dp.
+- Screen code phải là constant trong ads config, không hardcode rải rác.
+- Premium user/ad-free policy phải được kiểm tra ở integration boundary chung.
+- Khi xóa screen, xóa placement/config không còn consumer.
+
+## Khi thêm feature mới
+
+Document rõ:
+
+- Placement type và vị trí.
+- Trigger/frequency cap.
+- Loading/failed fallback.
+- Premium behavior.
+- Navigation continuation callback.
+- Analytics event liên quan.

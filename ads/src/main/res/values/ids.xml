@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- IDs used by NativeAdViewBuilder for programmatic native ad layouts -->
+    <item name="unifiedAdView" type="id" />
+    <item name="imgIcon" type="id" />
+    <item name="tvTitleAds" type="id" />
+    <item name="tvMessageAds" type="id" />
+    <item name="tvOpenAds" type="id" />
+    <item name="mediaView" type="id" />
+    <item name="flBlur" type="id" />
+    <item name="ivBlurContent" type="id" />
+
+    <!-- IDs used by old View-based code (banner/shimmer containers) -->
+
+    <item name="tag_native_ad" type="id"/>
+</resources>

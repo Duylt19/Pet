@@ -1,0 +1,570 @@
+<resources>
+    <string name="app_name" translatable="false">Emoji Battery: Cute Pet</string>
+    <string name="home_header_title" translatable="false">Emoji Battery</string>
+    <string name="splash_title" translatable="false">Emoji Battery</string>
+    <string name="adjust_token" translatable="false">9m8kbvwtwh6o</string>
+    <string name="facebook_app_id" translatable="false">993681063116351</string>
+    <string name="facebook_token" translatable="false">84b3bdf78933f7ab12dae551e57d915c</string>
+    <string name="premium_title" translatable="false">Premium</string>
+
+    <string name="language_en" translatable="false">English</string>
+    <string name="language_hi" translatable="false">हिन्दी</string>
+    <string name="language_es" translatable="false">Español</string>
+    <string name="language_pt" translatable="false">Português</string>
+    <string name="language_de" translatable="false">Deutsch</string>
+    <string name="language_ar" translatable="false">عربي</string>
+    <string name="language_vi" translatable="false">Tiếng Việt</string>
+    <string name="language_fr" translatable="false">Français</string>
+    <string name="language_ha" translatable="false">Hausa</string>
+    <string name="language_af" translatable="false">Afrikaans</string>
+    <string name="language_zh" translatable="false">中国</string>
+    <string name="language">Language</string>
+    <string name="back">Back</string>
+    <string name="exit_dialog_title">Do you want to exit the app?</string>
+    <string name="exit_dialog_tap_to_exit">Tap to exit</string>
+    <string name="cancel">Cancel</string>
+    <string name="rate_us">Rate us</string>
+    <string name="maybe_later">Maybe later</string>
+    <string name="next">Next</string>
+    <string name="confirm">Confirm</string>
+    <string name="this_action_can_contain_ads">This action can contain ads</string>
+    <string name="setting_up_your_app_experience_please_wait_a_moment">Setting up your app experience, please wait a moment...</string>
+    <string name="grant_permission_later">Skip for now</string>
+    <string name="permission_title">Let your pet roam anywhere</string>
+    <string name="permission_subtitle">Emoji Battery needs display access to stay visible above other apps. Notifications keep you in control while it is running.</string>
+    <string name="permission_continue">CONTINUE</string>
+    <string name="permission_overlay_title">Display over other apps</string>
+    <string name="permission_overlay_subtitle">Required to show and move your pet outside Emoji Battery.</string>
+    <string name="permission_notification_title">Pet running notification</string>
+    <string name="permission_notification_subtitle">Recommended so you can always see and stop the running pet.</string>
+    <string name="permission_allow">Allow</string>
+    <string name="permission_allowed">Allowed</string>
+
+    <!-- Rate App Dialog -->
+    <string name="rate_do_you_like">Do you like this app?</string>
+    <string name="rate_feedback_helps">Your feedback helps us improve!</string>
+    <string name="rate_best_rating">The best rating for us</string>
+    <string name="rate_thank_love">Thank you for the love!</string>
+    <string name="rate_made_our_day">Your rating made our day!</string>
+    <string name="rate_not_enjoying">Not enjoying the app?</string>
+    <string name="rate_share_wrong">Could you share what went wrong?</string>
+    <string name="rate_tell_us">Tell us the bothers you</string>
+    <string name="rate_thanks_feedback">Thanks for your feedback</string>
+    <string name="rate_send">Send</string>
+    <string name="rate_select_star">Please select a star rating first</string>
+    <string name="rate_select_feedback">Please select a feedback option first</string>
+    <string name="rate_enter_other_feedback">Please enter your feedback first</string>
+    <string name="rate_feedback_hint">Star your feedback here</string>
+    <string name="rate_feedback_battery_not_showing">Emoji Battery isn\'t showing</string>
+    <string name="rate_feedback_pet_not_showing">Pet isn\'t appearing on screen</string>
+    <string name="rate_feedback_pet_appearance">Battery theme isn\'t working as expected</string>
+    <string name="rate_feedback_disappears">Emoji Battery disappears too often</string>
+    <string name="rate_feedback_swipe">Swipe gestures aren\'t working</string>
+    <string name="rate_feedback_permissions">Too many permissions required</string>
+    <string name="rate_feedback_battery_drain">Battery drains too quickly</string>
+    <string name="rate_feedback_crashed">App crashed or froze</string>
+    <string name="rate_feedback_others">Others</string>
+    <string name="rate_star_content_description">Star %1$d</string>
+    <string name="premium_subtitle">Unlock the complete Emoji Battery experience</string>
+    <string name="premium_all_features">All Premium features</string>
+    <string name="premium_free">Free</string>
+    <string name="premium_pro">Pro</string>
+    <string name="premium_private_browsing">Cute screen pets</string>
+    <string name="premium_unlimited_downloads">More pets on screen</string>
+    <string name="premium_remove_ads">Remove ADS</string>
+    <string name="premium_faster_downloads">Special pet animations</string>
+    <string name="premium_secure_file_vault">Exclusive pet collection</string>
+    <string name="premium_weekly">Weekly</string>
+    <string name="premium_monthly">Monthly</string>
+    <string name="premium_desc_in_week">%s/ Week</string>
+    <string name="premium_yearly">Yearly</string>
+    <string name="premium_subscribe_now">Subscribe Now</string>
+    <string name="premium_privacy_policy">Privacy Policy</string>
+    <string name="premium_disclaimer">Your account will be charged within 24 hours before the current period ends. You can manage or cancel your subscription at any time in Google Play settings.</string>
+    <string name="premium_sale_79" translatable="false">Sale 79%</string>
+    <string name="please_check_your_internet_connection_and_try_again">Please check your internet connection and try again.</string>
+
+    <!-- Intro / Onboarding -->
+    <string name="intro_title_1">Show your battery level with playful emojis</string>
+    <string name="intro_title_2">Custom your status bar to match your style</string>
+    <string name="intro_title_3">Enjoy adorable pets moving across your screen</string>
+    <string name="start">Start</string>
+
+    <!-- Time Ago -->
+
+    <!-- Private Browser Strings -->
+    <string name="settings_privacy_policy_title">Privacy Policy</string>
+    <string name="settings_rate_us_title">Rate us</string>
+    <string name="search_clear_content_description">Clear search</string>
+
+    <!-- Settings Screen (M9) -->
+    <string name="settings_language_title">Language</string>
+
+    <!-- Clear History Dialog -->
+
+    <!-- Share / Feedback -->
+    <string name="share_app_subject">Try Emoji Battery</string>
+    <string name="share_app_message"><![CDATA[Bring playful battery themes and animated pets to your screen with Emoji Battery.\n\nDownload: %1$s]]></string>
+    <string name="share_app_chooser_title">Share via</string>
+    <string name="feedback_email_address" translatable="false">feedback@asianmobile.ltd</string>
+    <string name="feedback_subject_template">Emoji Battery feedback v%1$s (Android API %2$d, %3$s %4$s)</string>
+    <string name="feedback_body_template">\n\n---\nDevice info auto-filled. Please describe your issue or feedback above.</string>
+    <string name="feedback_chooser_title">Send feedback via</string>
+    <string name="feedback_no_email_app">No email app installed</string>
+
+    <string name="common_done">Done</string>
+    <string name="mine_my_pet">My Pet</string>
+    <string name="mine_favourite_recent">Favourite &amp; Recent</string>
+    <string name="favourite_recent_title">Favourite &amp; Recent</string>
+    <string name="favourite_recent_favourite_tab">Favourite</string>
+    <string name="favourite_recent_recent_tab">Recent</string>
+    <string name="favourite_recent_empty_title">No emoji battery yet!</string>
+    <string name="favourite_recent_empty_subtitle">Add a new one to start</string>
+    <string name="favourite_recent_back">Back</string>
+    <string name="mine_section_general">GENERAL</string>
+    <string name="mine_section_other">OTHER</string>
+    <string name="mine_apps_hidden_title">Apps that hide icons</string>
+    <string name="mine_apps_hidden_subtitle">Emoji Battery will be hidden when these apps are opened.</string>
+    <string name="mine_grant_permission">Grant Permissions</string>
+    <string name="mine_setting_pets">Setting Pets</string>
+    <string name="mine_apps_hidden_empty">No launchable apps found.</string>
+    <string name="mine_apps_hidden_load_failed">Unable to load installed apps.</string>
+    <string name="mine_apps_hidden_retry">Retry</string>
+    <string name="mine_apps_hidden_switch_content_description">Hide Emoji Battery in %1$s</string>
+    <string name="mine_share_app">Share this app</string>
+    <string name="mine_contact_us">Contact us</string>
+    <string name="mine_more_apps">More apps</string>
+    <string name="mine_current_version">Current Version: %1$s</string>
+
+    <!-- Pet overlay foreground service -->
+    <string name="pet_overlay_notification_channel_name">Screen pet</string>
+    <string name="pet_overlay_notification_channel_description">Keeps your animated pet visible on top of other apps</string>
+    <string name="pet_overlay_notification_title">Emoji Battery pet is on your screen</string>
+    <string name="pet_overlay_notification_text">Tap to open Emoji Battery or stop the pet from this notification.</string>
+    <string name="pet_overlay_notification_stop">Stop pet</string>
+    <string name="pet_overlay_content_description">Animated screen pet</string>
+    <string name="pet_speech_affection_1">Hi! I missed you 💕</string>
+    <string name="pet_speech_affection_2">Hehe, that tickles!</string>
+    <string name="pet_speech_affection_3">One more pat, please?</string>
+    <string name="pet_speech_affection_4">You found me!</string>
+    <string name="pet_speech_affection_5">I knew you would come back!</string>
+    <string name="pet_speech_affection_6">Your tap made my day!</string>
+    <string name="pet_speech_affection_7">Stay with me a little longer?</string>
+    <string name="pet_speech_affection_8">You are my favorite person!</string>
+    <string name="pet_speech_chatter_1">What adventure is next?</string>
+    <string name="pet_speech_chatter_2">I am keeping your screen safe.</string>
+    <string name="pet_speech_chatter_3">Snack break soon?</string>
+    <string name="pet_speech_chatter_4">I have a tiny secret…</string>
+    <string name="pet_speech_chatter_5">I wonder what is beyond this edge.</string>
+    <string name="pet_speech_chatter_6">This screen is enormous from down here!</string>
+    <string name="pet_speech_chatter_7">Should I climb up or take a nap?</string>
+    <string name="pet_speech_chatter_8">I am planning my next big move.</string>
+    <string name="pet_speech_social_hello_1">Hey, over here!</string>
+    <string name="pet_speech_social_hello_2">Hi, little buddy!</string>
+    <string name="pet_speech_social_hello_3">Want to play?</string>
+    <string name="pet_speech_social_hello_4">I found you!</string>
+    <string name="pet_speech_social_hello_5">What are you doing over there?</string>
+    <string name="pet_speech_social_hello_6">Come see this!</string>
+    <string name="pet_speech_social_hello_7">Race you to the other side!</string>
+    <string name="pet_speech_social_hello_8">It is good to see you again!</string>
+    <string name="pet_speech_social_reply_1">Coming!</string>
+    <string name="pet_speech_social_reply_2">Yes! Let\'s go!</string>
+    <string name="pet_speech_social_reply_3">Hi hi! 👋</string>
+    <string name="pet_speech_social_reply_4">Show me what you found!</string>
+    <string name="pet_speech_social_reply_5">Wait for me!</string>
+    <string name="pet_speech_social_reply_6">That sounds fun!</string>
+    <string name="pet_speech_social_reply_7">I was just looking for you!</string>
+    <string name="pet_speech_social_reply_8">Challenge accepted!</string>
+    <string name="pet_speech_skill_1">Watch this!</string>
+    <string name="pet_speech_skill_2">Secret technique!</string>
+    <string name="pet_speech_skill_3">Maximum tiny power!</string>
+    <string name="pet_speech_skill_4">Ta-da! ✨</string>
+    <string name="pet_speech_skill_5">Activating super mode!</string>
+    <string name="pet_speech_skill_6">Do not blink!</string>
+    <string name="pet_speech_skill_7">Here comes my finishing move!</string>
+    <string name="pet_speech_skill_8">Gravity cannot stop me!</string>
+    <string name="pet_speech_celebration_1">This show is just for you!</string>
+    <string name="pet_speech_celebration_2">Ready for something amazing?</string>
+    <string name="pet_speech_celebration_3">My best move—watch closely!</string>
+    <string name="pet_speech_celebration_4">Encore! Encore!</string>
+    <string name="pet_speech_celebration_5">Did you see that?</string>
+    <string name="pet_speech_celebration_6">A perfect performance!</string>
+    <string name="pet_speech_celebration_7">I have been practicing all day!</string>
+    <string name="pet_speech_celebration_8">The crowd goes wild!</string>
+
+    <!-- Privacy Policy -->
+    <string name="privacy_policy_default_url" translatable="false">https://sites.google.com/view/sanya-studio/home</string>
+    <string name="more_apps_developer_url" translatable="false">https://play.google.com/store/apps/developer?id=Sanya.Studio</string>
+
+    <!-- Set Default Browser (M10) -->
+
+    <!-- Polish (M12) -->
+
+    <!-- Browser Screen -->
+
+    <!-- File Manager - Media List -->
+
+    <!-- Folder Screen (Dark Theme Redesign) -->
+
+    <!-- Bookmark Screen (Dark Theme) -->
+    <!-- Video Download -->
+
+    <!-- Browser More Popup Menu -->
+
+    <!-- Find in Page -->
+
+    <!-- Media Viewer -->
+    <!-- Battery status capsule -->
+    <string name="battery_catalog_all">All</string>
+    <string name="battery_builtin_category">🌱 Starter</string>
+    <string name="battery_catalog_empty">No battery styles match this filter.</string>
+    <string name="data_empty_message">Nothing to show yet</string>
+    <string name="data_load_failed_title">Couldn’t load this content</string>
+    <string name="data_load_failed_message">Check your connection and try again.</string>
+    <string name="data_retry">Try again</string>
+    <string name="battery_favorite_action">Add or remove favorite</string>
+    <string name="battery_reward_unlock_title">Claim your reward now!</string>
+    <string name="battery_reward_watch">Get it free</string>
+    <string name="battery_reward_loading">Loading…</string>
+    <string name="battery_reward_get_premium">Unlimited</string>
+    <string name="battery_reward_not_earned">Please finish the rewarded video to unlock this style.</string>
+    <string name="battery_theme_unavailable_title">Style unavailable</string>
+    <string name="battery_theme_unavailable_message">This battery style is missing required assets. Refresh the catalog and try again.</string>
+    <string name="battery_asset_loading">Loading…</string>
+    <string name="battery_asset_download_failed_title">Couldn’t load this item</string>
+    <string name="battery_asset_download_failed_message">Connect to the internet and try again. Your previous pet or battery remains selected.</string>
+    <string name="battery_editor_title">Customize Status Bar</string>
+    <string name="battery_editor_pet_picker">Pet</string>
+    <string name="battery_editor_battery_picker">Battery</string>
+    <string name="battery_editor_emoji_picker">Emoji</string>
+    <string name="battery_editor_theme_picker">Theme</string>
+    <string name="battery_editor_theme_icon">🏞️</string>
+    <string name="battery_editor_template">Template</string>
+    <string name="battery_editor_background">Background</string>
+    <string name="battery_editor_color">Color</string>
+    <string name="battery_editor_percentage">Percentage</string>
+    <string name="battery_editor_size_label">Size</string>
+    <string name="battery_editor_layout_size">Layout &amp; Size</string>
+    <string name="battery_editor_emoji_battery">Emoji Battery</string>
+    <string name="battery_editor_height">Height</string>
+    <string name="battery_editor_left_margin">Left Margin</string>
+    <string name="battery_editor_right_margin">Right Margin</string>
+    <string name="battery_editor_customize_icon">Customize icon</string>
+    <string name="battery_editor_dp_value">%1$ddp</string>
+    <string name="battery_color_picker_title">Select color</string>
+    <string name="battery_color_picker_close">Close color picker</string>
+    <string name="battery_color_picker_opacity">OPACITY</string>
+    <string name="battery_color_picker_rgb">RGB</string>
+    <string name="battery_color_picker_percentage">%1$d%%</string>
+    <string name="battery_component_date_short">Date</string>
+    <string name="battery_component_emotion">Emotion</string>
+    <string name="battery_component_data_short">Data</string>
+    <string name="battery_component_charge_short">Charge</string>
+    <string name="battery_component_clock">Clock</string>
+    <string name="battery_component_select">Select</string>
+    <string name="battery_component_selected">Selected</string>
+    <string name="battery_component_unlock">Unlock</string>
+    <string name="battery_editor_overview_hint">Mix a pet and battery style, customize the remaining components, then apply all changes together.</string>
+    <string name="battery_editor_quick_controls">Quick controls</string>
+    <string name="battery_editor_customize">Customize</string>
+    <string name="battery_editor_size_title">Size</string>
+    <string name="battery_editor_appearance_title">Appearance</string>
+    <string name="battery_editor_emoji_title">Emoji &amp; emotion</string>
+    <string name="battery_editor_battery_title">Battery icon</string>
+    <string name="battery_editor_size_hint">Fine-tune the status bar and decorative asset sizes while watching the preview.</string>
+    <string name="battery_editor_appearance_hint">Choose the bar background and a readable color for text and icons.</string>
+    <string name="battery_editor_emoji_hint">Add or remove the decorative emotion shown beside the selected theme emoji.</string>
+    <string name="battery_editor_battery_hint">Control the battery percentage and icon size.</string>
+    <string name="battery_editor_size_summary">Bar %1$d · Emoji %2$d · Battery %3$d dp</string>
+    <string name="battery_editor_component_on">Visible</string>
+    <string name="battery_editor_component_off">Hidden</string>
+    <string name="battery_editor_percentage_on">Percentage visible</string>
+    <string name="battery_editor_percentage_off">Percentage hidden</string>
+    <string name="battery_editor_more_components">More status components</string>
+    <string name="battery_editor_more_components_hint">Customize every status component. The overlay updates each icon from the current device state.</string>
+    <string name="battery_discard_title">Discard Changes?</string>
+    <string name="battery_discard_message">Your changes haven’t been saved. Are you sure you want to exit?</string>
+    <string name="battery_discard_cancel">Cancel</string>
+    <string name="battery_discard_exit">Exit</string>
+    <string name="battery_component_wifi">Wi-Fi</string>
+    <string name="battery_component_signal">Signal</string>
+    <string name="battery_component_data">Mobile data</string>
+    <string name="battery_component_date">Date &amp; time</string>
+    <string name="battery_component_ringer">Ringer</string>
+    <string name="battery_component_airplane">Airplane</string>
+    <string name="battery_component_hotspot">Hotspot</string>
+    <string name="battery_component_animation">Animation</string>
+    <string name="battery_component_charge">Charging</string>
+    <string name="battery_component_customize">Customize</string>
+    <string name="battery_show_time">Show time</string>
+    <string name="battery_show_percentage">Show battery percentage</string>
+    <string name="battery_bar_height">Bar height</string>
+    <string name="battery_emoji_size">Emoji size</string>
+    <string name="battery_left_padding">Left padding</string>
+    <string name="battery_right_padding">Right padding</string>
+    <string name="battery_icon_size">Battery icon size</string>
+    <string name="battery_percentage_size">Percentage size</string>
+    <string name="battery_percentage_color">Percentage color</string>
+    <string name="battery_background_color">Bar color</string>
+    <string name="battery_background_style">Background style</string>
+    <string name="battery_background_solid">Solid</string>
+    <string name="battery_foreground_color">Text and icon color</string>
+    <string name="battery_show_emotion">Show decorative emotion</string>
+    <string name="battery_status_component_hint">The preview keeps this component visible while you edit it. The applied overlay follows the actual device state.</string>
+    <string name="battery_status_icon_style">Icon style</string>
+    <string name="battery_status_icon_size">Icon size</string>
+    <string name="battery_status_icon_color">Icon color</string>
+    <string name="battery_status_uses_device_state">The applied overlay uses the actual device state; current bar height is %1$d dp.</string>
+    <string name="battery_animation_hint">Choose one of the bundled animations and adjust how it appears in the status capsule.</string>
+    <string name="battery_animation_show">Show animation</string>
+    <string name="battery_animation_size">Animation size</string>
+    <string name="battery_animation_style">Animation style</string>
+    <string name="battery_data_hint">Choose the mobile generation label and customize its size and color.</string>
+    <string name="battery_data_type">Mobile data label</string>
+    <string name="battery_charge_hint">The preview simulates charging while you choose an icon. The applied overlay shows it only while the device is charging.</string>
+    <string name="battery_charge_style">Charging icon</string>
+    <string name="battery_charge_style_figma">Charge Style</string>
+    <string name="battery_date_hint">Control date visibility and format. Typeface, size and color apply to both time and date.</string>
+    <string name="battery_date_show">Show date</string>
+    <string name="battery_date_size">Time and date size</string>
+    <string name="battery_date_color">Time and date color</string>
+    <string name="battery_date_format">Date Format</string>
+    <string name="battery_date_style">Date Style</string>
+    <string name="battery_date_font">Time and date font</string>
+    <string name="battery_emotion_style">Emotion style</string>
+    <string name="battery_slider_value">%1$s · %2$d dp</string>
+    <string name="battery_apply">Apply</string>
+    <string name="battery_disable">Turn off battery bar</string>
+    <string name="battery_troll_title">Battery Troll Themes</string>
+    <string name="battery_troll_customize_title">Customize</string>
+    <string name="battery_troll_mode">Mode</string>
+    <string name="battery_troll_mode_fake">Fake Battery</string>
+    <string name="battery_troll_mode_real">Real Battery</string>
+    <string name="battery_troll_mode_hint">Display a fake battery percentage to prank others.</string>
+    <string name="battery_troll_edit">Edit</string>
+    <string name="battery_troll_percent_value">%1$d%%</string>
+    <string name="battery_troll_percentage">Percentage</string>
+    <string name="battery_troll_size">Size</string>
+    <string name="battery_troll_emoji">Emoji</string>
+    <string name="battery_troll_battery">Battery</string>
+    <string name="battery_troll_custom">Custom</string>
+    <string name="battery_troll_custom_hint">Use only one funny message.</string>
+    <string name="battery_troll_random">Random</string>
+    <string name="battery_troll_edit_title">Edit Battery</string>
+    <string name="battery_troll_edit_confirm">Save</string>
+    <string name="battery_troll_edit_percent_error">Maximum value is %1$d.</string>
+    <string name="battery_troll_theme_locked">Premium theme</string>
+    <string name="battery_preview_time" translatable="false">09:41</string>
+    <string name="battery_accessibility_required">Accessibility access is required to keep this bar visible above other apps.</string>
+    <string name="battery_accessibility_ready">Accessibility access is on. Changes will apply to the overlay.</string>
+    <!-- Android drops an accessibility service from the enabled list whenever the package is
+         force-stopped, so the bar can vanish without the user having touched anything. -->
+    <string name="battery_accessibility_recovery_app_closed">Your battery bar turned off. Android removes Accessibility access when the app is closed from recents. Lock the app in recents to stop this happening again.</string>
+    <string name="battery_accessibility_recovery_device_killed">Your battery bar turned off. This device stopped the app, and Android removed its Accessibility access. Allow autostart and remove battery limits to stop this happening again.</string>
+    <string name="battery_accessibility_recovery_unknown">Your battery bar turned off because its Accessibility access is no longer granted.</string>
+    <string name="battery_accessibility_recovery_action">Turn back on</string>
+    <string name="battery_accessibility_recovery_dismiss">Dismiss</string>
+    <string name="battery_overlay_notification_title">Emoji Battery is on</string>
+    <string name="battery_overlay_notification_text">Your battery bar stays on screen. Tap to change or turn it off.</string>
+    <string name="battery_overlay_notification_channel_name">Battery bar</string>
+    <string name="battery_overlay_notification_channel_description">Shown only while your battery bar is turned on.</string>
+    <string name="battery_accessibility_service_label">Emoji Battery: Cute Pet — Status bar</string>
+    <string name="battery_accessibility_service_description">Displays the selected battery capsule and checks the foreground app package locally to apply your hidden-app list. It does not read screen content or control other apps.</string>
+    <!-- Shown next to the on/off state in the system Accessibility list, so it has to say why the service must be turned on and what it never touches. -->
+    <string name="battery_accessibility_service_summary">Turn this on so Emoji Battery can draw your chosen battery bar over the status bar. It only checks which app is in the foreground, to hide the bar in the apps you pick. It does not read screen content, and no personal data is collected or shared.</string>
+    <string name="battery_overlay_description">Battery status, %1$d percent</string>
+    <string name="battery_overlay_percentage">%1$d%%</string>
+    <string name="battery_overlay_unavailable_short">--</string>
+    <string name="battery_overlay_unavailable">Battery information unavailable</string>
+    <string name="battery_overlay_detailed_description">Battery %1$d percent, %2$s</string>
+    <string name="battery_overlay_state_charging">charging</string>
+    <string name="battery_overlay_state_full">fully charged</string>
+    <string name="battery_overlay_state_not_charging">plugged in, not charging</string>
+    <string name="battery_overlay_state_discharging">discharging</string>
+    <string name="battery_overlay_state_unknown">charge state unknown</string>
+    <string name="battery_overlay_power_ac">AC power</string>
+    <string name="battery_overlay_power_usb">USB power</string>
+    <string name="battery_overlay_power_wireless">wireless charging</string>
+    <string name="battery_overlay_power_dock">dock power</string>
+    <string name="battery_overlay_wifi_connected">Wi-Fi connected</string>
+    <string name="battery_overlay_wifi_limited">Wi-Fi has limited connectivity</string>
+    <string name="battery_overlay_wifi_disabled">Wi-Fi off</string>
+    <string name="battery_overlay_wifi_disconnected">Wi-Fi disconnected</string>
+    <string name="battery_overlay_cellular_connected">mobile data connected</string>
+    <string name="battery_overlay_cellular_limited">mobile data has limited connectivity</string>
+    <string name="battery_overlay_airplane_enabled">airplane mode on</string>
+    <string name="battery_overlay_ringer_vibrate">vibrate mode</string>
+    <string name="battery_overlay_ringer_silent">silent mode</string>
+    <string name="battery_overlay_hotspot_enabled">hotspot on</string>
+
+    <!-- Emoji Battery Discover -->
+    <string name="discover_brand_name" translatable="false">Emoji Battery</string>
+    <string name="discover_search">Search pets and battery themes</string>
+    <string name="discover_pro" translatable="false">PRO</string>
+    <string name="discover_battery_enable_prompt">Turn on Emoji Battery to get started</string>
+    <string name="discover_battery_enabled">Emoji Battery is active</string>
+    <string name="discover_customize_status_bar">Customize Status Bar</string>
+    <string name="search_battery_hint">Search battery</string>
+    <string name="search_cancel">Cancel</string>
+    <string name="search_no_results">No matching battery themes</string>
+    <string name="discover_battery_troll_banner" translatable="false">Battery Troll – Fake Battery</string>
+    <string name="discover_shimeji_pets">🐰 Shimeji Pets</string>
+    <string name="discover_pet_category">Breed: %1$s</string>
+    <string name="discover_trending_battery_themes">🔥 Trending Emoji Battery</string>
+    <string name="discover_status_bar_themes">Status bar themes</string>
+    <string name="discover_emoji_title">Emoji</string>
+    <string name="discover_battery_title">DIY Battery</string>
+    <string name="discover_more">More</string>
+    <string name="discover_favorite_theme">Favorite battery theme</string>
+    <string name="discover_tab_discover">Discover</string>
+    <string name="discover_tab_battery">Battery</string>
+    <string name="discover_tab_pet_store">Shimeji Pets</string>
+    <string name="pet_store_enable_pet">Turn on to add a pet to your screen</string>
+    <string name="pet_store_banner_placeholder">Open Pet Home</string>
+    <string name="pet_store_tab_pets">Shimeji Pets</string>
+    <string name="pet_store_tab_food">Food</string>
+    <string name="pet_store_breed">Breed: %1$s</string>
+    <string name="pet_store_unlock_title">Claim your reward now!</string>
+    <string name="pet_store_unlimited">Unlimited</string>
+    <string name="pet_store_get_free">Get it free</string>
+    <string name="pet_store_downloading">Downloading…</string>
+    <string name="pet_store_new_pet">NEW PET</string>
+    <string name="pet_store_new_food">NEW FOOD</string>
+    <string name="pet_store_tap_continue">Tap to continue</string>
+    <string name="pet_store_name_title">Your pet\'s name</string>
+    <string name="pet_store_name_hint">Pet name</string>
+    <string name="pet_store_save">Save</string>
+    <string name="pet_store_joined">%1$s has joined your home! 💕</string>
+    <string name="pet_store_view">View</string>
+    <string name="pet_store_food_received">%1$s added to your food</string>
+    <string name="pet_store_food_reward_title">Claim your reward now!</string>
+    <string name="pet_store_food_quantity">x%1$d</string>
+    <string name="pet_store_no_pets_title">No pets yet</string>
+    <string name="pet_store_no_pets_body">Choose and add a pet before turning on Pet on Screen.</string>
+    <string name="pet_store_no_active_pets_title">No active pets</string>
+    <string name="pet_store_no_active_pets_body">All your pets are inactive. Open My Pet Room and turn on at least one pet first.</string>
+    <string name="pet_store_browse_pets">Browse pets</string>
+    <string name="pet_store_open_my_pet">Open My Pet</string>
+    <string name="pet_store_dialog_not_now">Not now</string>
+    <string name="discover_tab_mine">Mine</string>
+    <string name="pet_room_title">My Pet Room</string>
+    <string name="pet_room_tab_pet">My Pet</string>
+    <string name="pet_room_tab_food">Food</string>
+    <string name="pet_room_tab_room">Room</string>
+    <string name="pet_room_back">Back</string>
+    <string name="pet_room_music_on">Turn music off</string>
+    <string name="pet_room_music_off">Turn music on</string>
+    <string name="pet_room_collapse_sheet">Hide panel</string>
+    <string name="pet_room_expand_sheet">Show panel</string>
+    <string name="pet_room_open_store">Shimeji Pets</string>
+    <string name="pet_room_add_pet">Add pet</string>
+    <string name="pet_family_full_title">Your pet family is full</string>
+    <string name="pet_family_full_message">You can keep up to %1$d pets. Remove one from My Pet Room before adding a new pet.</string>
+    <string name="pet_family_full_not_now">Not now</string>
+    <string name="pet_family_full_manage">Manage pets</string>
+    <string name="pet_family_full_confirm">Got it</string>
+    <string name="pet_room_rooms_unavailable">Rooms are unavailable right now</string>
+    <string name="pet_room_breed">Breed: %1$s</string>
+    <string name="pet_room_active">Active</string>
+    <string name="pet_room_inactive">Inactive</string>
+    <string name="pet_room_field_name">Pet Name:</string>
+    <string name="pet_room_field_breed">Breed:</string>
+    <string name="pet_room_field_adopted">Adopted On:</string>
+    <string name="pet_room_energy">Energy</string>
+    <string name="pet_room_energy_max">Max</string>
+    <string name="pet_room_energy_value">%1$d/%2$d</string>
+    <string name="pet_room_add_food">Get more food</string>
+    <string name="pet_room_food_portions">x%1$d</string>
+    <string name="pet_room_remove_pet">Remove pet</string>
+    <string name="pet_room_remove_title">Delete Pet?</string>
+    <string name="pet_room_remove_message">Are you sure you want to remove %1$s from your pet list?</string>
+    <string name="pet_room_remove_confirm">Delete</string>
+    <string name="pet_room_remove_cancel">Cancel</string>
+    <string name="pet_room_minimum_active_title">Keep one pet active</string>
+    <string name="pet_room_minimum_active_message">Pet on Screen needs at least one active pet. Turn on another pet before making %1$s inactive.</string>
+    <string name="pet_room_minimum_active_confirm">Got it</string>
+    <string name="pet_room_remove_failed">Could not remove this pet. Please try again.</string>
+    <string name="pet_room_select_pet_first">Select a pet first.</string>
+    <string name="pet_room_out_of_food">Out of food. Please add more food.</string>
+    <string name="pet_room_food_reward_not_earned">Watch the full video to receive this food.</string>
+    <string name="pet_room_food_reward_failed">Could not add this food. Please try again.</string>
+    <string name="pet_room_already_full">This pet already has maximum energy.</string>
+    <string name="pet_room_no_free_slot">Up to 12 pets can be assigned to Pet on Screen. Remove a pet before activating another one.</string>
+    <string name="pet_room_settings">Pet settings</string>
+    <string name="pet_room_settings_title">Setting Pet</string>
+    <string name="pet_room_settings_speed">Speed: </string>
+    <string name="pet_room_settings_size">Size: </string>
+    <string name="pet_room_settings_value">(%1$s)</string>
+    <string name="pet_room_settings_reset">Reset</string>
+    <string name="pet_room_settings_cancel">Cancel</string>
+    <string name="pet_room_settings_save">Save</string>
+    <string name="pet_room_download">Download this room</string>
+    <string name="pet_room_download_failed">Could not download this room. Check your connection.</string>
+    <string name="search_tab_pets">Shimeji Pets</string>
+    <string name="search_tab_battery">Battery</string>
+    <string name="search_results">Result search</string>
+    <string name="accessibility_disclosure_title">Accessibility Service Access</string>
+    <string name="accessibility_disclosure_intro">This app needs Accessibility Service permission to enable your custom battery and status bar features.</string>
+    <string name="accessibility_disclosure_use_heading">The Accessibility Service is used to:</string>
+    <string name="accessibility_disclosure_use_items">• Identify and align system UI elements (like the status bar)\n• Properly display custom battery icons and visual overlays on your screen\n• Check the foreground app package locally to hide the overlay in apps you select</string>
+    <string name="accessibility_disclosure_visual_only">This permission is strictly used for visual customization only.</string>
+    <string name="accessibility_disclosure_no_access_heading">We DO NOT:</string>
+    <string name="accessibility_disclosure_no_access_items">• Collect any personal or sensitive data\n• Read your messages, notifications, or passwords\n• Record, retain, or share your app usage history</string>
+    <string name="accessibility_disclosure_conclusion">This feature requires your explicit consent and can be easily disabled anytime in your device settings.</string>
+    <string name="accessibility_disclosure_consent">I have read and agree to the terms of service</string>
+    <string name="accessibility_disclosure_allow">Allow</string>
+    <string name="accessibility_disclosure_close">Close</string>
+    <string name="accessibility_disclosure_consent_required_toast">Please agree to the terms of service before continuing.</string>
+    <string name="accessibility_how_to_use_title">How to use</string>
+    <string name="accessibility_how_to_step_1_prefix">Tap on\u0020</string>
+    <string name="accessibility_how_to_step_1_accent">"Installed Apps"</string>
+    <string name="accessibility_how_to_step_1_suffix">\u0020in the Accessibility settings</string>
+    <string name="accessibility_how_to_step_2_prefix">Find and select\u0020</string>
+    <string name="accessibility_how_to_step_2_accent">"Emoji Battery"</string>
+    <string name="accessibility_how_to_step_3">Toggle the switch to turn it on</string>
+    <string name="accessibility_how_to_step_4_prefix">Tap\u0020</string>
+    <string name="accessibility_how_to_step_4_accent">"Allow"</string>
+    <string name="accessibility_how_to_step_4_suffix">\u0020to confirm</string>
+    <string name="accessibility_how_to_step_image_description">Accessibility settings illustration for step %1$d</string>
+    <string name="accessibility_how_to_go_to_settings">Go to settings</string>
+    <string name="overlay_permission_disclosure_title">Allow Pets to Show on Screen</string>
+    <string name="overlay_permission_disclosure_body">To keep your pets visible while you are using other applications, please grant the \"Display over other apps\" permission.</string>
+    <string name="overlay_permission_disclosure_allow">Allow Access</string>
+    <string name="overlay_permission_disclosure_not_now">Not now</string>
+    <string name="grant_permissions_nav">Grant Permissions</string>
+    <string name="grant_permissions_section_necessary">Necessary Permissions</string>
+    <string name="grant_permissions_section_stability">Enhanced Stability Permissions</string>
+    <string name="grant_permissions_section_battery_emoji">Battery Emoji</string>
+    <string name="grant_permissions_section_pet_on_screen">Pet on Screen</string>
+    <string name="grant_permissions_accessibility_title">Turn on Accessibility Mode</string>
+    <string name="grant_permissions_accessibility_body">Lets Emoji Battery identify system UI elements so your custom battery and status bar are positioned correctly.</string>
+    <string name="grant_permissions_overlay_required_title">Allow Pets to Show on Screen</string>
+    <string name="grant_permissions_overlay_required_body">Allows active pets to stay visible above other apps while Pet on Screen is on.</string>
+    <string name="grant_permissions_go_to_settings">Go to Settings</string>
+    <string name="grant_permissions_required">Required</string>
+    <string name="grant_permissions_allowed">Allowed</string>
+    <string name="grant_permissions_battery_title">Ignore Battery Optimization</string>
+    <string name="grant_permissions_battery_body">Reduces the chance that Android stops Pet on Screen while it is running in the background.</string>
+    <string name="grant_permissions_notification_title">Notification access</string>
+    <string name="grant_permissions_notification_body">Allows Pet on Screen to show its ongoing service notification and pet reminders.</string>
+    <string name="grant_permissions_autostart_title">Auto Start</string>
+    <string name="grant_permissions_autostart_body">Allows supported devices to start Emoji Battery automatically instead of blocking it in the background.</string>
+    <string name="grant_permissions_pet_start_failed">Unable to start your pet. Please try again.</string>
+    <string name="battery_category_back">Back</string>
+    <string name="battery_emotion_style_title">Emotion Style</string>
+    <string name="battery_emotion_group_classic">Classic</string>
+    <string name="battery_emotion_group_emoji">Emoji</string>
+    <string name="battery_emotion_group_cony">Cony</string>
+    <string name="battery_emotion_group_kiiroitori">Kiiroitori</string>
+    <string name="battery_emotion_group_molang">Molang</string>
+    <string name="battery_emotion_group_mochi">Mochi</string>
+    <string name="battery_emotion_group_tobi">Tobi</string>
+    <string name="battery_emotion_group_keroppi">Keroppi</string>
+    <string name="battery_emotion_group_pochacco">Pochacco</string>
+    <string name="battery_troll_empty">No troll themes available right now.</string>
+    <string name="battery_troll_error_offline">Couldn’t load troll themes. Check your connection and try again.</string>
+    <string name="battery_troll_error_invalid">Troll themes couldn’t be read. Please try again later.</string>
+    <string name="battery_troll_unpublished">Troll themes are coming soon.</string>
+    <string name="battery_troll_retry">Try again</string>
+    <string name="battery_apply_success">Applied to your status bar</string>
+</resources>

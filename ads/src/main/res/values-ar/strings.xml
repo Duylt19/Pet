@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="welcome_back">مرحبًا بعودتك</string>
+    <string name="loading_ads_inter">تحميل الإعلانات…</string>
+    <string name="rewarded_unavailable_continue">الإعلان غير متاح. لا يزال بإمكانك استخدام هذا العنصر.</string>
+</resources>

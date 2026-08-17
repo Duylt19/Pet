@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>github_token_pet_server</key>
+        <value></value>
+    </entry>
+    <entry>
+        <key>app_password_mail</key>
+        <value></value>
+    </entry>
+    <entry>
+        <key>rc_premium_onboarding_first</key>
+        <value>false</value>
+    </entry>
+    <entry>
+        <key>rc_premium_splash_return</key>
+        <value>false</value>
+    </entry>
+    <entry>
+        <key>distance_time_show_same_ads</key>
+        <value>30</value>
+    </entry>
+
+    <entry>
+        <key>distance_time_show_other_ads</key>
+        <value>20</value>
+    </entry>
+
+    <entry>
+        <key>is_show_banner_ads</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_rewarded_ads</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_open_ads</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_inter_ads</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>show_inter_launcher</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>time_click_action</key>
+        <value>3</value>
+    </entry>
+    <entry>
+        <key>rule_show_inter</key>
+        <value>3</value>
+    </entry>
+    <entry>
+        <key>is_show_native</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>number_click_ads_to_limit</key>
+        <value>5</value>
+    </entry>
+
+    <!-- Native ads per screen -->
+    <entry>
+        <key>is_show_native_intro</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_intro_second</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_intro_full</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_exit_dialog</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_language</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>is_show_native_language_second</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_permission</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_grant_permissions</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_accessibility_disclosure</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_overlay_permission</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_search</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_favourite_recent</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_battery_catalog</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_battery_category</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_battery_troll</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_customize_status_bar</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_battery_editor</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_battery_reward</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_battery_discard</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_pet_reward</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_food_reward</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_battery_troll_reward</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>is_show_native_apps_hidden</key>
+        <value>true</value>
+    </entry>
+
+</defaultsMap>

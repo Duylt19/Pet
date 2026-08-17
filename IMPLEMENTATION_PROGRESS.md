@@ -1,0 +1,50 @@
+# Implementation Progress — Cute Pet/Shimeji
+
+| Hạng mục | Trạng thái | Ghi chú |
+|---|---|---|
+| Làm sạch feature Private Browser | Done | Browser/search/clear/storage/download/media/Room/service đã xóa |
+| Base onboarding | Done | Splash, Language, Intro, product permission flow |
+| Product Home | Done | Overlay access + Start/Stop pet + Settings/Premium |
+| Settings/Premium infrastructure | Done | Giữ để tái sử dụng và cập nhật sau |
+| Chuẩn hóa tài liệu cho AI agent | Done | Docs phản ánh source và base contract |
+| Product foundation cleanup | Done | Branding/copy active đã chuyển sang Cute Pet |
+| Pure Kotlin pet engine | Done | Deterministic state machine, frame timeline, drag/fling và bounds |
+| Overlay foreground service | Done | specialUse FGS, một small-window pet, notification Stop, 30 FPS |
+| Product Home/permission flow | Done | Special access + notification permission + Start/Stop policy |
+| Pixel 3 XL device verification | Done | API 31 start/stop, notification, launcher overlay, drag/fling, revoke cleanup |
+| Pet catalog + validated pack v1 | Done | Secure ZIP import, repository/cache, detail/select, sprite overlay verified on API 31 |
+| Competitor technical audit | Done | Catalog/pack/engine/overlay/lifecycle/business/security evidence documented without copying decompiled implementation code |
+| Living pet behavior graph | Done | Weighted seeded scheduling, anti-repeat memory, look-up/dangle/jump, timed wall/ceiling/creep exits, gravity fall and full legacy frame rhythm covered by JVM tests |
+| Spatial skill choreography V3.2 | Done | 35 paced combos: wall/ceiling parkour, aerial/skill/dance stories, collision-driven transitions and social duet roles |
+| Spatial behavior balance V3.3 | Done | Reduced ground basics, two-story climb quota and longer wall/ceiling dwell |
+| Wall-to-wall traversal V3.4 | Done | Screen-relative leap, mirrored airborne travel, opposite-wall catch and continued climb choreography |
+| Upward wall-to-wall rise V3.5 | Done | Ballistic upward launch with FLUNG pose, higher opposite-wall catch and independent downward/upward combo weights |
+| Multi-pet stability V3.6 | Done | Initial social ownership/facing and grounded overlap policy; superseded by opt-in interaction V3.14 |
+| Pet speech and dialogue V3.7 | Done | Frame 34–36 TALK pose, localized bubble and tap/skill/social lines; speech ownership superseded by V3.14 |
+| Pet message personalization V3.8 | Done | Editable 30-line list, Unicode-safe persistence, random anti-repeat, 48 fallback lines, broader triggers and slower 4.5–8.5s pacing |
+| TALK box attachment V3.9 | Done | Frame 34–36 box follows original -64px IE offset, mirrors in front of pet and cannot outlive its TALK pose |
+| Pose-gated speech choreography V3.10 | Done | All messages require TALK, combo tone is context-only, silent combos stay silent and carried box is rectangular without a tail |
+| Synchronized TALK lifecycle V3.11 | Done | Bubble and frame share TALK enter/exit transitions; independent reading timer removed so neither can finish before the other |
+| Adaptive speech layout V3.12 | Done | Glyph-aware 80–260dp × 48–112dp box, balanced four-line wrapping, viewport clamp and explicit 80-code-point Settings limit |
+| Stationary/moving speech V3.13 | Done | TALK holds frame 34; TALK_WALK uses 34/35/34/36 at walking speed, legacy packs normalize without reinstall and bubble lifecycle covers both |
+| Independent multi-pet interaction V3.14 | Done | Autonomous movers pass through, social invitations are probabilistic/interruptible, each TALK pet owns a box and off-ground speech is rejected |
+| Semantic action cadence V3.15 | Done | Movement/physics/expression use separate speed influence; the original held skill endpoint is superseded by V3.17 after cross-pack frame inspection |
+| Standing/rest balance V3.16 | Done | Owner IDLE renders a zero-velocity standing pose; autonomous SIT stays in 4/17 stories and social SIT is reduced from 11 to 2 roles |
+| Frame-semantic choreography V3.17 | Done | 1,026-pack frame audit drives emote/floor-play/sprawl/surface-hold aliases, one-shot skills with recovery, energy-aware transitions and silent physical stunts |
+| Display-off render suspension | Done | Shared clock pauses during doze and resumes without catch-up; service/window cleanup verified on API 31 |
+| Owner pet data snapshot | Done | 1,026 animated base packs plus 36 original WC 2026 packs/864 frames and 180 custom assets, with pinned APK/API provenance and CRC/SHA-256 inventory |
+| Local owner pet catalog | Done | 1,062 pets, 269 categories, search/thumbnail/Set, on-demand legacy normalization and device-local sync |
+| Private GitHub pet server | Done | 1.062 JSON records + 2.124 ZIP/PNG assets, size/SHA-256 validation, original WC 2026 frame/provenance audit, Remote Config token, cache-first catalog with 24h TTL/ETag/rate-limit backoff, and on-demand verified download |
+| Swarm playful runtime profile | Done | Chặn TALK/TALK_WALK ở engine, không tạo social/crowd coordinator và ưu tiên wall/ceiling/aerial stunt với nhịp nghỉ ngắn |
+| Incremental Swarm roster | Done | Count +/- chỉ add/remove instance chênh lệch, giữ state/window của pet cũ và tính lại shared FPS thay vì rebuild cả đàn |
+| Random live Swarm spawn | Done | Pet thêm mới chọn ngẫu nhiên 1/12 ứng viên an toàn xa đàn hiện có; initial Start và pet cũ giữ nguyên |
+| Incremental Mixed roster | Done | Add/Remove/change character reconcile theo pack identity; pet còn lại giữ view/engine/state dù slot bị dịch index |
+| Live Swarm size/speed | Done | Size, speed, randomization và movement bounds cập nhật tại chỗ; giữ PetState/action/combo/position thay vì rebuild |
+| Swarm zero-inset edge parity | Done | Left/Right/Top 0% giữ screen-edge overflow theo size pet; bật movement constraint không còn tạo lề canvas lớn ở hai bên |
+| Swarm spacing remap + jump rate | Done | Spacing co/giãn remap vị trí tương đối hai chiều không reset; wall jump 90% và wall-to-wall stories chiếm tối thiểu 25% raw weight |
+| Mixed 12-slot Rewarded capacity | Done | Slot 1–3 miễn phí; slot 4–12 mở tuần tự bằng Rewarded khi ad có sẵn, unavailable tiếp tục flow, persist theo device, Premium bypass và Catalog chặn Set/Import trước unlock |
+| Đổi namespace/application ID | Done | `com.asianmobile.emojibattery.shimeji` |
+
+## Nguyên tắc cập nhật
+
+Khi hoàn thành một milestone sản phẩm mới, cập nhật file này và `docs/09_IMPLEMENTATION_ROADMAP.md` trong cùng commit. Không phục hồi milestone hoặc trạng thái của Private Browser như feature hiện tại.

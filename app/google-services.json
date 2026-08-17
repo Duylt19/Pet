@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "178186336097",
+    "project_id": "shimejibattery",
+    "storage_bucket": "shimejibattery.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178186336097:android:e2a8853aeef0bcc46bf720",
+        "android_client_info": {
+          "package_name": "com.asianmobile.emojibattery.shimeji"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLDGoQXjaSXlitwWaa5DCp1DeSHgWTNww"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
