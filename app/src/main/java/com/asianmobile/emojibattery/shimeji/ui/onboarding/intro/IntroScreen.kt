@@ -431,7 +431,7 @@ private fun IntroPrimaryButton(
             .clip(CircleShape)
             .background(colorResource(R.color.colors_FFFFFF))
             .border(
-                width = dimensionResource(R_sdp.dimen._2sdp) * layoutScale,
+                width = dimensionResource(R_sdp.dimen._1sdp) * layoutScale,
                 brush = Brush.horizontalGradient(
                     listOf(
                         colorResource(R.color.colors_C95DFF),
