@@ -71,7 +71,7 @@ internal fun HomeRoute(
     val catalogViewModel = hiltViewModel<BatteryCatalogViewModel>(homeEntry)
     var canHandleHomeBack by remember(homeEntry.id) { mutableStateOf(false) }
 
-    fun navigateToTab(tab: HomeTab) {
+    fun navigateToTab(tab: HomeTab, requestInterstitial: Boolean = true) {
         val route = routeForHomeTab(tab)
         if (currentEntry?.destination?.route == route) return
         val navigate = {
@@ -81,8 +81,12 @@ internal fun HomeRoute(
                 restoreState = true
             }
         }
-        if (tab == HomeTab.MINE) {
-            navigateWithAd(context, route, navigate)
+        if (requestInterstitial) {
+            navigateWithAd(
+                context = context,
+                placement = navigationAdPlacement(route, NavigationAdDirection.TAB),
+                onNavigate = navigate
+            )
         } else {
             navigate()
         }
@@ -91,7 +95,8 @@ internal fun HomeRoute(
     LaunchedEffect(requestedTabValue) {
         val requestedTab = homeTabFromNavigationValue(requestedTabValue)
             ?: return@LaunchedEffect
-        navigateToTab(requestedTab)
+        // The root destination already requested its interstitial before handing this tab off.
+        navigateToTab(requestedTab, requestInterstitial = false)
         homeEntry.savedStateHandle[Routes.HOME_TAB_REQUEST] = null
     }
 

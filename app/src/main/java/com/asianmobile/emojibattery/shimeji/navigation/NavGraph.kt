@@ -236,19 +236,17 @@ fun AppNavGraph(
     }
 
     fun navigateFromHome(route: String) {
-        when (route) {
-            Routes.LANGUAGE_SETTINGS -> navigateWithAd(context, route) {
-                navController.safeNavigate(Routes.LANGUAGE_SETTINGS, ignoreDebounce = true)
-            }
-
-            Routes.PREMIUM -> navController.safeNavigate(
-                "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
-                ignoreDebounce = true
-            )
-
-            else -> navController.safeNavigate(route, ignoreDebounce = true) {
-                launchSingleTop = true
-            }
+        val destination = if (route == Routes.PREMIUM) {
+            "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}"
+        } else {
+            route
+        }
+        navController.safeNavigateWithAd(
+            context = context,
+            route = destination,
+            placementRoute = route
+        ) {
+            launchSingleTop = true
         }
     }
 
@@ -256,23 +254,33 @@ fun AppNavGraph(
         val homeEntry = runCatching {
             navController.getBackStackEntry(Routes.HOME_GRAPH)
         }.getOrNull() ?: return
-        homeEntry.savedStateHandle[Routes.HOME_TAB_REQUEST] = tab.name
-        if (petStoreTab != null) {
-            homeEntry.savedStateHandle[Routes.PET_STORE_TAB_REQUEST] =
-                petStoreTab.navigationValue
+        val targetRoute = routeForHomeTab(tab)
+        navigateWithAd(
+            context = context,
+            placement = navigationAdPlacement(targetRoute, NavigationAdDirection.TAB)
+        ) {
+            homeEntry.savedStateHandle[Routes.HOME_TAB_REQUEST] = tab.name
+            if (petStoreTab != null) {
+                homeEntry.savedStateHandle[Routes.PET_STORE_TAB_REQUEST] =
+                    petStoreTab.navigationValue
+            }
+            navController.popBackStack(Routes.HOME_GRAPH, inclusive = false)
         }
-        navController.popBackStack(Routes.HOME_GRAPH, inclusive = false)
     }
 
     fun navigateToAccessibilityHowToUse(source: NavBackStackEntry) {
         source.consumeAccessibilityHowToUseResult()
-        navController.safeNavigate(Routes.ACCESSIBILITY_HOW_TO_USE, ignoreDebounce = true) {
+        navController.safeNavigateWithAd(context, Routes.ACCESSIBILITY_HOW_TO_USE) {
             launchSingleTop = true
         }
     }
 
     fun navigateToOverlayGrantPermissions() {
-        navController.safeNavigate(Routes.grantPermissionsForOverlay(), ignoreDebounce = true) {
+        navController.safeNavigateWithAd(
+            context = context,
+            route = Routes.grantPermissionsForOverlay(),
+            placementRoute = Routes.GRANT_PERMISSIONS
+        ) {
             launchSingleTop = true
         }
     }
@@ -310,7 +318,13 @@ fun AppNavGraph(
                 LanguageScreen(
                     onConfirm = {
                         viewModel.completeLanguage()
-                        navigateWithAd(context, Routes.INTRO) {
+                        navigateWithAd(
+                            context = context,
+                            placement = navigationAdPlacement(
+                                Routes.INTRO,
+                                NavigationAdDirection.FORWARD
+                            )
+                        ) {
                             navController.safeNavigate(Routes.INTRO, ignoreDebounce = true) {
                                 popUpTo(Routes.LANGUAGE) { inclusive = true }
                             }
@@ -324,19 +338,31 @@ fun AppNavGraph(
                 LanguageScreen(
                     isSettings = true,
                     onConfirm = {
-                        val intent = context.packageManager
-                            .getLaunchIntentForPackage(context.packageName)
-                            ?.apply {
-                                putExtra("skip_splash", true)
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                            }
-                        intent?.let(context::startActivity)
-                        (context as? Activity)?.finish()
+                        navigateWithAd(
+                            context = context,
+                            placement = navigationAdPlacement(
+                                Routes.HOME_GRAPH,
+                                NavigationAdDirection.FORWARD
+                            )
+                        ) {
+                            val intent = context.packageManager
+                                .getLaunchIntentForPackage(context.packageName)
+                                ?.apply {
+                                    putExtra("skip_splash", true)
+                                    addFlags(
+                                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                                            Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    )
+                                }
+                            intent?.let(context::startActivity)
+                            (context as? Activity)?.finish()
+                        }
                     },
                     onBack = {
-                        navigateWithAd(context, Routes.SETTINGS) {
-                            navController.safePopBackStack(ignoreDebounce = true)
-                        }
+                        navController.safePopBackStackWithAd(
+                            context = context,
+                            currentRoute = Routes.LANGUAGE_SETTINGS
+                        )
                     }
                 )
             }
@@ -346,20 +372,21 @@ fun AppNavGraph(
                     onFinish = {
                         viewModel.completeIntro()
                         if (SafeRemoteConfig.isShowPremiumOnboardingFirst()) {
-                            navController.safeNavigate(
-                                "${Routes.PREMIUM}/${StartPremiumIndexes.ONBOARDING_FIRST.name}",
-                                ignoreDebounce = true
+                            navController.safeNavigateWithAd(
+                                context = context,
+                                route = "${Routes.PREMIUM}/" +
+                                    StartPremiumIndexes.ONBOARDING_FIRST.name,
+                                placementRoute = Routes.PREMIUM
                             ) {
                                 popUpTo(Routes.INTRO) { inclusive = true }
                             }
                         } else {
-                            navigateWithAd(context, "after_intro") {
-                                navController.safeNavigate(
-                                    destinationAfterIntro(),
-                                    ignoreDebounce = true
-                                ) {
-                                    popUpTo(Routes.INTRO) { inclusive = true }
-                                }
+                            navController.safeNavigateWithAd(
+                                context = context,
+                                route = destinationAfterIntro(),
+                                placementRoute = "after_intro"
+                            ) {
+                                popUpTo(Routes.INTRO) { inclusive = true }
                             }
                         }
                     }
@@ -370,10 +397,12 @@ fun AppNavGraph(
                 val navigateHome = {
                     viewModel.completePermission()
                     // Preserve the existing ad placement key while entering the parent graph.
-                    navigateWithAd(context, Routes.DISCOVER) {
-                        navController.safeNavigate(Routes.HOME_GRAPH, ignoreDebounce = true) {
-                            popUpTo(Routes.PERMISSION) { inclusive = true }
-                        }
+                    navController.safeNavigateWithAd(
+                        context = context,
+                        route = Routes.HOME_GRAPH,
+                        placementRoute = Routes.DISCOVER
+                    ) {
+                        popUpTo(Routes.PERMISSION) { inclusive = true }
                     }
                 }
                 PermissionScreen(
@@ -416,7 +445,12 @@ fun AppNavGraph(
                     else -> GrantPermissionsTarget.ACCESSIBILITY
                 }
                 GrantPermissionsScreen(
-                    onNavigateBack = { navController.safePopBackStack() },
+                    onNavigateBack = {
+                        navController.safePopBackStackWithAd(
+                            context = context,
+                            currentRoute = Routes.GRANT_PERMISSIONS
+                        )
+                    },
                     onPermissionFlowCompleted = {
                         navController.safePopBackStack(ignoreDebounce = true)
                     },
@@ -431,31 +465,53 @@ fun AppNavGraph(
             }
 
             composable(Routes.ACCESSIBILITY_HOW_TO_USE) {
-                fun returnToSource(permissionGranted: Boolean) {
-                    navController.previousBackStackEntry?.savedStateHandle?.set(
-                        ACCESSIBILITY_HOW_TO_USE_RESULT,
-                        permissionGranted
-                    )
-                    navController.safePopBackStack(ignoreDebounce = true)
+                fun returnToSource(permissionGranted: Boolean, requestInterstitial: Boolean) {
+                    val publishResult: () -> Unit = {
+                        navController.previousBackStackEntry?.savedStateHandle?.set(
+                            ACCESSIBILITY_HOW_TO_USE_RESULT,
+                            permissionGranted
+                        )
+                        Unit
+                    }
+                    if (requestInterstitial) {
+                        navController.safePopBackStackWithAd(
+                            context = context,
+                            currentRoute = Routes.ACCESSIBILITY_HOW_TO_USE,
+                            onBeforePop = publishResult
+                        )
+                    } else {
+                        publishResult()
+                        navController.safePopBackStack(ignoreDebounce = true)
+                    }
                 }
                 AccessibilityHowToUseScreen(
-                    onNavigateBack = { returnToSource(false) },
-                    onPermissionGranted = { returnToSource(true) }
+                    onNavigateBack = {
+                        returnToSource(permissionGranted = false, requestInterstitial = true)
+                    },
+                    onPermissionGranted = {
+                        returnToSource(permissionGranted = true, requestInterstitial = false)
+                    }
                 )
             }
 
             composable(Routes.SEARCH) {
                 SearchScreen(
-                    onCancel = { navController.safePopBackStack(ignoreDebounce = true) },
+                    onCancel = {
+                        navController.safePopBackStackWithAd(
+                            context = context,
+                            currentRoute = Routes.SEARCH
+                        )
+                    },
                     onOpenTheme = { themeId ->
-                        navController.safeNavigate(
-                            Routes.batteryEditor(themeId),
-                            ignoreDebounce = true
+                        navController.safeNavigateWithAd(
+                            context = context,
+                            route = Routes.batteryEditor(themeId),
+                            placementRoute = Routes.BATTERY_EDITOR
                         )
                     },
                     onPremium = { navigateFromHome(Routes.PREMIUM) },
                     onViewPet = {
-                        navController.safeNavigate(Routes.MY_PET, ignoreDebounce = true)
+                        navController.safeNavigateWithAd(context, Routes.MY_PET)
                     },
                     onNavigateToGrantPermissions = ::navigateToOverlayGrantPermissions
                 )
@@ -463,12 +519,18 @@ fun AppNavGraph(
 
             composable(Routes.FAVOURITE_RECENT) {
                 FavouriteRecentScreen(
-                    onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                    onBack = {
+                        navController.safePopBackStackWithAd(
+                            context = context,
+                            currentRoute = Routes.FAVOURITE_RECENT
+                        )
+                    },
                     onPremium = { navigateFromHome(Routes.PREMIUM) },
                     onOpenTheme = { themeId ->
-                        navController.safeNavigate(
-                            Routes.batteryEditor(themeId),
-                            ignoreDebounce = true
+                        navController.safeNavigateWithAd(
+                            context = context,
+                            route = Routes.batteryEditor(themeId),
+                            placementRoute = Routes.BATTERY_EDITOR
                         )
                     }
                 )
@@ -481,7 +543,12 @@ fun AppNavGraph(
                 }
 
                 PetRoomScreen(
-                    onNavigateBack = { navController.safePopBackStack() },
+                    onNavigateBack = {
+                        navController.safePopBackStackWithAd(
+                            context = context,
+                            currentRoute = Routes.MY_PET
+                        )
+                    },
                     onOpenPetStore = ::openPetStore,
                     onPremium = { navigateFromHome(Routes.PREMIUM) }
                 )
@@ -507,18 +574,24 @@ fun AppNavGraph(
                     BatteryCategoryScreen(
                         categoryId = backStackEntry.arguments?.getInt("categoryId") ?: 0,
                         onBack = {
-                            navController.safePopBackStack(ignoreDebounce = true)
+                            navController.safePopBackStackWithAd(
+                                context = context,
+                                currentRoute = Routes.BATTERY_CATEGORY
+                            )
                         },
                         onNavigateToPremium = {
-                            navController.safeNavigate(
-                                "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
-                                ignoreDebounce = true
+                            navController.safeNavigateWithAd(
+                                context = context,
+                                route = "${Routes.PREMIUM}/" +
+                                    StartPremiumIndexes.IN_APP.name,
+                                placementRoute = Routes.PREMIUM
                             )
                         },
                         onOpenTheme = { themeId ->
-                            navController.safeNavigate(
-                                Routes.batteryEditor(themeId),
-                                ignoreDebounce = true
+                            navController.safeNavigateWithAd(
+                                context = context,
+                                route = Routes.batteryEditor(themeId),
+                                placementRoute = Routes.BATTERY_EDITOR
                             )
                         },
                         accessibilityHowToUseResult =
@@ -557,17 +630,25 @@ fun AppNavGraph(
                 ) {
                     BatteryEditorScreen(
                         page = BatteryEditorPage.OVERVIEW,
-                        onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                        onBack = {
+                            navController.safePopBackStackWithAd(
+                                context = context,
+                                currentRoute = Routes.BATTERY_EDITOR
+                            )
+                        },
                         onOpenPage = { page ->
-                            navController.safeNavigate(
-                                Routes.batteryEditorComponent(themeId, page.name),
-                                ignoreDebounce = true
+                            navController.safeNavigateWithAd(
+                                context = context,
+                                route = Routes.batteryEditorComponent(themeId, page.name),
+                                placementRoute = Routes.BATTERY_EDITOR_COMPONENT
                             )
                         },
                         onNavigateToPremium = {
-                            navController.safeNavigate(
-                                "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
-                                ignoreDebounce = true
+                            navController.safeNavigateWithAd(
+                                context = context,
+                                route = "${Routes.PREMIUM}/" +
+                                    StartPremiumIndexes.IN_APP.name,
+                                placementRoute = Routes.PREMIUM
                             )
                         },
                         accessibilityHowToUseResult =
@@ -619,18 +700,26 @@ fun AppNavGraph(
                 ) {
                     BatteryEditorScreen(
                         page = page,
-                        onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                        onBack = {
+                            navController.safePopBackStackWithAd(
+                                context = context,
+                                currentRoute = Routes.BATTERY_EDITOR_COMPONENT
+                            )
+                        },
                         onNavigateToPremium = {
-                            navController.safeNavigate(
-                                "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
-                                ignoreDebounce = true
+                            navController.safeNavigateWithAd(
+                                context = context,
+                                route = "${Routes.PREMIUM}/" +
+                                    StartPremiumIndexes.IN_APP.name,
+                                placementRoute = Routes.PREMIUM
                             )
                         },
                         onOpenEmotionGroup = { groupKey ->
                             val themeId = backStackEntry.arguments?.getInt("themeId") ?: 0
-                            navController.safeNavigate(
-                                Routes.batteryEditorEmotionDetail(themeId, groupKey),
-                                ignoreDebounce = true
+                            navController.safeNavigateWithAd(
+                                context = context,
+                                route = Routes.batteryEditorEmotionDetail(themeId, groupKey),
+                                placementRoute = Routes.BATTERY_EDITOR_EMOTION_DETAIL
                             )
                         },
                         accessibilityHowToUseResult =
@@ -668,11 +757,18 @@ fun AppNavGraph(
                     BatteryEditorScreen(
                         page = BatteryEditorPage.EMOTION_DETAIL,
                         emotionGroupKey = backStackEntry.arguments?.getString("groupKey"),
-                        onBack = { navController.safePopBackStack(ignoreDebounce = true) },
+                        onBack = {
+                            navController.safePopBackStackWithAd(
+                                context = context,
+                                currentRoute = Routes.BATTERY_EDITOR_EMOTION_DETAIL
+                            )
+                        },
                         onNavigateToPremium = {
-                            navController.safeNavigate(
-                                "${Routes.PREMIUM}/${StartPremiumIndexes.IN_APP.name}",
-                                ignoreDebounce = true
+                            navController.safeNavigateWithAd(
+                                context = context,
+                                route = "${Routes.PREMIUM}/" +
+                                    StartPremiumIndexes.IN_APP.name,
+                                placementRoute = Routes.PREMIUM
                             )
                         },
                         accessibilityHowToUseResult =
@@ -698,11 +794,17 @@ fun AppNavGraph(
                     }
                 ) {
                     BatteryTrollScreen(
-                        onNavigateBack = { navController.safePopBackStack() },
+                        onNavigateBack = {
+                            navController.safePopBackStackWithAd(
+                                context = context,
+                                currentRoute = Routes.BATTERY_TROLL
+                            )
+                        },
                         onNavigateToCustomize = { trollId ->
-                            navController.safeNavigate(
-                                Routes.batteryTrollCustomize(trollId),
-                                ignoreDebounce = true
+                            navController.safeNavigateWithAd(
+                                context = context,
+                                route = Routes.batteryTrollCustomize(trollId),
+                                placementRoute = Routes.BATTERY_TROLL_CUSTOMIZE
                             )
                         },
                         onPremium = { navigateFromHome(Routes.PREMIUM) }
@@ -723,7 +825,12 @@ fun AppNavGraph(
                     }
                 ) {
                     BatteryTrollCustomizeScreen(
-                        onNavigateBack = { navController.safePopBackStack() },
+                        onNavigateBack = {
+                            navController.safePopBackStackWithAd(
+                                context = context,
+                                currentRoute = Routes.BATTERY_TROLL_CUSTOMIZE
+                            )
+                        },
                         accessibilityHowToUseResult =
                             backStackEntry.accessibilityHowToUseResult(),
                         onAccessibilityHowToUseResultConsumed =
@@ -769,7 +876,16 @@ fun AppNavGraph(
 
                 PremiumScreen(
                     startByIndex = startByIndex,
-                    onClose = { closePremium() },
+                    onClose = {
+                        navigateWithAd(
+                            context = context,
+                            placement = navigationAdPlacement(
+                                Routes.PREMIUM,
+                                NavigationAdDirection.BACK
+                            ),
+                            onNavigate = ::closePremium
+                        )
+                    },
                     buyPremiumSuccess = { index ->
                         when (index) {
                             StartPremiumIndexes.ONBOARDING_FIRST,

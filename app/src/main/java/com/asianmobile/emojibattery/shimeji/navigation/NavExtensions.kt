@@ -11,6 +11,23 @@ import com.asianmobile.emojibattery.shimeji.ads.tracking.AdPlacement
 private var lastNavigateTime = 0L
 private const val NAVIGATION_DEBOUNCE_TIME = 500L
 
+internal enum class NavigationAdDirection(val analyticsValue: String) {
+    FORWARD("forward"),
+    TAB("tab"),
+    BACK("back")
+}
+
+internal fun navigationAdPlacement(
+    route: String,
+    direction: NavigationAdDirection
+): String {
+    val canonicalRoute = route
+        .substringBefore('?')
+        .substringBefore('/')
+        .ifBlank { "unknown" }
+    return "navigation_${direction.analyticsValue}_$canonicalRoute"
+}
+
 /**
  * Extension function for [NavController] to show an Interstitial Ad before navigating to a destination.
  */
@@ -33,6 +50,37 @@ fun navigateWithAd(
         }
     } ?: run {
         onNavigate()
+    }
+}
+
+/** Shows an eligible interstitial before a forward navigation and always continues on fallback. */
+internal fun NavController.safeNavigateWithAd(
+    context: Context,
+    route: String,
+    placementRoute: String = route,
+    direction: NavigationAdDirection = NavigationAdDirection.FORWARD,
+    builder: NavOptionsBuilder.() -> Unit = {}
+) {
+    navigateWithAd(
+        context = context,
+        placement = navigationAdPlacement(placementRoute, direction)
+    ) {
+        safeNavigate(route = route, ignoreDebounce = true, builder = builder)
+    }
+}
+
+/** Shows an eligible interstitial before an app-bar Back action. */
+internal fun NavController.safePopBackStackWithAd(
+    context: Context,
+    currentRoute: String,
+    onBeforePop: () -> Unit = {}
+) {
+    navigateWithAd(
+        context = context,
+        placement = navigationAdPlacement(currentRoute, NavigationAdDirection.BACK)
+    ) {
+        onBeforePop()
+        safePopBackStack(ignoreDebounce = true)
     }
 }
 

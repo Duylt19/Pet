@@ -46,6 +46,9 @@ config đã lưu, không tự Apply draft đang chỉnh.
 
 - Screen mới có `Screen`, `ViewModel`, `UiState` trừ trường hợp presentational page rất nhỏ đã được owner chấp thuận.
 - Screen nhận navigation callback, không tự sở hữu NavController.
+- Callback mở destination mới và Back/Close của app bar được root navigation bọc bằng
+  `navigateWithAd`; screen không gọi ads SDK trực tiếp. Đổi tab nội bộ/modal không tạo transition
+  interstitial, còn bốn Home tab là bốn destination thật nên có policy tab riêng.
 - Phải biểu diễn loading/content/empty/error nếu data feature có các trạng thái đó.
 - Nếu refresh lỗi nhưng còn dữ liệu cache có thể render, tiếp tục hiển thị content; chỉ dùng
   error/offline empty UI khi vùng đó thật sự không còn dữ liệu và Retry phải gọi đúng nguồn data.

@@ -156,7 +156,12 @@ route, popUpTo behavior, process-death behavior và docs này.
 
 - Route constant chỉ định nghĩa trong `Routes`.
 - Dùng `safeNavigate`/`safePopBackStack`.
-- Full-screen ad transition dùng `navigateWithAd` theo policy.
+- Forward navigation do user bấm, đổi Home tab và Back/Close trên app bar request Interstitial
+  trước khi thay back stack qua `navigateWithAd`; nếu SDK/config/frequency/Premium không cho hiển
+  thị thì callback tiếp tục ngay. Dynamic ID/query không đi vào placement analytics.
+- Splash routing tự động, callback hoàn tất quyền, callback mua Premium thành công, modal và tab
+  nội bộ không request Interstitial. Đây không phải transition chủ động sang một app destination
+  mới hoặc là completion không được phép chặn.
 - Bottom navigation và placement `home_mode_bottom` do `ui/home/shell/HomeShell` sở hữu.
   Chỉ bốn tab được render trong Home NavHost. `battery_category/{categoryId}` nằm ở root graph,
   ẩn toàn bộ Home shell và tự sở hữu native `screen_battery_category` cố định ở đáy.

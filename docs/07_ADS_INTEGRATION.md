@@ -28,7 +28,15 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
   tạo khoảng trống hoặc request mới. Hai placement Intro không render shimmer: loading/fail
   collapse hoàn toàn và native chỉ xuất hiện khi SDK đã trả về ad thật, nên offline không làm
   nội dung bị đẩy/co lại.
-- Navigation có `navigateWithAd()` cho interstitial-aware transition.
+- Mọi chuyển màn do user chủ động đều đi qua `navigateWithAd()` trước khi thay đổi back stack:
+  forward destination, đổi một trong bốn Home tab và Back/Close trên app bar. SDK boundary vẫn
+  quyết định có hiển thị thật hay tiếp tục ngay dựa trên Premium, Remote Config, click/time cap,
+  trạng thái SDK và inventory. Placement analytics ổn định theo
+  `navigation_{forward|tab|back}_{route}` và loại dynamic argument khỏi route.
+- Không request interstitial cho Splash tự quyết định bước tiếp theo, callback hoàn tất quyền,
+  callback mua Premium thành công, dialog/bottom sheet hay tab nội bộ không tạo destination.
+  Những flow này tiếp tục trực tiếp để không chặn system/purchase completion. Launcher
+  interstitial của Splash vẫn giữ policy riêng hiện có.
 - MainActivity quản lý App Open Ads theo lifecycle.
 - Premium dùng BillingClient và `StartPremiumIndexes` để biết entry source.
 - Native Ad templates dùng light pink-white surface theo Figma node `8047:2973`; các
