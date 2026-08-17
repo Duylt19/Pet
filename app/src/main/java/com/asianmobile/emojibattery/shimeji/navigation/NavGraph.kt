@@ -89,6 +89,7 @@ object Routes {
     const val MY_PET = "my_pet"
     const val PET_STORE = "pet_store"
     const val PET_STORE_TAB_REQUEST = "pet_store_tab_request"
+    const val PET_STORE_CATEGORY_REQUEST = "pet_store_category_request"
     const val SETTINGS = "settings"
     const val BATTERY_CATALOG = "battery_catalog"
     const val BATTERY_CATEGORY = "battery_category"

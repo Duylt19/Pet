@@ -17,6 +17,9 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
 - Splash khởi tạo consent/config liên quan. Launcher interstitial chỉ được load/show khi cả
   `show_inter_launcher` và master gate `is_show_inter_ads` đều bật, user còn ads và consent cho
   phép request; tắt một trong hai Remote Config phải tiếp tục navigation ngay.
+- Language kiểm tra cả policy native chung và Remote Config của placement trước khi tạo ad slot.
+  `screen_language` và `screen_language_second` giữ trạng thái tải độc lập; placement bị tắt
+  collapse ngay từ composition đầu tiên, không render shimmer/loading scrim một frame rồi mới ẩn.
 - App Open Ad dùng Welcome Back pastel cover trong lúc chuyển sang quảng cáo. Đây là transient
   Compose content thuộc `:ads`, không phải navigation destination; Premium/ad-suppression và
   lifecycle show/dismiss hiện tại vẫn là boundary authoritative. Cover dùng chính wallpaper làm

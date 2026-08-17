@@ -13,6 +13,7 @@ import com.asianmobile.emojibattery.shimeji.data.repository.PetRoomCatalogReposi
 import com.asianmobile.emojibattery.shimeji.data.repository.PetRoomRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.PetStoreRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.RemoteConfigRepository
 import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollCatalogParser
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.BatteryCatalogParser
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStoreBatterySettingsRepository
@@ -21,6 +22,7 @@ import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStorePetFoo
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStorePetRoomRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStorePetSettingsRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.DataStorePetStoreRepository
+import com.asianmobile.emojibattery.shimeji.data.repository.impl.FirebaseRemoteConfigRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.HybridBatteryCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.HybridBatteryTrollCatalogRepository
 import com.asianmobile.emojibattery.shimeji.data.repository.impl.PackageManagerInstalledAppsRepository
@@ -95,6 +97,12 @@ object DataModule {
     fun providePetStoreRepository(
         repository: DataStorePetStoreRepository
     ): PetStoreRepository = repository
+
+    @Provides
+    @Singleton
+    fun provideRemoteConfigRepository(
+        repository: FirebaseRemoteConfigRepository
+    ): RemoteConfigRepository = repository
 
     @Provides
     @Singleton

@@ -47,6 +47,16 @@ class HomeTabNavigationTest {
     }
 
     @Test
+    fun `discover trending pets more targets pets tab and trending category`() {
+        val request = trendingPetsHomeRequest()
+
+        assertEquals("pets", request.tabValue)
+        assertEquals("Trending", request.category)
+        assertEquals("pet_store_tab_request", Routes.PET_STORE_TAB_REQUEST)
+        assertEquals("pet_store_category_request", Routes.PET_STORE_CATEGORY_REQUEST)
+    }
+
+    @Test
     fun `overlay disclosure routes through the focused grant permissions screen`() {
         assertEquals(
             "${Routes.GRANT_PERMISSIONS}?" +

@@ -16,6 +16,8 @@ import com.asianmobile.emojibattery.shimeji.utils.TrackScreenView
 fun ShimejiPetsScreen(
     requestedTab: PetStoreTab? = null,
     onRequestedTabConsumed: () -> Unit = {},
+    requestedCategory: String? = null,
+    onRequestedCategoryConsumed: () -> Unit = {},
     onSearch: () -> Unit,
     onPremium: () -> Unit,
     onViewPet: () -> Unit,
@@ -30,6 +32,15 @@ fun ShimejiPetsScreen(
         requestedTab?.let {
             viewModel.selectTab(it)
             onRequestedTabConsumed()
+        }
+    }
+
+    LaunchedEffect(requestedCategory, state.categories) {
+        val category = requestedCategory ?: return@LaunchedEffect
+        val isAvailable = state.categories.any { it.equals(category, ignoreCase = true) }
+        if (isAvailable) {
+            viewModel.selectCategory(category)
+            onRequestedCategoryConsumed()
         }
     }
 

@@ -125,13 +125,20 @@ class PetStorePolicyTest {
 
     @Test
     fun `category selection retains a valid request and falls back to first category`() {
-        val categories = PetStorePolicy.categories(categorizedPets)
+        val categories = PetStorePolicy.randomizedCategories(
+            pets = categorizedPets,
+            sessionSeed = 42L,
+        )
         assertEquals(
             "Rabbit",
             PetStorePolicy.selectedCategory(categories, requestedCategory = "rabbit")
         )
         assertEquals(
-            "Cat",
+            PET_STORE_TRENDING_CATEGORY,
+            PetStorePolicy.selectedCategory(categories, requestedCategory = "trending")
+        )
+        assertEquals(
+            categories.first(),
             PetStorePolicy.selectedCategory(categories, requestedCategory = "Bird")
         )
     }

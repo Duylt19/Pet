@@ -49,7 +49,7 @@ Discover ──Emoji Battery toggle(no access)──> Accessibility disclosure �
 Discover ──Battery/Theme/Emoji──> Battery Styles hoặc Customize Status Bar
 Discover ──Search──> Search ──theme──> Battery access flow ──> Customize Status Bar
 Search ──pet──> Pet Store unlock/download/name/permission flow
-Discover ──More Shimeji Pets──> Shimeji Pets
+Discover ──More Shimeji Pets──> Home/Shimeji Pets tab `PETS` + category `Trending`
 Discover ──Trending pet──> Rewarded/Premium sheet dùng chung ──> Download/verify/unlock ──> bật ở slot Mixed trống đầu tiên
 Pet unlock ──Save tên──> thiếu Overlay: disclosure/Grant Permissions ──> đủ quyền bắt buộc: tự start Pet on Screen
                          └─ từ chối: pet vẫn owned + Active trong My Pet; pet unlock kế tiếp hỏi lại

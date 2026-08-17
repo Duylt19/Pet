@@ -14,6 +14,7 @@ import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollCatalogParse
 import com.asianmobile.emojibattery.shimeji.data.remote.BatteryTrollRecord
 import com.asianmobile.emojibattery.shimeji.data.remote.GithubBatteryTrollCatalogClient
 import com.asianmobile.emojibattery.shimeji.data.repository.BatteryTrollCatalogRepository
+import com.asianmobile.emojibattery.shimeji.data.usecase.EnsurePetServerAccessUseCase
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +37,8 @@ import kotlinx.coroutines.withContext
 @Singleton
 class HybridBatteryTrollCatalogRepository @Inject constructor(
     private val client: GithubBatteryTrollCatalogClient,
-    private val parser: BatteryTrollCatalogParser
+    private val parser: BatteryTrollCatalogParser,
+    private val ensurePetServerAccess: EnsurePetServerAccessUseCase,
 ) : BatteryTrollCatalogRepository {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val refreshMutex = Mutex()
@@ -53,10 +55,19 @@ class HybridBatteryTrollCatalogRepository @Inject constructor(
     override suspend fun refresh() = withContext(Dispatchers.IO) {
         refreshMutex.withLock {
             val cached = client.readCachedCatalog()
+            val serverAccess = ensurePetServerAccess()
             val cachedPublished = cached?.json?.let(::parseCatalog)?.let(::publish) == true
-
+            if (!serverAccess) {
+                if (!cachedPublished) {
+                    failIfEmpty(BatteryTrollCatalogError.CATALOG_UNAVAILABLE)
+                }
+                return@withLock
+            }
             val metadata = cached?.metadata ?: client.readCatalogCacheMetadata()
-            if (cachedPublished && !client.shouldRefreshCatalog(metadata)) {
+            if (
+                cachedPublished &&
+                !client.shouldRefreshCatalog(metadata)
+            ) {
                 return@withLock
             }
 
@@ -96,6 +107,7 @@ class HybridBatteryTrollCatalogRepository @Inject constructor(
 
     override suspend fun materializeAsset(path: String?): String? = withContext(Dispatchers.IO) {
         val record = path?.let(assetsByPath::get) ?: return@withContext null
+        if (!ensurePetServerAccess()) return@withContext null
         client.materializeAsset(
             relativePath = record.path,
             expectedSizeBytes = record.sizeBytes,

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -70,7 +71,7 @@ private val robotoSemiBoldFontFamily = FontFamily(
 
 private const val INTRO_DESIGN_WIDTH = 360f
 private const val INTRO_DESIGN_HEIGHT = 800f
-private const val INTRO_PAGE_TWO_COPY_TOP = 624f
+private const val INTRO_PAGE_TWO_COPY_BOTTOM = 41f
 
 private data class IntroPage(
     val titleRes: Int,
@@ -263,9 +264,9 @@ internal fun IntroPageContent(
                 onNextClick = onActionClick,
                 layoutScale = compactHeightScale,
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .offset(
-                        y = referenceUnit * INTRO_PAGE_TWO_COPY_TOP * compactHeightScale,
+                    .align(Alignment.BottomCenter)
+                    .padding(
+                        bottom = referenceUnit * INTRO_PAGE_TWO_COPY_BOTTOM * compactHeightScale,
                     ),
             )
 
@@ -341,8 +342,7 @@ private fun IntroCopyAndControls(
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
-            .height(dimensionResource(R_sdp.dimen._86sdp) * layoutScale),
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(
@@ -354,7 +354,9 @@ private fun IntroCopyAndControls(
             text = stringResource(page.titleRes),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensionResource(R_sdp.dimen._46sdp) * layoutScale)
+                .heightIn(
+                    min = dimensionResource(R_sdp.dimen._46sdp) * layoutScale,
+                )
                 .padding(
                     start = dimensionResource(R_sdp.dimen._24sdp) * layoutScale,
                     end = dimensionResource(R_sdp.dimen._24sdp) * layoutScale,
@@ -365,7 +367,7 @@ private fun IntroCopyAndControls(
             fontSize = (dimensionResource(R_ssp.dimen._17ssp).value * layoutScale).sp,
             lineHeight = (dimensionResource(R_ssp.dimen._23ssp).value * layoutScale).sp,
             textAlign = TextAlign.Center,
-            maxLines = 2,
+            maxLines = 4,
         )
         Spacer(
             modifier = Modifier.height(
@@ -416,6 +418,11 @@ private fun IntroCopyAndControls(
                 )
             }
         }
+        Spacer(
+            modifier = Modifier.height(
+                dimensionResource(R_sdp.dimen._6sdp) * layoutScale,
+            ),
+        )
     }
 }
 

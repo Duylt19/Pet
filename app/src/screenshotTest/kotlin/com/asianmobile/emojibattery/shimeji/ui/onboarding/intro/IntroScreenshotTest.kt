@@ -78,6 +78,32 @@ fun IntroPageThreeCompactScreenshotTest() {
     )
 }
 
+@PreviewTest
+@Preview(widthDp = 360, heightDp = 800, locale = "vi")
+@Composable
+fun IntroPageTwoVietnameseScreenshotTest() {
+    IntroPageContent(
+        pageIndex = 1,
+        currentPage = 1,
+        showNativeAd = false,
+        onActionClick = {},
+        adContent = {},
+    )
+}
+
+@PreviewTest
+@Preview(widthDp = 360, heightDp = 800, locale = "pt")
+@Composable
+fun IntroPageThreePortugueseScreenshotTest() {
+    IntroPageContent(
+        pageIndex = 2,
+        currentPage = 2,
+        showNativeAd = true,
+        onActionClick = {},
+        adContent = { IntroAdPlaceholder() },
+    )
+}
+
 @Composable
 private fun IntroAdPlaceholder() {
     Spacer(

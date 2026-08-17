@@ -8,6 +8,7 @@ import com.asianmobile.emojibattery.shimeji.data.remote.GithubPetCatalogClient
 import com.asianmobile.emojibattery.shimeji.data.remote.PetCatalogFetchResult
 import com.asianmobile.emojibattery.shimeji.data.remote.PetServerConfig
 import com.asianmobile.emojibattery.shimeji.data.repository.OwnerPetCatalogRepository
+import com.asianmobile.emojibattery.shimeji.data.usecase.EnsurePetServerAccessUseCase
 import com.asianmobile.emojibattery.shimeji.pet.pack.LegacyShimejiPackInstaller
 import com.asianmobile.emojibattery.shimeji.pet.pack.PetPackInstallResult
 import javax.inject.Inject
@@ -27,7 +28,8 @@ import kotlinx.coroutines.withContext
 class RemoteOwnerPetCatalogRepository @Inject constructor(
     private val parser: OwnerPetCatalogParser,
     private val client: GithubPetCatalogClient,
-    private val installer: LegacyShimejiPackInstaller
+    private val installer: LegacyShimejiPackInstaller,
+    private val ensurePetServerAccess: EnsurePetServerAccessUseCase,
 ) : OwnerPetCatalogRepository {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val refreshMutex = Mutex()
@@ -46,9 +48,18 @@ class RemoteOwnerPetCatalogRepository @Inject constructor(
             val cachedDocument = cached?.json?.let { json ->
                 runCatching { parser.parseDocument(json) }.getOrNull()
             }
+            val serverAccess = ensurePetServerAccess()
             val metadata = cached?.metadata ?: client.readCatalogCacheMetadata()
             if (cachedDocument != null) {
                 _snapshot.value = cachedDocument.toSnapshot()
+            }
+            if (!serverAccess) {
+                if (cachedDocument == null) {
+                    _snapshot.value = errorSnapshot(
+                        OwnerPetCatalogError.REMOTE_CATALOG_UNAVAILABLE
+                    )
+                }
+                return@withLock
             }
             val shouldFetch = if (force) {
                 client.canForceRefreshCatalog(metadata)
@@ -114,6 +125,11 @@ class RemoteOwnerPetCatalogRepository @Inject constructor(
 
     override suspend fun preparePack(petId: Int): PetPackInstallResult =
         withContext(Dispatchers.IO) {
+            if (!ensurePetServerAccess()) {
+                return@withContext PetPackInstallResult.Failed(
+                    "Pet server credentials are unavailable"
+                )
+            }
             val entry = _snapshot.value.entries.firstOrNull { it.id == petId }
                 ?: return@withContext PetPackInstallResult.Failed(
                     "Pet is not in the server catalog"
