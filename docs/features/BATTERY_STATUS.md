@@ -72,6 +72,10 @@ Vertical slice hiện đã có trong source:
   format, bundled font, size và color từ draft.
 - Config chưa lưu lựa chọn icon dùng Wi‑Fi style 2 và Hotspot style 3 theo default UX;
   Signal, Airplane và Ringer giữ style 1. Lựa chọn đã persist của user không bị ghi đè.
+- Charge style 1–12 và các family icon Wi‑Fi/Signal/Airplane/Hotspot/Ringer được persist bằng
+  tên resource, nhưng mọi tên phải đi qua `BatteryStatusDrawableCatalog`. Catalog giữ tham chiếu
+  `R.drawable` compile-time để resource cleanup không thể xóa icon còn được runtime chọn rồi âm
+  thầm rơi về fallback hình tròn.
 
 Đây chưa phải release-complete: cần asset ownership approval, device/OEM matrix, Play
 Accessibility declaration và UX validation trước khi bật catalog ngoài debug.

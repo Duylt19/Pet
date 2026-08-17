@@ -93,6 +93,7 @@ import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPowerState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPreviewSystemStatePolicy
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryRingerState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusDrawableCatalog
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutItem
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutPolicy
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusLayoutResult
@@ -1335,8 +1336,6 @@ private fun StatusIconStylePicker(
     label: String? = null,
     onSelected: (Int) -> Unit
 ) {
-    val context = LocalContext.current
-    val resources = LocalResources.current
     Text(
         text = label ?: stringResource(R.string.battery_status_icon_style),
         color = colorResource(R.color.colors_776D84),
@@ -1350,13 +1349,9 @@ private fun StatusIconStylePicker(
     ) {
         items(iconStyles.indices.toList()) { stylePosition ->
             val styleIndex = stylePosition + 1
-            val resourceIds = remember(iconStyles, stylePosition, resources) {
+            val resourceIds = remember(iconStyles, stylePosition) {
                 iconStyles[stylePosition].map { resourceName ->
-                    resources.getIdentifier(
-                        resourceName,
-                        "drawable",
-                        context.packageName
-                    )
+                    BatteryStatusDrawableCatalog.resolve(resourceName)
                 }
             }
             Box(
@@ -1704,17 +1699,14 @@ private fun StatusComponentsGrid(onOpenPage: (BatteryEditorPage) -> Unit) {
 }
 
 @Composable
-@SuppressLint("DiscouragedApi")
 private fun StatusComponentTile(
     label: String,
     iconName: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val context = LocalContext.current
-    val resources = LocalResources.current
-    val iconResource = remember(iconName, resources) {
-        resources.getIdentifier(iconName, "drawable", context.packageName)
+    val iconResource = remember(iconName) {
+        BatteryStatusDrawableCatalog.resolve(iconName)
     }
     Column(
         modifier = modifier

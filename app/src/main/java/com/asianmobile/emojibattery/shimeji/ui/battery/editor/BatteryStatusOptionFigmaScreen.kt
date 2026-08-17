@@ -52,6 +52,7 @@ import com.asianmobile.emojibattery.shimeji.R
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryConnectivityState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryHotspotState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryRingerState
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusDrawableCatalog
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatterySystemStatusPolicy
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFont
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryDateFormat
@@ -440,7 +441,6 @@ private fun StatusOptionStyleSection(
 }
 
 @Composable
-@SuppressLint("DiscouragedApi")
 private fun StatusOptionStyleCard(
     iconNames: List<String>,
     selected: Boolean,
@@ -448,10 +448,8 @@ private fun StatusOptionStyleCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val resources = LocalResources.current
-    val packageName = LocalContext.current.packageName
-    val resourceIds = remember(iconNames, resources, packageName) {
-        iconNames.map { resources.getIdentifier(it, "drawable", packageName) }
+    val resourceIds = remember(iconNames) {
+        iconNames.map(BatteryStatusDrawableCatalog::resolve)
     }
     val shape = RoundedCornerShape(dimensionResource(SdpR.dimen._9sdp))
     Row(

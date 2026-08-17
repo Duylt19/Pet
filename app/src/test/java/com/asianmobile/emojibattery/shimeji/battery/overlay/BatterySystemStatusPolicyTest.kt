@@ -264,6 +264,35 @@ class BatterySystemStatusPolicyTest {
         )
     }
 
+    @Test
+    fun every_runtime_selected_status_icon_has_a_compile_time_drawable() {
+        val iconNames = buildSet {
+            (1..12).forEach { add("charge_%02d".format(it)) }
+            (1..4).forEach { style ->
+                add(BatterySystemStatusPolicy.wifiIcon(BatteryConnectivityState.CONNECTED, style))
+                add(
+                    BatterySystemStatusPolicy.cellularIcon(
+                        BatteryConnectivityState.CONNECTED,
+                        style
+                    )
+                )
+                add(BatterySystemStatusPolicy.airplaneIcon(style))
+                add(requireNotNull(BatterySystemStatusPolicy.hotspotIcon(BatteryHotspotState.ENABLED, style)))
+                add(requireNotNull(BatterySystemStatusPolicy.ringerIcon(BatteryRingerState.VIBRATE, style)))
+                add(requireNotNull(BatterySystemStatusPolicy.ringerIcon(BatteryRingerState.SILENT, style)))
+            }
+            add(BatterySystemStatusPolicy.wifiIcon(BatteryConnectivityState.LIMITED))
+            add(BatterySystemStatusPolicy.wifiIcon(BatteryConnectivityState.DISABLED))
+            add(BatterySystemStatusPolicy.cellularIcon(BatteryConnectivityState.LIMITED))
+            add(BatterySystemStatusPolicy.cellularIcon(BatteryConnectivityState.DISABLED))
+            add(requireNotNull(BatterySystemStatusPolicy.hotspotIcon(BatteryHotspotState.DISABLING)))
+            add(requireNotNull(BatterySystemStatusPolicy.hotspotIcon(BatteryHotspotState.FAILED)))
+        }
+
+        assertEquals(42, iconNames.size)
+        assertTrue(iconNames.all { BatteryStatusDrawableCatalog.resolve(it) != 0 })
+    }
+
     private fun observation(
         internet: Boolean = false,
         validated: Boolean = false,

@@ -725,7 +725,7 @@ class BatteryStatusBarView(context: Context) : View(context) {
         val size = sizeDp * density
         val left = if (fromLeft) anchor else anchor - size
         val drawable = drawableCache.getOrPut(name) {
-            val id = resources.getIdentifier(name, "drawable", context.packageName)
+            val id = BatteryStatusDrawableCatalog.resolve(name)
             if (id == 0) null else ResourcesCompat.getDrawable(resources, id, context.theme)
         }
         if (drawable != null) {

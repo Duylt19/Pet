@@ -44,6 +44,7 @@ import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryDeviceState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPowerState
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryPreviewSystemStatePolicy
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusComponent
+import com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusDrawableCatalog
 import com.asianmobile.emojibattery.shimeji.battery.overlay.BatterySystemStatusPolicy
 import com.asianmobile.emojibattery.shimeji.battery.settings.systemStatusBarHeightDp
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryAnimationEntry
@@ -387,16 +388,13 @@ private fun PreviewAsyncImage(
 }
 
 @Composable
-@SuppressLint("DiscouragedApi")
 private fun PreviewStatusIcon(
     iconName: String,
     sizeDp: Float,
     colorArgb: Int
 ) {
-    val context = LocalContext.current
-    val resources = LocalResources.current
-    val iconResource = remember(iconName, resources) {
-        resources.getIdentifier(iconName, "drawable", context.packageName)
+    val iconResource = remember(iconName) {
+        BatteryStatusDrawableCatalog.resolve(iconName)
     }
     if (iconResource != 0) {
         Icon(
