@@ -67,6 +67,9 @@ internal fun HomeRoute(
     val requestedPetStoreTab by homeEntry.savedStateHandle
         .getStateFlow<String?>(Routes.PET_STORE_TAB_REQUEST, null)
         .collectAsStateWithLifecycle()
+    val requestedPetStoreCategory by homeEntry.savedStateHandle
+        .getStateFlow<String?>(Routes.PET_STORE_CATEGORY_REQUEST, null)
+        .collectAsStateWithLifecycle()
     val accessibilityResult = homeEntry.accessibilityHowToUseResult()
     val catalogViewModel = hiltViewModel<BatteryCatalogViewModel>(homeEntry)
     var canHandleHomeBack by remember(homeEntry.id) { mutableStateOf(false) }
@@ -86,6 +89,15 @@ internal fun HomeRoute(
         } else {
             navigate()
         }
+    }
+
+    fun navigateToTrendingPets() {
+        val request = trendingPetsHomeRequest()
+        homeEntry.savedStateHandle[Routes.PET_STORE_TAB_REQUEST] =
+            request.tabValue
+        homeEntry.savedStateHandle[Routes.PET_STORE_CATEGORY_REQUEST] =
+            request.category
+        navigateToTab(HomeTab.PET_STORE)
     }
 
     LaunchedEffect(requestedTabValue) {
@@ -137,9 +149,14 @@ internal fun HomeRoute(
                         homeEntry::consumeAccessibilityHowToUseResult,
                     onNavigateToAccessibilityHowToUse =
                         onNavigateToAccessibilityHowToUse,
+                    onNavigateToTrendingPets = ::navigateToTrendingPets,
                     requestedPetStoreTab = requestedPetStoreTab,
                     onRequestedPetStoreTabConsumed = {
                         homeEntry.savedStateHandle[Routes.PET_STORE_TAB_REQUEST] = null
+                    },
+                    requestedPetStoreCategory = requestedPetStoreCategory,
+                    onRequestedPetStoreCategoryConsumed = {
+                        homeEntry.savedStateHandle[Routes.PET_STORE_CATEGORY_REQUEST] = null
                     },
                     catalogViewModel = catalogViewModel
                 )
@@ -165,8 +182,11 @@ private fun NavGraphBuilder.homeTabs(
     accessibilityHowToUseResult: Boolean?,
     onAccessibilityHowToUseResultConsumed: () -> Unit,
     onNavigateToAccessibilityHowToUse: () -> Unit,
+    onNavigateToTrendingPets: () -> Unit,
     requestedPetStoreTab: String?,
     onRequestedPetStoreTabConsumed: () -> Unit,
+    requestedPetStoreCategory: String?,
+    onRequestedPetStoreCategoryConsumed: () -> Unit,
     catalogViewModel: BatteryCatalogViewModel
 ) {
     composable(Routes.DISCOVER) {
@@ -179,7 +199,7 @@ private fun NavGraphBuilder.homeTabs(
             },
             onNavigateToBattery = { onNavigateToHomeTab(HomeTab.BATTERY) },
             onNavigateToBatteryTroll = { onNavigateOutsideHome(Routes.BATTERY_TROLL) },
-            onNavigateToPetStore = { onNavigateToHomeTab(HomeTab.PET_STORE) },
+            onNavigateToPetStore = onNavigateToTrendingPets,
             onNavigateToMyPet = { onNavigateOutsideHome(Routes.MY_PET) },
             onNavigateToGrantPermissions = onNavigateToOverlayGrantPermissions,
             onOpenBatteryTheme = { themeId ->
@@ -229,6 +249,8 @@ private fun NavGraphBuilder.homeTabs(
         PetStoreScreen(
             requestedTab = PetStoreTab.fromNavigationValue(requestedPetStoreTab),
             onRequestedTabConsumed = onRequestedPetStoreTabConsumed,
+            requestedCategory = requestedPetStoreCategory,
+            onRequestedCategoryConsumed = onRequestedPetStoreCategoryConsumed,
             onSearch = { onNavigateOutsideHome(Routes.SEARCH) },
             onPremium = {
                 onNavigateOutsideHome(

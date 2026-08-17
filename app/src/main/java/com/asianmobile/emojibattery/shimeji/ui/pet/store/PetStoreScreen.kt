@@ -165,6 +165,8 @@ private const val FOOD_QUANTITY_Y_IN_HERO_PX = 124f
 fun PetStoreScreen(
     requestedTab: PetStoreTab? = null,
     onRequestedTabConsumed: () -> Unit = {},
+    requestedCategory: String? = null,
+    onRequestedCategoryConsumed: () -> Unit = {},
     onSearch: () -> Unit,
     onPremium: () -> Unit,
     onViewPet: () -> Unit,
@@ -178,6 +180,15 @@ fun PetStoreScreen(
         requestedTab?.let {
             viewModel.selectTab(it)
             onRequestedTabConsumed()
+        }
+    }
+
+    LaunchedEffect(requestedCategory, state.categories) {
+        val category = requestedCategory ?: return@LaunchedEffect
+        val isAvailable = state.categories.any { it.equals(category, ignoreCase = true) }
+        if (isAvailable) {
+            viewModel.selectCategory(category)
+            onRequestedCategoryConsumed()
         }
     }
 
