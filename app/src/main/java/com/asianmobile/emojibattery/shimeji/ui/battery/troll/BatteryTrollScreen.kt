@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -164,6 +165,10 @@ internal fun BatteryTrollContent(
                 .fillMaxSize()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
             containerColor = Color.Transparent,
+            // The host hides the system navigation bar and renders the destination ad below
+            // this Scaffold. Reserving Scaffold's default bottom inset therefore creates an
+            // empty strip between the grid and the ad on some Android 10 Samsung devices.
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             topBar = {
                 BatteryTrollTopBar(
                     onBack = onBack,
