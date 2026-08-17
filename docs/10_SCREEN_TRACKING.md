@@ -47,7 +47,8 @@
 ## Rules
 
 - Dùng `TrackScreenView(ScreenName.X)` tại screen nhìn thấy.
-- Pager chỉ track page đang visible.
+- Pager chỉ track page đã settle và đang visible; page chỉ được compose/preload không được phát
+  `screen_view`.
 - Mỗi destination/editor page nhìn thấy phải có screen name riêng; không dùng chung event chỉ vì
   hai màn cùng chỉnh một nhóm dữ liệu.
 - Value lowercase snake_case, unique, ổn định và không quá 100 ký tự.
@@ -61,10 +62,18 @@
   manual `screen_view` để tránh Firebase tự ghi mọi destination thành `MainActivity`.
 - `TrackScreenView` chỉ log khi lifecycle owner của destination ở trạng thái `RESUMED`, log lại
   khi user quay về màn sau navigation hoặc app resume, và không log adjacent pager page.
-- Intro dùng `PagerState.settledPage`; swipe chưa hoàn tất không được tính là screen view.
+- Intro preload cả ba page để giữ native ad, nhưng mỗi page truyền `isVisible=true` duy nhất khi
+  `pageIndex == PagerState.settledPage`; swipe chưa hoàn tất hoặc bị hủy không được tính là screen
+  view mới.
 - Battery Editor map từng `BatteryEditorPage` sang một `ScreenName` riêng. Picker, option editor,
   emotion detail và Clock không được tái sử dụng event của màn khác.
-- `ScreenTrackingCoverageTest` đối chiếu mọi `*Screen()` được gọi trực tiếp trong `NavGraph` và
-  `HomeNavGraph` với source owner có `TrackScreenView`; route mới thiếu tracker sẽ làm unit test fail.
+- `ScreenTrackingCoverageTest` đối chiếu inventory mọi `*Screen()` được gọi trực tiếp trong
+  `NavGraph`/`HomeNavGraph` và xác nhận source owner gọi đúng canonical tracker; route mới thiếu
+  tracker hoặc dùng nhầm screen name sẽ làm unit test fail.
+- Bốn Home tab là bốn destination nhìn thấy độc lập nên lần lượt track `discover`,
+  `battery_catalog`, `pet_store`, `settings`. `home_graph` chỉ là container và không phát event.
+- Tab nội bộ trong Search, Favourite & Recent, Shimeji Pets và My Pet Room là state của cùng một
+  destination, không tự phát thêm `screen_view`. Nếu cần đo thao tác đổi tab, dùng action event có
+  tên riêng thay vì giả thành một màn navigation mới.
 - Dialog/bottom sheet tạm thời không phát `screen_view` vì destination phía sau vẫn là màn visible.
   Nếu cần đo funnel của dialog, dùng action event riêng thay vì giả thành screen event.

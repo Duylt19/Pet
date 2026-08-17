@@ -14,7 +14,7 @@ tự thêm quảng cáo chỉ từ tên route.
 | Permission onboarding | `permission` | Native `screen_permission` |
 | Grant Permissions | `grant_permissions` | Native `screen_grant_permissions` ghim đáy |
 | Accessibility How to use | `accessibility_how_to_use` | Không thêm placement; disclosure trước đó dùng `dialog_accessibility_disclosure` |
-| Discover | `home` | Banner shell Home + banner inline `discover_inline` |
+| Discover | `discover` | Banner shell Home + banner inline `discover_inline` |
 | Battery styles | `battery_catalog` | Banner shell Home, native `screen_battery_catalog`; reward sheet dùng `dialog_battery_reward` + Rewarded |
 | Battery category | `battery_category` | Native đáy `screen_battery_category` |
 | Shimeji Pets | `pet_store` | Banner shell Home; pet reward dùng `dialog_pet_reward`, food reward dùng `dialog_food_reward` + Rewarded |
@@ -23,9 +23,12 @@ tự thêm quảng cáo chỉ từ tên route.
 | Search | `search` | Native `screen_search` + banner inline `search_inline` |
 | Favourite & Recent | `favourite_recent` | Native `screen_favourite_recent` |
 | Customize Status Bar overview | `battery_editor` | Native `screen_customize_status_bar` dạng collapsible |
-| Battery editor library | Screen library tương ứng | Banner `battery_editor_bottom` |
-| Battery editor option/emotion/detail | Screen editor tương ứng | Native `screen_battery_editor` dạng collapsible; discard sheet dùng `dialog_battery_discard` |
+| Battery/Emoji template library | `battery_template_picker` / `battery_emoji_editor` | Native `screen_battery_editor` dạng collapsible |
+| Background/Size/Appearance/Icon editor | `battery_background_theme_picker` / `battery_size_editor` / `battery_appearance_editor` / `battery_icon_editor` | Banner `battery_editor_bottom` |
+| Emotion packs/detail | `battery_emotion_editor` / `battery_emotion_detail` | Native `screen_battery_editor` dạng collapsible |
+| Animation/Wi-Fi/Data/Signal/Airplane/Hotspot/Ringer/Charge/Date-Time/Clock editor | `battery_animation_editor` / `battery_wifi_editor` / `battery_data_editor` / `battery_signal_editor` / `battery_airplane_editor` / `battery_hotspot_editor` / `battery_ringer_editor` / `battery_charge_editor` / `battery_date_time_editor` / `battery_clock_editor` | Native `screen_battery_editor` dạng collapsible; discard sheet dùng `dialog_battery_discard` |
 | Battery Troll | `battery_troll` | Native đáy collapsible `screen_battery_troll`; reward sheet dùng `dialog_battery_troll_reward` + Rewarded |
+| Battery Troll Customize | `battery_troll_customize` | Banner `battery_editor_bottom` |
 | Premium | `premium` | Không có placement |
 | Exit dialog | Giữ screen hiện tại | Native `dialog_exit_app` |
 

@@ -18,6 +18,21 @@ class IntroScreenTrackingTest {
     }
 
     @Test
+    fun `only settled page is visible to tracking while adjacent pages are preloaded`() {
+        INTRO_PAGE_INDICES.forEach { settledPage ->
+            INTRO_PAGE_INDICES.forEach { composedPage ->
+                assertEquals(
+                    composedPage == settledPage,
+                    isIntroPageVisible(
+                        pageIndex = composedPage,
+                        settledPage = settledPage,
+                    ),
+                )
+            }
+        }
+    }
+
+    @Test
     fun `first native stays mounted and last native starts after its first visit`() {
         assertTrue(shouldKeepIntroNativeAdMounted(pageIndex = 0, hasVisitedLastPage = false))
         assertTrue(shouldKeepIntroNativeAdMounted(pageIndex = 0, hasVisitedLastPage = true))
@@ -39,5 +54,9 @@ class IntroScreenTrackingTest {
         assertEquals(1f, introCompactHeightScale(widthDp = 360f, heightDp = 800f), 0.001f)
         assertEquals(0.9f, introCompactHeightScale(widthDp = 360f, heightDp = 720f), 0.001f)
         assertEquals(0.8f, introCompactHeightScale(widthDp = 450f, heightDp = 800f), 0.001f)
+    }
+
+    private companion object {
+        val INTRO_PAGE_INDICES = 0..2
     }
 }

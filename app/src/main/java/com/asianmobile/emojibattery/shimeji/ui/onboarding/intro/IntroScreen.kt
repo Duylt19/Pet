@@ -111,10 +111,6 @@ fun IntroScreen(
         }
     }
 
-    // Track only after the pager settles so an aborted swipe cannot emit a page the user did
-    // not actually enter.
-    TrackScreenView(introPageScreenName(pagerState.settledPage))
-
     HorizontalPager(
         state = pagerState,
         // Intro has only three pages. Keeping them composed preserves each loaded native view
@@ -124,6 +120,16 @@ fun IntroScreen(
             .fillMaxSize()
             .background(colorResource(R.color.colors_FFFFFF)),
     ) { pageIndex ->
+        // All three pages are intentionally preloaded to preserve their native ads. Attach the
+        // tracker to each page but enable only the settled page, so composition is never mistaken
+        // for an actual screen view and an aborted swipe keeps the previous page visible.
+        TrackScreenView(
+            screen = introPageScreenName(pageIndex),
+            isVisible = isIntroPageVisible(
+                pageIndex = pageIndex,
+                settledPage = pagerState.settledPage,
+            ),
+        )
         val nativeAdScreenCode = introNativeAdScreenCode(pageIndex)
         IntroPageContent(
             pageIndex = pageIndex,
@@ -163,6 +169,9 @@ internal fun introPageScreenName(pageIndex: Int): ScreenName = when (pageIndex) 
     1 -> ScreenName.INTRO_PAGE_2
     else -> ScreenName.INTRO_PAGE_3
 }
+
+internal fun isIntroPageVisible(pageIndex: Int, settledPage: Int): Boolean =
+    pageIndex == settledPage
 
 internal fun shouldKeepIntroNativeAdMounted(
     pageIndex: Int,

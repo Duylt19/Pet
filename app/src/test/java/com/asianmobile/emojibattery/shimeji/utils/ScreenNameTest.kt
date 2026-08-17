@@ -1,5 +1,6 @@
 package com.asianmobile.emojibattery.shimeji.utils
 
+import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -64,7 +65,28 @@ class ScreenNameTest {
         assertEquals(expected, ScreenName.entries.mapTo(mutableSetOf(), ScreenName::value))
     }
 
+    @Test
+    fun `screen tracking documentation matches canonical screen names`() {
+        val trackingDocument = sequenceOf(
+            File("docs/10_SCREEN_TRACKING.md"),
+            File("../docs/10_SCREEN_TRACKING.md")
+        ).firstOrNull(File::isFile)
+            ?: error("Cannot find docs/10_SCREEN_TRACKING.md from ${File(".").absolutePath}")
+        val documentedValues = SCREEN_DOCUMENT_ROW_PATTERN
+            .findAll(trackingDocument.readText())
+            .map { match -> match.groupValues[1] }
+            .toSet()
+
+        assertEquals(
+            ScreenName.entries.mapTo(mutableSetOf(), ScreenName::value),
+            documentedValues
+        )
+    }
+
     private companion object {
         val SCREEN_NAME_PATTERN = Regex("^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$")
+        val SCREEN_DOCUMENT_ROW_PATTERN = Regex(
+            """(?m)^\|[^|]+\|\s*`([a-z][a-z0-9]*(?:_[a-z0-9]+)*)`\s*\|$"""
+        )
     }
 }
