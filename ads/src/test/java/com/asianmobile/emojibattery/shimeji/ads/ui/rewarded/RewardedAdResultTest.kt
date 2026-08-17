@@ -13,10 +13,12 @@ class RewardedAdResultTest {
     @Test
     fun `unavailable reward continues flow`() {
         assertTrue(RewardedAdResult.UNAVAILABLE.shouldContinueFlow)
+        assertTrue(RewardedAdResult.UNAVAILABLE.showsFallbackMessage)
     }
 
     @Test
     fun `dismissed reward stops flow`() {
         assertFalse(RewardedAdResult.DISMISSED.shouldContinueFlow)
+        assertFalse(RewardedAdResult.DISMISSED.showsFallbackMessage)
     }
 }

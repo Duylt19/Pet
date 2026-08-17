@@ -2,4 +2,5 @@
 <resources>
     <string name="welcome_back">Bem-vindo de volta</string>
     <string name="loading_ads_inter">Carregando anúncios…</string>
+    <string name="rewarded_unavailable_continue">Anúncio indisponível. Você ainda pode usar este item.</string>
 </resources>

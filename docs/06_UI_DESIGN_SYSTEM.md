@@ -17,6 +17,9 @@ flow onboarding cho tới khi policy first-permission được bật lại.
   discovery bằng grid; Mine là app/support hub; Customize biểu diễn một hồ sơ pet độc lập.
 - Shared primitives nằm ở `ui/shared/component/CutePetComponents.kt`; component dark cũ không được
   dùng cho product screen mới nếu không có lý do tương thích.
+- Compose root dùng Material light color scheme với primary `#FB3675`, surface trắng và text
+  `#212327`; không dùng lại purple dark scheme của template cũ. Dialog lỗi/thông báo một CTA dùng
+  `AppMessageDialog` để giữ surface trắng, radius/shadow và action hồng nhất quán với app.
 
 ## Async data states
 
@@ -99,6 +102,8 @@ Discover Home contract:
   dùng placement SDK thật `discover_inline`, không đóng gói creative quảng cáo mẫu;
 - Thứ tự nhóm đầu sau hero là `Trending Emoji Battery` → `Shimeji Pets` → inline banner;
   `Status bar themes` tiếp tục nằm ngay sau banner, đúng hierarchy node Figma `8015:1035`;
+- section header dành vùng co giãn riêng cho title và giữ `More` cố định bên phải; bản dịch dài
+  ellipsize trong vùng title thay vì đè sát hoặc đẩy action ra ngoài màn hình;
 - Trending Emoji Battery và Shimeji Pets lấy ranking lần lượt từ
   `BatteryCatalogSnapshot.trendingEmojiThemeIds` và `OwnerPetCatalogSnapshot.trendingPetIds`;
   catalog cũ dùng fallback product đi kèm app. UI giữ đúng thứ tự, lấy toàn bộ item tìm thấy và

@@ -50,4 +50,5 @@
     <string name="ad_attribution" translatable="false">Ad</string>
 
     <string name="loading_ads_inter">Loading Ads…</string>
+    <string name="rewarded_unavailable_continue">Ad unavailable. You can still use this item.</string>
 </resources>

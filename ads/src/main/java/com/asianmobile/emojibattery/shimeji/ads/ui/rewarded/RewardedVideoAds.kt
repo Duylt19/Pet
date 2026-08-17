@@ -3,6 +3,7 @@ package com.asianmobile.emojibattery.shimeji.ads.ui.rewarded
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.asianmobile.emojibattery.shimeji.ads.BuildConfig
 import com.asianmobile.emojibattery.shimeji.ads.R
 import com.asianmobile.emojibattery.shimeji.ads.data.CheckShowAdsUtil
@@ -174,6 +175,13 @@ class RewardedVideoAds {
         resultListener = null
         if (!activity.isDestroyed && !activity.isFinishing) {
             activity.runOnUiThread {
+                if (result.showsFallbackMessage) {
+                    Toast.makeText(
+                        activity,
+                        activity.getString(R.string.rewarded_unavailable_continue),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
                 listener.onAdClosed(result)
             }
         }
@@ -191,4 +199,7 @@ enum class RewardedAdResult {
 
     val shouldContinueFlow: Boolean
         get() = this != DISMISSED
+
+    val showsFallbackMessage: Boolean
+        get() = this == UNAVAILABLE
 }

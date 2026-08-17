@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -110,6 +109,7 @@ import com.asianmobile.emojibattery.shimeji.data.model.MAX_BATTERY_STATUS_ICON_S
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryBackgroundRewardUnlockSheet
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryRewardUnlockSheet
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppSwitch
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppMessageDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.BATTERY_PREVIEW_DEFAULT_PERCENT
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.BatteryStatusPreviewCard
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.AsyncContentState
@@ -363,35 +363,23 @@ internal fun BatteryEditorScreen(
     ) {
         val assetDownloadFailed =
             state.message == BatteryEditorMessage.ASSET_DOWNLOAD_FAILED
-        AlertDialog(
-            onDismissRequest = viewModel::clearMessage,
-            title = {
-                Text(
-                    stringResource(
-                        if (assetDownloadFailed) {
-                            R.string.battery_asset_download_failed_title
-                        } else {
-                            R.string.battery_theme_unavailable_title
-                        }
-                    )
-                )
-            },
-            text = {
-                Text(
-                    stringResource(
-                        if (assetDownloadFailed) {
-                            R.string.battery_asset_download_failed_message
-                        } else {
-                            R.string.battery_theme_unavailable_message
-                        }
-                    )
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = viewModel::clearMessage) {
-                    Text(stringResource(R.string.common_done))
+        AppMessageDialog(
+            title = stringResource(
+                if (assetDownloadFailed) {
+                    R.string.battery_asset_download_failed_title
+                } else {
+                    R.string.battery_theme_unavailable_title
                 }
-            }
+            ),
+            message = stringResource(
+                if (assetDownloadFailed) {
+                    R.string.battery_asset_download_failed_message
+                } else {
+                    R.string.battery_theme_unavailable_message
+                }
+            ),
+            confirmText = stringResource(R.string.common_done),
+            onDismiss = viewModel::clearMessage
         )
     }
 

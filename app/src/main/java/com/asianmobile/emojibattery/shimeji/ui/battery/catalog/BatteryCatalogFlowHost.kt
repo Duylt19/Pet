@@ -10,9 +10,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -22,6 +19,7 @@ import com.asianmobile.emojibattery.shimeji.ads.ui.rewarded.RewardedVideoAds
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryThemeEntitlement
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryBackgroundAccess
 import com.asianmobile.emojibattery.shimeji.ui.battery.editor.BatteryBackgroundAccessPolicy
+import com.asianmobile.emojibattery.shimeji.ui.shared.component.AppMessageDialog
 import com.asianmobile.emojibattery.shimeji.ui.shared.component.GrantPermissionDialog
 
 @Composable
@@ -148,15 +146,11 @@ internal fun BatteryCatalogFlowHost(
             onPremium = onNavigateToPremium
         )
     } else if (state.message == BatteryCatalogMessage.THEME_UNAVAILABLE) {
-        AlertDialog(
-            onDismissRequest = viewModel::clearMessage,
-            title = { Text(stringResource(R.string.battery_theme_unavailable_title)) },
-            text = { Text(stringResource(R.string.battery_theme_unavailable_message)) },
-            confirmButton = {
-                TextButton(onClick = viewModel::clearMessage) {
-                    Text(stringResource(R.string.common_done))
-                }
-            }
+        AppMessageDialog(
+            title = stringResource(R.string.battery_theme_unavailable_title),
+            message = stringResource(R.string.battery_theme_unavailable_message),
+            confirmText = stringResource(R.string.common_done),
+            onDismiss = viewModel::clearMessage
         )
     }
 }

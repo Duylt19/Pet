@@ -2,4 +2,5 @@
 <resources>
     <string name="welcome_back">Content de te revoir</string>
     <string name="loading_ads_inter">Chargement des annonces…</string>
+    <string name="rewarded_unavailable_continue">Publicité indisponible. Vous pouvez quand même utiliser cet élément.</string>
 </resources>

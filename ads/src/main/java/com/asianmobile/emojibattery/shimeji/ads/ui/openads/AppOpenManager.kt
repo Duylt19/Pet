@@ -52,6 +52,7 @@ class AppOpenManager() : LifecycleObserver {
 
     private var appOpenAd: AppOpenAd? = null
     private var loadCallback: AdLoadCallback<AppOpenAd>? = null
+    private var isLoadingAd = false
 
     private var isShowingAd = false
     val isShowing: Boolean get() = isShowingAd
@@ -168,15 +169,18 @@ class AppOpenManager() : LifecycleObserver {
     /**
      * Request an ad
      */
+    @Synchronized
     internal fun fetchAd(context: Context) {
         if (!MobileAds.isInitialized) return
 
         // Have unused ad, no need to fetch another.
         if (!CheckShowAdsUtil.checkLoadOpenAd(context)) return
 
-        if (isAdAvailable()) {
+        if (!shouldStartAppOpenLoad(isLoadingAd, isAdAvailable())) {
             return
         }
+
+        isLoadingAd = true
 
         val adUnitId = if (BuildConfig.DEBUG) {
             context.getString(R.string.id_emoji_battery_open_ads_test)
@@ -192,6 +196,7 @@ class AppOpenManager() : LifecycleObserver {
              * @param ad the loaded app open ad.
              */
             override fun onAdLoaded(ad: AppOpenAd) {
+                isLoadingAd = false
                 AdsIdLogger.loaded(
                     format = "APP_OPEN",
                     adUnitId = adUnitId,
@@ -208,6 +213,7 @@ class AppOpenManager() : LifecycleObserver {
              * @param adError the error.
              */
             override fun onAdFailedToLoad(adError: LoadAdError) {
+                isLoadingAd = false
                 // Handle the error.
                 AdsIdLogger.failed(
                     format = "APP_OPEN",
@@ -333,3 +339,8 @@ class AppOpenManager() : LifecycleObserver {
         }
     }
 }
+
+internal fun shouldStartAppOpenLoad(
+    isLoading: Boolean,
+    isAdAvailable: Boolean
+): Boolean = !isLoading && !isAdAvailable

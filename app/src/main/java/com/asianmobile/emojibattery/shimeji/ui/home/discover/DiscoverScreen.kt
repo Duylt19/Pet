@@ -995,7 +995,12 @@ internal fun SectionHeader(
             .padding(horizontal = dimensionResource(SdpR.dimen._12sdp)),
         verticalAlignment = Alignment.Top
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = dimensionResource(SdpR.dimen._6sdp)),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             if (titleIcon != null) {
                 Image(
                     painter = painterResource(titleIcon),
@@ -1004,13 +1009,16 @@ internal fun SectionHeader(
                 )
                 Spacer(Modifier.width(dimensionResource(SdpR.dimen._3sdp)))
             }
-            Box {
+            Box(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
                     color = colorResource(R.color.colors_212327),
                     fontFamily = DiscoverRobotoMedium,
                     fontSize = dimensionResource(SspR.dimen._12ssp).value.sp,
-                    lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp
+                    lineHeight = dimensionResource(SspR.dimen._18ssp).value.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 if (underline) {
                     Image(
@@ -1028,7 +1036,6 @@ internal fun SectionHeader(
                 }
             }
         }
-        Spacer(Modifier.weight(1f))
         Row(
             modifier = Modifier
                 .clip(CircleShape)

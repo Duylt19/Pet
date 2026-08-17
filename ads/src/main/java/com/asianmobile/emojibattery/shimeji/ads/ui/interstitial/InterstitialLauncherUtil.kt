@@ -13,7 +13,7 @@ import com.asianmobile.emojibattery.shimeji.ads.BuildConfig
 import com.asianmobile.emojibattery.shimeji.ads.R
 import com.asianmobile.emojibattery.shimeji.ads.config.SHOW_INTER_LAUNCHER
 import com.asianmobile.emojibattery.shimeji.ads.config.TIME_LOADING_ADS
-import com.asianmobile.emojibattery.shimeji.ads.data.SharedPreferencesUtils
+import com.asianmobile.emojibattery.shimeji.ads.data.CheckShowAdsUtil
 import com.asianmobile.emojibattery.shimeji.ads.databinding.DialogBeforeShowInterBinding
 import com.asianmobile.emojibattery.shimeji.ads.tracking.Tracking
 import com.asianmobile.emojibattery.shimeji.ads.utils.SafeRemoteConfig
@@ -55,7 +55,13 @@ class InterstitialLauncherUtil {
         isLoadComplete: () -> Unit
     ) {
         Log.e(TAG, "loadAdmobLauncher: ${!isShowInterstitialLauncher()}  --- ${!shouldLoadAds}")
-        if (!isShowInterstitialLauncher() || !shouldLoadAds) {
+        if (
+            !shouldUseLauncherInterstitial(
+                isLauncherEnabled = isShowInterstitialLauncher(),
+                isInterstitialEligible = CheckShowAdsUtil.checkLoadInterAd(context),
+                canRequestAds = shouldLoadAds
+            )
+        ) {
             isLoadComplete.invoke()
             return
         }
@@ -150,7 +156,10 @@ class InterstitialLauncherUtil {
             adCloseListener.onAdClosed()
             return
         }
-        if (!SharedPreferencesUtils.getIsEnableAds(activity) || !isShowInterstitialLauncher()) {
+        if (
+            !isShowInterstitialLauncher() ||
+            !CheckShowAdsUtil.checkShowInterAd(activity)
+        ) {
             adCloseListener.onAdClosed()
             return
         }
@@ -218,3 +227,9 @@ class InterstitialLauncherUtil {
         }
     }
 }
+
+internal fun shouldUseLauncherInterstitial(
+    isLauncherEnabled: Boolean,
+    isInterstitialEligible: Boolean,
+    canRequestAds: Boolean
+): Boolean = isLauncherEnabled && isInterstitialEligible && canRequestAds
