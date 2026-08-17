@@ -15,7 +15,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,7 +57,6 @@ internal fun HomeRoute(
     onHomeBack: () -> Unit,
     onDestinationChanged: (String?) -> Unit
 ) {
-    val context = LocalContext.current
     val homeNavController = rememberNavController()
     val currentEntry by homeNavController.currentBackStackEntryAsState()
     val requestedTabValue by homeEntry.savedStateHandle
@@ -71,32 +69,20 @@ internal fun HomeRoute(
     val catalogViewModel = hiltViewModel<BatteryCatalogViewModel>(homeEntry)
     var canHandleHomeBack by remember(homeEntry.id) { mutableStateOf(false) }
 
-    fun navigateToTab(tab: HomeTab, requestInterstitial: Boolean = true) {
+    fun navigateToTab(tab: HomeTab) {
         val route = routeForHomeTab(tab)
         if (currentEntry?.destination?.route == route) return
-        val navigate = {
-            homeNavController.safeNavigate(route, ignoreDebounce = true) {
-                popUpTo(Routes.DISCOVER) { saveState = true }
-                launchSingleTop = true
-                restoreState = true
-            }
-        }
-        if (requestInterstitial) {
-            navigateWithAd(
-                context = context,
-                placement = navigationAdPlacement(route, NavigationAdDirection.TAB),
-                onNavigate = navigate
-            )
-        } else {
-            navigate()
+        homeNavController.safeNavigate(route) {
+            popUpTo(Routes.DISCOVER) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
         }
     }
 
     LaunchedEffect(requestedTabValue) {
         val requestedTab = homeTabFromNavigationValue(requestedTabValue)
             ?: return@LaunchedEffect
-        // The root destination already requested its interstitial before handing this tab off.
-        navigateToTab(requestedTab, requestInterstitial = false)
+        navigateToTab(requestedTab)
         homeEntry.savedStateHandle[Routes.HOME_TAB_REQUEST] = null
     }
 

@@ -156,9 +156,11 @@ route, popUpTo behavior, process-death behavior và docs này.
 
 - Route constant chỉ định nghĩa trong `Routes`.
 - Dùng `safeNavigate`/`safePopBackStack`.
-- Forward navigation do user bấm, đổi Home tab và Back/Close trên app bar request Interstitial
-  trước khi thay back stack qua `navigateWithAd`; nếu SDK/config/frequency/Premium không cho hiển
-  thị thì callback tiếp tục ngay. Dynamic ID/query không đi vào placement analytics.
+- Forward navigation do user bấm và Back/Close trên app bar request Interstitial trước khi thay
+  back stack qua `navigateWithAd`; nếu SDK/config/frequency/Premium không cho hiển thị thì callback
+  tiếp tục ngay. Dynamic ID/query không đi vào placement analytics.
+- Chuyển giữa bốn Home tab không request Interstitial; tab đổi ngay và vẫn giữ state/back-stack
+  riêng theo Home NavHost.
 - Splash routing tự động, callback hoàn tất quyền, callback mua Premium thành công, modal và tab
   nội bộ không request Interstitial. Đây không phải transition chủ động sang một app destination
   mới hoặc là completion không được phép chặn.

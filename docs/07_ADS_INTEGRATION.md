@@ -28,11 +28,12 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
   tạo khoảng trống hoặc request mới. Hai placement Intro không render shimmer: loading/fail
   collapse hoàn toàn và native chỉ xuất hiện khi SDK đã trả về ad thật, nên offline không làm
   nội dung bị đẩy/co lại.
-- Mọi chuyển màn do user chủ động đều đi qua `navigateWithAd()` trước khi thay đổi back stack:
-  forward destination, đổi một trong bốn Home tab và Back/Close trên app bar. SDK boundary vẫn
-  quyết định có hiển thị thật hay tiếp tục ngay dựa trên Premium, Remote Config, click/time cap,
+- Chuyển sang destination khác do user chủ động và Back/Close trên app bar đi qua
+  `navigateWithAd()` trước khi thay đổi back stack. SDK boundary vẫn quyết định có hiển thị thật
+  hay tiếp tục ngay dựa trên Premium, Remote Config, click/time cap,
   trạng thái SDK và inventory. Placement analytics ổn định theo
-  `navigation_{forward|tab|back}_{route}` và loại dynamic argument khỏi route.
+  `navigation_{forward|back}_{route}` và loại dynamic argument khỏi route.
+- Chuyển giữa bốn Home tab không request Interstitial để bottom navigation phản hồi ngay.
 - Không request interstitial cho Splash tự quyết định bước tiếp theo, callback hoàn tất quyền,
   callback mua Premium thành công, dialog/bottom sheet hay tab nội bộ không tạo destination.
   Những flow này tiếp tục trực tiếp để không chặn system/purchase completion. Launcher

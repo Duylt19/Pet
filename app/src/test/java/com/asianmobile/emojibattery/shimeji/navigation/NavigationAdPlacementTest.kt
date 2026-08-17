@@ -17,11 +17,7 @@ class NavigationAdPlacementTest {
     }
 
     @Test
-    fun `home tab and app bar back use distinct stable placements`() {
-        assertEquals(
-            "navigation_tab_pet_store",
-            navigationAdPlacement(Routes.PET_STORE, NavigationAdDirection.TAB)
-        )
+    fun `app bar back uses a stable placement`() {
         assertEquals(
             "navigation_back_search",
             navigationAdPlacement(Routes.SEARCH, NavigationAdDirection.BACK)

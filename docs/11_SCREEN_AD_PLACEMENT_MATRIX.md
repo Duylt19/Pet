@@ -4,8 +4,9 @@ Firebase screen tracking và ad placement là hai contract độc lập: màn vi
 `ScreenName`, còn quảng cáo chỉ render ở các surface đã được product gắn sẵn. Không suy ra hoặc
 tự thêm quảng cáo chỉ từ tên route.
 
-Interstitial navigation dùng ID/config global hiện có và được request trước forward destination,
-đổi Home tab hoặc Back/Close app bar. Request không đồng nghĩa chắc chắn hiển thị: Premium,
+Interstitial navigation dùng ID/config global hiện có và được request trước forward destination
+hoặc Back/Close app bar. Chuyển giữa bốn Home tab không request interstitial. Request không đồng
+nghĩa chắc chắn hiển thị: Premium,
 Remote Config, frequency cap, SDK/inventory vẫn quyết định tại `:ads`. Splash routing tự động,
 permission/purchase completion và state nội bộ cùng destination không tạo request này.
 

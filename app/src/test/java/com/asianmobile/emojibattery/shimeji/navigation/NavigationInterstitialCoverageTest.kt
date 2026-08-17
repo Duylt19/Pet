@@ -33,14 +33,17 @@ class NavigationInterstitialCoverageTest {
     }
 
     @Test
-    fun `all home tabs share the same interstitial policy`() {
+    fun `home tab changes never request an interstitial`() {
         val homeGraph = navigationSource("HomeNavGraph.kt")
+        val navGraph = navigationSource("NavGraph.kt")
 
-        assertTrue(homeGraph.contains("if (requestInterstitial)"))
-        assertTrue(homeGraph.contains("NavigationAdDirection.TAB"))
         assertFalse(
-            "A single Home tab must not bypass the shared ad policy",
-            homeGraph.contains("tab == HomeTab.MINE")
+            "Bottom navigation must switch Home tabs without an interstitial",
+            homeGraph.contains("navigateWithAd(")
+        )
+        assertFalse(
+            "A root hand-off to a Home tab must not introduce a tab interstitial",
+            navGraph.contains("NavigationAdDirection.TAB")
         )
     }
 

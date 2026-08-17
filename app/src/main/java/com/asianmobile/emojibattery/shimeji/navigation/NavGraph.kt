@@ -254,18 +254,12 @@ fun AppNavGraph(
         val homeEntry = runCatching {
             navController.getBackStackEntry(Routes.HOME_GRAPH)
         }.getOrNull() ?: return
-        val targetRoute = routeForHomeTab(tab)
-        navigateWithAd(
-            context = context,
-            placement = navigationAdPlacement(targetRoute, NavigationAdDirection.TAB)
-        ) {
-            homeEntry.savedStateHandle[Routes.HOME_TAB_REQUEST] = tab.name
-            if (petStoreTab != null) {
-                homeEntry.savedStateHandle[Routes.PET_STORE_TAB_REQUEST] =
-                    petStoreTab.navigationValue
-            }
-            navController.popBackStack(Routes.HOME_GRAPH, inclusive = false)
+        homeEntry.savedStateHandle[Routes.HOME_TAB_REQUEST] = tab.name
+        if (petStoreTab != null) {
+            homeEntry.savedStateHandle[Routes.PET_STORE_TAB_REQUEST] =
+                petStoreTab.navigationValue
         }
+        navController.popBackStack(Routes.HOME_GRAPH, inclusive = false)
     }
 
     fun navigateToAccessibilityHowToUse(source: NavBackStackEntry) {

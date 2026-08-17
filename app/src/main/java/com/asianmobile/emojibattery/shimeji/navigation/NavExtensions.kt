@@ -13,7 +13,6 @@ private const val NAVIGATION_DEBOUNCE_TIME = 500L
 
 internal enum class NavigationAdDirection(val analyticsValue: String) {
     FORWARD("forward"),
-    TAB("tab"),
     BACK("back")
 }
 
