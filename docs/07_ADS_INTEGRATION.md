@@ -15,6 +15,9 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
 ## Base behavior còn giữ
 
 - Splash khởi tạo consent/config liên quan.
+- Language kiểm tra cả policy native chung và Remote Config của placement trước khi tạo ad slot.
+  `screen_language` và `screen_language_second` giữ trạng thái tải độc lập; placement bị tắt
+  collapse ngay từ composition đầu tiên, không render shimmer/loading scrim một frame rồi mới ẩn.
 - App Open Ad dùng Welcome Back pastel cover trong lúc chuyển sang quảng cáo. Đây là transient
   Compose content thuộc `:ads`, không phải navigation destination; Premium/ad-suppression và
   lifecycle show/dismiss hiện tại vẫn là boundary authoritative.
