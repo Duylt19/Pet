@@ -432,7 +432,7 @@ private fun IntroPrimaryButton(
             .background(colorResource(R.color.colors_FFFFFF))
             .border(
                 width = dimensionResource(R_sdp.dimen._1sdp) * layoutScale,
-                brush = Brush.horizontalGradient(
+                brush = Brush.verticalGradient(
                     listOf(
                         colorResource(R.color.colors_C95DFF),
                         colorResource(R.color.colors_FB54BB),
