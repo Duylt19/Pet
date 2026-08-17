@@ -81,3 +81,17 @@ object BatteryTrollDistributionPolicy {
         isDebugBuild: Boolean
     ): Boolean = isDebugBuild || status == BatteryTrollDistributionStatus.APPROVED
 }
+
+/**
+ * Product-level denylist for Battery Troll artwork that must no longer be distributed.
+ *
+ * This is intentionally enforced in the app as well as in the server catalog. Existing installs
+ * can keep a valid catalog in app-private storage for up to 24 hours, so filtering only the remote
+ * JSON would leave retired artwork visible until that cache expires. These IDs are permanently
+ * retired and must not be reused for replacement artwork.
+ */
+object BatteryTrollAvailabilityPolicy {
+    private val retiredTrollIds = setOf(1, 4, 5, 7, 8, 10)
+
+    fun isAvailable(trollId: Int): Boolean = trollId !in retiredTrollIds
+}

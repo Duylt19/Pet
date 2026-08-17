@@ -268,12 +268,16 @@ Việc mở route Current Style không tạo bản ghi mới vì đó không ph�
   như ba catalog kia. Release chỉ chấp nhận `APPROVED`; debug chấp nhận cả
   `REVIEW_REQUIRED`. **Không có bundled fallback** — thiếu mạng thì snapshot rỗng kèm
   typed error, vì Battery Troll là feature tuỳ chọn chứ không phải nền tảng của màn nào.
+- Catalog hiện chỉ phân phối bốn theme original có ID `2, 3, 6, 9`. Các ID
+  `1, 4, 5, 7, 8, 10` đã bị retire vĩnh viễn vì rủi ro bản quyền và không được tái sử dụng.
+  `BatteryTrollAvailabilityPolicy` lọc các ID này ở app trước khi publish snapshot để cache
+  hợp lệ cũ trong TTL 24 giờ cũng không thể tiếp tục hiển thị hoặc materialize asset đã retire.
 - `BatteryTrollEntry` gồm `id, name, slug, order, entitlement, batteryOrientation` và đúng
   **11 asset**: một thumbnail, năm emoji và năm mức pin. Parser từ chối catalog nếu một
   trong hai mảng không đúng năm phần tử, vì `BatteryTrollPolicy` đánh chỉ số 0–4 và một
   mảng ngắn hơn sẽ thành crash lúc vẽ chứ không phải lỗi hiển thị.
-- `batteryOrientation` tồn tại vì theme 4 có vỏ pin dọc trong khi chín theme còn lại nằm
-  ngang; renderer cần biết trước để bố trí, không suy ra từ ảnh lúc chạy.
+- `batteryOrientation` vẫn là metadata bắt buộc để renderer bố trí đúng artwork của mọi
+  revision catalog, không suy ra hướng từ ảnh trong lúc chạy.
 - Hàng preview ghép sẵn trong Figma **không** được ship. Runtime tự chồng
   `emoji[index]` lên `battery[index]`, nên hai lớp luôn cùng một mức và không phải tải
   thêm 50 ảnh.

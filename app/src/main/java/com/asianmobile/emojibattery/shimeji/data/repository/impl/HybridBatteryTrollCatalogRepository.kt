@@ -2,6 +2,7 @@ package com.asianmobile.emojibattery.shimeji.data.repository.impl
 
 import android.util.Log
 import com.asianmobile.emojibattery.shimeji.BuildConfig
+import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollAvailabilityPolicy
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollCatalogError
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollCatalogSnapshot
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollDistributionPolicy
@@ -138,11 +139,14 @@ class HybridBatteryTrollCatalogRepository @Inject constructor(
             )
             return false
         }
-        assetsByPath = document.trolls
+        val availableTrolls = document.trolls.filter { troll ->
+            BatteryTrollAvailabilityPolicy.isAvailable(troll.id)
+        }
+        assetsByPath = availableTrolls
             .flatMap(BatteryTrollRecord::assets)
             .associateBy(BatteryTrollAssetRecord::path)
         state.value = BatteryTrollCatalogSnapshot(
-            trolls = document.trolls.map { troll ->
+            trolls = availableTrolls.map { troll ->
                 BatteryTrollEntry(
                     id = troll.id,
                     name = troll.name,

@@ -8,6 +8,14 @@ import org.junit.Test
 
 class BatteryTrollCatalogTest {
     @Test
+    fun availabilityGate_blocksRetiredCopyrightedThemesFromStaleCatalogs() {
+        assertEquals(
+            listOf(2, 3, 6, 9),
+            (1..10).filter(BatteryTrollAvailabilityPolicy::isAvailable)
+        )
+    }
+
+    @Test
     fun distributionGate_acceptsAnApprovedCatalogInEveryBuild() {
         assertTrue(
             BatteryTrollDistributionPolicy.isDistributionAllowed(

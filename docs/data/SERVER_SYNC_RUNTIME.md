@@ -40,6 +40,11 @@ Pet, Battery, Room và Battery Troll dùng cùng `PetCatalogRefreshPolicy`:
 9. `403/429`: đọc `Retry-After`/`X-RateLimit-Reset`, giữ cache và hoãn retry tối đa 24 giờ.
 10. Network/parse/hash lỗi không xóa dữ liệu đang dùng; repository fallback theo từng loại.
 
+Riêng Battery Troll, các ID retire vì bản quyền (`1, 4, 5, 7, 8, 10`) còn bị chặn bởi
+`BatteryTrollAvailabilityPolicy` trước khi repository publish cache. Lớp bảo vệ phía client này
+đảm bảo catalog cũ còn trong TTL không làm artwork đã gỡ xuất hiện lại; ID retire không được tái
+sử dụng ở catalog server.
+
 Debug nhận catalog `REVIEW_REQUIRED`; release chỉ nhận `APPROVED`.
 
 ## Preview, full asset và materialization
