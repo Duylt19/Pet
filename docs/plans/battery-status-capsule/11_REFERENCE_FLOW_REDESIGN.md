@@ -11,7 +11,7 @@ màn tổng quan và editor con, dựa trên 14 screenshot reference owner cung 
 
 | Ảnh | Vai trò trong flow | Ánh xạ hiện tại |
 |---|---|---|
-| 1 | Discovery theo category, chọn mẫu pin | `BatteryCatalogScreen` |
+| 1 | Discovery theo category, chọn mẫu pin | `BatteryHomeScreen` |
 | 2–4 | Tổng quan Customize, preview, size, appearance, component list, Apply cố định | `BatteryEditorScreen` — `OVERVIEW` |
 | 5 | Editor biểu tượng pin/sạc | Editor con `BATTERY`; charge style chi tiết thuộc phase data tiếp theo |
 | 6 | Editor hoạt ảnh trang trí | Hiện rõ trạng thái `Sắp có`; cần animation runtime riêng |

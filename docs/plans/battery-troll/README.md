@@ -209,7 +209,7 @@ State delta đã xác định: `Real Battery` ⇒ disable `Edit`; `Random` ⇒ m
 | Apply panel | `StatusBarApplyPanel(enabled, onApply)` — `:980` |
 | Slider thumb thanh mảnh | `DesignSlider` — `:857` |
 | PRO pill | `PetPremiumBadge.kt` |
-| Flow host (reward + permission + effect) | `BatteryCatalogFlowHost` — `BatteryCatalogScreen.kt:67` |
+| Flow host (reward + permission + effect) | `BatteryCatalogFlowHost` — `BatteryCatalogFlowHost.kt` |
 
 **UI thật sự mới (5 thứ):** segmented control hồng, info chip, hàng `999% + Edit`,
 radio row Custom/Random, hàng 5 ô 56×56.

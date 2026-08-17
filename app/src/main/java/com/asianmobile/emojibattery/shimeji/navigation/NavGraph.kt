@@ -60,9 +60,9 @@ import com.asianmobile.emojibattery.shimeji.ui.onboarding.language.LanguageScree
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreTab
 import com.asianmobile.emojibattery.shimeji.ui.app.MainViewModel
 import com.asianmobile.emojibattery.shimeji.ui.app.destinationAfterIntro
-import com.asianmobile.emojibattery.shimeji.ui.settings.permissions.AccessibilityHowToUseScreen
-import com.asianmobile.emojibattery.shimeji.ui.settings.permissions.GrantPermissionsScreen
-import com.asianmobile.emojibattery.shimeji.ui.settings.permissions.GrantPermissionsTarget
+import com.asianmobile.emojibattery.shimeji.ui.permissions.AccessibilityHowToUseScreen
+import com.asianmobile.emojibattery.shimeji.ui.permissions.GrantPermissionsScreen
+import com.asianmobile.emojibattery.shimeji.ui.permissions.GrantPermissionsTarget
 import com.asianmobile.emojibattery.shimeji.ui.onboarding.permission.PermissionScreen
 import com.asianmobile.emojibattery.shimeji.ui.premium.PremiumScreen
 import com.asianmobile.emojibattery.shimeji.ui.pet.room.PetRoomScreen

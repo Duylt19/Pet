@@ -12,8 +12,8 @@
 | Ads/remote config | module `:ads` | Active |
 | Pure pet engine | `pet/engine` | Active, JVM-tested; weighted behavior + multi-action routines |
 | Multi-pet overlay | `pet/overlay`, `ui/pet/room` | Active; My Pet Room sở hữu roster và toggle pet hiện trên màn hình |
-| Validated pet packs | `pet/pack`, `ui/pet/store` | Active, schema v1 + secure verified download/install |
-| Owner pet catalog | `OwnerPetCatalogRepository`, `data/remote`, `ui/pet/store`, `ui/search` | Active private GitHub raw source, 1.062 pets including 36 original WC 2026 packs/864 frames + cached metadata + authenticated thumbnail + verified on-demand ZIP unlock |
+| Validated pet packs | `pet/pack`, `ui/pet/store`, `ui/home/pet` | Active, schema v1 + secure verified download/install |
+| Owner pet catalog | `OwnerPetCatalogRepository`, `data/remote`, `ui/pet/store`, `ui/home/pet`, `ui/search` | Active private GitHub raw source, 1.062 pets including 36 original WC 2026 packs/864 frames + cached metadata + authenticated thumbnail + verified on-demand ZIP unlock |
 | Pet speech and dialogue | `pet/speech`, transient speech overlay | Active, localized/custom reactions + lifecycle độc lập theo pet |
 | Pet settings persistence | `PetSettingsRepository`, DataStore | Active, `PetSlotPreferences` độc lập cho selection/size/speed/message list/interaction và position/reset guard theo slot |
 | Battery status capsule | `BatteryCatalogRepository`, `ui/battery`, `battery/overlay` | Debug vertical slice active; Accessibility cover + local audited catalog + foreground package exclusion do user chọn, release còn policy/license/device gate |

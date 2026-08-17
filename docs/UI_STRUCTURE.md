@@ -1,7 +1,7 @@
 # UI Structure and Flow Map
 
-Tài liệu này là bản đồ nhanh để tìm source UI. Package được chia theo domain
-sản phẩm; bên trong domain mới chia theo screen/flow.
+Tài liệu này là bản đồ nhanh để tìm source UI. Entry screen được chia theo surface runtime;
+flow/component dùng lại giữa nhiều surface được giữ ở package domain.
 
 ## Cây package
 
@@ -16,17 +16,19 @@ ui/
 │   └── permission/
 ├── home/
 │   ├── shell/                  # Home chrome, bottom navigation và banner owner
-│   └── discover/
+│   ├── discover/               # Tab 1 entry
+│   ├── battery/                # Tab 2 entry; compose reusable battery catalog flow
+│   ├── pet/                    # Tab 3 entry; compose reusable pet store flow
+│   └── mine/                   # Tab 4 entry và UI chỉ thuộc Mine
 ├── battery/
-│   ├── catalog/
+│   ├── catalog/                # Reusable flow/state + root category destination
 │   ├── favoriterecent/
-│   └── editor/
+│   ├── editor/
+│   └── troll/
 ├── pet/
-│   ├── store/
+│   ├── store/                  # Reusable reward/download/content flow
 │   └── room/
-├── settings/
-│   ├── mine/
-│   └── permissions/
+├── permissions/                # App-wide grant/how-to destinations
 ├── search/
 ├── premium/
 └── shared/
@@ -45,14 +47,14 @@ feature phải di chuyển test cùng lúc.
 | Home container | `home_graph` (root destination, không track analytics) | `navigation/HomeNavGraph` + `ui/home/shell` |
 | Onboarding | `splash`, `language`, `intro`, `permission` | `ui/onboarding/*` |
 | Discover tab | `discover` | `ui/home/discover` |
-| Battery tab | `battery_catalog` | `ui/battery/catalog` |
+| Battery tab | `battery_catalog` | `ui/home/battery/BatteryHomeScreen` |
 | Battery category | `battery_category/{id}` (root destination) | `ui/battery/catalog` |
 | Battery collection | `favourite_recent` | `ui/battery/favoriterecent` |
 | Status bar editor | `battery_editor/*` | `ui/battery/editor` |
-| Shimeji Pets tab | `pet_store` | `ui/pet/store` |
+| Shimeji Pets tab | `pet_store` | `ui/home/pet/ShimejiPetsScreen` |
 | My Pet Room | `my_pet` | `ui/pet/room` |
-| Mine tab | `settings` | `ui/settings/mine` |
-| Permission manager | `grant_permissions`, `accessibility_how_to_use` | `ui/settings/permissions` |
+| Mine tab | `settings` | `ui/home/mine/MineScreen` |
+| Permission manager | `grant_permissions`, `accessibility_how_to_use` | `ui/permissions` |
 | Search | `search` | `ui/search` |
 | Premium | `premium/*` | `ui/premium` |
 
@@ -65,16 +67,20 @@ feature phải di chuyển test cùng lúc.
   tạo theme package khác.
 - `navigation/AppNavGraph.kt` và `HomeNavGraph.kt` chỉ wiring route/callback. Business state
   vẫn thuộc ViewModel của feature.
+- Home tab entry chỉ sở hữu lifecycle collection, screen tracking và composition của tab.
+  Reward/download/access policy dùng bởi Discover/Search không được đặt trong một tab package.
 
 ## Home shell
 
-Bốn tab top-level vẫn thuộc các domain riêng:
+Bốn tab top-level có entry screen cùng nằm dưới Home, còn reusable flow ở domain package:
 
 ```text
-Discover              Battery              Shimeji Pets          Mine
-ui/home/discover      ui/battery/catalog   ui/pet/store          ui/settings/mine
-        \_______________ HomeRoute nested NavHost (4 tab) ________________/
+ui/home/discover   ui/home/battery   ui/home/pet   ui/home/mine
+        \____________ HomeRoute nested NavHost (4 tab) ____________/
                          ui/home/shell Home chrome
+
+BatteryHomeScreen ──uses──> ui/battery/catalog
+ShimejiPetsScreen ──uses──> ui/pet/store
 ```
 
 `AppNavGraph` giữ root `NavController` cho onboarding và các màn độc lập. `HomeRoute` tạo

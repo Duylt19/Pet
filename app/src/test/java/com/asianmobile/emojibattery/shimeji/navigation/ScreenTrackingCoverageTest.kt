@@ -61,7 +61,7 @@ class ScreenTrackingCoverageTest {
         val SCREEN_CALL_PATTERN = Regex("""\b([A-Z][A-Za-z0-9]*Screen)\(""")
         val EXPECTED_TRACKERS = mapOf(
             "AccessibilityHowToUseScreen" to trackerFor("ACCESSIBILITY_HOW_TO_USE"),
-            "BatteryCatalogScreen" to trackerFor("BATTERY_CATALOG"),
+            "BatteryHomeScreen" to trackerFor("BATTERY_CATALOG"),
             "BatteryCategoryScreen" to trackerFor("BATTERY_CATEGORY"),
             "BatteryEditorScreen" to Regex(
                 """TrackScreenView\(\s*page\.analyticsScreen\(\)\s*\)"""
@@ -81,10 +81,10 @@ class ScreenTrackingCoverageTest {
             ),
             "PermissionScreen" to trackerFor("PERMISSION"),
             "PetRoomScreen" to trackerFor("MY_PET"),
-            "PetStoreScreen" to trackerFor("PET_STORE"),
+            "ShimejiPetsScreen" to trackerFor("PET_STORE"),
             "PremiumScreen" to trackerFor("PREMIUM"),
             "SearchScreen" to trackerFor("SEARCH"),
-            "SettingsScreen" to trackerFor("SETTINGS"),
+            "MineScreen" to trackerFor("SETTINGS"),
             "SplashScreen" to trackerFor("SPLASH")
         )
 

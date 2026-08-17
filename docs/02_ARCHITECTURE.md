@@ -48,10 +48,15 @@ com.asianmobile.emojibattery.shimeji/
 ├── ui/
 │   ├── app/                    # App-level presentation state
 │   ├── onboarding/             # Splash, Language, Intro, Permission
-│   ├── home/                   # Home shell/chrome và Discover
-│   ├── battery/                # Catalog, Favourite/Recent, Editor
-│   ├── pet/                    # Pet Store và My Pet Room
-│   ├── settings/               # Mine và permission management
+│   ├── home/                   # Shell + entry screen của 4 top-level tab
+│   │   ├── discover/
+│   │   ├── battery/
+│   │   ├── pet/
+│   │   ├── mine/
+│   │   └── shell/
+│   ├── battery/                # Catalog flow dùng lại, category, collection, editor, troll
+│   ├── pet/                    # Store flow dùng lại và My Pet Room
+│   ├── permissions/            # Grant dashboard + Accessibility how-to dùng toàn app
 │   ├── search/
 │   ├── premium/
 │   └── shared/                 # Component và theme dùng chung
@@ -59,8 +64,8 @@ com.asianmobile.emojibattery.shimeji/
 ```
 
 Xem [UI_STRUCTURE.md](UI_STRUCTURE.md) để tra route ↔ package và ownership của từng
-flow. Cây package presentation phải phản ánh domain sản phẩm, không phản ánh thứ tự
-lịch sử mà file được tạo.
+flow. Entry screen phản ánh surface mà user đang thấy; logic/presentation flow được nhiều
+surface dùng lại vẫn thuộc domain package, không bị kéo vào `ui/home` chỉ vì Home gọi nó.
 
 ## Feature template
 
@@ -80,6 +85,9 @@ ui/<domain>/<feature>/
   `ui/shared/component` chỉ khi thật sự cross-feature.
 - Test source và screenshot test phải mirror package của source để tìm feature nhanh và
   tiếp tục truy cập được các policy/composable `internal`.
+- Bốn entry screen gắn trực tiếp với bottom navigation là ngoại lệ có chủ đích và nằm tại
+  `ui/home/<tab>`. Catalog/store flow mà Discover/Search cũng sử dụng vẫn ở `ui/battery/catalog`
+  và `ui/pet/store`; Home entry chỉ collect state, tracking và compose flow đó.
 
 ## Data boundary
 
@@ -172,6 +180,9 @@ ui/<domain>/<feature>/
 - Root NavHost không dùng cross-fade. Mỗi destination có nền opaque để Navigation không giữ hai
   layout nhìn thấy cùng lúc hoặc đổi chiều cao màn cũ khi ad của màn mới được mount.
 - Feature Screen nhận callback như `onBack`, `onOpenSettings`; không nhận NavController nếu không có lý do đặc biệt.
+- `ui/home/{discover,battery,pet,mine}` là bốn entry ngang hàng. Permission dashboard không thuộc
+  Mine dù Mine có link tới nó; package owner là `ui/permissions` vì Discover, editor và pet flow
+  cũng có thể mở cùng destination.
 - Back-stack behavior là một phần contract và phải được document/test.
 
 ## Cách mở rộng ứng dụng

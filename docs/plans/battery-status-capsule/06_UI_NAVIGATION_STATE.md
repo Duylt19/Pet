@@ -26,8 +26,11 @@ không còn định nghĩa route Pet Catalog xanh cũ.
 ## Screen/file contract
 
 ```text
+ui/home/battery/
+├── BatteryHomeScreen.kt
+
 ui/battery/catalog/
-├── BatteryCatalogScreen.kt
+├── BatteryCatalogFlowHost.kt
 ├── BatteryCatalogViewModel.kt
 └── BatteryCatalogUiState.kt
 

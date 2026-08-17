@@ -4,7 +4,8 @@
 
 Vertical slice hiện đã có trong source:
 
-- Home bottom navigation mở `BatteryCatalogScreen`.
+- Home bottom navigation mở `ui/home/battery/BatteryHomeScreen`; screen này compose catalog flow
+  dùng chung từ `ui/battery/catalog`.
 - Catalog local chuẩn hóa, Search từ Home header, category, Free/Premium, favorite và built-in
   fallback. Landing nhóm theme thật thành carousel theo category; More mở grid ba cột của
   category bằng ID canonical. Built-in ID `0` chỉ là runtime fallback, không phải catalog item.

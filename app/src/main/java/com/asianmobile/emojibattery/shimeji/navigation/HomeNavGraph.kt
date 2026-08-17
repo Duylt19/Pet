@@ -26,16 +26,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.asianmobile.emojibattery.shimeji.R
-import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogScreen
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.BatteryCatalogViewModel
 import com.asianmobile.emojibattery.shimeji.ui.battery.catalog.CURRENT_BATTERY_STYLE_ID
+import com.asianmobile.emojibattery.shimeji.ui.home.battery.BatteryHomeScreen
 import com.asianmobile.emojibattery.shimeji.ui.home.discover.DiscoverScreen
+import com.asianmobile.emojibattery.shimeji.ui.home.mine.MineScreen
+import com.asianmobile.emojibattery.shimeji.ui.home.pet.ShimejiPetsScreen
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeShell
 import com.asianmobile.emojibattery.shimeji.ui.home.shell.HomeTab
-import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreScreen
 import com.asianmobile.emojibattery.shimeji.ui.pet.store.PetStoreTab
 import com.asianmobile.emojibattery.shimeji.ui.premium.StartPremiumIndexes
-import com.asianmobile.emojibattery.shimeji.ui.settings.mine.SettingsScreen
 import kotlinx.coroutines.delay
 
 private const val HOME_BACK_HANDOFF_DELAY_MS = 250L
@@ -195,7 +195,7 @@ private fun NavGraphBuilder.homeTabs(
     }
 
     composable(Routes.BATTERY_CATALOG) {
-        BatteryCatalogScreen(
+        BatteryHomeScreen(
             onSearch = { onNavigateOutsideHome(Routes.SEARCH) },
             onOpenCategory = { categoryId ->
                 onNavigateOutsideHome(Routes.batteryCategory(categoryId))
@@ -217,7 +217,7 @@ private fun NavGraphBuilder.homeTabs(
     }
 
     composable(Routes.PET_STORE) {
-        PetStoreScreen(
+        ShimejiPetsScreen(
             requestedTab = PetStoreTab.fromNavigationValue(requestedPetStoreTab),
             onRequestedTabConsumed = onRequestedPetStoreTabConsumed,
             onSearch = { onNavigateOutsideHome(Routes.SEARCH) },
@@ -232,7 +232,7 @@ private fun NavGraphBuilder.homeTabs(
     }
 
     composable(Routes.SETTINGS) {
-        SettingsScreen(
+        MineScreen(
             onSearch = { onNavigateOutsideHome(Routes.SEARCH) },
             onPremium = {
                 onNavigateOutsideHome(

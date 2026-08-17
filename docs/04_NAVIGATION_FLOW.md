@@ -165,7 +165,9 @@ route, popUpTo behavior, process-death behavior và docs này.
   nội bộ không request Interstitial. Đây không phải transition chủ động sang một app destination
   mới hoặc là completion không được phép chặn.
 - Bottom navigation và placement `home_mode_bottom` do `ui/home/shell/HomeShell` sở hữu.
-  Chỉ bốn tab được render trong Home NavHost. `battery_category/{categoryId}` nằm ở root graph,
+  Entry của bốn tab lần lượt thuộc `ui/home/discover`, `ui/home/battery`, `ui/home/pet` và
+  `ui/home/mine`; chỉ bốn tab này được render trong Home NavHost.
+  `battery_category/{categoryId}` nằm ở root graph,
   ẩn toàn bộ Home shell và tự sở hữu native `screen_battery_category` cố định ở đáy.
 - String argument phải encode; enum argument phải parse an toàn với fallback.
 - Không phục hồi route Private Browser cũ nếu chưa có feature spec mới.
