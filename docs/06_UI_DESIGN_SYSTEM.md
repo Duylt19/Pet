@@ -104,6 +104,9 @@ Discover Home contract:
   `Status bar themes` tiếp tục nằm ngay sau banner, đúng hierarchy node Figma `8015:1035`;
 - section header dành vùng co giãn riêng cho title và giữ `More` cố định bên phải; bản dịch dài
   ellipsize trong vùng title thay vì đè sát hoặc đẩy action ra ngoài màn hình;
+- tên thương hiệu nằm trong chuỗi dịch phải giữ word boundary rõ ràng: `Emoji Battery` và
+  `Shimeji` không được dính với từ đứng trước/sau. Nhãn tiếng Việt canonical là
+  `Shimeji Thú cưng`; tiêu đề có emoji dùng `🐰 Shimeji Thú cưng`.
 - Trending Emoji Battery và Shimeji Pets lấy ranking lần lượt từ
   `BatteryCatalogSnapshot.trendingEmojiThemeIds` và `OwnerPetCatalogSnapshot.trendingPetIds`;
   catalog cũ dùng fallback product đi kèm app. UI giữ đúng thứ tự, lấy toàn bộ item tìm thấy và

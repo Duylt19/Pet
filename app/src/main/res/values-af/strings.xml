@@ -337,7 +337,7 @@
     <string name="search_battery_hint">Soek battery</string>
     <string name="search_cancel">Kanselleer</string>
     <string name="search_no_results">Geen ooreenstemmende batterytemas nie</string>
-    <string name="discover_shimeji_pets">🐰ShimejiTroeteldiere</string>
+    <string name="discover_shimeji_pets">🐰 Shimeji Troeteldiere</string>
     <string name="discover_pet_category">Ras: %1$s</string>
     <string name="discover_trending_battery_themes">🔥 Trending Emoji Battery</string>
     <string name="discover_status_bar_themes">Statusbalk-temas</string>
@@ -347,10 +347,10 @@
     <string name="discover_favorite_theme">Gunsteling battery tema</string>
     <string name="discover_tab_discover">Ontdek</string>
     <string name="discover_tab_battery">Battery</string>
-    <string name="discover_tab_pet_store">ShimejiTroeteldiere</string>
+    <string name="discover_tab_pet_store">Shimeji Troeteldiere</string>
     <string name="pet_store_enable_pet">Skakel aan om \'n troeteldier by jou skerm te voeg</string>
     <string name="pet_store_banner_placeholder">Maak troeteldierhuis oop</string>
-    <string name="pet_store_tab_pets">ShimejiTroeteldiere</string>
+    <string name="pet_store_tab_pets">Shimeji Troeteldiere</string>
     <string name="pet_store_tab_food">Kos</string>
     <string name="pet_store_breed">Ras: %1$s</string>
     <string name="pet_store_unlock_title">Eis nou jou beloning op!</string>
@@ -385,7 +385,7 @@
     <string name="pet_room_music_off">Skakel musiek aan</string>
     <string name="pet_room_collapse_sheet">Versteek paneel</string>
     <string name="pet_room_expand_sheet">Wys paneel</string>
-    <string name="pet_room_open_store">ShimejiTroeteldiere</string>
+    <string name="pet_room_open_store">Shimeji Troeteldiere</string>
     <string name="pet_room_add_pet">Voeg troeteldier by</string>
     <string name="pet_family_full_title">Jou troeteldierfamilie is vol</string>
     <string name="pet_family_full_message">Jy kan tot %1$d troeteldiere aanhou. Verwyder een uit My Pet Room voordat jy \'n nuwe troeteldier byvoeg.</string>
@@ -429,7 +429,7 @@
     <string name="pet_room_settings_save">Stoor</string>
     <string name="pet_room_download">Laai hierdie kamer af</string>
     <string name="pet_room_download_failed">Kon nie hierdie kamer aflaai nie. Gaan jou verbinding na.</string>
-    <string name="search_tab_pets">ShimejiTroeteldiere</string>
+    <string name="search_tab_pets">Shimeji Troeteldiere</string>
     <string name="search_tab_battery">Battery</string>
     <string name="search_results">Resultaatsoektog</string>
     <string name="accessibility_disclosure_title">Toeganklikheiddienstoegang</string>

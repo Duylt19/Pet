@@ -337,7 +337,7 @@
     <string name="search_battery_hint">搜索电池</string>
     <string name="search_cancel">取消</string>
     <string name="search_no_results">没有匹配的电池主题</string>
-    <string name="discover_shimeji_pets">🐰Shimeji宠物</string>
+    <string name="discover_shimeji_pets">🐰 Shimeji 宠物</string>
     <string name="discover_pet_category">品种：%1$s</string>
     <string name="discover_trending_battery_themes">🔥 流行趋势 Emoji Battery</string>
     <string name="discover_status_bar_themes">状态栏主题</string>
@@ -347,10 +347,10 @@
     <string name="discover_favorite_theme">最喜欢的电池主题</string>
     <string name="discover_tab_discover">发现</string>
     <string name="discover_tab_battery">电池</string>
-    <string name="discover_tab_pet_store">Shimeji宠物</string>
+    <string name="discover_tab_pet_store">Shimeji 宠物</string>
     <string name="pet_store_enable_pet">打开以将宠物添加到屏幕上</string>
     <string name="pet_store_banner_placeholder">打开宠物之家</string>
-    <string name="pet_store_tab_pets">Shimeji宠物</string>
+    <string name="pet_store_tab_pets">Shimeji 宠物</string>
     <string name="pet_store_tab_food">食品</string>
     <string name="pet_store_breed">品种：%1$s</string>
     <string name="pet_store_unlock_title">立即领取您的奖励！</string>
@@ -385,7 +385,7 @@
     <string name="pet_room_music_off">打开音乐</string>
     <string name="pet_room_collapse_sheet">隐藏面板</string>
     <string name="pet_room_expand_sheet">显示面板</string>
-    <string name="pet_room_open_store">Shimeji宠物</string>
+    <string name="pet_room_open_store">Shimeji 宠物</string>
     <string name="pet_room_add_pet">添加宠物</string>
     <string name="pet_family_full_title">你的宠物家庭已满</string>
     <string name="pet_family_full_message">您最多可以饲养 %1$d 只宠物。添加新宠物之前，请从“我的宠物室”中删除一只。</string>
@@ -429,7 +429,7 @@
     <string name="pet_room_settings_save">保存</string>
     <string name="pet_room_download">下载这个房间</string>
     <string name="pet_room_download_failed">无法下载该房间。检查您的连接。</string>
-    <string name="search_tab_pets">Shimeji宠物</string>
+    <string name="search_tab_pets">Shimeji 宠物</string>
     <string name="search_tab_battery">电池</string>
     <string name="search_results">结果搜索</string>
     <string name="accessibility_disclosure_title">无障碍服务接入</string>

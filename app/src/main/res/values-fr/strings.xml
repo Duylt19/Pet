@@ -337,7 +337,7 @@
     <string name="search_battery_hint">Rechercher une batterie</string>
     <string name="search_cancel">Annuler</string>
     <string name="search_no_results">Aucun thème de batterie correspondant</string>
-    <string name="discover_shimeji_pets">🐰ShimejiAnimaux de compagnie</string>
+    <string name="discover_shimeji_pets">🐰 Shimeji Animaux de compagnie</string>
     <string name="discover_pet_category">Race : %1$s</string>
     <string name="discover_trending_battery_themes">🔥 Tendance Emoji Battery</string>
     <string name="discover_status_bar_themes">Thèmes de la barre d\'état</string>
@@ -347,10 +347,10 @@
     <string name="discover_favorite_theme">Thème de batterie préféré</string>
     <string name="discover_tab_discover">Découvrez</string>
     <string name="discover_tab_battery">Batterie</string>
-    <string name="discover_tab_pet_store">ShimejiAnimaux de compagnie</string>
+    <string name="discover_tab_pet_store">Shimeji Animaux de compagnie</string>
     <string name="pet_store_enable_pet">Activez pour ajouter un animal de compagnie à votre écran</string>
     <string name="pet_store_banner_placeholder">Ouvrir la maison pour animaux de compagnie</string>
-    <string name="pet_store_tab_pets">ShimejiAnimaux de compagnie</string>
+    <string name="pet_store_tab_pets">Shimeji Animaux de compagnie</string>
     <string name="pet_store_tab_food">Nourriture</string>
     <string name="pet_store_breed">Race : %1$s</string>
     <string name="pet_store_unlock_title">Réclamez votre récompense maintenant !</string>
@@ -385,7 +385,7 @@
     <string name="pet_room_music_off">Allumez la musique</string>
     <string name="pet_room_collapse_sheet">Masquer le panneau</string>
     <string name="pet_room_expand_sheet">Afficher le panneau</string>
-    <string name="pet_room_open_store">ShimejiAnimaux de compagnie</string>
+    <string name="pet_room_open_store">Shimeji Animaux de compagnie</string>
     <string name="pet_room_add_pet">Ajouter un animal</string>
     <string name="pet_family_full_title">Votre famille d\'animaux est au complet</string>
     <string name="pet_family_full_message">Vous pouvez garder jusqu\'à %1$d animaux. Supprimez-en un de My Pet Room avant d’ajouter un nouvel animal.</string>
@@ -429,7 +429,7 @@
     <string name="pet_room_settings_save">Enregistrer</string>
     <string name="pet_room_download">Téléchargez cette salle</string>
     <string name="pet_room_download_failed">Impossible de télécharger cette salle. Vérifiez votre connexion.</string>
-    <string name="search_tab_pets">ShimejiAnimaux de compagnie</string>
+    <string name="search_tab_pets">Shimeji Animaux de compagnie</string>
     <string name="search_tab_battery">Batterie</string>
     <string name="search_results">Recherche de résultats</string>
     <string name="accessibility_disclosure_title">Accès au service d\'accessibilité</string>

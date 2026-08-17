@@ -337,7 +337,7 @@
     <string name="search_battery_hint">Batería de búsqueda</string>
     <string name="search_cancel">Cancelar</string>
     <string name="search_no_results">No hay temas de batería coincidentes</string>
-    <string name="discover_shimeji_pets">🐰ShimejiMascotas</string>
+    <string name="discover_shimeji_pets">🐰 Shimeji Mascotas</string>
     <string name="discover_pet_category">Raza: %1$s</string>
     <string name="discover_trending_battery_themes">🔥 Tendencia Emoji Battery</string>
     <string name="discover_status_bar_themes">Temas de la barra de estado</string>
@@ -347,10 +347,10 @@
     <string name="discover_favorite_theme">Tema de batería favorito</string>
     <string name="discover_tab_discover">Descubrir</string>
     <string name="discover_tab_battery">Batería</string>
-    <string name="discover_tab_pet_store">ShimejiMascotas</string>
+    <string name="discover_tab_pet_store">Shimeji Mascotas</string>
     <string name="pet_store_enable_pet">Activa para agregar una mascota a tu pantalla</string>
     <string name="pet_store_banner_placeholder">Hogar de mascotas abierto</string>
-    <string name="pet_store_tab_pets">ShimejiMascotas</string>
+    <string name="pet_store_tab_pets">Shimeji Mascotas</string>
     <string name="pet_store_tab_food">comida</string>
     <string name="pet_store_breed">Raza: %1$s</string>
     <string name="pet_store_unlock_title">¡Reclama tu recompensa ahora!</string>
@@ -385,7 +385,7 @@
     <string name="pet_room_music_off">Enciende la música</string>
     <string name="pet_room_collapse_sheet">Ocultar panel</string>
     <string name="pet_room_expand_sheet">Mostrar panel</string>
-    <string name="pet_room_open_store">ShimejiMascotas</string>
+    <string name="pet_room_open_store">Shimeji Mascotas</string>
     <string name="pet_room_add_pet">Añadir mascota</string>
     <string name="pet_family_full_title">Tu familia de mascotas está llena</string>
     <string name="pet_family_full_message">Puedes tener hasta %1$d mascotas. Elimina uno de Mi habitación de mascotas antes de agregar una nueva mascota.</string>
@@ -429,7 +429,7 @@
     <string name="pet_room_settings_save">Guardar</string>
     <string name="pet_room_download">Descargar esta sala</string>
     <string name="pet_room_download_failed">No se pudo descargar esta sala. Comprueba tu conexión.</string>
-    <string name="search_tab_pets">ShimejiMascotas</string>
+    <string name="search_tab_pets">Shimeji Mascotas</string>
     <string name="search_tab_battery">Batería</string>
     <string name="search_results">Búsqueda de resultados</string>
     <string name="accessibility_disclosure_title">Acceso al Servicio de Accesibilidad</string>

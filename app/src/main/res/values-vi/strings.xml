@@ -303,7 +303,7 @@
     <string name="battery_overlay_notification_text">Thanh pin của bạn vẫn ở trên màn hình. Nhấn để thay đổi hoặc tắt nó.</string>
     <string name="battery_overlay_notification_channel_name">Thanh pin</string>
     <string name="battery_overlay_notification_channel_description">Chỉ hiển thị khi thanh pin của bạn được bật.</string>
-    <string name="battery_accessibility_service_label">Thanh trạng thái Emoji Battery</string>
+    <string name="battery_accessibility_service_label"> Thanh trạng thái Emoji Battery</string>
     <string name="battery_accessibility_service_description">Hiển thị hộp pin đã chọn và kiểm tra cục bộ gói ứng dụng nền trước để áp dụng danh sách ứng dụng ẩn của bạn. Nó không đọc nội dung màn hình hoặc kiểm soát các ứng dụng khác.</string>
     <string name="battery_accessibility_service_summary">Bật dịch vụ này để Emoji Battery có thể hiển thị thanh pin bạn đã chọn trên thanh trạng thái. Ứng dụng chỉ kiểm tra ứng dụng nào đang ở phía trước để ẩn thanh trong những ứng dụng bạn chọn. Ứng dụng không đọc nội dung màn hình, thu thập hay chia sẻ dữ liệu cá nhân.</string>
     <string name="battery_overlay_description">Trạng thái pin, %1$d phần trăm</string>
@@ -337,7 +337,7 @@
     <string name="search_battery_hint">Tìm kiếm pin</string>
     <string name="search_cancel">Hủy bỏ</string>
     <string name="search_no_results">Không có chủ đề pin phù hợp</string>
-    <string name="discover_shimeji_pets">🐰ShimejiThú cưng</string>
+    <string name="discover_shimeji_pets">🐰 Shimeji Thú cưng</string>
     <string name="discover_pet_category">Giống: %1$s</string>
     <string name="discover_trending_battery_themes">🔥 Đang thịnh hành Emoji Battery</string>
     <string name="discover_status_bar_themes">Chủ đề thanh trạng thái</string>
@@ -347,10 +347,10 @@
     <string name="discover_favorite_theme">Chủ đề pin yêu thích</string>
     <string name="discover_tab_discover">Khám phá</string>
     <string name="discover_tab_battery">Pin</string>
-    <string name="discover_tab_pet_store">ShimejiThú cưng</string>
+    <string name="discover_tab_pet_store">Shimeji Thú cưng</string>
     <string name="pet_store_enable_pet">Bật để thêm thú cưng vào màn hình của bạn</string>
     <string name="pet_store_banner_placeholder">Mở nhà thú cưng</string>
-    <string name="pet_store_tab_pets">ShimejiThú cưng</string>
+    <string name="pet_store_tab_pets">Shimeji Thú cưng</string>
     <string name="pet_store_tab_food">Thức ăn</string>
     <string name="pet_store_breed">Giống: %1$s</string>
     <string name="pet_store_unlock_title">Yêu cầu phần thưởng của bạn bây giờ!</string>
@@ -385,7 +385,7 @@
     <string name="pet_room_music_off">Bật nhạc lên</string>
     <string name="pet_room_collapse_sheet">Ẩn bảng điều khiển</string>
     <string name="pet_room_expand_sheet">Hiển thị bảng điều khiển</string>
-    <string name="pet_room_open_store">ShimejiThú cưng</string>
+    <string name="pet_room_open_store">Shimeji Thú cưng</string>
     <string name="pet_room_add_pet">Thêm thú cưng</string>
     <string name="pet_family_full_title">Gia đình thú cưng của bạn đã đông đủ</string>
     <string name="pet_family_full_message">Bạn có thể nuôi tối đa %1$d vật nuôi. Xóa một con khỏi Phòng Thú cưng của tôi trước khi thêm thú cưng mới.</string>
@@ -429,7 +429,7 @@
     <string name="pet_room_settings_save">Lưu</string>
     <string name="pet_room_download">Tải về phòng này</string>
     <string name="pet_room_download_failed">Không thể tải xuống phòng này. Kiểm tra kết nối của bạn.</string>
-    <string name="search_tab_pets">ShimejiThú cưng</string>
+    <string name="search_tab_pets">Shimeji Thú cưng</string>
     <string name="search_tab_battery">Pin</string>
     <string name="search_results">Tìm kiếm kết quả</string>
     <string name="accessibility_disclosure_title">Truy cập dịch vụ trợ năng</string>

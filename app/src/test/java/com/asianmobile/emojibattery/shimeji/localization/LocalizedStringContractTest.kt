@@ -42,6 +42,17 @@ class LocalizedStringContractTest {
         )
     }
 
+    @Test
+    fun `Vietnamese Shimeji labels keep readable word boundaries`() {
+        val strings = readStrings(resourceRoot().resolve("values-vi/strings.xml"))
+        SHIMEJI_LABEL_KEYS.forEach { key ->
+            assertTrue(
+                "$key has joined words: ${strings.getValue(key).value}",
+                strings.getValue(key).value.contains("Shimeji Thú cưng")
+            )
+        }
+    }
+
     private fun readStrings(file: File): LinkedHashMap<String, StringValue> {
         val factory = DocumentBuilderFactory.newInstance().apply {
             setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
@@ -87,7 +98,14 @@ class LocalizedStringContractTest {
     private companion object {
         val SUPPORTED_LOCALES = listOf("af", "ar", "de", "es", "fr", "ha", "hi", "pt", "vi", "zh")
         val FORMAT_ARGUMENT = Regex("%(?:\\d+\\$)?[sdf]")
-        val BRAND = Regex("Emoji Battery")
+        val BRAND = Regex("Emoji Battery|Shimeji")
+        val SHIMEJI_LABEL_KEYS = listOf(
+            "discover_shimeji_pets",
+            "discover_tab_pet_store",
+            "pet_store_tab_pets",
+            "pet_room_open_store",
+            "search_tab_pets",
+        )
         val OPEN_BOUNDARIES = setOf('"', '“', '‘', '(')
         val CLOSE_BOUNDARIES = setOf('.', ',', '،', '。', ':', ';', '!', '?', '"', '”', '’', ')')
     }

@@ -337,7 +337,7 @@
     <string name="search_battery_hint">Batterie suchen</string>
     <string name="search_cancel">Abbrechen</string>
     <string name="search_no_results">Keine passenden Batteriethemen</string>
-    <string name="discover_shimeji_pets">🐰ShimejiHaustiere</string>
+    <string name="discover_shimeji_pets">🐰 Shimeji Haustiere</string>
     <string name="discover_pet_category">Rasse: %1$s</string>
     <string name="discover_trending_battery_themes">🔥 Im Trend Emoji Battery</string>
     <string name="discover_status_bar_themes">Themen der Statusleiste</string>
@@ -347,10 +347,10 @@
     <string name="discover_favorite_theme">Lieblingsbatteriethema</string>
     <string name="discover_tab_discover">Entdecken</string>
     <string name="discover_tab_battery">Batterie</string>
-    <string name="discover_tab_pet_store">ShimejiHaustiere</string>
+    <string name="discover_tab_pet_store">Shimeji Haustiere</string>
     <string name="pet_store_enable_pet">Aktivieren Sie diese Option, um Ihrem Bildschirm ein Haustier hinzuzufügen</string>
     <string name="pet_store_banner_placeholder">Öffnen Sie das Tierheim</string>
-    <string name="pet_store_tab_pets">ShimejiHaustiere</string>
+    <string name="pet_store_tab_pets">Shimeji Haustiere</string>
     <string name="pet_store_tab_food">Essen</string>
     <string name="pet_store_breed">Rasse: %1$s</string>
     <string name="pet_store_unlock_title">Fordern Sie jetzt Ihre Belohnung an!</string>
@@ -385,7 +385,7 @@
     <string name="pet_room_music_off">Schalten Sie Musik ein</string>
     <string name="pet_room_collapse_sheet">Panel ausblenden</string>
     <string name="pet_room_expand_sheet">Panel anzeigen</string>
-    <string name="pet_room_open_store">ShimejiHaustiere</string>
+    <string name="pet_room_open_store">Shimeji Haustiere</string>
     <string name="pet_room_add_pet">Haustier hinzufügen</string>
     <string name="pet_family_full_title">Ihre Haustierfamilie ist voll</string>
     <string name="pet_family_full_message">Sie können bis zu %1$d Haustiere halten. Entfernen Sie eines aus „Mein Haustierzimmer“, bevor Sie ein neues Haustier hinzufügen.</string>
@@ -429,7 +429,7 @@
     <string name="pet_room_settings_save">Speichern</string>
     <string name="pet_room_download">Laden Sie diesen Raum herunter</string>
     <string name="pet_room_download_failed">Dieser Raum konnte nicht heruntergeladen werden. Überprüfen Sie Ihre Verbindung.</string>
-    <string name="search_tab_pets">ShimejiHaustiere</string>
+    <string name="search_tab_pets">Shimeji Haustiere</string>
     <string name="search_tab_battery">Batterie</string>
     <string name="search_results">Ergebnissuche</string>
     <string name="accessibility_disclosure_title">Zugang zum Barrierefreiheitsdienst</string>

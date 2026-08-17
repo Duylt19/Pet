@@ -337,7 +337,7 @@
     <string name="search_battery_hint">Pesquisar bateria</string>
     <string name="search_cancel">Cancelar</string>
     <string name="search_no_results">Não há temas de bateria correspondentes</string>
-    <string name="discover_shimeji_pets">🐰ShimejiAnimais de estimação</string>
+    <string name="discover_shimeji_pets">🐰 Shimeji Animais de estimação</string>
     <string name="discover_pet_category">Raça: %1$s</string>
     <string name="discover_trending_battery_themes">🔥 Tendências Emoji Battery</string>
     <string name="discover_status_bar_themes">Temas da barra de status</string>
@@ -347,10 +347,10 @@
     <string name="discover_favorite_theme">Tema de bateria favorito</string>
     <string name="discover_tab_discover">Descubra</string>
     <string name="discover_tab_battery">Bateria</string>
-    <string name="discover_tab_pet_store">ShimejiAnimais de estimação</string>
+    <string name="discover_tab_pet_store">Shimeji Animais de estimação</string>
     <string name="pet_store_enable_pet">Ative para adicionar um animal de estimação à sua tela</string>
     <string name="pet_store_banner_placeholder">Abra a casa do animal de estimação</string>
-    <string name="pet_store_tab_pets">ShimejiAnimais de estimação</string>
+    <string name="pet_store_tab_pets">Shimeji Animais de estimação</string>
     <string name="pet_store_tab_food">Comida</string>
     <string name="pet_store_breed">Raça: %1$s</string>
     <string name="pet_store_unlock_title">Reivindique sua recompensa agora!</string>
@@ -385,7 +385,7 @@
     <string name="pet_room_music_off">Ligue a música</string>
     <string name="pet_room_collapse_sheet">Ocultar painel</string>
     <string name="pet_room_expand_sheet">Mostrar painel</string>
-    <string name="pet_room_open_store">ShimejiAnimais de estimação</string>
+    <string name="pet_room_open_store">Shimeji Animais de estimação</string>
     <string name="pet_room_add_pet">Adicionar animal de estimação</string>
     <string name="pet_family_full_title">Sua família de animais de estimação está cheia</string>
     <string name="pet_family_full_message">Você pode manter até %1$d animais de estimação. Remova um do My Pet Room antes de adicionar um novo animal de estimação.</string>
@@ -429,7 +429,7 @@
     <string name="pet_room_settings_save">Salvar</string>
     <string name="pet_room_download">Baixe esta sala</string>
     <string name="pet_room_download_failed">Não foi possível baixar esta sala. Verifique sua conexão.</string>
-    <string name="search_tab_pets">ShimejiAnimais de estimação</string>
+    <string name="search_tab_pets">Shimeji Animais de estimação</string>
     <string name="search_tab_battery">Bateria</string>
     <string name="search_results">Pesquisa de resultados</string>
     <string name="accessibility_disclosure_title">Acesso ao serviço de acessibilidade</string>

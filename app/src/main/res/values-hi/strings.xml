@@ -337,7 +337,7 @@
     <string name="search_battery_hint">बैटरी खोजें</string>
     <string name="search_cancel">रद्द करें</string>
     <string name="search_no_results">कोई मेल खाती बैटरी थीम नहीं</string>
-    <string name="discover_shimeji_pets">🐰Shimejiपालतू जानवर</string>
+    <string name="discover_shimeji_pets">🐰 Shimeji पालतू जानवर</string>
     <string name="discover_pet_category">नस्ल: %1$s</string>
     <string name="discover_trending_battery_themes">🔥 ट्रेंडिंग Emoji Battery</string>
     <string name="discover_status_bar_themes">स्टेटस बार थीम</string>
@@ -347,10 +347,10 @@
     <string name="discover_favorite_theme">पसंदीदा बैटरी थीम</string>
     <string name="discover_tab_discover">खोजें</string>
     <string name="discover_tab_battery">बैटरी</string>
-    <string name="discover_tab_pet_store">Shimejiपालतू जानवर</string>
+    <string name="discover_tab_pet_store">Shimeji पालतू जानवर</string>
     <string name="pet_store_enable_pet">अपनी स्क्रीन पर एक पालतू जानवर जोड़ने के लिए चालू करें</string>
     <string name="pet_store_banner_placeholder">पेट होम खोलें</string>
-    <string name="pet_store_tab_pets">Shimejiपालतू जानवर</string>
+    <string name="pet_store_tab_pets">Shimeji पालतू जानवर</string>
     <string name="pet_store_tab_food">खाना</string>
     <string name="pet_store_breed">नस्ल: %1$s</string>
     <string name="pet_store_unlock_title">अभी अपने इनाम का दावा करें!</string>
@@ -385,7 +385,7 @@
     <string name="pet_room_music_off">संगीत चालू करें</string>
     <string name="pet_room_collapse_sheet">पैनल छिपाएँ</string>
     <string name="pet_room_expand_sheet">पैनल दिखाएँ</string>
-    <string name="pet_room_open_store">Shimejiपालतू जानवर</string>
+    <string name="pet_room_open_store">Shimeji पालतू जानवर</string>
     <string name="pet_room_add_pet">पालतू जानवर जोड़ें</string>
     <string name="pet_family_full_title">आपका पालतू परिवार भरा हुआ है</string>
     <string name="pet_family_full_message">आप %1$d तक पालतू जानवर रख सकते हैं। नया पालतू जानवर जोड़ने से पहले माई पेट रूम से एक को हटा दें।</string>
@@ -429,7 +429,7 @@
     <string name="pet_room_settings_save">सहेजें</string>
     <string name="pet_room_download">इस कमरे को डाउनलोड करें</string>
     <string name="pet_room_download_failed">यह कमरा डाउनलोड नहीं किया जा सका. अपना कनेक्शन जांचें.</string>
-    <string name="search_tab_pets">Shimejiपालतू जानवर</string>
+    <string name="search_tab_pets">Shimeji पालतू जानवर</string>
     <string name="search_tab_battery">बैटरी</string>
     <string name="search_results">परिणाम खोज</string>
     <string name="accessibility_disclosure_title">अभिगम्यता सेवा अभिगम्यता</string>

@@ -337,7 +337,7 @@
     <string name="search_battery_hint">بحث عن البطارية</string>
     <string name="search_cancel">إلغاء</string>
     <string name="search_no_results">لا توجد سمات البطارية مطابقة</string>
-    <string name="discover_shimeji_pets">🐰Shimejiحيوانات أليفة</string>
+    <string name="discover_shimeji_pets">🐰 Shimeji حيوانات أليفة</string>
     <string name="discover_pet_category">السلالة: %1$s</string>
     <string name="discover_trending_battery_themes">🔥 تتجه Emoji Battery</string>
     <string name="discover_status_bar_themes">موضوعات شريط الحالة</string>
@@ -347,10 +347,10 @@
     <string name="discover_favorite_theme">موضوع البطارية المفضل</string>
     <string name="discover_tab_discover">اكتشف</string>
     <string name="discover_tab_battery">البطارية</string>
-    <string name="discover_tab_pet_store">Shimejiحيوانات أليفة</string>
+    <string name="discover_tab_pet_store">Shimeji حيوانات أليفة</string>
     <string name="pet_store_enable_pet">قم بالتشغيل لإضافة حيوان أليف إلى شاشتك</string>
     <string name="pet_store_banner_placeholder">افتح بيت الحيوانات الأليفة</string>
-    <string name="pet_store_tab_pets">Shimejiحيوانات أليفة</string>
+    <string name="pet_store_tab_pets">Shimeji حيوانات أليفة</string>
     <string name="pet_store_tab_food">طعام</string>
     <string name="pet_store_breed">السلالة: %1$s</string>
     <string name="pet_store_unlock_title">احصل على مكافأتك الآن!</string>
@@ -385,7 +385,7 @@
     <string name="pet_room_music_off">قم بتشغيل الموسيقى</string>
     <string name="pet_room_collapse_sheet">إخفاء اللوحة</string>
     <string name="pet_room_expand_sheet">إظهار اللوحة</string>
-    <string name="pet_room_open_store">Shimejiحيوانات أليفة</string>
+    <string name="pet_room_open_store">Shimeji حيوانات أليفة</string>
     <string name="pet_room_add_pet">أضف حيوانًا أليفًا</string>
     <string name="pet_family_full_title">عائلتك الأليفة ممتلئة</string>
     <string name="pet_family_full_message">يمكنك الاحتفاظ بما يصل إلى %1$d من الحيوانات الأليفة. قم بإزالة واحد من My Pet Room قبل إضافة حيوان أليف جديد.</string>
@@ -429,7 +429,7 @@
     <string name="pet_room_settings_save">حفظ</string>
     <string name="pet_room_download">قم بتنزيل هذه الغرفة</string>
     <string name="pet_room_download_failed">تعذر تنزيل هذه الغرفة. تحقق من اتصالك.</string>
-    <string name="search_tab_pets">Shimejiحيوانات أليفة</string>
+    <string name="search_tab_pets">Shimeji حيوانات أليفة</string>
     <string name="search_tab_battery">البطارية</string>
     <string name="search_results">بحث النتيجة</string>
     <string name="accessibility_disclosure_title">إمكانية الوصول إلى خدمة الوصول</string>

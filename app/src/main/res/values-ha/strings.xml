@@ -337,7 +337,7 @@
     <string name="search_battery_hint">Bincika baturi</string>
     <string name="search_cancel">Soke</string>
     <string name="search_no_results">Babu jigogin baturi da suka dace</string>
-    <string name="discover_shimeji_pets">🐰ShimejiDabbobi</string>
+    <string name="discover_shimeji_pets">🐰 Shimeji Dabbobi</string>
     <string name="discover_pet_category">Iri: %1$s</string>
     <string name="discover_trending_battery_themes">🔥 Trending Emoji Battery</string>
     <string name="discover_status_bar_themes">Jigogi mashaya matsayi</string>
@@ -347,10 +347,10 @@
     <string name="discover_favorite_theme">Jigon baturi da aka fi so</string>
     <string name="discover_tab_discover">Gano</string>
     <string name="discover_tab_battery">Baturi</string>
-    <string name="discover_tab_pet_store">ShimejiDabbobi</string>
+    <string name="discover_tab_pet_store">Shimeji Dabbobi</string>
     <string name="pet_store_enable_pet">Kunna don ƙara dabbar dabba a allonku</string>
     <string name="pet_store_banner_placeholder">Bude Gidan Dabbobi</string>
-    <string name="pet_store_tab_pets">ShimejiDabbobi</string>
+    <string name="pet_store_tab_pets">Shimeji Dabbobi</string>
     <string name="pet_store_tab_food">Abinci</string>
     <string name="pet_store_breed">Iri: %1$s</string>
     <string name="pet_store_unlock_title">Nemi ladan ku yanzu!</string>
@@ -385,7 +385,7 @@
     <string name="pet_room_music_off">Kunna kiɗa</string>
     <string name="pet_room_collapse_sheet">Boye panel</string>
     <string name="pet_room_expand_sheet">Nuna panel</string>
-    <string name="pet_room_open_store">ShimejiDabbobi</string>
+    <string name="pet_room_open_store">Shimeji Dabbobi</string>
     <string name="pet_room_add_pet">Ƙara dabbar gida</string>
     <string name="pet_family_full_title">Iyalin dabbobinku sun cika</string>
     <string name="pet_family_full_message">Kuna iya adana har zuwa %1$d dabbobi. Cire ɗaya daga Dakin Dabbobin nawa kafin ƙara sabon dabbar dabba.</string>
@@ -429,7 +429,7 @@
     <string name="pet_room_settings_save">Ajiye</string>
     <string name="pet_room_download">Zazzage wannan ɗakin</string>
     <string name="pet_room_download_failed">An kasa sauke wannan ɗakin. Duba haɗin ku.</string>
-    <string name="search_tab_pets">ShimejiDabbobi</string>
+    <string name="search_tab_pets">Shimeji Dabbobi</string>
     <string name="search_tab_battery">Baturi</string>
     <string name="search_results">Neman sakamako</string>
     <string name="accessibility_disclosure_title">Samun damar Sabis</string>
