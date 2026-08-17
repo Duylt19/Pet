@@ -10,8 +10,8 @@ Sau vòng review đối kháng và đợt fix, trạng thái:
 | 1 | Screenshot golden | **Đã sinh và đã so với Figma.** `validateDebugScreenshotTest` 77/77 pass. |
 | 2 | Dialog nhập phần trăm | **Đã dựng lại theo Figma `8615:6284`**: card 320/360, tiêu đề `Edit Battery` Roboto 500 20/28, ô nhập 288×60 viền `#C8C8C9`, số Roboto 600 28/36, hai nút pill dùng lại `RewardOutlineButton`/`RewardGradientButton`. |
 | 3 | Switch nhóm `Emoji` | **Đã giải quyết**: điều khiển `trollShowEmoji`, tắt thì nhân vật biến mất khỏi cả preview lẫn status bar. |
-| 4 | Server | **Đã push + merge `master`** (`3406d2c`). Vẫn `REVIEW_REQUIRED` nên chỉ debug dùng được; đổi sang `APPROVED` bằng cách chạy lại pipeline với `--distribution-status APPROVED`, không sửa tay JSON. |
-| 5 | Bản quyền | Chưa đổi. 6/10 theme là IP, 4 trong số đó nằm sau paywall. |
+| 4 | Server | Catalog production `troll-original-only-2026-08-17-v2` đã được pipeline tạo ở commit server `7407de0`, trạng thái `APPROVED`. |
+| 5 | Bản quyền | **Đã xử lý.** Catalog production v2 chỉ giữ bốn artwork gốc `2`, `3`, `6`, `9`; sáu theme IP và asset tương ứng đã bị loại khỏi server. |
 
 ### Ghi chú vận hành: screenshot test flaky
 
@@ -70,14 +70,13 @@ xuống còn "một chế độ của runtime đã có".
 
 | # | Vấn đề | Quyết định |
 |---|---|---|
-| Q1 | **Bản quyền.** 6/10 theme là IP có bản quyền: Spider-Man, Zoro (One Piece), Doraemon, SpongeBob, Messi, bộ sticker corgi "KEJI". Chỉ 4 theme (mèo Xiêm, mèo đen, hải cẩu xanh, gấu mũ đỏ) là nguyên bản. | **Publish cả 10.** Owner đã chuyển catalog production sang `APPROVED`; hồ sơ nguồn/license vẫn là external release gate. Tên hiển thị dùng mô tả trung tính (`Spider Hero`, `Green Swordsman`, `Blue Robot Cat`, `Football Star`, `Yellow Sponge`) chứ không dùng tên thương hiệu. |
+| Q1 | **Bản quyền.** 6/10 theme là IP có bản quyền: Spider-Man, Zoro (One Piece), Doraemon, SpongeBob, Messi, bộ sticker corgi "KEJI". Chỉ 4 theme (mèo Xiêm, mèo đen, hải cẩu xanh, gấu mũ đỏ) là nguyên bản. | **Chỉ publish bốn theme gốc.** Giữ nguyên ID `2`, `3`, `6`, `9`, đánh lại `order` thành `0..3`; xóa các ID `1`, `4`, `5`, `7`, `8`, `10` và asset tương ứng khỏi server. |
 | Q2 | Troll chạy trên status-bar cover hiện có? | **Đúng.** Dùng chung quyền Accessibility và `BatteryStatusConfig`; runtime release đã được owner bật. |
-| Q3 | **Mô hình khoá.** | Giống Battery theme hiện tại: FREE mở thẳng, PREMIUM hiện crown ở góc tile rồi mở reward sheet khi tap. Dùng lại `BatteryThemeAccessPolicy`. Danh sách khoá do agent bốc ngẫu nhiên (seed `battery-troll-2026-08-12`): **FREE = 1, 6, 7, 9**; PREMIUM = 2, 3, 4, 5, 8, 10. |
+| Q3 | **Mô hình khoá.** | Giống Battery theme hiện tại: FREE mở thẳng, PREMIUM hiện crown ở góc tile rồi mở reward sheet khi tap. Dùng lại `BatteryThemeAccessPolicy`. Catalog production hiện có **FREE = 6, 9**; **PREMIUM = 2, 3**. |
 | Q4 | **Ngữ nghĩa `Random`/`Edit`.** | `Random` = **xoay vòng emoji theo chu kỳ thời gian**, không phụ thuộc mức pin thật. `Edit` mở dialog nhập số 0–9999, dựng theo style dialog sẵn có. |
 
-> ⚠️ Rủi ro còn treo: kết quả bốc ngẫu nhiên đặt 4 theme IP (Zoro, Doraemon, Messi,
-> SpongeBob) vào nhóm **trả phí**. Thu tiền trực tiếp trên nhân vật có bản quyền nặng hơn
-> phát miễn phí nếu bị khiếu nại. Sửa = 1 dòng trong manifest server.
+Rủi ro bản quyền đã đóng ở catalog `troll-original-only-2026-08-17-v2`; client không tái sử dụng
+ID đã xóa cho artwork khác nên config/cache cũ sẽ fallback an toàn thay vì hiển thị sai theme.
 
 Câu hỏi phụ (không chặn, quyết trong lúc làm):
 - Info chip ở mode `Real Battery` giữ nguyên chữ "Display a fake battery percentage…" hay đổi/ẩn?
@@ -87,7 +86,7 @@ Câu hỏi phụ (không chặn, quyết trong lúc làm):
 
 ---
 
-## 2. Data — 10 theme, cấu trúc đồng nhất
+## 2. Data — 10 theme thiết kế, 4 theme production
 
 Mỗi frame trong section `8465:6119` là **một theme**: một nhân vật ở 5 trạng thái cảm xúc
 + một vỏ pin ở 5 mức. Lưới 3×5 cố định, cột chạy từ đầy → cạn.
