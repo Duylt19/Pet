@@ -37,6 +37,7 @@ fun MineScreenshotTest() {
         onRate = {},
         onShare = {},
         onContact = {},
+        onMoreApps = {},
         onPrivacy = {}
     )
 }
