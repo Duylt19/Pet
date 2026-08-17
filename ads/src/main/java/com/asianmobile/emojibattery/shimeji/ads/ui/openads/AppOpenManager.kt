@@ -104,32 +104,24 @@ class AppOpenManager() : LifecycleObserver {
                             appOpenAd = null
                             isShowingAd = false
                             fetchAd(activity)
-                            if (!activity.isDestroyed && !activity.isFinishing) {
-                                activity.runOnUiThread {
-                                    dismissProgressDialog(activity)
-                                    InterstitialUtil.getInstance().lastTimeOpenAd =
-                                        System.currentTimeMillis()
-                                    adCloseListener?.onAdClosed()
-                                }
+                            restoreAppBeforeDismissingCover(activity) {
+                                InterstitialUtil.getInstance().lastTimeOpenAd =
+                                    System.currentTimeMillis()
+                                adCloseListener?.onAdClosed()
                             }
-                            AdOverlayState.hide()
                         }
 
                         override fun onAdFailedToShowFullScreenContent(fullScreenContentError: FullScreenContentError) {
                             appOpenAd = null
                             isShowingAd = false
-                            if (!activity.isDestroyed && !activity.isFinishing) {
-                                activity.runOnUiThread {
-                                    dismissProgressDialog(activity)
-                                    adCloseListener?.onAdClosed()
-                                }
+                            restoreAppBeforeDismissingCover(activity) {
+                                adCloseListener?.onAdClosed()
                             }
-                            AdOverlayState.hide()
                         }
 
                         override fun onAdShowedFullScreenContent() {
                             isShowingAd = true
-                            AdOverlayState.show()
+                            updatePresentationStage(AppOpenPresentationStage.FULLSCREEN_AD)
                         }
 
                         override fun onAdClicked() {
@@ -145,7 +137,7 @@ class AppOpenManager() : LifecycleObserver {
                             Tracking.setTrackRevenueByAdjust(value.valueMicros, value.currencyCode)
                         }
                     }
-                AdOverlayState.show()
+                updatePresentationStage(AppOpenPresentationStage.WELCOME_BACK_COVER)
                 isShowingAd = true
                 showProgressDialog(activity)
                 val handler = Handler(Looper.getMainLooper())
@@ -265,6 +257,9 @@ class AppOpenManager() : LifecycleObserver {
         }
 
         val view = ComposeView(activity).apply {
+            // A Compose dialog does not draw its first frame synchronously. Keep the same branded
+            // cover underneath it so the host Activity never exposes its black ad background.
+            setBackgroundResource(R.drawable.img_onboarding_wallpaper)
             setViewTreeLifecycleOwner(lifecycleOwner)
             setViewTreeViewModelStoreOwner(
                 activityDecorView.findViewTreeViewModelStoreOwner()
@@ -312,6 +307,37 @@ class AppOpenManager() : LifecycleObserver {
         }
         if (alertDialog.isShowing) {
             alertDialog.dismiss()
+        }
+    }
+
+    /**
+     * Restore app-owned surfaces before removing the Welcome Back cover.
+     *
+     * MainActivity observes [AdOverlayState] and makes its content visible asynchronously. If the
+     * dialog is dismissed first, the black anti-bleed window background becomes visible for one
+     * frame. Waiting for the next animation frame keeps the cover in place until that restoration
+     * has been applied.
+     */
+    private fun restoreAppBeforeDismissingCover(
+        activity: Activity,
+        onRestored: () -> Unit
+    ) {
+        updatePresentationStage(AppOpenPresentationStage.IDLE)
+        if (activity.isFinishing || activity.isDestroyed) return
+        activity.runOnUiThread {
+            activity.window.decorView.postOnAnimation {
+                if (activity.isFinishing || activity.isDestroyed) return@postOnAnimation
+                dismissProgressDialog(activity)
+                onRestored()
+            }
+        }
+    }
+
+    private fun updatePresentationStage(stage: AppOpenPresentationStage) {
+        if (AppOpenOverlayPolicy.shouldHideAppContent(stage)) {
+            AdOverlayState.show()
+        } else {
+            AdOverlayState.hide()
         }
     }
 }

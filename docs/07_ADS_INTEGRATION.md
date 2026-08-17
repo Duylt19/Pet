@@ -17,7 +17,10 @@ giữ key rỗng và giá trị production phải được cấp từ Firebase R
 - Splash khởi tạo consent/config liên quan.
 - App Open Ad dùng Welcome Back pastel cover trong lúc chuyển sang quảng cáo. Đây là transient
   Compose content thuộc `:ads`, không phải navigation destination; Premium/ad-suppression và
-  lifecycle show/dismiss hiện tại vẫn là boundary authoritative.
+  lifecycle show/dismiss hiện tại vẫn là boundary authoritative. Cover dùng chính wallpaper làm
+  window background để không lộ nền đen trước frame Compose đầu tiên; `AdOverlayState` chỉ bật từ
+  callback fullscreen thật của SDK. Khi ads đóng/fail, Activity được phục hồi trước một frame rồi
+  cover mới dismiss để không chớp đen khi user quay lại màn đang dùng.
 - Intro page 1 mount/load native placement `SCREEN_INTRO` ngay khi vào pager; page 3 kích hoạt
   `SCREEN_INTRO_SECOND` sau lần đầu pager settle tại page 3, còn page 2 không có ads. Sau khi
   kích hoạt, placement được giữ trong composition suốt Intro lifecycle để swipe quay lại không

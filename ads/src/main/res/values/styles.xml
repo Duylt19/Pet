@@ -5,7 +5,7 @@
     <style name="Theme.CutePet.WelcomeBack" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionModeOverlay">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowBackground">@drawable/img_onboarding_wallpaper</item>
         <item name="android:colorAccent">@color/colors_FF417E</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
