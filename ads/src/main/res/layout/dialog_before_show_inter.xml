@@ -9,7 +9,7 @@
     <ProgressBar
         android:layout_width="@dimen/_60sdp"
         android:layout_height="@dimen/_60sdp"
-        android:indeterminateTint="@color/colors_5FADFF" />
+        android:indeterminateTint="@color/colors_FB54BB" />
 
     <TextView
         android:layout_width="match_parent"
