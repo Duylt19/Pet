@@ -45,4 +45,43 @@ class BatteryTrollEmojiSizeTest {
         assertEquals(24f, size(batterySizeDp = 0f), 0.001f)
         assertEquals(24f, size(batterySizeDp = Float.NaN), 0.001f)
     }
+
+    @Test
+    fun `compact preview preserves the same canvas ratio as the status bar`() {
+        val scale = batteryTrollPairScale(
+            batterySizeDp = 32f,
+            emojiCanvasPx = 420,
+            batteryCanvasPx = 508,
+            fallbackEmojiSizeDp = 24f
+        )
+
+        assertEquals(1f, scale.batteryFraction, 0.001f)
+        assertEquals(420f / 508f, scale.emojiFraction, 0.001f)
+    }
+
+    @Test
+    fun `compact preview uses configured sizes when canvas metadata is absent`() {
+        val scale = batteryTrollPairScale(
+            batterySizeDp = 32f,
+            emojiCanvasPx = 0,
+            batteryCanvasPx = 0,
+            fallbackEmojiSizeDp = 24f
+        )
+
+        assertEquals(1f, scale.batteryFraction, 0.001f)
+        assertEquals(0.75f, scale.emojiFraction, 0.001f)
+    }
+
+    @Test
+    fun `compact preview normalizes around the larger emoji layer`() {
+        val scale = batteryTrollPairScale(
+            batterySizeDp = 24f,
+            emojiCanvasPx = 2,
+            batteryCanvasPx = 1,
+            fallbackEmojiSizeDp = 24f
+        )
+
+        assertEquals(0.5f, scale.batteryFraction, 0.001f)
+        assertEquals(1f, scale.emojiFraction, 0.001f)
+    }
 }

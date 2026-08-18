@@ -48,6 +48,41 @@ fun batteryTrollEmojiSizeDp(
     return batterySizeDp * emojiCanvasPx / batteryCanvasPx
 }
 
+/**
+ * Relative layer sizes for a compact preview of the troll pair.
+ *
+ * [BatteryStatusBarView][com.asianmobile.emojibattery.shimeji.battery.overlay.BatteryStatusBarView]
+ * centers both layers inside a square whose side is the larger of the battery and emoji sizes.
+ * Compact Compose previews must preserve those same proportions; positioning the two assets in
+ * separate top/bottom slots loses the offsets baked into their transparent canvases.
+ */
+data class BatteryTrollPairScale(
+    val batteryFraction: Float,
+    val emojiFraction: Float
+)
+
+fun batteryTrollPairScale(
+    batterySizeDp: Float,
+    emojiCanvasPx: Int,
+    batteryCanvasPx: Int,
+    fallbackEmojiSizeDp: Float
+): BatteryTrollPairScale {
+    val emojiSizeDp = batteryTrollEmojiSizeDp(
+        batterySizeDp = batterySizeDp,
+        emojiCanvasPx = emojiCanvasPx,
+        batteryCanvasPx = batteryCanvasPx,
+        fallbackEmojiSizeDp = fallbackEmojiSizeDp
+    )
+    val pairSizeDp = maxOf(batterySizeDp, emojiSizeDp)
+    if (!pairSizeDp.isFinite() || pairSizeDp <= 0f) {
+        return BatteryTrollPairScale(batteryFraction = 1f, emojiFraction = 1f)
+    }
+    return BatteryTrollPairScale(
+        batteryFraction = (batterySizeDp / pairSizeDp).coerceIn(0f, 1f),
+        emojiFraction = (emojiSizeDp / pairSizeDp).coerceIn(0f, 1f)
+    )
+}
+
 object BatteryTrollAssetPolicy {
 
     /**

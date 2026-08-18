@@ -422,8 +422,9 @@ Battery Troll là **một chế độ của chính service này**, không phải
   suy scale đó từ `emojiCanvasPx / batteryCanvasPx` mà catalog công bố; `emojiSizeDp` của user
   **không** dùng ở chế độ troll vì slider đó dành cho việc trộn pet của theme A với pin của
   theme B, điều troll không bao giờ làm. Catalog không công bố canvas thì mới rơi về slider.
-  Luật này áp cho cả overlay thật lẫn `BatteryStatusPreviewCard`, nên preview không thể hiển
-  thị theo quy tắc mà thanh thật không theo.
+  Luật này áp cho overlay thật, `BatteryStatusPreviewCard` và preview gọn trong card Mode. Preview
+  gọn đặt hai layer cùng tâm rồi chuẩn hóa theo layer lớn hơn; không tự xếp emoji phía trên và pin
+  phía dưới vì offset đã nằm sẵn trong canvas artwork.
 - **Yêu cầu với pipeline export.** Vì vị trí chỉ sống trong canvas, pipeline **không được**
   trim rồi căn giữa từng frame emoji. Bản catalog hiện tại đã bị: tâm nội dung trùng tâm canvas
   ±1px ở toàn bộ troll và toàn bộ mức, nên mọi mức đều vẽ nhân vật ở giữa vỏ pin và bản dựng

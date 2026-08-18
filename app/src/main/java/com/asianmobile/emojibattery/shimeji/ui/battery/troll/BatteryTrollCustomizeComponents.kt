@@ -79,6 +79,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import coil.compose.AsyncImage
 import com.asianmobile.emojibattery.shimeji.R
+import com.asianmobile.emojibattery.shimeji.battery.troll.batteryTrollPairScale
 import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_TROLL_LEVEL_COUNT
 import com.asianmobile.emojibattery.shimeji.data.model.BATTERY_TROLL_RANDOM_ROTATION_MS
 import com.asianmobile.emojibattery.shimeji.data.model.BatteryTrollCatalogError
@@ -353,8 +354,9 @@ internal fun TrollEditChip(
 }
 
 /**
- * The 96x96 preview in the Mode card: the picked battery with the picked character sitting on it,
- * which is how the pair will read once the status bar is covered.
+ * The compact preview in the Mode card uses the same centered, proportional layer geometry as the
+ * status bar. The character placement is already encoded in each transparent artwork canvas, so
+ * adding a separate top/bottom offset here would move it a second time and misrepresent the bar.
  *
  * The two images are decorative on their own, so the box carries one merged label — the troll's
  * catalog name — instead of announcing two unnamed graphics.
@@ -365,29 +367,38 @@ internal fun TrollThemePreview(
     showEmoji: Boolean,
     emojiLevelIndex: Int,
     batteryLevelIndex: Int,
+    batterySizeDp: Float,
+    fallbackEmojiSizeDp: Float,
     modifier: Modifier = Modifier
 ) {
+    val pairScale = troll?.let {
+        batteryTrollPairScale(
+            batterySizeDp = batterySizeDp,
+            emojiCanvasPx = it.emojiCanvasPx,
+            batteryCanvasPx = it.batteryCanvasPx,
+            fallbackEmojiSizeDp = fallbackEmojiSizeDp
+        )
+    } ?: return
     Box(
         modifier = modifier
             .size(dimensionResource(SdpR.dimen._74sdp))
             .semantics(mergeDescendants = true) {
-                troll?.name?.let { contentDescription = it }
+                contentDescription = troll.name
             },
         contentAlignment = Alignment.Center
     ) {
         TrollArtwork(
-            path = troll?.batteryPaths?.getOrNull(batteryLevelIndex),
+            path = troll.batteryPaths.getOrNull(batteryLevelIndex),
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .height(dimensionResource(SdpR.dimen._49sdp))
+                .align(Alignment.Center)
+                .fillMaxSize(pairScale.batteryFraction)
         )
         if (showEmoji) {
             TrollArtwork(
-                path = troll?.emojiPaths?.getOrNull(emojiLevelIndex),
+                path = troll.emojiPaths.getOrNull(emojiLevelIndex),
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .size(dimensionResource(SdpR.dimen._43sdp))
+                    .align(Alignment.Center)
+                    .fillMaxSize(pairScale.emojiFraction)
             )
         }
     }

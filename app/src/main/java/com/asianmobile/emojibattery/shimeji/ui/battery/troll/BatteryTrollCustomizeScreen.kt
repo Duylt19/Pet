@@ -358,7 +358,9 @@ private fun TrollModeGroup(
                 troll = uiState.troll,
                 showEmoji = uiState.draft.showEmoji,
                 emojiLevelIndex = emojiLevelIndex,
-                batteryLevelIndex = batteryLevelIndex
+                batteryLevelIndex = batteryLevelIndex,
+                batterySizeDp = uiState.previewConfig.batterySizeDp,
+                fallbackEmojiSizeDp = uiState.previewConfig.emojiSizeDp
             )
         }
     }
